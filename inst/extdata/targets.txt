@@ -1,0 +1,2 @@
+Sample	Reads1	Reads2
+sample1	reads_1.fastq.gz	reads_2.fastq.gz
