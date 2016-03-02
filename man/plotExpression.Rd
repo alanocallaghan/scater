@@ -13,13 +13,11 @@ plotExpression(object, ...)
 
 plotExpressionSCESet(object, features, x, exprs_values = "exprs",
   colour_by = NULL, shape_by = NULL, size_by = NULL, ncol = 2,
-  xlab = NULL, show_median = FALSE, show_violin = TRUE, theme_size = 10,
-  log2_values = FALSE)
+  xlab = NULL, show_median = FALSE, show_violin = TRUE,
+  show_smooth = FALSE, theme_size = 10, log2_values = FALSE)
 
 plotExpressionDefault(object, aesth, ncol = 2, xlab = NULL, ylab = NULL,
-  show_median = FALSE, show_violin = TRUE)
-
-\S4method{plotExpression}{SCESet}(object, ...)
+  show_median = FALSE, show_violin = TRUE, show_smooth = FALSE)
 
 \S4method{plotExpression}{SCESet}(object, ...)
 
@@ -27,43 +25,45 @@ plotExpressionDefault(object, aesth, ncol = 2, xlab = NULL, ylab = NULL,
 }
 \arguments{
 \item{object}{an SCESet object containing expression values and
-experimental information. Must have been appropriately prepared. For the 
-\code{plotExpressionDefault} method, the \code{object} argument is a 
+experimental information. Must have been appropriately prepared. For the
+\code{plotExpressionDefault} method, the \code{object} argument is a
 data.frame in 'long' format providing expression values for a set of features
  to plot, plus metadata used in the \code{aesth} argument, but this is not
  meant to be a user-level operation.}
 
-\item{...}{optional arguments (from those listed above) passed to 
+\item{...}{optional arguments (from those listed above) passed to
 \code{plotExpressionSCESet} or \code{plotExpressionDefault}}
 
 \item{features}{a character vector of feature names or Boolean
-vector or numeric vector of indices indicating which features should have 
+vector or numeric vector of indices indicating which features should have
 their expression values plotted}
 
-\item{x}{character string providing a column name of \code{pData(object)} to 
-plot on the x-axis in the expression plot(s)}
+\item{x}{character string providing a column name of \code{pData(object)} or
+a feature name (i.e. gene or transcript) to plot on the x-axis in the
+expression plot(s). If a feature name, then expression values for the feature
+will be plotted on the x-axis for each subplot.}
 
 \item{exprs_values}{character string indicating which values should be used
-as the expression values for this plot. Valid arguments are \code{"tpm"} 
-(default; transcripts per million), \code{"norm_tpm"} (normalised TPM 
-values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM 
-values), \code{"counts"} (counts for each feature), \code{"norm_counts"}, 
-\code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised 
-counts-per-million), \code{"exprs"} (whatever is in the \code{'exprs'} slot 
-of the \code{SCESet} object; default), \code{"norm_exprs"} (normalised 
+as the expression values for this plot. Valid arguments are \code{"tpm"}
+(default; transcripts per million), \code{"norm_tpm"} (normalised TPM
+values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM
+values), \code{"counts"} (counts for each feature), \code{"norm_counts"},
+\code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised
+counts-per-million), \code{"exprs"} (whatever is in the \code{'exprs'} slot
+of the \code{SCESet} object; default), \code{"norm_exprs"} (normalised
 expression values) or \code{"stand_exprs"} (standardised expression values)
-or any other slots that have been added to the \code{"assayData"} slot by 
+or any other slots that have been added to the \code{"assayData"} slot by
 the user.}
 
-\item{colour_by}{optional character string supplying name of a column of 
-\code{pData(object)} which will be used as a variable by which to colour 
+\item{colour_by}{optional character string supplying name of a column of
+\code{pData(object)} which will be used as a variable by which to colour
 expression values on the plot.}
 
-\item{shape_by}{optional character string supplying name of a column of 
+\item{shape_by}{optional character string supplying name of a column of
 \code{pData(object)} which will be used as a variable to define the shape of
 points for expression values on the plot.}
 
-\item{size_by}{optional character string supplying name of a column of 
+\item{size_by}{optional character string supplying name of a column of
 \code{pData(object)} which will be used as a variable to define the size of
 points for expression values on the plot.}
 
@@ -77,15 +77,17 @@ used as the x-axis label}
 \item{show_violin}{logical, show a violin plot for the distribution
 for each group on the plot}
 
-\item{theme_size}{numeric scalar giving default font size for plotting theme 
+\item{show_smooth}{show a smoothed fit through the data points?}
+
+\item{theme_size}{numeric scalar giving default font size for plotting theme
 (default is 10)}
 
-\item{log2_values}{should the expression values be transformed to the 
+\item{log2_values}{should the expression values be transformed to the
 log2-scale for plotting (with an offset of 1 to avoid logging zeroes)?}
 
 \item{aesth}{an \code{aes} object to use in the call to \code{\link{ggplot}}.}
 
-\item{ylab}{character string defining a label for the y-axis (y-axes) of the 
+\item{ylab}{character string defining a label for the y-axis (y-axes) of the
 plot.}
 }
 \value{
@@ -99,15 +101,25 @@ Plot expression values (default log2(transcripts-per-million +
 1), if available) for a set of features.
 }
 \examples{
+## prepare data
 data("sc_example_counts")
 data("sc_example_cell_info")
 pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
 example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 example_sceset <- calculateQCMetrics(example_sceset)
-plotExpression(example_sceset, 1:6, x="Mutation_Status", exprs_values="exprs", 
+
+## default plot
+plotExpression(example_sceset, 1:6, "Mutation_Status")
+
+## explore options
+plotExpression(example_sceset, 1:6, x="Mutation_Status", exprs_values="exprs",
 colour_by="Cell_Cycle", show_violin=TRUE, show_median=TRUE)
-plotExpression(example_sceset, 1:6, x="Mutation_Status", exprs_values="counts", 
+plotExpression(example_sceset, 1:6, x="Mutation_Status", exprs_values="counts",
 colour_by="Cell_Cycle", show_violin=TRUE, show_median=TRUE)
+
+## plot expression against expression values for Gene_0004
+plotExpression(example_sceset, 1:4, "Gene_0004")
+plotExpression(example_sceset, 1:4, "Gene_0004", show_smooth = TRUE)
 
 }
 

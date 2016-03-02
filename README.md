@@ -1,21 +1,26 @@
 # scater: single-cell analysis toolkit for expression with R
 
+[//]: # ([![Linux Build Status](https://travis-ci.org/davismcc/scater.svg?branch=master)](https://travis-ci.org/davismcc/scater))
+[![Linux Build Status](https://semaphoreci.com/api/v1/davismcc/scater/branches/master/badge.svg)](https://semaphoreci.com/davismcc/scater)
+[![Windows Build status](https://ci.appveyor.com/api/projects/status/github/davismcc/scater?svg=true)](https://ci.appveyor.com/project/davismcc/scater)
+[![Coverage Status](https://img.shields.io/codecov/c/github/davismcc/scater/master.svg)](https://codecov.io/github/davismcc/scater?branch=master)
+
 This package contains useful tools for the analysis of single-cell
 gene expression data using the statistical software R. The package places an
 emphasis on tools for quality control, visualisation and pre-processing of data
 before further downstream analysis.
 
 We hope that `scater` fills a useful niche between raw RNA-sequencing
-count data and more focused downstream modelling tools such as
+count or transcripts-per-million data and more focused downstream
+modelling tools such as
 [monocle](http://www.bioconductor.org/packages/release/bioc/html/monocle.html),
 [scLVM](http://github.com/PMBio/scLVM),
 [SCDE](http://pklab.med.harvard.edu/scde/index.html),
 [edgeR](http://www.bioconductor.org/packages/release/bioc/html/edgeR.html),
-[limma](http://www.bioconductor.org/packages/release/bioc/html/limma.html) and
-so on.
+[limma](http://www.bioconductor.org/packages/release/bioc/html/limma.html)
+and so on.
 
 Briefly, `scater` enables the following:
-
 
 1. Automated computation of QC metrics
 1. Transcript quantification from read data with pseudo-alignment
@@ -27,30 +32,54 @@ Briefly, `scater` enables the following:
 See below for information about installation, getting started and highlights of the package.
 
 ## Installation
-Once the package is accepted into Bioconductor, the most reliable way to install
-the package will be to use the usual Bioconductor method:
+The `scater` package has been accepted into Bioconductor!
+Thus, the most reliable way to install the package is to use the usual
+Bioconductor method:
 
-```
+```{R}
 ## try http:// if https:// URLs are not supported
 source("https://bioconductor.org/biocLite.R")
 biocLite("scater")
 ```
 
-The `scater` package should become available in the next Bioconductor release in
-April 2016. In the meantime, `scater` can be installed directly from GitHub as
-described below.
+Currently, only the "devel" (i.e. development) version of `scater` is
+available through Bioconductor. This means that you will need to be
+using Bioconductor devel and the development version of R (R 3.3) in
+order to install `scater` from Bioconductor.
 
-This package currently lives on GitHub, so I recommend using Hadley Wickham's
-`devtools` package to install `scater` directly from GitHub. If you don't have
-`devtools` installed, then install that from CRAN (as shown below) and then run
-the call to install `scater`:
+The `scater` package will become available as a "release" version in
+the next Bioconductor release in April 2016. At this point the release
+version of `scater` will work with the release version of R and
+Bioconductor, and development will continue in the devel version of
+the package.
+
+Alternatively, `scater` can be installed directly from GitHub as
+described below. In this case, package that `scater` uses ("depends
+on" in R parlance) will not be automatically installed, so you will
+have to install the required packages as shown below.
+
+I recommend using Hadley Wickham's `devtools` package to install
+`scater` directly from GitHub. If you don't have `devtools` installed,
+then install that from CRAN (as shown below) and then run the call to
+install `scater`:
+
+**If you are using the development version of R, 3.3:**
 
 ```{r}
 install.packages("devtools")
 devtools::install_github("davismcc/scater", build_vignettes = TRUE)
 ```
 
-Using the most recent version of R is strongly recommended (R 3.2.2 at the time
+**If you are using the current release version of R, 3.2.3:**
+```{r}
+devtools::install_github("davismcc/scater", ref = "release-R-3.2", build_vignettes = TRUE)
+```
+
+If you find that the above will not install on Linux systems, please
+try with the option `build_vignettes = FALSE`. This is a known issue
+that we are working to resolve.
+
+Using the most recent version of R is strongly recommended (R 3.2.3 at the time
 of writing). Effort has been made to ensure the package works with R >3.0, but
 the package has not been tested with R <3.1.1.
 
@@ -89,8 +118,6 @@ You might also like to install `dplyr` for convenient data manipulation:
 ```{r}
 install.packages("dplyr")
 ```
-
-We plan to contribute `scater` to Bioconductor in the near future.
 
 
 ## Getting started
@@ -140,24 +167,24 @@ The `runKallisto` function provides a wrapper to the [`kallisto`](http://pachter
 
 ### Plotting functions
 
-Default `plot` for an SCESet object gives cumulative expression for the 
+Default `plot` for an SCESet object gives cumulative expression for the
 most-expressed features (genes or transcripts)
 
 The `plotTSNE` function produces a t-distributed stochastic neighbour embedding
 plot for the cells.
 
-The `plotPCA` function produces a principal components analysis plot for the 
+The `plotPCA` function produces a principal components analysis plot for the
 cells.
 
 The `plotDiffusionMap` function produces a diffusion map plot for the cells.
 
-The `plotExpression` function plots the expression values for a selection of 
+The `plotExpression` function plots the expression values for a selection of
 features.
 
 The `plotQC` function produces a variety of QC plots useful for diagnostics and
-feature and cell filtering. It can be used to plot the most highly-expressed 
-genes (or features) in the data set or create density plots to assess the 
-relative importance of explanatory variables, as well as many other 
+feature and cell filtering. It can be used to plot the most highly-expressed
+genes (or features) in the data set or create density plots to assess the
+relative importance of explanatory variables, as well as many other
 visualisations useful for QC.
 
 The `plotPhenoData` function plots two phenotype metadata variables (such as QC
@@ -182,9 +209,9 @@ It also uses and extends code for an approximate rank-product test by [Heskes et
 -->
 
 
-The package is currently in an Beta state. The major functionality of the 
-package is settled, but it is still under development so may change from time 
-to time. Please do try it and contact me with bug reports, feedback, feature 
+The package is currently in an Beta state. The major functionality of the
+package is settled, but it is still under development so may change from time
+to time. Please do try it and contact me with bug reports, feedback, feature
 requests, questions and suggestions to improve the package.
 
-Davis McCarthy, December 2015
+Davis McCarthy, February 2016

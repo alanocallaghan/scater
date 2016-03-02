@@ -4,9 +4,9 @@
 \name{cpm}
 \alias{cpm}
 \alias{cpm,SCESet-method}
-\alias{cpm.SCESet}
 \alias{cpm<-}
 \alias{cpm<-,SCESet,matrix-method}
+\alias{cpmSCESet}
 \title{Accessors for the 'cpm' (counts per million) element of an SCESet object.}
 \usage{
 cpm(object)

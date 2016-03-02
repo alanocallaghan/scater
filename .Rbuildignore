@@ -1,0 +1,7 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^output*
+^NEWS\.md$
+^\.travis\.yml$
+^appveyor\.yml$
+^\.git*

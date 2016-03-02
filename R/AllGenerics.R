@@ -1,7 +1,7 @@
 ### defining all generic methods
 
 #' Replacement for phenoData
-#' 
+#'
 #' @name pData<-
 #' @param x object containing phenoData to replace
 #' @param value AnnotatedDataFrame to replace existing phenoData
@@ -14,7 +14,7 @@ setGeneric("pData<-", signature = signature("x", "value"),
            function(x, value) {standardGeneric("pData<-")})
 
 #' Replacement for featureData
-#' 
+#'
 #' @name fData<-
 #' @param x object containing featureData to replace
 #' @param value AnnotatedDataFrame to replace existing featureData
@@ -354,5 +354,13 @@ setGeneric("plotTSNE", function(object, ...) {
 #' @rdname plotDiffusionMap
 setGeneric("plotDiffusionMap", function(object, ...) {
     standardGeneric("plotDiffusionMap")
+})
+
+#' @name plotMDS
+#' @export
+#' @docType methods
+#' @rdname plotMDS
+setGeneric("plotMDS", function(object, ...) {
+    standardGeneric("plotMDS")
 })
 

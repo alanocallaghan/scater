@@ -93,17 +93,17 @@ newSCESet <- function(exprsData = NULL,
                       useForExprs = "exprs")
 {
     ## Check that we have some expression data
-    if ( is.null(exprsData) & is.null(countData) & is.null(tpmData) &
-         is.null(fpkmData) & is.null(cpmData))
+    if ( is.null(exprsData) && is.null(countData) && is.null(tpmData) &
+         is.null(fpkmData) && is.null(cpmData))
         stop("Require at least one of exprsData, tpmData, fpkmData or countData arguments.")
     ## Check dimensions of data matrices
-    
+
     ## Check counts are a matrix; renames is_exprsData if not null
     if ( !is.null(countData) )
         countData <- as.matrix(countData)
     if ( !is.null(is_exprsData) )
         isexprs <- is_exprsData
-    
+
     ## If no exprsData provided define is_exprs from tpmData, fpkmData or countData
     if ( is.null(exprsData) ) {
         ## Define exprs data if null
@@ -168,13 +168,13 @@ Using log2(FPKM + logExprsOffset) for exprs slot. See also ?calculateFPKM and ?c
             message(paste0("Defining 'is_exprs' using exprsData and a lower exprs threshold of ", lowerDetectionLimit))
         }
     }
-    
+
     ## Generate valid phenoData and featureData if not provided
     if ( is.null(phenoData) )
         phenoData <- annotatedDataFrameFrom(exprsData, byrow = FALSE)
     if ( is.null(featureData) )
         featureData <- annotatedDataFrameFrom(exprsData, byrow = TRUE)
-    
+
     ## Check experimentData
     expData_null <- new("MIAME",
                         name = "<your name here>",
@@ -197,10 +197,10 @@ Using log2(FPKM + logExprsOffset) for exprs slot. See also ?calculateFPKM and ?c
     } else {
         expData <- expData_null
     }
-    
+
     ## Check valid useForExprs
     useForExprs <- match.arg(useForExprs, c("exprs","tpm","counts","fpkm"))
-    
+
     ## Generate new SCESet object
     assaydata <- assayDataNew("environment", exprs = exprsData,
                               is_exprs = isexprs)
@@ -213,7 +213,7 @@ Using log2(FPKM + logExprsOffset) for exprs slot. See also ?calculateFPKM and ?c
                    logExprsOffset = logExprsOffset,
                    logged = logged,
                    useForExprs = useForExprs)
-    
+
     ## Add non-null slots to assayData for SCESet object, omitting null slots
     if ( !is.null(tpmData) )
         tpm(sceset) <- tpmData
@@ -223,8 +223,8 @@ Using log2(FPKM + logExprsOffset) for exprs slot. See also ?calculateFPKM and ?c
         counts(sceset) <- countData
     if ( !is.null(cpmData) )
         cpm(sceset) <- cpmData
-    
-    
+
+
     ## Check validity of object
     validObject(sceset)
     sceset
@@ -237,7 +237,7 @@ Using log2(FPKM + logExprsOffset) for exprs slot. See also ?calculateFPKM and ?c
 setValidity("SCESet", function(object) {
     msg <- NULL
     valid <- TRUE
-    
+
     ## Check that the dimensions and names of the bootstraps slot are sensible
     if ( (length(object@bootstraps) != 0) && (nrow(object@bootstraps)
                                               != nrow(object)) ) {
@@ -311,7 +311,7 @@ setValidity("SCESet", function(object) {
         valid <- FALSE
         msg <- c(msg, "object@useForExprs must be one of 'exprs', 'tpm', 'fpkm', 'counts'")
     }
-    
+
     if(valid) TRUE else msg
 })
 
@@ -531,7 +531,7 @@ setReplaceMethod("pData", signature(x = "SCESet", value = "data.frame"),
 
 #' Generic accessor for expression data from an SCESet object.
 #'
-#' Access by name a matrix of expression values, one row for each feature (gene, 
+#' Access by name a matrix of expression values, one row for each feature (gene,
 #' exon, region, etc), and one column for each cell stored an element of the
 #' assayData slot of the SCESet object.
 #'
@@ -541,19 +541,19 @@ setReplaceMethod("pData", signature(x = "SCESet", value = "data.frame"),
 #' @docType methods
 #' @name get_exprs
 #' @rdname get_exprs
-#' @aliases get_exprs get_exprs,SCESet-method 
+#' @aliases get_exprs get_exprs,SCESet-method
 #'
 #' @param object a \code{SCESet} object.
 #' @param exprs_values character string indicating which values should be used
-#' as the expression values for this plot. Valid arguments are \code{"tpm"} 
-#' (default; transcripts per million), \code{"norm_tpm"} (normalised TPM 
-#' values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM 
-#' values), \code{"counts"} (counts for each feature), \code{"norm_counts"}, 
-#' \code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised 
-#' counts-per-million), \code{"exprs"} (whatever is in the \code{'exprs'} slot 
-#' of the \code{SCESet} object; default), \code{"norm_exprs"} (normalised 
+#' as the expression values for this plot. Valid arguments are \code{"tpm"}
+#' (default; transcripts per million), \code{"norm_tpm"} (normalised TPM
+#' values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM
+#' values), \code{"counts"} (counts for each feature), \code{"norm_counts"},
+#' \code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised
+#' counts-per-million), \code{"exprs"} (whatever is in the \code{'exprs'} slot
+#' of the \code{SCESet} object; default), \code{"norm_exprs"} (normalised
 #' expression values) or \code{"stand_exprs"} (standardised expression values)
-#' or any other slots that have been added to the \code{"assayData"} slot by 
+#' or any other slots that have been added to the \code{"assayData"} slot by
 #' the user.
 #' @author Davis McCarthy
 #' @export
@@ -562,9 +562,9 @@ setReplaceMethod("pData", signature(x = "SCESet", value = "data.frame"),
 #' data("sc_example_cell_info")
 #' example_sceset <- newSCESet(countData = sc_example_counts)
 #' get_exprs(example_sceset, "counts")
-#' 
+#'
 #' ## new slots can be defined and accessed
-#' set_exprs(example_sceset, "scaled_counts") <- t(t(counts(example_sceset)) / 
+#' set_exprs(example_sceset, "scaled_counts") <- t(t(counts(example_sceset)) /
 #' colSums(counts(example_sceset)))
 #' get_exprs(example_sceset, "scaled_counts")[1:6, 1:6]
 #'
@@ -585,8 +585,8 @@ setMethod("get_exprs", signature(object = "SCESet"),
 
 #' Assignment method for the new elements of an SCESet object.
 #'
-#' The assayData slot of an SCESet object holds the expression data matrices. 
-#' This functions makes it convenient to add new transformations of the 
+#' The assayData slot of an SCESet object holds the expression data matrices.
+#' This functions makes it convenient to add new transformations of the
 #' expression data to the assayData slot.
 #'
 #' @usage
@@ -608,7 +608,7 @@ setMethod("get_exprs", signature(object = "SCESet"),
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
 #' example_sceset <- newSCESet(countData = sc_example_counts)
-#' set_exprs(example_sceset, "scaled_counts") <- t(t(counts(example_sceset)) / 
+#' set_exprs(example_sceset, "scaled_counts") <- t(t(counts(example_sceset)) /
 #' colSums(counts(example_sceset)))
 #' get_exprs(example_sceset, "scaled_counts")[1:6, 1:6]
 #' @name set_exprs
@@ -828,7 +828,7 @@ setReplaceMethod("norm_exprs", signature(object = "SCESet", value = "matrix"),
 ################################################################################
 ### stand_exprs
 
-#' Accessors for the 'stand_exprs' (standardised expression) element of an 
+#' Accessors for the 'stand_exprs' (standardised expression) element of an
 #' SCESet object.
 #'
 #' The \code{stand_exprs} element of the arrayData slot in an SCESet object holds
@@ -919,7 +919,7 @@ setReplaceMethod("stand_exprs", signature(object = "SCESet", value = "matrix"),
 #' data("sc_example_cell_info")
 #' example_sceset <- newSCESet(countData = sc_example_counts)
 #' tpm(example_sceset)
-#' 
+#'
 tpm.SCESet <- function(object) {
     object@assayData$tpm
 }
@@ -974,7 +974,7 @@ setReplaceMethod("tpm", signature(object = "SCESet", value = "matrix"),
 #' data("sc_example_cell_info")
 #' example_sceset <- newSCESet(countData = sc_example_counts)
 #' norm_tpm(example_sceset)
-#' 
+#'
 norm_tpm.SCESet <- function(object) {
     object@assayData$norm_tpm
 }
@@ -1029,7 +1029,7 @@ setReplaceMethod("norm_tpm", signature(object = "SCESet", value = "matrix"),
 #' data("sc_example_cell_info")
 #' example_sceset <- newSCESet(countData=sc_example_counts)
 #' cpm(example_sceset)[1:10, 1:6]
-cpm.SCESet <- function(object) {
+cpmSCESet <- function(object) {
     object@assayData$cpm
 }
 
@@ -1037,7 +1037,7 @@ cpm.SCESet <- function(object) {
 #' @rdname cpm
 #' @export
 #' @aliases cpm,SCESet-method
-setMethod("cpm", signature(object = "SCESet"), cpm.SCESet)
+setMethod("cpm", signature(object = "SCESet"), cpmSCESet)
 
 #' @name cpm<-
 #' @rdname cpm
@@ -1083,7 +1083,7 @@ setReplaceMethod("cpm", signature(object = "SCESet", value = "matrix"),
 #' data("sc_example_cell_info")
 #' example_sceset <- newSCESet(countData=sc_example_counts)
 #' norm_cpm(example_sceset)
-#' 
+#'
 norm_cpm.SCESet <- function(object) {
     object@assayData$norm_cpm
 }
@@ -1138,7 +1138,7 @@ setReplaceMethod("norm_cpm", signature(object = "SCESet", value = "matrix"),
 #' data("sc_example_cell_info")
 #' example_sceset <- newSCESet(countData = sc_example_counts)
 #' fpkm(example_sceset)
-#' 
+#'
 fpkm.SCESet <- function(object) {
     object@assayData$fpkm
 }
@@ -1193,7 +1193,7 @@ setReplaceMethod("fpkm", signature(object = "SCESet", value = "matrix"),
 #' data("sc_example_cell_info")
 #' example_sceset <- newSCESet(countData = sc_example_counts)
 #' norm_fpkm(example_sceset)
-#' 
+#'
 norm_fpkm.SCESet <- function(object) {
     object@assayData$norm_fpkm
 }
@@ -1267,7 +1267,7 @@ setMethod("bootstraps", signature(object = "SCESet"), bootstraps.SCESet)
 #' @export "bootstraps<-"
 setReplaceMethod("bootstraps", signature(object = "SCESet", value = "array"),
                  function(object, value) {
-                     if ( (nrow(value) == nrow(object)) & 
+                     if ( (nrow(value) == nrow(object)) &&
                           (ncol(value) == ncol(object)) ) {
                          object@bootstraps <- value
                          return(object)
@@ -1335,7 +1335,7 @@ setMethod("redDim", signature(object = "SCESet"), redDim.SCESet)
 #' @aliases reducedDimension
 #' @rdname reducedDimension
 #' @exportMethod "reducedDimension<-"
-setReplaceMethod("reducedDimension", signature(object = "SCESet", 
+setReplaceMethod("reducedDimension", signature(object = "SCESet",
                                                value = "matrix"),
                  function(object, value) {
                      if ( nrow(value) == ncol(object) ) {
@@ -1432,7 +1432,7 @@ setMethod("cellDist", signature(object = "SCESet"), cellDistSCESet)
 #' @aliases cellPairwiseDistances
 #' @rdname cellPairwiseDistances
 #' @exportMethod "cellPairwiseDistances<-"
-setReplaceMethod("cellPairwiseDistances", signature(object = "SCESet", 
+setReplaceMethod("cellPairwiseDistances", signature(object = "SCESet",
                                                     value = "matrix"),
                  function(object, value) {
                      if ( nrow(value) == ncol(object) ) {
@@ -1515,7 +1515,7 @@ setMethod("featDist", signature(object = "SCESet"), featDistSCESet)
 #' @aliases featurePairwiseDistances
 #' @rdname featurePairwiseDistances
 #' @export "featurePairwiseDistances<-"
-setReplaceMethod("featurePairwiseDistances", signature(object = "SCESet", 
+setReplaceMethod("featurePairwiseDistances", signature(object = "SCESet",
                                                        value = "matrix"),
                  function(object, value) {
                      if ( nrow(value) == nrow(object) ) {
@@ -1554,7 +1554,7 @@ setReplaceMethod("featDist", signature(object = "SCESet", value = "matrix"),
 #' @rdname toCellDataSet
 #' @name toCellDataSet
 #' @return An object of class \code{SCESet}
-#' @examples 
+#' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
 #' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
@@ -1576,7 +1576,7 @@ toCellDataSet <- function(sce, exprs_values = "exprs") {
         if ( exprs_values == "exprs" && sce@logged )
             exprsData <- 2 ^ exprsData - sce@logExprsOffset
         celldataset <- monocle::newCellDataSet(
-            exprsData, phenoData = phenoData(sce), 
+            exprsData, phenoData = phenoData(sce),
             featureData = featureData(sce),
             lowerDetectionLimit = sce@lowerDetectionLimit)
         celldataset@reducedDimS <- t(redDim(sce))
@@ -1600,21 +1600,21 @@ toCellDataSet <- function(sce, exprs_values = "exprs") {
 #' @rdname fromCellDataSet
 #' @name fromCellDataSet
 #' @return An object of class \code{SCESet}
-#' @examples 
+#' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
 #' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
 #' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 #' if ( requireNamespace("monocle") ) {
-#'     # cds <- toCellDataSet(example_sceset) # not run 
-#'     # sceset <- fromCellDataSet(cds) # not run 
+#'     # cds <- toCellDataSet(example_sceset) # not run
+#'     # sceset <- fromCellDataSet(cds) # not run
 #' }
 fromCellDataSet <- function(cds, exprs_values = "tpm", logged = FALSE) {
     pkgAvail <- requireNamespace("monocle")
     if (pkgAvail) {
         if (!is(cds,'CellDataSet')) stop('cds must be of type CellDataSet from package monocle')
         exprsData <- countData <- NULL
-        exprs_values <- match.arg(exprs_values, 
+        exprs_values <- match.arg(exprs_values,
                                   c("exprs", "tpm", "fpkm", "counts"))
         exprsData <- countData <- tpmData <- fpkmData <- NULL
         if (exprs_values == "exprs") {
@@ -1626,20 +1626,20 @@ fromCellDataSet <- function(cds, exprs_values = "tpm", logged = FALSE) {
         } else {
             countData <- exprs(cds)
         }
-        
+
         sce <- newSCESet(exprsData = exprsData, tpmData = tpmData,
                          fpkmData = fpkmData, countData = countData,
                          phenoData = phenoData(cds),
                          featureData = featureData(cds),
                          lowerDetectionLimit = cds@lowerDetectionLimit,
                          logged = logged)
-        
+
         ## now try and preserve a reduced dimension representation
         ## this is really not elegant - KC
         rds <- cds@reducedDimS
         if (length(rds) == 0) {
             rds <- cds@reducedDimA
-        } 
+        }
         if (length(rds) == 2 * ncol(sce)) { # something is there and of the right dimension
             if (nrow(rds) == 2) {
                 redDim(sce) <- t(rds)
@@ -1647,7 +1647,7 @@ fromCellDataSet <- function(cds, exprs_values = "tpm", logged = FALSE) {
                 redDim(sce) <- rds
             } # else do nothing
         }
-        
+
         return( sce )
     }
     else
@@ -1681,14 +1681,14 @@ fromCellDataSet <- function(cds, exprs_values = "tpm", logged = FALSE) {
 #' all(counts(example_sceset) == getExprs(example_sceset)) # TRUE
 getExprs <- function(object) {
     if (!is(object,'SCESet')) stop('object must be of type SCESet')
-    
+
     x <- switch(object@useForExprs,
                 exprs = exprs(object),
                 tpm = tpm(object),
                 fpkm = fpkm(object),
                 counts = counts(object))
-    
+
     if(is.null(x)) warning(paste("Slot for", object@useForExprs, "is empty; returning NULL"))
-    
+
     return( x )
 }

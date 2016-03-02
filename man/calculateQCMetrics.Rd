@@ -42,15 +42,16 @@ of data and identification of potentially problematic features and cells. The
 \describe{
  \item{total_counts}{Total number of counts for the cell (aka ``library size'')}
  \item{log10_total_counts}{Total counts on the log10-scale}
- \item{coverage}{The number of features for the cell that have expression 
- above the detection limit (default detection limit is zero)}
+ \item{total_features}{The number of endogenous features (i.e. not control 
+ features) for the cell that have expression above the detection limit
+  (default detection limit is zero)}
  \item{filter_on_depth}{Would this cell be filtered out based on its 
  log10-depth being (by default) more than 5 median absolute deviations from 
  the median log10-depth for the dataset?} 
  \item{filter_on_coverage}{Would this cell be filtered out based on its 
  coverage being (by default) more than 5 median absolute deviations from the 
  median coverage for the dataset?}
- \item{counts_from_feature_controls}{Total number of counts for the cell 
+ \item{counts_feature_controls}{Total number of counts for the cell 
  that come from (one or more sets of user-defined) control features. Defaults
   to zero if no control features are indicated. If more than one set of 
   feature controls are defined (for example, ERCC and MT genes are defined 
@@ -59,7 +60,7 @@ of data and identification of potentially problematic features and cells. The
   \code{counts_feature_controls_ERCC}, 
   \code{counts_feature_controls_MT} and 
   \code{counts_feature_controls}).}
- \item{log10_counts_from_feature_controls}{Just as above, the total 
+ \item{log10_counts_feature_controls}{Just as above, the total 
   number of counts from feature controls, but on the log10-scale. Defaults 
   to zero (i.e.~log10(0 + 1), offset to avoid negative infinite values) if 
   no feature control are indicated.}

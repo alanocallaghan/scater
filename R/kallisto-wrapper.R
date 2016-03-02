@@ -2,91 +2,92 @@
 
 ################################################################################
 #' Run kallisto on FASTQ files to quantify feature abundance
-#' 
-#' Run the abundance quantification tool \code{kallisto} on a set of FASTQ 
+#'
+#' Run the abundance quantification tool \code{kallisto} on a set of FASTQ
 #' files. Requires \code{kallisto} (\url{http://pachterlab.github.io/kallisto/})
-#' to be installed and a kallisto feature index must have been generated prior 
+#' to be installed and a kallisto feature index must have been generated prior
 #' to using this function. See the kallisto website for installation and basic
 #' usage instructions.
-#' 
-#' @param targets_file character string giving the path to a tab-delimited text 
+#'
+#' @param targets_file character string giving the path to a tab-delimited text
 #' file with either 2 columns (single-end reads) or 3 columns (paired-end reads)
 #' that gives the sample names (first column) and FastQ file names (column 2 and
-#' if applicable 3). The file is assumed to have column headers, although these 
+#' if applicable 3). The file is assumed to have column headers, although these
 #' are not used.
-#' @param transcript_index character string giving the path to the kallisto 
+#' @param transcript_index character string giving the path to the kallisto
 #' index to be used for the feature abundance quantification.
 #' @param single_end logical, are single-end reads used, or paired-end reads?
 #' @param output_prefix character string giving the prefix for the output folder
-#' that will contain the kallisto results. The default is \code{"output"} and 
+#' that will contain the kallisto results. The default is \code{"output"} and
 #' the sample name (column 1 of \code{targets_file}) is appended (preceded by an
 #' underscore).
-#' @param fragment_length scalar integer or numeric giving the estimated 
-#' average fragment length. Required argument if \code{single_end} is \code{TRUE}, 
-#' optional if \code{FALSE} (kallisto default for paired-end data is that the 
+#' @param fragment_length scalar integer or numeric giving the estimated
+#' average fragment length. Required argument if \code{single_end} is \code{TRUE},
+#' optional if \code{FALSE} (kallisto default for paired-end data is that the
 #' value is estimated from the input data.
 #' @param n_cores integer giving the number of cores (nodes/threads) to use for
 #' the kallisto jobs. The package \code{parallel} is used. Default is 2 cores.
-#' @param n_bootstrap_samples integer giving the number of bootstrap samples 
-#' that kallisto should use (default is 0). With bootstrap samples, uncertainty 
+#' @param n_bootstrap_samples integer giving the number of bootstrap samples
+#' that kallisto should use (default is 0). With bootstrap samples, uncertainty
 #' in abundance can be quantified.
-#' @param bootstrap_seed scalar integer or numeric giving the seed to use for 
+#' @param bootstrap_seed scalar integer or numeric giving the seed to use for
 #' the bootstrap sampling (default used by kallisto is 42). Optional argument.
-#' @param correct_bias logical, should kallisto's option to model and correct 
-#' abundances for sequence specific bias? Requires kallisto version 0.42.2 or 
+#' @param correct_bias logical, should kallisto's option to model and correct
+#' abundances for sequence specific bias? Requires kallisto version 0.42.2 or
 #' higher.
-#' @param plaintext logical, if \code{TRUE} then bootstrapping results are 
-#' returned in a plain text file rather than an HDF5 
+#' @param plaintext logical, if \code{TRUE} then bootstrapping results are
+#' returned in a plain text file rather than an HDF5
 #' \url{https://www.hdfgroup.org/HDF5/} file.
-#' @param kallisto_version character string indicating whether or not the 
-#' version of kallisto to be used is \code{"pre-0.42.2"} or \code{"current"}. 
-#' This is required because the kallisto developers changed the output file 
+#' @param kallisto_version character string indicating whether or not the
+#' version of kallisto to be used is \code{"pre-0.42.2"} or \code{"current"}.
+#' This is required because the kallisto developers changed the output file
 #' extensions and added features in version 0.42.2.
 #' @param verbose logical, should timings for the run be printed?
-#' @param dry_run logical, if \code{TRUE} then a list containing the kallisto 
-#' commands that would be run and the output directories is returned. Can be 
+#' @param dry_run logical, if \code{TRUE} then a list containing the kallisto
+#' commands that would be run and the output directories is returned. Can be
 #' used to read in results if kallisto is run outside an R session or to produce
 #'  a script to run outside of an R session.
 #' @param kallisto_cmd (optional) string giving full command to use fo call
 #' kallisto, if simply typing "kallisto" at the command line does not give the
 #' required version of kallisto or does not work. Default is simply "kalliso".
 #' If used, this argument should give the full path to the desired kallisto
-#' binary. 
-#' 
-#' @details A kallisto transcript index can be built from a FASTA file: 
+#' binary.
+#'
+#' @details A kallisto transcript index can be built from a FASTA file:
 #' \code{kallisto index [arguments] FASTA-file}. See the kallisto documentation
 #' for further details.
-#' 
-#' @return A list containing three elements for each sample for which feature 
-#' abundance has been quantified: (1) \code{kallisto_call}, the call used for 
-#' kallisto, (2) \code{kallisto_log} the log generated by kallisto, and (3) 
+#'
+#' @return A list containing three elements for each sample for which feature
+#' abundance has been quantified: (1) \code{kallisto_call}, the call used for
+#' kallisto, (2) \code{kallisto_log} the log generated by kallisto, and (3)
 #' \code{output_dir} the directory in which the kallisto results can be found.
-#' 
+#'
 #' @importFrom parallel makeCluster
 #' @importFrom parallel stopCluster
 #' @importFrom parallel parLapply
+#' @importFrom utils read.delim
 #' @export
 #' @examples
 #' \dontrun{
 #' ## If in kallisto's 'test' directory, then try these calls:
 #' ## Generate 'targets.txt' file:
-#' write.table(data.frame(Sample="sample1", File1="reads_1.fastq.gz", File2="reads_1.fastq.gz"), 
+#' write.table(data.frame(Sample="sample1", File1="reads_1.fastq.gz", File2="reads_1.fastq.gz"),
 #'  file="targets.txt", quote=FALSE, row.names=FALSE, sep="\t")
-#' kallisto_log <- runKallisto("targets.txt", "transcripts.idx", single_end=FALSE, 
+#' kallisto_log <- runKallisto("targets.txt", "transcripts.idx", single_end=FALSE,
 #'          output_prefix="output", verbose=TRUE, n_bootstrap_samples=10,
 #'          dry_run = FALSE)
 #' }
 runKallisto <- function(targets_file, transcript_index, single_end = TRUE,
-                        output_prefix = "output", fragment_length = NULL, 
-                        n_cores = 2, n_bootstrap_samples = 0, 
-                        bootstrap_seed = NULL, correct_bias = TRUE, 
-                        plaintext = FALSE, kallisto_version = "current", 
+                        output_prefix = "output", fragment_length = NULL,
+                        n_cores = 2, n_bootstrap_samples = 0,
+                        bootstrap_seed = NULL, correct_bias = TRUE,
+                        plaintext = FALSE, kallisto_version = "current",
                         verbose = TRUE, dry_run = FALSE,
                         kallisto_cmd = "kallisto") {
     targets_dir <- paste0(dirname(targets_file), "/")
     targets <- read.delim(targets_file, stringsAsFactors = FALSE, header = TRUE)
     if ( !(ncol(targets) == 2 || ncol(targets) == 3) )
-        stop("Targets file must have either 2 columns (single-end reads) or 
+        stop("Targets file must have either 2 columns (single-end reads) or
              3 columns (paired-end reads). File should be tab-delimited with
              column headers")
     if ( ncol(targets) == 2 && !single_end ) {
@@ -131,7 +132,7 @@ samples, or a vector providing the ave fragment length for each sample.")
     kallisto_args <- paste(kallisto_args, targets[, 2])
     if (paired_end)
         kallisto_args <- paste(kallisto_args, targets[, 3])
-    ##     
+    ##
     if ( dry_run ) {
         kallisto_log <- vector("list", length(samples))
         names(kallisto_log) <- samples
@@ -139,7 +140,7 @@ samples, or a vector providing the ave fragment length for each sample.")
         for (i in seq_len(length(kallisto_calls))) {
             kallisto_log[[i]]$output_dir <- output_dirs[i]
             kallisto_log[[i]]$kallisto_call <- kallisto_calls[i]
-            kallisto_log[[i]]$kallisto_log <- 
+            kallisto_log[[i]]$kallisto_log <-
                 "Dry run: kallisto commands not executed."
         }
     } else {
@@ -147,14 +148,14 @@ samples, or a vector providing the ave fragment length for each sample.")
             print(paste("Analysis started: ", Sys.time()))
         cl <- parallel::makeCluster(n_cores)
         # one or more parLapply calls to kallisto
-        kallisto_log <- parallel::parLapply(cl, kallisto_args, .call_kallisto, 
+        kallisto_log <- parallel::parLapply(cl, kallisto_args, .call_kallisto,
                                             kallisto_cmd, verbose)
         parallel::stopCluster(cl)
         ## Return log of kallisto jobs, so user knows where to find results
         names(kallisto_log) <- samples
         if (verbose) {
             print(paste("Analysis completed: ", Sys.time()))
-            print(paste("Processed", length(samples), "samples"))    
+            print(paste("Processed", length(samples), "samples"))
         }
         for (i in seq_len(length(kallisto_log))) {
             kallisto_log[[i]]$output_dir <- output_dirs[i]
@@ -164,52 +165,52 @@ samples, or a vector providing the ave fragment length for each sample.")
 }
 
 .call_kallisto <- function(kcall, kallisto_cmd, verbose=TRUE) {
-    out <- tryCatch(ex <- system2(kallisto_cmd, kcall, stdout = TRUE, 
-                                  stderr = TRUE), 
+    out <- tryCatch(ex <- system2(kallisto_cmd, kcall, stdout = TRUE,
+                                  stderr = TRUE),
                     warning = function(w){w}, error = function(e){e})
     list(kallisto_call = paste(kallisto_cmd, kcall), kallisto_log = out)
 }
 
 ### Possible test for kallisto wrapper, but seems to leave tests hanging (not clear why)
 # context("kallisto tests on inputs")
-# 
+#
 # test_that("tests for presence of average fragment length if single-end reads", {
-#     expect_that(runKallisto("../extdata/targets.txt", 
+#     expect_that(runKallisto("../extdata/targets.txt",
 #                             "../extdata/transcripts.idx",
-#                             output_prefix="../extdata/output", n_cores=12, 
-#                             fragment_length=NULL, verbose=TRUE), 
+#                             output_prefix="../extdata/output", n_cores=12,
+#                             fragment_length=NULL, verbose=TRUE),
 #                 gives_warning("targets only has three columns, but 'single_end' was TRUE; proceeding assuming paired-end reads"))
 # })
-# 
-# 
+#
+#
 
 ################################################################################
 #' Read kallisto results for a single sample into a list
-#' 
+#'
 #' @param directory character string giving the path to the directory containing
 #' the kallisto results for the sample.
-#' @param read_h5 logical, if \code{TRUE} then read in bootstrap results from 
+#' @param read_h5 logical, if \code{TRUE} then read in bootstrap results from
 #' the HDF5 object produced by kallisto.
-#' @param kallisto_version character string indicating whether or not the 
-#' version of kallisto to be used is \code{"pre-0.42.2"} or \code{"current"}. 
-#' This is required because the kallisto developers changed the output file 
+#' @param kallisto_version character string indicating whether or not the
+#' version of kallisto to be used is \code{"pre-0.42.2"} or \code{"current"}.
+#' This is required because the kallisto developers changed the output file
 #' extensions and added features in version 0.42.2.
-#' 
-#' @details The directory is expected to contain results for just a single 
+#'
+#' @details The directory is expected to contain results for just a single
 #' sample. Putting more than one sample's results in the directory will result
-#' in unpredictable behaviour with this function. The function looks for the 
-#' files (with the default names given by kallisto) 'abundance.txt', 
-#' 'run_info.json' and (if \code{read_h5=TRUE}) 'abundance/h5'. If these files 
-#' are missing, or if results files have different names, then this function 
-#' will not find them. 
-#' 
-#' @return A list with two elements: (1) a data.frame \code{abundance} with 
-#' columns for 'target_id' (feature, transcript, gene etc), 'length' (feature 
-#' length), 'eff_length' (effective feature length), 'est_counts' (estimated 
-#' feature counts), 'tpm' (transcripts per million) and possibly many columns 
+#' in unpredictable behaviour with this function. The function looks for the
+#' files (with the default names given by kallisto) 'abundance.txt',
+#' 'run_info.json' and (if \code{read_h5=TRUE}) 'abundance/h5'. If these files
+#' are missing, or if results files have different names, then this function
+#' will not find them.
+#'
+#' @return A list with two elements: (1) a data.frame \code{abundance} with
+#' columns for 'target_id' (feature, transcript, gene etc), 'length' (feature
+#' length), 'eff_length' (effective feature length), 'est_counts' (estimated
+#' feature counts), 'tpm' (transcripts per million) and possibly many columns
 #' containing bootstrap estimated counts; and (2) a list \code{run_info} with
 #' details about the kallisto run that generated the results.
-#' 
+#'
 #' @importFrom data.table fread
 #' @importFrom rhdf5 h5read
 #' @importFrom rhdf5 H5close
@@ -218,7 +219,7 @@ samples, or a vector providing the ave fragment length for each sample.")
 #' @examples
 #' # If kallisto results are in the directory "output", then call:
 #' # readKallistoResultsOneSample("output")
-readKallistoResultsOneSample <- function(directory, read_h5=FALSE, 
+readKallistoResultsOneSample <- function(directory, read_h5=FALSE,
                                          kallisto_version = "current") {
     ## Read in abundance information for the sample
     if ( kallisto_version == "pre-0.42.2" )
@@ -241,70 +242,70 @@ readKallistoResultsOneSample <- function(directory, read_h5=FALSE,
             stop(paste("File", file_to_read, "not found or does not exist. Please check directory is correct and that you want to read results in HDF5 format."))
         }
         if ( h5$aux$num_bootstrap > 0 ) {
-            boot_mat <- data.frame(matrix(unlist(h5$bootstrap), 
-                                          nrow = length(h5$est_counts), 
+            boot_mat <- data.frame(matrix(unlist(h5$bootstrap),
+                                          nrow = length(h5$est_counts),
                                           ncol = h5$aux$num_bootstrap))
             colnames(boot_mat) <- names(h5$bootstrap)
             abundance <- cbind(abundance, boot_mat)
-        }        
+        }
     }
     list(abundance = abundance, run_info = run_info)
 }
 
 
 ################################################################################
-#' Read kallisto results from a batch of jobs 
-#' 
-#' After generating transcript/feature abundance results using kallisto for a 
+#' Read kallisto results from a batch of jobs
+#'
+#' After generating transcript/feature abundance results using kallisto for a
 #' batch of samples, read these abundance values into an \code{SCESet} object.
-#' 
-#' @param kallisto_log list, generated by \code{runKallisto}. If provided, then 
+#'
+#' @param kallisto_log list, generated by \code{runKallisto}. If provided, then
 #' \code{samples} and \code{directories} arguments are ignored.
-#' @param samples character vector providing a set of sample names to use for 
+#' @param samples character vector providing a set of sample names to use for
 #' the abundance results.
 #' @param directories character vector providing a set of directories containing
 #' kallisto abundance results to be read in.
 #' @param read_h5 logical, should the bootstrap results be read in from the HDF5
 #' objects produced by kallisto?
-#' @param kallisto_version character string indicating whether or not the 
-#' version of kallisto to be used is \code{"pre-0.42.2"} or \code{"current"}. 
-#' This is required because the kallisto developers changed the output file 
+#' @param kallisto_version character string indicating whether or not the
+#' version of kallisto to be used is \code{"pre-0.42.2"} or \code{"current"}.
+#' This is required because the kallisto developers changed the output file
 #' extensions and added features in version 0.42.2.
 #' @param logExprsOffset numeric scalar, providing the offset used when doing
 #' log2-transformations of expression data to avoid trying to take logs of zero.
 #' Default offset value is \code{1}.
 #' @param verbose logical, should function provide output about progress?
-#' 
-#' @details This function expects to find only one set of kallisto abundance 
-#' results per directory; multiple adundance results in a given directory will 
+#'
+#' @details This function expects to find only one set of kallisto abundance
+#' results per directory; multiple adundance results in a given directory will
 #' be problematic.
-#' 
+#'
 #' @return an SCESet object
-#' 
+#'
 #' @export
 #' @examples
 #' \dontrun{
-#' kallisto_log <- runKallisto("targets.txt", "transcripts.idx", single_end=FALSE, 
+#' kallisto_log <- runKallisto("targets.txt", "transcripts.idx", single_end=FALSE,
 #'          output_prefix="output", verbose=TRUE, n_bootstrap_samples=10)
 #' sceset <- readKallistoResults(kallisto_log)
 #' }
-#' 
-readKallistoResults <- function(kallisto_log = NULL, samples = NULL, 
-                                directories = NULL, read_h5 = FALSE, 
-                                kallisto_version = "current", 
-                                logExprsOffset = 1, 
+#'
+readKallistoResults <- function(kallisto_log = NULL, samples = NULL,
+                                directories = NULL, read_h5 = FALSE,
+                                kallisto_version = "current",
+                                logExprsOffset = 1,
                                 verbose = TRUE) {
     kallisto_fail <- rep(FALSE, length(samples))
-    
+
     ## Checks on arguments
     if ( !is.null(kallisto_log) ) {
         cat("Using kallisto_log argument to define samples and results directories.")
         if ( !is.list(kallisto_log) )
             stop("The kallisto_log argument should be a list returned by runKallisto()")
-        samples <- names(kallisto_log)       
+        samples <- names(kallisto_log)
         directories <- sapply(kallisto_log, function(x) {x$output_dir})
         logs <- lapply(kallisto_log, function(x) {x$kallisto_log})
-        
+
         ## Can only check kallisto fail if log provided
         kallisto_fail <- sapply(logs, function(x) {
           any(grepl("[wW]arning|[eE]rror", x))})
@@ -313,7 +314,7 @@ readKallistoResults <- function(kallisto_log = NULL, samples = NULL,
                          paste0(names(logs)[kallisto_fail], collapse = "\n"),
                          "\n It is recommended that you inspect kallisto_log for these samples."))
         }
-        
+
     } else {
       cat("Kallisto log not provided - assuming all runs successful")
         if ( is.null(samples) | is.null(directories) )
@@ -321,27 +322,27 @@ readKallistoResults <- function(kallisto_log = NULL, samples = NULL,
         if ( length(samples) != length(directories) )
             stop("samples and directories arguments must be the same length")
     }
-    
+
 
     samples <- samples[!kallisto_fail]
     directories <- directories[!kallisto_fail]
-    
+
     ## Read first file to get size of feature set
-    s1 <- readKallistoResultsOneSample(directories[1], read_h5 = read_h5, 
+    s1 <- readKallistoResultsOneSample(directories[1], read_h5 = read_h5,
                                        kallisto_version = kallisto_version)
     nsamples <- length(samples)
     nfeatures <- nrow(s1$abundance)
     nbootstraps <- s1$run_info$n_bootstraps
     navec_samples <- rep(NA, nsamples)
-    
+
     ## Set up results objects
     pdata <- data.frame(n_targets = navec_samples, n_bootstraps = navec_samples,
-                        kallisto_version = navec_samples, 
+                        kallisto_version = navec_samples,
                         index_version = navec_samples, start_time = navec_samples,
                         call = navec_samples)
     rownames(pdata) <- samples
-    fdata <- data.frame(feature_id = s1$abundance$target_id, 
-                        feature_length = s1$abundance$length, 
+    fdata <- data.frame(feature_id = s1$abundance$target_id,
+                        feature_length = s1$abundance$length,
                         feature_eff_length = s1$abundance$eff_length)
     rownames(fdata) <- s1$abundance$target_id
     est_counts <- tpm <- matrix(NA, nrow = nfeatures, ncol = nsamples)
@@ -352,18 +353,18 @@ readKallistoResults <- function(kallisto_log = NULL, samples = NULL,
         rownames(bootstraps) <- s1$abundance$target_id
         colnames(bootstraps) <- samples
     }
-    
+
     ## Read kallisto results into results objects
     if ( verbose )
         cat(paste("\nReading results for", nsamples, "samples:\n"))
     for (i in seq_len(nsamples)) {
         tmp_samp <- readKallistoResultsOneSample(
-            directories[i], read_h5 = read_h5, 
+            directories[i], read_h5 = read_h5,
             kallisto_version = kallisto_version)
         ## counts
         if ( length(tmp_samp$abundance$est_counts) != nfeatures )
             warning(paste("Results for directory", directories[i], "do not match dimensions of other samples."))
-        else            
+        else
             est_counts[,i] <- tmp_samp$abundance$est_counts
         ## tpm
         if ( length(tmp_samp$abundance$est_counts) == nfeatures )
@@ -389,10 +390,10 @@ readKallistoResults <- function(kallisto_log = NULL, samples = NULL,
     ## Produce SCESet object
     pdata <- new("AnnotatedDataFrame", pdata)
     fdata <- new("AnnotatedDataFrame", fdata)
-    sce_out <- newSCESet(exprsData = log2(tpm + logExprsOffset), 
-                         phenoData = pdata, featureData = fdata, 
-                         countData = est_counts, 
-                         logExprsOffset = logExprsOffset, 
+    sce_out <- newSCESet(exprsData = log2(tpm + logExprsOffset),
+                         phenoData = pdata, featureData = fdata,
+                         countData = est_counts,
+                         logExprsOffset = logExprsOffset,
                          lowerDetectionLimit = 0)
     tpm(sce_out) <- tpm
     if ( verbose )
