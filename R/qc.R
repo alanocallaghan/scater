@@ -509,6 +509,8 @@ a lower count threshold of 0.")
                                            pct_feature_controls_threshold,
                                            calc_top_features = FALSE,
                                            exprs_type = "exprs") {
+    #' Many thanks to Aaron Lun for suggesting efficiency improvements
+    #' for this function.
     ## Get total expression from feature controls
     exprs_feature_controls <- colSums(exprs_mat[is_feature_control,])
     ## Get % expression from feature controls
@@ -524,12 +526,14 @@ a lower count threshold of 0.")
     if (calc_top_features) { ## Do we want to calculate exprs accounted for by
         ## top features?
         ## Determine percentage of counts for top features by cell
-        pct_exprs_by_cell <- (100 * t(t(exprs_mat) / colSums(exprs_mat)))
-        pct_exprs_by_cell_sorted <- apply(pct_exprs_by_cell, 2, sort,
-                                          decreasing = TRUE)
-        pct_exprs_top <-
-            matrixStats::colCumsums(pct_exprs_by_cell_sorted[1:500,])
-        pct_exprs_top_out <- t(pct_exprs_top[c(50, 100, 200),])
+        pct_exprs_top_out <- rep(list(list()), ncol(exprs_mat))
+        for (cell in seq_along(pct_exprs_top_out)) {
+            exprs_by_cell_sorted <- sort(exprs_mat[,cell], decreasing = TRUE)
+            pct_exprs_top <- cumsum(exprs_by_cell_sorted[1:500]) / 
+                sum(exprs_by_cell_sorted) * 100
+            pct_exprs_top_out[[cell]] <- pct_exprs_top[c(50, 100, 200)]
+        }
+        pct_exprs_top_out <- do.call(rbind, pct_exprs_top_out)
         colnames(pct_exprs_top_out) <- paste0("pct_exprs_top_",
                                               c(50, 100, 200), "_features")
         df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_out)
