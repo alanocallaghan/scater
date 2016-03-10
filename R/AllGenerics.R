@@ -123,21 +123,6 @@ setGeneric("fpkm", function(object) {standardGeneric("fpkm")})
 #' @rdname fpkm
 setGeneric("fpkm<-", function(object, value) {standardGeneric("fpkm<-")})
 
-
-#' @name counts
-#' @export
-#' @docType methods
-#' @return a matrix of count data
-#' @rdname counts
-setGeneric("counts", function(object) {standardGeneric("counts")})
-
-#' @name counts<-
-#' @export
-#' @docType methods
-#' @rdname counts
-setGeneric("counts<-", function(object, value) {standardGeneric("counts<-")})
-
-
 #' @name norm_counts
 #' @export
 #' @docType methods
@@ -331,14 +316,6 @@ setGeneric("plotExpression", function(object, ...) {
 #         standardGeneric("plotPCA")
 #     })
 # }
-
-#' @name plotPCA
-#' @export
-#' @docType methods
-#' @rdname plotPCA
-setGeneric("plotPCA", function(object, ...) {
-    standardGeneric("plotPCA")
-})
 
 #' @name plotTSNE
 #' @export

@@ -327,6 +327,9 @@ readKallistoResults <- function(kallisto_log = NULL, samples = NULL,
     samples <- samples[!kallisto_fail]
     directories <- directories[!kallisto_fail]
 
+    if ( !all(dir.exists(directories)) )
+        stop("Some of the desired directories to import do not exist!")
+    
     ## Read first file to get size of feature set
     s1 <- readKallistoResultsOneSample(directories[1], read_h5 = read_h5,
                                        kallisto_version = kallisto_version)

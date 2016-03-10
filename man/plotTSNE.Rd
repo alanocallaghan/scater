@@ -8,7 +8,7 @@
 \usage{
 plotTSNE(object, ...)
 
-\S4method{plotTSNE}{SCESet}(object, ntop = 5000, ncomponents = 2,
+\S4method{plotTSNE}{SCESet}(object, ntop = 500, ncomponents = 2,
   exprs_values = "exprs", colour_by = NULL, shape_by = NULL,
   size_by = NULL, feature_set = NULL, return_SCESet = FALSE,
   scale_features = TRUE, draw_plot = TRUE, theme_size = 10,
@@ -21,7 +21,7 @@ plotTSNE(object, ...)
 \item{...}{further arguments passed to \code{\link[Rtsne]{Rtsne}}}
 
 \item{ntop}{numeric scalar indicating the number of most variable features to
-use for the t-SNE Default is \code{5000}, but any \code{ntop} argument is
+use for the t-SNE Default is \code{500}, but any \code{ntop} argument is
 overrided if the \code{feature_set} argument is non-NULL.}
 
 \item{ncomponents}{numeric scalar indicating the number of t-SNE

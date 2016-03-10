@@ -342,66 +342,66 @@ NULL
 #' @export
 #' @seealso \code{\link[base]{Extract}}
 #'
-setMethod('[', 'SCESet', function (x, i, j, ..., drop=FALSE) {
-    if ( !missing(i) && missing(j) ){
+setMethod('[', 'SCESet', function(x, i, j, ..., drop=FALSE) {
+    if ( !missing(i) && missing(j) ) {
         ## Subsetting features only
-        x <- selectMethod('[', 'ExpressionSet')(x, i, , drop=drop)
-        if( nrow(x@featurePairwiseDistances) != 0 )
-            x@featurePairwiseDistances <- x@featurePairwiseDistances[i, i, drop=drop]
-        if( !missing(...) ) {
-            if( !is.na(ncol(x@bootstraps)) ) {
-                if(  nrow(x@bootstraps) != 0 && length(dim(x@bootstraps)) > 2 )
-                    x@bootstraps <- x@bootstraps[i, , ..., drop=drop]
+        x <- selectMethod('[', 'ExpressionSet')(x, i, , drop = drop)
+        if ( nrow(x@featurePairwiseDistances) != 0 )
+            x@featurePairwiseDistances <- x@featurePairwiseDistances[i, i, drop = drop]
+        if ( !missing(...) ) {
+            if ( !is.na(ncol(x@bootstraps)) ) {
+                if (  nrow(x@bootstraps) != 0 && length(dim(x@bootstraps)) > 2 )
+                    x@bootstraps <- x@bootstraps[i, , ..., drop = drop]
             }
         } else {
-            if( !is.na(ncol(x@bootstraps)) ) {
-                if( nrow(x@bootstraps) != 0 )
-                    x@bootstraps <- x@bootstraps[i, , , drop=drop]
+            if ( !is.na(ncol(x@bootstraps)) ) {
+                if ( nrow(x@bootstraps) != 0 )
+                    x@bootstraps <- x@bootstraps[i, , , drop = drop]
             }
         }
-    } else if ( missing(i) && !missing(j) ){
+    } else if ( missing(i) && !missing(j) ) {
         ## Subsetting cells only
-        x <- selectMethod('[', 'ExpressionSet')(x, , j, drop=drop)
-        if( nrow(x@cellPairwiseDistances) != 0 )
-            x@cellPairwiseDistances <- x@cellPairwiseDistances[j, j, drop=drop]
-        if( nrow(x@reducedDimension) != 0 )
-            x@reducedDimension <- x@reducedDimension[j, , drop=drop]
+        x <- selectMethod('[', 'ExpressionSet')(x, , j, drop = drop)
+        if ( nrow(x@cellPairwiseDistances) != 0 )
+            x@cellPairwiseDistances <- x@cellPairwiseDistances[j, j, drop = drop]
+        if ( nrow(x@reducedDimension) != 0 )
+            x@reducedDimension <- x@reducedDimension[j, , drop = drop]
         if ( !missing(...) ) {
-            if( !is.na(ncol(x@bootstraps)) ) {
-                if( ncol(x@bootstraps) != 0 && length(dim(x@bootstraps)) > 2 )
-                    x@bootstraps <- x@bootstraps[, j, ..., drop=drop]
+            if ( !is.na(ncol(x@bootstraps)) ) {
+                if ( ncol(x@bootstraps) != 0 && length(dim(x@bootstraps)) > 2 )
+                    x@bootstraps <- x@bootstraps[, j, ..., drop = drop]
             }
         } else {
-            if( !is.na(ncol(x@bootstraps)) ) {
-                if( ncol(x@bootstraps) != 0 )
-                    x@bootstraps <- x@bootstraps[, j, , drop=drop]
+            if ( !is.na(ncol(x@bootstraps)) ) {
+                if ( ncol(x@bootstraps) != 0 )
+                    x@bootstraps <- x@bootstraps[, j, , drop = drop]
             }
         }
-    } else if ( !missing(i) && !missing(j) ){
+    } else if ( !missing(i) && !missing(j) ) {
         ## Subsetting features (i) and cells (j)
-        x <- selectMethod('[', 'ExpressionSet')(x, i, j, drop=drop)
-        if( nrow(x@featurePairwiseDistances) != 0 )
-            x@featurePairwiseDistances <- x@featurePairwiseDistances[i, i, drop=drop]
-        if( nrow(x@cellPairwiseDistances) != 0 )
-            x@cellPairwiseDistances <- x@cellPairwiseDistances[j, j, drop=drop]
-        if( nrow(x@reducedDimension) != 0 )
-            x@reducedDimension <- x@reducedDimension[j, , drop=drop]
+        x <- selectMethod('[', 'ExpressionSet')(x, i, j, drop = drop)
+        if ( nrow(x@featurePairwiseDistances) != 0 )
+            x@featurePairwiseDistances <- x@featurePairwiseDistances[i, i, drop = drop]
+        if ( nrow(x@cellPairwiseDistances) != 0 )
+            x@cellPairwiseDistances <- x@cellPairwiseDistances[j, j, drop = drop]
+        if ( nrow(x@reducedDimension) != 0 )
+            x@reducedDimension <- x@reducedDimension[j, , drop = drop]
         if ( !missing(...) ) {
-            if( !is.na(ncol(x@bootstraps)) ) {
-                if( nrow(x@bootstraps) != 0 && ncol(x@bootstraps) != 0 && length(dim(x@bootstraps)) > 2 )
-                    x@bootstraps <- x@bootstraps[i, j, ..., drop=drop]
+            if ( !is.na(ncol(x@bootstraps)) ) {
+                if ( nrow(x@bootstraps) != 0 && ncol(x@bootstraps) != 0 && length(dim(x@bootstraps)) > 2 )
+                    x@bootstraps <- x@bootstraps[i, j, ..., drop = drop]
             }
         } else {
-            if( !is.na(ncol(x@bootstraps)) ) {
-                if( nrow(x@bootstraps) != 0 && ncol(x@bootstraps) != 0 )
-                    x@bootstraps <- x@bootstraps[i, j, , drop=drop]
+            if ( !is.na(ncol(x@bootstraps)) ) {
+                if ( nrow(x@bootstraps) != 0 && ncol(x@bootstraps) != 0 )
+                    x@bootstraps <- x@bootstraps[i, j, , drop = drop]
             }
         }
     } else{
         ## All missing: possibly not missing ... for subsetting bootstrap samples
         if ( !is.na(ncol(x@bootstraps)) ) {
-            if( nrow(x@bootstraps) != 0 && ncol(x@bootstraps) != 0 && length(dim(x@bootstraps)) > 2 )
-                x@bootstraps <- x@bootstraps[, , ..., drop=drop]
+            if ( nrow(x@bootstraps) != 0 && ncol(x@bootstraps) != 0 && length(dim(x@bootstraps)) > 2 )
+                x@bootstraps <- x@bootstraps[, , ..., drop = drop]
         }
     }
     ## Check validity of object
@@ -448,6 +448,7 @@ cellNames <- function(object) {
 #' @return A matrix of expression count data, where rows correspond to features
 #' (e.g. genes) and columns correspond to cells.
 #'
+#' @importFrom Biobase fData<-
 #' @export
 #' @rdname fData
 #' @aliases fData fData,SCESet-method fData<-,SCESet,AnnotatedDataFrame-method fData<-,SCESet,data.frame-method
@@ -488,6 +489,7 @@ setReplaceMethod("fData", signature(x = "SCESet", value = "data.frame"),
 #' @return A matrix of expression count data, where rows correspond to features
 #' (e.g. genes) and columns correspond to cells.
 #'
+#' @importFrom Biobase pData<-
 #' @exportMethod "pData<-"
 #' @rdname pData
 #' @aliases pData pData,SCESet-method pData<-,SCESet,AnnotatedDataFrame-method pData<-,SCESet,data.frame-method
@@ -631,6 +633,7 @@ setReplaceMethod("set_exprs", signature(object = "SCESet", value = "matrix"),
 #' @docType methods
 #' @name counts
 #' @rdname counts
+#' @importFrom BiocGenerics counts
 #' @aliases counts counts,SCESet-method counts<-,SCESet,matrix-method
 #'
 #' @param object a \code{SCESet} object.
@@ -653,6 +656,7 @@ setMethod("counts", signature(object = "SCESet"), counts.SCESet)
 
 #' @name counts
 #' @rdname counts
+#' @importFrom BiocGenerics counts<-
 #' @exportMethod "counts<-"
 setReplaceMethod("counts", signature(object = "SCESet", value = "matrix"),
                  function(object, value) {

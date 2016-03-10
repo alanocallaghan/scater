@@ -7,16 +7,16 @@ Authors@R: c(person("Davis", "McCarthy", role=c("aut", "cre"),
         role=c("aut"), email="qilin@quinwills.net"), person("Kieran",
         "Campbell", role=c("aut"),
         email="kieran.campbell@sjc.ox.ac.uk"))
-Version: 0.99.4
-Date: 2016-03-07
+Version: 0.99.5
+Date: 2016-03-08
 License: GPL (>= 2)
 Title: Single-cell analysis toolkit for gene expression data in R
 Description: A collection of tools for doing various analyses of
         single-cell RNA-seq gene expression data, with a focus on
         quality control.
 Depends: R (>= 3.3), Biobase, ggplot2, methods
-Imports: biomaRt, data.table, dplyr, edgeR, grid, limma, matrixStats,
-        parallel, plyr, reshape2, rhdf5, rjson, viridis
+Imports: biomaRt, BiocGenerics, data.table, dplyr, edgeR, grid, limma, 
+        matrixStats, parallel, plyr, reshape2, rhdf5, rjson, tximport, viridis
 Suggests: BiocStyle, cowplot, cluster, destiny, knitr, monocle,
         mvoutlier, rmarkdown, Rtsne, testthat
 VignetteBuilder: knitr

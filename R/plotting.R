@@ -284,7 +284,7 @@ plotSCESet <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 #'
 #' @param object an \code{SCESet} object
 #' @param ntop numeric scalar indicating the number of most variable features to
-#' use for the PCA. Default is \code{5000}, but any \code{ntop} argument is
+#' use for the PCA. Default is \code{500}, but any \code{ntop} argument is
 #' overrided if the \code{feature_set} argument is non-NULL.
 #' @param ncomponents numeric scalar indicating the number of principal
 #' components to plot, starting from the first principal component. Default is
@@ -358,6 +358,7 @@ plotSCESet <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 #'
 #' @name plotPCA
 #' @aliases plotPCA plotPCA,SCESet-method
+#' @importFrom BiocGenerics plotPCA
 #' @importFrom matrixStats rowVars
 #' @importFrom matrixStats colVars
 #' @export
@@ -388,7 +389,7 @@ plotSCESet <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 #' plotPCA(example_sceset, ncomponents = 4, colour_by = "Treatment",
 #' shape_by = "Mutation_Status")
 #'
-plotPCASCESet <- function(object, ntop=5000, ncomponents=2,
+plotPCASCESet <- function(object, ntop=500, ncomponents=2,
                           exprs_values = "exprs", colour_by = NULL,
                           shape_by = NULL, size_by = NULL, feature_set = NULL,
                           return_SCESet = FALSE, scale_features = TRUE,
@@ -643,7 +644,7 @@ setMethod("plotPCA", signature("SCESet"),
 #'
 #' @param object an \code{SCESet} object
 #' @param ntop numeric scalar indicating the number of most variable features to
-#' use for the t-SNE Default is \code{5000}, but any \code{ntop} argument is
+#' use for the t-SNE Default is \code{500}, but any \code{ntop} argument is
 #' overrided if the \code{feature_set} argument is non-NULL.
 #' @param ncomponents numeric scalar indicating the number of t-SNE
 #' components to plot, starting from the first t-SNE component. Default is
@@ -733,7 +734,7 @@ setMethod("plotPCA", signature("SCESet"),
 #'
 #'
 setMethod("plotTSNE", signature("SCESet"),
-          function(object, ntop = 5000, ncomponents = 2, exprs_values = "exprs",
+          function(object, ntop = 500, ncomponents = 2, exprs_values = "exprs",
                    colour_by = NULL, shape_by = NULL, size_by = NULL,
                    feature_set = NULL, return_SCESet = FALSE,
                    scale_features = TRUE, draw_plot = TRUE, theme_size = 10,
@@ -876,7 +877,7 @@ setMethod("plotTSNE", signature("SCESet"),
 #'
 #' @param object an \code{SCESet} object
 #' @param ntop numeric scalar indicating the number of most variable features to
-#' use for the diffusion map. Default is \code{5000}, but any \code{ntop} 
+#' use for the diffusion map. Default is \code{500}, but any \code{ntop} 
 #' argument is overrided if the \code{feature_set} argument is non-NULL.
 #' @param ncomponents numeric scalar indicating the number of principal
 #' components to plot, starting from the first diffusion map component. Default 
@@ -963,7 +964,7 @@ setMethod("plotTSNE", signature("SCESet"),
 #' return_SCESet = TRUE)
 #'
 #'
-plotDiffusionMapSCESet <- function(object, ntop = 5000, ncomponents = 2,
+plotDiffusionMapSCESet <- function(object, ntop = 500, ncomponents = 2,
                                    exprs_values = "exprs", colour_by = NULL,
                                    shape_by = NULL, size_by = NULL,
                                    feature_set = NULL, return_SCESet = FALSE,

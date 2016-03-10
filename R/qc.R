@@ -506,8 +506,8 @@ a lower count threshold of 0.")
                                            pct_feature_controls_threshold,
                                            calc_top_features = FALSE,
                                            exprs_type = "exprs") {
-    #' Many thanks to Aaron Lun for suggesting efficiency improvements
-    #' for this function.
+    ## Many thanks to Aaron Lun for suggesting efficiency improvements
+    ## for this function.
     ## Get total expression from feature controls
     exprs_feature_controls <- colSums(exprs_mat[is_feature_control,])
     ## Get % expression from feature controls
