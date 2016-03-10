@@ -8,37 +8,40 @@
 \usage{
 plotTSNE(object, ...)
 
-\S4method{plotTSNE}{SCESet}(object, ntop = 500, ncomponents = 2,
+\S4method{plotTSNE}{SCESet}(object, ntop = 5000, ncomponents = 2,
   exprs_values = "exprs", colour_by = NULL, shape_by = NULL,
   size_by = NULL, feature_set = NULL, return_SCESet = FALSE,
-  scale_features = FALSE, draw_plot = TRUE, theme_size = 10,
-  rand_seed = NULL, perplexity = floor(ncol(object)/5), ...)
+  scale_features = TRUE, draw_plot = TRUE, theme_size = 10,
+  rand_seed = NULL, perplexity = floor(ncol(object)/5), legend = TRUE,
+  ...)
 }
 \arguments{
 \item{object}{an \code{SCESet} object}
 
 \item{...}{further arguments passed to \code{\link[Rtsne]{Rtsne}}}
 
-\item{ntop}{numeric scalar indicating the number of most variable features to 
-use for the PCA. Default is \code{500}, but any \code{ntop} argument is 
+\item{ntop}{numeric scalar indicating the number of most variable features to
+use for the t-SNE Default is \code{5000}, but any \code{ntop} argument is
 overrided if the \code{feature_set} argument is non-NULL.}
 
-\item{ncomponents}{numeric scalar indicating the number of principal 
-components to plot, starting from the first principal component. Default is 
-2. If \code{ncomponents} is 2, then a scatterplot of PC2 vs PC1 is produced.
-If \code{ncomponents} is greater than 2, a pairs plots for the top components
-is produced. NB: computing more than two components for t-SNE can become very
-time consuming.}
+\item{ncomponents}{numeric scalar indicating the number of t-SNE
+components to plot, starting from the first t-SNE component. Default is
+2. If \code{ncomponents} is 2, then a scatterplot of component 1 vs component
+2 is produced. If \code{ncomponents} is greater than 2, a pairs plots for the
+top components is produced. NB: computing more than two components for t-SNE
+can become very time consuming.}
 
 \item{exprs_values}{character string indicating which values should be used
-as the expression values for this plot. Valid arguments are \code{"tpm"} 
-(default; transcripts per million), \code{"norm_tpm"} (normalised TPM 
-values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM 
-values), \code{"counts"} (counts for each feature), \code{"norm_counts"}, 
-\code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised 
-counts-per-million), \code{"exprs"} (whatever is in the \code{'exprs'} slot 
-of the \code{SCESet} object; default), \code{"norm_exprs"} (normalised 
-expression values) or \code{"stand_exprs"} (standardised expression values).}
+as the expression values for this plot. Valid arguments are \code{"tpm"}
+(default; transcripts per million), \code{"norm_tpm"} (normalised TPM
+values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM
+values), \code{"counts"} (counts for each feature), \code{"norm_counts"},
+\code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised
+counts-per-million), \code{"exprs"} (whatever is in the \code{'exprs'} slot
+of the \code{SCESet} object; default), \code{"norm_exprs"} (normalised
+expression values) or \code{"stand_exprs"} (standardised expression values), 
+or any other named element of the \code{assayData} slot of the \code{SCESet}
+object that can be accessed with the \code{get_exprs} function.}
 
 \item{colour_by}{character string defining the column of \code{pData(object)} to
 be used as a factor by which to colour the points in the plot.}
@@ -50,50 +53,46 @@ be used as a factor by which to define the shape of the points in the plot.}
 be used as a factor by which to define the size of points in the plot.}
 
 \item{feature_set}{character, numeric or logical vector indicating a set of
-features to use for the PCA. If character, entries must all be in 
-\code{featureNames(object)}. If numeric, values are taken to be indices for 
+features to use for the t-SNE calculation. If character, entries must all be 
+in \code{featureNames(object)}. If numeric, values are taken to be indices for
 features. If logical, vector is used to index features and should have length
 equal to \code{nrow(object)}.}
 
-\item{return_SCESet}{logical, should the function return an \code{SCESet} 
-object with principal component values for cells in the 
-\code{reducedDimension} slot. Default is \code{FALSE}, in which case a 
+\item{return_SCESet}{logical, should the function return an \code{SCESet}
+object with principal component values for cells in the
+\code{reducedDimension} slot. Default is \code{FALSE}, in which case a
 \code{ggplot} object is returned.}
 
 \item{scale_features}{logical, should the expression values be standardised
-so that each feature has unit variance? Default is \code{FALSE}.}
+so that each feature has unit variance? Default is \code{TRUE}.}
 
-\item{draw_plot}{logical, should the plot be drawn on the current graphics 
-device? Only used if \code{return_SCESet} is \code{TRUE}, otherwise the plot 
+\item{draw_plot}{logical, should the plot be drawn on the current graphics
+device? Only used if \code{return_SCESet} is \code{TRUE}, otherwise the plot
 is always produced.}
 
-\item{theme_size}{numeric scalar giving default font size for plotting theme 
+\item{theme_size}{numeric scalar giving default font size for plotting theme
 (default is 10).}
 
-\item{rand_seed}{(optional) numeric scalar that can be passed to 
+\item{rand_seed}{(optional) numeric scalar that can be passed to
 \code{set.seed} to make plots reproducible.}
 
-\item{perplexity}{numeric scalar value defining the "perplexity parameter" 
+\item{perplexity}{numeric scalar value defining the "perplexity parameter"
 for the t-SNE plot. Passed to \code{\link[Rtsne]{Rtsne}} - see documentation
 for that package for more details.}
+
+\item{legend}{logical, should the legend(s) be shown? Default is \code{TRUE}.}
 }
 \value{
 If \code{return_SCESet} is \code{TRUE}, then the function returns an
 \code{SCESet} object, otherwise it returns a \code{ggplot} object.
 }
 \description{
-Produce a t-distributed stochastic neighbour embedding plot of two components
- for an \code{SCESet} dataset.
+Produce a t-distributed stochastic neighbour embedding (t-SNE) plot of two
+components for an \code{SCESet} dataset.
 }
 \details{
-The function \code{\link[Rtsne]{Rtsne}} is used internally to 
-compute the t-SNE. The function checks whether the \code{object} has 
-standardised expression values (by looking at \code{stand_exprs(object)}). If
-yes, the existing standardised expression values are used for the PCA. If 
-not, then standardised expression values are computed using 
-\code{\link{scale}} (with feature-wise unit variances or not according to the
-\code{scale_features} argument), added to the object and PCA is done using 
-these new standardised expression values.
+The function \code{\link[Rtsne]{Rtsne}} is used internally to
+compute the t-SNE.
 }
 \examples{
 ## Set up an example SCESet
@@ -109,11 +108,11 @@ plotTSNE(example_sceset, perplexity = 10)
 plotTSNE(example_sceset, colour_by = "Cell_Cycle", perplexity = 10)
 plotTSNE(example_sceset, colour_by = "Cell_Cycle", shape_by = "Treatment",
 perplexity = 10)
-plotTSNE(example_sceset, colour_by = "Cell_Cycle", shape_by = "Treatment", 
+plotTSNE(example_sceset, colour_by = "Cell_Cycle", shape_by = "Treatment",
 size_by = "Mutation_Status", perplexity = 10)
 plotTSNE(example_sceset, shape_by = "Treatment", size_by = "Mutation_Status",
 perplexity = 5)
-plotTSNE(example_sceset, feature_set = 1:100, colour_by = "Treatment", 
+plotTSNE(example_sceset, feature_set = 1:100, colour_by = "Treatment",
 shape_by = "Mutation_Status", perplexity = 5)
 
 plotTSNE(example_sceset, shape_by = "Treatment", return_SCESet = TRUE,
@@ -122,7 +121,7 @@ perplexity = 10)
 
 }
 \references{
-L.J.P. van der Maaten. Barnes-Hut-SNE. In Proceedings of the International 
+L.J.P. van der Maaten. Barnes-Hut-SNE. In Proceedings of the International
 Conference on Learning Representations, 2013.
 }
 \seealso{

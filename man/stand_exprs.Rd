@@ -7,7 +7,7 @@
 \alias{stand_exprs.SCESet}
 \alias{stand_exprs<-}
 \alias{stand_exprs<-,SCESet,matrix-method}
-\title{Accessors for the 'stand_exprs' (standardised expression) element of an 
+\title{Accessors for the 'stand_exprs' (standardised expression) element of an
 SCESet object.}
 \usage{
 stand_exprs(object)

@@ -7,12 +7,12 @@
 multiplot(..., plotlist = NULL, cols = 1, layout = NULL)
 }
 \arguments{
-\item{..., plotlist}{ggplot objects can be passed in ..., or to plotlist (as 
+\item{..., plotlist}{ggplot objects can be passed in ..., or to plotlist (as
 a list of ggplot objects)}
 
 \item{cols}{numeric scalar giving the number of columns in the layout}
 
-\item{layout}{a matrix specifying the layout. If present, \code{cols} is 
+\item{layout}{a matrix specifying the layout. If present, \code{cols} is
 ignored.}
 }
 \value{
@@ -22,11 +22,11 @@ a \code{ggplot} plot object
 Place multiple \code{\link[ggplot2]{ggplot}} plots on one page.
 }
 \details{
-If the layout is something like 
-\code{matrix(c(1,2,3,3), nrow=2, byrow=TRUE)}, then plot 1 will go in the 
-upper left, 2 will go in the upper right, and 3 will go all the way across 
-the bottom. There is no way to tweak the relative heights or widths of the 
-plots with this simple function. It was adapted from 
+If the layout is something like
+\code{matrix(c(1,2,3,3), nrow=2, byrow=TRUE)}, then plot 1 will go in the
+upper left, 2 will go in the upper right, and 3 will go all the way across
+the bottom. There is no way to tweak the relative heights or widths of the
+plots with this simple function. It was adapted from
 \url{http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/}
 }
 \examples{
@@ -50,9 +50,9 @@ p4 <- ggplot(subset(ChickWeight, Time == 21), aes(x = weight, fill = Diet)) +
     geom_histogram(colour = "black", binwidth = 50) +
    facet_grid(Diet ~ .) +
    ggtitle("Final weight, by diet") +
-   theme(legend.position = "none")        # No legend (redundant in this graph)  
+   theme(legend.position = "none")        # No legend (redundant in this graph)
 ## Combine plots and display
-multiplot(p1, p2, p3, p4, cols = 2)   
+multiplot(p1, p2, p3, p4, cols = 2)
 
 }
 

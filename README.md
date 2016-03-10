@@ -32,6 +32,8 @@ Briefly, `scater` enables the following:
 See below for information about installation, getting started and highlights of the package.
 
 ## Installation
+
+### Installation from Bioconductor (recommended)
 The `scater` package has been accepted into Bioconductor!
 Thus, the most reliable way to install the package is to use the usual
 Bioconductor method:
@@ -53,6 +55,7 @@ version of `scater` will work with the release version of R and
 Bioconductor, and development will continue in the devel version of
 the package.
 
+## Installation from Github
 Alternatively, `scater` can be installed directly from GitHub as
 described below. In this case, package that `scater` uses ("depends
 on" in R parlance) will not be automatically installed, so you will

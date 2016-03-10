@@ -24,15 +24,15 @@ elements of the \code{assayData} slot of the \code{SCESet} object.}
 NULL, but adds expression data to the SCESet object
 }
 \description{
-The assayData slot of an SCESet object holds the expression data matrices. 
-This functions makes it convenient to add new transformations of the 
+The assayData slot of an SCESet object holds the expression data matrices.
+This functions makes it convenient to add new transformations of the
 expression data to the assayData slot.
 }
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
 example_sceset <- newSCESet(countData = sc_example_counts)
-set_exprs(example_sceset, "scaled_counts") <- t(t(counts(example_sceset)) / 
+set_exprs(example_sceset, "scaled_counts") <- t(t(counts(example_sceset)) /
 colSums(counts(example_sceset)))
 get_exprs(example_sceset, "scaled_counts")[1:6, 1:6]
 }

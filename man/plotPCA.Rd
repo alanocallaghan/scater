@@ -9,42 +9,46 @@
 \usage{
 plotPCA(object, ...)
 
-plotPCASCESet(object, ntop = 500, ncomponents = 2, exprs_values = "exprs",
-  colour_by = NULL, shape_by = NULL, size_by = NULL, feature_set = NULL,
-  return_SCESet = FALSE, scale_features = FALSE, draw_plot = TRUE,
-  pca_data_input = "exprs", selected_variables = NULL,
-  detect_outliers = FALSE, theme_size = 10)
+plotPCASCESet(object, ntop = 5000, ncomponents = 2,
+  exprs_values = "exprs", colour_by = NULL, shape_by = NULL,
+  size_by = NULL, feature_set = NULL, return_SCESet = FALSE,
+  scale_features = TRUE, draw_plot = TRUE, pca_data_input = "exprs",
+  selected_variables = NULL, detect_outliers = FALSE, theme_size = 10,
+  legend = TRUE)
 
 \S4method{plotPCA}{SCESet}(object, ntop = 500, ncomponents = 2,
   exprs_values = "exprs", colour_by = NULL, shape_by = NULL,
   size_by = NULL, feature_set = NULL, return_SCESet = FALSE,
-  scale_features = FALSE, draw_plot = TRUE, pca_data_input = "exprs",
-  selected_variables = NULL, detect_outliers = FALSE, theme_size = 10)
+  scale_features = TRUE, draw_plot = TRUE, pca_data_input = "exprs",
+  selected_variables = NULL, detect_outliers = FALSE, theme_size = 10,
+  legend = TRUE)
 }
 \arguments{
 \item{object}{an \code{SCESet} object}
 
 \item{...}{further arguments passed to \code{\link{plotPCASCESet}}}
 
-\item{ntop}{numeric scalar indicating the number of most variable features to 
-use for the PCA. Default is \code{500}, but any \code{ntop} argument is 
+\item{ntop}{numeric scalar indicating the number of most variable features to
+use for the PCA. Default is \code{5000}, but any \code{ntop} argument is
 overrided if the \code{feature_set} argument is non-NULL.}
 
-\item{ncomponents}{numeric scalar indicating the number of principal 
-components to plot, starting from the first principal component. Default is 
+\item{ncomponents}{numeric scalar indicating the number of principal
+components to plot, starting from the first principal component. Default is
 2. If \code{ncomponents} is 2, then a scatterplot of PC2 vs PC1 is produced.
 If \code{ncomponents} is greater than 2, a pairs plots for the top components
 is produced.}
 
 \item{exprs_values}{character string indicating which values should be used
-as the expression values for this plot. Valid arguments are \code{"tpm"} 
-(default; transcripts per million), \code{"norm_tpm"} (normalised TPM 
-values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM 
-values), \code{"counts"} (counts for each feature), \code{"norm_counts"}, 
-\code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised 
-counts-per-million), \code{"exprs"} (whatever is in the \code{'exprs'} slot 
-of the \code{SCESet} object; default), \code{"norm_exprs"} (normalised 
-expression values) or \code{"stand_exprs"} (standardised expression values).}
+as the expression values for this plot. Valid arguments are \code{"tpm"}
+(default; transcripts per million), \code{"norm_tpm"} (normalised TPM
+values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM
+values), \code{"counts"} (counts for each feature), \code{"norm_counts"},
+\code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised
+counts-per-million), \code{"exprs"} (whatever is in the \code{'exprs'} slot
+of the \code{SCESet} object; default), \code{"norm_exprs"} (normalised
+expression values) or \code{"stand_exprs"} (standardised expression values)
+or any other named element of the \code{assayData} slot of the \code{SCESet}
+object that can be accessed with the \code{get_exprs} function.}
 
 \item{colour_by}{character string defining the column of \code{pData(object)} to
 be used as a factor by which to colour the points in the plot.}
@@ -56,57 +60,66 @@ be used as a factor by which to define the shape of the points in the plot.}
 be used as a factor by which to define the size of points in the plot.}
 
 \item{feature_set}{character, numeric or logical vector indicating a set of
-features to use for the PCA. If character, entries must all be in 
-\code{featureNames(object)}. If numeric, values are taken to be indices for 
+features to use for the PCA. If character, entries must all be in
+\code{featureNames(object)}. If numeric, values are taken to be indices for
 features. If logical, vector is used to index features and should have length
 equal to \code{nrow(object)}.}
 
-\item{return_SCESet}{logical, should the function return an \code{SCESet} 
-object with principal component values for cells in the 
-\code{reducedDimension} slot. Default is \code{FALSE}, in which case a 
+\item{return_SCESet}{logical, should the function return an \code{SCESet}
+object with principal component values for cells in the
+\code{reducedDimension} slot. Default is \code{FALSE}, in which case a
 \code{ggplot} object is returned.}
 
 \item{scale_features}{logical, should the expression values be standardised
-so that each feature has unit variance? Default is \code{FALSE}.}
+so that each feature has unit variance? Default is \code{TRUE}.}
 
-\item{draw_plot}{logical, should the plot be drawn on the current graphics 
-device? Only used if \code{return_SCESet} is \code{TRUE}, otherwise the plot 
+\item{draw_plot}{logical, should the plot be drawn on the current graphics
+device? Only used if \code{return_SCESet} is \code{TRUE}, otherwise the plot
 is always produced.}
 
 \item{pca_data_input}{character argument defining which data should be used
-as input for the PCA. Possible options are \code{"exprs"} (default), which 
+as input for the PCA. Possible options are \code{"exprs"} (default), which
 uses expression data to produce a PCA at the cell level; \code{"pdata"} which
 uses numeric variables from \code{pData(object)} to do PCA at the cell level;
 and \code{"fdata"} which uses numeric variables from \code{fData(object)} to
 do PCA at the feature level.}
 
-\item{selected_variables}{character vector indicating which variables in 
-\code{pData(object)} to use for the phenotype-data based PCA. Ignored if 
+\item{selected_variables}{character vector indicating which variables in
+\code{pData(object)} to use for the phenotype-data based PCA. Ignored if
 the argument \code{pca_data_input} is anything other than \code{"pdata"}.}
 
 \item{detect_outliers}{logical, should outliers be detected in the PC plot?
 Only an option when \code{pca_data_input} argument is \code{"pdata"}. Default
 is \code{FALSE}.}
 
-\item{theme_size}{numeric scalar giving default font size for plotting theme 
+\item{theme_size}{numeric scalar giving default font size for plotting theme
 (default is 10).}
+
+\item{legend}{logical, should the legend(s) be shown? Default is \code{TRUE}.}
 }
 \value{
 either a ggplot plot object or an SCESet object
 }
 \description{
-Produce a principal components analysis (PCA) plot of two or more principal 
+Produce a principal components analysis (PCA) plot of two or more principal
 components for an \code{SCESet} dataset.
 }
 \details{
-The function \code{\link{prcomp}} is used internally to do the PCA. 
-The function checks whether the \code{object} has standardised 
-expression values (by looking at \code{stand_exprs(object)}). If yes, the 
-existing standardised expression values are used for the PCA. If not, then 
+The function \code{\link{prcomp}} is used internally to do the PCA.
+The function checks whether the \code{object} has standardised
+expression values (by looking at \code{stand_exprs(object)}). If yes, the
+existing standardised expression values are used for the PCA. If not, then
 standardised expression values are computed using \code{\link{scale}} (with
-feature-wise unit variances or not according to the \code{scale_features} 
+feature-wise unit variances or not according to the \code{scale_features}
 argument), added to the object and PCA is done using these new standardised
 expression values.
+
+If the arguments \code{detect_outliers} and \code{return_SCESet} are both 
+\code{TRUE}, then the element \code{$outlier} is added to the pData 
+(phenotype data) slot of the \code{SCESet} object. This element contains
+indicator values about whether or not each cell has been designated as an
+outlier based on the PCA. These values can be accessed for filtering 
+low quality cells with, foe example, \code{example_sceset$outlier}.
 }
 \examples{
 ## Set up an example SCESet
@@ -121,17 +134,17 @@ example_sceset <- example_sceset[!drop_genes, ]
 plotPCA(example_sceset)
 plotPCA(example_sceset, colour_by = "Cell_Cycle")
 plotPCA(example_sceset, colour_by = "Cell_Cycle", shape_by = "Treatment")
-plotPCA(example_sceset, colour_by = "Cell_Cycle", shape_by = "Treatment", 
+plotPCA(example_sceset, colour_by = "Cell_Cycle", shape_by = "Treatment",
 size_by = "Mutation_Status")
 plotPCA(example_sceset, shape_by = "Treatment", size_by = "Mutation_Status")
-plotPCA(example_sceset, feature_set = 1:100, colour_by = "Treatment", 
+plotPCA(example_sceset, feature_set = 1:100, colour_by = "Treatment",
 shape_by = "Mutation_Status")
 
 plotPCA(example_sceset, shape_by = "Treatment", return_SCESet = TRUE)
 
 ## Examples plotting more than 2 PCs
 plotPCA(example_sceset, ncomponents = 8)
-plotPCA(example_sceset, ncomponents = 4, colour_by = "Treatment", 
+plotPCA(example_sceset, ncomponents = 4, colour_by = "Treatment",
 shape_by = "Mutation_Status")
 
 }

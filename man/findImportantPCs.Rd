@@ -11,13 +11,13 @@ findImportantPCs(object, variable = "total_features",
 \item{object}{an SCESet object containing expression values and
 experimental information. Must have been appropriately prepared.}
 
-\item{variable}{character scalar providing a variable name (column from 
+\item{variable}{character scalar providing a variable name (column from
 \code{pData(object)}) for which to determine the most important PCs.}
 
 \item{plot_type}{character string, indicating which type of plot to produce.
 Default, \code{"pairs-pcs"} produces a pairs plot for the top 5 PCs based on
-their R-squared with the variable of interest. A value of 
-\code{"pcs-vs-vars"} produces plots of the top PCs against the variable of 
+their R-squared with the variable of interest. A value of
+\code{"pcs-vs-vars"} produces plots of the top PCs against the variable of
 interest.}
 
 \item{theme_size}{numeric scalar providing base font size for ggplot theme.}
@@ -29,12 +29,12 @@ a \code{\link{ggplot}} plot object
 Find most important principal components for a given variable
 }
 \details{
-Plot the top 5 most important PCs for a given variable. Importance 
+Plot the top 5 most important PCs for a given variable. Importance
 here is defined as the R-squared value from a linear model regressing each PC
-onto the variable of interest. If the variable is discrete, unique values of 
-the variable define  the clusters. If the variable is continuous, it is coerced into three 
-discrete values, "low" (bottom quartile), "medium" (middle two quartiles) 
-and "high" (upper quartile), and these levels are used as a factor in the 
+onto the variable of interest. If the variable is discrete, unique values of
+the variable define  the clusters. If the variable is continuous, it is coerced into three
+discrete values, "low" (bottom quartile), "medium" (middle two quartiles)
+and "high" (upper quartile), and these levels are used as a factor in the
 linear model. Cells are coloured by their cluster in the plot.
 }
 \examples{

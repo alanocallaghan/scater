@@ -17,22 +17,22 @@ get_exprs(object, exprs_values)
 \item{object}{a \code{SCESet} object.}
 
 \item{exprs_values}{character string indicating which values should be used
-as the expression values for this plot. Valid arguments are \code{"tpm"} 
-(default; transcripts per million), \code{"norm_tpm"} (normalised TPM 
-values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM 
-values), \code{"counts"} (counts for each feature), \code{"norm_counts"}, 
-\code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised 
-counts-per-million), \code{"exprs"} (whatever is in the \code{'exprs'} slot 
-of the \code{SCESet} object; default), \code{"norm_exprs"} (normalised 
+as the expression values for this plot. Valid arguments are \code{"tpm"}
+(default; transcripts per million), \code{"norm_tpm"} (normalised TPM
+values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM
+values), \code{"counts"} (counts for each feature), \code{"norm_counts"},
+\code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised
+counts-per-million), \code{"exprs"} (whatever is in the \code{'exprs'} slot
+of the \code{SCESet} object; default), \code{"norm_exprs"} (normalised
 expression values) or \code{"stand_exprs"} (standardised expression values)
-or any other slots that have been added to the \code{"assayData"} slot by 
+or any other slots that have been added to the \code{"assayData"} slot by
 the user.}
 }
 \value{
 a matrix of expression values
 }
 \description{
-Access by name a matrix of expression values, one row for each feature (gene, 
+Access by name a matrix of expression values, one row for each feature (gene,
 exon, region, etc), and one column for each cell stored an element of the
 assayData slot of the SCESet object.
 }
@@ -43,7 +43,7 @@ example_sceset <- newSCESet(countData = sc_example_counts)
 get_exprs(example_sceset, "counts")
 
 ## new slots can be defined and accessed
-set_exprs(example_sceset, "scaled_counts") <- t(t(counts(example_sceset)) / 
+set_exprs(example_sceset, "scaled_counts") <- t(t(counts(example_sceset)) /
 colSums(counts(example_sceset)))
 get_exprs(example_sceset, "scaled_counts")[1:6, 1:6]
 

@@ -9,24 +9,24 @@ plotMetadata(object, aesth = aes_string(x = "log10(total_counts)", y =
   theme_size = 10)
 }
 \arguments{
-\item{object}{a data.frame (or object that can be coerced to such) object 
+\item{object}{a data.frame (or object that can be coerced to such) object
 containing metadata in columns to plot.}
 
-\item{aesth}{aesthetics function call to pass to ggplot. This function 
-expects at least x and y variables to be supplied. The default is to plot 
+\item{aesth}{aesthetics function call to pass to ggplot. This function
+expects at least x and y variables to be supplied. The default is to plot
 total_features against log10(total_counts).}
 
 \item{shape}{numeric scalar to define the plotting shape. Ignored if shape is
 included in the \code{aesth} argument.}
 
-\item{alpha}{numeric scalar (in the interval 0 to 1) to define the alpha 
-level (transparency) of plotted points. Ignored if alpha is included in the 
+\item{alpha}{numeric scalar (in the interval 0 to 1) to define the alpha
+level (transparency) of plotted points. Ignored if alpha is included in the
 \code{aesth} argument.}
 
 \item{size}{numeric scalar to define the plotting size. Ignored if size is
 included in the \code{aesth} argument.}
 
-\item{theme_size}{numeric scalar giving default font size for plotting theme 
+\item{theme_size}{numeric scalar giving default font size for plotting theme
 (default is 10)}
 }
 \value{
@@ -37,11 +37,11 @@ Plot metadata for cells or features
 }
 \details{
 Plot cell or feature metadata from an SCESet object. If one variable
- is supplied then a density plot will be returned. If both variables are 
+ is supplied then a density plot will be returned. If both variables are
 continuous (numeric) then a scatter plot will be returned. If one variable is
-discrete and one continuous then a violin plot with jittered points overlaid 
-will be returned. If both variables are discrete then a jitter plot will be 
-produced. The object returned is a ggplot object, so further layers and 
+discrete and one continuous then a violin plot with jittered points overlaid
+will be returned. If both variables are discrete then a jitter plot will be
+produced. The object returned is a ggplot object, so further layers and
 plotting options (titles, facets, themes etc) can be added.
 }
 \examples{

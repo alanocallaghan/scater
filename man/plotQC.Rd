@@ -10,16 +10,16 @@ plotQC(object, type = "highest-expression", ...)
 \item{object}{an SCESet object containing expression values and
 experimental information. Must have been appropriately prepared.}
 
-\item{type}{character scalar providing type of QC plot to compute: 
+\item{type}{character scalar providing type of QC plot to compute:
 "highest-expression" (showing features with highest expression), "find-pcs" (showing
-the most important principal components for a given variable), 
-"explanatory-variables" (showing a set of explanatory variables plotted 
-against each other, ordered by marginal variance explained), or 
-"exprs-mean-vs-freq" (plotting the mean expression levels against the 
+the most important principal components for a given variable),
+"explanatory-variables" (showing a set of explanatory variables plotted
+against each other, ordered by marginal variance explained), or
+"exprs-mean-vs-freq" (plotting the mean expression levels against the
 frequency of expression for a set of features).}
 
-\item{...}{arguments passed to \code{plotHighestExprs}, 
-\code{plotImportantPCs}, \code{plotExplanatoryVariables} and 
+\item{...}{arguments passed to \code{plotHighestExprs},
+\code{plotImportantPCs}, \code{plotExplanatoryVariables} and
 \code{plotExprsMeanVsFreq} as appropriate.}
 }
 \value{

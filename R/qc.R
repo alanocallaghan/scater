@@ -10,36 +10,22 @@
 ### * .getRSquared
 ### * .getTypeOfVariable
 
-#### Some ideas for adding to QC metrics - proportion of library from top x features
-#     subset(seq_real_estate_long, feature == 10) %>%
-#         ggplot(aes(x = Proportion_Library, colour = culture)) +
-#         geom_density(aes(fill = culture), alpha = 0.5) +
-#         facet_wrap(~perturbed, ncol=2) +
-#         theme_igray(16) + scale_colour_tableau() + scale_fill_tableau() +
-#         xlab("Cumulative proportion of library from 10 most expressed features") +
-#         ylab("Density")
 
-#     subset(seq_real_estate_long, feature == 50) %>%
-#         ggplot(aes(x = norm.lib.size, y = Proportion_Library,
-#                    colour = culture)) + geom_point(size = 4, alpha = 0.7) + geom_rug(alpha = 0.7) +
-#         facet_wrap(~perturbed, ncol = 2) + theme_igray(16) + scale_colour_tableau() +
-#         scale_fill_tableau() + ylab("Cumulative proportion of library from 50 most expressed features") +
-#         xlab("Normalised library size")
-
+################################################################################
 #' Calculate QC metrics
 #'
 #' @param object an SCESet object containing expression values and
 #' experimental information. Must have been appropriately prepared.
-#' @param feature_controls a character vector of feature names, or a logical vector,
-#' or a numeric vector of indices used to identify feature controls (for example,
-#' ERCC spike-in genes, mitochondrial genes, etc).
+#' @param feature_controls a character vector of feature names, or a logical 
+#' vector, or a numeric vector of indices used to identify feature controls 
+#' (for example, ERCC spike-in genes, mitochondrial genes, etc).
 #' @param cell_controls a character vector of cell (sample) names, or a logical
 #' vector, or a numeric vector of indices used to identify cell controls (for
 #' example, blank wells or bulk controls).
-#' @param nmads numeric scalar giving the number of median absolute deviations to be
-#' used to flag potentially problematic cells based on total_counts (total number of
-#' counts for the cell, or library size) and total_features (number of features with
-#' non-zero expression). Default value is 5.
+#' @param nmads numeric scalar giving the number of median absolute deviations 
+#' to be used to flag potentially problematic cells based on total_counts (total
+#' number of counts for the cell, or library size) and total_features (number of
+#' features with non-zero expression). Default value is 5.
 #' @param pct_feature_controls_threshold numeric scalar giving a threshold for
 #' percentage of expression values accounted for by feature controls. Used as to
 #' flag cells that may be filtered based on high percentage of expression from
@@ -49,18 +35,23 @@
 #' of data and identification of potentially problematic features and cells. The
 #'  following QC metrics are computed:
 #' \describe{
-#'  \item{total_counts}{Total number of counts for the cell (aka ``library size'')}
-#'  \item{log10_total_counts}{Total counts on the log10-scale}
-#'  \item{total_features}{The number of endogenous features (i.e. not control
+#'  \item{total_counts:}{Total number of counts for the cell (aka ``library 
+#'  size'')}
+#'  \item{log10_total_counts:}{Total counts on the log10-scale}
+#'  \item{total_features:}{The number of endogenous features (i.e. not control
 #'  features) for the cell that have expression above the detection limit
 #'   (default detection limit is zero)}
-#'  \item{filter_on_depth}{Would this cell be filtered out based on its
+#'  \item{filter_on_depth:}{Would this cell be filtered out based on its
 #'  log10-depth being (by default) more than 5 median absolute deviations from
 #'  the median log10-depth for the dataset?}
-#'  \item{filter_on_coverage}{Would this cell be filtered out based on its
+#'  \item{filter_on_coverage:}{Would this cell be filtered out based on its
 #'  coverage being (by default) more than 5 median absolute deviations from the
 #'  median coverage for the dataset?}
-#'  \item{counts_feature_controls}{Total number of counts for the cell
+#'  \item{filter_on_pct_counts_feature_controls:}{Should the cell be filtered
+#'  out on the basis of having a high percentage of counts assigned to control
+#'  features? Default threshold is 80 percent (i.e. cells with more than 80
+#'  percent of counts assigned to feature controls are flagged).}
+#'  \item{counts_feature_controls:}{Total number of counts for the cell
 #'  that come from (one or more sets of user-defined) control features. Defaults
 #'   to zero if no control features are indicated. If more than one set of
 #'   feature controls are defined (for example, ERCC and MT genes are defined
@@ -69,28 +60,30 @@
 #'   \code{counts_feature_controls_ERCC},
 #'   \code{counts_feature_controls_MT} and
 #'   \code{counts_feature_controls}).}
-#'  \item{log10_counts_feature_controls}{Just as above, the total
+#'  \item{log10_counts_feature_controls:}{Just as above, the total
 #'   number of counts from feature controls, but on the log10-scale. Defaults
 #'   to zero (i.e.~log10(0 + 1), offset to avoid negative infinite values) if
 #'   no feature control are indicated.}
-#'  \item{pct_counts_feature_controls}{Just as for the counts
+#'  \item{pct_counts_feature_controls:}{Just as for the counts
 #'   described above, but expressed as a percentage of the total counts.
 #'   Defined for all control sets and their union, just like the raw counts.
 #'   Defaults to zero if no feature controls are defined.}
-#'  \item{filter_on_pct_counts_feature_controls}{Would this cell be
+#'  \item{filter_on_pct_counts_feature_controls:}{Would this cell be
 #'   filtered out on the basis that the percentage of counts from feature
 #'   controls is higher than a defined threhold (default is 80\%)? Just as with
 #'   \code{counts_feature_controls}, this is defined for all control sets
 #'   and their union.}
-#'  \item{pct_counts_top_50_features}{What percentage of the total counts is accounted for by the 50 highest-count features? Also computed for the top 100 and top 200 features, with the obvious changes to the column names.}
-#'  \item{counts_endogenous_features}{Total number of counts for the cell
+#'  \item{pct_counts_top_50_features:}{What percentage of the total counts is accounted for by the 50 highest-count features? Also computed for the top 100 and top 200 features, with the obvious changes to the column names.}
+#'  \item{pct_dropout:}{Percentage of features that are not ``detectably 
+#'  expressed'', i.e. have expression below the \code{lowerDetectionLimit} 
+#'  threshold.}
+#'  \item{counts_endogenous_features:}{Total number of counts for the cell
 #'   that come from endogenous features (i.e. not control features). Defaults
 #'   to `depth` if no control features are indicated.}
-#'  \item{log10_counts_endogenous_features}{Total number of counts from
-#'   endogenous features on the log10-scale. Defaults to zero
-#'   (i.e.~log10(0 + 1), offset to avoid infinite values) if no control features
-#'    are indicated.}
-#'  \item{n_detected_feature_controls}{Number of defined feature controls
+#'  \item{log10_counts_endogenous_features:}{Total number of counts from
+#'   endogenous features on the log10-scale. Defaults to all counts if no 
+#'   control features are indicated.}
+#'  \item{n_detected_feature_controls:}{Number of defined feature controls
 #'    that have expression greater than the threshold defined in the object
 #'    (that is, they are ``detectably expressed''; see
 #'    \code{object@lowerDetectionLimit} to check the threshold). As with other
@@ -99,14 +92,14 @@
 #'    columns \code{n_detected_feature_controls_ERCC},
 #'    \code{n_detected_feature_controls_MT} and
 #'    \code{n_detected_feature_controls} (ERCC and MT genes detected).}
-#'  \item{is_cell_control}{Has the cell been defined as a cell control? If
+#'  \item{is_cell_control:}{Has the cell been defined as a cell control? If
 #'    more than one set of cell controls are defined (for example, blanks and
 #'    bulk libraries are defined as cell controls), then this metric is produced
 #'     for all sets, plus the union of all sets (so we could typically get
 #'     columns \code{is_cell_control_Blank},
 #'     \code{is_cell_control_Bulk}, and \code{is_cell_control}, the latter
 #'     including both blanks and bulks as cell controls).}
-#'     }
+#' }
 #' These cell-level QC metrics are added as columns to the ``phenotypeData''
 #' slot of the \code{SCESet} object so that they can be inspected and are
 #' readily available for other functions to use. Furthermore, wherever
@@ -116,17 +109,19 @@
 #' replacing ``counts'' in the name. The following feature-level QC metrics are
 #' also computed:
 #' \describe{
-#' \item{mean_exprs}{The mean expression level of the  gene/feature.}
-#' \item{exprs_rank}{The rank of the feature's mean expression level in the
+#' \item{mean_exprs:}{The mean expression level of the  gene/feature.}
+#' \item{exprs_rank:}{The rank of the feature's mean expression level in the
 #' cell.}
-#' \item{n_cells_exprs}{The number of cells for which the expression level of
+#' \item{n_cells_exprs:}{The number of cells for which the expression level of
 #' the feature is above the detection limit (default detection limit is zero).}
-#' \item{total_feature_counts}{The total number of counts assigned to that
+#' \item{total_feature_counts:}{The total number of counts assigned to that
 #' feature across all cells.}
-#' \item{log10_total_feature_counts}{Total feature counts on the log10-scale.}
-#' \item{pct_total_counts}{The percentage of all counts that are accounted for
+#' \item{log10_total_feature_counts:}{Total feature counts on the log10-scale.}
+#' \item{pct_total_counts:}{The percentage of all counts that are accounted for
 #' by the counts assigned to the feature.}
-#' \item{is_feature_control}{Is the feature a control feature? Default is
+#' \item{pct_dropout:}{The percentage of all cells that have no detectable 
+#' expression (i.e. \code{is_exprs(object)} is \code{FALSE}) for the feature.}
+#' \item{is_feature_control:}{Is the feature a control feature? Default is
 #' `FALSE` unless control features are defined by the user. If more than one
 #' feature control set is defined (as above), then a column of this type is
 #' produced for each control set (e.g. here, \code{is_feature_control_ERCC} and
@@ -159,6 +154,8 @@
 #' example_sceset <- newSCESet(countData=sc_example_counts, phenoData=pd)
 #' example_sceset <- calculateQCMetrics(example_sceset)
 #'
+#' ## with a set of feature controls define
+#' example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:40)
 calculateQCMetrics <- function(object, feature_controls = NULL,
                                cell_controls = NULL, nmads = 5,
                                pct_feature_controls_threshold = 80) {

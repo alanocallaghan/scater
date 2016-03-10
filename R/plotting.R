@@ -284,7 +284,7 @@ plotSCESet <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 #'
 #' @param object an \code{SCESet} object
 #' @param ntop numeric scalar indicating the number of most variable features to
-#' use for the PCA. Default is \code{500}, but any \code{ntop} argument is
+#' use for the PCA. Default is \code{5000}, but any \code{ntop} argument is
 #' overrided if the \code{feature_set} argument is non-NULL.
 #' @param ncomponents numeric scalar indicating the number of principal
 #' components to plot, starting from the first principal component. Default is
@@ -299,7 +299,9 @@ plotSCESet <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 #' \code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised
 #' counts-per-million), \code{"exprs"} (whatever is in the \code{'exprs'} slot
 #' of the \code{SCESet} object; default), \code{"norm_exprs"} (normalised
-#' expression values) or \code{"stand_exprs"} (standardised expression values).
+#' expression values) or \code{"stand_exprs"} (standardised expression values)
+#' or any other named element of the \code{assayData} slot of the \code{SCESet}
+#' object that can be accessed with the \code{get_exprs} function.
 #' @param colour_by character string defining the column of \code{pData(object)} to
 #' be used as a factor by which to colour the points in the plot.
 #' @param shape_by character string defining the column of \code{pData(object)} to
@@ -316,7 +318,7 @@ plotSCESet <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 #' \code{reducedDimension} slot. Default is \code{FALSE}, in which case a
 #' \code{ggplot} object is returned.
 #' @param scale_features logical, should the expression values be standardised
-#' so that each feature has unit variance? Default is \code{FALSE}.
+#' so that each feature has unit variance? Default is \code{TRUE}.
 #' @param draw_plot logical, should the plot be drawn on the current graphics
 #' device? Only used if \code{return_SCESet} is \code{TRUE}, otherwise the plot
 #' is always produced.
@@ -334,6 +336,7 @@ plotSCESet <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 #' is \code{FALSE}.
 #' @param theme_size numeric scalar giving default font size for plotting theme
 #' (default is 10).
+#' @param legend logical, should the legend(s) be shown? Default is \code{TRUE}.
 #'
 #' @details The function \code{\link{prcomp}} is used internally to do the PCA.
 #' The function checks whether the \code{object} has standardised
@@ -343,6 +346,13 @@ plotSCESet <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 #' feature-wise unit variances or not according to the \code{scale_features}
 #' argument), added to the object and PCA is done using these new standardised
 #' expression values.
+#' 
+#' If the arguments \code{detect_outliers} and \code{return_SCESet} are both 
+#' \code{TRUE}, then the element \code{$outlier} is added to the pData 
+#' (phenotype data) slot of the \code{SCESet} object. This element contains
+#' indicator values about whether or not each cell has been designated as an
+#' outlier based on the PCA. These values can be accessed for filtering 
+#' low quality cells with, foe example, \code{example_sceset$outlier}. 
 #'
 #' @return either a ggplot plot object or an SCESet object
 #'
@@ -378,13 +388,13 @@ plotSCESet <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 #' plotPCA(example_sceset, ncomponents = 4, colour_by = "Treatment",
 #' shape_by = "Mutation_Status")
 #'
-plotPCASCESet <- function(object, ntop=500, ncomponents=2,
+plotPCASCESet <- function(object, ntop=5000, ncomponents=2,
                           exprs_values = "exprs", colour_by = NULL,
                           shape_by = NULL, size_by = NULL, feature_set = NULL,
-                          return_SCESet = FALSE, scale_features = FALSE,
+                          return_SCESet = FALSE, scale_features = TRUE,
                           draw_plot = TRUE, pca_data_input = "exprs",
                           selected_variables = NULL, detect_outliers = FALSE,
-                          theme_size = 10) {
+                          theme_size = 10, legend = TRUE) {
     ## Set up indicator for whether to use pData or features for size_by and
     ## colour_by
     colour_by_use_pdata <- TRUE
@@ -458,13 +468,15 @@ plotPCASCESet <- function(object, ntop=500, ncomponents=2,
         if ( any(vars_not_found) )
             message(paste("The following selected_variables were not found in pData(object):", selected_variables[vars_not_found]))
         ## scale double variables
-        exprs_to_plot <- scale(pData(object)[, use_variable])
+        exprs_to_plot <- scale(pData(object)[, use_variable], 
+                               scale = scale_features)
     } else if ( pca_data_input == "fdata" ) {
         use_variable <- sapply(fData(object), is.double)
         ## scale double variables
-        exprs_to_plot <- scale(fData(object)[, use_variable])
+        exprs_to_plot <- scale(fData(object)[, use_variable],
+                               scale = scale_features)
     } else {
-        ## Standardise expression if stand_exprs(object) is null
+        ## Standardise expression if scale_features argument is TRUE
         exprs_to_plot <- scale(t(exprs_mat), scale = scale_features)
     }
 
@@ -546,10 +558,12 @@ plotPCASCESet <- function(object, ntop=500, ncomponents=2,
     ## Make reduced-dimension plot
     if ( pca_data_input == "fdata" )
         plot_out <- plotReducedDim.default(df_to_plot, ncomponents,
-                                           percentVar = percentVar)
+                                           percentVar = percentVar,
+                                           legend = legend)
     else
         plot_out <- plotReducedDim.default(df_to_plot, ncomponents, colour_by,
-                                           shape_by, size_by, percentVar)
+                                           shape_by, size_by, percentVar,
+                                           legend = legend)
 
     ## Define plotting theme
     if ( requireNamespace("cowplot", quietly = TRUE) )
@@ -583,13 +597,14 @@ setMethod("plotPCA", signature("SCESet"),
           function(object, ntop = 500, ncomponents = 2, exprs_values = "exprs",
                    colour_by = NULL, shape_by = NULL, size_by = NULL,
                    feature_set = NULL, return_SCESet = FALSE,
-                   scale_features = FALSE, draw_plot = TRUE,
+                   scale_features = TRUE, draw_plot = TRUE,
                    pca_data_input = "exprs", selected_variables = NULL,
-                   detect_outliers = FALSE, theme_size = 10) {
+                   detect_outliers = FALSE, theme_size = 10, legend = TRUE) {
               plotPCASCESet(object, ntop, ncomponents, exprs_values, colour_by,
                             shape_by, size_by, feature_set, return_SCESet,
                             scale_features, draw_plot, pca_data_input,
-                            selected_variables, detect_outliers, theme_size)
+                            selected_variables, detect_outliers, theme_size,
+                            legend)
           })
 
 
@@ -623,19 +638,19 @@ setMethod("plotPCA", signature("SCESet"),
 
 #' Plot t-SNE for an SCESet object
 #'
-#' Produce a t-distributed stochastic neighbour embedding plot of two components
-#'  for an \code{SCESet} dataset.
+#' Produce a t-distributed stochastic neighbour embedding (t-SNE) plot of two
+#' components for an \code{SCESet} dataset.
 #'
 #' @param object an \code{SCESet} object
 #' @param ntop numeric scalar indicating the number of most variable features to
-#' use for the PCA. Default is \code{500}, but any \code{ntop} argument is
+#' use for the t-SNE Default is \code{5000}, but any \code{ntop} argument is
 #' overrided if the \code{feature_set} argument is non-NULL.
-#' @param ncomponents numeric scalar indicating the number of principal
-#' components to plot, starting from the first principal component. Default is
-#' 2. If \code{ncomponents} is 2, then a scatterplot of PC2 vs PC1 is produced.
-#' If \code{ncomponents} is greater than 2, a pairs plots for the top components
-#' is produced. NB: computing more than two components for t-SNE can become very
-#' time consuming.
+#' @param ncomponents numeric scalar indicating the number of t-SNE
+#' components to plot, starting from the first t-SNE component. Default is
+#' 2. If \code{ncomponents} is 2, then a scatterplot of component 1 vs component
+#' 2 is produced. If \code{ncomponents} is greater than 2, a pairs plots for the
+#' top components is produced. NB: computing more than two components for t-SNE
+#' can become very time consuming.
 #' @param exprs_values character string indicating which values should be used
 #' as the expression values for this plot. Valid arguments are \code{"tpm"}
 #' (default; transcripts per million), \code{"norm_tpm"} (normalised TPM
@@ -644,7 +659,9 @@ setMethod("plotPCA", signature("SCESet"),
 #' \code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised
 #' counts-per-million), \code{"exprs"} (whatever is in the \code{'exprs'} slot
 #' of the \code{SCESet} object; default), \code{"norm_exprs"} (normalised
-#' expression values) or \code{"stand_exprs"} (standardised expression values).
+#' expression values) or \code{"stand_exprs"} (standardised expression values), 
+#' or any other named element of the \code{assayData} slot of the \code{SCESet}
+#' object that can be accessed with the \code{get_exprs} function.
 #' @param colour_by character string defining the column of \code{pData(object)} to
 #' be used as a factor by which to colour the points in the plot.
 #' @param shape_by character string defining the column of \code{pData(object)} to
@@ -652,8 +669,8 @@ setMethod("plotPCA", signature("SCESet"),
 #' @param size_by character string defining the column of \code{pData(object)} to
 #' be used as a factor by which to define the size of points in the plot.
 #' @param feature_set character, numeric or logical vector indicating a set of
-#' features to use for the PCA. If character, entries must all be in
-#' \code{featureNames(object)}. If numeric, values are taken to be indices for
+#' features to use for the t-SNE calculation. If character, entries must all be 
+#' in \code{featureNames(object)}. If numeric, values are taken to be indices for
 #' features. If logical, vector is used to index features and should have length
 #' equal to \code{nrow(object)}.
 #' @param return_SCESet logical, should the function return an \code{SCESet}
@@ -661,7 +678,7 @@ setMethod("plotPCA", signature("SCESet"),
 #' \code{reducedDimension} slot. Default is \code{FALSE}, in which case a
 #' \code{ggplot} object is returned.
 #' @param scale_features logical, should the expression values be standardised
-#' so that each feature has unit variance? Default is \code{FALSE}.
+#' so that each feature has unit variance? Default is \code{TRUE}.
 #' @param draw_plot logical, should the plot be drawn on the current graphics
 #' device? Only used if \code{return_SCESet} is \code{TRUE}, otherwise the plot
 #' is always produced.
@@ -672,16 +689,11 @@ setMethod("plotPCA", signature("SCESet"),
 #' @param perplexity numeric scalar value defining the "perplexity parameter"
 #' for the t-SNE plot. Passed to \code{\link[Rtsne]{Rtsne}} - see documentation
 #' for that package for more details.
+#' @param legend logical, should the legend(s) be shown? Default is \code{TRUE}.
 #' @param ... further arguments passed to \code{\link[Rtsne]{Rtsne}}
 #'
 #' @details The function \code{\link[Rtsne]{Rtsne}} is used internally to
-#' compute the t-SNE. The function checks whether the \code{object} has
-#' standardised expression values (by looking at \code{stand_exprs(object)}). If
-#' yes, the existing standardised expression values are used for the PCA. If
-#' not, then standardised expression values are computed using
-#' \code{\link{scale}} (with feature-wise unit variances or not according to the
-#' \code{scale_features} argument), added to the object and PCA is done using
-#' these new standardised expression values.
+#' compute the t-SNE.
 #'
 #' @return If \code{return_SCESet} is \code{TRUE}, then the function returns an
 #' \code{SCESet} object, otherwise it returns a \code{ggplot} object.
@@ -721,11 +733,12 @@ setMethod("plotPCA", signature("SCESet"),
 #'
 #'
 setMethod("plotTSNE", signature("SCESet"),
-          function(object, ntop = 500, ncomponents = 2, exprs_values = "exprs",
+          function(object, ntop = 5000, ncomponents = 2, exprs_values = "exprs",
                    colour_by = NULL, shape_by = NULL, size_by = NULL,
                    feature_set = NULL, return_SCESet = FALSE,
-                   scale_features = FALSE, draw_plot = TRUE, theme_size = 10,
-                   rand_seed = NULL, perplexity = floor(ncol(object) / 5), ...) {
+                   scale_features = TRUE, draw_plot = TRUE, theme_size = 10,
+                   rand_seed = NULL, perplexity = floor(ncol(object) / 5), 
+                   legend = TRUE, ...) {
               ##
               if ( !requireNamespace("Rtsne", quietly = TRUE) )
                   stop("This function requires the 'Rtsne' package.
@@ -781,19 +794,18 @@ setMethod("plotTSNE", signature("SCESet"),
               ## defined, then those
               if ( is.null(feature_set) ) {
                   rv <- matrixStats::rowVars(exprs_mat)
-                  feature_set <-
-                      order(rv, decreasing = TRUE)[seq_len(min(ntop,
-                                                               length(rv)))]
+                  ntop <- min(ntop, length(rv))
+                  feature_set <- order(rv, decreasing = TRUE)[seq_len(ntop)]
               }
 
-              ## Standardise expression if stand_exprs(object) is null
-              exprs_to_plot <- t(scale(t(exprs_mat), scale = scale_features))
-
               ## Drop any features with zero variance
-              exprs_to_plot <- exprs_to_plot[feature_set,]
+              exprs_to_plot <- exprs_mat[feature_set,]
               keep_feature <- (matrixStats::rowVars(exprs_to_plot) > 0.001)
               keep_feature[is.na(keep_feature)] <- FALSE
               exprs_to_plot <- exprs_to_plot[keep_feature, ]
+              
+              ## Standardise expression if stand_exprs(object) is null
+              exprs_to_plot <- t(scale(t(exprs_to_plot), scale = scale_features))
 
               ## Compute t-SNE
               if ( !is.null(rand_seed) )
@@ -832,7 +844,8 @@ setMethod("plotTSNE", signature("SCESet"),
 
               ## Make reduced-dimension plot
               plot_out <- plotReducedDim.default(df_to_plot, ncomponents,
-                                                 colour_by, shape_by, size_by)
+                                                 colour_by, shape_by, size_by,
+                                                 legend = legend)
 
               ## Define plotting theme
               if ( requireNamespace("cowplot", quietly = TRUE) )
@@ -863,14 +876,14 @@ setMethod("plotTSNE", signature("SCESet"),
 #'
 #' @param object an \code{SCESet} object
 #' @param ntop numeric scalar indicating the number of most variable features to
-#' use for the PCA. Default is \code{500}, but any \code{ntop} argument is
-#' overrided if the \code{feature_set} argument is non-NULL.
+#' use for the diffusion map. Default is \code{5000}, but any \code{ntop} 
+#' argument is overrided if the \code{feature_set} argument is non-NULL.
 #' @param ncomponents numeric scalar indicating the number of principal
-#' components to plot, starting from the first principal component. Default is
-#' 2. If \code{ncomponents} is 2, then a scatterplot of PC2 vs PC1 is produced.
-#' If \code{ncomponents} is greater than 2, a pairs plots for the top components
-#' is produced. NB: computing more than two components for t-SNE can become very
-#' time consuming.
+#' components to plot, starting from the first diffusion map component. Default 
+#' is 2. If \code{ncomponents} is 2, then a scatterplot of component 1 vs 
+#' component 2 is produced. If \code{ncomponents} is greater than 2, a pairs 
+#' plots for the top components is produced. NB: computing many components for 
+#' the diffusion map can become time consuming.
 #' @param exprs_values character string indicating which values should be used
 #' as the expression values for this plot. Valid arguments are \code{"tpm"}
 #' (default; transcripts per million), \code{"norm_tpm"} (normalised TPM
@@ -879,7 +892,9 @@ setMethod("plotTSNE", signature("SCESet"),
 #' \code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised
 #' counts-per-million), \code{"exprs"} (whatever is in the \code{'exprs'} slot
 #' of the \code{SCESet} object; default), \code{"norm_exprs"} (normalised
-#' expression values) or \code{"stand_exprs"} (standardised expression values).
+#' expression values) or \code{"stand_exprs"} (standardised expression values)
+#' or any other named element of the \code{assayData} slot of the \code{SCESet}
+#' object that can be accessed with the \code{get_exprs} function.
 #' @param colour_by character string defining the column of \code{pData(object)} to
 #' be used as a factor by which to colour the points in the plot.
 #' @param shape_by character string defining the column of \code{pData(object)} to
@@ -887,7 +902,7 @@ setMethod("plotTSNE", signature("SCESet"),
 #' @param size_by character string defining the column of \code{pData(object)} to
 #' be used as a factor by which to define the size of points in the plot.
 #' @param feature_set character, numeric or logical vector indicating a set of
-#' features to use for the PCA. If character, entries must all be in
+#' features to use for the diffusion map. If character, entries must all be in
 #' \code{featureNames(object)}. If numeric, values are taken to be indices for
 #' features. If logical, vector is used to index features and should have length
 #' equal to \code{nrow(object)}.
@@ -896,7 +911,7 @@ setMethod("plotTSNE", signature("SCESet"),
 #' \code{reducedDimension} slot. Default is \code{FALSE}, in which case a
 #' \code{ggplot} object is returned.
 #' @param scale_features logical, should the expression values be standardised
-#' so that each feature has unit variance? Default is \code{FALSE}.
+#' so that each feature has unit variance? Default is \code{TRUE}.
 #' @param draw_plot logical, should the plot be drawn on the current graphics
 #' device? Only used if \code{return_SCESet} is \code{TRUE}, otherwise the plot
 #' is always produced.
@@ -906,10 +921,11 @@ setMethod("plotTSNE", signature("SCESet"),
 #' \code{set.seed} to make plots reproducible.
 #' @param sigma argument passed to \code{\link[destiny]{DiffusionMap}}
 #' @param distance argument passed to \code{\link[destiny]{DiffusionMap}}
+#' @param legend logical, should the legend(s) be shown? Default is \code{TRUE}.
 #' @param ... further arguments passed to \code{\link[destiny]{DiffusionMap}}
 #'
-#' @details The function \code{\link[destiny]{DiffusionMap}} is used internally to
-#' compute the diffusion map.
+#' @details The function \code{\link[destiny]{DiffusionMap}} is used internally 
+#' to compute the diffusion map.
 #'
 #' @return If \code{return_SCESet} is \code{TRUE}, then the function returns an
 #' \code{SCESet} object, otherwise it returns a \code{ggplot} object.
@@ -931,7 +947,7 @@ setMethod("plotTSNE", signature("SCESet"),
 #' drop_genes <- apply(exprs(example_sceset), 1, function(x) {var(x) == 0})
 #' example_sceset <- example_sceset[!drop_genes, ]
 #'
-#' ## Examples plotting PC1 and PC2
+#' ## Examples plotting diffusion maps
 #' plotDiffusionMap(example_sceset)
 #' plotDiffusionMap(example_sceset, colour_by = "Cell_Cycle")
 #' plotDiffusionMap(example_sceset, colour_by = "Cell_Cycle",
@@ -947,14 +963,14 @@ setMethod("plotTSNE", signature("SCESet"),
 #' return_SCESet = TRUE)
 #'
 #'
-plotDiffusionMapSCESet <- function(object, ntop = 500, ncomponents = 2,
+plotDiffusionMapSCESet <- function(object, ntop = 5000, ncomponents = 2,
                                    exprs_values = "exprs", colour_by = NULL,
                                    shape_by = NULL, size_by = NULL,
                                    feature_set = NULL, return_SCESet = FALSE,
-                                   scale_features = FALSE, draw_plot = TRUE,
+                                   scale_features = TRUE, draw_plot = TRUE,
                                    theme_size = 10, rand_seed = NULL,
                                    sigma = NULL, distance = "euclidean",
-                                   ...) {
+                                   legend = TRUE, ...) {
     ##
     if ( !requireNamespace("destiny", quietly = TRUE) )
         stop("This function requires the 'destiny' package.
@@ -1018,15 +1034,15 @@ plotDiffusionMapSCESet <- function(object, ntop = 500, ncomponents = 2,
             order(rv, decreasing = TRUE)[seq_len(min(ntop, length(rv)))]
     }
 
-    ## Standardise expression if stand_exprs(object) is null
-    # exprs_to_plot <- t(scale(t(exprs_mat), scale = scale_features))
-
     ## Drop any features with zero variance
     exprs_to_plot <- exprs_mat
     exprs_to_plot <- exprs_to_plot[feature_set,]
     keep_feature <- (matrixStats::rowVars(exprs_to_plot) > 0.001)
     keep_feature[is.na(keep_feature)] <- FALSE
     exprs_to_plot <- exprs_to_plot[keep_feature, ]
+    
+    ## Standardise expression if indicated by scale_features argument
+    exprs_to_plot <- t(scale(t(exprs_to_plot), scale = scale_features))
 
     ## Compute DiffusionMap
     if ( !is.null(rand_seed) )
@@ -1064,7 +1080,8 @@ plotDiffusionMapSCESet <- function(object, ntop = 500, ncomponents = 2,
 
     ## Make reduced-dimension plot
     plot_out <- plotReducedDim.default(df_to_plot, ncomponents,
-                                       colour_by, shape_by, size_by)
+                                       colour_by, shape_by, size_by, 
+                                       legend = legend)
 
     ## Define plotting theme
     if ( requireNamespace("cowplot", quietly = TRUE) )
@@ -1095,12 +1112,12 @@ setMethod("plotDiffusionMap", signature("SCESet"),
                    feature_set = NULL, return_SCESet = FALSE,
                    scale_features = FALSE, draw_plot = TRUE, theme_size = 10,
                    rand_seed = NULL, sigma = NULL, distance = "euclidean",
-                   ...) {
+                   legend = TRUE, ...) {
               plotDiffusionMapSCESet(object, ntop, ncomponents, exprs_values,
                                      colour_by, shape_by, size_by,
                                      feature_set, return_SCESet,
                                      scale_features, draw_plot, theme_size,
-                                     rand_seed, sigma, distance, ...)
+                                     rand_seed, sigma, distance, legend, ...)
           })
 
 
@@ -1134,6 +1151,7 @@ setMethod("plotDiffusionMap", signature("SCESet"),
 #' is always produced.
 #' @param theme_size numeric scalar giving default font size for plotting theme
 #' (default is 10).
+#' @param legend logical, should the legend(s) be shown? Default is \code{TRUE}.
 #' @param ... arguments passed to S4 plotMDS method
 #'
 #' @details The function \code{\link{cmdscale}} is used internally to
@@ -1174,7 +1192,7 @@ setMethod("plotDiffusionMap", signature("SCESet"),
 plotMDSSCESet <- function(object, ncomponents = 2, colour_by = NULL,
                           shape_by = NULL, size_by = NULL,
                           return_SCESet = FALSE, draw_plot = TRUE,
-                          theme_size = 10) {
+                          theme_size = 10, legend = TRUE) {
     ##
     cell_dist <- cellDist(object)
     ncells <- ncol(object)
@@ -1250,7 +1268,8 @@ plotMDSSCESet <- function(object, ncomponents = 2, colour_by = NULL,
 
     ## Make reduced-dimension plot
     plot_out <- plotReducedDim.default(df_to_plot, ncomponents,
-                                       colour_by, shape_by, size_by)
+                                       colour_by, shape_by, size_by, 
+                                       legend = legend)
 
     ## Define plotting theme
     if ( requireNamespace("cowplot", quietly = TRUE) )
@@ -1278,9 +1297,9 @@ plotMDSSCESet <- function(object, ncomponents = 2, colour_by = NULL,
 setMethod("plotMDS", signature("SCESet"),
           function(object, ncomponents = 2, colour_by = NULL, shape_by = NULL,
                    size_by = NULL, return_SCESet = FALSE, draw_plot = TRUE,
-                   theme_size = 10) {
+                   theme_size = 10, legend = TRUE) {
               plotMDSSCESet(object, ncomponents, colour_by, shape_by, size_by,
-                            return_SCESet, draw_plot, theme_size)
+                            return_SCESet, draw_plot, theme_size, legend)
           })
 
 
@@ -1310,6 +1329,7 @@ setMethod("plotMDS", signature("SCESet"),
 #' internally in the \code{\link[scater]{plotPCA}} function.
 #' @param theme_size numeric scalar giving default font size for plotting theme
 #' (default is 10).
+#' @param legend logical, should the legend(s) be shown? Default is \code{TRUE}.
 #' @param ... optional arguments (from those listed above) passed to
 #' \code{plotReducedDim.SCESet} or \code{plotReducedDim.default}
 #'
@@ -1344,7 +1364,7 @@ setMethod("plotMDS", signature("SCESet"),
 #'
 plotReducedDim.default <- function(df_to_plot, ncomponents=2, colour_by=NULL,
                            shape_by=NULL, size_by=NULL, percentVar=NULL,
-                           theme_size = 10) {
+                           theme_size = 10, legend = TRUE) {
     ## Define plot
     if ( ncomponents > 2 ) {
         ## expanding numeric columns for pairs plot
@@ -1458,6 +1478,8 @@ plotReducedDim.default <- function(df_to_plot, ncomponents=2, colour_by=NULL,
         }
     }
 
+    if ( !legend )
+        plot_out <- plot_out + theme(legend.position = "none")
     ## Return plot
     plot_out
 }
@@ -1466,7 +1488,8 @@ plotReducedDim.default <- function(df_to_plot, ncomponents=2, colour_by=NULL,
 #' @aliases plotReducedDim
 #' @export
 plotReducedDim.SCESet <- function(object, ncomponents=2, colour_by=NULL,
-                                  shape_by=NULL, size_by=NULL, theme_size = 10) {
+                                  shape_by=NULL, size_by=NULL, theme_size = 10,
+                                  legend = TRUE) {
     ## Set up indicator for whether to use pData or features for size_by and
     ## colour_by
     colour_by_use_pdata <- TRUE
@@ -1536,7 +1559,7 @@ plotReducedDim.SCESet <- function(object, ncomponents=2, colour_by=NULL,
     ## Call default method to make the plot
     plot_out <- plotReducedDim.default(df_to_plot, ncomponents, colour_by,
                                        shape_by, size_by, percentVar = NULL,
-                                       theme_size)
+                                       theme_size, legend)
 
     ## Define plotting theme
     if ( requireNamespace("cowplot", quietly = TRUE) )
@@ -1551,9 +1574,9 @@ plotReducedDim.SCESet <- function(object, ncomponents=2, colour_by=NULL,
 #' @export
 setMethod("plotReducedDim", signature("SCESet"),
           function(object, ncomponents=2, colour_by=NULL, shape_by=NULL,
-                   size_by=NULL) {
+                   size_by=NULL, legend=TRUE) {
               plotReducedDim.SCESet(object, ncomponents, colour_by, shape_by,
-                                    size_by)
+                                    size_by, legend)
           })
 
 #' @rdname plotReducedDim
@@ -1561,9 +1584,9 @@ setMethod("plotReducedDim", signature("SCESet"),
 #' @export
 setMethod("plotReducedDim", signature("data.frame"),
           function(object, ncomponents=2, colour_by=NULL, shape_by=NULL,
-                   size_by=NULL, percentVar=NULL) {
+                   size_by=NULL, percentVar=NULL, legend=TRUE) {
               plotReducedDim.default(object, ncomponents, colour_by, shape_by,
-                                     size_by, percentVar)
+                                     size_by, percentVar, legend)
           })
 
 

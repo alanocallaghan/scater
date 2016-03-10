@@ -58,11 +58,13 @@
 #'
 #'  An \code{SCESet} object has to have the \code{'exprs'} slot defined, so if
 #'  the \code{exprsData} argument is \code{NULL}, then this function will define
-#'  \code{'exprs'} with the following order of precedence: log2(TPM + 1), if
-#'  \code{tpmData} is defined; log2(FPKM + 1) if \code{fpkmData} is defined;
-#'  otherwise log2(counts-per-million + 1) are used. Note that for most analyses
-#'  counts-per-million are not recommended, and if possible transcripts-per-million
-#'  should be used.
+#'  \code{'exprs'} with the following order of precedence: log2(TPM + 
+#'  logExprsOffset), if \code{tpmData} is defined; log2(FPKM + logExprsOffset) 
+#'  if \code{fpkmData} is defined; otherwise log2(counts-per-million + 
+#'  logExprsOffset) are used. The \code{\link[edgeR]{cpm}} function from the 
+#'  edgeR package is used to compte \code{cpm}. Note that for many analyses 
+#'  counts-per-million are not recommended, and if possible 
+#'  transcripts-per-million should be used.
 #'
 #'  In many downstream functions you will likely find it most convenient if the
 #'  \code{'exprs'} values are on the log2-scale, so this is recommended.
@@ -110,31 +112,20 @@ newSCESet <- function(exprsData = NULL,
         if ( !is.null(tpmData) ) {
             exprsData <- log2(tpmData + logExprsOffset)
             logged <- TRUE
-            message("exprs(object) (i.e. exprsData) is not defined.
-Using log2(transcripts-per-million + logExprsOffset) for exprs slot. See also ?calculateTPM.")
         } else {
             if ( !is.null(fpkmData) ) {
                 exprsData <- log2(fpkmData + logExprsOffset)
                 logged <- TRUE
-                message("exprs(object) (i.e. exprsData) is not defined.
-Using log2(FPKM + logExprsOffset) for exprs slot. See also ?calculateFPKM and ?calculateTPM.")
             } else {
                 if ( !is.null(cpmData) ) {
                     exprsData <- log2(cpmData + logExprsOffset)
                     logged <- TRUE
-                    message("exprs(object) (i.e. exprsData) is not defined.
-                            Using log2(CPM + logExprsOffset) for exprs slot.
-                            See also ?calculateFPKM and ?calculateTPM.")
                 }  else {
                     cpmData <- edgeR::cpm.default(countData,
                                                   prior.count = logExprsOffset,
                                                   log = FALSE)
                     exprsData <- log2(cpmData + logExprsOffset)
                     logged <- TRUE
-                    message("Generating log2(counts-per-million + offset) from counts to use as
-                expression data, with prior.count = logExprsOffset. See edgeR::cpm().
-                        Note that counts-per-million are not recommended for most analyses.
-                        Consider using transcripts-per-million instead. See ?calculateTPM.")
                 }
             }
         }
@@ -144,18 +135,18 @@ Using log2(FPKM + logExprsOffset) for exprs slot. See also ?calculateFPKM and ?c
                 isexprs <- tpmData > lowerDetectionLimit
                 rownames(isexprs) <- rownames(tpmData)
                 colnames(isexprs) <- colnames(tpmData)
-                message(paste0("Defining 'is_exprs' using TPM data and a lower TPM threshold of ", lowerDetectionLimit))
+                # message(paste0("Defining 'is_exprs' using TPM data and a lower TPM threshold of ", lowerDetectionLimit))
             } else {
                 if ( !is.null(fpkmData) ) {
                     isexprs <- fpkmData > lowerDetectionLimit
                     rownames(isexprs) <- rownames(fpkmData)
                     colnames(isexprs) <- colnames(fpkmData)
-                    message(paste0("Defining 'is_exprs' using FPKM data and a lower FPKM threshold of ", lowerDetectionLimit))
+                    # message(paste0("Defining 'is_exprs' using FPKM data and a lower FPKM threshold of ", lowerDetectionLimit))
                 } else {
                     isexprs <- countData > lowerDetectionLimit
                     rownames(isexprs) <- rownames(countData)
                     colnames(isexprs) <- colnames(countData)
-                    message(paste0("Defining 'is_exprs' using count data and a lower count threshold of ", lowerDetectionLimit))
+                    # message(paste0("Defining 'is_exprs' using count data and a lower count threshold of ", lowerDetectionLimit))
                 }
             }
         }
@@ -165,7 +156,7 @@ Using log2(FPKM + logExprsOffset) for exprs slot. See also ?calculateFPKM and ?c
             isexprs <- exprsData > lowerDetectionLimit
             rownames(isexprs) <- rownames(exprsData)
             colnames(isexprs) <- colnames(exprsData)
-            message(paste0("Defining 'is_exprs' using exprsData and a lower exprs threshold of ", lowerDetectionLimit))
+            # message(paste0("Defining 'is_exprs' using exprsData and a lower exprs threshold of ", lowerDetectionLimit))
         }
     }
 

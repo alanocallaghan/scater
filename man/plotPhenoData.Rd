@@ -11,11 +11,11 @@ plotPhenoData(object, aesth = aes_string(x = "log10(total_counts)", y =
 \item{object}{an SCESet object containing expression values and
 experimental information. Must have been appropriately prepared.}
 
-\item{aesth}{aesthetics function call to pass to ggplot. This function 
-expects at least x and y variables to be supplied. The default is to plot 
+\item{aesth}{aesthetics function call to pass to ggplot. This function
+expects at least x and y variables to be supplied. The default is to plot
 total_features against log10(total_counts).}
 
-\item{theme_size}{numeric scalar giving default font size for plotting theme 
+\item{theme_size}{numeric scalar giving default font size for plotting theme
 (default is 10).}
 
 \item{...}{arguments passed to \code{\link{plotMetadata}}.}
@@ -27,12 +27,12 @@ a ggplot plot object
 Plot phenotype data from an SCESet object
 }
 \details{
-Plot phenotype data from an SCESet object. If one variable is 
-supplied then a density plot will be returned. If both variables are 
+Plot phenotype data from an SCESet object. If one variable is
+supplied then a density plot will be returned. If both variables are
 continuous (numeric) then a scatter plot will be returned. If one variable is
-discrete and one continuous then a violin plot with jittered points overlaid 
-will be returned. If both variables are discrete then a jitter plot will be 
-produced. The object returned is a ggplot object, so further layers and 
+discrete and one continuous then a violin plot with jittered points overlaid
+will be returned. If both variables are discrete then a jitter plot will be
+produced. The object returned is a ggplot object, so further layers and
 plotting options (titles, facets, themes etc) can be added.
 }
 \examples{
@@ -41,7 +41,7 @@ data("sc_example_cell_info")
 pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
 example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 example_sceset <- calculateQCMetrics(example_sceset)
-plotPhenoData(example_sceset, aesth = aes_string(x = "log10(total_counts)", 
+plotPhenoData(example_sceset, aesth = aes_string(x = "log10(total_counts)",
 y = "total_features", colour = "Mutation_Status"))
 
 }

@@ -711,7 +711,19 @@ plotReducedDim(example_sceset, ncomponents = 4, colour_by = "Gene_1000",
 PCA plot above.)
 
 Based on PCA or dimensionality reduction plots we may identify outlier cells
-and, if we wish, filter them out of the analysis.
+and, if we wish, filter them out of the analysis. There is also an outlier 
+detection option available with the plotPCA function.
+
+```{r plot-pca-outlier}
+example_sceset <- plotPCA(example_sceset, pca_data_input = "pdata", 
+                          detect_outliers = TRUE, return_SCESet = TRUE)
+
+```
+
+The `$outlier` element of the pData (phenotype data) slot of the `SCESet` 
+contains indicator values about whether or not each cell has been designated as
+an outlier based on the PCA. Here, these values can be accessed for filtering 
+low quality cells with `example_sceset$outlier`. 
 
 We can also use t-SNE and diffusion maps to visualise cells in a
 reduced-dimension space:

@@ -13,30 +13,32 @@
 plotReducedDim(object, ...)
 
 plotReducedDim.default(df_to_plot, ncomponents = 2, colour_by = NULL,
-  shape_by = NULL, size_by = NULL, percentVar = NULL, theme_size = 10)
+  shape_by = NULL, size_by = NULL, percentVar = NULL, theme_size = 10,
+  legend = TRUE)
 
 plotReducedDim.SCESet(object, ncomponents = 2, colour_by = NULL,
-  shape_by = NULL, size_by = NULL, theme_size = 10)
+  shape_by = NULL, size_by = NULL, theme_size = 10, legend = TRUE)
 
 \S4method{plotReducedDim}{SCESet}(object, ncomponents = 2, colour_by = NULL,
-  shape_by = NULL, size_by = NULL)
+  shape_by = NULL, size_by = NULL, legend = TRUE)
 
 \S4method{plotReducedDim}{data.frame}(object, ncomponents = 2,
-  colour_by = NULL, shape_by = NULL, size_by = NULL, percentVar = NULL)
+  colour_by = NULL, shape_by = NULL, size_by = NULL, percentVar = NULL,
+  legend = TRUE)
 }
 \arguments{
 \item{object}{an \code{SCESet} object with a non-NULL \code{reducedDimension}
 slot.}
 
-\item{...}{optional arguments (from those listed above) passed to 
+\item{...}{optional arguments (from those listed above) passed to
 \code{plotReducedDim.SCESet} or \code{plotReducedDim.default}}
 
 \item{df_to_plot}{data.frame containing a reduced dimension represenation of
 cells and optional metadata for the plot.}
 
-\item{ncomponents}{numeric scalar indicating the number of principal 
-components to plot, starting from the first principal component. Default is 
-2. If \code{ncomponents} is 2, then a scatterplot of Dimension 2 vs Dimension 
+\item{ncomponents}{numeric scalar indicating the number of principal
+components to plot, starting from the first principal component. Default is
+2. If \code{ncomponents} is 2, then a scatterplot of Dimension 2 vs Dimension
 1 is produced. If \code{ncomponents} is greater than 2, a pairs plots for the
  top dimensions is produced.}
 
@@ -49,12 +51,14 @@ be used as a factor by which to define the shape of the points in the plot.}
 \item{size_by}{character string defining the column of \code{pData(object)} to
 be used as a factor by which to define the size of points in the plot.}
 
-\item{percentVar}{numeric vector giving the proportion of variance in 
-expression explained by each reduced dimension. Only expected to be used 
+\item{percentVar}{numeric vector giving the proportion of variance in
+expression explained by each reduced dimension. Only expected to be used
 internally in the \code{\link[scater]{plotPCA}} function.}
 
-\item{theme_size}{numeric scalar giving default font size for plotting theme 
+\item{theme_size}{numeric scalar giving default font size for plotting theme
 (default is 10).}
+
+\item{legend}{logical, should the legend(s) be shown? Default is \code{TRUE}.}
 }
 \value{
 a ggplot plot object
@@ -63,9 +67,9 @@ a ggplot plot object
 Plot reduced dimension representation of cells
 }
 \details{
-The function \code{plotReducedDim.default} assumes that the first 
+The function \code{plotReducedDim.default} assumes that the first
 \code{ncomponents} columns of \code{df_to_plot} contain the reduced dimension
- components to plot, and that any subsequent columns define factors for 
+ components to plot, and that any subsequent columns define factors for
  \code{colour_by}, \code{shape_by} and \code{size_by} in the plot.
 }
 \examples{

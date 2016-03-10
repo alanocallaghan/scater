@@ -14,16 +14,16 @@ experimental information. Must have been appropriately prepared.}
 \item{col_by_variable}{variable name (must be a column name of pData(object))
 to be used to assign colours to cell-level values.}
 
-\item{n}{numeric scalar giving the number of the most expressed features to 
+\item{n}{numeric scalar giving the number of the most expressed features to
 show. Default value is 50.}
 
-\item{drop_features}{a character, logical or numeric vector indicating which 
-features (e.g. genes, transcripts) to drop when producing the plot. For 
-example, control genes might be dropped to focus attention on contribution 
+\item{drop_features}{a character, logical or numeric vector indicating which
+features (e.g. genes, transcripts) to drop when producing the plot. For
+example, control genes might be dropped to focus attention on contribution
 from endogenous rather than synthetic genes.}
 
-\item{exprs_values}{which slot of the \code{assayData} in the \code{object} 
-should be used to define expression? Valid options are "counts" (default), 
+\item{exprs_values}{which slot of the \code{assayData} in the \code{object}
+should be used to define expression? Valid options are "counts" (default),
 "tpm", "fpkm" and "exprs".}
 }
 \value{

@@ -11,19 +11,19 @@ plotExprsFreqVsMean(object, feature_set = NULL, feature_controls = NULL,
 \item{object}{an \code{SCESet} object.}
 
 \item{feature_set}{character, numeric or logical vector indicating a set of
-features to plot. If character, entries must all be in 
-\code{featureNames(object)}. If numeric, values are taken to be indices for 
+features to plot. If character, entries must all be in
+\code{featureNames(object)}. If numeric, values are taken to be indices for
 features. If logical, vector is used to index features and should have length
-equal to \code{nrow(object)}. If \code{NULL}, then the function checks if 
+equal to \code{nrow(object)}. If \code{NULL}, then the function checks if
 feature controls are defined. If so, then only feature controls are plotted,
 if not, then all features are plotted.}
 
 \item{feature_controls}{character, numeric or logical vector indicating a set of
-features to be used as feature controls for computing technical dropout 
+features to be used as feature controls for computing technical dropout
 effects. If character, entries must all be in \code{featureNames(object)}. If
-numeric, values are taken to be indices for features. If logical, vector is 
-used to index features and should have length equal to \code{nrow(object)}. 
-If \code{NULL}, then the function checks if feature controls are defined. If 
+numeric, values are taken to be indices for features. If logical, vector is
+used to index features and should have length equal to \code{nrow(object)}.
+If \code{NULL}, then the function checks if feature controls are defined. If
 so, then these feature controls are used.}
 
 \item{shape}{(optional) numeric scalar to define the plotting shape.}
@@ -31,7 +31,7 @@ so, then these feature controls are used.}
 \item{alpha}{(optional) numeric scalar (in the interval 0 to 1) to define the
 alpha level (transparency) of plotted points.}
 
-\item{...}{further arguments passed to \code{\link{plotMetadata}} (should 
+\item{...}{further arguments passed to \code{\link{plotMetadata}} (should
 only be \code{size}, if anythin).}
 }
 \value{
@@ -41,13 +41,13 @@ a ggplot plot object
 Plot frequency of expression against mean expression level
 }
 \details{
-This function plots gene expression frequency versus mean 
-expression level, which can be useful to assess the effects of technical 
-dropout in the dataset. We fit a non-linear least squares curve for the 
+This function plots gene expression frequency versus mean
+expression level, which can be useful to assess the effects of technical
+dropout in the dataset. We fit a non-linear least squares curve for the
 relationship between expression frequency and mean expression and use this to
-define the number of genes above high technical dropout and the numbers of 
-genes that are expressed in at least 50% and at least 25% of cells. A subset 
-of genes to be treated as feature controls can be specified, otherwise any 
+define the number of genes above high technical dropout and the numbers of
+genes that are expressed in at least 50% and at least 25% of cells. A subset
+of genes to be treated as feature controls can be specified, otherwise any
 feature controls previously defined are used.
 }
 \examples{
