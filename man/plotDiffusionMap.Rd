@@ -13,15 +13,15 @@ plotDiffusionMapSCESet(object, ntop = 500, ncomponents = 2,
   exprs_values = "exprs", colour_by = NULL, shape_by = NULL,
   size_by = NULL, feature_set = NULL, return_SCESet = FALSE,
   scale_features = TRUE, draw_plot = TRUE, theme_size = 10,
-  rand_seed = NULL, sigma = NULL, distance = "euclidean", legend = TRUE,
-  ...)
+  rand_seed = NULL, sigma = NULL, distance = "euclidean",
+  legend = "auto", ...)
 
 \S4method{plotDiffusionMap}{SCESet}(object, ntop = 500, ncomponents = 2,
   exprs_values = "exprs", colour_by = NULL, shape_by = NULL,
   size_by = NULL, feature_set = NULL, return_SCESet = FALSE,
   scale_features = FALSE, draw_plot = TRUE, theme_size = 10,
-  rand_seed = NULL, sigma = NULL, distance = "euclidean", legend = TRUE,
-  ...)
+  rand_seed = NULL, sigma = NULL, distance = "euclidean",
+  legend = "auto", ...)
 }
 \arguments{
 \item{object}{an \code{SCESet} object}
@@ -88,7 +88,9 @@ is always produced.}
 
 \item{distance}{argument passed to \code{\link[destiny]{DiffusionMap}}}
 
-\item{legend}{logical, should the legend(s) be shown? Default is \code{TRUE}.}
+\item{legend}{character, specifying how the legend(s) be shown? Default is 
+\code{"auto"}, which hides legends that have only one level and shows others. 
+Alternatives are "all" (show all legends) or "none" (hide all legends).}
 }
 \value{
 If \code{return_SCESet} is \code{TRUE}, then the function returns an

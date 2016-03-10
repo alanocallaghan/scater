@@ -11,11 +11,11 @@ plotMDS(object, ...)
 
 plotMDSSCESet(object, ncomponents = 2, colour_by = NULL, shape_by = NULL,
   size_by = NULL, return_SCESet = FALSE, draw_plot = TRUE,
-  theme_size = 10, legend = TRUE)
+  theme_size = 10, legend = "auto")
 
 \S4method{plotMDS}{SCESet}(object, ncomponents = 2, colour_by = NULL,
   shape_by = NULL, size_by = NULL, return_SCESet = FALSE,
-  draw_plot = TRUE, theme_size = 10, legend = TRUE)
+  draw_plot = TRUE, theme_size = 10, legend = "auto")
 }
 \arguments{
 \item{object}{an \code{SCESet} object}
@@ -50,7 +50,9 @@ is always produced.}
 \item{theme_size}{numeric scalar giving default font size for plotting theme
 (default is 10).}
 
-\item{legend}{logical, should the legend(s) be shown? Default is \code{TRUE}.}
+\item{legend}{character, specifying how the legend(s) be shown? Default is 
+\code{"auto"}, which hides legends that have only one level and shows others. 
+Alternatives are "all" (show all legends) or "none" (hide all legends).}
 }
 \value{
 If \code{return_SCESet} is \code{TRUE}, then the function returns an

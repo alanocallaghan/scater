@@ -14,10 +14,10 @@ plotReducedDim(object, ...)
 
 plotReducedDim.default(df_to_plot, ncomponents = 2, colour_by = NULL,
   shape_by = NULL, size_by = NULL, percentVar = NULL, theme_size = 10,
-  legend = TRUE)
+  legend = "auto")
 
 plotReducedDim.SCESet(object, ncomponents = 2, colour_by = NULL,
-  shape_by = NULL, size_by = NULL, theme_size = 10, legend = TRUE)
+  shape_by = NULL, size_by = NULL, theme_size = 10, legend = "auto")
 
 \S4method{plotReducedDim}{SCESet}(object, ncomponents = 2, colour_by = NULL,
   shape_by = NULL, size_by = NULL, legend = TRUE)
@@ -58,7 +58,9 @@ internally in the \code{\link[scater]{plotPCA}} function.}
 \item{theme_size}{numeric scalar giving default font size for plotting theme
 (default is 10).}
 
-\item{legend}{logical, should the legend(s) be shown? Default is \code{TRUE}.}
+\item{legend}{character, specifying how the legend(s) be shown? Default is 
+\code{"auto"}, which hides legends that have only one level and shows others. 
+Alternatives are "all" (show all legends) or "none" (hide all legends).}
 }
 \value{
 a ggplot plot object

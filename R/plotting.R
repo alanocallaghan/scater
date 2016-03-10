@@ -336,7 +336,9 @@ plotSCESet <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 #' is \code{FALSE}.
 #' @param theme_size numeric scalar giving default font size for plotting theme
 #' (default is 10).
-#' @param legend logical, should the legend(s) be shown? Default is \code{TRUE}.
+#' @param legend character, specifying how the legend(s) be shown? Default is 
+#' \code{"auto"}, which hides legends that have only one level and shows others. 
+#' Alternatives are "all" (show all legends) or "none" (hide all legends).
 #'
 #' @details The function \code{\link{prcomp}} is used internally to do the PCA.
 #' The function checks whether the \code{object} has standardised
@@ -381,6 +383,10 @@ plotSCESet <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 #' plotPCA(example_sceset, shape_by = "Treatment", size_by = "Mutation_Status")
 #' plotPCA(example_sceset, feature_set = 1:100, colour_by = "Treatment",
 #' shape_by = "Mutation_Status")
+#' 
+#' ## experiment with legend
+#' example_subset <- example_sceset[, example_sceset$Treatment == "treat1"]
+#' plotPCA(example_subset, colour_by = "Cell_Cycle", shape_by = "Treatment", legend = "all")
 #'
 #' plotPCA(example_sceset, shape_by = "Treatment", return_SCESet = TRUE)
 #'
@@ -395,7 +401,9 @@ plotPCASCESet <- function(object, ntop=500, ncomponents=2,
                           return_SCESet = FALSE, scale_features = TRUE,
                           draw_plot = TRUE, pca_data_input = "exprs",
                           selected_variables = NULL, detect_outliers = FALSE,
-                          theme_size = 10, legend = TRUE) {
+                          theme_size = 10, legend = "auto") {
+    ## check legend argument
+    legend <- match.arg(legend, c("auto", "none", "all"))
     ## Set up indicator for whether to use pData or features for size_by and
     ## colour_by
     colour_by_use_pdata <- TRUE
@@ -571,7 +579,10 @@ plotPCASCESet <- function(object, ntop=500, ncomponents=2,
         plot_out <- plot_out + cowplot::theme_cowplot(theme_size)
     else
         plot_out <- plot_out + theme_bw(theme_size)
-
+    ## remove legend if so desired
+    if ( legend == "none" )
+        plot_out <- plot_out + theme(legend.position = "none")
+    
     ## Plot PCA and return appropriate object
     if (return_SCESet) {
         ncomp_out <- max(ncomponents, 10)
@@ -600,7 +611,7 @@ setMethod("plotPCA", signature("SCESet"),
                    feature_set = NULL, return_SCESet = FALSE,
                    scale_features = TRUE, draw_plot = TRUE,
                    pca_data_input = "exprs", selected_variables = NULL,
-                   detect_outliers = FALSE, theme_size = 10, legend = TRUE) {
+                   detect_outliers = FALSE, theme_size = 10, legend = "auto") {
               plotPCASCESet(object, ntop, ncomponents, exprs_values, colour_by,
                             shape_by, size_by, feature_set, return_SCESet,
                             scale_features, draw_plot, pca_data_input,
@@ -690,7 +701,9 @@ setMethod("plotPCA", signature("SCESet"),
 #' @param perplexity numeric scalar value defining the "perplexity parameter"
 #' for the t-SNE plot. Passed to \code{\link[Rtsne]{Rtsne}} - see documentation
 #' for that package for more details.
-#' @param legend logical, should the legend(s) be shown? Default is \code{TRUE}.
+#' @param legend character, specifying how the legend(s) be shown? Default is 
+#' \code{"auto"}, which hides legends that have only one level and shows others. 
+#' Alternatives are "all" (show all legends) or "none" (hide all legends).
 #' @param ... further arguments passed to \code{\link[Rtsne]{Rtsne}}
 #'
 #' @details The function \code{\link[Rtsne]{Rtsne}} is used internally to
@@ -739,11 +752,13 @@ setMethod("plotTSNE", signature("SCESet"),
                    feature_set = NULL, return_SCESet = FALSE,
                    scale_features = TRUE, draw_plot = TRUE, theme_size = 10,
                    rand_seed = NULL, perplexity = floor(ncol(object) / 5), 
-                   legend = TRUE, ...) {
+                   legend = "auto", ...) {
               ##
               if ( !requireNamespace("Rtsne", quietly = TRUE) )
                   stop("This function requires the 'Rtsne' package.
                        Try: install.packages('Rtsne').")
+              ## check legend argument
+              legend <- match.arg(legend, c("auto", "none", "all"))
               ## Set up indicator for whether to use pData or features for size_by and
               ## colour_by
               colour_by_use_pdata <- TRUE
@@ -853,7 +868,10 @@ setMethod("plotTSNE", signature("SCESet"),
                   plot_out <- plot_out + cowplot::theme_cowplot(theme_size)
               else
                   plot_out <- plot_out + theme_bw(theme_size)
-
+              ## remove legend if so desired
+              if ( legend == "none" )
+                  plot_out <- plot_out + theme(legend.position = "none")
+              
               ## Plot t-SNE and return appropriate object
               if (return_SCESet) {
                   df_out <- tsne_out$Y[, 1:ncomponents]
@@ -922,7 +940,9 @@ setMethod("plotTSNE", signature("SCESet"),
 #' \code{set.seed} to make plots reproducible.
 #' @param sigma argument passed to \code{\link[destiny]{DiffusionMap}}
 #' @param distance argument passed to \code{\link[destiny]{DiffusionMap}}
-#' @param legend logical, should the legend(s) be shown? Default is \code{TRUE}.
+#' @param legend character, specifying how the legend(s) be shown? Default is 
+#' \code{"auto"}, which hides legends that have only one level and shows others. 
+#' Alternatives are "all" (show all legends) or "none" (hide all legends).
 #' @param ... further arguments passed to \code{\link[destiny]{DiffusionMap}}
 #'
 #' @details The function \code{\link[destiny]{DiffusionMap}} is used internally 
@@ -971,13 +991,15 @@ plotDiffusionMapSCESet <- function(object, ntop = 500, ncomponents = 2,
                                    scale_features = TRUE, draw_plot = TRUE,
                                    theme_size = 10, rand_seed = NULL,
                                    sigma = NULL, distance = "euclidean",
-                                   legend = TRUE, ...) {
+                                   legend = "auto", ...) {
     ##
     if ( !requireNamespace("destiny", quietly = TRUE) )
         stop("This function requires the 'destiny' package.
                        Try from Bioconductor with:
                        source('https://bioconductor.org/biocLite.R')
                        biocLite('destiny').")
+    ## check legend argument
+    legend <- match.arg(legend, c("auto", "none", "all"))
     ## Set up indicator for whether to use pData or features
     ## for size_by and
     ## colour_by
@@ -1089,7 +1111,10 @@ plotDiffusionMapSCESet <- function(object, ntop = 500, ncomponents = 2,
         plot_out <- plot_out + cowplot::theme_cowplot(theme_size)
     else
         plot_out <- plot_out + theme_bw(theme_size)
-
+    ## remove legend if so desired
+    if ( legend == "none" )
+        plot_out <- plot_out + theme(legend.position = "none")
+    
     ## Plot PCA and return appropriate object
     if (return_SCESet) {
         df_out <- difmap_out@eigenvectors[, 1:ncomponents]
@@ -1113,7 +1138,7 @@ setMethod("plotDiffusionMap", signature("SCESet"),
                    feature_set = NULL, return_SCESet = FALSE,
                    scale_features = FALSE, draw_plot = TRUE, theme_size = 10,
                    rand_seed = NULL, sigma = NULL, distance = "euclidean",
-                   legend = TRUE, ...) {
+                   legend = "auto", ...) {
               plotDiffusionMapSCESet(object, ntop, ncomponents, exprs_values,
                                      colour_by, shape_by, size_by,
                                      feature_set, return_SCESet,
@@ -1152,7 +1177,9 @@ setMethod("plotDiffusionMap", signature("SCESet"),
 #' is always produced.
 #' @param theme_size numeric scalar giving default font size for plotting theme
 #' (default is 10).
-#' @param legend logical, should the legend(s) be shown? Default is \code{TRUE}.
+#' @param legend character, specifying how the legend(s) be shown? Default is 
+#' \code{"auto"}, which hides legends that have only one level and shows others. 
+#' Alternatives are "all" (show all legends) or "none" (hide all legends).
 #' @param ... arguments passed to S4 plotMDS method
 #'
 #' @details The function \code{\link{cmdscale}} is used internally to
@@ -1193,7 +1220,9 @@ setMethod("plotDiffusionMap", signature("SCESet"),
 plotMDSSCESet <- function(object, ncomponents = 2, colour_by = NULL,
                           shape_by = NULL, size_by = NULL,
                           return_SCESet = FALSE, draw_plot = TRUE,
-                          theme_size = 10, legend = TRUE) {
+                          theme_size = 10, legend = "auto") {
+    ## check legend argument
+    legend <- match.arg(legend, c("auto", "none", "all"))
     ##
     cell_dist <- cellDist(object)
     ncells <- ncol(object)
@@ -1277,7 +1306,10 @@ plotMDSSCESet <- function(object, ncomponents = 2, colour_by = NULL,
         plot_out <- plot_out + cowplot::theme_cowplot(theme_size)
     else
         plot_out <- plot_out + theme_bw(theme_size)
-
+    ## remove legend if so desired
+    if ( legend == "none" )
+        plot_out <- plot_out + theme(legend.position = "none")
+    
     ## Plot PCA and return appropriate object
     if (return_SCESet) {
         df_out <- mds_out[, 1:ncomponents]
@@ -1298,7 +1330,7 @@ plotMDSSCESet <- function(object, ncomponents = 2, colour_by = NULL,
 setMethod("plotMDS", signature("SCESet"),
           function(object, ncomponents = 2, colour_by = NULL, shape_by = NULL,
                    size_by = NULL, return_SCESet = FALSE, draw_plot = TRUE,
-                   theme_size = 10, legend = TRUE) {
+                   theme_size = 10, legend = "auto") {
               plotMDSSCESet(object, ncomponents, colour_by, shape_by, size_by,
                             return_SCESet, draw_plot, theme_size, legend)
           })
@@ -1330,7 +1362,9 @@ setMethod("plotMDS", signature("SCESet"),
 #' internally in the \code{\link[scater]{plotPCA}} function.
 #' @param theme_size numeric scalar giving default font size for plotting theme
 #' (default is 10).
-#' @param legend logical, should the legend(s) be shown? Default is \code{TRUE}.
+#' @param legend character, specifying how the legend(s) be shown? Default is 
+#' \code{"auto"}, which hides legends that have only one level and shows others. 
+#' Alternatives are "all" (show all legends) or "none" (hide all legends).
 #' @param ... optional arguments (from those listed above) passed to
 #' \code{plotReducedDim.SCESet} or \code{plotReducedDim.default}
 #'
@@ -1365,7 +1399,9 @@ setMethod("plotMDS", signature("SCESet"),
 #'
 plotReducedDim.default <- function(df_to_plot, ncomponents=2, colour_by=NULL,
                            shape_by=NULL, size_by=NULL, percentVar=NULL,
-                           theme_size = 10, legend = TRUE) {
+                           theme_size = 10, legend = "auto") {
+    ## check legend argument
+    legend <- match.arg(legend, c("auto", "none", "all"), several.ok = FALSE)
     ## Define plot
     if ( ncomponents > 2 ) {
         ## expanding numeric columns for pairs plot
@@ -1373,9 +1409,9 @@ plotReducedDim.default <- function(df_to_plot, ncomponents=2, colour_by=NULL,
         if ( is.null(percentVar) ) {
             colnames(df_to_expand) <- colnames(df_to_plot)[1:ncomponents]
         } else {
-            colnames(df_to_expand) <- paste0(colnames(df_to_plot)[1:ncomponents], ": ",
-                                             round(percentVar[1:ncomponents] * 100),
-                                             "% variance")
+            colnames(df_to_expand) <- paste0(
+                colnames(df_to_plot)[1:ncomponents], ": ",
+                round(percentVar[1:ncomponents] * 100), "% variance")
         }
         gg1 <- .makePairs(df_to_expand)
         ## new data frame
@@ -1409,6 +1445,15 @@ plotReducedDim.default <- function(df_to_plot, ncomponents=2, colour_by=NULL,
             theme_bw(theme_size)
     }
 
+    ## if only one level for the variable, set to NULL
+    if ( legend == "auto" ) {
+        if ( !is.null(colour_by) && length(unique(df_to_plot$colour_by)) == 1)
+            colour_by <- NULL
+        if ( !is.null(shape_by) && length(unique(df_to_plot$shape_by)) == 1)
+            shape_by  <- NULL
+        if ( !is.null(size_by) && length(unique(df_to_plot$size_by)) == 1)
+            size_by <- NULL
+    }
     ## Apply colour_by, shape_by and size_by variables if defined
     if ( !is.null(colour_by) && !is.null(shape_by) && !is.null(size_by) ) {
         plot_out <- plot_out +
@@ -1479,8 +1524,6 @@ plotReducedDim.default <- function(df_to_plot, ncomponents=2, colour_by=NULL,
         }
     }
 
-    if ( !legend )
-        plot_out <- plot_out + theme(legend.position = "none")
     ## Return plot
     plot_out
 }
@@ -1490,7 +1533,9 @@ plotReducedDim.default <- function(df_to_plot, ncomponents=2, colour_by=NULL,
 #' @export
 plotReducedDim.SCESet <- function(object, ncomponents=2, colour_by=NULL,
                                   shape_by=NULL, size_by=NULL, theme_size = 10,
-                                  legend = TRUE) {
+                                  legend = "auto") {
+    ## check legend argument
+    legend <- match.arg(legend, c("auto", "none", "all"))
     ## Set up indicator for whether to use pData or features for size_by and
     ## colour_by
     colour_by_use_pdata <- TRUE
@@ -1567,6 +1612,11 @@ plotReducedDim.SCESet <- function(object, ncomponents=2, colour_by=NULL,
         plot_out <- plot_out + cowplot::theme_cowplot(theme_size)
     else
         plot_out <- plot_out + theme_bw(theme_size)
+    ## remove legend if so desired
+    if ( legend == "none" )
+        plot_out <- plot_out + theme(legend.position = "none")
+
+    ## return plot
     plot_out
 }
 
@@ -1581,7 +1631,7 @@ setMethod("plotReducedDim", signature("SCESet"),
           })
 
 #' @rdname plotReducedDim
-#' @aliases plotReducedDIm
+#' @aliases plotReducedDim
 #' @export
 setMethod("plotReducedDim", signature("data.frame"),
           function(object, ncomponents=2, colour_by=NULL, shape_by=NULL,

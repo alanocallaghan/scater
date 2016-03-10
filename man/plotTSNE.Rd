@@ -12,7 +12,7 @@ plotTSNE(object, ...)
   exprs_values = "exprs", colour_by = NULL, shape_by = NULL,
   size_by = NULL, feature_set = NULL, return_SCESet = FALSE,
   scale_features = TRUE, draw_plot = TRUE, theme_size = 10,
-  rand_seed = NULL, perplexity = floor(ncol(object)/5), legend = TRUE,
+  rand_seed = NULL, perplexity = floor(ncol(object)/5), legend = "auto",
   ...)
 }
 \arguments{
@@ -80,7 +80,9 @@ is always produced.}
 for the t-SNE plot. Passed to \code{\link[Rtsne]{Rtsne}} - see documentation
 for that package for more details.}
 
-\item{legend}{logical, should the legend(s) be shown? Default is \code{TRUE}.}
+\item{legend}{character, specifying how the legend(s) be shown? Default is 
+\code{"auto"}, which hides legends that have only one level and shows others. 
+Alternatives are "all" (show all legends) or "none" (hide all legends).}
 }
 \value{
 If \code{return_SCESet} is \code{TRUE}, then the function returns an

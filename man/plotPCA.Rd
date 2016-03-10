@@ -11,14 +11,14 @@ plotPCASCESet(object, ntop = 500, ncomponents = 2, exprs_values = "exprs",
   colour_by = NULL, shape_by = NULL, size_by = NULL, feature_set = NULL,
   return_SCESet = FALSE, scale_features = TRUE, draw_plot = TRUE,
   pca_data_input = "exprs", selected_variables = NULL,
-  detect_outliers = FALSE, theme_size = 10, legend = TRUE)
+  detect_outliers = FALSE, theme_size = 10, legend = "auto")
 
 \S4method{plotPCA}{SCESet}(object, ntop = 500, ncomponents = 2,
   exprs_values = "exprs", colour_by = NULL, shape_by = NULL,
   size_by = NULL, feature_set = NULL, return_SCESet = FALSE,
   scale_features = TRUE, draw_plot = TRUE, pca_data_input = "exprs",
   selected_variables = NULL, detect_outliers = FALSE, theme_size = 10,
-  legend = TRUE)
+  legend = "auto")
 }
 \arguments{
 \item{object}{an \code{SCESet} object}
@@ -90,7 +90,9 @@ is \code{FALSE}.}
 \item{theme_size}{numeric scalar giving default font size for plotting theme
 (default is 10).}
 
-\item{legend}{logical, should the legend(s) be shown? Default is \code{TRUE}.}
+\item{legend}{character, specifying how the legend(s) be shown? Default is 
+\code{"auto"}, which hides legends that have only one level and shows others. 
+Alternatives are "all" (show all legends) or "none" (hide all legends).}
 
 \item{...}{further arguments passed to \code{\link{plotPCASCESet}}}
 }
@@ -136,6 +138,10 @@ size_by = "Mutation_Status")
 plotPCA(example_sceset, shape_by = "Treatment", size_by = "Mutation_Status")
 plotPCA(example_sceset, feature_set = 1:100, colour_by = "Treatment",
 shape_by = "Mutation_Status")
+
+## experiment with legend
+example_subset <- example_sceset[, example_sceset$Treatment == "treat1"]
+plotPCA(example_subset, colour_by = "Cell_Cycle", shape_by = "Treatment", legend = "all")
 
 plotPCA(example_sceset, shape_by = "Treatment", return_SCESet = TRUE)
 
