@@ -29,7 +29,7 @@ a ggplot plot object
 Produce QC diagnostic plots
 }
 \details{
-Calculate useful quality control metrics to help with pre-processing
+Display useful quality control plots to help with pre-processing
 of data and identification of potentially problematic features and cells.
 }
 \examples{

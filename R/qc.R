@@ -554,15 +554,26 @@ a lower count threshold of 0.")
 #' their R-squared with the variable of interest. A value of
 #' \code{"pcs-vs-vars"} produces plots of the top PCs against the variable of
 #' interest.
+#' @param exprs_values which slot of the \code{assayData} in the \code{object}
+#' should be used to define expression? Valid options are "counts" (default),
+#' "tpm", "fpkm" and "exprs", or anything else in the object added manually by 
+#' the user.
+#' @param ntop numeric scalar indicating the number of most variable features to
+#' use for the PCA. Default is \code{500}, but any \code{ntop} argument is
+#' overrided if the \code{feature_set} argument is non-NULL.
+#' @param feature_set character, numeric or logical vector indicating a set of
+#' features to use for the PCA. If character, entries must all be in
+#' \code{featureNames(object)}. If numeric, values are taken to be indices for
+#' features. If logical, vector is used to index features and should have length
+#' equal to \code{nrow(object)}.
+#' @param scale_features logical, should the expression values be standardised
+#' so that each feature has unit variance? Default is \code{TRUE}.
 #' @param theme_size numeric scalar providing base font size for ggplot theme.
 #'
-#' @details Plot the top 5 most important PCs for a given variable. Importance
-#' here is defined as the R-squared value from a linear model regressing each PC
-#' onto the variable of interest. If the variable is discrete, unique values of
-#' the variable define  the clusters. If the variable is continuous, it is coerced into three
-#' discrete values, "low" (bottom quartile), "medium" (middle two quartiles)
-#' and "high" (upper quartile), and these levels are used as a factor in the
-#' linear model. Cells are coloured by their cluster in the plot.
+#' @details Plot the top 5 or 6 most important PCs (depending on the 
+#' \code{plot_type} argument for a given variable. Importance here is defined as
+#' the R-squared value from a linear model regressing each PC onto the variable 
+#' of interest. 
 #'
 #' @return a \code{\link{ggplot}} plot object
 #'
@@ -580,11 +591,30 @@ a lower count threshold of 0.")
 #' findImportantPCs(example_sceset, variable="total_features")
 #'
 findImportantPCs <- function(object, variable="total_features",
-                             plot_type = "pcs-vs-vars", theme_size = 10) {
-    df_for_pca <- t(exprs(object))
-    col_zero_var <- (apply(df_for_pca, 2, var) == 0)
-    pca <- prcomp(df_for_pca[, !col_zero_var], retx = TRUE, center = TRUE,
-                  scale. = TRUE)
+                             plot_type = "pcs-vs-vars", exprs_values = "exprs",
+                             ntop = 500, feature_set = NULL, 
+                             scale_features = TRUE, theme_size = 10) {
+    if ( !is.null(feature_set) && typeof(feature_set) == "character" ) {
+        if ( !(all(feature_set %in% featureNames(object))) )
+            stop("when the argument 'feature_set' is of type character, all features must be in featureNames(object)")
+    }
+    df_for_pca <- get_exprs(object, exprs_values)
+    if ( is.null(df_for_pca) )
+        stop("The supplied 'exprs_values' argument not found in assayData(object). Try 'exprs' or similar.")
+    if ( is.null(feature_set) ) {
+        rv <- matrixStats::rowVars(df_for_pca)
+        feature_set <-
+            order(rv, decreasing = TRUE)[seq_len(min(ntop, length(rv)))]
+    }
+    df_for_pca <- df_for_pca[feature_set,]
+    df_for_pca <- t(df_for_pca)
+    ## Drop any features with zero variance
+    keep_feature <- (matrixStats::colVars(df_for_pca) > 0.001)
+    keep_feature[is.na(keep_feature)] <- FALSE
+    df_for_pca <- df_for_pca[, keep_feature]
+    ## compute PCA
+    pca <- prcomp(df_for_pca, retx = TRUE, center = TRUE, 
+                  scale. = scale_features)
     colnames(pca$x) <- paste("component", 1:ncol(pca$x))
     if (!(variable %in% colnames(pData(object))))
         stop("variable not found in pData(object).
@@ -603,10 +633,7 @@ findImportantPCs <- function(object, variable="total_features",
         ## Compute R-squared for each PC
         design <- model.matrix(~x_int)
     } else {
-        ## If x is a continuous variable - turn into an ordinal variable with three
-        ## values - low, medium and high - or five values based on quintiles
-        x_int <- cut(x, c(min(x) - 1, quantile(x, probs = c(0.2, 0.4, 0.6, 0.8)),
-                                    max(x) + 1), right = TRUE)
+        ## If x is a continuous variable - use as a continuous variable
         design <- model.matrix(~x)
     }
     ## Get R-squared for each PC for the variable of interest
@@ -940,13 +967,18 @@ plotExplanatoryVariables <- function(object, method = "density",
     ## Check method argument
     method <- match.arg(method, c("density", "pairs"))
     ## Checking arguments for expression values
-    exprs_values <- match.arg(
-        exprs_values,
-        choices = c("exprs", "norm_exprs", "stand_exprs", "norm_exprs",
-                    "counts", "norm_counts", "tpm", "norm_tpm", "fpkm",
-                    "norm_fpkm", "cpm", "norm_cpm"))
+    # exprs_values <- match.arg(
+    #     exprs_values,
+    #     choices = c("exprs", "norm_exprs", "stand_exprs", "norm_exprs",
+    #                 "counts", "norm_counts", "tpm", "norm_tpm", "fpkm",
+    #                 "norm_fpkm", "cpm", "norm_cpm"))
     exprs_mat <- get_exprs(object, exprs_values)
-
+    if ( is.null(exprs_mat) )
+        stop("The supplied 'exprs_values' argument not found in assayData(object). Try 'exprs' or similar.")
+    ## exit if any features have zero variance as this causes problem downstream
+    if ( any(matrixStats::rowVars(exprs_mat) == 0) )
+        stop("Some features have zero variance. Please filter out features with zero variance (e.g. all zeros).")
+    
     ## Check that variables are defined
     if ( is.null(variables) ) {
         variables_to_plot <- varLabels(object)
@@ -1291,7 +1323,7 @@ plotExprsFreqVsMean <- function(object, feature_set = NULL,
 #' \code{plotImportantPCs}, \code{plotExplanatoryVariables} and
 #' \code{plotExprsMeanVsFreq} as appropriate.
 #'
-#' @details Calculate useful quality control metrics to help with pre-processing
+#' @details Display useful quality control plots to help with pre-processing
 #' of data and identification of potentially problematic features and cells.
 #'
 #' @return a ggplot plot object

@@ -67,12 +67,16 @@
 #' 
 #' @author Davis McCarthy
 #' @importFrom edgeR calcNormFactors.default
+#' @importFrom limma lmFit
+#' @importFrom limma residuals.MArrayLM
 #' @export
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
 #' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
 #' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+#' keep_gene <- rowSums(counts(example_sceset)) > 0
+#' example_sceset <- example_sceset[keep_gene,]
 #' 
 #' ## Apply TMM normalisation taking into account all genes
 #' example_sceset <- normaliseExprs(example_sceset, method = "TMM")
@@ -87,6 +91,11 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
     ## Define expression values to be used
     exprs_values <- match.arg(exprs_values, c("exprs", "tpm", "fpkm", "counts"))
     exprs_mat <- get_exprs(object, exprs_values)
+    ## exit if any features have zero variance as this causes problem downstream
+    if ( any(matrixStats::rowVars(exprs_mat) == 0) )
+        stop("Some features have zero variance. 
+             Please filter out features with zero variance (e.g. all zeros).")
+    
     if ( exprs_values == "exprs" && object@logged ) {
         exprs_mat <- 2 ^ exprs_mat - object@logExprsOffset
     }
@@ -110,7 +119,7 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
     if ( !is.null(feature_set) ) {
         ## Divide expression values by the normalisation factors and total 
         expression 
-        norm_exprs_mat <- t(t(exprs_mat) / norm_factors / 
+        norm_exprs_mat <- t(t(exprs_mat_for_norm) / norm_factors / 
                                 colSums(exprs_mat_for_norm))
     } else {
         ## Divide expression values by the normalisation factors
@@ -160,8 +169,9 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
     ## If a design matrix is provided, then normalised expression values are
     ## residuals of a linear model fit to norm_exprs values with that design
     if ( !is.null(design) ) {
-        limma_fit <- lmFit(norm_exprs(object), design)
-        norm_exprs(object) <- limma_fit$residuals
+        limma_fit <- limma::lmFit( norm_exprs(object), design)
+        norm_exprs(object) <- limma::residuals.MArrayLM(limma_fit, 
+                                                        norm_exprs(object))
     }
     
     ## Return SCESet object

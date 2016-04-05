@@ -1844,7 +1844,7 @@ plotExpressionDefault <- function(object, aesth, ncol=2, xlab = NULL,
                                       object[[as.character(aesth$colour)]],
                                       as.character(aesth$colour))
     plot_out <- plot_out +
-        geom_jitter(alpha = 0.5, position = position_jitter(height = 0))
+        geom_jitter(alpha = 0.6, position = position_jitter(height = 0))
     if (show_violin) {
         plot_out <- plot_out + geom_violin(colour = "gray60", alpha = 0.3,
                                            fill = "gray80", scale = "width")

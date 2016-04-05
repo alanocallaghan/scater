@@ -88,6 +88,8 @@ data("sc_example_counts")
 data("sc_example_cell_info")
 pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
 example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+keep_gene <- rowSums(counts(example_sceset)) > 0
+example_sceset <- example_sceset[keep_gene,]
 
 ## Apply TMM normalisation taking into account all genes
 example_sceset <- normaliseExprs(example_sceset, method = "TMM")

@@ -56,9 +56,9 @@ level of some features (gene, exon, region, etc.), then we first need to form an
 `SCESet` object containing the data. An `SCESet` object is the basic data
 container that we use in `scater`.
 
-Here we use the example data provided with
-the package, which gives us two objects, a matrix of counts and a dataframe
-with information about the cells we are studying:
+Here we use the example data provided with the package, which gives us two 
+objects, a matrix of counts and a dataframe with information about the cells we 
+are studying:
 
 ```{r quickstart-load-data, message=FALSE, warning=FALSE}
 library(scater, quietly = TRUE)
@@ -76,7 +76,7 @@ example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 ```
 
 Subsetting is very convenient with this class. For example, we can filter out
-features that are not expressed in any cells:
+features (genes) that are not expressed in any cells:
 
 ```{r filter-no-exprs}
 keep_feature <- rowSums(is_exprs(example_sceset)) > 0
@@ -92,6 +92,13 @@ It is straight-forward to compute many quality control metrics:
 example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:40)
 ```
 
+Now you can play around with your data using the graphical user interface (GUI),
+which opens an interactive dashboard in your browser!
+
+```{r quick-start-gui, eval=FALSE}
+scater_gui(example_sceset)
+```
+
 Many plotting functions are available for visualising the data:
 
 * `plot`: a plot method exists for `SCESet` objects, which gives an overview
@@ -101,7 +108,7 @@ of expression across cells.
 * `plotTSNE`: produce a t-distributed stochastic neighbour embedding (reduced dimension) plot for the cells.
 * `plotDiffusionMap`: produce a diffusion map (reduced dimension) plot for the
 cells.
-* * `plotMDS`: produce a multi-dimensional scaling plot for the cells.
+* `plotMDS`: produce a multi-dimensional scaling plot for the cells.
 * `plotReducedDim`: plot a reduced-dimension representation of the cells.
 * `plotExpression`: plot expression levels for a defined set of features.
 * `plotPhenoData`: plot cell metadata and QC metrics.

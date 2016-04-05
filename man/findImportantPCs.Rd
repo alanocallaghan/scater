@@ -5,7 +5,8 @@
 \title{Find most important principal components for a given variable}
 \usage{
 findImportantPCs(object, variable = "total_features",
-  plot_type = "pcs-vs-vars", theme_size = 10)
+  plot_type = "pcs-vs-vars", exprs_values = "exprs", ntop = 500,
+  feature_set = NULL, scale_features = TRUE, theme_size = 10)
 }
 \arguments{
 \item{object}{an SCESet object containing expression values and
@@ -20,6 +21,24 @@ their R-squared with the variable of interest. A value of
 \code{"pcs-vs-vars"} produces plots of the top PCs against the variable of
 interest.}
 
+\item{exprs_values}{which slot of the \code{assayData} in the \code{object}
+should be used to define expression? Valid options are "counts" (default),
+"tpm", "fpkm" and "exprs", or anything else in the object added manually by 
+the user.}
+
+\item{ntop}{numeric scalar indicating the number of most variable features to
+use for the PCA. Default is \code{500}, but any \code{ntop} argument is
+overrided if the \code{feature_set} argument is non-NULL.}
+
+\item{feature_set}{character, numeric or logical vector indicating a set of
+features to use for the PCA. If character, entries must all be in
+\code{featureNames(object)}. If numeric, values are taken to be indices for
+features. If logical, vector is used to index features and should have length
+equal to \code{nrow(object)}.}
+
+\item{scale_features}{logical, should the expression values be standardised
+so that each feature has unit variance? Default is \code{TRUE}.}
+
 \item{theme_size}{numeric scalar providing base font size for ggplot theme.}
 }
 \value{
@@ -29,13 +48,10 @@ a \code{\link{ggplot}} plot object
 Find most important principal components for a given variable
 }
 \details{
-Plot the top 5 most important PCs for a given variable. Importance
-here is defined as the R-squared value from a linear model regressing each PC
-onto the variable of interest. If the variable is discrete, unique values of
-the variable define  the clusters. If the variable is continuous, it is coerced into three
-discrete values, "low" (bottom quartile), "medium" (middle two quartiles)
-and "high" (upper quartile), and these levels are used as a factor in the
-linear model. Cells are coloured by their cluster in the plot.
+Plot the top 5 or 6 most important PCs (depending on the 
+\code{plot_type} argument for a given variable. Importance here is defined as
+the R-squared value from a linear model regressing each PC onto the variable 
+of interest.
 }
 \examples{
 data("sc_example_counts")

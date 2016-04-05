@@ -37,3 +37,25 @@ test_that("we can compute standard QC metrics with multiple sets of feature and
     expect_that(example_sceset, is_a("SCESet"))
 })
 
+test_that("failure is as expected for misspecified arg to plotExplanatoryVariables()", {
+    data("sc_example_counts")
+    data("sc_example_cell_info")
+    pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+    example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+    expect_error(plotExplanatoryVariables(example_sceset, "expl"))
+})
+
+
+test_that("failure is as expected for input with zero-variance features", {
+    data("sc_example_counts")
+    data("sc_example_cell_info")
+    pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+    example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+    err_string <- "Some features have zero variance"
+    expect_error(plotExplanatoryVariables(example_sceset, "density"), err_string)
+})
+
+
+
+
+
