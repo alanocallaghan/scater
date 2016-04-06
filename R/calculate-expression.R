@@ -81,6 +81,11 @@ calcIsExprs <- function(object, lowerDetectionLimit = NULL, exprs_data = "counts
 #' effective_length <- rep(1000, 2000)
 #' tpm(example_sceset) <- calculateTPM(example_sceset, effective_length, 
 #'     calc_from = "counts")
+#'     
+#' ## calculate from FPKM
+#' fpkm(example_sceset) <- calculateFPKM(example_sceset, effective_length)
+#' tpm(example_sceset) <- calculateTPM(example_sceset, effective_length, 
+#'                                     calc_from = "fpkm")
 #' 
 calculateTPM <- function(object, effective_length = NULL, calc_from = "counts") {
     if ( !is(object, "SCESet"))
@@ -140,7 +145,7 @@ calculateFPKM <- function(object, effective_length) {
     counts0 <- counts
     counts0[counts == 0] <- NA
     rate <- log(counts0) - log(eff_len)
-    denom <- log(colSums(exp(rate)))
+    denom <- log(colSums(exp(rate), na.rm = TRUE))
     out <- exp( t(t(rate) - denom) + log(1e6) )
     out[is.na(out)] <- 0
     out

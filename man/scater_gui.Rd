@@ -15,7 +15,8 @@ Opens a browser window with an interactive shiny app and visualize
 all possible plots included in the scater
 }
 \description{
-scater shiny app GUI for workflow for less programmatically inclined users
+scater shiny app GUI for workflow for less programmatically inclined users or
+those who would like a quick and easy way to view multiple plots.
 }
 \examples{
 data("sc_example_counts")
@@ -29,5 +30,8 @@ example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:40)
 \dontrun{
 scater_gui(example_sceset)
 }
+}
+\author{
+Davis McCarthy and Vladimir Kiselev
 }
 
