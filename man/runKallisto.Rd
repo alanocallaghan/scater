@@ -5,7 +5,8 @@
 \title{Run kallisto on FASTQ files to quantify feature abundance}
 \usage{
 runKallisto(targets_file, transcript_index, single_end = TRUE,
-  output_prefix = "output", fragment_length = NULL, n_cores = 2,
+  output_prefix = "output", fragment_length = NULL,
+  fragment_standard_deviation = NULL, n_cores = 2,
   n_bootstrap_samples = 0, bootstrap_seed = NULL, correct_bias = TRUE,
   plaintext = FALSE, kallisto_version = "current", verbose = TRUE,
   dry_run = FALSE, kallisto_cmd = "kallisto")
@@ -30,7 +31,12 @@ underscore).}
 \item{fragment_length}{scalar integer or numeric giving the estimated
 average fragment length. Required argument if \code{single_end} is \code{TRUE},
 optional if \code{FALSE} (kallisto default for paired-end data is that the
-value is estimated from the input data.}
+value is estimated from the input data).}
+
+\item{fragment_standard_deviation}{scalar numeric giving the estimated 
+standard deviation of read fragment length. Required argument if 
+\code{single_end} is \code{TRUE}, optional if \code{FALSE} (kallisto default 
+for paired-end data is that the value is estimated from the input data).}
 
 \item{n_cores}{integer giving the number of cores (nodes/threads) to use for
 the kallisto jobs. The package \code{parallel} is used. Default is 2 cores.}
