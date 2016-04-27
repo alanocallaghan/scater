@@ -22,7 +22,9 @@ example, blank wells or bulk controls).}
 \item{nmads}{numeric scalar giving the number of median absolute deviations 
 to be used to flag potentially problematic cells based on total_counts (total
 number of counts for the cell, or library size) and total_features (number of
-features with non-zero expression). Default value is 5.}
+features with non-zero expression). For total_features, cells are flagged for
+filtering only if total_features is \code{nmads} below the median. Default 
+value is 5.}
 
 \item{pct_feature_controls_threshold}{numeric scalar giving a threshold for
 percentage of expression values accounted for by feature controls. Used as to

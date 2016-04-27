@@ -442,7 +442,7 @@ cellNames <- function(object) {
 #' SCESet objects contain feature information (inherited from the ExpressionSet
 #' class). This function conveniently replaces the feature data with the
 #' value supplied, which must be an AnnotatedDataFrame.
-#' @param x An SCESet object.
+#' @param object An SCESet object.
 #' @param value an AnnotatedDataFrame with updated featureData to replace
 #' existing
 #' @return A matrix of expression count data, where rows correspond to features
@@ -461,19 +461,19 @@ cellNames <- function(object) {
 #' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 #' fData(example_sceset)
 #' }
-setReplaceMethod("fData", signature(x = "SCESet", value = "AnnotatedDataFrame"),
-                 function(x, value) {
-                     x@featureData <- value
-                     x
+setReplaceMethod("fData", signature(object = "SCESet", value = "AnnotatedDataFrame"),
+                 function(object, value) {
+                     object@featureData <- value
+                     object
                  } )
 
 #' @name fData
 #' @rdname fData
 #' @exportMethod "fData<-"
-setReplaceMethod("fData", signature(x = "SCESet", value = "data.frame"),
-                 function(x, value) {
-                     x@featureData <- new("AnnotatedDataFrame", value)
-                     x
+setReplaceMethod("fData", signature(object = "SCESet", value = "data.frame"),
+                 function(object, value) {
+                     object@featureData <- new("AnnotatedDataFrame", value)
+                     object
                  } )
 
 
@@ -483,7 +483,7 @@ setReplaceMethod("fData", signature(x = "SCESet", value = "data.frame"),
 #' SCESet objects contain phenotype information (inherited from the
 #' ExpressionSet class). This function conveniently replaces the phenotype data
 #' with the value supplied, which must be an AnnotatedDataFrame.
-#' @param x An SCESet object.
+#' @param object An SCESet object.
 #' @param value an AnnotatedDataFrame with updated phenoData to replace
 #' existing
 #' @return A matrix of expression count data, where rows correspond to features
@@ -502,20 +502,20 @@ setReplaceMethod("fData", signature(x = "SCESet", value = "data.frame"),
 #' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 #' pData(example_sceset)
 #' }
-setReplaceMethod("pData", signature(x = "SCESet", value = "AnnotatedDataFrame"),
-                 function(x, value) {
-                     x@phenoData <- value
-                     x
+setReplaceMethod("pData", signature(object = "SCESet", value = "AnnotatedDataFrame"),
+                 function(object, value) {
+                     object@phenoData <- value
+                     object
                  } )
 
 
 #' @name pData
 #' @rdname pData
 #' @exportMethod "pData<-"
-setReplaceMethod("pData", signature(x = "SCESet", value = "data.frame"),
-                 function(x, value) {
-                     x@phenoData <- new("AnnotatedDataFrame", value)
-                     x
+setReplaceMethod("pData", signature(object = "SCESet", value = "data.frame"),
+                 function(object, value) {
+                     object@phenoData <- new("AnnotatedDataFrame", value)
+                     object
                  } )
 
 
@@ -1206,6 +1206,82 @@ setMethod("norm_fpkm", signature(object = "SCESet"), norm_fpkm.SCESet)
 setReplaceMethod("norm_fpkm", signature(object = "SCESet", value = "matrix"),
                  function(object, value) {
                      object@assayData$norm_fpkm <- value
+                     validObject(object)
+                     object
+                 })
+
+
+################################################################################
+### sizeFactors
+
+#' Accessors size factors of an SCESet object.
+#'
+#' For normalisation, library-specific size factors can be defined. Raw values 
+#' can be divided by the appropriate size factors to obtain normalised counts, 
+#' TPM, etc.
+#'
+#' @usage
+#' \S4method{sizeFactors}{SCESet}(object)
+#'
+#' \S4method{sizeFactors}{SCESet,numeric}(object)<-value
+#' \S4method{sizeFactors}{SCESet,NULL}(object)<-value
+#'
+#' @docType methods
+#' @name sizeFactors
+#' @rdname sizeFactors
+#' @aliases sizeFactors sizeFactors,SCESet-method sizeFactors<-,SCESet,numeric-method sizeFactors<-,SCESet,NULL-method
+#'
+#' @param object a \code{SCESet} object.
+#' @param value a vector of class \code{"numeric"} or \code{NULL}
+#'
+#' @author Davis McCarthy
+#' @export
+#' 
+#' @importFrom BiocGenerics sizeFactors
+#' @importFrom BiocGenerics sizeFactors<-
+#' 
+#' @examples
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' example_sceset <- newSCESet(countData = sc_example_counts)
+#' sizeFactors(example_sceset)
+#' sizeFactors(example_sceset) <- 2 ^ rnorm(ncol(example_sceset))
+#' sizeFactors(example_sceset)
+#'
+sizeFactors.SCESet <- function(object) {
+    out <- object$size_factor
+    if ( is.null(out) ) { 
+        warning("'sizeFactors' have not been set") 
+        return(NULL)
+    }
+    names(out) <- colnames(object) 
+    return(out)
+}
+
+#' @name sizeFactors
+#' @rdname sizeFactors
+#' @export
+#' @aliases sizeFactors,SCESet-method
+setMethod("sizeFactors", signature(object = "SCESet"), sizeFactors.SCESet)
+
+#' @name sizeFactors<-
+#' @rdname sizeFactors
+#' @exportMethod "sizeFactors<-"
+#' @aliases sizeFactors<-,SCESet,numeric-method
+setReplaceMethod("sizeFactors", signature(object = "SCESet", value = "numeric"),
+                 function(object, value) {
+                     object$size_factor <- value
+                     validObject(object)
+                     object
+                 })
+
+#' @name sizeFactors<-
+#' @rdname sizeFactors
+#' @exportMethod "sizeFactors<-"
+#' @aliases sizeFactors<-,SCESet,NULL-method
+setReplaceMethod("sizeFactors", signature(object = "SCESet", value = "NULL"),
+                 function(object, value) {
+                     object$size_factor <- NULL
                      validObject(object)
                      object
                  })

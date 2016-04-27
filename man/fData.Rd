@@ -8,12 +8,12 @@
 \alias{fData<-,SCESet,data.frame-method}
 \title{Replaces featureData in an SCESet object}
 \usage{
-\S4method{fData}{SCESet,AnnotatedDataFrame}(x) <- value
+\S4method{fData}{SCESet,AnnotatedDataFrame}(object) <- value
 
-\S4method{fData}{SCESet,data.frame}(x) <- value
+\S4method{fData}{SCESet,data.frame}(object) <- value
 }
 \arguments{
-\item{x}{An SCESet object.}
+\item{object}{An SCESet object.}
 
 \item{value}{an AnnotatedDataFrame with updated featureData to replace
 existing}

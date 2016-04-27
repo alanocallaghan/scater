@@ -25,7 +25,9 @@
 #' @param nmads numeric scalar giving the number of median absolute deviations 
 #' to be used to flag potentially problematic cells based on total_counts (total
 #' number of counts for the cell, or library size) and total_features (number of
-#' features with non-zero expression). Default value is 5.
+#' features with non-zero expression). For total_features, cells are flagged for
+#' filtering only if total_features is \code{nmads} below the median. Default 
+#' value is 5.
 #' @param pct_feature_controls_threshold numeric scalar giving a threshold for
 #' percentage of expression values accounted for by feature controls. Used as to
 #' flag cells that may be filtered based on high percentage of expression from
@@ -308,14 +310,6 @@ a lower count threshold of 0.")
         df_pdata_this <- .get_qc_metrics_exprs_mat(
             exprs_mat, is_feature_control, pct_feature_controls_threshold,
             calc_top_features = TRUE, exprs_type = "exprs")
-#         exprs_feature_controls <- colSums(exprs_mat[is_feature_control,])
-#         pct_exprs_feature_controls <- (100 * exprs_feature_controls /
-#                                              colSums(exprs_mat))
-#         filter_on_pct_exprs_feature_controls <-
-#             (pct_exprs_feature_controls > pct_feature_controls_threshold)
-#         df_pdata_this <- data.frame(exprs_feature_controls,
-#                                     pct_exprs_feature_controls,
-#                                     filter_on_pct_exprs_feature_controls)
         if ( !is.null(counts_mat) ) {
             df_pdata_counts <- .get_qc_metrics_exprs_mat(
                 counts_mat, is_feature_control, pct_feature_controls_threshold,
@@ -342,23 +336,21 @@ a lower count threshold of 0.")
 
     ## Compute total_features and find outliers
     total_features <- colSums(is_exprs(object)[!is_feature_control,])
-    mad_total_features <- mad(total_features)
-    med_total_features <- median(total_features)
-    keep_total_features <- c(med_total_features - nmads * mad_total_features,
-                             med_total_features + nmads * mad_total_features)
-    filter_on_total_features <- (findInterval(total_features,
-                                              keep_total_features) != 1)
+    # mad_total_features <- mad(total_features)
+    # med_total_features <- median(total_features)
+    # keep_total_features <- c(med_total_features - nmads * mad_total_features,
+    #                          med_total_features + nmads * mad_total_features)
+    filter_on_total_features <- isOutlier(total_features, nmads, type = "lower")
     ## Compute total_counts if counts are present
     if ( !is.null(counts_mat) )
         total_counts <- colSums(counts_mat)
     else
         total_counts <- colSums(exprs_mat)
-    mad_total_counts <- mad(log10(total_counts))
-    med_total_counts <- median(log10(total_counts))
-    keep_total_counts <- c(med_total_counts - nmads * mad_total_counts,
-                           med_total_counts + nmads * mad_total_counts)
-    filter_on_total_counts <- (findInterval(log10(total_counts),
-                                            keep_total_counts) != 1)
+    # mad_total_counts <- mad(log10(total_counts))
+    # med_total_counts <- median(log10(total_counts))
+    # keep_total_counts <- c(med_total_counts - nmads * mad_total_counts,
+    #                        med_total_counts + nmads * mad_total_counts)
+    filter_on_total_counts <- isOutlier(total_counts, nmads, log = TRUE)
 
     ## Define counts from endogenous features
     qc_pdata <- feature_controls_pdata
@@ -539,7 +531,56 @@ a lower count threshold of 0.")
     df_pdata_this
 }
 
+################################################################################
 
+#' Identify if a cell is an outlier based on a metric
+#' 
+#' @param metric numeric or integer vector of values for a metric
+#' @param nmads scalar, number of median-absolute-deviations away from median
+#' required for a value to be called an outlier
+#' @param type character scalar, choice indicate whether outliers should be 
+#' looked for at both tails (default: "both") or only at the lower end ("lower") 
+#' or the higher end ("higher")
+#' @param log logical, should the values of the metric be transformed to the 
+#' log10 scale before computing median-absolute-deviation for outlier detection?
+#' 
+#' @description Convenience function to determine which values for a metric are
+#' outliers based on median-absolute-deviation (MAD).
+#' 
+#' @return a logical vector of the same length as the \code{metric} argument
+#' 
+#' @export
+#' @examples
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' pd <- new("AnnotatedDataFrame", data=sc_example_cell_info)
+#' rownames(pd) <- pd$Cell
+#' example_sceset <- newSCESet(countData=sc_example_counts, phenoData=pd)
+#' example_sceset <- calculateQCMetrics(example_sceset)
+#'
+#' ## with a set of feature controls defined
+#' example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:40)
+#' isOutlier(example_sceset$total_counts, nmads = 3)
+#' 
+isOutlier <- function(metric, nmads = 5, type = c("both", "lower", "higher"), 
+                      log = FALSE) {
+    if (log) {
+        metric <- log10(metric)
+    }
+    cur.med <- median(metric)
+    cur.mad <- mad(metric, center = cur.med)
+
+    type <- match.arg(type)
+    upper.limit <- cur.med + nmads * cur.mad
+    lower.limit <- cur.med - nmads * cur.mad
+    if (type == "lower") {
+        upper.limit <- Inf
+    } else if (type == "higher") {
+        lower.limit <- -Inf
+    }
+
+    return(metric < lower.limit | upper.limit < metric)
+}
 
 ################################################################################
 

@@ -94,3 +94,31 @@ test_that("we can compute normalised expression values with a design matrix", {
     expect_that(example_sceset, is_a("SCESet"))
 })
 
+test_that("we can compute normalise the object", {
+    data("sc_example_counts")
+    data("sc_example_cell_info")
+    pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+    example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+    keep_gene <- rowSums(counts(example_sceset)) > 0
+    example_sceset <- example_sceset[keep_gene,]
+    
+    example_sceset <- normaliseExprs(example_sceset, method = "none", 
+                                     feature_set = 1:100)
+    ## normalize
+    example_sceset <- normalize(example_sceset)
+    expect_that(example_sceset, is_a("SCESet"))
+    
+    ## normalise
+    example_sceset <- normalise(example_sceset)    
+    expect_that(example_sceset, is_a("SCESet"))
+    
+    ## check error if no size factors
+    sizeFactors(example_sceset) <- NULL
+
+    expect_warning(normalize(example_sceset), "have not been set")
+    expect_message(normalize(example_sceset), "No size factors defined")
+    
+})
+
+
+

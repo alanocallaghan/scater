@@ -8,12 +8,12 @@
 \alias{pData<-,SCESet,data.frame-method}
 \title{Replaces phenoData in an SCESet object}
 \usage{
-\S4method{pData}{SCESet,AnnotatedDataFrame}(x) <- value
+\S4method{pData}{SCESet,AnnotatedDataFrame}(object) <- value
 
-\S4method{pData}{SCESet,data.frame}(x) <- value
+\S4method{pData}{SCESet,data.frame}(object) <- value
 }
 \arguments{
-\item{x}{An SCESet object.}
+\item{object}{An SCESet object.}
 
 \item{value}{an AnnotatedDataFrame with updated phenoData to replace
 existing}
