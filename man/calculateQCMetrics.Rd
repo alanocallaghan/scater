@@ -4,8 +4,9 @@
 \alias{calculateQCMetrics}
 \title{Calculate QC metrics}
 \usage{
-calculateQCMetrics(object, feature_controls = NULL, cell_controls = NULL,
-  nmads = 5, pct_feature_controls_threshold = 80)
+calculateQCMetrics(object, feature_controls = NULL,
+  technical_feature_controls = NULL, biological_feature_controls = NULL,
+  cell_controls = NULL, nmads = 5, pct_feature_controls_threshold = 80)
 }
 \arguments{
 \item{object}{an SCESet object containing expression values and
@@ -13,7 +14,18 @@ experimental information. Must have been appropriately prepared.}
 
 \item{feature_controls}{a character vector of feature names, or a logical 
 vector, or a numeric vector of indices used to identify feature controls 
-(for example, ERCC spike-in genes, mitochondrial genes, etc).}
+(for example, ERCC spike-in genes, mitochondrial genes, etc). Treated as 
+technical feature controls and overridden if an argument to 
+\code{technical_feature_controls} is provided.}
+
+\item{technical_feature_controls}{a character vector of feature names, or a 
+logical vector, or a numeric vector of indices used to identify technical 
+feature controls (for example, ERCC spike-in genes). Overrides 
+\code{feature_controls} if both arguments are provided.}
+
+\item{biological_feature_controls}{a character vector of feature names, or a 
+logical vector, or a numeric vector of indices used to identify technical 
+feature controls (for example, mitochondrial genes)}
 
 \item{cell_controls}{a character vector of cell (sample) names, or a logical
 vector, or a numeric vector of indices used to identify cell controls (for
@@ -39,8 +51,9 @@ Calculate QC metrics
 }
 \details{
 Calculate useful quality control metrics to help with pre-processing
-of data and identification of potentially problematic features and cells. The
- following QC metrics are computed:
+of data and identification of potentially problematic features and cells. 
+
+The following QC metrics are computed:
 \describe{
  \item{total_counts:}{Total number of counts for the cell (aka ``library 
  size'')}
@@ -154,5 +167,11 @@ example_sceset <- calculateQCMetrics(example_sceset)
 
 ## with a set of feature controls define
 example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:40)
+
+## with both technical and biological feature controls
+example_sceset <- calculateQCMetrics(example_sceset, 
+technical_feature_controls = list(ERCC = 1:40), 
+biological_feature_controls = list(MT = 50:100))
+
 }
 

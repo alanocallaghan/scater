@@ -18,7 +18,16 @@
 #' experimental information. Must have been appropriately prepared.
 #' @param feature_controls a character vector of feature names, or a logical 
 #' vector, or a numeric vector of indices used to identify feature controls 
-#' (for example, ERCC spike-in genes, mitochondrial genes, etc).
+#' (for example, ERCC spike-in genes, mitochondrial genes, etc). Treated as 
+#' technical feature controls and overridden if an argument to 
+#' \code{technical_feature_controls} is provided.
+#' @param technical_feature_controls a character vector of feature names, or a 
+#' logical vector, or a numeric vector of indices used to identify technical 
+#' feature controls (for example, ERCC spike-in genes). Overrides 
+#' \code{feature_controls} if both arguments are provided.
+#' @param biological_feature_controls a character vector of feature names, or a 
+#' logical vector, or a numeric vector of indices used to identify technical 
+#' feature controls (for example, mitochondrial genes)
 #' @param cell_controls a character vector of cell (sample) names, or a logical
 #' vector, or a numeric vector of indices used to identify cell controls (for
 #' example, blank wells or bulk controls).
@@ -34,8 +43,9 @@
 #' feature controls.
 #'
 #' @details Calculate useful quality control metrics to help with pre-processing
-#' of data and identification of potentially problematic features and cells. The
-#'  following QC metrics are computed:
+#' of data and identification of potentially problematic features and cells. 
+#' 
+#' The following QC metrics are computed:
 #' \describe{
 #'  \item{total_counts:}{Total number of counts for the cell (aka ``library 
 #'  size'')}
@@ -158,7 +168,15 @@
 #'
 #' ## with a set of feature controls define
 #' example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:40)
+#' 
+#' ## with both technical and biological feature controls
+#' example_sceset <- calculateQCMetrics(example_sceset, 
+#' technical_feature_controls = list(ERCC = 1:40), 
+#' biological_feature_controls = list(MT = 50:100))
+#' 
 calculateQCMetrics <- function(object, feature_controls = NULL,
+                               technical_feature_controls = NULL,
+                               biological_feature_controls = NULL,
                                cell_controls = NULL, nmads = 5,
                                pct_feature_controls_threshold = 80) {
     ## We must have an SCESet object
@@ -193,107 +211,26 @@ a lower count threshold of 0.")
     tpm_mat <- tpm(object)
     fpkm_mat <- fpkm(object)
 
-    ## Contributions from control features
-    ### Determine if vector or list
-    if ( is.null(feature_controls) | length(feature_controls) == 0 ) {
-        exprs_feature_controls <- pct_exprs_feature_controls <-
-            rep(0, ncol(object))
-        feature_controls_pdata <- data.frame(exprs_feature_controls,
-                                          pct_exprs_feature_controls)
-        if ( !is.null(counts_mat) ) {
-            counts_feature_controls <- pct_counts_feature_controls <-
-                rep(0, ncol(object))
-            feature_controls_pdata <- cbind(feature_controls_pdata,
-                                         data.frame(counts_feature_controls,
-                                              pct_counts_feature_controls))
-        }
-        if ( !is.null(tpm_mat) ) {
-            tpm_feature_controls <- pct_tpm_feature_controls <-
-                rep(0, ncol(object))
-            feature_controls_pdata <- cbind(feature_controls_pdata,
-                                         data.frame(tpm_feature_controls,
-                                                    pct_tpm_feature_controls))
-        }
-        if ( !is.null(fpkm_mat) ) {
-            fpkm_feature_controls <- pct_fpkm_feature_controls <-
-                rep(0, ncol(object))
-            feature_controls_pdata <- cbind(feature_controls_pdata,
-                                         data.frame(fpkm_feature_controls,
-                                                    pct_fpkm_feature_controls))
-        }
-        is_feature_control <- rep(FALSE, nrow(object))
-        feature_controls_fdata <- data.frame(is_feature_control)
-        n_sets_feature_controls <- 1
-    } else {
-        if ( is.list(feature_controls) ) {
-            feature_controls_list <- feature_controls
-            n_sets_feature_controls <- length(feature_controls)
-        }
-        else {
-            feature_controls_list <- list(feature_controls)
-            n_sets_feature_controls <- 1
-        }
-        ## Cycle through the feature_controls list and add QC info
-        for (i in seq_len(length(feature_controls_list)) ) {
-            gc_set <- feature_controls_list[[i]]
-            set_name <- names(feature_controls_list)[i]
-            if ( is.logical(gc_set) ) {
-                is_feature_control <- gc_set
-                gc_set <- which(gc_set)
-            } else {
-                is_feature_control <- rep(FALSE, nrow(object))
-            }
-            if (is.character(gc_set))
-                gc_set <- which(rownames(object) %in% gc_set)
-            df_pdata_this <- .get_qc_metrics_exprs_mat(
-                exprs_mat, gc_set, pct_feature_controls_threshold,
-                calc_top_features = (n_sets_feature_controls == 1),
-                exprs_type = "exprs")
-            if ( !is.null(counts_mat) ) {
-                df_pdata_counts <- .get_qc_metrics_exprs_mat(
-                    counts_mat, gc_set, pct_feature_controls_threshold,
-                    calc_top_features = (n_sets_feature_controls == 1),
-                    exprs_type = "counts")
-                df_pdata_this <- cbind(df_pdata_this, df_pdata_counts)
-            }
-            if ( !is.null(tpm_mat) ) {
-                df_pdata_tpm <- .get_qc_metrics_exprs_mat(
-                    tpm_mat, gc_set, pct_feature_controls_threshold,
-                    calc_top_features = (n_sets_feature_controls == 1),
-                    exprs_type = "tpm")
-                df_pdata_this <- cbind(df_pdata_this, df_pdata_tpm)
-            }
-            if ( !is.null(fpkm_mat) ) {
-                df_pdata_fpkm <- .get_qc_metrics_exprs_mat(
-                    fpkm_mat, gc_set, pct_feature_controls_threshold,
-                    calc_top_features = (n_sets_feature_controls == 1),
-                    exprs_type = "fpkm")
-                df_pdata_this <- cbind(df_pdata_this, df_pdata_fpkm)
-            }
-            is_feature_control[gc_set] <- TRUE
-            ## Define number of feature controls expressed
-            n_detected_feature_controls <- colSums(is_exprs(object)[gc_set,])
-            df_pdata_this$n_detected_feature_controls <-
-                n_detected_feature_controls
-            if ( n_sets_feature_controls > 1 )
-                colnames(df_pdata_this) <- paste(colnames(df_pdata_this),
-                                                 set_name, sep = "_")
-            if ( exists("feature_controls_pdata") )
-                feature_controls_pdata <- cbind(feature_controls_pdata,
-                                                df_pdata_this)
-            else
-                feature_controls_pdata <- df_pdata_this
-            ## Construct data.frame for fData from this feature control set
-            df_fdata_this <- data.frame(is_feature_control)
-            colnames(df_fdata_this) <- paste(colnames(df_fdata_this), set_name,
-                                          sep = "_")
-            if ( exists("feature_controls_fdata") )
-                feature_controls_fdata <- cbind(feature_controls_fdata,
-                                                df_fdata_this)
-            else
-                feature_controls_fdata <- df_fdata_this
-        }
+    if ( !is.null(technical_feature_controls) ) {
+        if ( !is.null(feature_controls) )
+            warning("Both technical_feature_controls and feature_controls arguments provided, so ignoring feature_controls")
+        feature_controls <- technical_feature_controls
+
     }
+    
+    ## get number of sets of technical feature controls
+    if ( is.list(feature_controls) )
+        n_sets_feature_controls <- length(feature_controls)
+    else
+        n_sets_feature_controls <- 1
+    
+    ## Contributions from technical control features
+    tech_features <- .process_feature_controls(
+        object, feature_controls, pct_feature_controls_threshold, exprs_mat, 
+        counts_mat, tpm_mat, fpkm_mat)
+    feature_controls_pdata <- tech_features$pData
+    feature_controls_fdata <- tech_features$fData
+    
 
     ## Fix column names and define feature controls across all control sets
     if ( n_sets_feature_controls == 1 ) {
@@ -301,6 +238,7 @@ a lower count threshold of 0.")
                                               colnames(feature_controls_pdata))
         colnames(feature_controls_fdata) <- gsub("_$", "",
                                               colnames(feature_controls_fdata))
+        is_feature_control <- apply(feature_controls_fdata, 1, any)        
     } else {
         ## Combine all feature controls
         is_feature_control <- apply(feature_controls_fdata, 1, any)
@@ -333,23 +271,34 @@ a lower count threshold of 0.")
         df_pdata_this$n_detected_feature_controls <- n_detected_feature_controls
         feature_controls_pdata <- cbind(feature_controls_pdata, df_pdata_this)
     }
+    
+    ## get metrics for biological feature controls if present
+    if ( !is.null(biological_feature_controls) ) {
+        if ( is.list(biological_feature_controls) )
+            n_sets_biological_feature_controls <- 
+                length(biological_feature_controls)
+        else
+            n_sets_biological_feature_controls <- 1
+        ## compute metrics
+        biol_features <- .process_feature_controls(
+            object, biological_feature_controls, pct_feature_controls_threshold,
+            exprs_mat, counts_mat, tpm_mat, fpkm_mat, biological = TRUE)
+        biol_feature_controls_pdata <- biol_features$pData
+        biol_feature_controls_fdata <- biol_features$fData
+        feature_controls_pdata <- cbind(
+            feature_controls_pdata, biol_feature_controls_pdata)
+        feature_controls_fdata <- cbind(
+            feature_controls_fdata, biol_feature_controls_fdata)
+    }
 
     ## Compute total_features and find outliers
     total_features <- colSums(is_exprs(object)[!is_feature_control,])
-    # mad_total_features <- mad(total_features)
-    # med_total_features <- median(total_features)
-    # keep_total_features <- c(med_total_features - nmads * mad_total_features,
-    #                          med_total_features + nmads * mad_total_features)
     filter_on_total_features <- isOutlier(total_features, nmads, type = "lower")
     ## Compute total_counts if counts are present
     if ( !is.null(counts_mat) )
         total_counts <- colSums(counts_mat)
     else
         total_counts <- colSums(exprs_mat)
-    # mad_total_counts <- mad(log10(total_counts))
-    # med_total_counts <- median(log10(total_counts))
-    # keep_total_counts <- c(med_total_counts - nmads * mad_total_counts,
-    #                        med_total_counts + nmads * mad_total_counts)
     filter_on_total_counts <- isOutlier(total_counts, nmads, log = TRUE)
 
     ## Define counts from endogenous features
@@ -440,6 +389,16 @@ a lower count threshold of 0.")
     new_pdata <- cbind(new_pdata, qc_pdata, cell_controls_pdata)
     pData(object) <-  new("AnnotatedDataFrame", new_pdata)
 
+    ## indicate if feature is feature control across any set
+    ## here use technical feature controls
+    if ( is.list(feature_controls) ) {
+        feat_controls_cols <- grep("^is_feature_control",
+                                   colnames(feature_controls_fdata))
+        feature_controls_fdata$is_feature_control <- (
+            rowSums(feature_controls_fdata[, feat_controls_cols, drop = FALSE])
+            > 0)
+    }
+    
     ## Add feature-level QC metrics to fData
     new_fdata <- as.data.frame(fData(object))
     ### Remove columns that are to be replaced
@@ -455,14 +414,8 @@ a lower count threshold of 0.")
         log10(new_fdata$total_feature_exprs + 1)
     new_fdata$pct_total_exprs <- 100 * rowSums(exprs_mat) / total_exprs
     new_fdata$pct_dropout <- 100 * rowSums(!is_exprs(object)) / ncol(object)
-    ## indicate if feature is feature control across any set
-    if ( is.list(feature_controls) ) {
-        feat_controls_cols <- grep("^is_feature_control",
-                                   colnames(feature_controls_fdata))
-        feature_controls_fdata$is_feature_control <- (
-            rowSums(feature_controls_fdata[, feat_controls_cols, drop = FALSE])
-            > 0)
-    }
+   
+ 
 
     if ( !is.null(counts_mat) ) {
         total_counts <- sum(counts_mat)
@@ -493,6 +446,7 @@ a lower count threshold of 0.")
     sampleNames(object) <- colnames(exprs(object))
     object
 }
+
 
 .get_qc_metrics_exprs_mat <- function(exprs_mat, is_feature_control,
                                            pct_feature_controls_threshold,
@@ -530,6 +484,97 @@ a lower count threshold of 0.")
     colnames(df_pdata_this) <- gsub("exprs", exprs_type, colnames(df_pdata_this))
     df_pdata_this
 }
+
+.process_feature_controls <- function(object, feature_controls, 
+                                      pct_feature_controls_threshold,
+                                      exprs_mat, counts_mat = NULL, 
+                                      tpm_mat = NULL, fpkm_mat = NULL, 
+                                      biological = FALSE) {
+    ## Take a vector or list of feature_controls and process them to return 
+    ## new pData and fData in a list
+    
+    ## determine if vector or list
+    if ( is.list(feature_controls) ) {
+        feature_controls_list <- feature_controls
+        n_sets_feature_controls <- length(feature_controls)
+    }
+    else {
+        feature_controls_list <- list(feature_controls)
+        n_sets_feature_controls <- 1
+    }
+    ## Cycle through the feature_controls list and add QC info
+    for (i in seq_len(length(feature_controls_list)) ) {
+        gc_set <- feature_controls_list[[i]]
+        set_name <- names(feature_controls_list)[i]
+        if ( is.logical(gc_set) ) {
+            is_feature_control <- gc_set
+            gc_set <- which(gc_set)
+        } else {
+            is_feature_control <- rep(FALSE, nrow(object))
+        }
+        if (is.character(gc_set))
+            gc_set <- which(rownames(object) %in% gc_set)
+        df_pdata_this <- .get_qc_metrics_exprs_mat(
+            exprs_mat, gc_set, pct_feature_controls_threshold,
+            calc_top_features = (n_sets_feature_controls == 1 && !biological),
+            exprs_type = "exprs")
+        if ( !is.null(counts_mat) ) {
+            df_pdata_counts <- .get_qc_metrics_exprs_mat(
+                counts_mat, gc_set, pct_feature_controls_threshold,
+                calc_top_features = (n_sets_feature_controls == 1 && !biological),
+                exprs_type = "counts")
+            df_pdata_this <- cbind(df_pdata_this, df_pdata_counts)
+        }
+        if ( !is.null(tpm_mat) ) {
+            df_pdata_tpm <- .get_qc_metrics_exprs_mat(
+                tpm_mat, gc_set, pct_feature_controls_threshold,
+                calc_top_features = (n_sets_feature_controls == 1 && !biological),
+                exprs_type = "tpm")
+            df_pdata_this <- cbind(df_pdata_this, df_pdata_tpm)
+        }
+        if ( !is.null(fpkm_mat) ) {
+            df_pdata_fpkm <- .get_qc_metrics_exprs_mat(
+                fpkm_mat, gc_set, pct_feature_controls_threshold,
+                calc_top_features = (n_sets_feature_controls == 1 && !biological),
+                exprs_type = "fpkm")
+            df_pdata_this <- cbind(df_pdata_this, df_pdata_fpkm)
+        }
+        is_feature_control[gc_set] <- TRUE
+        ## Define number of feature controls expressed
+        n_detected_feature_controls <- colSums(is_exprs(object)[gc_set,])
+        df_pdata_this$n_detected_feature_controls <-
+            n_detected_feature_controls
+        if ( n_sets_feature_controls > 1 )
+            colnames(df_pdata_this) <- paste(colnames(df_pdata_this),
+                                             set_name, sep = "_")
+        if ( exists("feature_controls_pdata") )
+            feature_controls_pdata <- cbind(feature_controls_pdata,
+                                            df_pdata_this)
+        else
+            feature_controls_pdata <- df_pdata_this
+        ## Construct data.frame for fData from this feature control set
+        df_fdata_this <- data.frame(is_feature_control)
+        colnames(df_fdata_this) <- paste(colnames(df_fdata_this), set_name,
+                                         sep = "_")
+        if ( exists("feature_controls_fdata") )
+            feature_controls_fdata <- cbind(feature_controls_fdata,
+                                            df_fdata_this)
+        else
+            feature_controls_fdata <- df_fdata_this
+    }
+    if ( biological ) {
+        colnames(feature_controls_fdata) <- gsub("feature_control", 
+                                                 "biological_feature_control",
+                                                 colnames(feature_controls_fdata))
+        colnames(feature_controls_pdata) <- gsub("feature_control", 
+                                                 "biological_feature_control",
+                                                 colnames(feature_controls_pdata))
+    }    
+    out <- list(pData = feature_controls_pdata, fData = feature_controls_fdata)
+    out
+}
+    
+
 
 ################################################################################
 
@@ -1331,7 +1376,7 @@ plotExprsFreqVsMean <- function(object, feature_set = NULL,
             # expression at 50% dropout
             annotate("text", x = text_x_loc, y = 60, label = paste(
                 sum(mn_vs_fq[!feature_controls_logical, "mn"] > coef(dropout)),
-                " genes above\nhigh technical dropout", sep = "")) +
+                " genes with\nhigh technical dropout", sep = "")) +
             annotate("text", x = text_x_loc, y = 40, label =  paste(
                 sum(mn_vs_fq$fq >= 0.5),
                 " genes are expressed\nin at least 50% of cells", sep = "" )) +
