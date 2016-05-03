@@ -9,7 +9,7 @@ Authors@R: c(person("Davis", "McCarthy", role=c("aut", "cre"),
         email="kieran.campbell@sjc.ox.ac.uk"),  person("Vladimir",
         "Kiselev", role=c("ctb"),
         email="vk6@sanger.ac.uk"))
-Version: 1.0.0
+Version: 1.1.0
 Date: 2016-04-29
 License: GPL (>= 2)
 Title: Single-cell analysis toolkit for gene expression data in R
