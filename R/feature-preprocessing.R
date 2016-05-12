@@ -71,6 +71,8 @@ getBMFeatureAnnos <- function(object, filters="ensembl_transcript_id",
                                   host = host) 
     ## Define feature IDs from SCESet object
     feature_ids <- featureNames(object)
+    ## Remove transcript ID artifacts from runKallisto (eg. ENSMUST00000201087.11 -> ENSMUST00000201087)
+    feature_ids <- gsub(pattern = "\\.[0-9]+", replacement = "", x = feature_ids)
     ## Get annotations from biomaRt
     feature_info <- biomaRt::getBM(attributes = attributes, 
                                    filters = filters, 
