@@ -8,11 +8,16 @@ test_that("Mutate correctly adds column name to pData", {
   data("sc_example_cell_info")
   pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
   example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+  snames <- paste0("sample", 1:ncol(example_sceset))
+  sampleNames(example_sceset) <- snames
+  
   example_sceset <- mutate(example_sceset, New_CC = Cell_Cycle)
+  
   
   expect_that(example_sceset, is_a("SCESet"))
   expect_true("New_CC" %in% varLabels(example_sceset))  
   expect_equal(example_sceset$Cell_Cycle, example_sceset$New_CC)
+  expect_equal(sampleNames(example_sceset), snames)
 })
 
 
@@ -23,6 +28,9 @@ test_that("Rename correctly renames columns", {
   data("sc_example_cell_info")
   pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
   example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+  snames <- paste0("sample", 1:ncol(example_sceset))
+  sampleNames(example_sceset) <- snames
+  
   
   old_cc <- example_sceset$Cell_Cycle
   example_sceset <- rename(example_sceset, Cell_Phase = Cell_Cycle)
@@ -31,6 +39,7 @@ test_that("Rename correctly renames columns", {
   expect_true("Cell_Phase" %in% varLabels(example_sceset))
   expect_false("Cell_Cycle" %in% varLabels(example_sceset))
   expect_equal(example_sceset$Cell_Phase, old_cc)
+  expect_equal(sampleNames(example_sceset), snames)
 })
 
 

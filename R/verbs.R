@@ -30,7 +30,9 @@ setMethod("mutate", signature(object = "SCESet"),
 #' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 #' example_sceset <- mutate(example_sceset, is_quiescent = Cell_Cycle == "G0")
 mutate.SCESet <- function(object, ...) {
-  pData(object) <- dplyr::mutate(pData(object), ...)
+  pd <- dplyr::mutate(pData(object), ...)
+  rownames(pd) <- sampleNames(object)
+  pData(object) <- pd
   return( object )
 }
 
@@ -61,7 +63,9 @@ setMethod("rename", signature(object = "SCESet"),
 #' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 #' example_sceset <- rename(example_sceset, Cell_Phase = Cell_Cycle)
 rename.SCESet <- function(object, ...) {
-  pData(object) <- dplyr::rename(pData(object), ...)
+  pd <- dplyr::rename(pData(object), ...)
+  rownames(pd) <- sampleNames(object)
+  pData(object) <- pd
   return( object )
 }
 
