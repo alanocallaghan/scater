@@ -387,6 +387,7 @@ readKallistoResults <- function(kallisto_log = NULL, samples = NULL,
             tpm[,i] <- tmp_samp$abundance$tpm
         ## run info
         pdata$n_targets[i] <- tmp_samp$run_info$n_targets
+        pdata$n_processed[i] <- tmp_samp$run_info$n_processed
         pdata$n_bootstraps[i] <- tmp_samp$run_info$n_bootstraps
         pdata$kallisto_version[i] <- tmp_samp$run_info$kallisto_version
         pdata$index_version[i] <- tmp_samp$run_info$index_version

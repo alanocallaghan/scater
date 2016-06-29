@@ -36,6 +36,10 @@
 # Get nice plotting colour schemes for very general colour variables
 .resolve_plot_colours <- function(plot_out, colour_by, colour_by_name,
                                   fill = FALSE) {
+    ## if the colour_by object is NULL, return the plot_out object unchanged
+    if ( is.null(colour_by) )
+        return(plot_out)
+    ## Otherwise, set a sensible colour scheme and return the plot_out object
     if ( fill ) {
         if ( is.numeric(colour_by) ) {
             plot_out <- plot_out +
@@ -485,14 +489,12 @@ plotPCASCESet <- function(object, ntop=500, ncomponents=2,
         exprs_to_plot <- scale(fData(object)[, use_variable],
                                scale = scale_features)
     } else {
+        # Subsetting to the desired features (do NOT move below 'scale()')
+        exprs_to_plot <- exprs_mat[feature_set,,drop=FALSE]
         ## Standardise expression if scale_features argument is TRUE
-        exprs_to_plot <- scale(t(exprs_mat), scale = scale_features)
+        exprs_to_plot <- scale(t(exprs_to_plot), scale = scale_features)
     }
 
-    ## select subset of features, if relevant
-    if ( pca_data_input != "pdata" && pca_data_input != "fdata") {
-        exprs_to_plot <- exprs_to_plot[, feature_set]
-    }
     ## Drop any features with zero variance
     keep_feature <- (matrixStats::colVars(exprs_to_plot) > 0.001)
     keep_feature[is.na(keep_feature)] <- FALSE
@@ -1840,11 +1842,21 @@ plotExpressionDefault <- function(object, aesth, ncol=2, xlab = NULL,
         facet_wrap(~Feature, ncol = ncol, scales = 'free_y') +
         xlab(xlab) +
         ylab(ylab)
-    plot_out <- .resolve_plot_colours(plot_out,
-                                      object[[as.character(aesth$colour)]],
-                                      as.character(aesth$colour))
-    plot_out <- plot_out +
-        geom_jitter(alpha = 0.6, position = position_jitter(height = 0))
+    
+    ## if colour aesthetic is defined, then choose sensible colour palette
+    if ( !is.null(aesth$colour) )
+        plot_out <- .resolve_plot_colours(plot_out,
+                                          object[[as.character(aesth$colour)]],
+                                          as.character(aesth$colour))
+
+    ## if x axis variable is not numeric, then jitter points horizontally
+    if ( is.numeric(aesth$x) ) 
+        plot_out <- plot_out + geom_jitter(alpha = 0.6)
+    else 
+        plot_out <- plot_out + geom_jitter(alpha = 0.6, 
+                                           position = position_jitter(height = 0))
+    
+    ## show optional decorations on plot if desired
     if (show_violin) {
         plot_out <- plot_out + geom_violin(colour = "gray60", alpha = 0.3,
                                            fill = "gray80", scale = "width")

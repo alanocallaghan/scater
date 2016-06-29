@@ -78,12 +78,12 @@ values could also be values from a single cell qPCR run or some other type of
 
  An \code{SCESet} object has to have the \code{'exprs'} slot defined, so if
  the \code{exprsData} argument is \code{NULL}, then this function will define
- \code{'exprs'} with the following order of precedence: log2(TPM + 
- logExprsOffset), if \code{tpmData} is defined; log2(FPKM + logExprsOffset) 
- if \code{fpkmData} is defined; otherwise log2(counts-per-million + 
- logExprsOffset) are used. The \code{\link[edgeR]{cpm}} function from the 
- edgeR package is used to compte \code{cpm}. Note that for many analyses 
- counts-per-million are not recommended, and if possible 
+ \code{'exprs'} with the following order of precedence: log2(TPM +
+ logExprsOffset), if \code{tpmData} is defined; log2(FPKM + logExprsOffset)
+ if \code{fpkmData} is defined; otherwise log2(counts-per-million +
+ logExprsOffset) are used. The \code{\link[edgeR]{cpm}} function from the
+ edgeR package is used to compte \code{cpm}. Note that for many analyses
+ counts-per-million are not recommended, and if possible
  transcripts-per-million should be used.
 
  In many downstream functions you will likely find it most convenient if the

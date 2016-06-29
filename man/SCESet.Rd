@@ -38,6 +38,10 @@ SCESet.
    reduced-dimension coordinates for cells (generated, for example, by PCA).}
    \item{\code{bootstraps}:}{Array of class \code{"numeric"} that can contain
    bootstrap estimates of the expression or count values.}
+   \item{\code{featureControlInfo}:}{Data frame of class 
+   \code{"AnnotatedDataFrame"} that can contain information/metadata about 
+   sets of control features defined for the \code{SCESet} object.
+   bootstrap estimates of the expression or count values.}
    \item{\code{useForExprs}:}{Character string (one of 'exprs','tpm','counts' or 'fpkm') indicating 
    which expression representation both internal methods and external packages should use. 
    Defaults to 'exprs'.}

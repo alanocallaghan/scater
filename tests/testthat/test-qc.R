@@ -38,37 +38,6 @@ test_that("we can compute standard QC metrics with multiple sets of feature and
 })
 
 
-test_that("we can compute standard QC metrics with multiple sets of technical 
-features, biological features and cell controls", {
-              data("sc_example_counts")
-              data("sc_example_cell_info")
-              pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-              example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-              example_sceset <- calculateQCMetrics(
-                  example_sceset, 
-                  technical_feature_controls = list(controls1 = 1:20, 
-                                                    controls2 = 500:1000),
-                  biological_feature_controls = 100:200,
-                  cell_controls = list(set_1 = 1:5, set_2 = 31:40))
-              
-              expect_that(example_sceset, is_a("SCESet"))
-              
-              example_sceset <- calculateQCMetrics(
-                  example_sceset, 
-                  technical_feature_controls = list(controls1 = 1:20, 
-                                                    controls2 = 500:1000),
-                  biological_feature_controls = list(biol1 = 100:200, 
-                                                     biol2 = 250:300),
-                  cell_controls = list(set_1 = 1:5, set_2 = 31:40))
-              
-              expect_that(example_sceset, is_a("SCESet"))
-              
-              example_sceset <- calculateQCMetrics(
-                  example_sceset, technical_feature_controls = list(ERCC = 1:40), 
-                  biological_feature_controls = list(MT = 50:100))
-          })
-
-
 test_that("failure is as expected for misspecified arg to plotExplanatoryVariables()", {
     data("sc_example_counts")
     data("sc_example_cell_info")
@@ -83,6 +52,7 @@ test_that("failure is as expected for input with zero-variance features", {
     data("sc_example_cell_info")
     pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
     example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+    exprs(example_sceset)[1:5,] <- 0
     err_string <- "Some features have zero variance"
     expect_error(plotExplanatoryVariables(example_sceset, "density"), err_string)
 })

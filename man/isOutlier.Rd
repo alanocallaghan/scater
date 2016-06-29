@@ -5,7 +5,7 @@
 \title{Identify if a cell is an outlier based on a metric}
 \usage{
 isOutlier(metric, nmads = 5, type = c("both", "lower", "higher"),
-  log = FALSE)
+  log = FALSE, na.rm = FALSE)
 }
 \arguments{
 \item{metric}{numeric or integer vector of values for a metric}
@@ -19,6 +19,10 @@ or the higher end ("higher")}
 
 \item{log}{logical, should the values of the metric be transformed to the 
 log10 scale before computing median-absolute-deviation for outlier detection?}
+
+\item{na.rm}{logical, should NA (missing) values be removed before computing
+median and median-absolute-deviation values? If \code{FALSE} then return 
+values for median and median-absolute-deviation will be NA if any value is NA.}
 }
 \value{
 a logical vector of the same length as the \code{metric} argument

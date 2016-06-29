@@ -16,18 +16,10 @@
 #'
 #' @param object an SCESet object containing expression values and
 #' experimental information. Must have been appropriately prepared.
-#' @param feature_controls a character vector of feature names, or a logical 
-#' vector, or a numeric vector of indices used to identify feature controls 
-#' (for example, ERCC spike-in genes, mitochondrial genes, etc). Treated as 
-#' technical feature controls and overridden if an argument to 
-#' \code{technical_feature_controls} is provided.
-#' @param technical_feature_controls a character vector of feature names, or a 
-#' logical vector, or a numeric vector of indices used to identify technical 
-#' feature controls (for example, ERCC spike-in genes). Overrides 
-#' \code{feature_controls} if both arguments are provided.
-#' @param biological_feature_controls a character vector of feature names, or a 
-#' logical vector, or a numeric vector of indices used to identify technical 
-#' feature controls (for example, mitochondrial genes)
+#' @param feature_controls a named list containing one or more vectors 
+#' (character vector of feature names, logical vector, or a numeric vector of
+#' indices are all acceptable) used to identify feature controls 
+#' (for example, ERCC spike-in genes, mitochondrial genes, etc). 
 #' @param cell_controls a character vector of cell (sample) names, or a logical
 #' vector, or a numeric vector of indices used to identify cell controls (for
 #' example, blank wells or bulk controls).
@@ -166,17 +158,14 @@
 #' example_sceset <- newSCESet(countData=sc_example_counts, phenoData=pd)
 #' example_sceset <- calculateQCMetrics(example_sceset)
 #'
-#' ## with a set of feature controls define
+#' ## with a set of feature controls defined
 #' example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:40)
 #' 
-#' ## with both technical and biological feature controls
+#' ## with a named set of feature controls defined
 #' example_sceset <- calculateQCMetrics(example_sceset, 
-#' technical_feature_controls = list(ERCC = 1:40), 
-#' biological_feature_controls = list(MT = 50:100))
+#'                                      feature_controls = list(ERCC = 1:40))
 #' 
 calculateQCMetrics <- function(object, feature_controls = NULL,
-                               technical_feature_controls = NULL,
-                               biological_feature_controls = NULL,
                                cell_controls = NULL, nmads = 5,
                                pct_feature_controls_threshold = 80) {
     ## We must have an SCESet object
@@ -190,60 +179,54 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     ## Compute cell-level metrics
     if ( is.null(is_exprs(object)) ) {
         if (is.null(counts(object))) {
-            stop("Please define is_exprs(object).
-                 E.g. use is_exprs(object) <- exprs(object) > 0.1")
-        } else {
-            warning("is_exprs(object) is null.
-Defining 'is_exprs' using count data and
-a lower count threshold of 0.")
-            isexprs <- calcIsExprs(object, lowerDetectionLimit = 0)
-            rownames(isexprs) <- rownames(counts(object))
-            colnames(isexprs) <- colnames(counts(object))
-            is_exprs(object) <- isexprs
+            stop("need either is_exprs(object) or counts(object) to be defined,
+  e.g., use `is_exprs(object) <- exprs(object) > 0.1`")
         }
     }
 
     ## See what versions of the expression data are available in the object
     exprs_mat <- exprs(object)
-    if ( object@logged )
-        exprs_mat <- 2 ^ exprs_mat - object@logExprsOffset
     counts_mat <- counts(object)
     tpm_mat <- tpm(object)
     fpkm_mat <- fpkm(object)
-
-    if ( !is.null(technical_feature_controls) ) {
-        if ( !is.null(feature_controls) )
-            warning("Both technical_feature_controls and feature_controls arguments provided, so ignoring feature_controls")
-        feature_controls <- technical_feature_controls
-
+  
+    ## get number of sets of feature controls, and name them
+    if ( is.null(feature_controls) ) {
+        feature_controls <- list()
+    } else if ( !is.list(feature_controls) ) {
+        feature_controls <- list(feature_controls) 
+    } 
+    n_sets_feature_controls <- length(feature_controls)
+    counter <- 1L
+    for (i in seq_len(n_sets_feature_controls)) {
+        curname <- names(feature_controls)[i]
+        if (is.null(curname) || curname=="") {
+            names(feature_controls)[i] <- paste0("unnamed", counter)
+            counter <- counter + 1L
+        }
     }
+    object@featureControlInfo <- AnnotatedDataFrame(
+        data.frame(name=names(feature_controls), stringsAsFactors=FALSE)
+    )
     
-    ## get number of sets of technical feature controls
-    if ( is.list(feature_controls) )
-        n_sets_feature_controls <- length(feature_controls)
-    else
-        n_sets_feature_controls <- 1
-    
-    ## Contributions from technical control features
-    tech_features <- .process_feature_controls(
-        object, feature_controls, pct_feature_controls_threshold, exprs_mat, 
-        counts_mat, tpm_mat, fpkm_mat)
-    feature_controls_pdata <- tech_features$pData
-    feature_controls_fdata <- tech_features$fData
-    
-
-    ## Fix column names and define feature controls across all control sets
-    if ( n_sets_feature_controls == 1 ) {
-        colnames(feature_controls_pdata) <- gsub("_$", "",
-                                              colnames(feature_controls_pdata))
-        colnames(feature_controls_fdata) <- gsub("_$", "",
-                                              colnames(feature_controls_fdata))
-        is_feature_control <- apply(feature_controls_fdata, 1, any)        
-    } else {
+    if (n_sets_feature_controls) {
+        ## Contributions from technical control features
+        tech_features <- .process_feature_controls(
+            object, feature_controls, pct_feature_controls_threshold, exprs_mat, 
+            counts_mat, tpm_mat, fpkm_mat)
+        feature_controls_pdata <- tech_features$pData
+        feature_controls_fdata <- tech_features$fData
+       
         ## Combine all feature controls
         is_feature_control <- apply(feature_controls_fdata, 1, any)
         feature_controls_fdata <- cbind(feature_controls_fdata,
                                         is_feature_control)
+    } else {
+        is_feature_control <- logical(nrow(object))
+        feature_controls_fdata <- data.frame(is_feature_control)
+        feature_controls_pdata <- data.frame(matrix(0, nrow=ncol(object), ncol=0))
+    }
+
         ## Compute metrics using all feature controls
         df_pdata_this <- .get_qc_metrics_exprs_mat(
             exprs_mat, is_feature_control, pct_feature_controls_threshold,
@@ -266,33 +249,13 @@ a lower count threshold of 0.")
                 calc_top_features = TRUE, exprs_type = "fpkm")
             df_pdata_this <- cbind(df_pdata_this, df_pdata_fpkm)
         }
-        n_detected_feature_controls <- colSums(
-            is_exprs(object)[is_feature_control,])
+        n_detected_feature_controls <- nexprs(object, 
+            subset.row = is_feature_control) 
         df_pdata_this$n_detected_feature_controls <- n_detected_feature_controls
         feature_controls_pdata <- cbind(feature_controls_pdata, df_pdata_this)
-    }
-    
-    ## get metrics for biological feature controls if present
-    if ( !is.null(biological_feature_controls) ) {
-        if ( is.list(biological_feature_controls) )
-            n_sets_biological_feature_controls <- 
-                length(biological_feature_controls)
-        else
-            n_sets_biological_feature_controls <- 1
-        ## compute metrics
-        biol_features <- .process_feature_controls(
-            object, biological_feature_controls, pct_feature_controls_threshold,
-            exprs_mat, counts_mat, tpm_mat, fpkm_mat, biological = TRUE)
-        biol_feature_controls_pdata <- biol_features$pData
-        biol_feature_controls_fdata <- biol_features$fData
-        feature_controls_pdata <- cbind(
-            feature_controls_pdata, biol_feature_controls_pdata)
-        feature_controls_fdata <- cbind(
-            feature_controls_fdata, biol_feature_controls_fdata)
-    }
 
     ## Compute total_features and find outliers
-    total_features <- colSums(is_exprs(object)[!is_feature_control,])
+    total_features <-  nexprs(object, subset.row = !is_feature_control) 
     filter_on_total_features <- isOutlier(total_features, nmads, type = "lower")
     ## Compute total_counts if counts are present
     if ( !is.null(counts_mat) )
@@ -318,8 +281,10 @@ a lower count threshold of 0.")
             feature_controls_pdata$fpkm_feature_controls
     }
     ## Define log10 read counts from feature controls
-    cols_to_log <- grep("^counts_|^exprs_|^tpm_|^fpkm_",
-                        colnames(qc_pdata))
+    cols_to_log <- grep("^counts_|^tpm_|^fpkm_", colnames(qc_pdata))
+    if ( !object@logged ) {
+        cols_to_log <- c(cols_to_log, grep("^exprs_", colnames(qc_pdata)))
+    }
     log10_cols <- log10(qc_pdata[, cols_to_log, drop = FALSE] + 1)
     colnames(log10_cols) <- paste0("log10_", colnames(qc_pdata)[cols_to_log])
     ## Combine into a big pdata object
@@ -355,7 +320,7 @@ a lower count threshold of 0.")
             ## Construct data.frame for pData from this feature control set
             is_cell_control <- as.data.frame(is_cell_control)
             colnames(is_cell_control) <- paste0("is_cell_control_", set_name)
-            if ( exists("cell_controls_pdata") ) {
+            if ( i > 1L ) {
                 cell_controls_pdata <- data.frame(cell_controls_pdata,
                                                   is_cell_control)
             } else
@@ -385,7 +350,7 @@ a lower count threshold of 0.")
     new_pdata$total_features <- total_features
     new_pdata$log10_total_features <- log10(total_features)
     new_pdata$filter_on_total_features <- filter_on_total_features
-    new_pdata$pct_dropout <- 100 * colSums(!is_exprs(object)) / nrow(object)
+    new_pdata$pct_dropout <- 100 / nrow(object) * nexprs(object, subset.row = NULL)
     new_pdata <- cbind(new_pdata, qc_pdata, cell_controls_pdata)
     pData(object) <-  new("AnnotatedDataFrame", new_pdata)
 
@@ -407,18 +372,19 @@ a lower count threshold of 0.")
     ### Add new QC information
     new_fdata$mean_exprs <- rowMeans(exprs(object))
     new_fdata$exprs_rank <- rank(rowMeans(exprs(object)))
-    new_fdata$n_cells_exprs <- rowSums(is_exprs(object))
+    new_fdata$n_cells_exprs <- nexprs(object, byrow = TRUE)
     total_exprs <- sum(exprs_mat)
     new_fdata$total_feature_exprs <- rowSums(exprs_mat)
-    new_fdata$log10_total_feature_exprs <-
-        log10(new_fdata$total_feature_exprs + 1)
+    if ( ! object@logged ) {
+        new_fdata$log10_total_feature_exprs <-
+            log10(new_fdata$total_feature_exprs + 1)
+    }
     new_fdata$pct_total_exprs <- 100 * rowSums(exprs_mat) / total_exprs
-    new_fdata$pct_dropout <- 100 * rowSums(!is_exprs(object)) / ncol(object)
-   
- 
+    new_fdata$pct_dropout <- 100 * (1 - new_fdata$n_cells_exprs / ncol(object))
+  
 
     if ( !is.null(counts_mat) ) {
-        total_counts <- sum(counts_mat)
+        total_counts <- sum(as.double(colSums(counts_mat))) # avoid integer overflow
         new_fdata$total_feature_counts <- rowSums(counts_mat)
         new_fdata$log10_total_feature_counts <-
             log10(new_fdata$total_feature_counts + 1)
@@ -455,7 +421,11 @@ a lower count threshold of 0.")
     ## Many thanks to Aaron Lun for suggesting efficiency improvements
     ## for this function.
     ## Get total expression from feature controls
-    exprs_feature_controls <- colSums(exprs_mat[is_feature_control,])
+    if (is.logical(is_feature_control)) { 
+        is_feature_control <- which(is_feature_control) 
+    }
+    exprs_feature_controls <- .checkedCall(cxx_colsum_subset, exprs_mat, 
+                                           is_feature_control)
     ## Get % expression from feature controls
     pct_exprs_feature_controls <- (100 * exprs_feature_controls /
                                          colSums(exprs_mat))
@@ -469,16 +439,10 @@ a lower count threshold of 0.")
     if (calc_top_features) { ## Do we want to calculate exprs accounted for by
         ## top features?
         ## Determine percentage of counts for top features by cell
-        pct_exprs_top_out <- rep(list(list()), ncol(exprs_mat))
-        for (cell in seq_along(pct_exprs_top_out)) {
-            exprs_by_cell_sorted <- sort(exprs_mat[,cell], decreasing = TRUE)
-            pct_exprs_top <- cumsum(exprs_by_cell_sorted[1:500]) / 
-                sum(exprs_by_cell_sorted) * 100
-            pct_exprs_top_out[[cell]] <- pct_exprs_top[c(50, 100, 200)]
-        }
-        pct_exprs_top_out <- do.call(rbind, pct_exprs_top_out)
+        top.number <- c(50L, 100L, 200L)
+        pct_exprs_top_out <- .checkedCall(cxx_calc_top_features, exprs_mat, top.number)
         colnames(pct_exprs_top_out) <- paste0("pct_exprs_top_",
-                                              c(50, 100, 200), "_features")
+                                              top.number, "_features")
         df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_out)
     }
     colnames(df_pdata_this) <- gsub("exprs", exprs_type, colnames(df_pdata_this))
@@ -488,8 +452,7 @@ a lower count threshold of 0.")
 .process_feature_controls <- function(object, feature_controls, 
                                       pct_feature_controls_threshold,
                                       exprs_mat, counts_mat = NULL, 
-                                      tpm_mat = NULL, fpkm_mat = NULL, 
-                                      biological = FALSE) {
+                                      tpm_mat = NULL, fpkm_mat = NULL) {
     ## Take a vector or list of feature_controls and process them to return 
     ## new pData and fData in a list
     
@@ -516,38 +479,38 @@ a lower count threshold of 0.")
             gc_set <- which(rownames(object) %in% gc_set)
         df_pdata_this <- .get_qc_metrics_exprs_mat(
             exprs_mat, gc_set, pct_feature_controls_threshold,
-            calc_top_features = (n_sets_feature_controls == 1 && !biological),
+            calc_top_features = (n_sets_feature_controls == 1),
             exprs_type = "exprs")
         if ( !is.null(counts_mat) ) {
             df_pdata_counts <- .get_qc_metrics_exprs_mat(
                 counts_mat, gc_set, pct_feature_controls_threshold,
-                calc_top_features = (n_sets_feature_controls == 1 && !biological),
+                calc_top_features = (n_sets_feature_controls == 1),
                 exprs_type = "counts")
             df_pdata_this <- cbind(df_pdata_this, df_pdata_counts)
         }
         if ( !is.null(tpm_mat) ) {
             df_pdata_tpm <- .get_qc_metrics_exprs_mat(
                 tpm_mat, gc_set, pct_feature_controls_threshold,
-                calc_top_features = (n_sets_feature_controls == 1 && !biological),
+                calc_top_features = (n_sets_feature_controls == 1),
                 exprs_type = "tpm")
             df_pdata_this <- cbind(df_pdata_this, df_pdata_tpm)
         }
         if ( !is.null(fpkm_mat) ) {
             df_pdata_fpkm <- .get_qc_metrics_exprs_mat(
                 fpkm_mat, gc_set, pct_feature_controls_threshold,
-                calc_top_features = (n_sets_feature_controls == 1 && !biological),
+                calc_top_features = (n_sets_feature_controls == 1),
                 exprs_type = "fpkm")
             df_pdata_this <- cbind(df_pdata_this, df_pdata_fpkm)
         }
         is_feature_control[gc_set] <- TRUE
         ## Define number of feature controls expressed
-        n_detected_feature_controls <- colSums(is_exprs(object)[gc_set,])
+        n_detected_feature_controls <- nexprs(object, subset.row = gc_set)
         df_pdata_this$n_detected_feature_controls <-
             n_detected_feature_controls
-        if ( n_sets_feature_controls > 1 )
+#        if ( n_sets_feature_controls > 1 )
             colnames(df_pdata_this) <- paste(colnames(df_pdata_this),
                                              set_name, sep = "_")
-        if ( exists("feature_controls_pdata") )
+        if ( i > 1L )  
             feature_controls_pdata <- cbind(feature_controls_pdata,
                                             df_pdata_this)
         else
@@ -556,25 +519,109 @@ a lower count threshold of 0.")
         df_fdata_this <- data.frame(is_feature_control)
         colnames(df_fdata_this) <- paste(colnames(df_fdata_this), set_name,
                                          sep = "_")
-        if ( exists("feature_controls_fdata") )
+        if ( i > 1L ) 
             feature_controls_fdata <- cbind(feature_controls_fdata,
                                             df_fdata_this)
         else
             feature_controls_fdata <- df_fdata_this
     }
-    if ( biological ) {
-        colnames(feature_controls_fdata) <- gsub("feature_control", 
-                                                 "biological_feature_control",
-                                                 colnames(feature_controls_fdata))
-        colnames(feature_controls_pdata) <- gsub("feature_control", 
-                                                 "biological_feature_control",
-                                                 colnames(feature_controls_pdata))
-    }    
     out <- list(pData = feature_controls_pdata, fData = feature_controls_fdata)
     out
 }
-    
 
+.get_feature_control_names <- function(object) {
+    object@featureControlInfo$name
+}
+
+
+#' Count the number of expressed genes per cell
+#' 
+#' 
+#' @param object an \code{SCESet} object
+#' @param threshold numeric scalar providing the value above which observations
+#' are deemed to be expressed. Defaults to \code{object@lowerDetectionLimit}.
+#' @param subset.row logical or character vector indicating which rows 
+#' (i.e. features/genes) to subset and calculate 'is_exprs_mat' for.
+#' @param byrow logical scalar indicating if \code{TRUE} to count expressing 
+#' cells per feature (i.e. gene) and if \code{FALSE} to count expressing 
+#' features (i.e. genes) per cell.
+#' 
+#' @description An efficient internal function that avoids the need to construct 
+#' 'is_exprs_mat' by counting the number of expressed genes per cell on the fly.
+#' 
+#' @return a numeric vector of the same length as the number of features if
+#' \code{byrow} argument is \code{TRUE} and the same length as the number of 
+#' cells if \code{byrow} is \code{FALSE}
+#' 
+#' @export
+#' @examples
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' pd <- new("AnnotatedDataFrame", data=sc_example_cell_info)
+#' rownames(pd) <- pd$Cell
+#' example_sceset <- newSCESet(countData=sc_example_counts, phenoData=pd)
+#' nexprs(example_sceset)[1:10]
+#' nexprs(example_sceset, byrow = TRUE)[1:10]
+#' 
+nexprs <- function(object, threshold = NULL, subset.row = NULL, byrow = FALSE) {
+    if (!is(object, "SCESet")) { 
+        stop("'object' must be a SCESet")
+    }
+    is_exprs_mat <- is_exprs(object)
+    counts_mat <- counts(object)
+    if (is.null(is_exprs_mat) && is.null(counts_mat)) {
+        stop("either 'is_exprs(object)' or 'counts(object)' must be non-NULL")
+    }
+
+    # Setting the detection threshold properly.
+    if (is.null(threshold)) {
+        threshold <- object@lowerDetectionLimit
+    }
+    if (!is.null(counts_mat)) { 
+        storage.mode(threshold) <- storage.mode(counts_mat)
+    }
+
+    if (!byrow) {
+        if (!is.null(is_exprs_mat)) {
+            # Counting expressing genes per cell, using predefined 'is_exprs(object)'.
+            if (is.null(subset.row)) {
+               return(colSums(is_exprs_mat)) 
+            } else {
+                subset.row <- .subset2index(subset.row, names = rownames(counts_mat))
+                return(.checkedCall(cxx_colsum_subset, is_exprs_mat, subset.row))
+            }
+        } else {
+            # Counting expressing genes per cell, using the counts to define 'expressing'.
+            if (is.null(subset.row)) { 
+                subset.row <- seq_len(nrow(counts_mat)) 
+            } else {
+                subset.row <- .subset2index(subset.row, 
+                                            names = rownames(counts_mat))
+            }
+            return(.checkedCall(cxx_colsum_exprs_subset, counts_mat, 
+                                threshold, subset.row))
+        }
+    } else {
+        # Counting expressing cells per gene.
+        if (!is.null(is_exprs_mat)) {
+            return(rowSums(is_exprs_mat))
+        } else { 
+            return(.checkedCall(cxx_rowsum_exprs, counts_mat, threshold))
+        }
+    }
+}
+
+.subset2index <- function(subset, names) {
+    if (is.logical(subset)) { 
+        subset <- which(subset) 
+    } else if (is.character(subset)) { 
+        subset <- match(subset, names)
+        if (any(is.na(subset))) { 
+            stop('missing names in specified subsetting vector')
+        }
+    }
+    as.integer(subset)
+}
 
 ################################################################################
 
@@ -588,6 +635,9 @@ a lower count threshold of 0.")
 #' or the higher end ("higher")
 #' @param log logical, should the values of the metric be transformed to the 
 #' log10 scale before computing median-absolute-deviation for outlier detection?
+#' @param na.rm logical, should NA (missing) values be removed before computing
+#' median and median-absolute-deviation values? If \code{FALSE} then return 
+#' values for median and median-absolute-deviation will be NA if any value is NA.
 #' 
 #' @description Convenience function to determine which values for a metric are
 #' outliers based on median-absolute-deviation (MAD).
@@ -608,12 +658,12 @@ a lower count threshold of 0.")
 #' isOutlier(example_sceset$total_counts, nmads = 3)
 #' 
 isOutlier <- function(metric, nmads = 5, type = c("both", "lower", "higher"), 
-                      log = FALSE) {
+                      log = FALSE, na.rm = FALSE) {
     if (log) {
         metric <- log10(metric)
     }
-    cur.med <- median(metric)
-    cur.mad <- mad(metric, center = cur.med)
+    cur.med <- median(metric, na.rm = na.rm)
+    cur.mad <- mad(metric, center = cur.med, na.rm = na.rm)
 
     type <- match.arg(type)
     upper.limit <- cur.med + nmads * cur.mad
@@ -1338,8 +1388,8 @@ plotExprsFreqVsMean <- function(object, feature_set = NULL,
     ## Plot this
     if ( any(fData(object)$is_feature_control[feature_set_logical]) &&
          !all(fData(object)$is_feature_control[feature_set_logical]) ) {
-        plot_out <- plotFeatureData(object[feature_set_logical,],
-                                    aes_string(x = "mean_exprs",
+        plot_out <- plotMetadata(fData(object)[feature_set_logical,],
+                                    aesth = aes_string(x = "mean_exprs",
                                                y = "pct_cells_exprs",
                                                colour = "is_feature_control",
                                                shape = "is_feature_control"),
@@ -1348,8 +1398,8 @@ plotExprsFreqVsMean <- function(object, feature_set = NULL,
             ylab(y_lab) +
             xlab(x_lab)
     } else {
-        plot_out <- plotFeatureData(object[feature_set_logical,],
-                                    aes_string(x = "mean_exprs",
+        plot_out <- plotMetadata(fData(object)[feature_set_logical,],
+                                    aesth = aes_string(x = "mean_exprs",
                                                y = "pct_cells_exprs"),
                                     alpha = alpha, shape = shape, ...) +
             ylab(y_lab) +

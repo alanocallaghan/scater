@@ -58,19 +58,21 @@
 #'
 #'  An \code{SCESet} object has to have the \code{'exprs'} slot defined, so if
 #'  the \code{exprsData} argument is \code{NULL}, then this function will define
-#'  \code{'exprs'} with the following order of precedence: log2(TPM + 
-#'  logExprsOffset), if \code{tpmData} is defined; log2(FPKM + logExprsOffset) 
-#'  if \code{fpkmData} is defined; otherwise log2(counts-per-million + 
-#'  logExprsOffset) are used. The \code{\link[edgeR]{cpm}} function from the 
-#'  edgeR package is used to compte \code{cpm}. Note that for many analyses 
-#'  counts-per-million are not recommended, and if possible 
+#'  \code{'exprs'} with the following order of precedence: log2(TPM +
+#'  logExprsOffset), if \code{tpmData} is defined; log2(FPKM + logExprsOffset)
+#'  if \code{fpkmData} is defined; otherwise log2(counts-per-million +
+#'  logExprsOffset) are used. The \code{\link[edgeR]{cpm}} function from the
+#'  edgeR package is used to compte \code{cpm}. Note that for many analyses
+#'  counts-per-million are not recommended, and if possible
 #'  transcripts-per-million should be used.
 #'
 #'  In many downstream functions you will likely find it most convenient if the
 #'  \code{'exprs'} values are on the log2-scale, so this is recommended.
 #'
 #' @importFrom Biobase annotatedDataFrameFrom
+#' @importFrom Biobase AnnotatedDataFrame
 #' @importFrom Biobase assayDataNew
+#' @importFrom Biobase assayDataElement
 #' @importFrom edgeR cpm.default
 #' @import methods
 #' @export
@@ -121,43 +123,13 @@ newSCESet <- function(exprsData = NULL,
                     exprsData <- log2(cpmData + logExprsOffset)
                     logged <- TRUE
                 }  else {
-                    cpmData <- edgeR::cpm.default(countData,
-                                                  prior.count = logExprsOffset,
-                                                  log = FALSE)
-                    exprsData <- log2(cpmData + logExprsOffset)
+                    exprsData <- .cpm_default(countData, prior.count = logExprsOffset, log = TRUE)
                     logged <- TRUE
-                }
-            }
-        }
-        ## Define isexprs if null
-        if ( is.null(is_exprsData) ) {
-            if ( !is.null(tpmData) ) {
-                isexprs <- tpmData > lowerDetectionLimit
-                rownames(isexprs) <- rownames(tpmData)
-                colnames(isexprs) <- colnames(tpmData)
-                # message(paste0("Defining 'is_exprs' using TPM data and a lower TPM threshold of ", lowerDetectionLimit))
-            } else {
-                if ( !is.null(fpkmData) ) {
-                    isexprs <- fpkmData > lowerDetectionLimit
-                    rownames(isexprs) <- rownames(fpkmData)
-                    colnames(isexprs) <- colnames(fpkmData)
-                    # message(paste0("Defining 'is_exprs' using FPKM data and a lower FPKM threshold of ", lowerDetectionLimit))
-                } else {
-                    isexprs <- countData > lowerDetectionLimit
-                    rownames(isexprs) <- rownames(countData)
-                    colnames(isexprs) <- colnames(countData)
-                    # message(paste0("Defining 'is_exprs' using count data and a lower count threshold of ", lowerDetectionLimit))
                 }
             }
         }
     } else {
         exprsData <- as.matrix(exprsData)
-        if ( is.null(is_exprsData) ) {
-            isexprs <- exprsData > lowerDetectionLimit
-            rownames(isexprs) <- rownames(exprsData)
-            colnames(isexprs) <- colnames(exprsData)
-            # message(paste0("Defining 'is_exprs' using exprsData and a lower exprs threshold of ", lowerDetectionLimit))
-        }
     }
 
     ## Generate valid phenoData and featureData if not provided
@@ -193,8 +165,11 @@ newSCESet <- function(exprsData = NULL,
     useForExprs <- match.arg(useForExprs, c("exprs","tpm","counts","fpkm"))
 
     ## Generate new SCESet object
-    assaydata <- assayDataNew("environment", exprs = exprsData,
-                              is_exprs = isexprs)
+    if ( !is.null(is_exprsData) )
+        assaydata <- assayDataNew("lockedEnvironment", exprs = exprsData,
+                                  is_exprs = isexprs)
+    else 
+        assaydata <- assayDataNew("lockedEnvironment", exprs = exprsData)
     sceset <- new( "SCESet",
                    assayData = assaydata,
                    phenoData = phenoData,
@@ -203,6 +178,7 @@ newSCESet <- function(exprsData = NULL,
                    lowerDetectionLimit = lowerDetectionLimit,
                    logExprsOffset = logExprsOffset,
                    logged = logged,
+                   featureControlInfo = AnnotatedDataFrame(),
                    useForExprs = useForExprs)
 
     ## Add non-null slots to assayData for SCESet object, omitting null slots
@@ -293,10 +269,10 @@ setValidity("SCESet", function(object) {
                  "Row names and column names of featurePairwiseDistances must be equal to featureNames(SCESet)")
     }
     ## Check that we have sensible values for the counts
-    if( any(is.na(exprs(object))) ) {
+    if( .checkedCall(cxx_missing_exprs, exprs(object)) ) {
         warning( "The exprs data contain NA values." )
     }
-    if ( (!is.null(counts(object))) && any(counts(object) < 0, na.rm = TRUE) )
+    if ( (!is.null(counts(object))) && .checkedCall(cxx_negative_counts, counts(object)) )
         warning( "The count data contain negative values." )
     if( !(object@useForExprs %in% c("exprs", "tpm", "fpkm", "counts")) ) {
         valid <- FALSE
@@ -609,7 +585,7 @@ setMethod("get_exprs", signature(object = "SCESet"),
 #' @exportMethod "set_exprs<-"
 setReplaceMethod("set_exprs", signature(object = "SCESet", value = "matrix"),
                  function(object, name, value) {
-                     object@assayData[[name]] <- value
+                     Biobase::assayDataElement(object, name) <- value
                      validObject(object)
                      object
                  })
@@ -660,7 +636,7 @@ setMethod("counts", signature(object = "SCESet"), counts.SCESet)
 #' @exportMethod "counts<-"
 setReplaceMethod("counts", signature(object = "SCESet", value = "matrix"),
                  function(object, value) {
-                     object@assayData$counts <- value
+                     Biobase::assayDataElement(object, "counts") <- value
                      validObject(object)
                      object
                  })
@@ -708,7 +684,7 @@ setMethod("norm_counts", signature(object = "SCESet"), norm_counts.SCESet)
 #' @exportMethod "norm_counts<-"
 setReplaceMethod("norm_counts", signature(object = "SCESet", value = "matrix"),
                  function(object, value) {
-                     object@assayData$norm_counts <- value
+                     Biobase::assayDataElement(object, "norm_counts") <- value
                      validObject(object)
                      object
                  })
@@ -756,7 +732,7 @@ setMethod("is_exprs", signature(object = "SCESet"), is_exprs.SCESet)
 #' @exportMethod "is_exprs<-"
 setReplaceMethod("is_exprs", signature(object = "SCESet", value = "matrix"),
                  function(object, value) {
-                     object@assayData$is_exprs <- value
+                     Biobase::assayDataElement(object, "is_exprs") <- value
                      validObject(object)
                      object
                  })
@@ -814,7 +790,7 @@ setMethod("norm_exprs", signature(object = "SCESet"), norm_exprs.SCESet)
 #' @exportMethod "norm_exprs<-"
 setReplaceMethod("norm_exprs", signature(object = "SCESet", value = "matrix"),
                  function(object, value) {
-                     object@assayData$norm_exprs <- value
+                     Biobase::assayDataElement(object, "norm_exprs") <- value
                      validObject(object)
                      object
                  })
@@ -875,7 +851,7 @@ setMethod("stand_exprs", signature(object = "SCESet"), stand_exprs.SCESet)
 #' @exportMethod "stand_exprs<-"
 setReplaceMethod("stand_exprs", signature(object = "SCESet", value = "matrix"),
                  function(object, value) {
-                     object@assayData$stand_exprs <- value
+                     Biobase::assayDataElement(object, "stand_exprs") <- value
                      validObject(object)
                      object
                  })
@@ -931,7 +907,7 @@ setMethod("tpm", signature(object = "SCESet"), tpm.SCESet)
 #' @aliases tpm<-,SCESet,matrix-method
 setReplaceMethod("tpm", signature(object = "SCESet", value = "matrix"),
                  function(object, value) {
-                     object@assayData$tpm <- value
+                     Biobase::assayDataElement(object, "tpm") <- value
                      validObject(object)
                      object
                  })
@@ -986,7 +962,7 @@ setMethod("norm_tpm", signature(object = "SCESet"), norm_tpm.SCESet)
 #' @aliases norm_tpm<-,SCESet,matrix-method
 setReplaceMethod("norm_tpm", signature(object = "SCESet", value = "matrix"),
                  function(object, value) {
-                     object@assayData$norm_tpm <- value
+                     Biobase::assayDataElement(object, "norm_tpm") <- value
                      validObject(object)
                      object
                  })
@@ -1040,7 +1016,7 @@ setMethod("cpm", signature(object = "SCESet"), cpmSCESet)
 #' @aliases cpm<-,SCESet,matrix-method
 setReplaceMethod("cpm", signature(object = "SCESet", value = "matrix"),
                  function(object, value) {
-                     object@assayData$cpm <- value
+                     Biobase::assayDataElement(object, "cpm") <- value
                      validObject(object)
                      object
                  })
@@ -1095,7 +1071,7 @@ setMethod("norm_cpm", signature(object = "SCESet"), norm_cpm.SCESet)
 #' @aliases norm_cpm<-,SCESet,matrix-method
 setReplaceMethod("norm_cpm", signature(object = "SCESet", value = "matrix"),
                  function(object, value) {
-                     object@assayData$norm_cpm <- value
+                     Biobase::assayDataElement(object, "norm_cpm") <- value
                      validObject(object)
                      object
                  })
@@ -1150,7 +1126,7 @@ setMethod("fpkm", signature(object = "SCESet"), fpkm.SCESet)
 #' @aliases fpkm<-,SCESet,matrix-method
 setReplaceMethod("fpkm", signature(object = "SCESet", value = "matrix"),
                  function(object, value) {
-                     object@assayData$fpkm <- value
+                     Biobase::assayDataElement(object, "fpkm") <- value
                      validObject(object)
                      object
                  })
@@ -1205,7 +1181,7 @@ setMethod("norm_fpkm", signature(object = "SCESet"), norm_fpkm.SCESet)
 #' @aliases norm_fpkm<-,SCESet,matrix-method
 setReplaceMethod("norm_fpkm", signature(object = "SCESet", value = "matrix"),
                  function(object, value) {
-                     object@assayData$norm_fpkm <- value
+                     Biobase::assayDataElement(object, "norm_fpkm") <- value
                      validObject(object)
                      object
                  })
@@ -1216,15 +1192,16 @@ setReplaceMethod("norm_fpkm", signature(object = "SCESet", value = "matrix"),
 
 #' Accessors size factors of an SCESet object.
 #'
-#' For normalisation, library-specific size factors can be defined. Raw values 
-#' can be divided by the appropriate size factors to obtain normalised counts, 
+#' For normalisation, library-specific size factors can be defined. Raw values
+#' can be divided by the appropriate size factors to obtain normalised counts,
 #' TPM, etc.
+#' 
 #'
 #' @usage
-#' \S4method{sizeFactors}{SCESet}(object)
+#' \S4method{sizeFactors}{SCESet}(object,type)
 #'
-#' \S4method{sizeFactors}{SCESet,numeric}(object)<-value
-#' \S4method{sizeFactors}{SCESet,NULL}(object)<-value
+#' \S4method{sizeFactors}{SCESet,numeric}(object,type)<-value
+#' \S4method{sizeFactors}{SCESet,NULL}(object,type)<-value
 #'
 #' @docType methods
 #' @name sizeFactors
@@ -1233,29 +1210,58 @@ setReplaceMethod("norm_fpkm", signature(object = "SCESet", value = "matrix"),
 #'
 #' @param object a \code{SCESet} object.
 #' @param value a vector of class \code{"numeric"} or \code{NULL}
+#' @param type optional character argument providing the type or name of the
+#' size factors to be accessed or assigned.
+#' @param ... further arguments passed to the function
 #'
-#' @author Davis McCarthy
+#' @details The size factors can alternatively be directly accessed from the
+#' \code{SCESet} object with \code{object$size_factor_type} (where "type" in the
+#' preceding is replaced by the actual type name).
+#'
+#' @author Davis McCarthy and Aaron Lun
 #' @export
-#' 
+#'
 #' @importFrom BiocGenerics sizeFactors
 #' @importFrom BiocGenerics sizeFactors<-
-#' 
+#'
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
 #' example_sceset <- newSCESet(countData = sc_example_counts)
 #' sizeFactors(example_sceset)
-#' sizeFactors(example_sceset) <- 2 ^ rnorm(ncol(example_sceset))
+#' sizeFactors(example_sceset, NULL) <- 2 ^ rnorm(ncol(example_sceset))
+#'
+#' example_sceset <- calculateQCMetrics(example_sceset,
+#'                                      feature_controls = list(set1 = 1:40))
+#' sizeFactors(example_sceset, "set1") <- 2 ^ rnorm(ncol(example_sceset))
 #' sizeFactors(example_sceset)
 #'
-sizeFactors.SCESet <- function(object) {
-    out <- object$size_factor
-    if ( is.null(out) ) { 
-        warning("'sizeFactors' have not been set") 
+sizeFactors.SCESet <- function(object, type=NULL) {
+    ofield <- .construct_sf_field(object, type)
+    out <- pData(object)[[ofield]]
+    if ( is.null(out) ) {
+        wstring <- "'sizeFactors' have not been set"
+        if (!is.null(type)) {
+            wstring <- paste0(wstring, " for '", type, "'")
+        }
+        warning(wstring)
         return(NULL)
     }
-    names(out) <- colnames(object) 
+    names(out) <- colnames(object)
     return(out)
+}
+
+.construct_sf_field <- function(object, type) {
+    ofield <- "size_factor"
+    if (!is.null(type)) {
+        fc_available <- .get_feature_control_names(object)
+        if (length(fc_available) == 0L) {
+            stop("no named controls specified in the SCESet object")
+        }
+        type <- match.arg(type, fc_available)
+        ofield <- paste0(ofield, "_", type)
+    }
+    return(ofield)
 }
 
 #' @name sizeFactors
@@ -1269,8 +1275,9 @@ setMethod("sizeFactors", signature(object = "SCESet"), sizeFactors.SCESet)
 #' @exportMethod "sizeFactors<-"
 #' @aliases sizeFactors<-,SCESet,numeric-method
 setReplaceMethod("sizeFactors", signature(object = "SCESet", value = "numeric"),
-                 function(object, value) {
-                     object$size_factor <- value
+                 function(object, type = NULL, ..., value) {
+                     ofield <- .construct_sf_field(object, type)
+                     pData(object)[[ofield]] <- value
                      validObject(object)
                      object
                  })
@@ -1280,8 +1287,9 @@ setReplaceMethod("sizeFactors", signature(object = "SCESet", value = "numeric"),
 #' @exportMethod "sizeFactors<-"
 #' @aliases sizeFactors<-,SCESet,NULL-method
 setReplaceMethod("sizeFactors", signature(object = "SCESet", value = "NULL"),
-                 function(object, value) {
-                     object$size_factor <- NULL
+                 function(object, type = NULL, ..., value) {
+                     ofield <- .construct_sf_field(object, type)
+                     pData(object)[[ofield]] <- NULL
                      validObject(object)
                      object
                  })
