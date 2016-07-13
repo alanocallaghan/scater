@@ -77,7 +77,7 @@
 #'   controls is higher than a defined threhold (default is 80\%)? Just as with
 #'   \code{counts_feature_controls}, this is defined for all control sets
 #'   and their union.}
-#'  \item{pct_counts_top_50_features:}{What percentage of the total counts is accounted for by the 50 highest-count features? Also computed for the top 100 and top 200 features, with the obvious changes to the column names.}
+#'  \item{pct_counts_top_50_features:}{What percentage of the total counts is accounted for by the 50 highest-count features? Also computed for the top 100 and top 200 features, with the obvious changes to the column names. Note that the top ``X'' percentage will not be computed if the total number of genes is less than ``X''.}
 #'  \item{pct_dropout:}{Percentage of features that are not ``detectably 
 #'  expressed'', i.e. have expression below the \code{lowerDetectionLimit} 
 #'  threshold.}
@@ -440,10 +440,15 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
         ## top features?
         ## Determine percentage of counts for top features by cell
         top.number <- c(50L, 100L, 200L)
-        pct_exprs_top_out <- .checkedCall(cxx_calc_top_features, exprs_mat, top.number)
-        colnames(pct_exprs_top_out) <- paste0("pct_exprs_top_",
-                                              top.number, "_features")
-        df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_out)
+        can.calculate <- top.number <= nrow(exprs_mat)
+        if (any(can.calculate)) { 
+            top.number <- top.number[can.calculate]
+            pct_exprs_top_out <- .checkedCall(cxx_calc_top_features, exprs_mat,
+                                              top.number)
+            colnames(pct_exprs_top_out) <- paste0("pct_exprs_top_",
+                                                  top.number, "_features")
+            df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_out)
+        }
     }
     colnames(df_pdata_this) <- gsub("exprs", exprs_type, colnames(df_pdata_this))
     df_pdata_this

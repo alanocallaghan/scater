@@ -82,7 +82,7 @@ The following QC metrics are computed:
   controls is higher than a defined threhold (default is 80\%)? Just as with
   \code{counts_feature_controls}, this is defined for all control sets
   and their union.}
- \item{pct_counts_top_50_features:}{What percentage of the total counts is accounted for by the 50 highest-count features? Also computed for the top 100 and top 200 features, with the obvious changes to the column names.}
+ \item{pct_counts_top_50_features:}{What percentage of the total counts is accounted for by the 50 highest-count features? Also computed for the top 100 and top 200 features, with the obvious changes to the column names. Note that the top ``X'' percentage will not be computed if the total number of genes is less than ``X''.}
  \item{pct_dropout:}{Percentage of features that are not ``detectably 
  expressed'', i.e. have expression below the \code{lowerDetectionLimit} 
  threshold.}
