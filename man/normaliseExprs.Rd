@@ -14,69 +14,69 @@ normalizeExprs(...)
 \arguments{
 \item{object}{an \code{SCESet} object.}
 
-\item{method}{character string giving method to be used to calculate 
+\item{method}{character string giving method to be used to calculate
 normalisation factors. Passed to \code{\link[edgeR]{calcNormFactors}}.}
 
-\item{design}{design matrix defining the linear model to be fitted to the 
-normalised expression values. If not \code{NULL}, then the residuals of this 
+\item{design}{design matrix defining the linear model to be fitted to the
+normalised expression values. If not \code{NULL}, then the residuals of this
 linear model fit are used as the normalised expression values.}
 
 \item{feature_set}{character, numeric or logical vector indicating a set of
-features to use for the PCA. If character, entries must all be in 
-\code{featureNames(object)}. If numeric, values are taken to be indices for 
+features to use for the PCA. If character, entries must all be in
+\code{featureNames(object)}. If numeric, values are taken to be indices for
 features. If logical, vector is used to index features and should have length
 equal to \code{nrow(object)}.}
 
-\item{exprs_values}{character string indicating which slot of the 
-assayData from the \code{SCESet} object should be used as expression values. 
-Valid options are \code{'counts'}, the count values, \code{'exprs'} the 
-expression slot, \code{'tpm'} the transcripts-per-million slot or 
+\item{exprs_values}{character string indicating which slot of the
+assayData from the \code{SCESet} object should be used as expression values.
+Valid options are \code{'counts'}, the count values, \code{'exprs'} the
+expression slot, \code{'tpm'} the transcripts-per-million slot or
 \code{'fpkm'} the FPKM slot.}
 
 \item{return_norm_as_exprs}{logical, should the normalised expression values
-be returned to the \code{exprs} slot of the object? Default is TRUE. If 
+be returned to the \code{exprs} slot of the object? Default is TRUE. If
 FALSE, values in the \code{exprs} slot will be left untouched. Regardless,
-normalised expression values will be returned to the \code{norm_exprs} slot 
+normalised expression values will be returned to the \code{norm_exprs} slot
 of the object.}
 
-\item{...}{arguments passed to \code{normaliseExprs} (in the case of 
+\item{...}{arguments passed to \code{normaliseExprs} (in the case of
 \code{normalizeExprs}) or to \code{\link[edgeR]{calcNormFactors}}.}
 }
 \value{
 an SCESet object
 }
 \description{
-Compute normalised expression values from an SCESet object and return the 
+Compute normalised expression values from an SCESet object and return the
 object with the normalised expression values added.
 }
 \details{
-This function allows the user to compute normalised expression 
-values from an SCESet object. The 'raw' values used can be the values in the 
+This function allows the user to compute normalised expression
+values from an SCESet object. The 'raw' values used can be the values in the
 \code{'counts'} (default), \code{'exprs'}, \code{'tpm'} or \code{'fpkm'} slot
-of the SCESet. Normalised expression values are added to the 
-\code{'norm_exprs'} slot of the object. Normalised expression values are on 
+of the SCESet. Normalised expression values are added to the
+\code{'norm_exprs'} slot of the object. Normalised expression values are on
 the log2-scale, with an offset defined by the \code{logExprsOffset}
-slot of the SCESet object. If the \code{'exprs_values'} argument is one of 
+slot of the SCESet object. If the \code{'exprs_values'} argument is one of
 \code{'counts'}, \code{'tpm'} or \code{'fpkm'}, then a corresponding slot
-with normalised values is added: \code{'norm_counts'}, 
-\code{'norm_tpm'} or \code{'norm_fpkm'}, as appropriate. If 
-\code{'exprs_values'} argument is \code{'counts'} a \code{'norm_cpm'} slot is 
+with normalised values is added: \code{'norm_counts'},
+\code{'norm_tpm'} or \code{'norm_fpkm'}, as appropriate. If
+\code{'exprs_values'} argument is \code{'counts'} a \code{'norm_cpm'} slot is
 also added, containing normalised counts-per-million values.
- 
-Normalisation is done relative to a defined feature set, if desired, which 
-defines the 'library size' by which expression values are divided. If no 
-feature set is defined, then all features are used. A normalisation size 
-factor can be computed (optionally), which internally uses 
-\code{\link[edgeR]{calcNormFactors}}. Thus, any of the methods available for 
+
+Normalisation is done relative to a defined feature set, if desired, which
+defines the 'library size' by which expression values are divided. If no
+feature set is defined, then all features are used. A normalisation size
+factor can be computed (optionally), which internally uses
+\code{\link[edgeR]{calcNormFactors}}. Thus, any of the methods available for
 \code{\link[edgeR]{calcNormFactors}} can be used: "TMM", "RLE", "upperquartile"
 or "none". See that function for further details. Library sizes are multiplied
 by size factors to obtain a "normalised library size" before normalisation.
 
-If the user wishes to remove the effects of certain explanatory variables, 
-then the \code{'design'} argument can be defined. The \code{design} argument 
-must be a valid design matrix, for example as produced by 
-\code{\link[stats]{model.matrix}}, with the relevant variables. A linear 
-model is then fitted using \code{\link[limma]{lmFit}} on expression values 
+If the user wishes to remove the effects of certain explanatory variables,
+then the \code{'design'} argument can be defined. The \code{design} argument
+must be a valid design matrix, for example as produced by
+\code{\link[stats]{model.matrix}}, with the relevant variables. A linear
+model is then fitted using \code{\link[limma]{lmFit}} on expression values
 after any size-factor and library size normalisation as descrived above. The
 returned normalised expression values are then the residuals from the linear
 model fit.
@@ -100,7 +100,7 @@ example_sceset <- example_sceset[keep_gene,]
 ## Apply TMM normalisation taking into account all genes
 example_sceset <- normaliseExprs(example_sceset, method = "TMM")
 ## Scale counts relative to a set of control features (here the first 100 features)
-example_sceset <- normaliseExprs(example_sceset, method = "none", 
+example_sceset <- normaliseExprs(example_sceset, method = "none",
 feature_set = 1:100)
 
 }

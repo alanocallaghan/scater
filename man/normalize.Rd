@@ -21,24 +21,24 @@ normalise(...)
 \arguments{
 \item{object}{an \code{SCESet} object.}
 
-\item{exprs_values}{character string indicating which slot of the 
-assayData from the \code{SCESet} object should be used as expression values. 
-Valid options are \code{'counts'}, the count values, \code{'exprs'} the 
-expression slot, \code{'tpm'} the transcripts-per-million slot or 
+\item{exprs_values}{character string indicating which slot of the
+assayData from the \code{SCESet} object should be used as expression values.
+Valid options are \code{'counts'}, the count values, \code{'exprs'} the
+expression slot, \code{'tpm'} the transcripts-per-million slot or
 \code{'fpkm'} the FPKM slot.}
 
-\item{logExprsOffset}{scalar numeric value giving the offset to add when 
-taking log2 of normalised values to return as expression values. If NULL 
+\item{logExprsOffset}{scalar numeric value giving the offset to add when
+taking log2 of normalised values to return as expression values. If NULL
 (default), then the value from \code{object@logExprsOffset} is used.}
 
-\item{recompute_cpm}{logical, should the counts-per-million values be 
+\item{recompute_cpm}{logical, should the counts-per-million values be
 recomputed after normalising with the stored size factors in the object and
 stored in \code{cpm(object)} in the returned object?}
 
 \item{return_norm_as_exprs}{logical, should the normalised expression values
-be returned to the \code{exprs} slot of the object? Default is TRUE. If 
+be returned to the \code{exprs} slot of the object? Default is TRUE. If
 FALSE, values in the \code{exprs} slot will be left untouched. Regardless,
-normalised expression values will be returned in the 
+normalised expression values will be returned in the
 \code{norm_exprs(object)} slot.}
 
 \item{...}{arguments passed to \code{normalize} when calling \code{normalise}.}
@@ -47,13 +47,13 @@ normalised expression values will be returned in the
 an SCESet object
 }
 \description{
-Compute normalised expression values from an SCESet object using the size 
-factors stored in the object. Return the object with the normalised 
+Compute normalised expression values from an SCESet object using the size
+factors stored in the object. Return the object with the normalised
 expression values added.
 }
 \details{
 \code{normalize} is exactly the same as \code{normalise}, the option
-provided for those who have a preference for North American or 
+provided for those who have a preference for North American or
 British/Australian spelling.
 }
 \examples{
@@ -67,7 +67,7 @@ example_sceset <- example_sceset[keep_gene,]
 ## Apply TMM normalisation taking into account all genes
 example_sceset <- normaliseExprs(example_sceset, method = "TMM")
 ## Scale counts relative to a set of control features (here the first 100 features)
-example_sceset <- normaliseExprs(example_sceset, method = "none", 
+example_sceset <- normaliseExprs(example_sceset, method = "none",
 feature_set = 1:100)
 
 ## normalize the object using the saved size factors
