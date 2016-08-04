@@ -201,9 +201,9 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
     ## If a design matrix is provided, then normalised expression values are
     ## residuals of a linear model fit to norm_exprs values with that design
     if ( !is.null(design) ) {
-        limma_fit <- limma::lmFit( norm_exprs(object), design)
+        limma_fit <- limma::lmFit(norm_exprs_mat, design)
         norm_exprs(object) <- limma::residuals.MArrayLM(limma_fit,
-                                                        norm_exprs(object))
+                                                        norm_exprs_mat)
     }
 
     ## Return normalised expression values in exprs(object)?

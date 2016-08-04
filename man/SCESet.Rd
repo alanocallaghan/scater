@@ -13,10 +13,6 @@ data. SCESet extends the basic Bioconductor ExpressionSet class.
 This class is initialized from a matrix of expression values.
 
 Methods that operate on SCESet objects constitute the basic scater workflow.
-
-Thanks to the Monocle package (github.com/cole-trapnell-lab/monocle-release/)
-for their CellDataSet class, which provided the inspiration and template for 
-SCESet.
 }
 \section{Slots}{
 
@@ -38,6 +34,7 @@ SCESet.
    reduced-dimension coordinates for cells (generated, for example, by PCA).}
    \item{\code{bootstraps}:}{Array of class \code{"numeric"} that can contain
    bootstrap estimates of the expression or count values.}
+   \item{\code{consensus}:}{List containing results from consensus clustering.}
    \item{\code{featureControlInfo}:}{Data frame of class 
    \code{"AnnotatedDataFrame"} that can contain information/metadata about 
    sets of control features defined for the \code{SCESet} object.
@@ -46,5 +43,10 @@ SCESet.
    which expression representation both internal methods and external packages should use. 
    Defaults to 'exprs'.}
 }
+}
+\references{
+Thanks to the Monocle package 
+(github.com/cole-trapnell-lab/monocle-release/) for their CellDataSet class, 
+which provided the inspiration and template for SCESet.
 }
 

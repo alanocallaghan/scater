@@ -445,6 +445,8 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
             top.number <- top.number[can.calculate]
             pct_exprs_top_out <- .checkedCall(cxx_calc_top_features, exprs_mat,
                                               top.number)
+            ## this call returns proportions, not percentages, so adjust
+            pct_exprs_top_out <- 100 * pct_exprs_top_out
             colnames(pct_exprs_top_out) <- paste0("pct_exprs_top_",
                                                   top.number, "_features")
             df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_out)
