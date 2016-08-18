@@ -878,6 +878,10 @@ findImportantPCs <- function(object, variable="total_features",
 #' @param exprs_values which slot of the \code{assayData} in the \code{object}
 #' should be used to define expression? Valid options are "counts" (default),
 #' "tpm", "fpkm" and "exprs".
+#' @param feature_names_to_plot character scalar indicating which column of the 
+#' featureData slot in the \code{object} is to be used for the feature names 
+#' displayed on the plot. Default is \code{NULL}, in which case 
+#' \code{featureNames(object)} is used.
 #'
 #' @details Plot the percentage of counts accounted for by the top n most highly
 #' expressed features across the dataset.
@@ -896,7 +900,8 @@ findImportantPCs <- function(object, variable="total_features",
 #' plotHighestExprs(example_sceset, col_by_variable="Mutation_Status")
 #'
 plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
-                              drop_features = NULL, exprs_values = "counts") {
+                             drop_features = NULL, exprs_values = "counts",
+                             feature_names_to_plot = NULL) {
     ## Check that variable to colour points exists
     if (!(col_by_variable %in% colnames(pData(object)))) {
         warning("col_by_variable not found in pData(object).
@@ -960,13 +965,19 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
             message("Using 'exprs' to order total expression of features.")
         }
     }
-    fdata$feature <- factor(featureNames(object),
-                            levels = rownames(object)[rev(oo)])
+    ## define feature names for plot
+    if (is.null(feature_names_to_plot) || 
+        is.null(fData(object)[[feature_names_to_plot]]))
+        fdata$feature <- factor(featureNames(object),
+                                levels = featureNames(object)[rev(oo)])
+    else 
+        fdata$feature <- factor(
+            fData(object)[[feature_names_to_plot]],
+            levels = fData(object)[[feature_names_to_plot]][rev(oo)])
+    fdata$Feature <- fdata$feature
     ## Check if is_feature_control is defined
     if ( is.null(fdata$is_feature_control) )
         fdata$is_feature_control <- rep(FALSE, nrow(fdata))
-    if ( is.null(fdata$Feature) )
-        fdata$Feature <- featureNames(object)
 
     ## Determine percentage expression accounted for by top features across all
     ## cells
@@ -978,8 +989,13 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
 
     ## Melt dataframe so it is conducive to ggplot
     df_pct_exprs_by_cell_long <- reshape2::melt(df_pct_exprs_by_cell)
+    df_pct_exprs_by_cell_long$Feature <- 
+        fdata[as.character(df_pct_exprs_by_cell_long$Var2), "feature"]
     df_pct_exprs_by_cell_long$Var2 <- factor(
         df_pct_exprs_by_cell_long$Var2, levels = rownames(object)[rev(oo[1:n])])
+    df_pct_exprs_by_cell_long$Feature <- factor(
+        df_pct_exprs_by_cell_long$Feature, levels = fdata$feature[rev(oo[1:n])])
+    
     ## Add colour variable information
     if (typeof_x == "discrete")
         df_pct_exprs_by_cell_long$colour_by <- factor(x)
@@ -987,7 +1003,7 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
         df_pct_exprs_by_cell_long$colour_by <- x
     ## Make plot
     plot_most_expressed <- ggplot(df_pct_exprs_by_cell_long,
-                                  aes_string(y = "Var2", x = "value",
+                                  aes_string(y = "Feature", x = "value",
                                              colour = "colour_by")) +
         geom_point(alpha = 0.6, shape = 124) +
         ggtitle(paste0("Top ", n, " account for ",
@@ -1184,8 +1200,10 @@ This variable will not be plotted."))
                          nvars_to_plot)
 
     if ( method == "pairs" ) {
+        if (nvars_to_plot == 1) 
+            stop("Only one variable to plot, which does not make sense for a pairs plot.")
         ## Generate a larger data.frame for pairs plot
-        df_to_expand <- val_to_plot_mat[, oo_median[1:nvars_to_plot]]
+        df_to_expand <- val_to_plot_mat[, oo_median[1:nvars_to_plot], drop = FALSE]
         names(df_to_expand) <- colnames(df_to_expand)
         gg1 <- .makePairs(df_to_expand)
         diag_labs <-  paste0("Median R-sq = \n",
@@ -1216,7 +1234,7 @@ This variable will not be plotted."))
             theme(legend.position = "none")
     } else {
         df_to_plot <- suppressMessages(reshape2::melt(
-            rsquared_mat[, oo_median[1:nvars_to_plot]]))
+            rsquared_mat[, oo_median[1:nvars_to_plot], drop = FALSE]))
         colnames(df_to_plot) <- c("Feature", "Expl_Var", "R_squared")
         df_to_plot$Pct_Var_Explained <- 100 * df_to_plot$R_squared
         df_to_plot$Expl_Var <- factor(
@@ -1228,7 +1246,7 @@ This variable will not be plotted."))
             geom_vline(xintercept = 1, linetype = 2) +
             scale_x_log10(breaks = 10 ^ (-3:2), labels = c(0.001, 0.01, 0.1, 1, 10, 100)) +
             xlab(paste0("% variance explained (log10-scale)")) +
-            ylab("") +
+            ylab("Density") +
             coord_cartesian(xlim = c(10 ^ (-3), 100))
         plot_out <- .resolve_plot_colours(plot_out, df_to_plot$Expl_Var, "")
         if ( requireNamespace("cowplot", quietly = TRUE) )

@@ -799,7 +799,7 @@ We can first look at a multidimensional scaling (MDS) plot using Euclidean
 distance between cells.
 
 ```{r cell-pairwise-distance-matrices-euclidean, eval=TRUE}
-cell_dist <- as.matrix(dist(t(exprs(example_sceset))))
+cell_dist <- dist(t(exprs(example_sceset)))
 cellPairwiseDistances(example_sceset) <- cell_dist
 plotMDS(example_sceset)
 ```
@@ -808,7 +808,7 @@ Second, we could also look at an MDS plot using the count data and the Canberra
 distance metric (plot not shown).
 
 ```{r cell-pairwise-distance-matrices-canberra, eval=TRUE, fig.show = FALSE}
-cell_dist <- as.matrix(dist(t(counts(example_sceset)), method = "canberra"))
+cell_dist <- dist(t(counts(example_sceset)), method = "canberra")
 cellPairwiseDistances(example_sceset) <- cell_dist
 plotMDS(example_sceset, colour_by = "Mutation_Status")
 ```
@@ -817,7 +817,7 @@ We could also look at an MDS plot for the features, here using Euclidean
 distance (plot not shown).
 
 ```{r feature-pairwise-distance-matrices, eval=FALSE}
-feature_dist <- as.matrix(dist(exprs(example_sceset)))
+feature_dist <- dist(exprs(example_sceset))
 featurePairwiseDistances(example_sceset) <- feature_dist
 limma::plotMDS(featDist(example_sceset))
 ```

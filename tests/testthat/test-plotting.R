@@ -64,5 +64,8 @@ test_that("we can produce expression plots with different expression values", {
 
     expect_that(plotExpression(example_sceset, 1:4, "Cell_Cycle"), is_a("ggplot"))
     expect_that(plotExpression(example_sceset, 1:4, "Gene_0004"), is_a("ggplot"))
+    expect_that(plotExpression(example_sceset, 1:4), is_a("ggplot"))
+    expect_that(plotExpression(example_sceset, 1:4, scales = "fixed"), 
+                is_a("ggplot"))
 })
 

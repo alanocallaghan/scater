@@ -5,11 +5,13 @@
 \alias{featDist}
 \alias{featDist,SCESet-method}
 \alias{featDist<-}
+\alias{featDist<-,SCESet,dist-method}
 \alias{featDist<-,SCESet,matrix-method}
 \alias{featDistSCESet}
 \alias{featurePairwiseDistances}
 \alias{featurePairwiseDistances,SCESet-method}
 \alias{featurePairwiseDistances<-}
+\alias{featurePairwiseDistances<-,SCESet,dist-method}
 \alias{featurePairwiseDistances<-,SCESet,matrix-method}
 \alias{featurePairwiseDistancesSCESet}
 \title{featurePairwiseDistances in an SCESet object}
@@ -32,7 +34,11 @@ featDistSCESet(object)
 
 \S4method{featurePairwiseDistances}{SCESet,matrix}(object) <- value
 
+\S4method{featurePairwiseDistances}{SCESet,dist}(object) <- value
+
 \S4method{featDist}{SCESet,matrix}(object) <- value
+
+\S4method{featDist}{SCESet,dist}(object) <- value
 }
 \arguments{
 \item{object}{a \code{SCESet} object.}

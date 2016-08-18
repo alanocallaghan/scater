@@ -20,11 +20,11 @@ plotReducedDim.SCESet(object, ncomponents = 2, colour_by = NULL,
   shape_by = NULL, size_by = NULL, theme_size = 10, legend = "auto")
 
 \S4method{plotReducedDim}{SCESet}(object, ncomponents = 2, colour_by = NULL,
-  shape_by = NULL, size_by = NULL, legend = TRUE)
+  shape_by = NULL, size_by = NULL, theme_size = 10, legend = "auto")
 
 \S4method{plotReducedDim}{data.frame}(object, ncomponents = 2,
   colour_by = NULL, shape_by = NULL, size_by = NULL, percentVar = NULL,
-  legend = TRUE)
+  legend = "auto")
 }
 \arguments{
 \item{object}{an \code{SCESet} object with a non-NULL \code{reducedDimension}

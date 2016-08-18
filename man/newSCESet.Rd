@@ -6,7 +6,9 @@
 \usage{
 newSCESet(exprsData = NULL, countData = NULL, tpmData = NULL,
   fpkmData = NULL, cpmData = NULL, phenoData = NULL, featureData = NULL,
-  experimentData = NULL, is_exprsData = NULL, lowerDetectionLimit = 0,
+  experimentData = NULL, is_exprsData = NULL,
+  cellPairwiseDistances = dist(vector()),
+  featurePairwiseDistances = dist(vector()), lowerDetectionLimit = 0,
   logExprsOffset = 1, logged = FALSE, useForExprs = "exprs")
 }
 \arguments{
@@ -33,9 +35,15 @@ about the experiment and dataset.}
 \item{is_exprsData}{matrix of class \code{"logical"}, indicating whether
 or not each observation is above the \code{lowerDetectionLimit}.}
 
+\item{cellPairwiseDistances}{object of class \code{"dist"} (or a class that 
+extends "dist") containing cell-cell distance or dissimilarity values.}
+
+\item{featurePairwiseDistances}{object of class \code{"dist"} (or a class that 
+extends "dist") containing feature-feature distance or dissimilarity values.}
+
 \item{lowerDetectionLimit}{the minimum expression level that constitutes true
 expression (defaults to zero and uses count data to determine if an
-observation is expressed or not)}
+observation is expressed or not).}
 
 \item{logExprsOffset}{numeric scalar, providing the offset used when doing
 log2-transformations of expression data to avoid trying to take logs of zero.

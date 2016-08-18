@@ -58,6 +58,42 @@ test_that("failure is as expected for input with zero-variance features", {
 })
 
 
+test_that("plotHighestExprs works as expected", {
+    data("sc_example_counts")
+    data("sc_example_cell_info")
+    pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+    example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+    example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:500)
+    expect_that(
+        plotHighestExprs(example_sceset, col_by_variable = "Mutation_Status"), 
+        is_a("ggplot"))
+})
+
+test_that("plotExplanatoryVariables works as expected", {
+    data("sc_example_counts")
+    data("sc_example_cell_info")
+    pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+    example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+    example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:500)
+    drop_genes <- apply(exprs(example_sceset), 1, function(x) {var(x) == 0})
+    example_sceset <- example_sceset[!drop_genes, ]
+    example_sceset <- calculateQCMetrics(example_sceset)
+    vars <- names(pData(example_sceset))[c(2:3, 5:14)]
+    expect_that(
+        plotExplanatoryVariables(example_sceset, variables = vars), 
+        is_a("ggplot"))
+    expect_that(
+        plotExplanatoryVariables(example_sceset, variables = vars[1]), 
+        is_a("ggplot"))
+    expect_that(
+        plotExplanatoryVariables(example_sceset, variables = vars, 
+                                 method = "pairs"), 
+        is_a("ggplot"))
+    err_string <- "Only one variable"
+    expect_error(plotExplanatoryVariables(example_sceset, variables = vars[1], 
+                                          method = "pairs"), err_string)
+})
+
 
 
 

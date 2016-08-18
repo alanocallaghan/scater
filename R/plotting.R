@@ -1607,7 +1607,7 @@ plotReducedDim.SCESet <- function(object, ncomponents=2, colour_by=NULL,
     ## Call default method to make the plot
     plot_out <- plotReducedDim.default(df_to_plot, ncomponents, colour_by,
                                        shape_by, size_by, percentVar = NULL,
-                                       theme_size, legend)
+                                       legend = legend)
 
     ## Define plotting theme
     if ( requireNamespace("cowplot", quietly = TRUE) )
@@ -1620,6 +1620,7 @@ plotReducedDim.SCESet <- function(object, ncomponents=2, colour_by=NULL,
 
     ## return plot
     plot_out
+    
 }
 
 #' @rdname plotReducedDim
@@ -1627,9 +1628,9 @@ plotReducedDim.SCESet <- function(object, ncomponents=2, colour_by=NULL,
 #' @export
 setMethod("plotReducedDim", signature("SCESet"),
           function(object, ncomponents=2, colour_by=NULL, shape_by=NULL,
-                   size_by=NULL, legend=TRUE) {
+                   size_by=NULL, theme_size = 10, legend="auto") {
               plotReducedDim.SCESet(object, ncomponents, colour_by, shape_by,
-                                    size_by, legend)
+                                    size_by, theme_size, legend)
           })
 
 #' @rdname plotReducedDim
@@ -1637,7 +1638,7 @@ setMethod("plotReducedDim", signature("SCESet"),
 #' @export
 setMethod("plotReducedDim", signature("data.frame"),
           function(object, ncomponents=2, colour_by=NULL, shape_by=NULL,
-                   size_by=NULL, percentVar=NULL, legend=TRUE) {
+                   size_by=NULL, percentVar=NULL, legend="auto") {
               plotReducedDim.default(object, ncomponents, colour_by, shape_by,
                                      size_by, percentVar, legend)
           })
@@ -1686,10 +1687,29 @@ setMethod("plotReducedDim", signature("data.frame"),
 #' @param show_median logical, show the median for each group on the plot
 #' @param show_violin logical, show a violin plot for the distribution
 #' for each group on the plot
+#' @param show_smooth logical, show a smoothed fit through the expression values
+#'  on the plot
+#' @param alpha numeric value between 0 (completely transparent) and 1 (completely
+#' solid) defining how transparent plotted points (cells) should be. 
+#' Points are jittered horizontally if the x-axis value is categorical rather 
+#' than numeric to avoid overplotting.
 #' @param theme_size numeric scalar giving default font size for plotting theme
 #' (default is 10)
 #' @param log2_values should the expression values be transformed to the
 #' log2-scale for plotting (with an offset of 1 to avoid logging zeroes)?
+#' @param size numeric scalar optionally providing size for points if 
+#' \code{size_by} argument is not given. Default is \code{NULL}, in which case
+#' \pkg{ggplot2} default is used.
+#' @param scales character scalar, should scales be fixed ("fixed"), 
+#' free ("free"), or free in one dimension ("free_x"; "free_y", the default). 
+#' Passed to the \code{scales} argument in the \code{\link[ggplot2]{facet_wrap}} function 
+#' from the \code{ggplot2} package.
+#' @param se logical, should standard errors be shown (default \code{TRUE}) for
+#' the smoothed fit through the cells. (Ignored if \code{show_smooth} is \code{FALSE}).
+#' @param jitter character scalar to define whether points are to be jittered 
+#' (\code{"jitter"}) or presented in a "beeswarm" style (if \code{"swarm"}; default). 
+#' "Beeswarm" style usually looks more attractive, but for datasets with a large 
+#' number of cells, or for dense plots, the jitter option may work better.
 #' @param ... optional arguments (from those listed above) passed to
 #' \code{plotExpressionSCESet} or \code{plotExpressionDefault}
 #'
@@ -1702,6 +1722,7 @@ setMethod("plotReducedDim", signature("data.frame"),
 #' @import ggplot2
 #' @importFrom Biobase varLabels
 #' @importFrom Biobase featureNames
+#' @importFrom ggbeeswarm geom_quasirandom
 #' @export
 #'
 #' @examples
@@ -1713,6 +1734,10 @@ setMethod("plotReducedDim", signature("data.frame"),
 #' example_sceset <- calculateQCMetrics(example_sceset)
 #'
 #' ## default plot
+#' plotExpression(example_sceset, 1:15)
+#' plotExpression(example_sceset, 1:15, jitter = "jitter")
+#' 
+#' ## plot expression against an x-axis value
 #' plotExpression(example_sceset, 1:6, "Mutation_Status")
 #'
 #' ## explore options
@@ -1724,13 +1749,15 @@ setMethod("plotReducedDim", signature("data.frame"),
 #' ## plot expression against expression values for Gene_0004
 #' plotExpression(example_sceset, 1:4, "Gene_0004")
 #' plotExpression(example_sceset, 1:4, "Gene_0004", show_smooth = TRUE)
+#' plotExpression(example_sceset, 1:4, "Gene_0004", show_smooth = TRUE, se = FALSE)
 #'
-plotExpressionSCESet <- function(object, features, x, exprs_values = "exprs",
+plotExpressionSCESet <- function(object, features, x = NULL, exprs_values = "exprs",
                                  colour_by = NULL, shape_by = NULL,
                                  size_by = NULL, ncol = 2, xlab = NULL,
                                  show_median = FALSE, show_violin = TRUE,
-                                 show_smooth = FALSE, theme_size = 10,
-                                 log2_values = FALSE) {
+                                 show_smooth = FALSE, alpha = 0.6, 
+                                 theme_size = 10, log2_values = FALSE, size = NULL, 
+                                 scales = "fixed", se = TRUE, jitter = "swarm") {
     ## Check object is an SCESet object
     if ( !is(object, "SCESet") )
         stop("object must be an SCESet")
@@ -1742,14 +1769,18 @@ plotExpressionSCESet <- function(object, features, x, exprs_values = "exprs",
         nfeatures <- length(features)
 
     ## Check arguments are valid
-    if ( !(x %in% varLabels(object)) && !(x %in% featureNames(object)))
-        stop("the argument 'x' should specify a column of pData(object) [see varLabels(object)] or a feature [see featureNames(object)")
-    if ( x %in% featureNames(object) ) {
-        x_is_feature <- TRUE
-        show_violin <- FALSE
-        show_median <- FALSE
-    } else
+    if ( is.null(x) ) {
         x_is_feature <- FALSE
+    } else {
+        if ( !(x %in% varLabels(object)) && !(x %in% featureNames(object)))
+            stop("the argument 'x' should specify a column of pData(object) [see varLabels(object)] or a feature [see featureNames(object)")
+        if ( x %in% featureNames(object) ) {
+            x_is_feature <- TRUE
+            show_violin <- FALSE
+            show_median <- FALSE
+        } else
+            x_is_feature <- FALSE
+    }
     if ( !is.null(colour_by) ) {
         if ( !(colour_by %in% varLabels(object)) )
             stop("the argument 'colour_by' should specify a column of pData(object) [see varLabels(object)]")
@@ -1788,7 +1819,15 @@ plotExpressionSCESet <- function(object, features, x, exprs_values = "exprs",
 
     ## Construct a ggplot2 aesthetic for the plot
     aesth <- aes()
-    aesth$x <- as.symbol(x)
+    if ( is.null(x) ) {
+        # samples_long$dummy <- "dummy"
+        # aesth$x <- as.symbol("dummy")
+        aesth$x <- as.symbol("Feature")
+        one_facet <- TRUE
+    } else {
+        aesth$x <- as.symbol(x)
+        one_facet <- FALSE
+    }
     aesth$y <- as.symbol("evals")
     if ( !is.null(colour_by) )
         aesth$colour <- as.symbol(colour_by)
@@ -1813,35 +1852,53 @@ plotExpressionSCESet <- function(object, features, x, exprs_values = "exprs",
 
     ## Make the plot
     plot_out <- plotExpressionDefault(object, aesth, ncol, xlab, ylab,
-                                      show_median, show_violin, show_smooth)
+                                      show_median, show_violin, show_smooth,
+                                      alpha, size, scales, one_facet, se, jitter)
 
     ## Define plotting theme
     if ( requireNamespace("cowplot", quietly = TRUE) )
         plot_out <- plot_out + cowplot::theme_cowplot(theme_size)
     else
         plot_out <- plot_out + theme_bw(theme_size)
+    if ( is.null(x) ) { ## in this case, do not show x-axis ticks or labels
+        plot_out <- plot_out + theme(
+            axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1), 
+            axis.ticks.x = element_blank(),
+            plot.margin = unit(c(.03, .02, .05, .02), "npc"))
+        if (is.null(colour_by))
+            plot_out <- plot_out + guides(fill = "none", colour = "none")
+    }
     plot_out
 }
 
 
-#' @param aesth an \code{aes} object to use in the call to \code{\link{ggplot}}.
+#' @param aesth an \code{aes} object to use in the call to \code{\link[ggplot2]{ggplot}}.
 #' @param ylab character string defining a label for the y-axis (y-axes) of the
 #' plot.
-#' @param show_smooth show a smoothed fit through the data points?
+#' @param one_facet logical, should expression values for features be plotted in one facet 
+#' instead of mutiple facets, one per feature? Default if \code{x = NULL}.
 #' @rdname plotExpression
 #' @aliases plotExpression
 #' @export
 plotExpressionDefault <- function(object, aesth, ncol=2, xlab = NULL,
                                   ylab = NULL, show_median = FALSE,
-                                  show_violin = TRUE, show_smooth = FALSE) {
+                                  show_violin = TRUE, show_smooth = FALSE, 
+                                  alpha = 0.6, size = NULL, scales = "fixed", 
+                                  one_facet = FALSE, se = TRUE, jitter = "swarm") {
     if ( !("Feature" %in% names(object)) )
         stop("object needs a column named 'Feature' to define the feature(s) by which to plot expression.")
 
     ## Define the plot
-    plot_out <- ggplot(object, aesth) +
-        facet_wrap(~Feature, ncol = ncol, scales = 'free_y') +
-        xlab(xlab) +
-        ylab(ylab)
+    if (one_facet) {
+        if (is.null(aesth$colour))
+            aesth$colour <- as.symbol("Feature")
+        plot_out <- ggplot(object, aesth) + xlab(xlab) + ylab(ylab)
+    } else {
+        plot_out <- ggplot(object, aesth) +
+            facet_wrap(~Feature, ncol = ncol, scales = scales) +
+            xlab(xlab) +
+            ylab(ylab)
+    }
     
     ## if colour aesthetic is defined, then choose sensible colour palette
     if ( !is.null(aesth$colour) )
@@ -1850,16 +1907,43 @@ plotExpressionDefault <- function(object, aesth, ncol=2, xlab = NULL,
                                           as.character(aesth$colour))
 
     ## if x axis variable is not numeric, then jitter points horizontally
-    if ( is.numeric(aesth$x) ) 
-        plot_out <- plot_out + geom_jitter(alpha = 0.6)
-    else 
-        plot_out <- plot_out + geom_jitter(alpha = 0.6, 
-                                           position = position_jitter(height = 0))
+    if ( is.numeric(aesth$x) ) {
+        if ( is.null(aesth$size) & !is.null(size) )
+            plot_out <- plot_out + geom_point(size = size, alpha = alpha)
+        else
+            plot_out <- plot_out + geom_point(alpha = alpha)
+    } else {
+        if ( is.null(aesth$size) & !is.null(size) ) {
+            if (jitter == "swarm")
+                plot_out <- plot_out + ggbeeswarm::geom_quasirandom(
+                    alpha = alpha, size = size)
+            else
+                plot_out <- plot_out + geom_jitter(
+                    alpha = alpha, size = size, position = position_jitter(height = 0))
+        }
+        else {
+            if (jitter == "swarm")
+                plot_out <- plot_out + ggbeeswarm::geom_quasirandom(
+                    alpha = alpha)
+            else
+                plot_out <- plot_out + geom_jitter(
+                    alpha = alpha, position = position_jitter(height = 0))
+        }
+    }    
     
     ## show optional decorations on plot if desired
     if (show_violin) {
-        plot_out <- plot_out + geom_violin(colour = "gray60", alpha = 0.3,
-                                           fill = "gray80", scale = "width")
+        if (one_facet && (aesth$colour == as.symbol("Feature"))) {
+            plot_out <- plot_out + 
+                geom_violin(aes_string(fill = "Feature"), colour = "gray60", 
+                            alpha = 0.2, scale = "width")
+            plot_out <- .resolve_plot_colours(
+                plot_out, object[[as.character(aesth$colour)]],
+                as.character(aesth$colour), fill = TRUE)
+        }
+        else
+            plot_out <- plot_out + geom_violin(colour = "gray60", alpha = 0.3,
+                                               fill = "gray80", scale = "width")
     }
     if (show_median) {
         plot_out <- plot_out +
@@ -1867,23 +1951,11 @@ plotExpressionDefault <- function(object, aesth, ncol=2, xlab = NULL,
                          geom = "crossbar", width = 0.3, alpha = 0.8)
     }
     if (show_smooth) {
-        plot_out <- plot_out + stat_smooth()
+        plot_out <- plot_out + stat_smooth(colour = "firebrick", linetype = 2, se = se)
     }
     plot_out
 }
 
-# #' @rdname plotExpression
-# #' @aliases plotExpression
-# #' @export
-# setMethod("plotExpression", signature(object = "SCESet"),
-#           function(object, features, x, exprs_values = "exprs", colour_by = NULL,
-#                    shape_by = NULL, size_by = NULL, ncol = 2, xlab = NULL,
-#                    show_median=FALSE, show_violin=TRUE, show_smooth=FALSE) {
-#               plotExpressionSCESet(object, features, x, exprs_values,
-#                                         colour_by, shape_by, size_by, ncol,
-#                                         xlab, show_median, show_violin,
-#                                    show_smooth)
-#           })
 
 #' @rdname plotExpression
 #' @aliases plotExpression
@@ -2025,22 +2097,22 @@ plotMetadata <- function(object,
     }
     if (plot_type == "jitter") {
         if ( !show_shape_guide )
-            plot_out <- plot_out + geom_jitter(shape = shape)
+            plot_out <- plot_out +  ggbeeswarm::geom_quasirandom(shape = shape)
         else
-            plot_out <- plot_out + geom_jitter()
+            plot_out <- plot_out +  ggbeeswarm::geom_quasirandom()
     }
     if (plot_type == "scatter") {
         if ( !show_shape_guide )
-            plot_out <- plot_out + geom_point(shape = shape)
+            plot_out <- plot_out +  ggbeeswarm::geom_quasirandom(shape = shape)
         else
-            plot_out <- plot_out + geom_point()
+            plot_out <- plot_out +  ggbeeswarm::geom_quasirandom()
         plot_out <- plot_out + geom_rug(alpha = 0.5, size = 1)
     }
     if (plot_type == "violin") {
         if ( !show_shape_guide )
-            plot_out  <- plot_out + geom_jitter(shape = shape)
+            plot_out  <- plot_out +  ggbeeswarm::geom_quasirandom(shape = shape)
         else
-            plot_out  <- plot_out + geom_jitter()
+            plot_out  <- plot_out +  ggbeeswarm::geom_quasirandom()
         plot_out <- plot_out + geom_violin(size = 1, scale = "width")
 
     }

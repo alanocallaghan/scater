@@ -5,12 +5,14 @@
 \alias{cellDist}
 \alias{cellDist,SCESet-method}
 \alias{cellDist<-}
+\alias{cellDist<-,SCESet,dist-method}
 \alias{cellDist<-,SCESet,matrix-method}
 \alias{cellDistSCESet}
 \alias{cellPairwiseDistances}
 \alias{cellPairwiseDistances,SCESet-method}
 \alias{cellPairwiseDistances.SCESet}
 \alias{cellPairwiseDistances<-}
+\alias{cellPairwiseDistances<-,SCESet,dist-method}
 \alias{cellPairwiseDistances<-,SCESet,matrix-method}
 \title{cellPairwiseDistances in an SCESet object}
 \usage{
@@ -32,7 +34,11 @@ cellDistSCESet(object)
 
 \S4method{cellPairwiseDistances}{SCESet,matrix}(object) <- value
 
+\S4method{cellPairwiseDistances}{SCESet,dist}(object) <- value
+
 \S4method{cellDist}{SCESet,matrix}(object) <- value
+
+\S4method{cellDist}{SCESet,dist}(object) <- value
 }
 \arguments{
 \item{object}{a \code{SCESet} object.}

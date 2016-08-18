@@ -11,13 +11,17 @@
 \usage{
 plotExpression(object, ...)
 
-plotExpressionSCESet(object, features, x, exprs_values = "exprs",
+plotExpressionSCESet(object, features, x = NULL, exprs_values = "exprs",
   colour_by = NULL, shape_by = NULL, size_by = NULL, ncol = 2,
   xlab = NULL, show_median = FALSE, show_violin = TRUE,
-  show_smooth = FALSE, theme_size = 10, log2_values = FALSE)
+  show_smooth = FALSE, alpha = 0.6, theme_size = 10,
+  log2_values = FALSE, size = NULL, scales = "fixed", se = TRUE,
+  jitter = "swarm")
 
 plotExpressionDefault(object, aesth, ncol = 2, xlab = NULL, ylab = NULL,
-  show_median = FALSE, show_violin = TRUE, show_smooth = FALSE)
+  show_median = FALSE, show_violin = TRUE, show_smooth = FALSE,
+  alpha = 0.6, size = NULL, scales = "fixed", one_facet = FALSE,
+  se = TRUE, jitter = "swarm")
 
 \S4method{plotExpression}{SCESet}(object, ...)
 
@@ -77,7 +81,13 @@ used as the x-axis label}
 \item{show_violin}{logical, show a violin plot for the distribution
 for each group on the plot}
 
-\item{show_smooth}{show a smoothed fit through the data points?}
+\item{show_smooth}{logical, show a smoothed fit through the expression values
+on the plot}
+
+\item{alpha}{numeric value between 0 (completely transparent) and 1 (completely
+solid) defining how transparent plotted points (cells) should be. 
+Points are jittered horizontally if the x-axis value is categorical rather 
+than numeric to avoid overplotting.}
 
 \item{theme_size}{numeric scalar giving default font size for plotting theme
 (default is 10)}
@@ -85,10 +95,30 @@ for each group on the plot}
 \item{log2_values}{should the expression values be transformed to the
 log2-scale for plotting (with an offset of 1 to avoid logging zeroes)?}
 
-\item{aesth}{an \code{aes} object to use in the call to \code{\link{ggplot}}.}
+\item{size}{numeric scalar optionally providing size for points if 
+\code{size_by} argument is not given. Default is \code{NULL}, in which case
+\pkg{ggplot2} default is used.}
+
+\item{scales}{character scalar, should scales be fixed ("fixed"), 
+free ("free"), or free in one dimension ("free_x"; "free_y", the default). 
+Passed to the \code{scales} argument in the \code{\link[ggplot2]{facet_wrap}} function 
+from the \code{ggplot2} package.}
+
+\item{se}{logical, should standard errors be shown (default \code{TRUE}) for
+the smoothed fit through the cells. (Ignored if \code{show_smooth} is \code{FALSE}).}
+
+\item{jitter}{character scalar to define whether points are to be jittered 
+(\code{"jitter"}) or presented in a "beeswarm" style (if \code{"swarm"}; default). 
+"Beeswarm" style usually looks more attractive, but for datasets with a large 
+number of cells, or for dense plots, the jitter option may work better.}
+
+\item{aesth}{an \code{aes} object to use in the call to \code{\link[ggplot2]{ggplot}}.}
 
 \item{ylab}{character string defining a label for the y-axis (y-axes) of the
 plot.}
+
+\item{one_facet}{logical, should expression values for features be plotted in one facet 
+instead of mutiple facets, one per feature? Default if \code{x = NULL}.}
 }
 \value{
 a ggplot plot object
@@ -109,6 +139,10 @@ example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 example_sceset <- calculateQCMetrics(example_sceset)
 
 ## default plot
+plotExpression(example_sceset, 1:15)
+plotExpression(example_sceset, 1:15, jitter = "jitter")
+
+## plot expression against an x-axis value
 plotExpression(example_sceset, 1:6, "Mutation_Status")
 
 ## explore options
@@ -120,6 +154,7 @@ colour_by="Cell_Cycle", show_violin=TRUE, show_median=TRUE)
 ## plot expression against expression values for Gene_0004
 plotExpression(example_sceset, 1:4, "Gene_0004")
 plotExpression(example_sceset, 1:4, "Gene_0004", show_smooth = TRUE)
+plotExpression(example_sceset, 1:4, "Gene_0004", show_smooth = TRUE, se = FALSE)
 
 }
 

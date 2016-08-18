@@ -5,7 +5,8 @@
 \title{Plot the features with the highest expression values}
 \usage{
 plotHighestExprs(object, col_by_variable = "total_features", n = 50,
-  drop_features = NULL, exprs_values = "counts")
+  drop_features = NULL, exprs_values = "counts",
+  feature_names_to_plot = NULL)
 }
 \arguments{
 \item{object}{an SCESet object containing expression values and
@@ -25,6 +26,11 @@ from endogenous rather than synthetic genes.}
 \item{exprs_values}{which slot of the \code{assayData} in the \code{object}
 should be used to define expression? Valid options are "counts" (default),
 "tpm", "fpkm" and "exprs".}
+
+\item{feature_names_to_plot}{character scalar indicating which column of the 
+featureData slot in the \code{object} is to be used for the feature names 
+displayed on the plot. Default is \code{NULL}, in which case 
+\code{featureNames(object)} is used.}
 }
 \value{
 a ggplot plot object

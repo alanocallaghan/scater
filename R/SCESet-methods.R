@@ -26,16 +26,21 @@
 #' @param featureData data frame containing attributes of features (e.g. genes)
 #' @param experimentData MIAME class object containing metadata data and details
 #' about the experiment and dataset.
+#' @param is_exprsData matrix of class \code{"logical"}, indicating whether
+#'    or not each observation is above the \code{lowerDetectionLimit}.
+#' @param cellPairwiseDistances object of class \code{"dist"} (or a class that 
+#' extends "dist") containing cell-cell distance or dissimilarity values.
+#' @param featurePairwiseDistances object of class \code{"dist"} (or a class that 
+#' extends "dist") containing feature-feature distance or dissimilarity values.
 #' @param lowerDetectionLimit the minimum expression level that constitutes true
 #'  expression (defaults to zero and uses count data to determine if an
-#'  observation is expressed or not)
+#'  observation is expressed or not).
 #' @param logExprsOffset numeric scalar, providing the offset used when doing
 #' log2-transformations of expression data to avoid trying to take logs of zero.
 #' Default offset value is \code{1}.
 #' @param logged logical, if a value is supplied for the exprsData argument, are
 #'  the expression values already on the log2 scale, or not?
-#' @param is_exprsData matrix of class \code{"logical"}, indicating whether
-#'    or not each observation is above the \code{lowerDetectionLimit}.
+
 #' @param useForExprs character string, either 'exprs' (default),'tpm','counts' or
 #'    'fpkm' indicating which expression representation both internal methods and
 #'    external packages should use when performing analyses.
@@ -91,6 +96,8 @@ newSCESet <- function(exprsData = NULL,
                       featureData = NULL,
                       experimentData = NULL,
                       is_exprsData = NULL,
+                      cellPairwiseDistances = dist(vector()),
+                      featurePairwiseDistances = dist(vector()),
                       lowerDetectionLimit = 0,
                       logExprsOffset = 1,
                       logged = FALSE,
@@ -175,6 +182,8 @@ newSCESet <- function(exprsData = NULL,
                    phenoData = phenoData,
                    featureData = featureData,
                    experimentData = expData,
+                   cellPairwiseDistances = cellPairwiseDistances,
+                   featurePairwiseDistances = featurePairwiseDistances,
                    lowerDetectionLimit = lowerDetectionLimit,
                    logExprsOffset = logExprsOffset,
                    logged = logged,
@@ -238,35 +247,28 @@ setValidity("SCESet", function(object) {
         msg <- c(msg, "Row names of reducedDimension don't match sampleNames of SCESet")
     }
     ## Check that the dimensions of the cellPairwiseDistances slot are sensible
-    if ( (nrow(object@cellPairwiseDistances) != ncol(object@cellPairwiseDistances)) ||
-         (nrow(object@cellPairwiseDistances) != 0 &&
-          nrow(object@cellPairwiseDistances) != ncol(object)) ) {
+    if ( (length(object@cellPairwiseDistances) != 0) &&
+         (length(object@cellPairwiseDistances) != choose(ncol(object), 2)) ) {
         valid <- FALSE
-        msg <- c(msg, "cellPariwiseDistances must be of dimension ncol(SCESet) by ncol(SCESet)")
+        msg <- c(msg, "cellPairwiseDistances must be of length compatible with ncol(SCESet)")
     }
-    if ( (nrow(object@cellPairwiseDistances) != 0) &&
-         (!identical(rownames(object@cellPairwiseDistances),
-                     colnames(object@cellPairwiseDistances)) ||
-          !identical(rownames(object@cellPairwiseDistances), sampleNames(object))) ) {
+    if ( (length(object@cellPairwiseDistances) != 0) &&
+         !identical(labels(object@cellPairwiseDistances), sampleNames(object)) ) {
         valid <- FALSE
         msg <- c(msg,
-                 "Row names and column names of cellPairwiseDistances must be equal to sampleNames(SCESet)")
+                 "Labels of cellPairwiseDistances must be identical to sampleNames(SCESet)")
     }
     ## Check that the dimensions of the featurePairwiseDistances slot are sensible
-    if ( (nrow(object@featurePairwiseDistances) !=
-          ncol(object@featurePairwiseDistances)) ||
-         (nrow(object@featurePairwiseDistances) != 0 &&
-          nrow(object@featurePairwiseDistances) != nrow(object)) ) {
+    if ( (length(object@featurePairwiseDistances) != 0) &&
+         (length(object@featurePairwiseDistances) != choose(ncol(object), 2)) ) {
         valid <- FALSE
-        msg <- c(msg, "featurePairwiseDistances must be of dimension nrow(SCESet) by nrow(SCESet)")
+        msg <- c(msg, "featurePairwiseDistances must be of length compatible with nrow(SCESet)")
     }
-    if ( (nrow(object@featurePairwiseDistances) != 0) &&
-         (!identical(rownames(object@featurePairwiseDistances),
-                     colnames(object@featurePairwiseDistances)) ||
-          !identical(rownames(object@featurePairwiseDistances), featureNames(object))) ) {
+    if ( (length(object@featurePairwiseDistances) != 0) &&
+          !identical(labels(object@featurePairwiseDistances), featureNames(object)) ) {
         valid <- FALSE
         msg <- c(msg,
-                 "Row names and column names of featurePairwiseDistances must be equal to featureNames(SCESet)")
+                 "Label names of featurePairwiseDistances must be identical to featureNames(SCESet)")
     }
     ## Check that we have sensible values for the counts
     if( .checkedCall(cxx_missing_exprs, exprs(object)) ) {
@@ -274,12 +276,12 @@ setValidity("SCESet", function(object) {
     }
     if ( (!is.null(counts(object))) && .checkedCall(cxx_negative_counts, counts(object)) )
         warning( "The count data contain negative values." )
-    if( !(object@useForExprs %in% c("exprs", "tpm", "fpkm", "counts")) ) {
+    if ( !(object@useForExprs %in% c("exprs", "tpm", "fpkm", "counts")) ) {
         valid <- FALSE
         msg <- c(msg, "object@useForExprs must be one of 'exprs', 'tpm', 'fpkm', 'counts'")
     }
 
-    if(valid) TRUE else msg
+    if (valid) TRUE else msg
 })
 
 
@@ -322,8 +324,9 @@ setMethod('[', 'SCESet', function(x, i, j, ..., drop=FALSE) {
     if ( !missing(i) && missing(j) ) {
         ## Subsetting features only
         x <- selectMethod('[', 'ExpressionSet')(x, i, , drop = drop)
-        if ( nrow(x@featurePairwiseDistances) != 0 )
-            x@featurePairwiseDistances <- x@featurePairwiseDistances[i, i, drop = drop]
+        if ( length(x@featurePairwiseDistances) != 0 )
+            x@featurePairwiseDistances <- 
+                as.dist(as.matrix(x@featurePairwiseDistances)[i, i, drop = drop])
         if ( !missing(...) ) {
             if ( !is.na(ncol(x@bootstraps)) ) {
                 if (  nrow(x@bootstraps) != 0 && length(dim(x@bootstraps)) > 2 )
@@ -338,8 +341,9 @@ setMethod('[', 'SCESet', function(x, i, j, ..., drop=FALSE) {
     } else if ( missing(i) && !missing(j) ) {
         ## Subsetting cells only
         x <- selectMethod('[', 'ExpressionSet')(x, , j, drop = drop)
-        if ( nrow(x@cellPairwiseDistances) != 0 )
-            x@cellPairwiseDistances <- x@cellPairwiseDistances[j, j, drop = drop]
+        if ( length(x@cellPairwiseDistances) != 0 )
+            x@cellPairwiseDistances <- 
+                as.dist(as.matrix(x@cellPairwiseDistances)[j, j, drop = drop])
         if ( nrow(x@reducedDimension) != 0 )
             x@reducedDimension <- x@reducedDimension[j, , drop = drop]
         if ( !missing(...) ) {
@@ -356,10 +360,12 @@ setMethod('[', 'SCESet', function(x, i, j, ..., drop=FALSE) {
     } else if ( !missing(i) && !missing(j) ) {
         ## Subsetting features (i) and cells (j)
         x <- selectMethod('[', 'ExpressionSet')(x, i, j, drop = drop)
-        if ( nrow(x@featurePairwiseDistances) != 0 )
-            x@featurePairwiseDistances <- x@featurePairwiseDistances[i, i, drop = drop]
-        if ( nrow(x@cellPairwiseDistances) != 0 )
-            x@cellPairwiseDistances <- x@cellPairwiseDistances[j, j, drop = drop]
+        if ( length(x@featurePairwiseDistances) != 0 )
+            x@featurePairwiseDistances <- 
+                as.dist(as.matrix(x@featurePairwiseDistances)[i, i, drop = drop])
+        if ( length(x@cellPairwiseDistances) != 0 )
+            x@cellPairwiseDistances <- 
+                as.dist(as.matrix(x@cellPairwiseDistances)[j, j, drop = drop])
         if ( nrow(x@reducedDimension) != 0 )
             x@reducedDimension <- x@reducedDimension[j, , drop = drop]
         if ( !missing(...) ) {
@@ -1468,7 +1474,7 @@ setReplaceMethod("redDim", signature(object = "SCESet", value = "matrix"),
 #' @docType methods
 #' @name cellPairwiseDistances
 #' @rdname cellPairwiseDistances
-#' @aliases cellPairwiseDistances cellPairwiseDistances,SCESet-method cellPairwiseDistances<-,SCESet,matrix-method cellDist,SCESet-method cellDist<-,SCESet,matrix-method
+#' @aliases cellPairwiseDistances cellPairwiseDistances,SCESet-method cellPairwiseDistances<-,SCESet,matrix-method cellPairwiseDistances<-,SCESet,dist-method cellDist,SCESet-method cellDist<-,SCESet,matrix-method cellDist<-,SCESet,dist-method
 #'
 #' @param object a \code{SCESet} object.
 #' @param value a matrix of class \code{"numeric"} containing cell pairwise
@@ -1476,7 +1482,8 @@ setReplaceMethod("redDim", signature(object = "SCESet", value = "matrix"),
 #' @author Davis McCarthy
 #'
 #' @return An SCESet object containing new cell pairwise distances matrix.
-#'
+#' 
+#' @importFrom stats as.dist dist
 #' @export
 #' @examples
 #' data("sc_example_counts")
@@ -1515,7 +1522,37 @@ setReplaceMethod("cellPairwiseDistances", signature(object = "SCESet",
                                                     value = "matrix"),
                  function(object, value) {
                      if ( nrow(value) == ncol(object) ) {
+                         object@cellPairwiseDistances <- as.dist(value)
+                         return(object)
+                     }
+                     else
+                         stop("Cell pairwise distance matrix supplied is of incorrect size.")
+                 } )
+
+
+#' @name cellPairwiseDistances<-
+#' @aliases cellPairwiseDistances
+#' @rdname cellPairwiseDistances
+#' @exportMethod "cellPairwiseDistances<-"
+setReplaceMethod("cellPairwiseDistances", signature(object = "SCESet", value = "dist"),
+                 function(object, value) {
+                     if ( length(value) == choose(ncol(object), 2) ) {
                          object@cellPairwiseDistances <- value
+                         return(object)
+                     }
+                     else
+                         stop("Cell pairwise dist object supplied is of incorrect size.")
+                 } )
+
+
+#' @name cellDist<-
+#' @aliases cellPairwiseDistances
+#' @rdname cellPairwiseDistances
+#' @exportMethod "cellDist<-"
+setReplaceMethod("cellDist", signature(object = "SCESet", value = "matrix"),
+                 function(object, value) {
+                     if ( nrow(value) == ncol(object) ) {
+                         object@cellPairwiseDistances <- as.dist(value)
                          return(object)
                      }
                      else
@@ -1526,15 +1563,16 @@ setReplaceMethod("cellPairwiseDistances", signature(object = "SCESet",
 #' @aliases cellPairwiseDistances
 #' @rdname cellPairwiseDistances
 #' @exportMethod "cellDist<-"
-setReplaceMethod("cellDist", signature(object = "SCESet", value = "matrix"),
+setReplaceMethod("cellDist", signature(object = "SCESet", value = "dist"),
                  function(object, value) {
-                     if ( nrow(value) == ncol(object) ) {
+                     if ( length(value) == choose(ncol(object), 2) ) {
                          object@cellPairwiseDistances <- value
                          return(object)
                      }
                      else
-                         stop("Cell pairwise distance matrix supplied is of incorrect size.")
+                         stop("Cell pairwise dist object supplied is of incorrect size.")
                  } )
+
 
 
 ################################################################################
@@ -1555,7 +1593,7 @@ setReplaceMethod("cellDist", signature(object = "SCESet", value = "matrix"),
 #' @docType methods
 #' @name featurePairwiseDistances
 #' @rdname featurePairwiseDistances
-#' @aliases featurePairwiseDistances featurePairwiseDistances,SCESet-method featurePairwiseDistances<-,SCESet,matrix-method featDist featDist,SCESet-method featDist<-,SCESet,matrix-method
+#' @aliases featurePairwiseDistances featurePairwiseDistances,SCESet-method featurePairwiseDistances<-,SCESet,matrix-method featurePairwiseDistances<-,SCESet,dist-method featDist featDist,SCESet-method featDist<-,SCESet,matrix-method featDist<-,SCESet,dist-method
 #'
 #' @author Davis McCarthy
 #'
@@ -1598,11 +1636,26 @@ setReplaceMethod("featurePairwiseDistances", signature(object = "SCESet",
                                                        value = "matrix"),
                  function(object, value) {
                      if ( nrow(value) == nrow(object) ) {
-                         object@featurePairwiseDistances <- value
+                         object@featurePairwiseDistances <- as.dist(value)
                          return(object)
                      }
                      else
                          stop("Feature pairwise distance matrix supplied is of incorrect size.")
+                 } )
+
+#' @name featurePairwiseDistances<-
+#' @aliases featurePairwiseDistances
+#' @rdname featurePairwiseDistances
+#' @export "featurePairwiseDistances<-"
+setReplaceMethod("featurePairwiseDistances", signature(object = "SCESet",
+                                                       value = "dist"),
+                 function(object, value) {
+                     if ( length(value) == choose(nrow(object)) ) {
+                         object@featurePairwiseDistances <- value
+                         return(object)
+                     }
+                     else
+                         stop("Feature pairwise dist object supplied is of incorrect size.")
                  } )
 
 #' @name featDist<-
@@ -1612,6 +1665,21 @@ setReplaceMethod("featurePairwiseDistances", signature(object = "SCESet",
 setReplaceMethod("featDist", signature(object = "SCESet", value = "matrix"),
                  function(object, value) {
                      if ( nrow(value) == nrow(object) ) {
+                         object@featurePairwiseDistances <- as.dist(value)
+                         return(object)
+                     }
+                     else
+                         stop("Feature pairwise distance matrix supplied is of incorrect size.")
+                 } )
+
+
+#' @name featDist<-
+#' @rdname featurePairwiseDistances
+#' @aliases featurePairwiseDistances
+#' @export "featDist<-"
+setReplaceMethod("featDist", signature(object = "SCESet", value = "dist"),
+                 function(object, value) {
+                     if ( nrow(value) == choose(nrow(object), 2) ) {
                          object@featurePairwiseDistances <- value
                          return(object)
                      }
