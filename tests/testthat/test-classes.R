@@ -18,6 +18,17 @@ test_that("example datasets work", {
 })
 
 
+test_that("we can update an SCESet object", {
+    data("sc_example_counts")
+    data("sc_example_cell_info")
+    pd <- new("AnnotatedDataFrame", data=sc_example_cell_info)
+    example_sceset <- newSCESet(countData=sc_example_counts, phenoData=pd)
+    example_sceset
+    
+    expect_that(updateSCESet(example_sceset), is_a("SCESet"))
+})
+
+
 context("test manipulations")
 
 test_that("we can subset the example SCESet", {

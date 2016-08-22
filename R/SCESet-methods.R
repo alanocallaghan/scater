@@ -286,6 +286,48 @@ setValidity("SCESet", function(object) {
 
 
 ################################################################################
+### updating an old SCESet object
+
+#' Update an SCESet object to the current version
+#' 
+#' It can be necessary to update an SCESet produced with an older version of the
+#' package to be compatible with the current version of the package.
+#' 
+#' @param object an \code{\link{SCESet}} object to be updated
+#' 
+#' @return an updated \code{\link{SCESet}} object
+#' @export
+#' @examples 
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+#' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+#' updateSCESet(example_sceset)
+updateSCESet <- function(object) {
+    if (!is(object, "SCESet")) 
+        stop("Object must be an SCESet.")
+    sceset <- new( "SCESet",
+                   assayData = object@assayData,
+                   phenoData = object@phenoData,
+                   featureData = object@featureData,
+                   experimentData = object@experimentData,
+                   cellPairwiseDistances = as.dist(object@cellPairwiseDistances),
+                   featurePairwiseDistances = as.dist(object@featurePairwiseDistances),
+                   consensus = ifelse(.hasSlot(object, "consensus"),
+                                      object@consensus, list()),
+                   lowerDetectionLimit = object@lowerDetectionLimit,
+                   logExprsOffset = object@logExprsOffset,
+                   logged = object@logged,
+                   featureControlInfo = object@featureControlInfo,
+                   useForExprs = object@useForExprs)
+    
+    ## Check validity of object
+    validObject(sceset)
+    sceset
+}
+
+
+################################################################################
 ### subsetting an SCESet object
 
 #' Subsetting SCESet Objects
