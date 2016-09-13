@@ -34,7 +34,7 @@ Methods that operate on SCESet objects constitute the basic scater workflow.
    reduced-dimension coordinates for cells (generated, for example, by PCA).}
    \item{\code{bootstraps}:}{Array of class \code{"numeric"} that can contain
    bootstrap estimates of the expression or count values.}
-   \item{\code{consensus}:}{List containing results from consensus clustering.}
+   \item{\code{sc3}:}{List containing results from consensus clustering from the SC3 package.}
    \item{\code{featureControlInfo}:}{Data frame of class 
    \code{"AnnotatedDataFrame"} that can contain information/metadata about 
    sets of control features defined for the \code{SCESet} object.

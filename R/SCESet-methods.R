@@ -296,6 +296,7 @@ setValidity("SCESet", function(object) {
 #' @param object an \code{\link{SCESet}} object to be updated
 #' 
 #' @return an updated \code{\link{SCESet}} object
+#' 
 #' @export
 #' @examples 
 #' data("sc_example_counts")
