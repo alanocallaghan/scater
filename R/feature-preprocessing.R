@@ -127,7 +127,14 @@ getBMFeatureAnnos <- function(object, filters="ensembl_transcript_id",
 #' @param summarise_by character string giving the column of \code{fData(object)}
 #' that will be used as the features for which summarised expression levels are 
 #' to be produced. Default is \code{'feature_id'}.
-#'  \code{"exprs"}.
+#' @param scaled_tpm_counts logical, should feature-summarised counts be 
+#' computed from summed TPM values scaled by total library size? This approach
+#' is recommended (see \url{https://f1000research.com/articles/4-1521/v2}), so
+#' the default is \code{TRUE} and it is applied if TPM values are available in
+#' the object.
+#' @param lib_size optional vector of numeric values of same length as the 
+#' number of columns in the \code{SCESet} object providing the total library 
+#' size (e.g. "count of mapped reads") for each cell/sample.
 #' 
 #' @details Only transcripts-per-million (TPM) and fragments per kilobase of 
 #' exon per million reads mapped (FPKM) expression values should be aggregated 
@@ -137,7 +144,9 @@ getBMFeatureAnnos <- function(object, filters="ensembl_transcript_id",
 #' features to get the expression of that set (for example, we cannot sum counts
 #' over transcripts to get accurate expression estimates for a gene). See the 
 #' following link for a discussion of RNA-seq expression units by Harold Pimentel:
-#' \url{https://haroldpimentel.wordpress.com/2014/05/08/what-the-fpkm-a-review-rna-seq-expression-units/}.
+#' \url{https://haroldpimentel.wordpress.com/2014/05/08/what-the-fpkm-a-review-rna-seq-expression-units/}. For more details about the effects of summarising 
+#' transcript expression values at the gene level see Sonesen et al, 2016 
+#' (\url{https://f1000research.com/articles/4-1521/v2}).
 #' 
 #' @return an SCESet object
 #' 
@@ -151,14 +160,22 @@ getBMFeatureAnnos <- function(object, filters="ensembl_transcript_id",
 #' fd <- new("AnnotatedDataFrame", data = 
 #' data.frame(gene_id = featureNames(example_sceset), 
 #' feature_id = paste("feature", rep(1:500, each = 4), sep = "_")))
+#' rownames(fd) <- featureNames(example_sceset)
 #' fData(example_sceset) <- fd
+#' effective_length <- rep(c(1000, 2000), times = 1000)
+#' tpm(example_sceset) <- calculateTPM(example_sceset, effective_length, calc_from = "counts")
+#' 
+#' example_sceset_summarised <- 
+#' summariseExprsAcrossFeatures(example_sceset, exprs_values = "tpm")
 #' example_sceset_summarised <- 
 #' summariseExprsAcrossFeatures(example_sceset, exprs_values = "counts")
 #' example_sceset_summarised <- 
 #' summariseExprsAcrossFeatures(example_sceset, exprs_values = "exprs")
 #' 
 summariseExprsAcrossFeatures <- function(object, exprs_values = "tpm", 
-                                         summarise_by = "feature_id") {
+                                         summarise_by = "feature_id",
+                                         scaled_tpm_counts = TRUE,
+                                         lib_size = NULL) {
     if ( !is(object, "SCESet") )
         stop("Object must be an SCESet")
     if ( !(summarise_by %in% colnames(fData(object))) )
@@ -198,14 +215,36 @@ summariseExprsAcrossFeatures <- function(object, exprs_values = "tpm",
                       counts = newSCESet(countData = exprs_new, phenoData = pd, 
                                          featureData = fd))
     ## Summarise other data in the object if present
-    if ( exprs_values != "counts" && !is.null(counts(object)) ) {
+    ## counts
+    if ( !is.null(tpm(object)) && scaled_tpm_counts ) {
+        if ( is.null(lib_size) ) {
+            if ( is.null(counts(object)) )
+                stop("If object does not contain count values, lib_size argument must be provided.")
+            else 
+                lib_size <- colSums(counts(object))
+        } else {
+            if ( length(lib_size) != ncol(object))
+                stop("lib_size argument must have length equal to number of columns of object.")
+        }
         tmp_exprs <- data.frame(feature = fData(object)[[summarise_by]], 
-                                counts(object))
+                                tpm(object))
         tmp_exprs_long <- reshape2::melt(tmp_exprs)
         counts_new <- reshape2::acast(tmp_exprs_long, feature ~ variable, sum)
+        ## scale TPM by total library size to get scaled counts
+        counts_new <- t(t(counts_new) * lib_size * 1e-06)
         colnames(counts_new) <- sampleNames(object) 
         counts(sce_out) <- counts_new
-        rm(counts_new)
+        rm(counts_new)   
+    } else {
+        if ( exprs_values != "counts" && !is.null(counts(object)) ) {
+            tmp_exprs <- data.frame(feature = fData(object)[[summarise_by]], 
+                                    counts(object))
+            tmp_exprs_long <- reshape2::melt(tmp_exprs)
+            counts_new <- reshape2::acast(tmp_exprs_long, feature ~ variable, sum)
+            colnames(counts_new) <- sampleNames(object) 
+            counts(sce_out) <- counts_new
+            rm(counts_new)
+        }
     }
     if ( exprs_values != "tpm" && !is.null(tpm(object)) ) {
         tmp_exprs <- data.frame(feature = fData(object)[[summarise_by]], 

@@ -51,7 +51,7 @@
 #' commands that would be run and the output directories is returned. Can be
 #' used to read in results if kallisto is run outside an R session or to produce
 #'  a script to run outside of an R session.
-#' @param kallisto_cmd (optional) string giving full command to use fo call
+#' @param kallisto_cmd (optional) string giving full command to use to call
 #' kallisto, if simply typing "kallisto" at the command line does not give the
 #' required version of kallisto or does not work. Default is simply "kalliso".
 #' If used, this argument should give the full path to the desired kallisto
@@ -241,6 +241,7 @@ readKallistoResultsOneSample <- function(directory, read_h5=FALSE,
         abundance <- data.table::fread(file_to_read, colClasses = c("numeric", "numeric", "numeric", "character", "character"), sep = "\t")
         abundance$est_counts <- as.numeric(abundance$est_counts)
         abundance$tpm <- as.numeric(abundance$tpm)
+        abundance$eff_length <- as.numeric(abundance$eff_length)
     } else
         stop(paste("File", file_to_read, "not found or does not exist. Please check directory is correct."))
     ## Read in run information
@@ -361,9 +362,12 @@ readKallistoResults <- function(kallisto_log = NULL, samples = NULL,
                         feature_length = s1$abundance$length,
                         feature_eff_length = s1$abundance$eff_length)
     rownames(fdata) <- s1$abundance$target_id
-    est_counts <- tpm <- matrix(NA, nrow = nfeatures, ncol = nsamples)
-    colnames(est_counts) <- colnames(tpm) <- samples
-    rownames(est_counts) <- rownames(tpm) <- s1$abundance$target_id
+    est_counts <- tpm <- feat_eff_len <- 
+        matrix(NA, nrow = nfeatures, ncol = nsamples)
+    colnames(est_counts) <- colnames(tpm) <- colnames(feat_eff_len) <- samples
+    rownames(est_counts) <- rownames(tpm) <- rownames(feat_eff_len) <- 
+        s1$abundance$target_id
+    
     if ( read_h5 ) {
         bootstraps <- array(NA, dim = c(nfeatures, nsamples, nbootstraps))
         rownames(bootstraps) <- s1$abundance$target_id
@@ -385,6 +389,12 @@ readKallistoResults <- function(kallisto_log = NULL, samples = NULL,
         ## tpm
         if ( length(tmp_samp$abundance$est_counts) == nfeatures )
             tpm[,i] <- tmp_samp$abundance$tpm
+        if ( length(tmp_samp$abundance$est_counts) == nfeatures )
+            tpm[,i] <- tmp_samp$abundance$tpm
+        ## feature effective length
+        if ( length(tmp_samp$abundance$eff_length) == nfeatures )
+            feat_eff_len[, i] <- tmp_samp$abundance$eff_length
+        
         ## run info
         pdata$n_targets[i] <- tmp_samp$run_info$n_targets
         pdata$n_processed[i] <- tmp_samp$run_info$n_processed
@@ -402,6 +412,9 @@ readKallistoResults <- function(kallisto_log = NULL, samples = NULL,
                 cat("\n")
         }
     }
+    ## Add median feature effective length to fData
+    fdata$median_effective_length <- matrixStats::rowMedians(feat_eff_len)
+    
     if ( verbose )
         cat("\n")
     ## Produce SCESet object
@@ -413,6 +426,7 @@ readKallistoResults <- function(kallisto_log = NULL, samples = NULL,
                          logExprsOffset = logExprsOffset,
                          lowerDetectionLimit = 0)
     tpm(sce_out) <- tpm
+    set_exprs(sce_out, "feature_effective_length") <- feat_eff_len
     if ( verbose )
         cat("Using log2(TPM + 1) as 'exprs' values in output.")
     if ( read_h5 )

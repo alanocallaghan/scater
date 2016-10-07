@@ -4,12 +4,15 @@
 \name{set_exprs<-}
 \alias{set_exprs}
 \alias{set_exprs<-}
+\alias{set_exprs<-,SCESet,ANY,NULL-method}
 \alias{set_exprs<-,SCESet,ANY,matrix-method}
 \title{Assignment method for the new elements of an SCESet object.}
 \usage{
 set_exprs(object, name) <- value
 
 \S4method{set_exprs}{SCESet,ANY,matrix}(object,name)<-value
+
+\S4method{set_exprs}{SCESet,ANY,`NULL`}(object, name) <- value
 }
 \arguments{
 \item{object}{a \code{SCESet} object.}
@@ -35,6 +38,10 @@ example_sceset <- newSCESet(countData = sc_example_counts)
 set_exprs(example_sceset, "scaled_counts") <- t(t(counts(example_sceset)) /
 colSums(counts(example_sceset)))
 get_exprs(example_sceset, "scaled_counts")[1:6, 1:6]
+
+## get rid of scaled counts
+set_exprs(example_sceset, "scaled_counts") <- NULL
+
 }
 \author{
 Davis McCarthy

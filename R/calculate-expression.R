@@ -106,6 +106,8 @@ calculateTPM <- function(object, effective_length = NULL, calc_from = "counts") 
                          norm_fpkm = .fpkmToTpm(norm_fpkm(object)))
     
     ## Return TPM values
+    rownames(tpm_to_add) <- featureNames(object)
+    colnames(tpm_to_add) <- colnames(object)
     tpm_to_add
 }
 
@@ -134,6 +136,8 @@ calculateFPKM <- function(object, effective_length) {
     ## Compute values to add
     fpkm_to_add <- .countToFpkm(counts(object), effective_length)
     ## Return matrix of FPKM values
+    rownames(fpkm_to_add) <- featureNames(object)
+    colnames(fpkm_to_add) <- colnames(object)
     fpkm_to_add
 }
 

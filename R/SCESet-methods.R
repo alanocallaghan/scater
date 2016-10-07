@@ -438,9 +438,9 @@ setMethod('[', 'SCESet', function(x, i, j, ..., drop=FALSE) {
 ################################################################################
 ## cellNames
 
-#' Get cell names from an SCESet object
+#' Get or set cell names from an SCESet object
 #'
-#' @param object An SCESet object.
+#' @param object An \code{\link{SCESet}} object.
 #'
 #' @return A vector of cell names.
 #'
@@ -457,6 +457,33 @@ setMethod('[', 'SCESet', function(x, i, j, ..., drop=FALSE) {
 cellNames <- function(object) {
     sampleNames(object)
 }
+
+
+#' @usage
+#' \S4method{cellNames}{SCESet,vector}(object)<-value
+#'
+#' @docType methods
+#' @name cellNames
+#' @rdname cellNames
+#' @aliases cellNames cellNames<-,SCESet,vector-method
+#'
+#' @param value a vector of cell names to apply to the \code{SCESet} object.
+#' @author Davis McCarthy
+#' 
+#' @exportMethod "cellNames<-"
+#' 
+#' @examples
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' example_sceset <- newSCESet(countData = sc_example_counts)
+#' cellNames(example_sceset) <- 1:ncol(example_sceset)
+#' 
+setReplaceMethod("cellNames", signature(object = "SCESet", value = "vector"),
+                 function(object, value) {
+                     sampleNames(object) <- value
+                     validObject(object)
+                     object
+                 })
 
 
 ################################################################################
@@ -613,7 +640,7 @@ setMethod("get_exprs", signature(object = "SCESet"),
 #' @docType methods
 #' @name set_exprs
 #' @rdname set_exprs
-#' @aliases set_exprs set_exprs<-,SCESet,ANY,matrix-method
+#' @aliases set_exprs set_exprs<-,SCESet,ANY,matrix-method set_exprs<-,SCESet,ANY,NULL-method
 #'
 #' @param object a \code{SCESet} object.
 #' @param name character string giving the name of the slot to which the data
@@ -629,10 +656,24 @@ setMethod("get_exprs", signature(object = "SCESet"),
 #' set_exprs(example_sceset, "scaled_counts") <- t(t(counts(example_sceset)) /
 #' colSums(counts(example_sceset)))
 #' get_exprs(example_sceset, "scaled_counts")[1:6, 1:6]
+#' 
+#' ## get rid of scaled counts
+#' set_exprs(example_sceset, "scaled_counts") <- NULL
+#' 
 #' @name set_exprs
 #' @rdname set_exprs
 #' @exportMethod "set_exprs<-"
 setReplaceMethod("set_exprs", signature(object = "SCESet", value = "matrix"),
+                 function(object, name, value) {
+                     Biobase::assayDataElement(object, name) <- value
+                     validObject(object)
+                     object
+                 })
+
+#' @name set_exprs
+#' @rdname set_exprs
+#' @exportMethod "set_exprs<-"
+setReplaceMethod("set_exprs", signature(object = "SCESet", value = "NULL"),
                  function(object, name, value) {
                      Biobase::assayDataElement(object, name) <- value
                      validObject(object)
@@ -1857,7 +1898,7 @@ fromCellDataSet <- function(cds, exprs_values = "tpm", logged = FALSE) {
 #' not defined, this method returns \code{NULL}.
 #'
 #' @param object An object of type \code{SCESet}
-#' @return A matrix representation of expression corresponding to \code{object@@useForExprs}.
+#' @return A matrix representation of expression corresponding to \code{object@useForExprs}.
 #'
 #' @export
 #' @examples
@@ -1882,3 +1923,183 @@ getExprs <- function(object) {
 
     return( x )
 }
+
+
+################################################################################
+
+#' Merge SCESet objects
+#' 
+#' Merge two SCESet objects that have the same features but contain different cells/samples.
+#' 
+#' @param x an \code{\link{SCESet}} object
+#' @param y an \code{\link{SCESet}} object
+#' @param fdata_cols_x a logical or numeric vector indicating which columns of featureData 
+#' for \code{x} are shared between \code{x} and \code{y} and should feature in the 
+#' returned merged \code{SCESet}. Default is all columns of \code{fData(x)}.
+#' @param fdata_cols_y a logical or numeric vector indicating which columns of featureData 
+#' for \code{y} are shared between \code{x} and \code{y} and should feature in the 
+#' returned merged \code{SCESet}. Default is \code{fdata_cols_x}.
+#' @param pdata_cols_x a logical or numeric vector indicating which columns of phenoData 
+#' of \code{x} should be retained.
+#' @param pdata_cols_y a logical or numeric vector indicating which columns of phenoData 
+#' of \code{y} should be retained.
+#' 
+#' @details Existing cell-cell pairwise distances and feature-feature pairwise distances will not be valid for a merged SCESet so these are set to \code{NULL} in the returned object. Similarly \code{experimentData} will need to be added anew to the merged SCESet returned.
+#' 
+#' @return a merged \code{SCESet} object combining data and metadata from \code{x} and \code{y}
+#' 
+#' @export
+#' 
+#' @examples 
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+#' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+#' mergeSCESet(example_sceset[, 1:20], example_sceset[, 21:40])
+#' 
+#' ## with specification of columns of fData
+#' example_sceset <- calculateQCMetrics(example_sceset)
+#' mergeSCESet(example_sceset[, 1:20], example_sceset[, 21:40], fdata_cols_x = c(1, 7))
+#' 
+#' ## with specification of columns of pData
+#' mergeSCESet(example_sceset[, 1:20], example_sceset[, 21:40], pdata_cols_x = 1:6)
+#' 
+#' 
+mergeSCESet <- function(x, y, fdata_cols_x = 1:ncol(fData(x)), fdata_cols_y = fdata_cols_x,
+                        pdata_cols_x = NULL, pdata_cols_y = NULL) {
+    if (!is(x,'SCESet')) stop('x must be of type SCESet')
+    if (!is(y,'SCESet')) stop('y must be of type SCESet')
+    if (!identical(featureNames(x), featureNames(y))) stop("feature names of x and y must be identical")
+   
+    if (x@logged != y@logged)
+        stop("x and y do not have the same value for the 'logged' slot.")
+    if (x@lowerDetectionLimit != y@lowerDetectionLimit)
+        stop("x and y do not have the same lowerDetectionLimit.")
+    if (x@logExprsOffset != y@logExprsOffset)
+        stop("x and y do not have the same logExprsOffset.")
+    
+    ## combine fData
+    if (ncol(fData(x)) == 0) {
+        if (!identical(fData(x), fData(y)))
+            stop("featureData do not match for x and y.")
+        new_fdata <- as(fData(x), "AnnotatedDataFrame")
+    } else {
+        fdata1 <- fData(x)[, fdata_cols_x, drop = FALSE]
+        fdata2 <- fData(y)[, fdata_cols_y, drop = FALSE]
+        if (!identical(fdata1, fdata2))
+            stop("featureData columns specified are not identical for x and y.")
+        new_fdata <- as(fdata1, "AnnotatedDataFrame")
+    }
+    ## combine pData
+    if (ncol(pData(x)) == 0 || pData(y) == 0)
+        stop("phenoData slot is empty for x or y.")
+    pdata_x <- pData(x)
+    pdata_y <- pData(y)
+    if (is.null(pdata_cols_x)) {
+        if (is.null(pdata_cols_y)) {
+            pdata_cols_x <- which(colnames(pdata_x) %in% colnames(pdata_y))
+            pdata_cols_y <- which(colnames(pdata_y) %in% colnames(pdata_x))
+        } else
+            pdata_cols_x <- which(colnames(pdata_x) %in% colnames(pdata_y)[pdata_cols_y])
+    } else {
+        if (is.null(pdata_cols_y))
+            pdata_cols_y <- which(colnames(pdata_y) %in% colnames(pdata_x)[pdata_cols_x])
+    }
+    if (length(pdata_cols_x) == 0 | length(pdata_cols_y) == 0)
+        stop("no phenoData column names found in common between x and y.")
+    ## make sure ordering of columns is correct
+    pdata_x <- pdata_x[, pdata_cols_x, drop = FALSE]
+    pdata_y <- pdata_y[, pdata_cols_y, drop = FALSE]
+    mm <- match(colnames(pdata_x), colnames(pdata_y))
+    pdata_y <- pdata_y[, mm]
+    if (!identical(colnames(pdata_x), colnames(pdata_y)))
+        stop("phenoData columns specified are not identical for x and y.")
+    new_pdata <- rbind(pdata_x, pdata_y)
+    new_pdata <- as(new_pdata, "AnnotatedDataFrame")
+    ## combine exprsData
+    new_exprs <- Biobase::combine(exprs(x), exprs(y))
+    ## new SCESet
+    merged_sceset <- newSCESet(exprsData = new_exprs, featureData = new_fdata,
+                            phenoData = new_pdata, logged = x@logged,
+                            logExprsOffset = x@logExprsOffset)
+    ## add remaining assayData to merged SCESet
+    assay_names <- intersect(names(Biobase::assayData(x)), 
+                             names(Biobase::assayData(y)))
+    for (assaydat in assay_names) {
+        new_dat <- Biobase::combine(get_exprs(x, assaydat), get_exprs(y, assaydat))
+        set_exprs(merged_sceset, assaydat) <- new_dat
+    }
+    merged_sceset
+}
+
+
+
+################################################################################
+## writeSCESet
+
+#' Write an SCESet object to an HDF5 file 
+#'
+#' @param object \code{\link{SCESet}} object to be writted to file
+#' @param file_path path to written file containing data from SCESet object
+#' @param type character string indicating type of output file. Default is "HDF5".
+#' @param overwrite_existing logical, if a file of the same name already exists
+#' should it be overwritten? Default is \code{FALSE}.
+#'
+#' @details Currently writing to HDF5 files is supported. The \pkg{\link{rhdf5}}
+#' package is used to write data to file and can be used to read data from HDF5
+#' files into R. For further details about the HDF5 data format see 
+#' \url{https://support.hdfgroup.org/HDF5/}.
+#'
+#' @return Return is \code{NULL}, having written the \code{SCESet} object to file.
+#' @export
+#'
+#' @examples
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+#' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+#' 
+#' \dontrun{
+#' writeSCESet(example_sceset, "test.h5")
+#' file.remove("test.h5")
+#' }
+#' 
+writeSCESet <- function(object, file_path, type = "HDF5", overwrite_existing = FALSE) {
+    if (!is(object,'SCESet')) stop('object must be of type SCESet')
+    if (file.exists(file_path) && !overwrite_existing)
+        stop("To overwrite an existing file use argument overwrite_existing=TRUE")
+    if (file.exists(file_path))
+        file.remove(file_path)
+    if (type == "HDF5") {
+        rhdf5::H5close()
+        rhdf5::h5createFile(file_path)
+        tryCatch({
+            rhdf5::h5write(featureNames(object), file = file_path, 
+                           name = "featureNames")
+            rhdf5::h5write(cellNames(object), file = file_path, name = "cellNames")
+            rhdf5::h5write(object@logged, file = file_path, name = "logged")
+            rhdf5::h5write(object@logExprsOffset, file = file_path, 
+                           name = "logExprsOffset")
+            rhdf5::h5write(object@lowerDetectionLimit, file = file_path, 
+                           name = "lowerDetectionLimit")
+            if (ncol(pData(object)) > 0)
+                rhdf5::h5write(pData(object), file = file_path, name = "phenoData", 
+                               write.attributes = FALSE)
+            if (ncol(fData(object)) > 0)
+                rhdf5::h5write(fData(object), file = file_path, name = "featureData", 
+                               write.attributes = FALSE)
+            rhdf5::h5createGroup(file_path, "assayData")
+            for (assay in names(Biobase::assayData(object))) {
+                group_set <- paste0("assayData/", assay)
+                rhdf5::h5write(get_exprs(object, assay), file = file_path, 
+                               name = group_set, 
+                               write.attributes = FALSE)
+            }
+            rhdf5::H5close()
+        }, finally = rhdf5::H5close())
+    } else
+        stop("HDF5 is the only format currently supported. See also saveRDS() to write to an object readable with R.")
+}
+
+
+

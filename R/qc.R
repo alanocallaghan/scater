@@ -224,7 +224,8 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     } else {
         is_feature_control <- logical(nrow(object))
         feature_controls_fdata <- data.frame(is_feature_control)
-        feature_controls_pdata <- data.frame(matrix(0, nrow=ncol(object), ncol=0))
+        feature_controls_pdata <- data.frame(
+            matrix(0, nrow = ncol(object), ncol = 0))
     }
 
         ## Compute metrics using all feature controls
@@ -234,19 +235,22 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
         if ( !is.null(counts_mat) ) {
             df_pdata_counts <- .get_qc_metrics_exprs_mat(
                 counts_mat, is_feature_control, pct_feature_controls_threshold,
-                calc_top_features = TRUE, exprs_type = "counts")
+                calc_top_features = TRUE, exprs_type = "counts",
+                compute_endog = TRUE)
             df_pdata_this <- cbind(df_pdata_this, df_pdata_counts)
         }
         if ( !is.null(tpm_mat) ) {
             df_pdata_tpm <- .get_qc_metrics_exprs_mat(
                 tpm_mat, is_feature_control, pct_feature_controls_threshold,
-                calc_top_features = TRUE, exprs_type = "tpm")
+                calc_top_features = TRUE, exprs_type = "tpm", 
+                compute_endog = TRUE)
             df_pdata_this <- cbind(df_pdata_this, df_pdata_tpm)
         }
         if ( !is.null(fpkm_mat) ) {
             df_pdata_fpkm <- .get_qc_metrics_exprs_mat(
                 fpkm_mat, is_feature_control, pct_feature_controls_threshold,
-                calc_top_features = TRUE, exprs_type = "fpkm")
+                calc_top_features = TRUE, exprs_type = "fpkm",
+                compute_endog = TRUE)
             df_pdata_this <- cbind(df_pdata_this, df_pdata_fpkm)
         }
         n_detected_feature_controls <- nexprs(object, 
@@ -350,7 +354,7 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     new_pdata$total_features <- total_features
     new_pdata$log10_total_features <- log10(total_features)
     new_pdata$filter_on_total_features <- filter_on_total_features
-    new_pdata$pct_dropout <- 100 / nrow(object) * nexprs(object, subset.row = NULL)
+    new_pdata$pct_dropout <- 100 * (1 - nexprs(object, subset.row = NULL) / nrow(object) )
     new_pdata <- cbind(new_pdata, qc_pdata, cell_controls_pdata)
     pData(object) <-  new("AnnotatedDataFrame", new_pdata)
 
@@ -375,7 +379,7 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     new_fdata$n_cells_exprs <- nexprs(object, byrow = TRUE)
     total_exprs <- sum(exprs_mat)
     new_fdata$total_feature_exprs <- rowSums(exprs_mat)
-    if ( ! object@logged ) {
+    if ( !object@logged ) {
         new_fdata$log10_total_feature_exprs <-
             log10(new_fdata$total_feature_exprs + 1)
     }
@@ -415,9 +419,10 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
 
 
 .get_qc_metrics_exprs_mat <- function(exprs_mat, is_feature_control,
-                                           pct_feature_controls_threshold,
-                                           calc_top_features = FALSE,
-                                           exprs_type = "exprs") {
+                                      pct_feature_controls_threshold,
+                                      calc_top_features = FALSE,
+                                      exprs_type = "exprs",
+                                      compute_endog = FALSE) {
     ## Many thanks to Aaron Lun for suggesting efficiency improvements
     ## for this function.
     ## Get total expression from feature controls
@@ -439,7 +444,7 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     if (calc_top_features) { ## Do we want to calculate exprs accounted for by
         ## top features?
         ## Determine percentage of counts for top features by cell
-        top.number <- c(50L, 100L, 200L)
+        top.number <- c(50L, 100L, 200L, 500L)
         can.calculate <- top.number <= nrow(exprs_mat)
         if (any(can.calculate)) { 
             top.number <- top.number[can.calculate]
@@ -449,7 +454,22 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
             pct_exprs_top_out <- 100 * pct_exprs_top_out
             colnames(pct_exprs_top_out) <- paste0("pct_exprs_top_",
                                                   top.number, "_features")
-            df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_out)
+            if ( compute_endog ) {
+                if ( length(is_feature_control) < 1L )
+                    pct_exprs_top_endog_out <- pct_exprs_top_out
+                else {
+                    pct_exprs_top_endog_out <- .checkedCall(
+                        cxx_calc_top_features, exprs_mat[-is_feature_control,], 
+                        top.number)
+                    ## this call returns proportions, not percentages, so adjust
+                    pct_exprs_top_endog_out <- 100 * pct_exprs_top_endog_out
+                }
+                colnames(pct_exprs_top_endog_out) <- paste0(
+                    "pct_exprs_top_", top.number, "_endogenous_features")
+                df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_out, 
+                                       pct_exprs_top_endog_out)
+            } else
+                df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_out)
         }
     }
     colnames(df_pdata_this) <- gsub("exprs", exprs_type, colnames(df_pdata_this))
@@ -1273,35 +1293,6 @@ This variable will not be plotted."))
 }
 
 
-# ### Emergency test code
-# rsq <- fData(sce_simmons_filt_strict)[, grep("^Rsq", names(fData(sce_simmons_filt_strict)))]
-# head(rsq)
-# colSums(rsq > 0.99)
-#
-# rsq[rsq$Rsq_batch > 0.99,]
-#
-# plotExpression(sce_simmons_filt_strict, rownames(rsq)[rsq$Rsq_batch > 0.99], x = "batch",
-#                ncol = 6, colour_by = "tissue_type", exprs_values = "norm_exprs")
-#
-# design <- model.matrix(~sce_simmons_filt_strict$batch)
-# lm.first <- lm(norm_exprs(sce_simmons_filt_strict)["ERCC-00002",] ~ -1 + design)
-# summary(lm.first)$r.squared
-# summary(lm.first)$residuals
-# plot(lm.first)
-# lm2 <- lm(norm_exprs(sce_simmons_filt_strict)["ERCC-00002",] ~ sce_simmons_filt_strict$batch)
-# summary(lm2)$r.squared
-#
-# rsq_limma <- .getRSquared(norm_exprs(sce_simmons_filt_strict), design)
-#
-# rsq_base2 <- apply(norm_exprs(sce_simmons_filt_strict), 1, function(y) {
-#     lm.first <- lm(y ~ sce_simmons_filt_strict$batch); summary(lm.first)$r.squared})
-#
-# all(abs(rsq_base2 - rsq_limma) < 0.00000000000001)
-#
-# rsq_base <- apply(norm_exprs(sce_simmons_filt_strict), 1, function(y) {
-#     lm.first <- lm(y ~ -1 + design); summary(lm.first)$r.squared})
-# all(abs(rsq_base - rsq$Rsq_batch) < 0.000000000001)
-
 
 ################################################################################
 ### Plot expression frequency vs mean for feature controls
@@ -1326,6 +1317,12 @@ This variable will not be plotted."))
 #' @param shape (optional) numeric scalar to define the plotting shape.
 #' @param alpha (optional) numeric scalar (in the interval 0 to 1) to define the
 #'  alpha level (transparency) of plotted points.
+#' @param show_smooth logical, should a smoothed fit through feature controls
+#' (if available; all features if not) be shown on the plot? Lowess used if a 
+#' small number of feature controls. For details see 
+#' \code{\link[ggplot2]{geom_smooth}}.
+#' @param se logical, should standard error (confidence interval) be shown for 
+#' smoothed fit?
 #' @param ... further arguments passed to \code{\link{plotMetadata}} (should
 #' only be \code{size}, if anythin).
 #'
@@ -1350,9 +1347,16 @@ This variable will not be plotted."))
 #' ex_sceset <- calculateQCMetrics(ex_sceset)
 #' plotExprsFreqVsMean(ex_sceset)
 #'
+#' ex_sceset <- calculateQCMetrics(
+#' ex_sceset, feature_controls = list(controls1 = 1:20, 
+#'                                       controls2 = 500:1000),
+#'                                       cell_controls = list(set_1 = 1:5, 
+#'                                       set_2 = 31:40))
+#' plotExprsFreqVsMean(ex_sceset)
+#'
 plotExprsFreqVsMean <- function(object, feature_set = NULL,
                                 feature_controls = NULL, shape = 1, alpha = 0.7,
-                                ...) {
+                                show_smooth = TRUE, se = TRUE, ...) {
     if ( !is(object, "SCESet") )
         stop("Object must be an SCESet")
     if ( is.null(fData(object)$n_cells_exprs) ||
@@ -1431,35 +1435,52 @@ plotExprsFreqVsMean <- function(object, feature_set = NULL,
             xlab(x_lab)
     }
 
-    ## add dropout information if feature controls are present
+    ## data frame with expression mean and frequency for feature controls
+    mn_vs_fq <- data.frame(
+        mn = fData(object)$mean_exprs,
+        fq = fData(object)$pct_cells_exprs / 100,
+        is_feature_control = feature_controls_logical)
+    text_x_loc <- min(mn_vs_fq$mn) + 0.6 * diff(range(mn_vs_fq$mn))
+    
+    if ( show_smooth ) {
+        if ( any(feature_controls_logical) )
+            plot_out <- plot_out +
+                geom_smooth(aes_string(x = "mn", y = "100 * fq"), 
+                            data = mn_vs_fq[feature_controls_logical,], 
+                            colour = "firebrick", size = 1, se = se)
+        else
+            plot_out <- plot_out +
+                geom_smooth(aes_string(x = "mn", y = "100 * fq"), data = mn_vs_fq, 
+                            colour = "firebrick", size = 1, se = se)
+    }        
+    
+    ## estimate 50% spike-in dropout
     if ( any(feature_controls_logical) ) {
-        ## data frame with expression mean and frequency for feature controls
-        mn_vs_fq <- data.frame(
-            mn = fData(object)$mean_exprs,
-            fq = fData(object)$pct_cells_exprs / 100)
-
-        ## estimate 50% spike-in dropout
         dropout <- nls(fq ~ (1 / (1 + exp(-(-i + 1 * mn)))),
                        start = list(i = 5),
                        data = mn_vs_fq[feature_controls_logical,])
-        text_x_loc <- min(mn_vs_fq$mn) + 0.6 * diff(range(mn_vs_fq$mn))
-
-        ## add annotations to existing plot
-        plot_out <- plot_out +
-            geom_hline(yintercept = 50, linetype = 2) + # 50% dropout
+        # nl_fit_df <- data.frame(
+        #     x = quantile(mn_vs_fq$mn, probs = seq(0.01, 0.999, by = 0.001)))
+        # nl_fit_df$y <- 100 * (1/(1 + exp(-(-coef(dropout) + 1 * nl_fit_df$x))))
+        # nl_fit_df$is_feature_control <- FALSE
+        ## annotate plot
+        plot_out <- plot_out + 
             geom_vline(xintercept = coef(dropout), linetype = 2) +
-            # expression at 50% dropout
             annotate("text", x = text_x_loc, y = 60, label = paste(
                 sum(mn_vs_fq[!feature_controls_logical, "mn"] > coef(dropout)),
-                " genes with\nhigh technical dropout", sep = "")) +
-            annotate("text", x = text_x_loc, y = 40, label =  paste(
-                sum(mn_vs_fq$fq >= 0.5),
-                " genes are expressed\nin at least 50% of cells", sep = "" )) +
-            annotate("text", x = text_x_loc, y = 20, label =  paste(
-                sum(mn_vs_fq$fq >= 0.25),
-                " genes are expressed\nin at least 25% of cells", sep = "" ))
+                " genes with mean expression\nhigher than value for 50% dropout of feature controls", sep = ""))
     }
-
+    
+    ## add annotations to existing plot
+    plot_out <- plot_out +
+        geom_hline(yintercept = 50, linetype = 2) + # 50% dropout
+        annotate("text", x = text_x_loc, y = 40, label =  paste(
+            sum(mn_vs_fq$fq >= 0.5),
+            " genes are expressed\nin at least 50% of cells", sep = "" )) +
+        annotate("text", x = text_x_loc, y = 20, label =  paste(
+            sum(mn_vs_fq$fq >= 0.25),
+            " genes are expressed\nin at least 25% of cells", sep = "" ))
+    
     ## return the plot object
     plot_out
 }

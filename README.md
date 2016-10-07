@@ -44,21 +44,14 @@ source("https://bioconductor.org/biocLite.R")
 biocLite("scater")
 ```
 
-Currently, only the "devel" (i.e. development) version of `scater` is
-available through Bioconductor. This means that you will need to be
-using Bioconductor devel and the development version of R (R 3.3) in
-order to install `scater` from Bioconductor.
-
-The `scater` package will become available as a "release" version in
-the next Bioconductor release in April 2016. At this point the release
-version of `scater` will work with the release version of R and
-Bioconductor, and development will continue in the devel version of
-the package.
+The `scater` package has been available as a "release" version in
+the Bioconductor since April 2016. The release version of `scater` works with the release version of R and Bioconductor, and development will continue in the devel version of the package on Bioconductor. Future releases will follow the regular 
+Bioconductor release cycle.
 
 ## Installation from Github
 Alternatively, `scater` can be installed directly from GitHub as
 described below. In this case, package that `scater` uses ("depends
-on" in R parlance) will not be automatically installed, so you will
+on" in R parlance) may not be automatically installed, so you may
 have to install the required packages as shown below.
 
 I recommend using Hadley Wickham's `devtools` package to install
@@ -66,14 +59,14 @@ I recommend using Hadley Wickham's `devtools` package to install
 then install that from CRAN (as shown below) and then run the call to
 install `scater`:
 
-**If you are using the development version of R, 3.3:**
+**If you are using R version 3.3:**
 
 ```{r}
 install.packages("devtools")
 devtools::install_github("davismcc/scater", build_vignettes = TRUE)
 ```
 
-**If you are using the current release version of R, 3.2.3:**
+**If you are using R version 3.2.3:**
 ```{r}
 devtools::install_github("davismcc/scater", ref = "release-R-3.2", build_vignettes = TRUE)
 ```
@@ -82,7 +75,7 @@ If you find that the above will not install on Linux systems, please
 try with the option `build_vignettes = FALSE`. This is a known issue
 that we are working to resolve.
 
-Using the most recent version of R is strongly recommended (R 3.2.3 at the time
+Using the most recent version of R is strongly recommended (R 3.3.2 at the time
 of writing). Effort has been made to ensure the package works with R >3.0, but
 the package has not been tested with R <3.1.1.
 
@@ -140,9 +133,10 @@ browseVignettes("scater")
 There is a detailed HTML document available that introduces the main features
 and functionality of `scater`.
 
+
 ## `scater` workflow
 
-The diagram below provised an overview of the pre-processing and QC workflow possible in `scater`, listing the functions that can be used at various stages.
+The diagram below provised an overview of the pre-processing and QC workflow possible in `scater`, listing the functions that can be used at various stages. A first place to start is with the `newSCESet` function, which will allow you to create a data object for use with `scater`.
 
 ![Diagram outlining the scater workflow](inst/scater_qc_workflow.png)
 
@@ -164,9 +158,9 @@ For details of how to use these functions, please consult the **vignette** and *
 
 Use the `calculateQCMetrics` function to compute many metrics useful for gene/transcript-level and cell-level QC. Metrics computed include number of genes expressed per cell, percentage of expression from control genes (e.g. ERCC spike-ins) and many more.
 
-### Transcript quantification with `kallisto`
+### Transcript quantification with `kallisto` or `Salmon`
 
-The `runKallisto` function provides a wrapper to the [`kallisto`](http://pachterlab.github.io/kallisto) software for quantifying transcript abundance from FASTQ files using a pseudo-alignment approach. This new approach is extremely fast. With `readKallisto`, transcript quantities can be read into a data object in `R`.
+The `runKallisto` and `runSalmon` functions provides wrappers to the [`kallisto`](http://pachterlab.github.io/kallisto) and ['Salmon'](https://combine-lab.github.io/salmon/) software for quantifying transcript abundance from FASTQ files using a "pseudo-alignment"" or "lightweight alignment" approaches. These new approaches are extremely fast while retaining accuracy. With `readKallistoResults` and `readSalmonResults`, transcript quantities can be read into a data object in `R`.
 
 ### Plotting functions
 
@@ -206,15 +200,7 @@ The package leans heavily on previously published work and packages, namely
 and `SCESet` objects in `scater` can be easily converted to and from `monocle's`
 `CellDataSet` objects.
 
-
-<!---
-It also uses and extends code for an approximate rank-product test by [Heskes et al (2014)](http://dx.doi.org/10.1186/s12859-014-0367-1).
--->
-
-
-The package is currently in an Beta state. The major functionality of the
-package is settled, but it is still under development so may change from time
-to time. Please do try it and contact me with bug reports, feedback, feature
+We hope the `scater` package makes your life easier when analysing single-cell RNA_seq data. Please do try it and contact me with bug reports, feedback, feature
 requests, questions and suggestions to improve the package.
 
-Davis McCarthy, February 2016
+Davis McCarthy, September 2016

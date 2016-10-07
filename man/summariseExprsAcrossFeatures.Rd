@@ -5,7 +5,7 @@
 \title{Summarise expression values across feature}
 \usage{
 summariseExprsAcrossFeatures(object, exprs_values = "tpm",
-  summarise_by = "feature_id")
+  summarise_by = "feature_id", scaled_tpm_counts = TRUE, lib_size = NULL)
 }
 \arguments{
 \item{object}{an \code{SCESet} object.}
@@ -17,8 +17,17 @@ transcripts-per-million slot or \code{'fpkm'} the FPKM slot.}
 
 \item{summarise_by}{character string giving the column of \code{fData(object)}
 that will be used as the features for which summarised expression levels are 
-to be produced. Default is \code{'feature_id'}.
- \code{"exprs"}.}
+to be produced. Default is \code{'feature_id'}.}
+
+\item{scaled_tpm_counts}{logical, should feature-summarised counts be 
+computed from summed TPM values scaled by total library size? This approach
+is recommended (see \url{https://f1000research.com/articles/4-1521/v2}), so
+the default is \code{TRUE} and it is applied if TPM values are available in
+the object.}
+
+\item{lib_size}{optional vector of numeric values of same length as the 
+number of columns in the \code{SCESet} object providing the total library 
+size (e.g. "count of mapped reads") for each cell/sample.}
 }
 \value{
 an SCESet object
@@ -37,7 +46,9 @@ adjusting for feature length. Thus, we cannot sum counts over a set of
 features to get the expression of that set (for example, we cannot sum counts
 over transcripts to get accurate expression estimates for a gene). See the 
 following link for a discussion of RNA-seq expression units by Harold Pimentel:
-\url{https://haroldpimentel.wordpress.com/2014/05/08/what-the-fpkm-a-review-rna-seq-expression-units/}.
+\url{https://haroldpimentel.wordpress.com/2014/05/08/what-the-fpkm-a-review-rna-seq-expression-units/}. For more details about the effects of summarising 
+transcript expression values at the gene level see Sonesen et al, 2016 
+(\url{https://f1000research.com/articles/4-1521/v2}).
 }
 \examples{
 data("sc_example_counts")
@@ -47,7 +58,13 @@ example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 fd <- new("AnnotatedDataFrame", data = 
 data.frame(gene_id = featureNames(example_sceset), 
 feature_id = paste("feature", rep(1:500, each = 4), sep = "_")))
+rownames(fd) <- featureNames(example_sceset)
 fData(example_sceset) <- fd
+effective_length <- rep(c(1000, 2000), times = 1000)
+tpm(example_sceset) <- calculateTPM(example_sceset, effective_length, calc_from = "counts")
+
+example_sceset_summarised <- 
+summariseExprsAcrossFeatures(example_sceset, exprs_values = "tpm")
 example_sceset_summarised <- 
 summariseExprsAcrossFeatures(example_sceset, exprs_values = "counts")
 example_sceset_summarised <- 

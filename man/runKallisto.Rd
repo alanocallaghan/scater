@@ -68,7 +68,7 @@ commands that would be run and the output directories is returned. Can be
 used to read in results if kallisto is run outside an R session or to produce
  a script to run outside of an R session.}
 
-\item{kallisto_cmd}{(optional) string giving full command to use fo call
+\item{kallisto_cmd}{(optional) string giving full command to use to call
 kallisto, if simply typing "kallisto" at the command line does not give the
 required version of kallisto or does not work. Default is simply "kalliso".
 If used, this argument should give the full path to the desired kallisto

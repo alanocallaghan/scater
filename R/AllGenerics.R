@@ -1,5 +1,11 @@
 ### defining all generic methods
 
+#' @name cellNames<-
+#' @export
+#' @docType methods
+#' @rdname cellNames
+setGeneric("cellNames<-", function(object, value) {standardGeneric("cellNames<-")})
+
 #' @name get_exprs
 #' @export
 #' @docType methods

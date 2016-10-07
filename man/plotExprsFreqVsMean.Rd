@@ -5,7 +5,7 @@
 \title{Plot frequency of expression against mean expression level}
 \usage{
 plotExprsFreqVsMean(object, feature_set = NULL, feature_controls = NULL,
-  shape = 1, alpha = 0.7, ...)
+  shape = 1, alpha = 0.7, show_smooth = TRUE, se = TRUE, ...)
 }
 \arguments{
 \item{object}{an \code{SCESet} object.}
@@ -30,6 +30,14 @@ so, then these feature controls are used.}
 
 \item{alpha}{(optional) numeric scalar (in the interval 0 to 1) to define the
 alpha level (transparency) of plotted points.}
+
+\item{show_smooth}{logical, should a smoothed fit through feature controls
+(if available; all features if not) be shown on the plot? Lowess used if a 
+small number of feature controls. For details see 
+\code{\link[ggplot2]{geom_smooth}}.}
+
+\item{se}{logical, should standard error (confidence interval) be shown for 
+smoothed fit?}
 
 \item{...}{further arguments passed to \code{\link{plotMetadata}} (should
 only be \code{size}, if anythin).}
@@ -57,6 +65,13 @@ pd <- new("AnnotatedDataFrame", data=sc_example_cell_info)
 rownames(pd) <- pd$Cell
 ex_sceset <- newSCESet(countData=sc_example_counts, phenoData=pd)
 ex_sceset <- calculateQCMetrics(ex_sceset)
+plotExprsFreqVsMean(ex_sceset)
+
+ex_sceset <- calculateQCMetrics(
+ex_sceset, feature_controls = list(controls1 = 1:20, 
+                                      controls2 = 500:1000),
+                                      cell_controls = list(set_1 = 1:5, 
+                                      set_2 = 31:40))
 plotExprsFreqVsMean(ex_sceset)
 
 }

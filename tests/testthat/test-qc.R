@@ -95,5 +95,20 @@ test_that("plotExplanatoryVariables works as expected", {
 })
 
 
-
+test_that("plotExprsFreqVsMean works as expected", {
+    data("sc_example_counts")
+    data("sc_example_cell_info")
+    pd <- new("AnnotatedDataFrame", data=sc_example_cell_info)
+    rownames(pd) <- pd$Cell
+    ex_sceset <- newSCESet(countData=sc_example_counts, phenoData=pd)
+    ex_sceset <- calculateQCMetrics(ex_sceset)
+    expect_that(plotExprsFreqVsMean(ex_sceset), is_a("ggplot"))
+    
+    ex_sceset <- calculateQCMetrics(
+        ex_sceset, feature_controls = list(controls1 = 1:20,
+                                           controls2 = 500:1000),
+        cell_controls = list(set_1 = 1:5,
+                             set_2 = 31:40))
+    expect_that(plotExprsFreqVsMean(ex_sceset), is_a("ggplot"))
+})
 

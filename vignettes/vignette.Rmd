@@ -28,7 +28,8 @@ The `scater` package is contains tools to help with the analysis of single-cell
 transcriptomic data, with the focus on RNA-seq data. The package features:
 
 * A data structure for single-cell expression data;
-* Wrappers to [`kallisto`](http://pachterlab.github.io/kallisto/) for rapid
+* Wrappers to [`kallisto`](http://pachterlab.github.io/kallisto/)  and 
+['Salmon'](https://combine-lab.github.io/salmon/) for rapid
 quantification of transcript abundance and tight integration with `scater`;
 * Simple calculation of many quality control metrics from the expression data;
 * Many tools for visualising scRNA-seq data, especially diagnostic plots
@@ -111,6 +112,8 @@ cells.
 * `plotMDS`: produce a multi-dimensional scaling plot for the cells.
 * `plotReducedDim`: plot a reduced-dimension representation of the cells.
 * `plotExpression`: plot expression levels for a defined set of features.
+* `plotPlatePosition`: plot cells in their position on a plate, coloured by 
+cell metadata and QC metrics or feature expression level.
 * `plotPhenoData`: plot cell metadata and QC metrics.
 * `plotFeatureData`: plot feature metadata and QC metrics.
 
@@ -823,12 +826,19 @@ limma::plotMDS(featDist(example_sceset))
 ```
 
 
-#  Using **kallisto** to quantify transcript abundance from within R
+#  Using **kallisto** and **Salmon** to quantify transcript abundance from within R
 
 Lior Pachter's group at Berkeley has recently released a new software tool
 called **kallisto** for rapid quantification of transcript abundance from RNA-seq
-data. In `scater`, a couple of wrapper functions to `kallisto` enable easy and
+data. Similarly, Rob Patro at Stony Brook University and colleagues have 
+released **Salmon**, a similarly fast and accurate RNA-seq quantification tool.
+In `scater`, a couple of wrapper functions to `kallisto` and `Salmon` enable easy and
 extremely fast quantification of transcript abundance from within R.
+
+For simplicity, examples are shown below demonstrating the use of `kallisto`, 
+but the same could be done with `Salmon` using almost identical interfaces 
+(replacing `runKallisto` with `runSalmon`, `readKallistoResults` with 
+`readSalmonResults` and so on).
 
 ```{r kallisto-demo-kallisto-test-data, eval=FALSE}
 ################################################################################
@@ -843,7 +853,7 @@ sce_test <- readKallistoResults(kallisto_log, read_h5=TRUE)
 sce_test
 ```
 
-An example using real data from a project investigating cell cycle. Not that
+An example using real data from a project investigating cell cycle. Note that
 this analysis is not 'live' (the raw data are not included in the package), but
 it demonstrates what can be done with `scater` and `kallisto`.
 
