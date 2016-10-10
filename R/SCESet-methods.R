@@ -130,7 +130,7 @@ newSCESet <- function(exprsData = NULL,
                     exprsData <- log2(cpmData + logExprsOffset)
                     logged <- TRUE
                 }  else {
-                    exprsData <- .cpm_default(countData, prior.count = logExprsOffset, log = TRUE)
+                    exprsData <- edgeR::cpm.default(countData, prior.count = logExprsOffset, log = TRUE)
                     logged <- TRUE
                 }
             }

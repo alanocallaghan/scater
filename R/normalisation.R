@@ -347,45 +347,23 @@ normalize.SCESet <- function(object, exprs_values = "counts",
     return(object)
 }
 
-.cpm_default <- function(counts, lib.sizes=NULL, prior.count=1, log=FALSE)
-# Code taken from edgeR but implemented into C++ to reduce temporary constructs.
-{
-    if (is.null(lib.sizes)) {
-        lib.sizes <- colSums(counts)
-    }
-    lib.sizes <- as.double(lib.sizes)
-    lib.sizes <- rep(lib.sizes, length.out=ncol(counts))
-
-    if (log) {
-        prior.count <- lib.sizes/mean(lib.sizes) * prior.count
-        lib.sizes <- lib.sizes + 2 * prior.count
-    } else {
-        prior.count <- numeric(ncol(counts))
-    }
-
-    lib.sizes <- lib.sizes/1e6 # per million, obviously.
-    out <- .checkedCall(cxx_calc_cpm, counts, lib.sizes, prior.count, log)
-    dimnames(out) <- dimnames(counts)
-    return(out)
-}
-
 
 .recompute_cpm_fun <- function(exprs_mat, size_factors,
                                lib_size, logExprsOffset) {
-    .cpm_default(exprs_mat,
+    edgeR::cpm.default(exprs_mat,
        # centering size factors on the average library size:
-       lib.sizes = (size_factors * mean(lib_size) / mean(size_factors)),
-       log = FALSE)
+       lib.size = (size_factors * mean(lib_size) / mean(size_factors)),
+       log = FALSE, prior.count = logExprsOffset)
 }
 
 .recompute_expr_fun <- function(exprs_mat, size_factors,
                                 logExprsOffset, isCount) {
     size_factors <- size_factors / mean(size_factors)
     if (isCount) {
-        out <- .cpm_default(
+        out <- edgeR::cpm.default(
                    exprs_mat, prior.count = logExprsOffset,
                    # 1e6 multiplication, so CPM *is* the "normalized" count:
-                   lib.sizes = size_factors * 1e6, log = TRUE)
+                   lib.size = size_factors * 1e6, log = TRUE)
     } else {
         out <- log2(t(t(exprs_mat) / size_factors) + logExprsOffset)
     }
