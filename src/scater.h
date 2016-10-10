@@ -40,7 +40,7 @@ SEXP colsum_exprs_subset(SEXP, SEXP, SEXP);
 
 SEXP rowsum_exprs(SEXP, SEXP);
 
-SEXP calc_top_features(SEXP, SEXP);
+SEXP calc_top_features(SEXP, SEXP, SEXP);
 
 SEXP negative_counts(SEXP);
 

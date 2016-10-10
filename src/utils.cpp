@@ -209,7 +209,7 @@ SEXP missing_exprs(SEXP matrix) try {
 /* A function to get the percentage of counts/expression taken up by the top set of genes. */
 
 template <typename T>
-SEXP calc_top_features_internal(const T* ptr, const matrix_info& MAT, SEXP top) {
+SEXP calc_top_features_internal(const T* ptr, const matrix_info& MAT, SEXP top, SEXP subset) {
     if (!isInteger(top)) { 
         throw std::runtime_error("top specification must be an integer vector");
     }
@@ -220,7 +220,27 @@ SEXP calc_top_features_internal(const T* ptr, const matrix_info& MAT, SEXP top) 
             throw std::runtime_error("numbers of top genes must be sorted"); 
         }
     }
-    if (ntop && (tptr[0] < 1 || tptr[ntop-1] > MAT.nrow)) {
+
+    // Checking subsetting vector.
+    int slen=0;
+    int* sptr=NULL;
+    const bool use_subset=(subset!=R_NilValue);
+    if (use_subset) {
+        if (!isInteger(subset)) { 
+            throw std::runtime_error("subset vector must be an integer vector");
+        }
+        slen=LENGTH(subset);
+        sptr=INTEGER(subset);
+        for (int s=0; s<slen; ++s) {
+            if (sptr[s] < 0 || sptr[s] >= MAT.nrow) { 
+                throw std::runtime_error("subset indices out of range");
+            }
+        }
+    }
+
+    // Figuring out what is the number of rows to iterate over.
+    const int& itercycles=(use_subset ? slen : MAT.nrow);
+    if (ntop && (tptr[0] < 1 || tptr[ntop-1] > itercycles)) {
         throw std::runtime_error("number of top genes is out of index range");
     }
     
@@ -235,16 +255,17 @@ SEXP calc_top_features_internal(const T* ptr, const matrix_info& MAT, SEXP top) 
             optrs[t]=optrs[t-1]+MAT.ncol;
         }
 
-        std::deque<T> values(MAT.nrow);
+        std::deque<T> values(itercycles);
         size_t r, x;
         size_t target_index;
         double accumulated, total;
 
         for (size_t c=0; c<MAT.ncol; ++c) {
             total=0;
-            for (r=0; r<MAT.nrow; ++r) {
-                values[r]=ptr[r];
-                total+=ptr[r];
+            for (r=0; r<itercycles; ++r) {
+                const T& chosen=ptr[use_subset ? sptr[r] : r];
+                values[r]=chosen;
+                total+=chosen;
             }
             
             // Sorting in descending order, and computing the accumulated total.
@@ -271,12 +292,12 @@ SEXP calc_top_features_internal(const T* ptr, const matrix_info& MAT, SEXP top) 
     return output;
 }
 
-SEXP calc_top_features (SEXP matrix, SEXP top) try {
+SEXP calc_top_features (SEXP matrix, SEXP top, SEXP subset) try {
     matrix_info MAT=check_matrix(matrix);
     if (MAT.is_integer){
-        return calc_top_features_internal<int>(MAT.iptr, MAT, top);
+        return calc_top_features_internal<int>(MAT.iptr, MAT, top, subset);
     } else {
-        return calc_top_features_internal<double>(MAT.dptr, MAT, top);
+        return calc_top_features_internal<double>(MAT.dptr, MAT, top, subset);
     }
 } catch (std::exception& e) {
     return mkString(e.what());

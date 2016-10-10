@@ -449,27 +449,39 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
         if (any(can.calculate)) { 
             top.number <- top.number[can.calculate]
             pct_exprs_top_out <- .checkedCall(cxx_calc_top_features, exprs_mat,
-                                              top.number)
+                                              top.number, NULL)
             ## this call returns proportions, not percentages, so adjust
             pct_exprs_top_out <- 100 * pct_exprs_top_out
             colnames(pct_exprs_top_out) <- paste0("pct_exprs_top_",
                                                   top.number, "_features")
+            df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_out)
+            
             if ( compute_endog ) {
-                if ( length(is_feature_control) < 1L )
+                if ( length(is_feature_control) < 1L ) {
                     pct_exprs_top_endog_out <- pct_exprs_top_out
-                else {
-                    pct_exprs_top_endog_out <- .checkedCall(
-                        cxx_calc_top_features, exprs_mat[-is_feature_control,], 
-                        top.number)
-                    ## this call returns proportions, not percentages, so adjust
-                    pct_exprs_top_endog_out <- 100 * pct_exprs_top_endog_out
+                    colnames(pct_exprs_top_endog_out) <- paste0(
+                        "pct_exprs_top_", top.number, "_endogenous_features")
+                    df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_endog_out)
+                } else {
+                    ## Getting the non-control features in the matrix.
+                    not_feature_control <- seq_len(nrow(exprs_mat))
+                    not_feature_control <- not_feature_control[-is_feature_control]
+                    not_feature_control <- not_feature_control - 1L
+
+                    can.calculate.endog <- top.number <= length(not_feature_control)
+                    if (any(can.calculate.endog)) { 
+                        top.number.endog <- top.number[can.calculate.endog]
+                        pct_exprs_top_endog_out <- .checkedCall(
+                            cxx_calc_top_features, exprs_mat, top.number.endog,
+                            not_feature_control)
+                        ## this call returns proportions, not percentages, so adjust
+                        pct_exprs_top_endog_out <- 100 * pct_exprs_top_endog_out
+                        colnames(pct_exprs_top_endog_out) <- paste0(
+                                "pct_exprs_top_", top.number.endog, "_endogenous_features")
+                        df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_endog_out)
+                    }
                 }
-                colnames(pct_exprs_top_endog_out) <- paste0(
-                    "pct_exprs_top_", top.number, "_endogenous_features")
-                df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_out, 
-                                       pct_exprs_top_endog_out)
-            } else
-                df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_out)
+            } 
         }
     }
     colnames(df_pdata_this) <- gsub("exprs", exprs_type, colnames(df_pdata_this))
