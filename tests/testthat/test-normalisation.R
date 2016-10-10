@@ -40,23 +40,23 @@ test_that("we can compute normalised expression values with RLE method", {
     expect_that(example_sceset, is_a("SCESet"))
 })
 
-test_that("we can compute normalised expression values with upperquartile 
-          method", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-    example_sceset <- newSCESet(countData = sc_example_counts + 1, 
-                                phenoData = pd)
-    keep_gene <- rowSums(counts(example_sceset)) > 0
-    example_sceset <- example_sceset[keep_gene,]
-    example_sceset <- example_sceset[
-        matrixStats::rowVars(counts(example_sceset)) > 0,]
-    
-    example_sceset <- normaliseExprs(example_sceset, method = "upperquartile", 
-                                     feature_set = 1:200)
-    
-    expect_that(example_sceset, is_a("SCESet"))
-})
+# test_that("we can compute normalised expression values with upperquartile 
+#           method", {
+#     data("sc_example_counts")
+#     data("sc_example_cell_info")
+#     pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+#     example_sceset <- newSCESet(countData = sc_example_counts + 1, 
+#                                 phenoData = pd)
+#     keep_gene <- rowSums(counts(example_sceset)) > 0
+#     example_sceset <- example_sceset[keep_gene,]
+#     example_sceset <- example_sceset[
+#         matrixStats::rowVars(counts(example_sceset)) > 0,]
+#     
+#     example_sceset <- normaliseExprs(example_sceset, method = "upperquartile", 
+#                                      feature_set = 1:200)
+#     
+#     expect_that(example_sceset, is_a("SCESet"))
+# })
 
 test_that("we can compute normalised expression values with none method", {
     data("sc_example_counts")
