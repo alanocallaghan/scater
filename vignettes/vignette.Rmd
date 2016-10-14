@@ -312,6 +312,8 @@ plotExpression(example_sceset, rownames(example_sceset)[7:12],
                log = TRUE)
 ```
 
+The package also contains the function `plotExprsVsTxLength()` for plotting expression values against transcript length, and the function `plotPlatePosition()` to plot expression values and cell metadata information for cells in their position on a plate.
+
 
 #  Quality control
 
