@@ -5,7 +5,7 @@
 \title{Identify if a cell is an outlier based on a metric}
 \usage{
 isOutlier(metric, nmads = 5, type = c("both", "lower", "higher"),
-  log = FALSE, na.rm = FALSE)
+  log = FALSE, subset = NULL, batch = NULL)
 }
 \arguments{
 \item{metric}{numeric or integer vector of values for a metric}
@@ -20,9 +20,13 @@ or the higher end ("higher")}
 \item{log}{logical, should the values of the metric be transformed to the 
 log10 scale before computing median-absolute-deviation for outlier detection?}
 
-\item{na.rm}{logical, should NA (missing) values be removed before computing
-median and median-absolute-deviation values? If \code{FALSE} then return 
-values for median and median-absolute-deviation will be NA if any value is NA.}
+\item{subset}{logical or integer vector, which subset of values should be 
+used to calculate the median/MAD? If \code{NULL}, all values are used.
+Missing values will trigger a warning and will be automatically ignored.}
+
+\item{batch}{factor of length equal to \code{metric}, specifying the batch
+to which each observation belongs. A median/MAD is calculated for each batch,
+and outliers are then identified within each batch.}
 }
 \value{
 a logical vector of the same length as the \code{metric} argument

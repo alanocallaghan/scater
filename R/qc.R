@@ -232,27 +232,17 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     df_pdata_this <- .get_qc_metrics_exprs_mat(
         exprs_mat, is_feature_control, pct_feature_controls_threshold,
         calc_top_features = TRUE, exprs_type = "exprs", compute_endog = FALSE)
-    if ( !is.null(counts_mat) ) {
-        df_pdata_counts <- .get_qc_metrics_exprs_mat(
-            counts_mat, is_feature_control, pct_feature_controls_threshold,
-            calc_top_features = TRUE, exprs_type = "counts",
+
+    for (ex in c("counts", "tpm", "fpkm")) { 
+        cur_mat <- switch(ex, counts=counts_mat, tpm=tpm_mat, fpkm=fpkm_mat)
+        if (is.null(cur_mat)) { next }
+        df_pdata_current <- .get_qc_metrics_exprs_mat(
+            cur_mat, is_feature_control, pct_feature_controls_threshold,
+            calc_top_features = TRUE, exprs_type = ex,
             compute_endog = TRUE)
-        df_pdata_this <- cbind(df_pdata_this, df_pdata_counts)
+        df_pdata_this <- cbind(df_pdata_this, df_pdata_current)
     }
-    if ( !is.null(tpm_mat) ) {
-        df_pdata_tpm <- .get_qc_metrics_exprs_mat(
-            tpm_mat, is_feature_control, pct_feature_controls_threshold,
-            calc_top_features = TRUE, exprs_type = "tpm", 
-            compute_endog = TRUE)
-        df_pdata_this <- cbind(df_pdata_this, df_pdata_tpm)
-    }
-    if ( !is.null(fpkm_mat) ) {
-        df_pdata_fpkm <- .get_qc_metrics_exprs_mat(
-            fpkm_mat, is_feature_control, pct_feature_controls_threshold,
-            calc_top_features = TRUE, exprs_type = "fpkm",
-            compute_endog = TRUE)
-        df_pdata_this <- cbind(df_pdata_this, df_pdata_fpkm)
-    }
+
     n_detected_feature_controls <- nexprs(object, 
                                           subset.row = is_feature_control) 
     df_pdata_this$n_detected_feature_controls <- n_detected_feature_controls
@@ -261,6 +251,7 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     ## Compute total_features and find outliers
     total_features <-  nexprs(object, subset.row = !is_feature_control) 
     filter_on_total_features <- isOutlier(total_features, nmads, type = "lower")
+
     ## Compute total_counts if counts are present
     if ( !is.null(counts_mat) )
         total_counts <- colSums(counts_mat)
@@ -272,18 +263,15 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     qc_pdata <- feature_controls_pdata
     qc_pdata$exprs_endogenous_features <- colSums(exprs_mat) -
         feature_controls_pdata$exprs_feature_controls
-    if ( !is.null(counts_mat) ) {
-        qc_pdata$counts_endogenous_features <- total_counts -
-            feature_controls_pdata$counts_feature_controls
+
+    for (ex in c("counts", "tpm", "fpkm")) { 
+        cur_mat <- switch(ex, counts=counts_mat, tpm=tpm_mat, fpkm=fpkm_mat)
+        if (is.null(cur_mat)) { next }
+        cur_totals <- switch(ex, counts=total_counts, colSums(cur_mat))
+        qc_pdata[[paste0(ex, "_endogenous_features")]] <- cur_totals -
+            feature_controls_pdata[[paste0(ex, "_feature_controls")]]
     }
-    if ( !is.null(tpm_mat) ) {
-        qc_pdata$tpm_endogenous_features <- colSums(tpm_mat) -
-            feature_controls_pdata$tpm_feature_controls
-    }
-    if ( !is.null(fpkm_mat) ) {
-        qc_pdata$fpkm_endogenous_features <- colSums(fpkm_mat) -
-            feature_controls_pdata$fpkm_feature_controls
-    }
+
     ## Define log10 read counts from feature controls
     cols_to_log <- grep("^counts_|^tpm_|^fpkm_", colnames(qc_pdata))
     if ( !object@logged ) {
@@ -291,6 +279,7 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     }
     log10_cols <- log10(qc_pdata[, cols_to_log, drop = FALSE] + 1)
     colnames(log10_cols) <- paste0("log10_", colnames(qc_pdata)[cols_to_log])
+
     ## Combine into a big pdata object
     qc_pdata <- cbind(qc_pdata, log10_cols)
     
@@ -343,10 +332,12 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
 
     ## Add cell-level QC metrics to pData
     new_pdata <- as.data.frame(pData(object))
+
     ### Remove columns to be replaced
     to_replace <- colnames(new_pdata) %in%
         c(colnames(qc_pdata), colnames(cell_controls_pdata))
     new_pdata <- new_pdata[, !to_replace, drop = FALSE]
+
     ### Add new QC metrics
     new_pdata$total_counts <- total_counts
     new_pdata$log10_total_counts <- log10(total_counts)
@@ -370,9 +361,11 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     
     ## Add feature-level QC metrics to fData
     new_fdata <- as.data.frame(fData(object))
+
     ### Remove columns that are to be replaced
     to_replace <- colnames(new_fdata) %in% colnames(feature_controls_fdata)
     new_fdata <- new_fdata[, !to_replace, drop = FALSE]
+
     ### Add new QC information
     new_fdata$mean_exprs <- rowMeans(exprs(object))
     new_fdata$exprs_rank <- rank(rowMeans(exprs(object)))
@@ -386,28 +379,18 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     new_fdata$pct_total_exprs <- 100 * rowSums(exprs_mat) / total_exprs
     new_fdata$pct_dropout <- 100 * (1 - new_fdata$n_cells_exprs / ncol(object))
   
+    for (ex in c("counts", "tpm", "fpkm")) { 
+        cur_mat <- switch(ex, counts=counts_mat, tpm=tpm_mat, fpkm=fpkm_mat)
+        if (is.null(cur_mat)) { next }
+        cur_totals <- sum(as.double(colSums(cur_mat))) # avoid integer overflow
 
-    if ( !is.null(counts_mat) ) {
-        total_counts <- sum(as.double(colSums(counts_mat))) # avoid integer overflow
-        new_fdata$total_feature_counts <- rowSums(counts_mat)
-        new_fdata$log10_total_feature_counts <-
-            log10(new_fdata$total_feature_counts + 1)
-        new_fdata$pct_total_counts <- 100 * rowSums(counts_mat) / total_counts
+        cur_feature_totals <- rowSums(cur_mat)
+        new_fdata[[paste0("total_feature_", ex)]] <- cur_feature_totals
+        new_fdata[[paste0("log10_total_feature_", ex)]] <-
+            log10(cur_feature_totals + 1)
+        new_fdata[[paste0("pct_total_", ex)]] <- 100 * cur_feature_totals/cur_totals
     }
-    if ( !is.null(tpm_mat) ) {
-        total_tpm <- sum(tpm_mat)
-        new_fdata$total_feature_tpm <- rowSums(tpm_mat)
-        new_fdata$log10_total_feature_tpm <-
-            log10(new_fdata$total_feature_tpm + 1)
-        new_fdata$pct_total_tpm <- 100 * rowSums(tpm_mat) / total_tpm
-    }
-    if ( !is.null(fpkm_mat) ) {
-        total_fpkm <- sum(fpkm_mat)
-        new_fdata$total_feature_fpkm <- rowSums(fpkm_mat)
-        new_fdata$log10_total_feature_fpkm <-
-            log10(new_fdata$total_feature_fpkm + 1)
-        new_fdata$pct_total_fpkm <- 100 * rowSums(fpkm_mat) / total_fpkm
-    }
+
     ## Add new fdata to object
     new_fdata <- cbind(new_fdata, feature_controls_fdata)
     fData(object) <- new("AnnotatedDataFrame", new_fdata)
@@ -431,54 +414,41 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     }
     exprs_feature_controls <- .checkedCall(cxx_colsum_subset, exprs_mat, 
                                            is_feature_control)
+
     ## Get % expression from feature controls
     pct_exprs_feature_controls <- (100 * exprs_feature_controls /
                                          colSums(exprs_mat))
+
     ## Indicate whether or not to filter on percentage from controls
     filter_on_pct_exprs_feature_controls <-
         (pct_exprs_feature_controls > pct_feature_controls_threshold)
+
     ## Make a data frame
     df_pdata_this <- data.frame(exprs_feature_controls,
                                 pct_exprs_feature_controls,
                                 filter_on_pct_exprs_feature_controls)
+
     if (calc_top_features) { ## Do we want to calculate exprs accounted for by
         ## top features?
         ## Determine percentage of counts for top features by cell
-        top.number <- c(50L, 100L, 200L, 500L)
-        can.calculate <- top.number <= nrow(exprs_mat)
-        if (any(can.calculate)) { 
-            top.number <- top.number[can.calculate]
-            pct_exprs_top_out <- .checkedCall(cxx_calc_top_features, exprs_mat,
-                                              top.number, NULL)
-            ## this call returns proportions, not percentages, so adjust
-            pct_exprs_top_out <- 100 * pct_exprs_top_out
-            colnames(pct_exprs_top_out) <- paste0("pct_exprs_top_",
-                                                  top.number, "_features")
-            df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_out)
+        pct_top <- .calc_top_prop(exprs_mat, suffix="features")
+        if (!is.null(pct_top)) {
+            df_pdata_this <- cbind(df_pdata_this, pct_top)
             
             if ( compute_endog ) {
-                if ( length(is_feature_control) < 1L ) {
-                    pct_exprs_top_endog_out <- pct_exprs_top_out
-                    colnames(pct_exprs_top_endog_out) <- paste0(
-                        "pct_exprs_top_", top.number, "_endogenous_features")
-                    df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_endog_out)
+                if ( length(is_feature_control) == 0L ) {
+                    pct_top_endog <- pct_top
+                    colnames(pct_top_endog) <- sub("features$", 
+                                                   "endogenous_features", 
+                                                   colnames(pct_top))
+                    df_pdata_this <- cbind(df_pdata_this, pct_top_endog)
                 } else {
-                    ## Getting the non-control features in the matrix.
-                    not_feature_control <- seq_len(nrow(exprs_mat))
-                    not_feature_control <- not_feature_control[-is_feature_control]
-                    not_feature_control <- not_feature_control - 1L
-
-                    can.calculate.endog <- top.number <= length(not_feature_control)
-                    if (any(can.calculate.endog)) { 
-                        top.number.endog <- top.number[can.calculate.endog]
-                        pct_exprs_top_endog_out <- .checkedCall(
-                            cxx_calc_top_features, exprs_mat, top.number.endog,
-                            not_feature_control)
-                        ## this call returns proportions, not percentages, so adjust
-                        pct_exprs_top_endog_out <- 100 * pct_exprs_top_endog_out
-                        colnames(pct_exprs_top_endog_out) <- paste0(
-                                "pct_exprs_top_", top.number.endog, "_endogenous_features")
-                        df_pdata_this <- cbind(df_pdata_this, pct_exprs_top_endog_out)
+                    ## Repeating for the non-control features in the matrix.
+                    pct_top_endog <- .calc_top_prop(exprs_mat, 
+                                                    subset.row=-is_feature_control,
+                                                    suffix="endogenous_features")
+                    if (!is.null(pct_top_endog)) { 
+                        df_pdata_this <- cbind(df_pdata_this, pct_top_endog)
                     }
                 }
             } 
@@ -487,6 +457,35 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     colnames(df_pdata_this) <- gsub("exprs", exprs_type, colnames(df_pdata_this))
     df_pdata_this
 }
+
+
+.calc_top_prop <- function(exprs_mat, top.number = c(50L, 100L, 200L, 500L),
+                           subset.row = NULL, suffix="features") {
+    ## Calculate the proportion of expression belonging to the top set of genes.
+    ## Produces a matrix of proportions for each top number.
+    
+    if (is.null(subset.row)) { 
+        total_nrows <- nrow(exprs_mat)
+    } else {
+        subset.row <- .subset2index(subset.row, exprs_mat) 
+        subset.row <- subset.row - 1L # zero indexing needed for this C++ code.
+        total_nrows <- length(subset.row)
+    }
+
+    can.calculate <- top.number <= total_nrows
+    if (any(can.calculate)) { 
+        top.number <- top.number[can.calculate]
+        pct_exprs_top_out <- .checkedCall(cxx_calc_top_features, exprs_mat,
+                                          top.number, subset.row)
+        ## this call returns proportions, not percentages, so adjust
+        pct_exprs_top_out <- 100 * pct_exprs_top_out
+        colnames(pct_exprs_top_out) <- paste0("pct_exprs_top_",
+                                              top.number, "_", suffix)
+        return(pct_exprs_top_out)
+    }
+    return(NULL)
+}
+
 
 .process_feature_controls <- function(object, feature_controls, 
                                       pct_feature_controls_threshold,
@@ -516,27 +515,21 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
         }
         if (is.character(gc_set))
             gc_set <- which(rownames(object) %in% gc_set)
+        
         df_pdata_this <- .get_qc_metrics_exprs_mat(
             exprs_mat, gc_set, pct_feature_controls_threshold,
             calc_top_features = FALSE, exprs_type = "exprs")
-        if ( !is.null(counts_mat) ) {
-            df_pdata_counts <- .get_qc_metrics_exprs_mat(
-                counts_mat, gc_set, pct_feature_controls_threshold,
-                calc_top_features = FALSE, exprs_type = "counts")
-            df_pdata_this <- cbind(df_pdata_this, df_pdata_counts)
+
+        for (ex in c("counts", "tpm", "fpkm")) {
+            cur_mat <- switch(ex, counts = counts_mat, 
+                              tpm = tpm_mat, fpkm = fpkm_mat)
+            if (is.null(cur_mat)) { next }
+            cur_df_pdata <- .get_qc_metrics_exprs_mat(
+                cur_mat, gc_set, pct_feature_controls_threshold,
+                calc_top_features = FALSE, exprs_type = ex)
+            df_pdata_this <- cbind(df_pdata_this, cur_df_pdata)
         }
-        if ( !is.null(tpm_mat) ) {
-            df_pdata_tpm <- .get_qc_metrics_exprs_mat(
-                tpm_mat, gc_set, pct_feature_controls_threshold,
-                calc_top_features = FALSE, exprs_type = "tpm")
-            df_pdata_this <- cbind(df_pdata_this, df_pdata_tpm)
-        }
-        if ( !is.null(fpkm_mat) ) {
-            df_pdata_fpkm <- .get_qc_metrics_exprs_mat(
-                fpkm_mat, gc_set, pct_feature_controls_threshold,
-                calc_top_features = FALSE, exprs_type = "fpkm")
-            df_pdata_this <- cbind(df_pdata_this, df_pdata_fpkm)
-        }
+
         is_feature_control[gc_set] <- TRUE
         ## Define number of feature controls expressed
         n_detected_feature_controls <- nexprs(object, subset.row = gc_set)
@@ -622,7 +615,7 @@ nexprs <- function(object, threshold = NULL, subset.row = NULL, byrow = FALSE) {
             if (is.null(subset.row)) {
                return(colSums(is_exprs_mat)) 
             } else {
-                subset.row <- .subset2index(subset.row, names = rownames(counts_mat))
+                subset.row <- .subset2index(subset.row, counts_mat)
                 return(.checkedCall(cxx_colsum_subset, is_exprs_mat, subset.row))
             }
         } else {
@@ -630,8 +623,7 @@ nexprs <- function(object, threshold = NULL, subset.row = NULL, byrow = FALSE) {
             if (is.null(subset.row)) { 
                 subset.row <- seq_len(nrow(counts_mat)) 
             } else {
-                subset.row <- .subset2index(subset.row, 
-                                            names = rownames(counts_mat))
+                subset.row <- .subset2index(subset.row, counts_mat)
             }
             return(.checkedCall(cxx_colsum_exprs_subset, counts_mat, 
                                 threshold, subset.row))
@@ -646,16 +638,26 @@ nexprs <- function(object, threshold = NULL, subset.row = NULL, byrow = FALSE) {
     }
 }
 
-.subset2index <- function(subset, names) {
-    if (is.logical(subset)) { 
-        subset <- which(subset) 
-    } else if (is.character(subset)) { 
-        subset <- match(subset, names)
-        if (any(is.na(subset))) { 
-            stop('missing names in specified subsetting vector')
-        }
+.subset2index <- function(subset, target, byrow=TRUE) {
+    ## Converts a subsetting vector into a integer equivalent.
+    ## Requires some care to handle logical/character vectors.
+
+    if (is.na(byrow)) { 
+        dummy <- seq_along(target)
+        names(dummy) <- names(target)
+    } else if (byrow) {
+        dummy <- seq_len(nrow(target))
+        names(dummy) <- rownames(target)
+    } else {
+        dummy <- seq_len(ncol(target))
+        names(dummy) <- colnames(target)
     }
-    as.integer(subset)
+    
+    subset <- dummy[subset]
+    if (any(is.na(subset))) { 
+        stop("invalid subset indices specified")
+    }
+    return(unname(subset))
 }
 
 ################################################################################
@@ -670,9 +672,12 @@ nexprs <- function(object, threshold = NULL, subset.row = NULL, byrow = FALSE) {
 #' or the higher end ("higher")
 #' @param log logical, should the values of the metric be transformed to the 
 #' log10 scale before computing median-absolute-deviation for outlier detection?
-#' @param na.rm logical, should NA (missing) values be removed before computing
-#' median and median-absolute-deviation values? If \code{FALSE} then return 
-#' values for median and median-absolute-deviation will be NA if any value is NA.
+#' @param subset logical or integer vector, which subset of values should be 
+#' used to calculate the median/MAD? If \code{NULL}, all values are used.
+#' Missing values will trigger a warning and will be automatically ignored. 
+#' @param batch factor of length equal to \code{metric}, specifying the batch
+#' to which each observation belongs. A median/MAD is calculated for each batch,
+#' and outliers are then identified within each batch.
 #' 
 #' @description Convenience function to determine which values for a metric are
 #' outliers based on median-absolute-deviation (MAD).
@@ -693,12 +698,49 @@ nexprs <- function(object, threshold = NULL, subset.row = NULL, byrow = FALSE) {
 #' isOutlier(example_sceset$total_counts, nmads = 3)
 #' 
 isOutlier <- function(metric, nmads = 5, type = c("both", "lower", "higher"), 
-                      log = FALSE, na.rm = FALSE) {
+                      log = FALSE, subset = NULL, batch = NULL) {
     if (log) {
         metric <- log10(metric)
     }
-    cur.med <- median(metric, na.rm = na.rm)
-    cur.mad <- mad(metric, center = cur.med, na.rm = na.rm)
+    if (any(is.na(metric))) { 
+        warning("missing values ignored during outlier detection")
+    }
+
+    if (!is.null(batch)) {
+        N <- length(metric)
+        if (length(batch)!=N) { 
+            stop("length of 'batch' must equal length of 'metric'")
+        }
+
+        # Coercing non-NULL subset into a logical vector.
+        if (!is.null(subset)) { 
+            new.subset <- logical(N)
+            names(new.subset) <- names(metric)
+            new.subset[subset] <- TRUE
+            subset <- new.subset
+        }
+   
+        # Computing QC metrics for each batch. 
+        by.batch <- split(seq_len(N), batch)
+        collected <- logical(N)
+        for (b in by.batch) {
+            collected[b] <- Recall(metric[b], nmads=nmads, type=type,
+                                   log=FALSE, subset=subset[b], batch=NULL)
+        }
+        return(collected)
+    }
+
+    # Computing median/MAD based on subsets.
+    if (!is.null(subset)) {
+        submetric <- metric[subset]
+        if (length(submetric)==0L) {
+            warning("no observations remaining after subsetting")
+        }
+    } else {
+        submetric <- metric
+    }
+    cur.med <- median(submetric, na.rm = TRUE)
+    cur.mad <- mad(submetric, center = cur.med, na.rm = TRUE)
 
     type <- match.arg(type)
     upper.limit <- cur.med + nmads * cur.mad
