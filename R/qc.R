@@ -615,7 +615,7 @@ nexprs <- function(object, threshold = NULL, subset.row = NULL, byrow = FALSE) {
             if (is.null(subset.row)) {
                return(colSums(is_exprs_mat)) 
             } else {
-                subset.row <- .subset2index(subset.row, counts_mat)
+                subset.row <- .subset2index(subset.row, is_exprs_mat)
                 return(.checkedCall(cxx_colsum_subset, is_exprs_mat, subset.row - 1L))
             }
         } else {
