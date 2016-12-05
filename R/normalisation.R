@@ -286,10 +286,12 @@ normalize.SCESet <- function(object, exprs_values = "counts",
                              return_norm_as_exprs = TRUE) {
     if ( !is(object, "SCESet") )
         stop("object must be an SCESet.")
+  
     ## Define expression values to be used
     exprs_values <- match.arg(exprs_values, c("tpm", "fpkm", "counts"))
     isCount <- exprs_values == "counts"
     exprs_mat <- get_exprs(object, exprs_values)
+
     ## extract existing size factors
     size_factors <- sizeFactors(object)
     if ( is.null(size_factors) ) {
@@ -297,15 +299,9 @@ normalize.SCESet <- function(object, exprs_values = "counts",
                 original object")
         return(object)
     }
+    
     ## figuring out how many controls have their own size factors
-    control_list <- list()
-    for (fc in .get_feature_control_names(object)) {
-        specific_sf <- suppressWarnings(sizeFactors(object, type=fc))
-        if (!is.null(specific_sf)) {
-            which.current <- fData(object)[[paste0("is_feature_control_", fc)]]
-            control_list[[fc]] <- list(SF=specific_sf, ID=which.current)
-        }
-    }
+    control_list <- .find_control_SF(object)
 
     ## extract logExprsOffset if argument is NULL
     if ( is.null(logExprsOffset) )
@@ -346,7 +342,6 @@ normalize.SCESet <- function(object, exprs_values = "counts",
     return(object)
 }
 
-
 .recompute_cpm_fun <- function(exprs_mat, size_factors,
                                lib_size, logExprsOffset) {
     edgeR::cpm.default(exprs_mat,
@@ -358,22 +353,15 @@ normalize.SCESet <- function(object, exprs_values = "counts",
 .recompute_expr_fun <- function(exprs_mat, size_factors,
                                 logExprsOffset, isCount, 
                                 subset.row = NULL) {
-    size_factors <- size_factors / mean(size_factors)
-    if (is.null(subset.row)) { 
-        subset.row <- seq_len(nrow(exprs_mat))
-    } else if (is.logical(subset.row)) { 
-        subset.row <- which(subset.row)
-    }
-    if (isCount) {
-        out <- .checkedCall(cxx_calc_exprs, exprs_mat, 
-                            as.double(size_factors), 
-                            as.double(logExprsOffset), 
-                            TRUE, # to log or not.
-                            FALSE, # to sum or not.
-                            subset.row - 1L)
+    if (isCount) { 
+        out <- .compute_exprs(exprs_mat, size_factors,
+                              log = TRUE, sum = FALSE,
+                              logExprsOffset = logExprsOffset,
+                              subset.row = subset.row)
     } else {
-        out <- log2(t(t(exprs_mat[subset.row,,drop=FALSE]) / size_factors) 
-                    + logExprsOffset)
+        size_factors <- size_factors / mean(size_factors)
+        if (!is.null(subset.row)) exprs_mat <- exprs_mat[subset.row,]
+        out <- log2(t(t(exprs_mat) / size_factors) + logExprsOffset)
     }
     return(out)
 }
