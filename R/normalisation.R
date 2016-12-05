@@ -161,10 +161,10 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
                                        mean(size_factors)),
                        prior.count = object@logExprsOffset, log = FALSE)
         if ( object@logged )
-            norm_exprs(object) <-
-            edgeR::cpm.default(exprs_mat,
-                       lib.size = (1e06 * size_factors),
-                       prior.count = object@logExprsOffset, log = object@logged)
+            norm_exprs(object) <- .recompute_expr_fun(exprs_mat = exprs_mat,
+                                                      size_factors = size_factors,
+                                                      logExprsOffset = object@logExprsOffset,
+                                                      isCount = TRUE)
     } else {
         ## Add tpm if relevant
         if ( exprs_values == "tpm" ) {
@@ -351,7 +351,8 @@ normalize.SCESet <- function(object, exprs_values = "counts",
 }
 
 .recompute_expr_fun <- function(exprs_mat, size_factors,
-                                logExprsOffset, isCount, 
+                                logExprsOffset, 
+                                isCount = TRUE,
                                 subset.row = NULL) {
     if (isCount) { 
         out <- .compute_exprs(exprs_mat, size_factors,
