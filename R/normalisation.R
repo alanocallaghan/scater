@@ -332,10 +332,9 @@ normalize.SCESet <- function(object, exprs_values = "counts",
                         logExprsOffset = logExprsOffset, isCount = isCount)
     for (alt in control_list) {
         norm_exprs_mat[alt$ID,] <- .recompute_expr_fun(
-                                        exprs_mat[alt$ID,,drop=FALSE],
-                                        size_factors = alt$SF,
+                                        exprs_mat, size_factors = alt$SF,
                                         logExprsOffset = logExprsOffset,
-                                        isCount = isCount)
+                                        isCount = isCount, subset.row=alt$ID)
     }
 
     ## add normalised values to object
@@ -357,15 +356,24 @@ normalize.SCESet <- function(object, exprs_values = "counts",
 }
 
 .recompute_expr_fun <- function(exprs_mat, size_factors,
-                                logExprsOffset, isCount) {
+                                logExprsOffset, isCount, 
+                                subset.row = NULL) {
     size_factors <- size_factors / mean(size_factors)
+    if (is.null(subset.row)) { 
+        subset.row <- seq_len(nrow(exprs_mat))
+    } else if (is.logical(subset.row)) { 
+        subset.row <- which(subset.row)
+    }
     if (isCount) {
-        out <- edgeR::cpm.default(
-                   exprs_mat, prior.count = logExprsOffset,
-                   # 1e6 multiplication, so CPM *is* the "normalized" count:
-                   lib.size = size_factors * 1e6, log = TRUE)
+        out <- .checkedCall(cxx_calc_exprs, exprs_mat, 
+                            as.double(size_factors), 
+                            as.double(logExprsOffset), 
+                            TRUE, # to log or not.
+                            FALSE, # to sum or not.
+                            subset.row - 1L)
     } else {
-        out <- log2(t(t(exprs_mat) / size_factors) + logExprsOffset)
+        out <- log2(t(t(exprs_mat[subset.row,,drop=FALSE]) / size_factors) 
+                    + logExprsOffset)
     }
     return(out)
 }

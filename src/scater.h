@@ -30,6 +30,11 @@ matrix_info check_matrix(SEXP matrix);
 bool isNA(int);
 bool isNA(double);
 
+// Functions to parse subsetting.
+
+typedef std::pair<const int, const int*> subset_info;
+subset_info process_subset_vector(SEXP, const matrix_info&);
+
 // Functions to be called from R.
 
 extern "C" {
@@ -46,7 +51,7 @@ SEXP negative_counts(SEXP);
 
 SEXP missing_exprs(SEXP);
 
-SEXP calc_cpm(SEXP, SEXP, SEXP, SEXP);
+SEXP calc_exprs(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 }
 

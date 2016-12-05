@@ -413,7 +413,7 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
         is_feature_control <- which(is_feature_control) 
     }
     exprs_feature_controls <- .checkedCall(cxx_colsum_subset, exprs_mat, 
-                                           is_feature_control)
+                                           is_feature_control - 1L) 
 
     ## Get % expression from feature controls
     pct_exprs_feature_controls <- (100 * exprs_feature_controls /
@@ -616,7 +616,7 @@ nexprs <- function(object, threshold = NULL, subset.row = NULL, byrow = FALSE) {
                return(colSums(is_exprs_mat)) 
             } else {
                 subset.row <- .subset2index(subset.row, counts_mat)
-                return(.checkedCall(cxx_colsum_subset, is_exprs_mat, subset.row))
+                return(.checkedCall(cxx_colsum_subset, is_exprs_mat, subset.row - 1L))
             }
         } else {
             # Counting expressing genes per cell, using the counts to define 'expressing'.
@@ -626,7 +626,7 @@ nexprs <- function(object, threshold = NULL, subset.row = NULL, byrow = FALSE) {
                 subset.row <- .subset2index(subset.row, counts_mat)
             }
             return(.checkedCall(cxx_colsum_exprs_subset, counts_mat, 
-                                threshold, subset.row))
+                                threshold, subset.row - 1L))
         }
     } else {
         # Counting expressing cells per gene.

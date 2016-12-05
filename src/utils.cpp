@@ -8,6 +8,20 @@ bool isNA(double x) {
     return ISNA(x);
 }
 
+subset_info process_subset_vector(SEXP subset, const matrix_info& MAT) {
+    if (!isInteger(subset)) { 
+        throw std::runtime_error("subset vector must be an integer vector");
+    }
+    const int slen=LENGTH(subset);
+    const int* sptr=INTEGER(subset);
+    for (int s=0; s<slen; ++s) {
+        if (sptr[s] < 0 || sptr[s] >= MAT.nrow) { 
+            throw std::runtime_error("subset indices out of range");
+        }
+    }
+    return std::make_pair(slen, sptr);
+}
+
 /*********************************************************
  This contains a number of small functions, written to improve 
  speed or memory efficiency over a native R implementation. 
@@ -17,23 +31,15 @@ bool isNA(double x) {
 
 template <typename T>
 SEXP colsum_subset_internal (const T* ptr, const matrix_info& MAT, SEXP subset) {
-    if (!isInteger(subset)) { 
-        throw std::runtime_error("subset vector must be an integer vector");
-    }
-    const int slen=LENGTH(subset);
-    const int* sptr=INTEGER(subset);
-    for (int s=0; s<slen; ++s) {
-        if (sptr[s] < 1 || sptr[s] > MAT.nrow) { 
-            throw std::runtime_error("subset indices out of range");
-        }
-    }
+    subset_info subout=process_subset_vector(subset, MAT);
+    const int slen=subout.first;
+    const int* sptr=subout.second;
 
     SEXP output=PROTECT(allocVector(REALSXP, MAT.ncol));
     try {
         double* optr=REAL(output);
         
-        // Summing across, using 1-indexed pointers.
-        --ptr;
+        // Summing across values.
         int s;
         for (size_t c=0; c<MAT.ncol; ++c) {
             optr[c]=0;
@@ -65,23 +71,15 @@ SEXP colsum_subset(SEXP matrix, SEXP subset) try {
 
 template <typename T>
 SEXP colsum_exprs_subset_internal (const T* ptr, const matrix_info& MAT, T threshold, SEXP subset) {
-    if (!isInteger(subset)) { 
-        throw std::runtime_error("subset vector must be an integer vector");
-    }
-    const int slen=LENGTH(subset);
-    const int* sptr=INTEGER(subset);
-    for (int s=0; s<slen; ++s) {
-        if (sptr[s] < 1 || sptr[s] > MAT.nrow) { 
-            throw std::runtime_error("subset indices out of range");
-        }
-    }
+    subset_info subout=process_subset_vector(subset, MAT);
+    const int slen=subout.first;
+    const int* sptr=subout.second;
 
     SEXP output=PROTECT(allocVector(INTSXP, MAT.ncol));
     try {
         int* optr=INTEGER(output);
         
-        // Summing across, using 1-indexed pointers.
-        --ptr;
+        // Counting whether or not they're expressed.
         int s;
         for (size_t c=0; c<MAT.ncol; ++c) {
             optr[c]=0;
@@ -223,19 +221,12 @@ SEXP calc_top_features_internal(const T* ptr, const matrix_info& MAT, SEXP top, 
 
     // Checking subsetting vector.
     int slen=0;
-    int* sptr=NULL;
+    const int* sptr=NULL;
     const bool use_subset=(subset!=R_NilValue);
     if (use_subset) {
-        if (!isInteger(subset)) { 
-            throw std::runtime_error("subset vector must be an integer vector");
-        }
-        slen=LENGTH(subset);
-        sptr=INTEGER(subset);
-        for (int s=0; s<slen; ++s) {
-            if (sptr[s] < 0 || sptr[s] >= MAT.nrow) { 
-                throw std::runtime_error("subset indices out of range");
-            }
-        }
+        subset_info subout=process_subset_vector(subset, MAT);
+        slen=subout.first;
+        sptr=subout.second;
     }
 
     // Figuring out what is the number of rows to iterate over.
