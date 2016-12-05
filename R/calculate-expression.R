@@ -60,8 +60,14 @@ calcIsExprs <- function(object, lowerDetectionLimit = NULL, exprs_data = "counts
 #' 
 #' 
 #' @param object an \code{SCESet} object
-#' @param threshold numeric scalar providing the value above which observations
+#' @param lowerDetectionLimit numeric scalar providing the value above which observations
 #' are deemed to be expressed. Defaults to \code{object@lowerDetectionLimit}.
+#' @param exprs_data character scalar indicating whether the count data 
+#' (\code{"counts"}), the transformed expression data (\code{"exprs"}), 
+#' transcript-per-million (\code{"tpm"}), counts-per-million (\code{"cpm"}) or 
+#' FPKM (\code{"fpkm"}) should be used to define if an observation is expressed 
+#' or not. However, if \code{is_exprs(object)} is present, it will be used directly 
+#' such that \code{exprs_data} and \code{lowerDetectionLimit} are ignored.
 #' @param subset.row logical or character vector indicating which rows 
 #' (i.e. features/genes) to subset and calculate 'is_exprs_mat' for.
 #' @param byrow logical scalar indicating if \code{TRUE} to count expressing 
@@ -85,22 +91,28 @@ calcIsExprs <- function(object, lowerDetectionLimit = NULL, exprs_data = "counts
 #' nexprs(example_sceset)[1:10]
 #' nexprs(example_sceset, byrow = TRUE)[1:10]
 #' 
-nexprs <- function(object, threshold = NULL, subset.row = NULL, byrow = FALSE) {
+nexprs <- function(object, lowerDetectionLimit = NULL, exprs_data = "counts", subset.row = NULL, byrow = FALSE) {
     if (!is(object, "SCESet")) { 
         stop("'object' must be a SCESet")
     }
     is_exprs_mat <- is_exprs(object)
-    counts_mat <- counts(object)
-    if (is.null(is_exprs_mat) && is.null(counts_mat)) {
-        stop("either 'is_exprs(object)' or 'counts(object)' must be non-NULL")
+    exprs_data <- match.arg(exprs_data, c("counts", "exprs", "tpm", "cpm", "fpkm"))
+    exprs_mat <- switch(exprs_data,
+                        counts = counts(object),
+                        exprs = exprs(object),
+                        tpm = tpm(object),
+                        cpm = cpm(object),
+                        fpkm = fpkm(object))   
+    if (is.null(is_exprs_mat) && is.null(exprs_mat)) {
+        stop(sprintf("either 'is_exprs(object)' or '%s(object)' must be non-NULL", exprs_data))
     }
 
-    # Setting the detection threshold properly.
-    if (is.null(threshold)) {
-        threshold <- object@lowerDetectionLimit
+    # Setting the detection lowerDetectionLimit properly.
+    if (is.null(lowerDetectionLimit)) {
+        lowerDetectionLimit <- object@lowerDetectionLimit
     }
-    if (!is.null(counts_mat)) { 
-        storage.mode(threshold) <- storage.mode(counts_mat)
+    if (!is.null(exprs_mat)) { 
+        storage.mode(lowerDetectionLimit) <- storage.mode(exprs_mat)
     }
 
     if (!byrow) {
@@ -115,19 +127,19 @@ nexprs <- function(object, threshold = NULL, subset.row = NULL, byrow = FALSE) {
         } else {
             # Counting expressing genes per cell, using the counts to define 'expressing'.
             if (is.null(subset.row)) { 
-                subset.row <- seq_len(nrow(counts_mat)) 
+                subset.row <- seq_len(nrow(exprs_mat)) 
             } else {
-                subset.row <- .subset2index(subset.row, counts_mat)
+                subset.row <- .subset2index(subset.row, exprs_mat)
             }
-            return(.checkedCall(cxx_colsum_exprs_subset, counts_mat, 
-                                threshold, subset.row - 1L))
+            return(.checkedCall(cxx_colsum_exprs_subset, exprs_mat, 
+                                lowerDetectionLimit, subset.row - 1L))
         }
     } else {
         # Counting expressing cells per gene.
         if (!is.null(is_exprs_mat)) {
             return(rowSums(is_exprs_mat))
         } else { 
-            return(.checkedCall(cxx_rowsum_exprs, counts_mat, threshold))
+            return(.checkedCall(cxx_rowsum_exprs, exprs_mat, lowerDetectionLimit))
         }
     }
 }
