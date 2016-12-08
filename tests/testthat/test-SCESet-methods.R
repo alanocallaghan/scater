@@ -1,12 +1,60 @@
 ## Testing SCESet methods
 
-test_that("newSCESet works as expected", {
+test_that("newSCESet works as expected with data type hierarchy", {
     data("sc_example_counts")
     data("sc_example_cell_info")
     pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+    ## new SCESet with count data
     example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-    
     expect_that(example_sceset, is_a("SCESet"))
+    ## new SCESet with tpm data
+    tpm <- calculateCPM(example_sceset, use.size.factors = FALSE)
+    expect_warning(example_sceset <- newSCESet(tpmData = tpm, phenoData = pd),
+                   "'logExprsOffset' should be set manually")
+    expect_that(example_sceset, is_a("SCESet"))
+    example_sceset <- newSCESet(tpmData = tpm, phenoData = pd, 
+                                logExprsOffset = 1)
+    expect_that(example_sceset, is_a("SCESet"))
+    ## new SCESet with cpm data
+    expect_warning(example_sceset <- newSCESet(cpmData = tpm, phenoData = pd),
+                   "'logExprsOffset' should be set manually")
+    example_sceset <- newSCESet(cpmData = tpm, phenoData = pd, 
+                                logExprsOffset = 1)
+    expect_that(example_sceset, is_a("SCESet"))
+    ## new SCESet with fpkm data
+    expect_warning(example_sceset <- newSCESet(fpkmData = tpm, phenoData = pd),
+                   "'logExprsOffset' should be set manually")
+    example_sceset <- newSCESet(fpkmData = tpm, phenoData = pd, 
+                                logExprsOffset = 1)
+    expect_that(example_sceset, is_a("SCESet"))
+    ## new SCESet with cpm data and counts
+    expect_warning(example_sceset <- 
+                       newSCESet(cpmData = tpm, countData = sc_example_counts,
+                                phenoData = pd),  "'cpmData' will be ignored")
+    expect_that(example_sceset, is_a("SCESet"))
+    ## new SCESet with fpkm data and counts
+    expect_warning(example_sceset <- 
+                       newSCESet(fpkmData = tpm, countData = sc_example_counts,
+                                 phenoData = pd),  "'fpkmData' will be ignored")
+    expect_that(example_sceset, is_a("SCESet"))
+    ## new SCESet with tpm and cpm data
+    expect_warning(example_sceset <- 
+                       newSCESet(tpmData = tpm, cpmData = tpm,
+                                 phenoData = pd),  "'cpmData' will be ignored")
+    expect_that(example_sceset, is_a("SCESet"))
+    ## new SCESet with tpm and cpm data
+    expect_warning(example_sceset <- 
+                       newSCESet(tpmData = tpm, fpkmData = tpm,
+                                 phenoData = pd),  "'fpkmData' will be ignored")
+    expect_that(example_sceset, is_a("SCESet"))
+
+    ## new SCESet with tpm data and counts
+    example_sceset <- newSCESet(tpmData = tpm, countData = sc_example_counts,
+                                phenoData = pd)
+    expect_that(example_sceset, is_a("SCESet"))
+    
+    
+    
 })
 
 
@@ -64,7 +112,7 @@ test_that("set_exprs and get_exprs work as expected", {
         
     ## expect NULL is returned if an assayData element hasn't been defined
     expect_warning(tmp <- get_exprs(example_sceset, "norm_exprs"), 
-                   "The object does not contain")
+                   "'object' does not contain")
     expect_null(tmp)
     
     ## expect we still get an SCESet after using set_exprs
@@ -75,6 +123,21 @@ test_that("set_exprs and get_exprs work as expected", {
     set_exprs(example_sceset, "counts") <- NULL
     expect_that(example_sceset, is_a("SCESet"))
     expect_null(counts(example_sceset))
+    ## test the check on dimnames
+    tmp <- exprs(example_sceset) / 2
+    rownames(tmp) <- rev(rownames(tmp))
+    expect_error(set_exprs(example_sceset, "new_exprs") <- tmp,
+                 "dimnames for new expression matrix")
+    colnames(tmp) <- rev(colnames(tmp))
+    expect_error(set_exprs(example_sceset, "new_exprs") <- tmp,
+                 "dimnames for new expression matrix")
+    rownames(tmp) <- NULL
+    expect_error(set_exprs(example_sceset, "new_exprs") <- tmp,
+                 "dimnames for new expression matrix")
+    dimnames(tmp) <- NULL
+    expect_error(set_exprs(example_sceset, "new_exprs") <- tmp,
+                 "dimnames for new expression matrix")
+    
 })
 
 

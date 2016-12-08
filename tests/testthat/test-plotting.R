@@ -135,9 +135,13 @@ test_that("plotExprsVsTxLength works as expected", {
     
     
     ## using matrix of tx length values in assayData(object)
-    set_exprs(example_sceset, "tx_len") <- 
-        matrix(rnorm(ncol(example_sceset) * nrow(example_sceset), 
-                     mean = 5000, sd = 500), nrow = nrow(example_sceset))
+    mat <- matrix(rnorm(ncol(example_sceset) * nrow(example_sceset), mean = 5000,
+                        sd = 500), nrow = nrow(example_sceset))
+    expect_error(set_exprs(example_sceset, "tx_len") <- mat, 
+                 "dimnames for new expression matrix")
+    
+    dimnames(mat) <- dimnames(example_sceset)
+    set_exprs(example_sceset, "tx_len") <- mat
     p1 <-  plotExprsVsTxLength(example_sceset, "tx_len", show_smooth = TRUE,
                                show_exprs_sd = TRUE)
     expect_that(p1, is_a("ggplot"))

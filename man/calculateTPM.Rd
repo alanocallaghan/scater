@@ -9,12 +9,12 @@ calculateTPM(object, effective_length = NULL, calc_from = "counts")
 \arguments{
 \item{object}{an \code{SCESet} object}
 
-\item{effective_length}{vector of class \code{"numeric"} providing the 
+\item{effective_length}{vector of class \code{"numeric"} providing the
 effective length for each feature in the \code{SCESet} object}
 
-\item{calc_from}{character string indicating whether to compute TPM from 
-\code{"counts"}, \code{"norm_counts"}, \code{"fpkm"} or \code{"norm_fpkm"}. 
-Default is to use \code{"counts"}, in which case the \code{effective_length} 
+\item{calc_from}{character string indicating whether to compute TPM from
+\code{"counts"}, \code{"norm_counts"}, \code{"fpkm"} or \code{"norm_fpkm"}.
+Default is to use \code{"counts"}, in which case the \code{effective_length}
 argument must be supplied.}
 }
 \value{
@@ -30,12 +30,12 @@ data("sc_example_cell_info")
 pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
 example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 effective_length <- rep(1000, 2000)
-tpm(example_sceset) <- calculateTPM(example_sceset, effective_length, 
+tpm(example_sceset) <- calculateTPM(example_sceset, effective_length,
     calc_from = "counts")
-    
+
 ## calculate from FPKM
 fpkm(example_sceset) <- calculateFPKM(example_sceset, effective_length)
-tpm(example_sceset) <- calculateTPM(example_sceset, effective_length, 
+tpm(example_sceset) <- calculateTPM(example_sceset, effective_length,
                                     calc_from = "fpkm")
 
 }

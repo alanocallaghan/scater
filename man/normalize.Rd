@@ -9,12 +9,11 @@
 \alias{normalize.SCESet}
 \title{Normalise an SCESet object using pre-computed size factors}
 \usage{
-normalize.SCESet(object, exprs_values = "counts", logExprsOffset = NULL,
-  recompute_cpm = TRUE, return_norm_as_exprs = TRUE)
-
-\S4method{normalize}{SCESet}(object, exprs_values = "counts",
-  logExprsOffset = NULL, recompute_cpm = TRUE,
+normalize.SCESet(object, exprs_values = NULL, logExprsOffset = NULL,
   return_norm_as_exprs = TRUE)
+
+\S4method{normalize}{SCESet}(object, exprs_values = NULL,
+  logExprsOffset = NULL, return_norm_as_exprs = TRUE)
 
 normalise(...)
 }
@@ -22,18 +21,14 @@ normalise(...)
 \item{object}{an \code{SCESet} object.}
 
 \item{exprs_values}{character string indicating which slot of the
-assayData from the \code{SCESet} object should be used as expression values.
-Valid options are \code{'counts'}, the count values, \code{'exprs'} the
-expression slot, \code{'tpm'} the transcripts-per-million slot or
-\code{'fpkm'} the FPKM slot.}
+assayData from the \code{SCESet} object should be used to compute
+log-transformed expression values. Valid options are \code{'counts'},
+\code{'tpm'}, \code{'cpm'} and \code{'fpkm'}. Defaults to the first
+available value of the options in the order shown.}
 
 \item{logExprsOffset}{scalar numeric value giving the offset to add when
 taking log2 of normalised values to return as expression values. If NULL
 (default), then the value from \code{object@logExprsOffset} is used.}
-
-\item{recompute_cpm}{logical, should the counts-per-million values be
-recomputed after normalising with the stored size factors in the object and
-stored in \code{cpm(object)} in the returned object?}
 
 \item{return_norm_as_exprs}{logical, should the normalised expression values
 be returned to the \code{exprs} slot of the object? Default is TRUE. If

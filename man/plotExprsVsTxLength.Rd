@@ -95,9 +95,11 @@ plotExprsVsTxLength(example_sceset, "median_tx_length", show_smooth = TRUE,
 show_exprs_sd = TRUE)
 
 ## using matrix of tx length values in assayData(object)
-set_exprs(example_sceset, "tx_len") <- 
-matrix(rnorm(ncol(example_sceset) * nrow(example_sceset), mean = 5000, sd = 500),
-nrow = nrow(example_sceset))
+mat <- matrix(rnorm(ncol(example_sceset) * nrow(example_sceset), mean = 5000,
+ sd = 500), nrow = nrow(example_sceset))
+dimnames(mat) <- dimnames(example_sceset)
+set_exprs(example_sceset, "tx_len") <- mat
+
 plotExprsVsTxLength(example_sceset, "tx_len", show_smooth = TRUE,
 show_exprs_sd = TRUE)
 

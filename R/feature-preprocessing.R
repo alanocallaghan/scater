@@ -207,7 +207,7 @@ summariseExprsAcrossFeatures <- function(object, exprs_values = "tpm",
     }
     sce_out <- switch(exprs_values,
                       exprs = newSCESet(exprsData = exprs_new, phenoData = pd, 
-                                        featureData = fd, logged = TRUE),
+                                        featureData = fd),
                       tpm = newSCESet(tpmData = exprs_new, phenoData = pd, 
                                       featureData = fd),
                       fpkm = newSCESet(fpkmData = exprs_new, phenoData = pd, 

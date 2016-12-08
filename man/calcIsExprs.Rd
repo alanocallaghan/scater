@@ -2,11 +2,11 @@
 % Please edit documentation in R/calculate-expression.R
 \name{calcIsExprs}
 \alias{calcIsExprs}
-\title{Calculate which features are expressed in which cells using a threshold on 
-observed counts, transcripts-per-million, counts-per-million, FPKM, or 
+\title{Calculate which features are expressed in which cells using a threshold on
+observed counts, transcripts-per-million, counts-per-million, FPKM, or
 defined expression levels.}
 \usage{
-calcIsExprs(object, lowerDetectionLimit = NULL, exprs_data = "counts")
+calcIsExprs(object, lowerDetectionLimit = NULL, exprs_data = NULL)
 }
 \arguments{
 \item{object}{an SCESet object with expression and/or count data.}
@@ -14,19 +14,20 @@ calcIsExprs(object, lowerDetectionLimit = NULL, exprs_data = "counts")
 \item{lowerDetectionLimit}{numeric scalar giving the minimum expression level
 for an expression observation in a cell for it to qualify as expressed.}
 
-\item{exprs_data}{character scalar indicating whether the count data 
-(\code{"counts"}), the transformed expression data (\code{"exprs"}), 
-transcript-per-million (\code{"tpm"}), counts-per-million (\code{"cpm"}) or 
-FPKM (\code{"fpkm"}) should be used to define if an observation is expressed 
-or not.}
+\item{exprs_data}{character scalar indicating whether the count data
+(\code{"counts"}), the transformed expression data (\code{"exprs"}),
+transcript-per-million (\code{"tpm"}), counts-per-million (\code{"cpm"}) or
+FPKM (\code{"fpkm"}) should be used to define if an observation is expressed
+or not. Defaults to the first available value of those options in the
+order shown.}
 }
 \value{
-a logical matrix indicating whether or not a feature in a particular 
+a logical matrix indicating whether or not a feature in a particular
 cell is expressed.
 }
 \description{
-Calculate which features are expressed in which cells using a threshold on 
-observed counts, transcripts-per-million, counts-per-million, FPKM, or 
+Calculate which features are expressed in which cells using a threshold on
+observed counts, transcripts-per-million, counts-per-million, FPKM, or
 defined expression levels.
 }
 \examples{

@@ -5,16 +5,12 @@
 
 #' Create a new SCESet object.
 #'
-#' Scater requires that all data be housed in SCESet objects. SCESet extends
-#' Bioconductor's ExpressionSet class, and the same basic interface is
-#' supported. newSCESet() expects a matrix of expression values as its first
-#' argument, with rows as features (usually genes) and columns as cells.
-#' Per-feature and per-cell metadata can be supplied with the featureData and
-#' phenoData arguments, respectively. Use of these optional arguments is
-#' strongly encouraged. The SCESet also includes a slot 'counts' to store an
-#' object containing raw count data.
+#' Create a new SCESet object (the basic data container class in scater) from a
+#' supplied matrix of expression values, plus cell and feature metadata. The
+#' expression matrix have rows representing features (usually genes) and columns
+#' representing cells.
 #'
-#' @param exprsData expression data matrix for an experiment
+#' @param exprsData expression data matrix for an experiment (features x cells)
 #' @param countData data matrix containing raw count expression values
 #' @param tpmData matrix of class \code{"numeric"} containing
 #' transcripts-per-million (TPM) expression values
@@ -28,9 +24,9 @@
 #' about the experiment and dataset.
 #' @param is_exprsData matrix of class \code{"logical"}, indicating whether
 #'    or not each observation is above the \code{lowerDetectionLimit}.
-#' @param cellPairwiseDistances object of class \code{"dist"} (or a class that 
+#' @param cellPairwiseDistances object of class \code{"dist"} (or a class that
 #' extends "dist") containing cell-cell distance or dissimilarity values.
-#' @param featurePairwiseDistances object of class \code{"dist"} (or a class that 
+#' @param featurePairwiseDistances object of class \code{"dist"} (or a class that
 #' extends "dist") containing feature-feature distance or dissimilarity values.
 #' @param lowerDetectionLimit the minimum expression level that constitutes true
 #'  expression (defaults to zero and uses count data to determine if an
@@ -38,41 +34,46 @@
 #' @param logExprsOffset numeric scalar, providing the offset used when doing
 #' log2-transformations of expression data to avoid trying to take logs of zero.
 #' Default offset value is \code{1}.
-#' @param logged logical, if a value is supplied for the exprsData argument, are
-#'  the expression values already on the log2 scale, or not?
-
-#' @param useForExprs character string, either 'exprs' (default),'tpm','counts' or
-#'    'fpkm' indicating which expression representation both internal methods and
-#'    external packages should use when performing analyses.
+#'
 #' @return a new SCESet object
 #'
 #' @details
-#' SCESet objects store a matrix of expression values. These values are
-#' typically transcripts-per-million (tpm), counts-per-million (cpm), fragments
-#' per kilobase per million mapped (FPKM) or some other output from a program
-#' that calculates expression values from RNA-Seq reads. We recommend that
-#' expression values on the log2 scale are used for the 'exprs' slot in the
-#' SCESet. For example, you may wish to store raw tpm values in the 'tpm' slot
-#' and \code{log2(tpm + 1)} values in the 'exprs' slot. However, expression
-#' values could also be values from a single cell qPCR run or some other type of
-#'  assay. The newSCESet function can also accept raw count values. In this case
-#'  see \code{\link{calculateTPM}} and \code{\link{calculateFPKM}} for computing
-#'  TPM and FPKM expression values, respectively, from counts. The function
-#'  \code{\link[edgeR]{cpm}} from the package edgeR to can be used to compute
-#'  log2(counts-per-million), if desired.
+#' Scater requires that all data be housed in SCESet objects. SCESet extends
+#' Bioconductor's ExpressionSet class, and the same basic interface is
+#' supported. newSCESet() expects a single matrix of expression values of a
+#' nominated type to be provided, for example a matrix of counts or a matrix of
+#' transcripts-per-million values. There is a hierarchy applied to the
+#' expression data: counts > transcripts-per-million (tpm) > counts-per-million
+#' (cpm) > fragments-per-kilobase-per-million-mapped (fpkm) > generic expression
+#' values on the log2 scale (exprs). Data types higher in the higher are
+#' preferred. Data types lower in the hierarchy will be computed from values
+#' higher in the hierarchy - e.g. counts-per-million and expression values
+#' (as log2(cpm + offset)) will be computed from counts. Data types higher in
+#' the hierarchy will never be computed from types lower in the hierarchy (e.g.
+#' counts will never be computed from exprs values). At a
+#' minimum, an SCESet object will contain exprs values; these will be computed
+#' as log2(*pm + offset) values if a data type higher in the hierarchy is
+#' supplied as the expression matrix.
 #'
-#'  An \code{SCESet} object has to have the \code{'exprs'} slot defined, so if
-#'  the \code{exprsData} argument is \code{NULL}, then this function will define
-#'  \code{'exprs'} with the following order of precedence: log2(TPM +
-#'  logExprsOffset), if \code{tpmData} is defined; log2(FPKM + logExprsOffset)
-#'  if \code{fpkmData} is defined; otherwise log2(counts-per-million +
-#'  logExprsOffset) are used. The \code{\link[edgeR]{cpm}} function from the
-#'  edgeR package is used to compte \code{cpm}. Note that for many analyses
-#'  counts-per-million are not recommended, and if possible
-#'  transcripts-per-million should be used.
+#' Per-feature and per-cell metadata can be supplied with the featureData and
+#' phenoData arguments, respectively. Use of these optional arguments is strongly encouraged.
 #'
-#'  In many downstream functions you will likely find it most convenient if the
-#'  \code{'exprs'} values are on the log2-scale, so this is recommended.
+#' Many methods are provided in the package that operate on SCESet objects.
+#'
+#' Aside from the hierarchy of data types described above, scater is relatively
+#' agnostic with respect to data the nature of the expression values. Most
+#' frequently used values are feature counts or transcripts-per-million (tpm),
+#' but any valid output from a program that calculates expression values from
+#' RNA-Seq reads is supported. For example, expression values could also be
+#' values from a single cell qPCR run or some other type of assay.
+#'
+#' In some cases it may be desirable to have both tpm and counts in an SCESet
+#' object. In such cases, expression matrices can be added to an SCESet object
+#' after it has been produced by using the \code{\link{set_exprs}} function to
+#' add the expression matrix to the SCESet object.
+#'
+#' In many downstream functions it is most convenient if the
+#' \code{'exprs'} values are on the log2-scale, so this is done by default.
 #'
 #' @importFrom Biobase annotatedDataFrameFrom
 #' @importFrom Biobase AnnotatedDataFrame
@@ -98,49 +99,63 @@ newSCESet <- function(exprsData = NULL,
                       is_exprsData = NULL,
                       cellPairwiseDistances = dist(vector()),
                       featurePairwiseDistances = dist(vector()),
-                      lowerDetectionLimit = 0,
-                      logExprsOffset = 1,
-                      logged = FALSE,
-                      useForExprs = "exprs")
+                      lowerDetectionLimit = NULL,
+                      logExprsOffset = NULL)
 {
-    ## Check that we have some expression data
-    if ( is.null(exprsData) && is.null(countData) && is.null(tpmData) &
-         is.null(fpkmData) && is.null(cpmData))
-        stop("Require at least one of exprsData, tpmData, fpkmData or countData arguments.")
-    ## Check dimensions of data matrices
-
-    ## Check counts are a matrix; renames is_exprsData if not null
-    if ( !is.null(countData) )
-        countData <- as.matrix(countData)
-    if ( !is.null(is_exprsData) )
-        isexprs <- is_exprsData
-
-    ## If no exprsData provided define is_exprs from tpmData, fpkmData or countData
-    if ( is.null(exprsData) ) {
-        ## Define exprs data if null
-        if ( !is.null(tpmData) ) {
-            exprsData <- log2(tpmData + logExprsOffset)
-            logged <- TRUE
-        } else {
-            if ( !is.null(fpkmData) ) {
-                exprsData <- log2(fpkmData + logExprsOffset)
-                logged <- TRUE
+    ## Checking which value to use, in the hierarchy specified.
+    have.data <- NULL
+    for (dataname in c("countData", "tpmData", "cpmData", "fpkmData",
+                       "exprsData")) {
+        eData <- get(dataname)
+        if (!is.null(eData)) {
+            if (!is.null(have.data)) {
+                warning(sprintf("'%s' provided, '%s' will be ignored",
+                                have.data, dataname))
+                assign(dataname, NULL)
             } else {
-                if ( !is.null(cpmData) ) {
-                    exprsData <- log2(cpmData + logExprsOffset)
-                    logged <- TRUE
-                }  else {
-                    exprsData <- .compute_exprs(countData,
-                                                size_factors = colSums(countData),
-                                                log = TRUE, sum = FALSE,
-                                                logExprsOffset = logExprsOffset) 
-                    dimnames(exprsData) <- dimnames(countData)
-                    logged <- TRUE
-                }
+                assign(dataname, as.matrix(eData))
+                have.data <- dataname
             }
         }
-    } else {
-        exprsData <- as.matrix(exprsData)
+    }
+
+    if (is.null(have.data)) {
+        stop("one set of expression values should be supplied")
+    }
+
+    if (!is.null(is_exprsData)) {
+        if (have.data != "exprsData") {
+            warning(sprintf("'%s' provided, 'is_exprsData' will be ignored",
+                            have.data))
+            is_exprsData <- NULL
+        } else {
+            is_exprsData <- as.matrix(is_exprsData)
+        }
+    }
+
+    ## Setting logExprsOffset and lowerDetectionLimit.
+    if (is.null(logExprsOffset)) {
+        logExprsOffset <- 1
+        if (have.data != "countData") {
+            warning("'logExprsOffset' should be set manually for non-count data")
+        }
+    }
+
+    if (is.null(lowerDetectionLimit)) {
+        lowerDetectionLimit <- 0
+        if (have.data == "exprsData") {
+            warning("'lowerDetectionLimit' should be set manually for log-expression values")
+        }
+    }
+
+    ## If no exprsData provided, define it from counts or T/C/FPKMs
+    if (have.data == "countData") {
+        exprsData <- .compute_exprs(countData, size_factors = colSums(countData),
+                                    log = TRUE, sum = FALSE,
+                                    logExprsOffset = logExprsOffset)
+        dimnames(exprsData) <- dimnames(countData)
+    } else if (have.data != "exprsData") {
+        exprsData <- log2(get(have.data) + logExprsOffset)
     }
 
     ## Generate valid phenoData and featureData if not provided
@@ -166,21 +181,14 @@ newSCESet <- function(exprsData = NULL,
             expData <- experimentData
         else {
             expData <- expData_null
-            warning("experimentData supplied is not an 'MIAME' object. Thus, experimentData is being set to an empty MIAME object.\n Please supply a valid 'MIAME' class object containing experiment data to experimentData(object).")
+            warning("'experimentData' is not an 'MIAME' object, setting to an empty object")
         }
     } else {
         expData <- expData_null
     }
 
-    ## Check valid useForExprs
-    useForExprs <- match.arg(useForExprs, c("exprs","tpm","counts","fpkm"))
-
     ## Generate new SCESet object
-    if ( !is.null(is_exprsData) )
-        assaydata <- assayDataNew("lockedEnvironment", exprs = exprsData,
-                                  is_exprs = isexprs)
-    else 
-        assaydata <- assayDataNew("lockedEnvironment", exprs = exprsData)
+    assaydata <- assayDataNew("lockedEnvironment", exprs = exprsData)
     sceset <- new( "SCESet",
                    assayData = assaydata,
                    phenoData = phenoData,
@@ -190,11 +198,13 @@ newSCESet <- function(exprsData = NULL,
                    featurePairwiseDistances = featurePairwiseDistances,
                    lowerDetectionLimit = lowerDetectionLimit,
                    logExprsOffset = logExprsOffset,
-                   logged = logged,
+                   logged = TRUE,
                    featureControlInfo = AnnotatedDataFrame(),
-                   useForExprs = useForExprs)
+                   useForExprs = "exprs")
 
     ## Add non-null slots to assayData for SCESet object, omitting null slots
+    if ( !is.null(is_exprsData) )
+        is_exprs(sceset) <- is_exprsData
     if ( !is.null(tpmData) )
         tpm(sceset) <- tpmData
     if ( !is.null(fpkmData) )
@@ -203,7 +213,6 @@ newSCESet <- function(exprsData = NULL,
         counts(sceset) <- countData
     if ( !is.null(cpmData) )
         cpm(sceset) <- cpmData
-
 
     ## Check validity of object
     validObject(sceset)
@@ -293,23 +302,23 @@ setValidity("SCESet", function(object) {
 ### updating an old SCESet object
 
 #' Update an SCESet object to the current version
-#' 
+#'
 #' It can be necessary to update an SCESet produced with an older version of the
 #' package to be compatible with the current version of the package.
-#' 
+#'
 #' @param object an \code{\link{SCESet}} object to be updated
-#' 
+#'
 #' @return an updated \code{\link{SCESet}} object
-#' 
+#'
 #' @export
-#' @examples 
+#' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
 #' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
 #' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 #' updateSCESet(example_sceset)
 updateSCESet <- function(object) {
-    if (!is(object, "SCESet")) 
+    if (!is(object, "SCESet"))
         stop("Object must be an SCESet.")
     sceset <- new( "SCESet",
                    assayData = object@assayData,
@@ -325,7 +334,7 @@ updateSCESet <- function(object) {
                    logged = object@logged,
                    featureControlInfo = object@featureControlInfo,
                    useForExprs = object@useForExprs)
-    
+
     ## Check validity of object
     validObject(sceset)
     sceset
@@ -372,7 +381,7 @@ setMethod('[', 'SCESet', function(x, i, j, ..., drop=FALSE) {
         ## Subsetting features only
         x <- selectMethod('[', 'ExpressionSet')(x, i, , drop = drop)
         if ( length(x@featurePairwiseDistances) != 0 )
-            x@featurePairwiseDistances <- 
+            x@featurePairwiseDistances <-
                 as.dist(as.matrix(x@featurePairwiseDistances)[i, i, drop = drop])
         if ( !missing(...) ) {
             if ( !is.na(ncol(x@bootstraps)) ) {
@@ -389,7 +398,7 @@ setMethod('[', 'SCESet', function(x, i, j, ..., drop=FALSE) {
         ## Subsetting cells only
         x <- selectMethod('[', 'ExpressionSet')(x, , j, drop = drop)
         if ( length(x@cellPairwiseDistances) != 0 )
-            x@cellPairwiseDistances <- 
+            x@cellPairwiseDistances <-
                 as.dist(as.matrix(x@cellPairwiseDistances)[j, j, drop = drop])
         if ( nrow(x@reducedDimension) != 0 )
             x@reducedDimension <- x@reducedDimension[j, , drop = drop]
@@ -408,10 +417,10 @@ setMethod('[', 'SCESet', function(x, i, j, ..., drop=FALSE) {
         ## Subsetting features (i) and cells (j)
         x <- selectMethod('[', 'ExpressionSet')(x, i, j, drop = drop)
         if ( length(x@featurePairwiseDistances) != 0 )
-            x@featurePairwiseDistances <- 
+            x@featurePairwiseDistances <-
                 as.dist(as.matrix(x@featurePairwiseDistances)[i, i, drop = drop])
         if ( length(x@cellPairwiseDistances) != 0 )
-            x@cellPairwiseDistances <- 
+            x@cellPairwiseDistances <-
                 as.dist(as.matrix(x@cellPairwiseDistances)[j, j, drop = drop])
         if ( nrow(x@reducedDimension) != 0 )
             x@reducedDimension <- x@reducedDimension[j, , drop = drop]
@@ -473,15 +482,15 @@ cellNames <- function(object) {
 #'
 #' @param value a vector of cell names to apply to the \code{SCESet} object.
 #' @author Davis McCarthy
-#' 
+#'
 #' @exportMethod "cellNames<-"
-#' 
+#'
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
 #' example_sceset <- newSCESet(countData = sc_example_counts)
 #' cellNames(example_sceset) <- 1:ncol(example_sceset)
-#' 
+#'
 setReplaceMethod("cellNames", signature(object = "SCESet", value = "vector"),
                  function(object, value) {
                      sampleNames(object) <- value
@@ -585,7 +594,7 @@ setReplaceMethod("pData", signature(object = "SCESet", value = "data.frame"),
 #' assayData slot of the SCESet object.
 #'
 #' @usage
-#' \S4method{get_exprs}{SCESet}(object, exprs_values)
+#' \S4method{get_exprs}{SCESet}(object, exprs_values, warning = TRUE)
 #'
 #' @docType methods
 #' @name get_exprs
@@ -604,6 +613,10 @@ setReplaceMethod("pData", signature(object = "SCESet", value = "data.frame"),
 #' expression values) or \code{"stand_exprs"} (standardised expression values)
 #' or any other slots that have been added to the \code{"assayData"} slot by
 #' the user.
+#' @param warning a logical scalar specifying whether a warning should be
+#' raised, and \code{NULL} returned, if the requested expression values are
+#' not present in \code{object}. Otherwise, an error will be thrown.
+#' @param ... further arguments passed to \code{get_exprs.SCESet}
 #' @author Davis McCarthy
 #' @export
 #' @examples
@@ -617,18 +630,26 @@ setReplaceMethod("pData", signature(object = "SCESet", value = "data.frame"),
 #' colSums(counts(example_sceset)))
 #' get_exprs(example_sceset, "scaled_counts")[1:6, 1:6]
 #'
-get_exprs.SCESet <- function(object, exprs_values = "exprs") {
+get_exprs.SCESet <- function(object, exprs_values = "exprs", warning = TRUE) {
     exprs_mat <- object@assayData[[exprs_values]]
-    if ( is.null(exprs_mat) )
-        warning(paste0("The object does not contain ", exprs_values, " expression values. Returning NULL."))
+
+    if ( is.null(exprs_mat) ) {
+        msg <- sprintf("'object' does not contain '%s' values", exprs_values)
+        if (warning) {
+            warning(paste0(msg, ", returning NULL"))
+        } else {
+            stop(msg)
+        }
+    }
+
     exprs_mat
 }
 
 #' @rdname get_exprs
 #' @export
 setMethod("get_exprs", signature(object = "SCESet"),
-          function(object, exprs_values = "exprs") {
-              get_exprs.SCESet(object, exprs_values)
+          function(object, exprs_values = "exprs", warning = TRUE) {
+              get_exprs.SCESet(object, exprs_values, warning = warning)
           })
 
 
@@ -660,15 +681,18 @@ setMethod("get_exprs", signature(object = "SCESet"),
 #' set_exprs(example_sceset, "scaled_counts") <- t(t(counts(example_sceset)) /
 #' colSums(counts(example_sceset)))
 #' get_exprs(example_sceset, "scaled_counts")[1:6, 1:6]
-#' 
+#'
 #' ## get rid of scaled counts
 #' set_exprs(example_sceset, "scaled_counts") <- NULL
-#' 
+#'
 #' @name set_exprs
 #' @rdname set_exprs
 #' @exportMethod "set_exprs<-"
 setReplaceMethod("set_exprs", signature(object = "SCESet", value = "matrix"),
                  function(object, name, value) {
+                     if (!identical(dimnames(object), dimnames(value)))
+                         stop("dimnames for new expression matrix must be
+                              identical to dimnames for object")
                      Biobase::assayDataElement(object, name) <- value
                      validObject(object)
                      object
@@ -1289,7 +1313,7 @@ setReplaceMethod("norm_fpkm", signature(object = "SCESet", value = "matrix"),
 #' For normalisation, library-specific size factors can be defined. Raw values
 #' can be divided by the appropriate size factors to obtain normalised counts,
 #' TPM, etc.
-#' 
+#'
 #'
 #' @usage
 #' \S4method{sizeFactors}{SCESet}(object,type)
@@ -1570,7 +1594,7 @@ setReplaceMethod("redDim", signature(object = "SCESet", value = "matrix"),
 #' @author Davis McCarthy
 #'
 #' @return An SCESet object containing new cell pairwise distances matrix.
-#' 
+#'
 #' @importFrom stats as.dist dist
 #' @export
 #' @examples
@@ -1777,6 +1801,58 @@ setReplaceMethod("featDist", signature(object = "SCESet", value = "dist"),
 
 
 ################################################################################
+### featureControlInfo
+
+#' featureControlInfo in an SCESet object
+#'
+#' Each SCESet object stores optional information about the controls in the
+#' \code{featureControlInfo} slot. These functions can be used to access,
+#' replace or modify this information.
+#'
+#' @param object a \code{SCESet} object.
+#' @param value an AnnotatedDataFrame object, where each row contains
+#' information for a single set of control features.
+#'
+#' @docType methods
+#' @name featureControlInfo
+#' @rdname featureControlInfo
+#' @aliases featureControlInfo featureControlInfo,SCESet-method featureControlInfo<-,SCESet,AnnotatedDataFrame-method featureControlInfo<-
+#'
+#' @author Aaron Lun
+#'
+#' @return An SCESet object containing new feature control information.
+#' @export
+#' @examples
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+#' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+#' example_sceset <- calculateQCMetrics(example_sceset,
+#'                             feature_controls = list(ERCC = 1:40, Mito=41:50))
+#' featureControlInfo(example_sceset)
+#' featureControlInfo(example_sceset)$IsSpike <- c(TRUE, FALSE)
+featureControlInfo.SCESet <- function(object) {
+    object@featureControlInfo
+}
+
+#' @rdname featureControlInfo
+#' @aliases featureControlInfo
+#' @export
+setMethod("featureControlInfo", signature(object = "SCESet"),
+          featureControlInfo.SCESet)
+
+#' @name featureControlInfo<-
+#' @aliases featureControlInfo
+#' @rdname featureControlInfo
+#' @export "featureControlInfo<-"
+setReplaceMethod("featureControlInfo", signature(object = "SCESet",
+                                                 value = "AnnotatedDataFrame"),
+                 function(object, value) {
+                     object@featureControlInfo <- value
+                     return(object)
+                 })
+
+################################################################################
 ### Convert to and from Monocle CellDataSet objects
 
 #' Convert an \code{SCESet} to a \code{CellDataSet}
@@ -1866,8 +1942,7 @@ fromCellDataSet <- function(cds, exprs_values = "tpm", logged = FALSE) {
                          fpkmData = fpkmData, countData = countData,
                          phenoData = phenoData(cds),
                          featureData = featureData(cds),
-                         lowerDetectionLimit = cds@lowerDetectionLimit,
-                         logged = logged)
+                         lowerDetectionLimit = cds@lowerDetectionLimit)
 
         ## now try and preserve a reduced dimension representation
         ## this is really not elegant - KC
@@ -1893,95 +1968,69 @@ fromCellDataSet <- function(cds, exprs_values = "tpm", logged = FALSE) {
 
 #' Retrieve a representation of gene expression
 #'
-#' Gene expression can be summarised in a variety of ways, e.g. as TPM, FPKM or
-#' as raw counts. Many internal methods and external packages rely on accessing
-#' a generic representation of expression without worrying about the particulars.
-#' Scater allows the user to set \code{object@@useForExprs} to the preferred
-#' type (either "exprs", "TPM", "fpkm" or "counts") and that particular representation
-#' will be returned by calls to \code{getExprs}. Note if such representation is
-#' not defined, this method returns \code{NULL}.
+#' Deprecated from scater version 1.3.29.
 #'
 #' @param object An object of type \code{SCESet}
 #' @return A matrix representation of expression corresponding to \code{object@useForExprs}.
 #'
-#' @export
-#' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-#' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd, useForExprs = "exprs")
-#' all(exprs(example_sceset) == getExprs(example_sceset)) # TRUE
-#' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd, useForExprs = "counts")
-#' all(exprs(example_sceset) == getExprs(example_sceset)) # FALSE
-#' all(counts(example_sceset) == getExprs(example_sceset)) # TRUE
 getExprs <- function(object) {
-    if (!is(object,'SCESet')) stop('object must be of type SCESet')
-
-    x <- switch(object@useForExprs,
-                exprs = exprs(object),
-                tpm = tpm(object),
-                fpkm = fpkm(object),
-                counts = counts(object))
-
-    if(is.null(x)) warning(paste("Slot for", object@useForExprs, "is empty; returning NULL"))
-
-    return( x )
+    stop("Deprecated from scater 1.3.29")
 }
 
 
 ################################################################################
 
 #' Merge SCESet objects
-#' 
+#'
 #' Merge two SCESet objects that have the same features but contain different cells/samples.
-#' 
+#'
 #' @param x an \code{\link{SCESet}} object
 #' @param y an \code{\link{SCESet}} object
-#' @param fdata_cols_x a logical or numeric vector indicating which columns of featureData 
-#' for \code{x} are shared between \code{x} and \code{y} and should feature in the 
+#' @param fdata_cols_x a logical or numeric vector indicating which columns of featureData
+#' for \code{x} are shared between \code{x} and \code{y} and should feature in the
 #' returned merged \code{SCESet}. Default is all columns of \code{fData(x)}.
-#' @param fdata_cols_y a logical or numeric vector indicating which columns of featureData 
-#' for \code{y} are shared between \code{x} and \code{y} and should feature in the 
+#' @param fdata_cols_y a logical or numeric vector indicating which columns of featureData
+#' for \code{y} are shared between \code{x} and \code{y} and should feature in the
 #' returned merged \code{SCESet}. Default is \code{fdata_cols_x}.
-#' @param pdata_cols_x a logical or numeric vector indicating which columns of phenoData 
+#' @param pdata_cols_x a logical or numeric vector indicating which columns of phenoData
 #' of \code{x} should be retained.
-#' @param pdata_cols_y a logical or numeric vector indicating which columns of phenoData 
+#' @param pdata_cols_y a logical or numeric vector indicating which columns of phenoData
 #' of \code{y} should be retained.
-#' 
+#'
 #' @details Existing cell-cell pairwise distances and feature-feature pairwise distances will not be valid for a merged SCESet so these are set to \code{NULL} in the returned object. Similarly \code{experimentData} will need to be added anew to the merged SCESet returned.
-#' 
+#'
 #' @return a merged \code{SCESet} object combining data and metadata from \code{x} and \code{y}
-#' 
+#'
 #' @export
-#' 
-#' @examples 
+#'
+#' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
 #' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
 #' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 #' mergeSCESet(example_sceset[, 1:20], example_sceset[, 21:40])
-#' 
+#'
 #' ## with specification of columns of fData
 #' example_sceset <- calculateQCMetrics(example_sceset)
 #' mergeSCESet(example_sceset[, 1:20], example_sceset[, 21:40], fdata_cols_x = c(1, 7))
-#' 
+#'
 #' ## with specification of columns of pData
 #' mergeSCESet(example_sceset[, 1:20], example_sceset[, 21:40], pdata_cols_x = 1:6)
-#' 
-#' 
+#'
+#'
 mergeSCESet <- function(x, y, fdata_cols_x = 1:ncol(fData(x)), fdata_cols_y = fdata_cols_x,
                         pdata_cols_x = NULL, pdata_cols_y = NULL) {
     if (!is(x,'SCESet')) stop('x must be of type SCESet')
     if (!is(y,'SCESet')) stop('y must be of type SCESet')
     if (!identical(featureNames(x), featureNames(y))) stop("feature names of x and y must be identical")
-   
+
     if (x@logged != y@logged)
         stop("x and y do not have the same value for the 'logged' slot.")
     if (x@lowerDetectionLimit != y@lowerDetectionLimit)
         stop("x and y do not have the same lowerDetectionLimit.")
     if (x@logExprsOffset != y@logExprsOffset)
         stop("x and y do not have the same logExprsOffset.")
-    
+
     ## combine fData
     if (ncol(fData(x)) == 0) {
         if (!identical(fData(x), fData(y)))
@@ -2024,10 +2073,10 @@ mergeSCESet <- function(x, y, fdata_cols_x = 1:ncol(fData(x)), fdata_cols_y = fd
     new_exprs <- Biobase::combine(exprs(x), exprs(y))
     ## new SCESet
     merged_sceset <- newSCESet(exprsData = new_exprs, featureData = new_fdata,
-                            phenoData = new_pdata, logged = x@logged,
-                            logExprsOffset = x@logExprsOffset)
+                               phenoData = new_pdata,
+                               logExprsOffset = x@logExprsOffset)
     ## add remaining assayData to merged SCESet
-    assay_names <- intersect(names(Biobase::assayData(x)), 
+    assay_names <- intersect(names(Biobase::assayData(x)),
                              names(Biobase::assayData(y)))
     for (assaydat in assay_names) {
         new_dat <- Biobase::combine(get_exprs(x, assaydat), get_exprs(y, assaydat))
@@ -2041,7 +2090,7 @@ mergeSCESet <- function(x, y, fdata_cols_x = 1:ncol(fData(x)), fdata_cols_y = fd
 ################################################################################
 ## writeSCESet
 
-#' Write an SCESet object to an HDF5 file 
+#' Write an SCESet object to an HDF5 file
 #'
 #' @param object \code{\link{SCESet}} object to be writted to file
 #' @param file_path path to written file containing data from SCESet object
@@ -2051,7 +2100,7 @@ mergeSCESet <- function(x, y, fdata_cols_x = 1:ncol(fData(x)), fdata_cols_y = fd
 #'
 #' @details Currently writing to HDF5 files is supported. The \pkg{\link{rhdf5}}
 #' package is used to write data to file and can be used to read data from HDF5
-#' files into R. For further details about the HDF5 data format see 
+#' files into R. For further details about the HDF5 data format see
 #' \url{https://support.hdfgroup.org/HDF5/}.
 #'
 #' @return Return is \code{NULL}, having written the \code{SCESet} object to file.
@@ -2062,12 +2111,12 @@ mergeSCESet <- function(x, y, fdata_cols_x = 1:ncol(fData(x)), fdata_cols_y = fd
 #' data("sc_example_cell_info")
 #' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
 #' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-#' 
+#'
 #' \dontrun{
 #' writeSCESet(example_sceset, "test.h5")
 #' file.remove("test.h5")
 #' }
-#' 
+#'
 writeSCESet <- function(object, file_path, type = "HDF5", overwrite_existing = FALSE) {
     if (!is(object,'SCESet')) stop('object must be of type SCESet')
     if (file.exists(file_path) && !overwrite_existing)
@@ -2078,25 +2127,25 @@ writeSCESet <- function(object, file_path, type = "HDF5", overwrite_existing = F
         rhdf5::H5close()
         rhdf5::h5createFile(file_path)
         tryCatch({
-            rhdf5::h5write(featureNames(object), file = file_path, 
+            rhdf5::h5write(featureNames(object), file = file_path,
                            name = "featureNames")
             rhdf5::h5write(cellNames(object), file = file_path, name = "cellNames")
             rhdf5::h5write(object@logged, file = file_path, name = "logged")
-            rhdf5::h5write(object@logExprsOffset, file = file_path, 
+            rhdf5::h5write(object@logExprsOffset, file = file_path,
                            name = "logExprsOffset")
-            rhdf5::h5write(object@lowerDetectionLimit, file = file_path, 
+            rhdf5::h5write(object@lowerDetectionLimit, file = file_path,
                            name = "lowerDetectionLimit")
             if (ncol(pData(object)) > 0)
-                rhdf5::h5write(pData(object), file = file_path, name = "phenoData", 
+                rhdf5::h5write(pData(object), file = file_path, name = "phenoData",
                                write.attributes = FALSE)
             if (ncol(fData(object)) > 0)
-                rhdf5::h5write(fData(object), file = file_path, name = "featureData", 
+                rhdf5::h5write(fData(object), file = file_path, name = "featureData",
                                write.attributes = FALSE)
             rhdf5::h5createGroup(file_path, "assayData")
             for (assay in names(Biobase::assayData(object))) {
                 group_set <- paste0("assayData/", assay)
-                rhdf5::h5write(get_exprs(object, assay), file = file_path, 
-                               name = group_set, 
+                rhdf5::h5write(get_exprs(object, assay), file = file_path,
+                               name = group_set,
                                write.attributes = FALSE)
             }
             rhdf5::H5close()
@@ -2104,6 +2153,3 @@ writeSCESet <- function(object, file_path, type = "HDF5", overwrite_existing = F
     } else
         stop("HDF5 is the only format currently supported. See also saveRDS() to write to an object readable with R.")
 }
-
-
-

@@ -1,14 +1,16 @@
 ---
 title: "Introduction to `scater`: Single-cell analysis toolkit for expression in R"
-author: "Davis McCarthy"
-date: "`r Sys.Date()`"
+author:
+- name: "Davis McCarthy"
+  affiliation: 
+  - EMBL-EBI
+package: scater
 output:
-    BiocStyle::html_document:
-        toc: true
+    BiocStyle::html_document2
 vignette: >
   %\VignetteIndexEntry{An introduction to the scater package}
   %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+  %VignetteEncoding{UTF-8}
 ---
 
 

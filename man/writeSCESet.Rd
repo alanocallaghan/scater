@@ -25,7 +25,7 @@ Write an SCESet object to an HDF5 file
 \details{
 Currently writing to HDF5 files is supported. The \pkg{\link{rhdf5}}
 package is used to write data to file and can be used to read data from HDF5
-files into R. For further details about the HDF5 data format see 
+files into R. For further details about the HDF5 data format see
 \url{https://support.hdfgroup.org/HDF5/}.
 }
 \examples{

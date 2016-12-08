@@ -27,7 +27,7 @@ test_that("we can summarise expression at feature level", {
                                      scaled_tpm_counts = FALSE)
     expect_that(example_sceset_summarised, is_a("SCESet"))    
 
-        ## counts 
+    ## counts 
     example_sceset_summarised <-
         summariseExprsAcrossFeatures(example_sceset, exprs_values = "counts")
     expect_that(example_sceset_summarised, is_a("SCESet"))

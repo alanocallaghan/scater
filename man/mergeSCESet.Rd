@@ -12,18 +12,18 @@ mergeSCESet(x, y, fdata_cols_x = 1:ncol(fData(x)),
 
 \item{y}{an \code{\link{SCESet}} object}
 
-\item{fdata_cols_x}{a logical or numeric vector indicating which columns of featureData 
-for \code{x} are shared between \code{x} and \code{y} and should feature in the 
+\item{fdata_cols_x}{a logical or numeric vector indicating which columns of featureData
+for \code{x} are shared between \code{x} and \code{y} and should feature in the
 returned merged \code{SCESet}. Default is all columns of \code{fData(x)}.}
 
-\item{fdata_cols_y}{a logical or numeric vector indicating which columns of featureData 
-for \code{y} are shared between \code{x} and \code{y} and should feature in the 
+\item{fdata_cols_y}{a logical or numeric vector indicating which columns of featureData
+for \code{y} are shared between \code{x} and \code{y} and should feature in the
 returned merged \code{SCESet}. Default is \code{fdata_cols_x}.}
 
-\item{pdata_cols_x}{a logical or numeric vector indicating which columns of phenoData 
+\item{pdata_cols_x}{a logical or numeric vector indicating which columns of phenoData
 of \code{x} should be retained.}
 
-\item{pdata_cols_y}{a logical or numeric vector indicating which columns of phenoData 
+\item{pdata_cols_y}{a logical or numeric vector indicating which columns of phenoData
 of \code{y} should be retained.}
 }
 \value{

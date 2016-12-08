@@ -11,7 +11,7 @@ setGeneric("cellNames<-", function(object, value) {standardGeneric("cellNames<-"
 #' @docType methods
 #' @return a matrix of expression values
 #' @rdname get_exprs
-setGeneric("get_exprs", function(object, exprs_values) {
+setGeneric("get_exprs", function(object, exprs_values, ...) {
     standardGeneric("get_exprs")})
 
 #' @name set_exprs<-
@@ -232,6 +232,22 @@ setGeneric("featDist", function(object) {
 #' @rdname featurePairwiseDistances
 setGeneric("featDist<-", function(object, value) {
     standardGeneric("featDist<-")
+})
+
+#' @name featureControlInfo
+#' @export
+#' @docType methods
+#' @rdname featureControlInfo 
+setGeneric("featureControlInfo", function(object) {
+    standardGeneric("featureControlInfo")
+})
+
+#' @name featureControlInfo<-
+#' @export
+#' @docType methods
+#' @rdname featureControlInfo
+setGeneric("featureControlInfo<-", function(object, value) {
+    standardGeneric("featureControlInfo<-")
 })
 
 

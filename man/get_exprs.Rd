@@ -7,11 +7,11 @@
 \alias{get_exprs.SCESet}
 \title{Generic accessor for expression data from an SCESet object.}
 \usage{
-get_exprs(object, exprs_values)
+get_exprs(object, exprs_values, ...)
 
-\S4method{get_exprs}{SCESet}(object, exprs_values)
+\S4method{get_exprs}{SCESet}(object, exprs_values, warning = TRUE)
 
-\S4method{get_exprs}{SCESet}(object, exprs_values = "exprs")
+\S4method{get_exprs}{SCESet}(object, exprs_values = "exprs", warning = TRUE)
 }
 \arguments{
 \item{object}{a \code{SCESet} object.}
@@ -27,6 +27,12 @@ of the \code{SCESet} object; default), \code{"norm_exprs"} (normalised
 expression values) or \code{"stand_exprs"} (standardised expression values)
 or any other slots that have been added to the \code{"assayData"} slot by
 the user.}
+
+\item{...}{further arguments passed to \code{get_exprs.SCESet}}
+
+\item{warning}{a logical scalar specifying whether a warning should be
+raised, and \code{NULL} returned, if the requested expression values are
+not present in \code{object}. Otherwise, an error will be thrown.}
 }
 \value{
 a matrix of expression values
