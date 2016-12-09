@@ -6,10 +6,9 @@
 \alias{[,SCESet,ANY,ANY,ANY-method}
 \alias{[,SCESet,ANY,ANY-method}
 \alias{[,SCESet,ANY-method}
-\alias{[,SCESet-method}
 \title{Subsetting SCESet Objects}
 \usage{
-\S4method{[}{SCESet}(x, i, j, ..., drop = FALSE)
+\S4method{[}{SCESet,ANY,ANY,ANY}(x, i, j, ..., drop = FALSE)
 }
 \arguments{
 \item{x}{

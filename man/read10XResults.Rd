@@ -4,21 +4,46 @@
 \alias{read10XResults}
 \title{Load in data from 10X experiment}
 \usage{
-read10XResults(data_dir = NULL)
+read10XResults(data_dir = NULL, min_total_cell_counts = 1000L,
+  min_mean_gene_counts = NULL, expand = TRUE, logExprsOffset = 1)
 }
 \arguments{
 \item{data_dir}{Directory containing the matrix.mtx, genes.tsv, and barcodes.tsv
 files provided by 10X. A vector or named vector can be given in order to load 
 several data directories. If a named vector is given, the cell barcode names 
 will be prefixed with the name.}
+
+\item{min_total_cell_counts}{integer(1) threshold such that cells (barcodes)
+with total counts below the threshold are filtered out}
+
+\item{min_mean_gene_counts}{numeric(1) threshold such that genes with mean 
+counts below the threshold are filtered out.}
+
+\item{expand}{logical(1), should the sparse count matrix be expanded 
+into an SCESet object with dense matrices for expression data (default), or
+should the sparse count matrix be returned?}
+
+\item{logExprsOffset}{numeric(1) offset value to apply when computing 
+expression values  as log2(cpm + offset) for the SCESet. Ignored if 
+\code{expand = FALSE}.}
 }
 \value{
-Returns a full matrix with rows and columns labeled
+If \code{expand} is TRUE, returns an SCESet object with counts data 
+and log2(cpm + offset) as expression data; else returns a sparse matrix with 
+rows and columns labeled.
 }
 \description{
-Creates a full matrix from a sparse data matrix provided by 10X genomics.
+Creates a full or sparse matrix from a sparse data matrix provided by 10X 
+genomics.
 }
 \details{
-This function is identical to the \code{Read10X} from \code{Seurat} package.
+This function was developed from the \code{Read10X} function from 
+the \code{Seurat} package.
+}
+\examples{
+\dontrun{
+sce10x <- read10XResults("path/to/data/directory")
+count_matrix_10x <- read10XResults("path/to/data/directory", expand = FALSE)
+}
 }
 
