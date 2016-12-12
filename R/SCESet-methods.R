@@ -1899,11 +1899,17 @@ setMethod("isSpike", "SCESet",
                   if (length(type)==1L) {
                       is.spike <- fData(object)[[paste0("is_feature_control_", type)]]
                   } else {
-                    # Combining the spike-in identities. 
+                      # Combining the spike-in identities. 
                       is.spike <- logical(nrow(object)) 
+                      all.absent <- TRUE
                       for (f in type) {
-                          is.spike <- is.spike | fData(object)[[paste0("is_feature_control_", f)]]
+                          cur.spike <- fData(object)[[paste0("is_feature_control_", f)]]
+                          if (!is.null(cur.spike)) {
+                              all.absent <- FALSE
+                              is.spike <- is.spike | cur.spike
+                          }
                       }
+                      if (all.absent) is.spike <- NULL
                   }
               }
 
