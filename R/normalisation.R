@@ -245,6 +245,12 @@ normalize.SCESet <- function(object, exprs_values = NULL,
 
     ## figuring out how many controls have their own size factors
     control_list <- .find_control_SF(object)
+    spike.names <- .spike_fcontrol_names(object)
+    no.spike.sf <- ! spike.names %in% names(control_list)
+    if (any(no.spike.sf)) {
+        warning(sprintf("spike-in transcripts in '%s' should have their own size factors",
+                        spike.names[no.spike.sf][1]))
+    }
 
     ## extract logExprsOffset if argument is NULL
     if ( is.null(logExprsOffset) )
