@@ -14,7 +14,7 @@ isSpike(object, ...)
 \item{object}{a \code{SCESet} object.}
 
 \item{type}{a character vector specifying the feature control sets to use. All 
-specified spike-in sets in \code{featureControlInfo} are used by default.}
+specified spike-in sets in \code{featureControlInfo(object)} are used by default.}
 
 \item{warning}{A logical scalar specifying if a warning should be raised 
 if spike-in controls are unavailable.}
@@ -34,7 +34,7 @@ example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 example_sceset <- calculateQCMetrics(example_sceset,
                             feature_controls = list(ERCC = 1:40, Mito=41:50))
 setSpike(example_sceset) <- "ERCC"
-isSpike(example_sceset)
+summary(isSpike(example_sceset))
 }
 \author{
 Aaron Lun

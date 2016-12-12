@@ -17,11 +17,18 @@ sets that are spike-ins. If \code{NULL}, all spike-in information is removed.}
 }
 \value{
 A \code{SCESet} object containing spike-in information in 
-\code{featureControlInfo} and updated \code{isSpike} results.
+\code{featureControlInfo} and an updated \code{is_feature_spike} vector for 
+extraction with \code{\link{isSpike}}.
 }
 \description{
 Specify which feature control sets in the SCESet object are spike-ins, i.e., 
 RNA of the same type and quantity added to each cell during the scRNA-seq protocol.
+}
+\details{
+While it is possible to declare overlapping sets as the spike-in sets with \code{isSpike(x)<-}, this is not advisable.
+This is because some downstream operations assume that each row belongs to only one set (i.e., one of the spike-in sets, or the set of endogenous genes).
+For example, normalization will use size factors from only one of the sets, so correspondence to multiple sets will not be honoured.
+Thus, a warning will be raised if overlapping sets are specified in \code{value}.
 }
 \examples{
 data("sc_example_counts")
@@ -32,7 +39,7 @@ example_sceset <- calculateQCMetrics(example_sceset,
                             feature_controls = list(ERCC = 1:40, Mito=41:50))
 setSpike(example_sceset) <- "ERCC"
 featureControlInfo(example_sceset)
-isSpike(example_sceset)
+summary(isSpike(example_sceset))
 }
 \author{
 Aaron Lun

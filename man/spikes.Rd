@@ -24,6 +24,10 @@ A matrix of expression values for features in the specified spike-in control set
 \description{
 Extract a matrix of expression values for features in spike-in control sets.
 }
+\details{
+If \code{exprs_values="exprs"}, users should have run \code{normalize(object)} first,
+so that spike-in features are normalized with spike-in size factors.
+}
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")

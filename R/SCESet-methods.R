@@ -1862,7 +1862,7 @@ setReplaceMethod("featureControlInfo", signature(object = "SCESet",
 #'
 #' @param object a \code{SCESet} object.
 #' @param type a character vector specifying the feature control sets to use. All 
-#' specified spike-in sets in \code{featureControlInfo} are used by default.
+#' specified spike-in sets in \code{featureControlInfo(object)} are used by default.
 #' @param warning A logical scalar specifying if a warning should be raised 
 #' if spike-in controls are unavailable.
 #'
@@ -1892,18 +1892,18 @@ setMethod("isSpike", "SCESet",
                   not.in <- !(type %in% .spike_fcontrol_names(object))
                   if (any(not.in)) { 
                       stop(sprintf("'%s' is not specified as a spike-in control", 
-                                   type[which(not.in)[1]]))
+                                   type[not.in][1]))
                   } 
                   
                   # Returning directly if possible.
                   if (length(type)==1L) {
-                      return(fData(object)[[paste0("is_feature_control_", type)]])
-                  }
-                  
-                  # Combining the spike-in identities. 
-                  is.spike <- logical(nrow(object)) 
-                  for (f in type) {
-                      is.spike <- is.spike | fData(object)[[paste0("is_feature_control_", f)]]
+                      is.spike <- fData(object)[[paste0("is_feature_control_", type)]]
+                  } else {
+                    # Combining the spike-in identities. 
+                      is.spike <- logical(nrow(object)) 
+                      for (f in type) {
+                          is.spike <- is.spike | fData(object)[[paste0("is_feature_control_", f)]]
+                      }
                   }
               }
 
@@ -1930,6 +1930,12 @@ setMethod("isSpike", "SCESet",
 #' @param value a character vector containing the names of the feature control
 #' sets that are spike-ins. If \code{NULL}, all spike-in information is removed. 
 #'
+#' @details 
+#' While it is possible to declare overlapping sets as the spike-in sets with \code{isSpike(x)<-}, this is not advisable.
+#' This is because some downstream operations assume that each row belongs to only one set (i.e., one of the spike-in sets, or the set of endogenous genes).
+#' For example, normalization will use size factors from only one of the sets, so correspondence to multiple sets will not be honoured.
+#' Thus, a warning will be raised if overlapping sets are specified in \code{value}.
+#'
 #' @docType methods
 #' @name setSpike
 #' @rdname setSpike
@@ -1938,7 +1944,8 @@ setMethod("isSpike", "SCESet",
 #' @author Aaron Lun
 #'
 #' @return A \code{SCESet} object containing spike-in information in 
-#' \code{featureControlInfo} and updated \code{isSpike} results.
+#' \code{featureControlInfo} and an updated \code{is_feature_spike} vector for 
+#' extraction with \code{\link{isSpike}}.
 #' 
 #' @export
 #' @examples
@@ -1954,24 +1961,14 @@ setMethod("isSpike", "SCESet",
 setReplaceMethod("setSpike", signature(object="SCESet", value="NULL"), 
                  function(object, value) {
                      fData(object)$is_feature_spike <- NULL 
-                     x@featureControlInfo$spike <- NULL
+                     featureControlInfo(object)$spike <- NULL
                      return(object) 
                  })
 
 setReplaceMethod("setSpike", signature(object="SCESet", value="character"), 
                  function(object, value) {
-                     m <- match(value, .fcontrol_names(object))
-                     lost <- is.na(m)
-                     if (any(lost)) {
-                         warning("'%s' is not a feature control", value[lost][1])
-                         value <- value[!lost]
-                         m <- m[!lost]
-                     }
-
                      # Recording all those that were listed as spikes.
-                     chosen <- logical(nrow(featureControlInfo(object)))
-                     chosen[m] <- TRUE
-                     featureControlInfo(object)$spike <- chosen
+                     featureControlInfo(object)$spike <- .fcontrol_names(object) %in% value
                      
                      # Setting the default is_feature_spike.
                      fData(object)$is_feature_spike <- isSpike(object, value)
@@ -2034,6 +2031,9 @@ setMethod("whichSpike", signature("SCESet"),
 #' @param type a character vector containing the names of the spike-in control sets to extract. By default,
 #' expression values for features in all spike-in control sets are extracted.
 #' 
+#' @details
+#' If \code{exprs_values="exprs"}, users should have run \code{normalize(object)} first,
+#' so that spike-in features are normalized with spike-in size factors.
 #'
 #' @docType methods
 #' @name spikes
