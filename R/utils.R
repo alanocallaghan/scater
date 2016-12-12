@@ -23,15 +23,21 @@
     return(unname(subset))
 }
 
-.get_feature_control_names <- function(object) {
-    ## gets the names of the feature controls.
+.fcontrol_names <- function(object){  
+    ## Gets names of all feature control sets.
     object@featureControlInfo$name
+}
+
+.spike_fcontrol_names <- function(object) {
+    ## Gets names of feature control sets that are spike-ins.
+    spike.sets <- featureControlInfo(object)$spike
+    .fcontrol_names(object)[spike.sets]
 }
 
 .find_control_SF <- function(object) {
     ## returns a list of indices and SFs for each control set.
     control_list <- list()
-    for (fc in .get_feature_control_names(object)) {
+    for (fc in .fcontrol_names(object)) {
         specific_sf <- suppressWarnings(sizeFactors(object, type=fc))
         if (!is.null(specific_sf)) {
             which.current <- fData(object)[[paste0("is_feature_control_", fc)]]

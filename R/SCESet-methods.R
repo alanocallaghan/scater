@@ -1372,7 +1372,7 @@ sizeFactors.SCESet <- function(object, type=NULL) {
 .construct_sf_field <- function(object, type) {
     ofield <- "size_factor"
     if (!is.null(type)) {
-        fc_available <- .get_feature_control_names(object)
+        fc_available <- .fcontrol_names(object)
         if (length(fc_available) == 0L) {
             stop("no named controls specified in the SCESet object")
         }
@@ -1851,6 +1851,215 @@ setReplaceMethod("featureControlInfo", signature(object = "SCESet",
                      object@featureControlInfo <- value
                      return(object)
                  })
+
+################################################################################
+### isSpike
+
+#' Get spike-in features in an SCESet object
+#'
+#' Get the features in the SCESet object that are spike-in controls, as 
+#' specified using \code{\link{setSpike<-}}.
+#'
+#' @param object a \code{SCESet} object.
+#' @param type a character vector specifying the feature control sets to use. All 
+#' specified spike-in sets in \code{featureControlInfo} are used by default.
+#' @param warning A logical scalar specifying if a warning should be raised 
+#' if spike-in controls are unavailable.
+#'
+#' @docType methods
+#' @name isSpike
+#' @rdname isSpike
+#' @aliases isSpike isSpike,SCESet-method 
+#'
+#' @author Aaron Lun
+#'
+#' @return A logical vector specifying if each row is a spike-in feature.
+#' @export
+#' @examples
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+#' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+#' example_sceset <- calculateQCMetrics(example_sceset,
+#'                             feature_controls = list(ERCC = 1:40, Mito=41:50))
+#' setSpike(example_sceset) <- "ERCC"
+#' summary(isSpike(example_sceset))
+setMethod("isSpike", "SCESet", 
+          function(object, type=NULL, warning=TRUE) {
+              if (is.null(type)) {
+                  is.spike <- fData(object)$is_feature_spike
+              } else {
+                  not.in <- !(type %in% .spike_fcontrol_names(object))
+                  if (any(not.in)) { 
+                      stop(sprintf("'%s' is not specified as a spike-in control", 
+                                   type[which(not.in)[1]]))
+                  } 
+                  
+                  # Returning directly if possible.
+                  if (length(type)==1L) {
+                      return(fData(object)[[paste0("is_feature_control_", type)]])
+                  }
+                  
+                  # Combining the spike-in identities. 
+                  is.spike <- logical(nrow(object)) 
+                  for (f in type) {
+                      is.spike <- is.spike | fData(object)[[paste0("is_feature_control_", f)]]
+                  }
+              }
+
+              if (warning && is.null(is.spike)) {
+                  if (!is.null(type)) {
+                      extra <- sprintf(" for '%s'", type)
+                  } else {
+                      extra <- ""
+                  }
+                  warning(sprintf("no spike-ins specified%s, returning NULL", extra)) 
+              }
+              return(is.spike)
+          })
+
+################################################################################
+### setSpike
+
+#' Set spike-in features in an SCESet object
+#'
+#' Specify which feature control sets in the SCESet object are spike-ins, i.e., 
+#' RNA of the same type and quantity added to each cell during the scRNA-seq protocol.
+#'
+#' @param object a \code{SCESet} object.
+#' @param value a character vector containing the names of the feature control
+#' sets that are spike-ins. If \code{NULL}, all spike-in information is removed. 
+#'
+#' @docType methods
+#' @name setSpike
+#' @rdname setSpike
+#' @aliases setSpike setSpike,SCESet,NULL-method setSpike,SCESet,character-method
+#'
+#' @author Aaron Lun
+#'
+#' @return A \code{SCESet} object containing spike-in information in 
+#' \code{featureControlInfo} and updated \code{isSpike} results.
+#' 
+#' @export
+#' @examples
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+#' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+#' example_sceset <- calculateQCMetrics(example_sceset,
+#'                             feature_controls = list(ERCC = 1:40, Mito=41:50))
+#' setSpike(example_sceset) <- "ERCC"
+#' featureControlInfo(example_sceset)
+#' summary(isSpike(example_sceset))
+setReplaceMethod("setSpike", signature(object="SCESet", value="NULL"), 
+                 function(object, value) {
+                     fData(object)$is_feature_spike <- NULL 
+                     x@featureControlInfo$spike <- NULL
+                     return(object) 
+                 })
+
+setReplaceMethod("setSpike", signature(object="SCESet", value="character"), 
+                 function(object, value) {
+                     m <- match(value, .fcontrol_names(object))
+                     lost <- is.na(m)
+                     if (any(lost)) {
+                         warning("'%s' is not a feature control", value[lost][1])
+                         value <- value[!lost]
+                         m <- m[!lost]
+                     }
+
+                     # Recording all those that were listed as spikes.
+                     chosen <- logical(nrow(featureControlInfo(object)))
+                     chosen[m] <- TRUE
+                     featureControlInfo(object)$spike <- chosen
+                     
+                     # Setting the default is_feature_spike.
+                     fData(object)$is_feature_spike <- isSpike(object, value)
+                     
+                     # Checking that they don't overlap.
+                     if (length(value) > 1L) { 
+                         total.hits <- integer(nrow(object))
+                         for (v in value) {
+                             total.hits <- total.hits + isSpike(object, v)
+                         }
+                         if (any(total.hits > 1L)) { 
+                             warning("overlapping spike-in sets detected")
+                         }
+                     }
+                     
+                     return(object) 
+                 })
+
+################################################################################
+### whichSpike
+
+#' Identify spike-in feature control sets in an SCESet object
+#'
+#' Get the names of the feature control sets that are spike-ins.
+#'
+#' @param object a \code{SCESet} object.
+#'
+#' @docType methods
+#' @name whichSpike
+#' @rdname whichSpike
+#' @aliases whichSpike whichSpike,SCESet-method
+#'
+#' @author Aaron Lun
+#'
+#' @return A character vector containing the names of feature control sets
+#' that are spike-in sets.
+#' 
+#' @export
+#' @examples
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+#' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+#' example_sceset <- calculateQCMetrics(example_sceset,
+#'                             feature_controls = list(ERCC = 1:40, Mito=41:50))
+#' setSpike(example_sceset) <- "ERCC"
+#' whichSpike(example_sceset)
+setMethod("whichSpike", signature("SCESet"), 
+          function(object) .spike_fcontrol_names(object))
+
+################################################################################
+### spikes
+
+#' Extract expression values for spike-in features in an SCESet object
+#'
+#' Extract a matrix of expression values for features in spike-in control sets.
+#'
+#' @param object a \code{SCESet} object.
+#' @param exprs_values a string specifying the type of expression values to extract.
+#' @param type a character vector containing the names of the spike-in control sets to extract. By default,
+#' expression values for features in all spike-in control sets are extracted.
+#' 
+#'
+#' @docType methods
+#' @name spikes
+#' @rdname spikes
+#' @aliases spikes spikes,SCESet-method
+#'
+#' @author Aaron Lun
+#'
+#' @return A matrix of expression values for features in the specified spike-in control sets.
+#' 
+#' @export
+#' @examples
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+#' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+#' example_sceset <- calculateQCMetrics(example_sceset,
+#'                             feature_controls = list(ERCC = 1:40, Mito=41:50))
+#' setSpike(example_sceset) <- "ERCC"
+#' head(spikes(example_scesets))
+setMethod("spikes", "SCESet", 
+          function(object, exprs_values="counts", type=NULL) {
+              is.spike <- isSpike(object, type=type)
+              get_exprs(object, exprs_values)[is.spike,,drop=FALSE]
+          })
+
 
 ################################################################################
 ### Convert to and from Monocle CellDataSet objects
