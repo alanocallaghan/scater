@@ -1686,7 +1686,6 @@ setReplaceMethod("cellDist", signature(object = "SCESet", value = "dist"),
                  } )
 
 
-
 ################################################################################
 ### featurePairwiseDistances
 
@@ -1852,19 +1851,21 @@ setReplaceMethod("featureControlInfo", signature(object = "SCESet",
                      return(object)
                  })
 
+
 ################################################################################
 ### isSpike
 
 #' Get spike-in features in an SCESet object
 #'
 #' Get the features in the SCESet object that are spike-in controls, as 
-#' specified using \code{\link{setSpike<-}}.
+#' specified using \code{\link{setSpike}}.
 #'
 #' @param object a \code{SCESet} object.
 #' @param type a character vector specifying the feature control sets to use. All 
 #' specified spike-in sets in \code{featureControlInfo(object)} are used by default.
 #' @param warning A logical scalar specifying if a warning should be raised 
 #' if spike-in controls are unavailable.
+#' @param ... arguments passed through generic version of the function.
 #'
 #' @docType methods
 #' @name isSpike
@@ -1896,8 +1897,9 @@ setMethod("isSpike", "SCESet",
                   } 
                   
                   # Returning directly if possible.
-                  if (length(type)==1L) {
-                      is.spike <- fData(object)[[paste0("is_feature_control_", type)]]
+                  if (length(type) == 1L) {
+                      is.spike <- fData(object)[[paste0("is_feature_control_", 
+                                                        type)]]
                   } else {
                       # Combining the spike-in identities. 
                       is.spike <- logical(nrow(object)) 
@@ -1924,17 +1926,20 @@ setMethod("isSpike", "SCESet",
               return(is.spike)
           })
 
+
 ################################################################################
 ### setSpike
 
 #' Set spike-in features in an SCESet object
 #'
 #' Specify which feature control sets in the SCESet object are spike-ins, i.e., 
-#' RNA of the same type and quantity added to each cell during the scRNA-seq protocol.
+#' RNA of the same type and quantity added to each cell during the scRNA-seq 
+#' protocol.
 #'
 #' @param object a \code{SCESet} object.
 #' @param value a character vector containing the names of the feature control
 #' sets that are spike-ins. If \code{NULL}, all spike-in information is removed. 
+#' @param ... arguments passed through generic version of the function.
 #'
 #' @details 
 #' While it is possible to declare overlapping sets as the spike-in sets with \code{isSpike(x)<-}, this is not advisable.
@@ -1945,7 +1950,7 @@ setMethod("isSpike", "SCESet",
 #' @docType methods
 #' @name setSpike
 #' @rdname setSpike
-#' @aliases setSpike setSpike,SCESet,NULL-method setSpike,SCESet,character-method
+#' @aliases setSpike<- setSpike<-,SCESet,NULL-method setSpike<-,SCESet,character-method
 #'
 #' @author Aaron Lun
 #'
@@ -1964,17 +1969,18 @@ setMethod("isSpike", "SCESet",
 #' setSpike(example_sceset) <- "ERCC"
 #' featureControlInfo(example_sceset)
 #' summary(isSpike(example_sceset))
-setReplaceMethod("setSpike", signature(object="SCESet", value="NULL"), 
+setReplaceMethod("setSpike", signature(object = "SCESet", value = "NULL"), 
                  function(object, value) {
                      fData(object)$is_feature_spike <- NULL 
                      featureControlInfo(object)$spike <- NULL
                      return(object) 
                  })
 
-setReplaceMethod("setSpike", signature(object="SCESet", value="character"), 
+setReplaceMethod("setSpike", signature(object = "SCESet", value = "character"), 
                  function(object, value) {
                      # Recording all those that were listed as spikes.
-                     featureControlInfo(object)$spike <- .fcontrol_names(object) %in% value
+                     featureControlInfo(object)$spike <- 
+                         .fcontrol_names(object) %in% value
                      
                      # Setting the default is_feature_spike.
                      fData(object)$is_feature_spike <- isSpike(object, value)
@@ -1992,6 +1998,7 @@ setReplaceMethod("setSpike", signature(object="SCESet", value="character"),
                      
                      return(object) 
                  })
+
 
 ################################################################################
 ### whichSpike
@@ -2025,6 +2032,7 @@ setReplaceMethod("setSpike", signature(object="SCESet", value="character"),
 setMethod("whichSpike", signature("SCESet"), 
           function(object) .spike_fcontrol_names(object))
 
+
 ################################################################################
 ### spikes
 
@@ -2036,6 +2044,7 @@ setMethod("whichSpike", signature("SCESet"),
 #' @param exprs_values a string specifying the type of expression values to extract.
 #' @param type a character vector containing the names of the spike-in control sets to extract. By default,
 #' expression values for features in all spike-in control sets are extracted.
+#' @param ... arguments passed through generic version of the function.
 #' 
 #' @details
 #' If \code{exprs_values="exprs"}, users should have run \code{normalize(object)} first,
@@ -2059,11 +2068,11 @@ setMethod("whichSpike", signature("SCESet"),
 #' example_sceset <- calculateQCMetrics(example_sceset,
 #'                             feature_controls = list(ERCC = 1:40, Mito=41:50))
 #' setSpike(example_sceset) <- "ERCC"
-#' head(spikes(example_scesets))
+#' head(spikes(example_sceset))
 setMethod("spikes", "SCESet", 
           function(object, exprs_values="counts", type=NULL) {
-              is.spike <- isSpike(object, type=type)
-              get_exprs(object, exprs_values)[is.spike,,drop=FALSE]
+              is.spike <- isSpike(object, type = type)
+              get_exprs(object, exprs_values)[is.spike,,drop = FALSE]
           })
 
 

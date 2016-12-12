@@ -13,6 +13,8 @@ spikes(object, ...)
 \arguments{
 \item{object}{a \code{SCESet} object.}
 
+\item{...}{arguments passed through generic version of the function.}
+
 \item{exprs_values}{a string specifying the type of expression values to extract.}
 
 \item{type}{a character vector containing the names of the spike-in control sets to extract. By default,
@@ -36,7 +38,7 @@ example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 example_sceset <- calculateQCMetrics(example_sceset,
                             feature_controls = list(ERCC = 1:40, Mito=41:50))
 setSpike(example_sceset) <- "ERCC"
-head(spikes(example_scesets))
+head(spikes(example_sceset))
 }
 \author{
 Aaron Lun

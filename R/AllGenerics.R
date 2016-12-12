@@ -379,8 +379,8 @@ setGeneric("spikes", function(object, ...) standardGeneric("spikes"))
 #' @export
 setGeneric("isSpike", function(object, ...) standardGeneric("isSpike"))
 
-#' @name setSpike<-
-#' @rdname setSpike<-
+#' @name setSpike
+#' @rdname setSpike
 #' @docType methods
 #' @export
 setGeneric("setSpike<-", function(object, value) standardGeneric("setSpike<-"))
