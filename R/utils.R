@@ -49,18 +49,17 @@
 
 .compute_exprs <- function(exprs_mat, size_factors, log = TRUE,
                            sum = FALSE, logExprsOffset = 1,
-                           subset.row = NULL) {
+                           subset_row = NULL) {
     ## computes normalized expression values.
-
     size_factors <- size_factors / mean(size_factors)
-    if (is.null(subset.row)) {
-        subset.row <- seq_len(nrow(exprs_mat))
+    if (is.null(subset_row)) {
+        subset_row <- seq_len(nrow(exprs_mat))
     } else {
-        subset.row <- .subset2index(subset.row, exprs_mat)
+        subset_row <- .subset2index(subset_row, exprs_mat)
     }
     .checkedCall(cxx_calc_exprs, exprs_mat, as.double(size_factors),
                  as.double(logExprsOffset), as.logical(log),
-                 as.logical(sum), subset.row - 1L)
+                 as.logical(sum), subset_row - 1L)
 }
 
 

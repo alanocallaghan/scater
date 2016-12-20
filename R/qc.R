@@ -238,12 +238,12 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     }
 
     n_detected_feature_controls <- nexprs(object, 
-                                          subset.row = is_feature_control) 
+                                          subset_row = is_feature_control) 
     df_pdata_this$n_detected_feature_controls <- n_detected_feature_controls
     feature_controls_pdata <- cbind(feature_controls_pdata, df_pdata_this)
     
     ## Compute total_features and find outliers
-    total_features <-  nexprs(object, subset.row = !is_feature_control) 
+    total_features <-  nexprs(object, subset_row = !is_feature_control) 
     filter_on_total_features <- isOutlier(total_features, nmads, type = "lower")
 
     ## Compute total_counts if counts are present
@@ -342,7 +342,7 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     new_pdata$total_features <- total_features
     new_pdata$log10_total_features <- log10(total_features)
     new_pdata$filter_on_total_features <- filter_on_total_features
-    new_pdata$pct_dropout <- 100 * (1 - nexprs(object, subset.row = NULL) / nrow(object) )
+    new_pdata$pct_dropout <- 100 * (1 - nexprs(object, subset_row = NULL) / nrow(object) )
     new_pdata <- cbind(new_pdata, qc_pdata, cell_controls_pdata)
     pData(object) <-  new("AnnotatedDataFrame", new_pdata)
 
@@ -442,7 +442,7 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
                 } else {
                     ## Repeating for the non-control features in the matrix.
                     pct_top_endog <- .calc_top_prop(exprs_mat, 
-                                                    subset.row=-is_feature_control,
+                                                    subset_row=-is_feature_control,
                                                     suffix="endogenous_features")
                     if (!is.null(pct_top_endog)) { 
                         df_pdata_this <- cbind(df_pdata_this, pct_top_endog)
@@ -457,23 +457,23 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
 
 
 .calc_top_prop <- function(exprs_mat, top.number = c(50L, 100L, 200L, 500L),
-                           subset.row = NULL, suffix="features") {
+                           subset_row = NULL, suffix="features") {
     ## Calculate the proportion of expression belonging to the top set of genes.
     ## Produces a matrix of proportions for each top number.
     
-    if (is.null(subset.row)) { 
+    if (is.null(subset_row)) { 
         total_nrows <- nrow(exprs_mat)
     } else {
-        subset.row <- .subset2index(subset.row, exprs_mat) 
-        subset.row <- subset.row - 1L # zero indexing needed for this C++ code.
-        total_nrows <- length(subset.row)
+        subset_row <- .subset2index(subset_row, exprs_mat) 
+        subset_row <- subset_row - 1L # zero indexing needed for this C++ code.
+        total_nrows <- length(subset_row)
     }
 
     can.calculate <- top.number <= total_nrows
     if (any(can.calculate)) { 
         top.number <- top.number[can.calculate]
         pct_exprs_top_out <- .checkedCall(cxx_calc_top_features, exprs_mat,
-                                          top.number, subset.row)
+                                          top.number, subset_row)
         ## this call returns proportions, not percentages, so adjust
         pct_exprs_top_out <- 100 * pct_exprs_top_out
         colnames(pct_exprs_top_out) <- paste0("pct_exprs_top_",
@@ -529,7 +529,7 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
 
         is_feature_control[gc_set] <- TRUE
         ## Define number of feature controls expressed
-        n_detected_feature_controls <- nexprs(object, subset.row = gc_set)
+        n_detected_feature_controls <- nexprs(object, subset_row = gc_set)
         df_pdata_this$n_detected_feature_controls <-
             n_detected_feature_controls
         #        if ( n_sets_feature_controls > 1 )

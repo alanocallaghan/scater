@@ -10,10 +10,11 @@
 \title{Normalise an SCESet object using pre-computed size factors}
 \usage{
 normalize.SCESet(object, exprs_values = NULL, logExprsOffset = NULL,
-  return_norm_as_exprs = TRUE)
+  centre_size_factors = TRUE, return_norm_as_exprs = TRUE)
 
 \S4method{normalize}{SCESet}(object, exprs_values = NULL,
-  logExprsOffset = NULL, return_norm_as_exprs = TRUE)
+  logExprsOffset = NULL, centre_size_factors = TRUE,
+  return_norm_as_exprs = TRUE)
 
 normalise(...)
 }
@@ -29,6 +30,12 @@ available value of the options in the order shown.}
 \item{logExprsOffset}{scalar numeric value giving the offset to add when
 taking log2 of normalised values to return as expression values. If NULL
 (default), then the value from \code{object@logExprsOffset} is used.}
+
+\item{centre_size_factors}{logical, should size factors centred
+at unity be stored in the returned object if \code{exprs_values="counts"}?
+Defaults to TRUE. Regardless, centred size factors will always be 
+used to calculate \code{exprs} from count data. This argument is ignored 
+for other \code{exprs_values}, where no size factors are used/modified.}
 
 \item{return_norm_as_exprs}{logical, should the normalised expression values
 be returned to the \code{exprs} slot of the object? Default is TRUE. If

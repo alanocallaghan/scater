@@ -8,14 +8,16 @@ bool isNA(double x) {
     return ISNA(x);
 }
 
-subset_info process_subset_vector(SEXP subset, const matrix_info& MAT) {
+subset_info process_subset_vector(SEXP subset, const matrix_info& MAT, bool byrow) {
     if (!isInteger(subset)) { 
         throw std::runtime_error("subset vector must be an integer vector");
     }
     const int slen=LENGTH(subset);
     const int* sptr=INTEGER(subset);
+    const size_t& upper=(byrow ? MAT.nrow : MAT.ncol);
+
     for (int s=0; s<slen; ++s) {
-        if (sptr[s] < 0 || sptr[s] >= MAT.nrow) { 
+        if (sptr[s] < 0 || sptr[s] >= upper) { 
             throw std::runtime_error("subset indices out of range");
         }
     }
@@ -62,6 +64,48 @@ SEXP colsum_subset(SEXP matrix, SEXP subset) try {
         return colsum_subset_internal<int>(MAT.iptr, MAT, subset);
     } else {
         return colsum_subset_internal<double>(MAT.dptr, MAT, subset);
+    }
+} catch (std::exception& e) {
+    return mkString(e.what());
+}
+
+/* A function to get the row sum in a subset of columns. */
+
+template <typename T>
+SEXP rowsum_subset_internal (const T* ptr, const matrix_info& MAT, SEXP subset) {
+    subset_info subout=process_subset_vector(subset, MAT, false);
+    const int slen=subout.first;
+    const int* sptr=subout.second;
+
+    SEXP output=PROTECT(allocVector(REALSXP, MAT.nrow));
+    try {
+        double* optr=REAL(output);
+        std::fill(optr, optr+MAT.nrow, 0);
+        
+        // Summing across values.
+        int s;
+        size_t r;
+        const T* ptr2=NULL;
+        for (int s=0; s<slen; ++s) {
+            ptr2=ptr+sptr[s]*MAT.nrow;
+            for (r=0; r<MAT.nrow; ++r) {
+                optr[r]+=ptr2[r];
+            }
+        }
+    } catch (std::exception& e) {
+        UNPROTECT(1);
+        throw;
+    }
+    UNPROTECT(1);
+    return output;
+}
+
+SEXP rowsum_subset(SEXP matrix, SEXP subset) try {
+    matrix_info MAT=check_matrix(matrix);
+    if (MAT.is_integer){
+        return rowsum_subset_internal<int>(MAT.iptr, MAT, subset);
+    } else {
+        return rowsum_subset_internal<double>(MAT.dptr, MAT, subset);
     }
 } catch (std::exception& e) {
     return mkString(e.what());
@@ -115,25 +159,28 @@ SEXP colsum_exprs_subset(SEXP matrix, SEXP threshold, SEXP subset) try {
     return mkString(e.what());
 }
 
-/* A function to get the number of above-threshold values in each row. */
+/* A function to get the number of above-threshold values in each row, for a subset of columns. */
 
 template <typename T>
-SEXP rowsum_exprs_internal (const T* ptr, const matrix_info& MAT, T threshold) {
+SEXP rowsum_exprs_subset_internal (const T* ptr, const matrix_info& MAT, T threshold, SEXP subset) {
+    subset_info subout=process_subset_vector(subset, MAT, false);
+    const int slen=subout.first;
+    const int* sptr=subout.second;
+
     SEXP output=PROTECT(allocVector(INTSXP, MAT.nrow));
     try {
         int* optr=INTEGER(output);
-        for (size_t r=0; r<MAT.nrow; ++r) {
-            optr[r]=0;
-        }
+        std::fill(optr, optr+MAT.nrow, 0);
         
-        // Summing across, using 1-indexed pointers.
-        for (size_t c=0; c<MAT.ncol; ++c) {
-            for (size_t r=0; r<MAT.nrow; ++r) {
-                if (ptr[r] > threshold) {
+        size_t r;
+        const T* ptr2=NULL;
+        for (int s=0; s<slen; ++s) {
+            ptr2=ptr+sptr[s]*MAT.nrow;
+            for (r=0; r<MAT.nrow; ++r) {
+                if (ptr2[r] > threshold) {
                     ++(optr[r]);
                 }
             }
-            ptr+=MAT.nrow;
         }
     } catch (std::exception& e) {
         UNPROTECT(1);
@@ -143,18 +190,18 @@ SEXP rowsum_exprs_internal (const T* ptr, const matrix_info& MAT, T threshold) {
     return output;
 }
 
-SEXP rowsum_exprs(SEXP matrix, SEXP threshold) try {
+SEXP rowsum_exprs_subset(SEXP matrix, SEXP threshold, SEXP subset) try {
     matrix_info MAT=check_matrix(matrix);
     if (MAT.is_integer){
         if (!isInteger(threshold) || LENGTH(threshold)!=1) { 
             throw std::runtime_error("threshold should be an integer scalar");
         }
-        return rowsum_exprs_internal<int>(MAT.iptr, MAT, asInteger(threshold));
+        return rowsum_exprs_subset_internal<int>(MAT.iptr, MAT, asInteger(threshold), subset);
     } else {
         if (!isReal(threshold) || LENGTH(threshold)!=1) { 
             throw std::runtime_error("threshold should be a double-precision scalar");
         }
-        return rowsum_exprs_internal<double>(MAT.dptr, MAT, asReal(threshold));
+        return rowsum_exprs_subset_internal<double>(MAT.dptr, MAT, asReal(threshold), subset);
     }
 } catch (std::exception& e) {
     return mkString(e.what());

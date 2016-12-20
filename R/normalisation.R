@@ -182,6 +182,11 @@ normalizeExprs <- function(...) {
 #' @param logExprsOffset scalar numeric value giving the offset to add when
 #' taking log2 of normalised values to return as expression values. If NULL
 #' (default), then the value from \code{object@logExprsOffset} is used.
+#' @param centre_size_factors logical, should size factors centred
+#' at unity be stored in the returned object if \code{exprs_values="counts"}?
+#' Defaults to TRUE. Regardless, centred size factors will always be
+#' used to calculate \code{exprs} from count data. This argument is ignored
+#' for other \code{exprs_values}, where no size factors are used/modified.
 #' @param return_norm_as_exprs logical, should the normalised expression values
 #' be returned to the \code{exprs} slot of the object? Default is TRUE. If
 #' FALSE, values in the \code{exprs} slot will be left untouched. Regardless,
@@ -221,7 +226,9 @@ normalizeExprs <- function(...) {
 #' example_sceset <- normalize(example_sceset)
 #'
 normalize.SCESet <- function(object, exprs_values = NULL,
-                             logExprsOffset = NULL, return_norm_as_exprs = TRUE) {
+                             logExprsOffset = NULL,
+                             centre_size_factors = TRUE,
+                             return_norm_as_exprs = TRUE) {
     if ( !is(object, "SCESet") )
         stop("'object' must be an SCESet")
 
@@ -232,24 +239,25 @@ normalize.SCESet <- function(object, exprs_values = NULL,
     }
     exprs_mat <- get_exprs(object, exprs_values, warning=FALSE)
 
-    ## extract existing size factors
     if (exprs_values=="counts") {
+        ## extract existing size factors
         size_factors <- suppressWarnings(sizeFactors(object))
         if ( is.null(size_factors) ) {
             warning("skipping normalization of counts as size factors were not defined")
             return(object)
         }
+
+        ## figuring out how many controls have their own size factors
+        control_list <- .find_control_SF(object)
+        spike.names <- .spike_fcontrol_names(object)
+        no.spike.sf <- ! spike.names %in% names(control_list)
+        if (any(no.spike.sf)) {
+            warning(sprintf("spike-in transcripts in '%s' should have their own size factors",
+                            spike.names[no.spike.sf][1]))
+        }
     } else {
         size_factors <- rep(1, ncol(object)) # ignoring size factors for non-count data.
-    }
-
-    ## figuring out how many controls have their own size factors
-    control_list <- .find_control_SF(object)
-    spike.names <- .spike_fcontrol_names(object)
-    no.spike.sf <- ! spike.names %in% names(control_list)
-    if (any(no.spike.sf)) {
-        warning(sprintf("spike-in transcripts in '%s' should have their own size factors",
-                        spike.names[no.spike.sf][1]))
+        control_list <- list()
     }
 
     ## extract logExprsOffset if argument is NULL
@@ -264,7 +272,7 @@ normalize.SCESet <- function(object, exprs_values = NULL,
         norm_exprs_mat[alt$ID,] <- .recompute_expr_fun(
                                         exprs_mat, size_factors = alt$SF,
                                         logExprsOffset = logExprsOffset,
-                                        subset.row=alt$ID)
+                                        subset_row=alt$ID)
     }
 
     ## add normalised values to object
@@ -272,17 +280,26 @@ normalize.SCESet <- function(object, exprs_values = NULL,
     if ( return_norm_as_exprs )
         exprs(object) <- norm_exprs_mat
 
+    ## centering all existing size factors if requested
+    if (exprs_values=="counts" && centre_size_factors) {
+        all.sf.fields <- c("size_factor", sprintf("size_factor_%s", names(control_list)))
+        for (sf in all.sf.fields) {
+            cur.sf <- pData(object)[[sf]]
+            cur.sf <- cur.sf/mean(cur.sf)
+            pData(object)[[sf]] <- cur.sf
+        }
+    }
+
     ## return object
     return(object)
 }
 
-
 .recompute_expr_fun <- function(exprs_mat, size_factors, logExprsOffset,
-                                subset.row = NULL) {
+                                subset_row = NULL) {
     .compute_exprs(exprs_mat, size_factors,
                    log = TRUE, sum = FALSE,
                    logExprsOffset = logExprsOffset,
-                   subset.row = subset.row)
+                   subset_row = subset_row)
 }
 
 #' @rdname normalize
@@ -291,10 +308,53 @@ normalize.SCESet <- function(object, exprs_values = NULL,
 setMethod("normalize", signature(object = "SCESet"),
           normalize.SCESet)
 
-
 #' @rdname normalize
 #' @aliases normalise
 #' @export
 normalise <- function(...) {
     normalize(...)
+}
+
+################################################################################
+
+#' Check if the size factors are centred at unity
+#'
+#' Checks if each set of size factors is centred at unity, such that
+#' abundances can be reasonably compared between features normalized
+#' with different sets of size factors.
+#'
+#' @param object an \code{SCESet} object containing multiple sets of
+#' size factors.
+#' @param centre a numeric scalar, the value around which all sets of
+#' size factors should be centred.
+#' @param tol a numeric scalar, the tolerance for testing equality of the
+#' mean of each size factor set to \code{centre}.
+#'
+#' @return a \code{SCESet} object with centred size factors
+#' @export
+#' @examples
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+#' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+#' keep_gene <- rowSums(counts(example_sceset)) > 0
+#' example_sceset <- example_sceset[keep_gene,]
+#'
+#' sizeFactors(example_sceset) <- runif(ncol(example_sceset))
+#' areSizeFactorsCentred(example_sceset)
+#' example_sceset <- normalize(example_sceset, centre=TRUE)
+#' areSizeFactorsCentred(example_sceset)
+#'
+areSizeFactorsCentred <- function(object, centre=1, tol=1e-6) {
+    control_list <- .find_control_SF(object)
+    for (x in names(control_list)) {
+        if (abs(mean(control_list[[x]]$SF) - centre) > tol) {
+            return(FALSE)
+        }
+    }
+    sf <- suppressWarnings(sizeFactors(object))
+    if (!is.null(sf) && abs(mean(sf) - centre) > tol) {
+        return(FALSE)
+    }
+    return(TRUE)
 }

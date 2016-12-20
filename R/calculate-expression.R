@@ -7,7 +7,7 @@
 #' @param object an SCESet object with expression and/or count data.
 #' @param lowerDetectionLimit numeric scalar giving the minimum expression level
 #' for an expression observation in a cell for it to qualify as expressed.
-#' @param exprs_data character scalar indicating whether the count data
+#' @param exprs_values character scalar indicating whether the count data
 #' (\code{"counts"}), the transformed expression data (\code{"exprs"}),
 #' transcript-per-million (\code{"tpm"}), counts-per-million (\code{"cpm"}) or
 #' FPKM (\code{"fpkm"}) should be used to define if an observation is expressed
@@ -21,15 +21,15 @@
 #' data("sc_example_cell_info")
 #' example_sceset <- newSCESet(countData=sc_example_counts)
 #' is_exprs(example_sceset) <- calcIsExprs(example_sceset, lowerDetectionLimit = 1,
-#' exprs_data = "exprs")
-calcIsExprs <- function(object, lowerDetectionLimit = NULL, exprs_data = NULL)
+#' exprs_values = "exprs")
+calcIsExprs <- function(object, lowerDetectionLimit = NULL, exprs_values = NULL)
 {
     if ( !is(object, "SCESet") )
         stop("Object must be an SCESet.")
 
     ## Check that args are appropriate
-    exprs_data <- .exprs_hunter(object, exprs_data)
-    dat_matrix <- get_exprs(object, exprs_data, warning = FALSE)
+    exprs_values <- .exprs_hunter(object, exprs_values)
+    dat_matrix <- get_exprs(object, exprs_values, warning = FALSE)
 
     ## Extract lowerDetectionLimit if not provided
     if ( is.null(lowerDetectionLimit) )
@@ -48,18 +48,22 @@ calcIsExprs <- function(object, lowerDetectionLimit = NULL, exprs_data = NULL)
 #' @param object an \code{SCESet} object
 #' @param lowerDetectionLimit numeric scalar providing the value above which observations
 #' are deemed to be expressed. Defaults to \code{object@lowerDetectionLimit}.
-#' @param exprs_data character scalar indicating whether the count data
+#' @param exprs_values character scalar indicating whether the count data
 #' (\code{"counts"}), the transformed expression data (\code{"exprs"}),
 #' transcript-per-million (\code{"tpm"}), counts-per-million (\code{"cpm"}) or
 #' FPKM (\code{"fpkm"}) should be used to define if an observation is expressed
 #' or not. Defaults to the first available value of those options in the
 #' order shown. However, if \code{is_exprs(object)} is present, it will be
-#' used directly; \code{exprs_data} and \code{lowerDetectionLimit} are ignored.
-#' @param subset.row logical or character vector indicating which rows
-#' (i.e. features/genes) to subset and calculate 'is_exprs_mat' for.
+#' used directly; \code{exprs_values} and \code{lowerDetectionLimit} are ignored.
 #' @param byrow logical scalar indicating if \code{TRUE} to count expressing
 #' cells per feature (i.e. gene) and if \code{FALSE} to count expressing
 #' features (i.e. genes) per cell.
+#' @param subset_row logical, integeror character vector indicating which rows
+#' (i.e. features/genes) to use when calculating the number of expressed
+#' features in each cell, when \code{byrow=FALSE}.
+#' @param subset_col logical, integer or character vector indicating which columns
+#' (i.e., cells) to use to calculate the number of cells expressing each gene
+#' when \code{byrow=TRUE}.
 #'
 #' @description An efficient internal function that avoids the need to construct
 #' 'is_exprs_mat' by counting the number of expressed genes per cell on the fly.
@@ -78,16 +82,16 @@ calcIsExprs <- function(object, lowerDetectionLimit = NULL, exprs_data = NULL)
 #' nexprs(example_sceset)[1:10]
 #' nexprs(example_sceset, byrow = TRUE)[1:10]
 #'
-nexprs <- function(object, lowerDetectionLimit = NULL, exprs_data = NULL, subset.row = NULL, byrow = FALSE) {
+nexprs <- function(object, lowerDetectionLimit = NULL, exprs_values = NULL, byrow = FALSE, subset_row = NULL, subset_col = NULL) {
     if (!is(object, "SCESet")) {
         stop("'object' must be a SCESet")
     }
     is_exprs_mat <- is_exprs(object)
 
-    exprs_data <- .exprs_hunter(object, exprs_data)
-    exprs_mat <- suppressWarnings(get_exprs(object, exprs_data))
+    exprs_values <- .exprs_hunter(object, exprs_values)
+    exprs_mat <- suppressWarnings(get_exprs(object, exprs_values))
     if (is.null(is_exprs_mat) && is.null(exprs_mat)) {
-        stop(sprintf("either 'is_exprs(object)' or '%s(object)' must be non-NULL", exprs_data))
+        stop(sprintf("either 'is_exprs(object)' or '%s(object)' must be non-NULL", exprs_values))
     }
 
     # Setting the detection lowerDetectionLimit properly.
@@ -101,30 +105,47 @@ nexprs <- function(object, lowerDetectionLimit = NULL, exprs_data = NULL, subset
     if (!byrow) {
         if (!is.null(is_exprs_mat)) {
             # Counting expressing genes per cell, using predefined 'is_exprs(object)'.
-            if (is.null(subset.row)) {
-               return(colSums(is_exprs_mat))
+            if (is.null(subset_row)) {
+                out <- colSums(is_exprs_mat)
             } else {
-                subset.row <- .subset2index(subset.row, is_exprs_mat)
-                return(.checkedCall(cxx_colsum_subset, is_exprs_mat, subset.row - 1L))
+                subset_row <- .subset2index(subset_row, is_exprs_mat)
+                out <- .checkedCall(cxx_colsum_subset, is_exprs_mat, subset_row - 1L)
+                names(out) <- colnames(is_exprs_mat)
             }
         } else {
             # Counting expressing genes per cell, using the counts to define 'expressing'.
-            if (is.null(subset.row)) {
-                subset.row <- seq_len(nrow(exprs_mat))
+            if (is.null(subset_row)) {
+                subset_row <- seq_len(nrow(exprs_mat))
             } else {
-                subset.row <- .subset2index(subset.row, exprs_mat)
+                subset_row <- .subset2index(subset_row, exprs_mat)
             }
-            return(.checkedCall(cxx_colsum_exprs_subset, exprs_mat,
-                                lowerDetectionLimit, subset.row - 1L))
+            out <- .checkedCall(cxx_colsum_exprs_subset, exprs_mat,
+                                lowerDetectionLimit, subset_row - 1L)
+            names(out) <- colnames(exprs_mat)
         }
     } else {
-        # Counting expressing cells per gene.
         if (!is.null(is_exprs_mat)) {
-            return(rowSums(is_exprs_mat))
+            # Counting expressing cells per gene, using predefined 'is_exprs(object)'.
+            if (is.null(subset_col)) { 
+                out <- rowSums(is_exprs_mat)
+            } else {
+                subset_col <- .subset2index(subset_col, is_exprs_mat, byrow = FALSE)
+                out <- .checkedCall(cxx_rowsum_subset, is_exprs_mat, subset_col - 1L)
+                names(out) <- rownames(is_exprs_mat)
+            }
         } else {
-            return(.checkedCall(cxx_rowsum_exprs, exprs_mat, lowerDetectionLimit))
+            # Counting expressing cells per gene, using the counts to define 'expressing'.
+            if (is.null(subset_col)) {
+                subset_col <- seq_len(ncol(exprs_mat))                
+            } else {
+                subset_col <- .subset2index(subset_col, exprs_mat, byrow = FALSE)
+            } 
+            out <- .checkedCall(cxx_rowsum_exprs_subset, exprs_mat, 
+                                lowerDetectionLimit, subset_col - 1L)
+            names(out) <- rownames(exprs_mat)
         }
     }
+    return(out)
 }
 
 #' Calculate transcripts-per-million (TPM)
@@ -323,13 +344,15 @@ calcAverage <- function(object) {
     for (alt in control_list) {
         all.ave[alt$ID] <- .compute_ave_count(counts(object), 
                                               size_factors = alt$SF,
-                                              subset.row = alt$ID)
+                                              subset_row = alt$ID)
     }
+
+    names(all.ave) <- rownames(object)
     return(all.ave / ncol(object))
 }
 
 
-.compute_ave_count <- function(counts_mat, size_factors, subset.row = NULL) {
+.compute_ave_count <- function(counts_mat, size_factors, subset_row = NULL) {
     .compute_exprs(counts_mat, size_factors, log = FALSE, sum = TRUE,
-                   logExprsOffset = 0, subset.row = subset.row)
+                   logExprsOffset = 0, subset_row = subset_row)
 }

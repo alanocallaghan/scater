@@ -33,7 +33,7 @@ bool isNA(double);
 // Functions to parse subsetting.
 
 typedef std::pair<const int, const int*> subset_info;
-subset_info process_subset_vector(SEXP, const matrix_info&);
+subset_info process_subset_vector(SEXP, const matrix_info&, bool=true);
 
 // Functions to be called from R.
 
@@ -41,9 +41,11 @@ extern "C" {
 
 SEXP colsum_subset(SEXP, SEXP);
 
+SEXP rowsum_subset(SEXP, SEXP);
+
 SEXP colsum_exprs_subset(SEXP, SEXP, SEXP);
 
-SEXP rowsum_exprs(SEXP, SEXP);
+SEXP rowsum_exprs_subset(SEXP, SEXP, SEXP);
 
 SEXP calc_top_features(SEXP, SEXP, SEXP);
 

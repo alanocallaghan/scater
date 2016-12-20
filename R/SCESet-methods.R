@@ -285,10 +285,10 @@ setValidity("SCESet", function(object) {
     }
     ## Check that we have sensible values for the counts
     if( .checkedCall(cxx_missing_exprs, exprs(object)) ) {
-        warning( "The exprs data contain NA values." )
+        warning( "'exprs' contains missing values" )
     }
     if ( (!is.null(counts(object))) && .checkedCall(cxx_negative_counts, counts(object)) )
-        warning( "The count data contain negative values." )
+        warning( "'counts' contains negative values" )
     if ( !(object@useForExprs %in% c("exprs", "tpm", "fpkm", "counts")) ) {
         valid <- FALSE
         msg <- c(msg, "object@useForExprs must be one of 'exprs', 'tpm', 'fpkm', 'counts'")

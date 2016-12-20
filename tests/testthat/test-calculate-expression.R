@@ -44,6 +44,27 @@ test_that("we can calculate TPM from FPKM", {
 })
 
 
+test_that("nexprs works as expected", {
+    data("sc_example_counts")
+    data("sc_example_cell_info")
+    pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+    example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+    
+    ## Testing nexprs on the counts themselves.
+    expect_equal(nexprs(example_sceset), colSums(counts(example_sceset) > 0))
+    expect_equal(nexprs(example_sceset, byrow=TRUE), rowSums(counts(example_sceset) > 0))
+    expect_equal(nexprs(example_sceset, subset_row=20:40), colSums(counts(example_sceset)[20:40,] > 0))
+    expect_equal(nexprs(example_sceset, byrow=TRUE, subset_col=20:40), rowSums(counts(example_sceset)[,20:40] > 0))
+
+    ## Checking what happens when 'is_exprs' is available.
+    is_exprs(example_sceset) <- calcIsExprs(example_sceset, lowerDetectionLimit=5)
+    expect_identical(is_exprs(example_sceset), counts(example_sceset) > 5)
+    expect_equal(nexprs(example_sceset), colSums(counts(example_sceset) > 5))
+    expect_equal(nexprs(example_sceset, byrow=TRUE), rowSums(counts(example_sceset) > 5))
+    expect_equal(nexprs(example_sceset, subset_row=20:40), colSums(counts(example_sceset)[20:40,] > 5))
+    expect_equal(nexprs(example_sceset, byrow=TRUE, subset_col=20:40), rowSums(counts(example_sceset)[,20:40] > 5))
+})
+
 test_that("calcAverage works as expected", {
     data("sc_example_counts")
     data("sc_example_cell_info")
@@ -52,7 +73,8 @@ test_that("calcAverage works as expected", {
     
     ## calculate average counts
     ave_counts <- calcAverage(example_sceset)
-    expected_vals <- c(305.551749, 325.719897, 183.090462, 162.143201, 1.231123)
-    expect_true(all(abs(ave_counts[1:5] - expected_vals) < 1e-06))
+    lib.sizes <- colSums(counts(example_sceset))
+    expected_vals <- colMeans(t(counts(example_sceset))/(lib.sizes/mean(lib.sizes)))
+    expect_equal(ave_counts, expected_vals)
 })
 
