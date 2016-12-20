@@ -33,8 +33,8 @@ taking log2 of normalised values to return as expression values. If NULL
 
 \item{centre_size_factors}{logical, should size factors centred
 at unity be stored in the returned object if \code{exprs_values="counts"}?
-Defaults to TRUE. Regardless, centred size factors will always be 
-used to calculate \code{exprs} from count data. This argument is ignored 
+Defaults to TRUE. Regardless, centred size factors will always be
+used to calculate \code{exprs} from count data. This argument is ignored
 for other \code{exprs_values}, where no size factors are used/modified.}
 
 \item{return_norm_as_exprs}{logical, should the normalised expression values

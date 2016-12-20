@@ -7,10 +7,10 @@
 areSizeFactorsCentred(object, centre = 1, tol = 1e-06)
 }
 \arguments{
-\item{object}{an \code{SCESet} object containing multiple sets of 
+\item{object}{an \code{SCESet} object containing multiple sets of
 size factors.}
 
-\item{centre}{a numeric scalar, the value around which all sets of 
+\item{centre}{a numeric scalar, the value around which all sets of
 size factors should be centred.}
 
 \item{tol}{a numeric scalar, the tolerance for testing equality of the
@@ -21,7 +21,7 @@ a \code{SCESet} object with centred size factors
 }
 \description{
 Checks if each set of size factors is centred at unity, such that
-abundances can be reasonably compared between features normalized 
+abundances can be reasonably compared between features normalized
 with different sets of size factors.
 }
 \examples{
