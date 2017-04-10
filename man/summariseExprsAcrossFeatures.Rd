@@ -71,4 +71,3 @@ example_sceset_summarised <-
 summariseExprsAcrossFeatures(example_sceset, exprs_values = "exprs")
 
 }
-

@@ -43,4 +43,3 @@ Salmon v0.7.
 readSalmonResultsOneSample("output")
 }
 }
-

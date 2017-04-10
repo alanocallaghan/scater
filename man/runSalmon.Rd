@@ -108,4 +108,3 @@ Salmon_log <- runSalmon("targets.txt", "transcripts.idx", single_end=FALSE,
          dry_run = FALSE)
 }
 }
-

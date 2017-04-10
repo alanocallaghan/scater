@@ -162,4 +162,3 @@ example_sceset <- calculateQCMetrics(example_sceset,
                                      feature_controls = list(ERCC = 1:40))
 
 }
-

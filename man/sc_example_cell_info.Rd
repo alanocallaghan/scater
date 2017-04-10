@@ -22,4 +22,3 @@ cells included in the example \code{counts} dataset included in the package.
 \author{
 Davis McCarthy, 2015-03-05
 }
-

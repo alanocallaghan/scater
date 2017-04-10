@@ -3,11 +3,16 @@
 \docType{methods}
 \name{sizeFactors}
 \alias{sizeFactors}
-\alias{sizeFactors,SCESet-method}
 \alias{sizeFactors.SCESet}
+\alias{sizeFactors,SCESet-method}
+\alias{sizeFactors<-,SCESet,numeric-method}
+\alias{sizeFactors<-,SCESet,NULL-method}
+\alias{sizeFactors}
+\alias{sizeFactors,SCESet-method}
+\alias{sizeFactors<-}
+\alias{sizeFactors<-,SCESet,numeric-method}
 \alias{sizeFactors<-}
 \alias{sizeFactors<-,SCESet,NULL-method}
-\alias{sizeFactors<-,SCESet,numeric-method}
 \title{Accessors size factors of an SCESet object.}
 \usage{
 \S4method{sizeFactors}{SCESet}(object,type)
@@ -30,6 +35,9 @@ size factors to be accessed or assigned.}
 \item{...}{further arguments passed to the function}
 
 \item{value}{a vector of class \code{"numeric"} or \code{NULL}}
+}
+\value{
+A numeric vector of size factors.
 }
 \description{
 For normalisation, library-specific size factors can be defined. Raw values
@@ -57,4 +65,3 @@ sizeFactors(example_sceset)
 \author{
 Davis McCarthy and Aaron Lun
 }
-

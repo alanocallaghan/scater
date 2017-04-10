@@ -22,4 +22,3 @@ are from a real experiment, but details have been anonymised.
 \author{
 Davis McCarthy, 2015-03-05
 }
-

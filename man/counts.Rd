@@ -3,9 +3,11 @@
 \docType{methods}
 \name{counts}
 \alias{counts}
-\alias{counts,SCESet-method}
 \alias{counts.SCESet}
+\alias{counts,SCESet-method}
 \alias{counts<-,SCESet,matrix-method}
+\alias{counts,SCESet-method}
+\alias{counts}
 \title{Accessors for the 'counts' element of an SCESet object.}
 \usage{
 \S4method{counts}{SCESet}(object)
@@ -20,6 +22,9 @@
 \item{object}{a \code{SCESet} object.}
 
 \item{value}{an integer matrix}
+}
+\value{
+A matrix of count values.
 }
 \description{
 The counts element holds the count data as a matrix of non-negative integer
@@ -37,4 +42,3 @@ counts(example_sceset)
 \author{
 Davis McCarthy
 }
-

@@ -10,9 +10,8 @@ getExprs(object)
 \item{object}{An object of type \code{SCESet}}
 }
 \value{
-A matrix representation of expression corresponding to \code{object@useForExprs}.
+A matrix representation of expression values.
 }
 \description{
 Deprecated from scater version 1.3.29.
 }
-

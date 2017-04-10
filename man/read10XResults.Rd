@@ -46,4 +46,3 @@ sce10x <- read10XResults("path/to/data/directory")
 count_matrix_10x <- read10XResults("path/to/data/directory", expand = FALSE)
 }
 }
-

@@ -4,27 +4,23 @@
 \alias{mergeSCESet}
 \title{Merge SCESet objects}
 \usage{
-mergeSCESet(x, y, fdata_cols_x = 1:ncol(fData(x)),
-  fdata_cols_y = fdata_cols_x, pdata_cols_x = NULL, pdata_cols_y = NULL)
+mergeSCESet(x, y, fdata_cols = NULL, pdata_cols = NULL)
 }
 \arguments{
 \item{x}{an \code{\link{SCESet}} object}
 
 \item{y}{an \code{\link{SCESet}} object}
 
-\item{fdata_cols_x}{a logical or numeric vector indicating which columns of featureData
-for \code{x} are shared between \code{x} and \code{y} and should feature in the
-returned merged \code{SCESet}. Default is all columns of \code{fData(x)}.}
+\item{fdata_cols}{a character vector indicating which columns of featureData
+of \code{x} and \code{y} should be retained. Alternatively, an integer or 
+logical vector can be supplied to subset the column names of \code{fData(x)},
+such that the subsetted character vector contains the columns to be retained.
+Defaults to all shared columns between \code{fData(x)} and \code{fData(y)}.}
 
-\item{fdata_cols_y}{a logical or numeric vector indicating which columns of featureData
-for \code{y} are shared between \code{x} and \code{y} and should feature in the
-returned merged \code{SCESet}. Default is \code{fdata_cols_x}.}
-
-\item{pdata_cols_x}{a logical or numeric vector indicating which columns of phenoData
-of \code{x} should be retained.}
-
-\item{pdata_cols_y}{a logical or numeric vector indicating which columns of phenoData
-of \code{y} should be retained.}
+\item{pdata_cols}{a character vector indicating which columns of phenoData
+of \code{x} and \code{y} should be retained. Alternatively, an integer or
+logical vector to subset the column names of \code{pData(x)}. Defaults to
+all shared columns between \code{pData(x)} and \code{pData(y)}.}
 }
 \value{
 a merged \code{SCESet} object combining data and metadata from \code{x} and \code{y}
@@ -33,7 +29,15 @@ a merged \code{SCESet} object combining data and metadata from \code{x} and \cod
 Merge two SCESet objects that have the same features but contain different cells/samples.
 }
 \details{
-Existing cell-cell pairwise distances and feature-feature pairwise distances will not be valid for a merged SCESet so these are set to \code{NULL} in the returned object. Similarly \code{experimentData} will need to be added anew to the merged SCESet returned.
+Existing cell-cell pairwise distances and feature-feature pairwise distances will not be valid for a merged \code{SCESet} object.
+These entries are subsequently set to \code{NULL} in the returned object. 
+Similarly, new \code{experimentData} will need to be added to the merged object.
+
+If \code{fdata_cols} does not include the definition of feature controls, the control sets may not be defined in the output object.
+In such cases, a warning is issued and the undefined control sets are removed from the \code{featureControlInfo} of the merged object.
+
+It is also \emph{strongly} recommended to recompute all size factors using the merged object, and re-run \code{\link{normalize}} before using \code{exprs}.
+For arbitrary \code{x} and \code{y}, there is no guarantee that the size factors (and thus \code{exprs}) are comparable across objects.
 }
 \examples{
 data("sc_example_counts")
@@ -44,11 +48,10 @@ mergeSCESet(example_sceset[, 1:20], example_sceset[, 21:40])
 
 ## with specification of columns of fData
 example_sceset <- calculateQCMetrics(example_sceset)
-mergeSCESet(example_sceset[, 1:20], example_sceset[, 21:40], fdata_cols_x = c(1, 7))
+mergeSCESet(example_sceset[, 1:20], example_sceset[, 21:40], fdata_cols = c(1, 7))
 
 ## with specification of columns of pData
-mergeSCESet(example_sceset[, 1:20], example_sceset[, 21:40], pdata_cols_x = 1:6)
-
+mergeSCESet(example_sceset[, 1:20], example_sceset[, 21:40], pdata_cols = 1:6)
+mergeSCESet(example_sceset[, 1:20], example_sceset[, 40], pdata_cols = 3)
 
 }
-

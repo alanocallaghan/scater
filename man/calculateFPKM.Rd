@@ -29,4 +29,3 @@ effective_length <- rep(1000, 2000)
 fpkm(example_sceset) <- calculateFPKM(example_sceset, effective_length)
 
 }
-

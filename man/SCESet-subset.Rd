@@ -4,8 +4,8 @@
 \name{SCESet-subset}
 \alias{SCESet-subset}
 \alias{[,SCESet,ANY,ANY,ANY-method}
-\alias{[,SCESet,ANY,ANY-method}
 \alias{[,SCESet,ANY-method}
+\alias{[,SCESet,ANY,ANY-method}
 \title{Subsetting SCESet Objects}
 \usage{
 \S4method{[}{SCESet,ANY,ANY,ANY}(x, i, j, ..., drop = FALSE)
@@ -47,4 +47,3 @@ phenotype data, feature data and other slots in the object.
 \seealso{
 \code{\link[base]{Extract}}
 }
-

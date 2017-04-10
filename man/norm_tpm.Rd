@@ -3,8 +3,13 @@
 \docType{methods}
 \name{norm_tpm}
 \alias{norm_tpm}
-\alias{norm_tpm,SCESet-method}
+\alias{norm_tpm<-}
+\alias{norm_tpm}
 \alias{norm_tpm.SCESet}
+\alias{norm_tpm,SCESet-method}
+\alias{norm_tpm<-,SCESet,matrix-method}
+\alias{norm_tpm}
+\alias{norm_tpm,SCESet-method}
 \alias{norm_tpm<-}
 \alias{norm_tpm<-,SCESet,matrix-method}
 \title{Accessors for the 'norm_tpm' (transcripts per million) element of an SCESet object.}
@@ -45,4 +50,3 @@ norm_tpm(example_sceset)
 \author{
 Davis McCarthy
 }
-

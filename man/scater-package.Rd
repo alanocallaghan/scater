@@ -13,4 +13,3 @@ In particular, \pkg{scater} provides easy generation of quality control
 metrics and simple functions to visualise quality control metrics and their 
 relationships.
 }
-

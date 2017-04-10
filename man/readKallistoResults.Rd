@@ -52,4 +52,3 @@ sceset <- readKallistoResults(kallisto_log)
 }
 
 }
-

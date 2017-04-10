@@ -3,6 +3,7 @@
 \docType{methods}
 \name{spikes}
 \alias{spikes}
+\alias{spikes}
 \alias{spikes,SCESet-method}
 \title{Extract expression values for spike-in features in an SCESet object}
 \usage{
@@ -43,4 +44,3 @@ head(spikes(example_sceset))
 \author{
 Aaron Lun
 }
-

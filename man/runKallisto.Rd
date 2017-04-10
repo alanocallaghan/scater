@@ -103,4 +103,3 @@ kallisto_log <- runKallisto("targets.txt", "transcripts.idx", single_end=FALSE,
          dry_run = FALSE)
 }
 }
-

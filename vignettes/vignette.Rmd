@@ -607,7 +607,7 @@ By default the PCA plot uses the expression values in the `exprs` slot of the
 `SCESet` object, but other expression values can be used by specifying the
 `exprs_values` argument (plot not shown):
 
-```{r plot-pca-cpm, fig.show=FALSE}
+```{r plot-pca-cpm, eval=FALSE}
 plotPCA(example_sceset, exprs_values = "cpm")
 ```
 

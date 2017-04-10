@@ -27,4 +27,3 @@ if ( requireNamespace("monocle") ) {
     toCellDataSet(example_sceset)
 }
 }
-

@@ -96,8 +96,8 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
     exprs_values <- .exprs_hunter(object, exprs_values)
 
     ## If counts, we can compute size factors.
-    if (exprs_values=="counts") {
-        exprs_mat <- get_exprs(object, exprs_values, warning=FALSE)
+    if (exprs_values == "counts") {
+        exprs_mat <- get_exprs(object, exprs_values, warning = FALSE)
 
         ## Check feature_set
         if (is.character(feature_set)) {
@@ -124,13 +124,13 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
         sizeFactors(object) <- size_factors
 
         ## Computing (normalized) CPMs is also possible.
-        norm_cpm(object) <- calculateCPM(object, use.size.factors=TRUE)
+        norm_cpm(object) <- calculateCPM(object, use.size.factors = TRUE)
     }
 
     ## Computing normalized expression values, if we're not working with 'exprs'.
-    if (exprs_values!="exprs") {
-        object <- normalize.SCESet(object, exprs_values=exprs_values,
-                                   return_norm_as_exprs=return_norm_as_exprs)
+    if (exprs_values != "exprs") {
+        object <- normalize.SCESet(object, exprs_values = exprs_values,
+                                   return_norm_as_exprs = return_norm_as_exprs)
     }
 
 #    ## exit if any features have zero variance as this causes problem downstream
@@ -142,9 +142,12 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
     ## If a design matrix is provided, then normalised expression values are
     ## residuals of a linear model fit to norm_exprs values with that design
     if ( !is.null(design) ) {
-        norm_exprs_mat <- norm_exprs(object)
+        if (exprs_values != "exprs")
+            norm_exprs_mat <- norm_exprs(object)
+        else 
+            norm_exprs_mat <- exprs(object)
         limma_fit <- limma::lmFit(norm_exprs_mat, design)
-        norm_exprs(object) <- limma::residuals.MArrayLM(limma_fit,
+        norm_exprs(object) <- limma::residuals.MArrayLM(limma_fit, 
                                                         norm_exprs_mat)
     }
 
@@ -197,6 +200,26 @@ normalizeExprs <- function(...) {
 #' @details \code{normalize} is exactly the same as \code{normalise}, the option
 #' provided for those who have a preference for North American or
 #' British/Australian spelling.
+#'
+#' @section Warning about centred size factors:
+#' Centring the size factors ensures that the computed \code{exprs} can be 
+#' interpreted as being on the same scale as log-counts. This does not affect
+#' relative comparisons between cells in the same \code{object}, as all size 
+#' factors are scaled by the same amount. However, if two different \code{SCESet}
+#' objects are run separately through \code{normalize}, the size factors 
+#' in each object will be rescaled differently. This means that the size factors
+#' and \code{exprs} will \emph{not} be comparable between objects.
+#'
+#' This lack of comparability is not always obvious. For example, if we subsetted
+#' an existing \code{SCESet}, and ran \code{normalize} separately on each subset, 
+#' the resulting \code{exprs} in each subsetted object would \emph{not} be 
+#' comparable to each other. This is despite the fact that all cells were 
+#' originally derived from a single \code{SCESet} object. 
+#'
+#' In general, it is advisable to only compare size factors and \code{exprs}
+#' between cells in one \code{SCESet} object. If objects are to be combined,
+#' e.g., with \code{\link{mergeSCESet}}, new size factors should be computed 
+#' using all cells in the combined object, followed by running \code{normalize}.
 #'
 #' @return an SCESet object
 #'

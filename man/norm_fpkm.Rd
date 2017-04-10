@@ -3,8 +3,13 @@
 \docType{methods}
 \name{norm_fpkm}
 \alias{norm_fpkm}
-\alias{norm_fpkm,SCESet-method}
+\alias{norm_fpkm<-}
+\alias{norm_fpkm}
 \alias{norm_fpkm.SCESet}
+\alias{norm_fpkm,SCESet-method}
+\alias{norm_fpkm<-,SCESet,matrix-method}
+\alias{norm_fpkm}
+\alias{norm_fpkm,SCESet-method}
 \alias{norm_fpkm<-}
 \alias{norm_fpkm<-,SCESet,matrix-method}
 \title{Accessors for the 'norm_fpkm' (normalised fragments per kilobase of exon per million reads mapped) element of an SCESet object.}
@@ -46,4 +51,3 @@ norm_fpkm(example_sceset)
 \author{
 Davis McCarthy
 }
-

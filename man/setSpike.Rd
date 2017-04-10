@@ -3,6 +3,7 @@
 \docType{methods}
 \name{setSpike}
 \alias{setSpike}
+\alias{setSpike}
 \alias{setSpike<-}
 \alias{setSpike<-,SCESet,NULL-method}
 \alias{setSpike<-,SCESet,character-method}
@@ -50,4 +51,3 @@ summary(isSpike(example_sceset))
 \author{
 Aaron Lun
 }
-

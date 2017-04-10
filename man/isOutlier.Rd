@@ -48,4 +48,3 @@ example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:40)
 isOutlier(example_sceset$total_counts, nmads = 3)
 
 }
-

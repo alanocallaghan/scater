@@ -3,8 +3,11 @@
 \docType{methods}
 \name{plotDiffusionMap}
 \alias{plotDiffusionMap}
-\alias{plotDiffusionMap,SCESet-method}
+\alias{plotDiffusionMap}
 \alias{plotDiffusionMapSCESet}
+\alias{plotDiffusionMap,SCESet-method}
+\alias{plotDiffusionMap,SCESet-method}
+\alias{plotDiffusionMap}
 \title{Plot a diffusion map for an SCESet object}
 \usage{
 plotDiffusionMap(object, ...)
@@ -29,19 +32,19 @@ plotDiffusionMapSCESet(object, ntop = 500, ncomponents = 2,
 \item{...}{further arguments passed to \code{\link[destiny]{DiffusionMap}}}
 
 \item{ntop}{numeric scalar indicating the number of most variable features to
-use for the diffusion map. Default is \code{500}, but any \code{ntop} 
+use for the diffusion map. Default is \code{500}, but any \code{ntop}
 argument is overrided if the \code{feature_set} argument is non-NULL.}
 
 \item{ncomponents}{numeric scalar indicating the number of principal
-components to plot, starting from the first diffusion map component. Default 
-is 2. If \code{ncomponents} is 2, then a scatterplot of component 1 vs 
-component 2 is produced. If \code{ncomponents} is greater than 2, a pairs 
-plots for the top components is produced. NB: computing many components for 
+components to plot, starting from the first diffusion map component. Default
+is 2. If \code{ncomponents} is 2, then a scatterplot of component 1 vs
+component 2 is produced. If \code{ncomponents} is greater than 2, a pairs
+plots for the top components is produced. NB: computing many components for
 the diffusion map can become time consuming.}
 
 \item{exprs_values}{character string indicating which values should be used
 as the expression values for this plot. Valid arguments are \code{"tpm"}
-(default; transcripts per million), \code{"norm_tpm"} (normalised TPM
+(transcripts per million), \code{"norm_tpm"} (normalised TPM
 values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM
 values), \code{"counts"} (counts for each feature), \code{"norm_counts"},
 \code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised
@@ -52,7 +55,8 @@ or any other named element of the \code{assayData} slot of the \code{SCESet}
 object that can be accessed with the \code{get_exprs} function.}
 
 \item{colour_by}{character string defining the column of \code{pData(object)} to
-be used as a factor by which to colour the points in the plot.}
+be used as a factor by which to colour the points in the plot. Alternatively, a
+data frame with one column containing values to map to colours for all cells.}
 
 \item{shape_by}{character string defining the column of \code{pData(object)} to
 be used as a factor by which to define the shape of the points in the plot.}
@@ -88,8 +92,8 @@ is always produced.}
 
 \item{distance}{argument passed to \code{\link[destiny]{DiffusionMap}}}
 
-\item{legend}{character, specifying how the legend(s) be shown? Default is 
-\code{"auto"}, which hides legends that have only one level and shows others. 
+\item{legend}{character, specifying how the legend(s) be shown? Default is
+\code{"auto"}, which hides legends that have only one level and shows others.
 Alternatives are "all" (show all legends) or "none" (hide all legends).}
 }
 \value{
@@ -100,7 +104,7 @@ If \code{return_SCESet} is \code{TRUE}, then the function returns an
 Produce a diffusion map plot of two components for an \code{SCESet} dataset.
 }
 \details{
-The function \code{\link[destiny]{DiffusionMap}} is used internally 
+The function \code{\link[destiny]{DiffusionMap}} is used internally
 to compute the diffusion map.
 }
 \examples{
@@ -135,4 +139,3 @@ Haghverdi L, Buettner F, Theis FJ. Diffusion maps for high-dimensional single-ce
 \seealso{
 \code{\link[destiny]{destiny}}
 }
-

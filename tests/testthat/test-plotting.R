@@ -69,6 +69,32 @@ test_that("we can produce expression plots with different expression values", {
                 is_a("ggplot"))
 })
 
+test_that("we can plot expression for named genes", {
+    data("sc_example_counts")
+    data("sc_example_cell_info")
+    pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+    example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+    example_sceset <- calculateQCMetrics(example_sceset)
+    geneset <- featureNames(example_sceset)[1:6]
+    expect_that(plotExpression(example_sceset, geneset, "Cell_Cycle"),
+                is_a("ggplot"))
+    expect_that(plotExpression(example_sceset, geneset, "Gene_0004"), is_a("ggplot"))
+})
+
+test_that("plotting expression for an object with non-NULL is_exprs() ", {
+    data("sc_example_counts")
+    data("sc_example_cell_info")
+    pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+    example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+    example_sceset <- calculateQCMetrics(example_sceset)
+    geneset <- featureNames(example_sceset)[1:6]
+    is_exprs(example_sceset) <- counts(example_sceset) > 0.5
+    expect_that(plotExpression(example_sceset, geneset, "Cell_Cycle"),
+                is_a("ggplot"))
+    expect_that(plotExpression(example_sceset, geneset, "Gene_0004"), 
+                is_a("ggplot"))
+})
+
 test_that("we can produce plots showing cells in plate position", {
     data("sc_example_counts")
     data("sc_example_cell_info")

@@ -18,6 +18,8 @@ setMethod("mutate", signature(object = "SCESet"),
 #' @param ... Additional arguments to be passed to \code{dplyr::mutate} to
 #' act on \code{pData(object)}.
 #' 
+#' @return An SCESet object.
+#' 
 #' @export
 #' @rdname mutate
 #' @name mutate
@@ -50,6 +52,8 @@ setMethod("rename", signature(object = "SCESet"),
 #' @param object A \code{SCESet} object.
 #' @param ... Additional arguments to be passed to \code{dplyr::rename} to
 #' act on \code{pData(object)}.
+#' 
+#' @return An SCESet object.
 #' 
 #' @export
 #' @rdname rename
@@ -88,6 +92,8 @@ setMethod("filter", signature(object = "SCESet"),
 #' @param ... Additional arguments to be passed to \code{dplyr::filter} to
 #' act on \code{pData(object)}.
 #' 
+#' @return An SCESet object.
+#' 
 #' @export
 #' @rdname filter
 #' @name filter
@@ -124,6 +130,8 @@ setMethod("arrange", signature(object = "SCESet"),
 #' @param object A \code{SCESet} object.
 #' @param ... Additional arguments to be passed to \code{dplyr::arrange} to
 #' act on \code{pData(object)}.
+#' 
+#' @return An SCESet object.
 #' 
 #' @export
 #' @rdname arrange

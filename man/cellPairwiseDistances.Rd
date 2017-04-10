@@ -2,18 +2,32 @@
 % Please edit documentation in R/AllGenerics.R, R/SCESet-methods.R
 \docType{methods}
 \name{cellPairwiseDistances}
+\alias{cellPairwiseDistances}
+\alias{cellPairwiseDistances<-}
 \alias{cellDist}
-\alias{cellDist,SCESet-method}
 \alias{cellDist<-}
-\alias{cellDist<-,SCESet,dist-method}
+\alias{cellPairwiseDistances}
+\alias{cellPairwiseDistances.SCESet}
+\alias{cellPairwiseDistances,SCESet-method}
+\alias{cellPairwiseDistances<-,SCESet,matrix-method}
+\alias{cellPairwiseDistances<-,SCESet,dist-method}
+\alias{cellDist,SCESet-method}
 \alias{cellDist<-,SCESet,matrix-method}
+\alias{cellDist<-,SCESet,dist-method}
+\alias{cellPairwiseDistances,SCESet-method}
+\alias{cellPairwiseDistances}
 \alias{cellDistSCESet}
 \alias{cellPairwiseDistances}
-\alias{cellPairwiseDistances,SCESet-method}
-\alias{cellPairwiseDistances.SCESet}
+\alias{cellDist,SCESet-method}
+\alias{cellPairwiseDistances}
 \alias{cellPairwiseDistances<-}
-\alias{cellPairwiseDistances<-,SCESet,dist-method}
-\alias{cellPairwiseDistances<-,SCESet,matrix-method}
+\alias{cellPairwiseDistances}
+\alias{cellPairwiseDistances<-}
+\alias{cellPairwiseDistances}
+\alias{cellDist<-}
+\alias{cellPairwiseDistances}
+\alias{cellDist<-}
+\alias{cellPairwiseDistances}
 \title{cellPairwiseDistances in an SCESet object}
 \usage{
 cellPairwiseDistances(object)
@@ -66,4 +80,3 @@ cellPairwiseDistances(example_sceset)
 \author{
 Davis McCarthy
 }
-

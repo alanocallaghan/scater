@@ -17,9 +17,6 @@ Methods that operate on SCESet objects constitute the basic scater workflow.
 \section{Slots}{
 
  \describe{
-   \item{\code{logged}:}{Scalar of class \code{"logical"}, indicating whether 
-   or not the expression data in the `exprs` slot have been log2-transformed
-   or not.}
    \item{\code{logExprsOffset}:}{Scalar of class \code{"numeric"}, providing an offset 
    applied to expression data in the `exprs` slot when undergoing log2-transformation
    to avoid trying to take logs of zero.}
@@ -39,14 +36,11 @@ Methods that operate on SCESet objects constitute the basic scater workflow.
    \code{"AnnotatedDataFrame"} that can contain information/metadata about 
    sets of control features defined for the \code{SCESet} object.
    bootstrap estimates of the expression or count values.}
-   \item{\code{useForExprs}:}{Character string (one of 'exprs','tpm','counts' or 'fpkm') indicating 
-   which expression representation both internal methods and external packages should use. 
-   Defaults to 'exprs'.}
 }
 }
+
 \references{
 Thanks to the Monocle package 
 (github.com/cole-trapnell-lab/monocle-release/) for their CellDataSet class, 
 which provided the inspiration and template for SCESet.
 }
-

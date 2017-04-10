@@ -3,6 +3,7 @@
 \docType{methods}
 \name{whichSpike}
 \alias{whichSpike}
+\alias{whichSpike}
 \alias{whichSpike,SCESet-method}
 \title{Identify spike-in feature control sets in an SCESet object}
 \usage{
@@ -33,4 +34,3 @@ whichSpike(example_sceset)
 \author{
 Aaron Lun
 }
-

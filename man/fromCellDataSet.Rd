@@ -4,7 +4,8 @@
 \alias{fromCellDataSet}
 \title{Convert a \code{CellDataSet} to an \code{SCESet}}
 \usage{
-fromCellDataSet(cds, exprs_values = "tpm", logged = FALSE)
+fromCellDataSet(cds, exprs_values = "tpm", logged = FALSE,
+  logExprsOffset = 1)
 }
 \arguments{
 \item{cds}{A \code{CellDataSet} from the \code{monocle} package}
@@ -12,8 +13,10 @@ fromCellDataSet(cds, exprs_values = "tpm", logged = FALSE)
 \item{exprs_values}{What should \code{exprs(cds)} be mapped to in the \code{SCESet}? Should be
 one of "exprs", "tpm", "fpkm", "counts"}
 
-\item{logged}{logical, if a value is supplied for the exprsData argument, are
+\item{logged}{logical, if \code{exprs_values="exprs"}, are
 the expression values already on the log2 scale, or not?}
+
+\item{logExprsOffset}{numeric, value to add prior to log-transformation.}
 }
 \value{
 An object of class \code{SCESet}
@@ -31,4 +34,3 @@ if ( requireNamespace("monocle") ) {
     # sceset <- fromCellDataSet(cds) # not run
 }
 }
-

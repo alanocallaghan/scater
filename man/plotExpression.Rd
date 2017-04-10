@@ -3,10 +3,16 @@
 \docType{methods}
 \name{plotExpression}
 \alias{plotExpression}
+\alias{plotExpression}
+\alias{plotExpressionSCESet}
 \alias{plotExpression,SCESet-method}
 \alias{plotExpression,data.frame-method}
 \alias{plotExpressionDefault}
-\alias{plotExpressionSCESet}
+\alias{plotExpression}
+\alias{plotExpression,SCESet-method}
+\alias{plotExpression}
+\alias{plotExpression,data.frame-method}
+\alias{plotExpression}
 \title{Plot expression values for a set of features (e.g. genes or transcripts)}
 \usage{
 plotExpression(object, ...)
@@ -49,7 +55,7 @@ will be plotted on the x-axis for each subplot.}
 
 \item{exprs_values}{character string indicating which values should be used
 as the expression values for this plot. Valid arguments are \code{"tpm"}
-(default; transcripts per million), \code{"norm_tpm"} (normalised TPM
+(transcripts per million), \code{"norm_tpm"} (normalised TPM
 values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM
 values), \code{"counts"} (counts for each feature), \code{"norm_counts"},
 \code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised
@@ -61,15 +67,18 @@ the user.}
 
 \item{colour_by}{optional character string supplying name of a column of
 \code{pData(object)} which will be used as a variable by which to colour
-expression values on the plot.}
+expression values on the plot. Alternatively, a data frame with one column,
+containing a value for each cell that will be mapped to a colour.}
 
 \item{shape_by}{optional character string supplying name of a column of
 \code{pData(object)} which will be used as a variable to define the shape of
-points for expression values on the plot.}
+points for expression values on the plot. Alternatively, a data frame with 
+one column containing values to map to shapes.}
 
 \item{size_by}{optional character string supplying name of a column of
 \code{pData(object)} which will be used as a variable to define the size of
-points for expression values on the plot.}
+points for expression values on the plot. Alternatively, a data frame with 
+one column containing values to map to sizes.}
 
 \item{ncol}{number of columns to be used for the panels of the plot}
 
@@ -85,8 +94,8 @@ for each group on the plot}
 on the plot}
 
 \item{alpha}{numeric value between 0 (completely transparent) and 1 (completely
-solid) defining how transparent plotted points (cells) should be. 
-Points are jittered horizontally if the x-axis value is categorical rather 
+solid) defining how transparent plotted points (cells) should be.
+Points are jittered horizontally if the x-axis value is categorical rather
 than numeric to avoid overplotting.}
 
 \item{theme_size}{numeric scalar giving default font size for plotting theme
@@ -95,21 +104,21 @@ than numeric to avoid overplotting.}
 \item{log2_values}{should the expression values be transformed to the
 log2-scale for plotting (with an offset of 1 to avoid logging zeroes)?}
 
-\item{size}{numeric scalar optionally providing size for points if 
+\item{size}{numeric scalar optionally providing size for points if
 \code{size_by} argument is not given. Default is \code{NULL}, in which case
 \pkg{ggplot2} default is used.}
 
-\item{scales}{character scalar, should scales be fixed ("fixed"), 
-free ("free"), or free in one dimension ("free_x"; "free_y", the default). 
-Passed to the \code{scales} argument in the \code{\link[ggplot2]{facet_wrap}} function 
+\item{scales}{character scalar, should scales be fixed ("fixed"),
+free ("free"), or free in one dimension ("free_x"; "free_y", the default).
+Passed to the \code{scales} argument in the \code{\link[ggplot2]{facet_wrap}} function
 from the \code{ggplot2} package.}
 
 \item{se}{logical, should standard errors be shown (default \code{TRUE}) for
 the smoothed fit through the cells. (Ignored if \code{show_smooth} is \code{FALSE}).}
 
-\item{jitter}{character scalar to define whether points are to be jittered 
-(\code{"jitter"}) or presented in a "beeswarm" style (if \code{"swarm"}; default). 
-"Beeswarm" style usually looks more attractive, but for datasets with a large 
+\item{jitter}{character scalar to define whether points are to be jittered
+(\code{"jitter"}) or presented in a "beeswarm" style (if \code{"swarm"}; default).
+"Beeswarm" style usually looks more attractive, but for datasets with a large
 number of cells, or for dense plots, the jitter option may work better.}
 
 \item{aesth}{an \code{aes} object to use in the call to \code{\link[ggplot2]{ggplot}}.}
@@ -117,7 +126,7 @@ number of cells, or for dense plots, the jitter option may work better.}
 \item{ylab}{character string defining a label for the y-axis (y-axes) of the
 plot.}
 
-\item{one_facet}{logical, should expression values for features be plotted in one facet 
+\item{one_facet}{logical, should expression values for features be plotted in one facet
 instead of mutiple facets, one per feature? Default if \code{x = NULL}.}
 }
 \value{
@@ -157,4 +166,3 @@ plotExpression(example_sceset, 1:4, "Gene_0004", show_smooth = TRUE)
 plotExpression(example_sceset, 1:4, "Gene_0004", show_smooth = TRUE, se = FALSE)
 
 }
-

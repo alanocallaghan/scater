@@ -3,10 +3,15 @@
 \docType{methods}
 \name{bootstraps}
 \alias{bootstraps}
-\alias{bootstraps,SCESet-method}
-\alias{bootstraps.SCESet}
 \alias{bootstraps<-}
+\alias{bootstraps}
+\alias{bootstraps.SCESet}
+\alias{bootstraps,SCESet-method}
 \alias{bootstraps<-,SCESet,array-method}
+\alias{bootstraps,SCESet-method}
+\alias{bootstraps}
+\alias{bootstraps<-}
+\alias{bootstraps}
 \title{Accessor and replacement for bootstrap results in an SCESet object}
 \usage{
 bootstraps(object)
@@ -48,4 +53,3 @@ bootstraps(example_sceset)
 \author{
 Davis McCarthy
 }
-

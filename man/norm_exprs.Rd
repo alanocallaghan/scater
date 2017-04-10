@@ -3,10 +3,13 @@
 \docType{methods}
 \name{norm_exprs}
 \alias{norm_exprs}
-\alias{norm_exprs,SCESet-method}
-\alias{norm_exprs.SCESet}
 \alias{norm_exprs<-}
+\alias{norm_exprs}
+\alias{norm_exprs.SCESet}
+\alias{norm_exprs,SCESet-method}
 \alias{norm_exprs<-,SCESet,matrix-method}
+\alias{norm_exprs,SCESet-method}
+\alias{norm_exprs<-}
 \title{Accessors for the 'norm_exprs' (normalised expression) element of an SCESet object.}
 \usage{
 norm_exprs(object)
@@ -52,4 +55,3 @@ norm_exprs(example_sceset)
 \author{
 Davis McCarthy
 }
-

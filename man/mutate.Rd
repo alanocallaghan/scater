@@ -4,7 +4,9 @@
 \name{mutate}
 \alias{mutate}
 \alias{mutate,SCESet-method}
+\alias{mutate}
 \alias{mutate.SCESet}
+\alias{mutate,SCESet-method}
 \title{Add new variables to \code{pData(object)}.}
 \usage{
 mutate(object, ...)
@@ -19,6 +21,9 @@ mutate.SCESet(object, ...)
 \item{...}{Additional arguments to be passed to \code{dplyr::mutate} to
 act on \code{pData(object)}.}
 }
+\value{
+An SCESet object.
+}
 \description{
 Adds new columns to \code{pData(object)} preserving existing variables.
 }
@@ -29,4 +34,3 @@ pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
 example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 example_sceset <- mutate(example_sceset, is_quiescent = Cell_Cycle == "G0")
 }
-

@@ -27,4 +27,3 @@ example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 ave_counts <- calcAverage(example_sceset)
 
 }
-

@@ -102,4 +102,3 @@ feature_set = 1:100)
 \author{
 Davis McCarthy
 }
-

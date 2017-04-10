@@ -2,16 +2,26 @@
 % Please edit documentation in R/AllGenerics.R, R/SCESet-methods.R
 \docType{methods}
 \name{reducedDimension}
-\alias{redDim}
-\alias{redDim,SCESet-method}
-\alias{redDim.SCESet}
-\alias{redDim<-}
-\alias{redDim<-,SCESet,matrix-method}
 \alias{reducedDimension}
-\alias{reducedDimension,SCESet-method}
-\alias{reducedDimension.SCESet}
 \alias{reducedDimension<-}
+\alias{redDim}
+\alias{redDim<-}
+\alias{reducedDimension}
+\alias{reducedDimension.SCESet}
+\alias{reducedDimension,SCESet-method}
 \alias{reducedDimension<-,SCESet,matrix-method}
+\alias{redDim,SCESet-method}
+\alias{redDim<-,SCESet,matrix-method}
+\alias{reducedDimension,SCESet-method}
+\alias{reducedDimension}
+\alias{redDim.SCESet}
+\alias{reducedDimension}
+\alias{redDim,SCESet-method}
+\alias{reducedDimension}
+\alias{reducedDimension<-}
+\alias{reducedDimension}
+\alias{redDim<-}
+\alias{reducedDimension}
 \title{Reduced dimension representation for cells in an SCESet object}
 \usage{
 reducedDimension(object)
@@ -63,4 +73,3 @@ reducedDimension(example_sceset)
 \author{
 Davis McCarthy
 }
-

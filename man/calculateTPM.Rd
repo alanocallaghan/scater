@@ -39,4 +39,3 @@ tpm(example_sceset) <- calculateTPM(example_sceset, effective_length,
                                     calc_from = "fpkm")
 
 }
-

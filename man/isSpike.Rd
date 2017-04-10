@@ -3,6 +3,7 @@
 \docType{methods}
 \name{isSpike}
 \alias{isSpike}
+\alias{isSpike}
 \alias{isSpike,SCESet-method}
 \title{Get spike-in features in an SCESet object}
 \usage{
@@ -41,4 +42,3 @@ summary(isSpike(example_sceset))
 \author{
 Aaron Lun
 }
-

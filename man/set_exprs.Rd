@@ -2,10 +2,11 @@
 % Please edit documentation in R/AllGenerics.R, R/SCESet-methods.R
 \docType{methods}
 \name{set_exprs<-}
-\alias{set_exprs}
 \alias{set_exprs<-}
-\alias{set_exprs<-,SCESet,ANY,NULL-method}
+\alias{set_exprs}
 \alias{set_exprs<-,SCESet,ANY,matrix-method}
+\alias{set_exprs<-,SCESet,ANY,NULL-method}
+\alias{set_exprs}
 \title{Assignment method for the new elements of an SCESet object.}
 \usage{
 set_exprs(object, name) <- value
@@ -46,4 +47,3 @@ set_exprs(example_sceset, "scaled_counts") <- NULL
 \author{
 Davis McCarthy
 }
-

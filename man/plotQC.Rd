@@ -18,9 +18,9 @@ against each other, ordered by marginal variance explained), or
 "exprs-mean-vs-freq" (plotting the mean expression levels against the
 frequency of expression for a set of features).}
 
-\item{...}{arguments passed to \code{plotHighestExprs},
-\code{plotImportantPCs}, \code{plotExplanatoryVariables} and
-\code{plotExprsMeanVsFreq} as appropriate.}
+\item{...}{arguments passed to \code{\link{plotHighestExprs}},
+\code{\link{findImportantPCs}}, \code{\link{plotExplanatoryVariables}} and
+\code{{plotExprsMeanVsFreq}} as appropriate.}
 }
 \value{
 a ggplot plot object
@@ -47,4 +47,3 @@ vars <- names(pData(example_sceset))[c(2:3, 5:14)]
 plotQC(example_sceset, type="expl", variables=vars)
 
 }
-

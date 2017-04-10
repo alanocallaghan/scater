@@ -37,4 +37,3 @@ example_sceset <- newSCESet(countData=sc_example_counts)
 is_exprs(example_sceset) <- calcIsExprs(example_sceset, lowerDetectionLimit = 1,
 exprs_values = "exprs")
 }
-

@@ -3,10 +3,13 @@
 \docType{methods}
 \name{stand_exprs}
 \alias{stand_exprs}
-\alias{stand_exprs,SCESet-method}
-\alias{stand_exprs.SCESet}
 \alias{stand_exprs<-}
+\alias{stand_exprs}
+\alias{stand_exprs.SCESet}
+\alias{stand_exprs,SCESet-method}
 \alias{stand_exprs<-,SCESet,matrix-method}
+\alias{stand_exprs,SCESet-method}
+\alias{stand_exprs<-}
 \title{Accessors for the 'stand_exprs' (standardised expression) element of an
 SCESet object.}
 \usage{
@@ -54,4 +57,3 @@ stand_exprs(example_sceset)
 \author{
 Davis McCarthy
 }
-

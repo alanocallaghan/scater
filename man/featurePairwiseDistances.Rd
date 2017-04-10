@@ -2,18 +2,33 @@
 % Please edit documentation in R/AllGenerics.R, R/SCESet-methods.R
 \docType{methods}
 \name{featurePairwiseDistances}
+\alias{featurePairwiseDistances}
+\alias{featurePairwiseDistances<-}
+\alias{featDist}
+\alias{featDist<-}
+\alias{featurePairwiseDistances}
+\alias{featurePairwiseDistancesSCESet}
+\alias{featurePairwiseDistances,SCESet-method}
+\alias{featurePairwiseDistances<-,SCESet,matrix-method}
+\alias{featurePairwiseDistances<-,SCESet,dist-method}
 \alias{featDist}
 \alias{featDist,SCESet-method}
-\alias{featDist<-}
-\alias{featDist<-,SCESet,dist-method}
 \alias{featDist<-,SCESet,matrix-method}
+\alias{featDist<-,SCESet,dist-method}
+\alias{featurePairwiseDistances,SCESet-method}
+\alias{featurePairwiseDistances}
 \alias{featDistSCESet}
 \alias{featurePairwiseDistances}
-\alias{featurePairwiseDistances,SCESet-method}
+\alias{featDist,SCESet-method}
+\alias{featurePairwiseDistances}
 \alias{featurePairwiseDistances<-}
-\alias{featurePairwiseDistances<-,SCESet,dist-method}
-\alias{featurePairwiseDistances<-,SCESet,matrix-method}
-\alias{featurePairwiseDistancesSCESet}
+\alias{featurePairwiseDistances}
+\alias{featurePairwiseDistances<-}
+\alias{featurePairwiseDistances}
+\alias{featDist<-}
+\alias{featurePairwiseDistances}
+\alias{featDist<-}
+\alias{featurePairwiseDistances}
 \title{featurePairwiseDistances in an SCESet object}
 \usage{
 featurePairwiseDistances(object)
@@ -67,4 +82,3 @@ featurePairwiseDistances(example_sceset)
 \author{
 Davis McCarthy
 }
-

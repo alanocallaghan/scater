@@ -27,4 +27,3 @@ example_sceset <- newSCESet(countData = sc_example_counts)
 cpm(example_sceset) <- calculateCPM(example_sceset)
 
 }
-

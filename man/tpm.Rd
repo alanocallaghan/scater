@@ -3,8 +3,13 @@
 \docType{methods}
 \name{tpm}
 \alias{tpm}
-\alias{tpm,SCESet-method}
+\alias{tpm<-}
+\alias{tpm}
 \alias{tpm.SCESet}
+\alias{tpm,SCESet-method}
+\alias{tpm<-,SCESet,matrix-method}
+\alias{tpm}
+\alias{tpm,SCESet-method}
 \alias{tpm<-}
 \alias{tpm<-,SCESet,matrix-method}
 \title{Accessors for the 'tpm' (transcripts per million) element of an SCESet object.}
@@ -45,4 +50,3 @@ tpm(example_sceset)
 \author{
 Davis McCarthy
 }
-

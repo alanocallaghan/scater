@@ -3,7 +3,7 @@
 [![Linux Build Status](https://semaphoreci.com/api/v1/davismcc/scater/branches/master/badge.svg)](https://semaphoreci.com/davismcc/scater)
 [![Coverage Status](https://img.shields.io/codecov/c/github/davismcc/scater/master.svg)](https://codecov.io/github/davismcc/scater?branch=master)
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/github/davismcc/scater?svg=true)](https://ci.appveyor.com/project/davismcc/scater)
-[//]: # ([![Linux Build Status](https://travis-ci.org/davismcc/scater.svg?branch=master)](https://travis-ci.org/davismcc/scater))
+<!--- [![Linux Build Status](https://travis-ci.org/davismcc/scater.svg?branch=master)](https://travis-ci.org/davismcc/scater) --->
 
 This package contains useful tools for the analysis of single-cell
 gene expression data using the statistical software R. The package places an

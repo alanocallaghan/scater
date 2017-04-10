@@ -52,4 +52,3 @@ nexprs(example_sceset)[1:10]
 nexprs(example_sceset, byrow = TRUE)[1:10]
 
 }
-

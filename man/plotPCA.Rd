@@ -3,8 +3,10 @@
 \docType{methods}
 \name{plotPCA}
 \alias{plotPCA}
-\alias{plotPCA,SCESet-method}
 \alias{plotPCASCESet}
+\alias{plotPCA,SCESet-method}
+\alias{plotPCA,SCESet-method}
+\alias{plotPCA}
 \title{Plot PCA for an SCESet object}
 \usage{
 plotPCASCESet(object, ntop = 500, ncomponents = 2, exprs_values = "exprs",
@@ -35,7 +37,7 @@ is produced.}
 
 \item{exprs_values}{character string indicating which values should be used
 as the expression values for this plot. Valid arguments are \code{"tpm"}
-(default; transcripts per million), \code{"norm_tpm"} (normalised TPM
+(transcripts per million), \code{"norm_tpm"} (normalised TPM
 values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM
 values), \code{"counts"} (counts for each feature), \code{"norm_counts"},
 \code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised
@@ -46,13 +48,16 @@ or any other named element of the \code{assayData} slot of the \code{SCESet}
 object that can be accessed with the \code{get_exprs} function.}
 
 \item{colour_by}{character string defining the column of \code{pData(object)} to
-be used as a factor by which to colour the points in the plot.}
+be used as a factor by which to colour the points in the plot. Alternatively, 
+a data frame with one column, containing values to map to colours for all cells.}
 
 \item{shape_by}{character string defining the column of \code{pData(object)} to
-be used as a factor by which to define the shape of the points in the plot.}
+be used as a factor by which to define the shape of the points in the plot.
+Alternatively, a data frame with one column containing values to map to shapes.}
 
 \item{size_by}{character string defining the column of \code{pData(object)} to
-be used as a factor by which to define the size of points in the plot.}
+be used as a factor by which to define the size of points in the plot.
+Alternatively, a data frame with one column containing values to map to sizes.}
 
 \item{feature_set}{character, numeric or logical vector indicating a set of
 features to use for the PCA. If character, entries must all be in
@@ -90,8 +95,8 @@ is \code{FALSE}.}
 \item{theme_size}{numeric scalar giving default font size for plotting theme
 (default is 10).}
 
-\item{legend}{character, specifying how the legend(s) be shown? Default is 
-\code{"auto"}, which hides legends that have only one level and shows others. 
+\item{legend}{character, specifying how the legend(s) be shown? Default is
+\code{"auto"}, which hides legends that have only one level and shows others.
 Alternatives are "all" (show all legends) or "none" (hide all legends).}
 
 \item{...}{further arguments passed to \code{\link{plotPCASCESet}}}
@@ -113,11 +118,11 @@ feature-wise unit variances or not according to the \code{scale_features}
 argument), added to the object and PCA is done using these new standardised
 expression values.
 
-If the arguments \code{detect_outliers} and \code{return_SCESet} are both 
-\code{TRUE}, then the element \code{$outlier} is added to the pData 
+If the arguments \code{detect_outliers} and \code{return_SCESet} are both
+\code{TRUE}, then the element \code{$outlier} is added to the pData
 (phenotype data) slot of the \code{SCESet} object. This element contains
 indicator values about whether or not each cell has been designated as an
-outlier based on the PCA. These values can be accessed for filtering 
+outlier based on the PCA. These values can be accessed for filtering
 low quality cells with, foe example, \code{example_sceset$outlier}.
 }
 \examples{
@@ -151,4 +156,3 @@ plotPCA(example_sceset, ncomponents = 4, colour_by = "Treatment",
 shape_by = "Mutation_Status")
 
 }
-

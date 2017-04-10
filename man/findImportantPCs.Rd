@@ -22,8 +22,8 @@ their R-squared with the variable of interest. A value of
 interest.}
 
 \item{exprs_values}{which slot of the \code{assayData} in the \code{object}
-should be used to define expression? Valid options are "counts" (default),
-"tpm", "fpkm" and "exprs", or anything else in the object added manually by 
+should be used to define expression? Valid options are "counts",
+"tpm", "fpkm" and "exprs" (default), or anything else in the object added manually by 
 the user.}
 
 \item{ntop}{numeric scalar indicating the number of most variable features to
@@ -65,4 +65,3 @@ example_sceset <- calculateQCMetrics(example_sceset)
 findImportantPCs(example_sceset, variable="total_features")
 
 }
-

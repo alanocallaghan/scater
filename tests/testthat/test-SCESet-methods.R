@@ -151,14 +151,15 @@ test_that("mergeSCESet works as expected", {
                                 row.names = rownames(sc_example_counts)))
     example_sceset <- newSCESet(countData = sc_example_counts)
     
-    err_string <- "phenoData slot is empty"
-    expect_error(mergeSCESet(example_sceset[, 1:20], example_sceset[, 21:40]), 
-                 err_string)
+    merged_sceset <- mergeSCESet(example_sceset[, 1:20], example_sceset[, 21:40])
+    expect_that(merged_sceset, is_a("SCESet"))
+    expect_identical(pData(merged_sceset), pData(example_sceset))
     
     example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
     merged_sceset <- mergeSCESet(example_sceset[, 1:20],
                                  example_sceset[, 21:40])
     expect_that(merged_sceset, is_a("SCESet"))
+    expect_identical(pData(merged_sceset), pData(example_sceset))
 
     example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd,
                                 featureData = fd)
@@ -170,7 +171,20 @@ test_that("mergeSCESet works as expected", {
     fData(tmp_sceset)$ID <- "nope"
     expect_error(mergeSCESet(example_sceset[, 1:20], tmp_sceset),
                  "not identical")
+    
+    # checking that selecting 1 pData column works OK
+    expect_that(mergeSCESet(example_sceset[, 1:20], example_sceset[, 40], 
+                            pdata_cols = 3), is_a("SCESet"))
 
+    # Checking that featureControlInfo is handled properly.
+    new_example_sceset <- calculateQCMetrics(example_sceset, 
+                                         feature_controls = list(ERCC = 1:40))
+    merged_sceset <- mergeSCESet(new_example_sceset[, 1:20],
+                                 new_example_sceset[, 21:40])
+    expect_identical(featureControlInfo(new_example_sceset), featureControlInfo(merged_sceset))
+    expect_warning(merged_sceset <- mergeSCESet(new_example_sceset[, 1:20],
+                                                new_example_sceset[, 21:40], fdata_cols=0),
+                   "removing undefined feature control set 'ERCC'")
 })
 
 

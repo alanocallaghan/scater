@@ -2,10 +2,11 @@
 % Please edit documentation in R/SCESet-methods.R
 \docType{methods}
 \name{fData<-,SCESet,AnnotatedDataFrame-method}
+\alias{fData<-,SCESet,AnnotatedDataFrame-method}
 \alias{fData}
 \alias{fData,SCESet-method}
-\alias{fData<-,SCESet,AnnotatedDataFrame-method}
 \alias{fData<-,SCESet,data.frame-method}
+\alias{fData}
 \title{Replaces featureData in an SCESet object}
 \usage{
 \S4method{fData}{SCESet,AnnotatedDataFrame}(object) <- value
@@ -36,4 +37,3 @@ example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 fData(example_sceset)
 }
 }
-

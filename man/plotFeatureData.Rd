@@ -5,7 +5,7 @@
 \title{Plot feature (gene) data from an SCESet object}
 \usage{
 plotFeatureData(object, aesth = aes_string(x = "n_cells_exprs", y =
-  "prop_total_counts"), theme_size = 10, ...)
+  "prop_total_counts"), ...)
 }
 \arguments{
 \item{object}{an SCESet object containing expression values and
@@ -16,10 +16,8 @@ expects at least x and y variables to be supplied. The default is to produce
 a density plot of number of cells expressing the feature (requires
 \code{calculateQCMetrics} to have been run on the SCESet object prior).}
 
-\item{theme_size}{numeric scalar giving default font size for plotting theme
-(default is 10).}
-
-\item{...}{arguments passed to \code{\link{plotMetadata}}.}
+\item{...}{arguments passed to \code{\link{plotMetadata}}, e.g. 
+\code{theme_size}, \code{size}, \code{alpha}, \code{shape}.}
 }
 \value{
 a ggplot plot object
@@ -45,4 +43,3 @@ example_sceset <- calculateQCMetrics(example_sceset)
 plotFeatureData(example_sceset, aesth=aes(x=n_cells_exprs, y=pct_total_counts))
 
 }
-

@@ -71,4 +71,3 @@ vars <- names(pData(example_sceset))[c(2:3, 5:14)]
 plotExplanatoryVariables(example_sceset, variables=vars)
 
 }
-

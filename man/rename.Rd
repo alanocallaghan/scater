@@ -4,7 +4,9 @@
 \name{rename}
 \alias{rename}
 \alias{rename,SCESet-method}
+\alias{rename}
 \alias{rename.SCESet}
+\alias{rename,SCESet-method}
 \title{Rename variables of \code{pData(object)}.}
 \usage{
 rename(object, ...)
@@ -19,6 +21,9 @@ rename.SCESet(object, ...)
 \item{...}{Additional arguments to be passed to \code{dplyr::rename} to
 act on \code{pData(object)}.}
 }
+\value{
+An SCESet object.
+}
 \description{
 Rename variables of \code{pData(object)}.
 }
@@ -29,4 +34,3 @@ pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
 example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 example_sceset <- rename(example_sceset, Cell_Phase = Cell_Cycle)
 }
-

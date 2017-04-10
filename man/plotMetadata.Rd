@@ -53,4 +53,3 @@ example_sceset <- calculateQCMetrics(example_sceset)
 plotMetadata(pData(example_sceset))
 
 }
-

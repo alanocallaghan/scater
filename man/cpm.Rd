@@ -3,10 +3,15 @@
 \docType{methods}
 \name{cpm}
 \alias{cpm}
+\alias{cpm<-}
+\alias{cpm}
+\alias{cpmSCESet}
+\alias{cpm,SCESet-method}
+\alias{cpm<-,SCESet,matrix-method}
+\alias{cpm}
 \alias{cpm,SCESet-method}
 \alias{cpm<-}
 \alias{cpm<-,SCESet,matrix-method}
-\alias{cpmSCESet}
 \title{Accessors for the 'cpm' (counts per million) element of an SCESet object.}
 \usage{
 cpm(object)
@@ -44,4 +49,3 @@ cpm(example_sceset)[1:10, 1:6]
 \author{
 Davis McCarthy
 }
-

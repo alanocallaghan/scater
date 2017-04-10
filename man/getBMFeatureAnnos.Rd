@@ -5,7 +5,7 @@
 \title{Get feature annotation information from Biomart}
 \usage{
 getBMFeatureAnnos(object, filters = "ensembl_transcript_id",
-  attributes = c("ensembl_transcript_id", "ensembl_gene_id", "mgi_symbol",
+  attributes = c("ensembl_transcript_id", "ensembl_gene_id", feature_symbol,
   "chromosome_name", "transcript_biotype", "transcript_start", "transcript_end",
   "transcript_count"), feature_symbol = "mgi_symbol",
   feature_id = "ensembl_gene_id", biomart = "ENSEMBL_MART_ENSEMBL",
@@ -63,4 +63,3 @@ object <- getBMFeatureAnnos(object)
 }
 
 }
-

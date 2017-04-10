@@ -3,10 +3,13 @@
 \docType{methods}
 \name{is_exprs}
 \alias{is_exprs}
-\alias{is_exprs,SCESet-method}
-\alias{is_exprs.SCESet}
 \alias{is_exprs<-}
+\alias{is_exprs}
+\alias{is_exprs.SCESet}
+\alias{is_exprs,SCESet-method}
 \alias{is_exprs<-,SCESet,matrix-method}
+\alias{is_exprs,SCESet-method}
+\alias{is_exprs<-}
 \title{Accessors for the 'is_exprs' element of an SCESet object.}
 \usage{
 is_exprs(object)
@@ -45,4 +48,3 @@ is_exprs(example_sceset)
 \author{
 Davis McCarthy
 }
-

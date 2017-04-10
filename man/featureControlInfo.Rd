@@ -3,10 +3,16 @@
 \docType{methods}
 \name{featureControlInfo}
 \alias{featureControlInfo}
-\alias{featureControlInfo,SCESet-method}
-\alias{featureControlInfo.SCESet}
 \alias{featureControlInfo<-}
+\alias{featureControlInfo}
+\alias{featureControlInfo.SCESet}
+\alias{featureControlInfo,SCESet-method}
 \alias{featureControlInfo<-,SCESet,AnnotatedDataFrame-method}
+\alias{featureControlInfo<-}
+\alias{featureControlInfo,SCESet-method}
+\alias{featureControlInfo}
+\alias{featureControlInfo<-}
+\alias{featureControlInfo}
 \title{featureControlInfo in an SCESet object}
 \usage{
 featureControlInfo(object)
@@ -46,4 +52,3 @@ featureControlInfo(example_sceset)$IsSpike <- c(TRUE, FALSE)
 \author{
 Aaron Lun
 }
-

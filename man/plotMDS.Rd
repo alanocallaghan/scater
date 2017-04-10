@@ -3,19 +3,23 @@
 \docType{methods}
 \name{plotMDS}
 \alias{plotMDS}
-\alias{plotMDS,SCESet-method}
+\alias{plotMDS}
 \alias{plotMDSSCESet}
+\alias{plotMDS,SCESet-method}
+\alias{plotMDS,SCESet-method}
+\alias{plotMDS}
 \title{Produce a multidimensional scaling plot for an SCESet object}
 \usage{
 plotMDS(object, ...)
 
 plotMDSSCESet(object, ncomponents = 2, colour_by = NULL, shape_by = NULL,
   size_by = NULL, return_SCESet = FALSE, draw_plot = TRUE,
-  theme_size = 10, legend = "auto")
+  exprs_values = "exprs", theme_size = 10, legend = "auto")
 
 \S4method{plotMDS}{SCESet}(object, ncomponents = 2, colour_by = NULL,
   shape_by = NULL, size_by = NULL, return_SCESet = FALSE,
-  draw_plot = TRUE, theme_size = 10, legend = "auto")
+  draw_plot = TRUE, exprs_values = "exprs", theme_size = 10,
+  legend = "auto")
 }
 \arguments{
 \item{object}{an \code{SCESet} object}
@@ -30,7 +34,8 @@ is produced. NB: computing more than two components for t-SNE can become very
 time consuming.}
 
 \item{colour_by}{character string defining the column of \code{pData(object)} to
-be used as a factor by which to colour the points in the plot.}
+be used as a factor by which to colour the points in the plot. Alternatively, a 
+data frame with one column containing values to map to colours for all cells.}
 
 \item{shape_by}{character string defining the column of \code{pData(object)} to
 be used as a factor by which to define the shape of the points in the plot.}
@@ -47,11 +52,14 @@ object with principal component values for cells in the
 device? Only used if \code{return_SCESet} is \code{TRUE}, otherwise the plot
 is always produced.}
 
+\item{exprs_values}{a string specifying the expression values to use for
+colouring the points, if \code{colour_by} or \code{size_by} are set as feature names.}
+
 \item{theme_size}{numeric scalar giving default font size for plotting theme
 (default is 10).}
 
-\item{legend}{character, specifying how the legend(s) be shown? Default is 
-\code{"auto"}, which hides legends that have only one level and shows others. 
+\item{legend}{character, specifying how the legend(s) be shown? Default is
+\code{"auto"}, which hides legends that have only one level and shows others.
 Alternatives are "all" (show all legends) or "none" (hide all legends).}
 }
 \value{
@@ -92,4 +100,3 @@ plotMDS(example_sceset, colour_by = "Cell_Cycle",
 shape_by = "Treatment", size_by = "Mutation_Status")
 
 }
-

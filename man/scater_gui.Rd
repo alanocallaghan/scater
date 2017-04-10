@@ -34,4 +34,3 @@ scater_gui(example_sceset)
 \author{
 Davis McCarthy and Vladimir Kiselev
 }
-

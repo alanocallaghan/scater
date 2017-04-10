@@ -5,7 +5,7 @@
 \title{Plot phenotype data from an SCESet object}
 \usage{
 plotPhenoData(object, aesth = aes_string(x = "log10(total_counts)", y =
-  "total_features"), theme_size = 10, ...)
+  "total_features"), ...)
 }
 \arguments{
 \item{object}{an SCESet object containing expression values and
@@ -15,10 +15,8 @@ experimental information. Must have been appropriately prepared.}
 expects at least x and y variables to be supplied. The default is to plot
 total_features against log10(total_counts).}
 
-\item{theme_size}{numeric scalar giving default font size for plotting theme
-(default is 10).}
-
-\item{...}{arguments passed to \code{\link{plotMetadata}}.}
+\item{...}{arguments passed to \code{\link{plotMetadata}}, e.g. 
+\code{theme_size}, \code{size}, \code{alpha}, \code{shape}.}
 }
 \value{
 a ggplot plot object
@@ -45,4 +43,3 @@ plotPhenoData(example_sceset, aesth = aes_string(x = "log10(total_counts)",
 y = "total_features", colour = "Mutation_Status"))
 
 }
-

@@ -3,10 +3,13 @@
 \docType{methods}
 \name{norm_counts}
 \alias{norm_counts}
-\alias{norm_counts,SCESet-method}
-\alias{norm_counts.SCESet}
 \alias{norm_counts<-}
+\alias{norm_counts}
+\alias{norm_counts.SCESet}
+\alias{norm_counts,SCESet-method}
 \alias{norm_counts<-,SCESet,matrix-method}
+\alias{norm_counts,SCESet-method}
+\alias{norm_counts}
 \title{Accessors for the 'norm_counts' element of an SCESet object.}
 \usage{
 norm_counts(object)
@@ -45,4 +48,3 @@ norm_counts(example_sceset)
 \author{
 Davis McCarthy
 }
-

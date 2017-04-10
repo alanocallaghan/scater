@@ -4,7 +4,9 @@
 \name{arrange}
 \alias{arrange}
 \alias{arrange,SCESet-method}
+\alias{arrange}
 \alias{arrange.SCESet}
+\alias{arrange,SCESet-method}
 \title{Arrange rows of \code{pData(object)} by variables.}
 \usage{
 arrange(object, ...)
@@ -19,6 +21,9 @@ arrange.SCESet(object, ...)
 \item{...}{Additional arguments to be passed to \code{dplyr::arrange} to
 act on \code{pData(object)}.}
 }
+\value{
+An SCESet object.
+}
 \description{
 The \code{SCESet} returned will have cells ordered by the corresponding
 variable in \code{pData(object)}.
@@ -30,4 +35,3 @@ pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
 example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
 example_sceset <- arrange(example_sceset, Cell_Cycle)
 }
-

@@ -43,4 +43,3 @@ will not find them.
 # If kallisto results are in the directory "output", then call:
 # readKallistoResultsOneSample("output")
 }
-

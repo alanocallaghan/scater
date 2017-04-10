@@ -38,4 +38,3 @@ example_sceset <- normalize(example_sceset, centre=TRUE)
 areSizeFactorsCentred(example_sceset)
 
 }
-

@@ -2,8 +2,9 @@
 % Please edit documentation in R/AllGenerics.R, R/SCESet-methods.R
 \docType{methods}
 \name{cellNames<-}
-\alias{cellNames}
 \alias{cellNames<-}
+\alias{cellNames}
+\alias{cellNames}
 \alias{cellNames<-,SCESet,vector-method}
 \title{Get or set cell names from an SCESet object}
 \usage{
@@ -43,4 +44,3 @@ cellNames(example_sceset) <- 1:ncol(example_sceset)
 \author{
 Davis McCarthy
 }
-

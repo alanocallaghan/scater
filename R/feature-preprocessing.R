@@ -54,7 +54,7 @@
 #' 
 getBMFeatureAnnos <- function(object, filters="ensembl_transcript_id", 
                               attributes=c("ensembl_transcript_id", 
-                                           "ensembl_gene_id", "mgi_symbol", 
+                                           "ensembl_gene_id", feature_symbol, 
                                            "chromosome_name", "transcript_biotype",
                                            "transcript_start", "transcript_end", 
                                            "transcript_count"), 
@@ -187,24 +187,26 @@ summariseExprsAcrossFeatures <- function(object, exprs_values = "tpm",
                         tpm = tpm(object),
                         fpkm = fpkm(object),
                         counts = counts(object))
-    if ( exprs_values == "exprs" && object@logged ) {
+    if ( exprs_values == "exprs" ) 
         exprs_mat <- 2 ^ exprs_mat - object@logExprsOffset
-    }
+    
     ## Use reshape2 to make a long version of the expression matrix
     tmp_exprs <- data.frame(feature = fData(object)[[summarise_by]], exprs_mat)
     tmp_exprs_long <- suppressMessages(reshape2::melt(tmp_exprs))
     exprs_new <- reshape2::acast(tmp_exprs_long, feature ~ variable, sum)
     cat("Collapsing expression to", nrow(exprs_new), "features.")
+   
     ## ensure sample names haven't been corrupted
     colnames(exprs_new) <- sampleNames(object) 
+   
     ## Create a new SCESet object
     pd <- new("AnnotatedDataFrame", pData(object))
     fd <- new("AnnotatedDataFrame",
               data.frame(exprs_collapsed_to = rownames(exprs_new)))
     rownames(fd) <- rownames(exprs_new)
-    if ( exprs_values == "exprs" && object@logged ) {
+    if ( exprs_values == "exprs" ) 
         exprs_new <- log2(exprs_new + object@logExprsOffset)
-    }
+    
     sce_out <- switch(exprs_values,
                       exprs = newSCESet(exprsData = exprs_new, phenoData = pd, 
                                         featureData = fd),

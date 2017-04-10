@@ -3,8 +3,13 @@
 \docType{methods}
 \name{norm_cpm}
 \alias{norm_cpm}
-\alias{norm_cpm,SCESet-method}
+\alias{norm_cpm<-}
+\alias{norm_cpm}
 \alias{norm_cpm.SCESet}
+\alias{norm_cpm,SCESet-method}
+\alias{norm_cpm<-,SCESet,matrix-method}
+\alias{norm_cpm}
+\alias{norm_cpm,SCESet-method}
 \alias{norm_cpm<-}
 \alias{norm_cpm<-,SCESet,matrix-method}
 \title{Accessors for the 'norm_cpm' (normalised counts per million) element of an SCESet object.}
@@ -45,4 +50,3 @@ norm_cpm(example_sceset)
 \author{
 Davis McCarthy
 }
-

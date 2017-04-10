@@ -3,8 +3,13 @@
 \docType{methods}
 \name{fpkm}
 \alias{fpkm}
-\alias{fpkm,SCESet-method}
+\alias{fpkm<-}
+\alias{fpkm}
 \alias{fpkm.SCESet}
+\alias{fpkm,SCESet-method}
+\alias{fpkm<-,SCESet,matrix-method}
+\alias{fpkm}
+\alias{fpkm,SCESet-method}
 \alias{fpkm<-}
 \alias{fpkm<-,SCESet,matrix-method}
 \title{Accessors for the 'fpkm' (fragments per kilobase of exon per million reads mapped) element of an SCESet object.}
@@ -46,4 +51,3 @@ fpkm(example_sceset)
 \author{
 Davis McCarthy
 }
-

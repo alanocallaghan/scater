@@ -53,4 +53,3 @@ plotHighestExprs(example_sceset, col_by_variable="total_features")
 plotHighestExprs(example_sceset, col_by_variable="Mutation_Status")
 
 }
-

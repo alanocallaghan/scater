@@ -269,9 +269,6 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     ## Define log10 read counts from feature controls
     stat.cols <- sub("_.*", "", colnames(qc_pdata))
     cols_to_log <- which(stat.cols %in% okay.expr.vals)
-    if ( !object@logged ) {
-        cols_to_log <- c(cols_to_log, which(stat.cols=="exprs"))
-    }
     if (length(cols_to_log)) { 
         log10_cols <- log10(qc_pdata[, cols_to_log, drop = FALSE] + 1)
         colnames(log10_cols) <- paste0("log10_", colnames(qc_pdata)[cols_to_log])
@@ -346,16 +343,6 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     new_pdata <- cbind(new_pdata, qc_pdata, cell_controls_pdata)
     pData(object) <-  new("AnnotatedDataFrame", new_pdata)
 
-    ## indicate if feature is feature control across any set
-    ## here use technical feature controls
-    if ( is.list(feature_controls) ) {
-        feat_controls_cols <- grep("^is_feature_control",
-                                   colnames(feature_controls_fdata))
-        feature_controls_fdata$is_feature_control <- (
-            rowSums(feature_controls_fdata[, feat_controls_cols, drop = FALSE])
-            > 0)
-    }
-    
     ## Add feature-level QC metrics to fData
     new_fdata <- as.data.frame(fData(object))
 
@@ -369,10 +356,6 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     new_fdata$n_cells_exprs <- nexprs(object, byrow = TRUE)
     total_exprs <- sum(exprs_mat)
     new_fdata$total_feature_exprs <- rowSums(exprs_mat)
-    if ( !object@logged ) {
-        new_fdata$log10_total_feature_exprs <-
-            log10(new_fdata$total_feature_exprs + 1)
-    }
     new_fdata$pct_total_exprs <- 100 * rowSums(exprs_mat) / total_exprs
     new_fdata$pct_dropout <- 100 * (1 - new_fdata$n_cells_exprs / ncol(object))
   
@@ -494,14 +477,12 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     ## determine if vector or list
     if ( is.list(feature_controls) ) {
         feature_controls_list <- feature_controls
-        n_sets_feature_controls <- length(feature_controls)
-    }
-    else {
+    } else {
         feature_controls_list <- list(feature_controls)
-        n_sets_feature_controls <- 1
     }
+
     ## Cycle through the feature_controls list and add QC info
-    for (i in seq_len(length(feature_controls_list)) ) {
+    for (i in seq_along(feature_controls_list)) {
         gc_set <- feature_controls_list[[i]]
         set_name <- names(feature_controls_list)[i]
         if ( is.logical(gc_set) ) {
@@ -528,11 +509,12 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
         }
 
         is_feature_control[gc_set] <- TRUE
+
         ## Define number of feature controls expressed
         n_detected_feature_controls <- nexprs(object, subset_row = gc_set)
         df_pdata_this$n_detected_feature_controls <-
             n_detected_feature_controls
-        #        if ( n_sets_feature_controls > 1 )
+        
         colnames(df_pdata_this) <- paste(colnames(df_pdata_this),
                                          set_name, sep = "_")
         if ( i > 1L )  
@@ -540,6 +522,7 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
                                             df_pdata_this)
         else
             feature_controls_pdata <- df_pdata_this
+        
         ## Construct data.frame for fData from this feature control set
         df_fdata_this <- data.frame(is_feature_control)
         colnames(df_fdata_this) <- paste(colnames(df_fdata_this), set_name,
@@ -662,8 +645,8 @@ isOutlier <- function(metric, nmads = 5, type = c("both", "lower", "higher"),
 #' \code{"pcs-vs-vars"} produces plots of the top PCs against the variable of
 #' interest.
 #' @param exprs_values which slot of the \code{assayData} in the \code{object}
-#' should be used to define expression? Valid options are "counts" (default),
-#' "tpm", "fpkm" and "exprs", or anything else in the object added manually by 
+#' should be used to define expression? Valid options are "counts",
+#' "tpm", "fpkm" and "exprs" (default), or anything else in the object added manually by 
 #' the user.
 #' @param ntop numeric scalar indicating the number of most variable features to
 #' use for the PCA. Default is \code{500}, but any \code{ntop} argument is
@@ -908,8 +891,8 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
         message("Using exprs(object) values as expression values.")
         exprs_values <- "exprs"
     }
-    if ( exprs_values == "exprs" && object@logged )
-        exprs_mat <- 2 ^ (exprs_mat) - object@logExprsOffset
+    if ( exprs_values == "exprs" ) 
+        exprs_mat <- 2 ^ exprs_mat - object@logExprsOffset
 
     ## Find the most highly expressed features in this dataset
     ### Order by total feature counts across whole dataset
@@ -1445,9 +1428,9 @@ plotExprsFreqVsMean <- function(object, feature_set = NULL,
 #' against each other, ordered by marginal variance explained), or
 #' "exprs-mean-vs-freq" (plotting the mean expression levels against the
 #' frequency of expression for a set of features).
-#' @param ... arguments passed to \code{plotHighestExprs},
-#' \code{plotImportantPCs}, \code{plotExplanatoryVariables} and
-#' \code{plotExprsMeanVsFreq} as appropriate.
+#' @param ... arguments passed to \code{\link{plotHighestExprs}},
+#' \code{\link{findImportantPCs}}, \code{\link{plotExplanatoryVariables}} and
+#' \code{{plotExprsMeanVsFreq}} as appropriate.
 #'
 #' @details Display useful quality control plots to help with pre-processing
 #' of data and identification of potentially problematic features and cells.
