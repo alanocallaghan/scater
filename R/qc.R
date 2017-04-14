@@ -220,12 +220,12 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
         feature_controls_pdata <- data.frame(
             matrix(0, nrow = ncol(object), ncol = 0))
     }
-    
-    ## Compute metrics using all feature controls
-    df_pdata_this <- .get_qc_metrics_exprs_mat(
-        exprs_mat, is_feature_control, pct_feature_controls_threshold,
-        calc_top_features = TRUE, exprs_type = "exprs", compute_endog = FALSE)
 
+    n_detected_feature_controls <- nexprs(object, 
+                                          subset_row = is_feature_control) 
+    df_pdata_this <- data.frame(n_detected_feature_controls)
+
+    ## Compute metrics using all feature controls
     okay.expr.vals <- c("counts", "cpm", "tpm", "fpkm")
     for (ex in okay.expr.vals) { 
         cur_mat <- switch(ex, counts = counts_mat, tpm = tpm_mat, fpkm = fpkm_mat)
@@ -237,9 +237,6 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
         df_pdata_this <- cbind(df_pdata_this, df_pdata_current)
     }
 
-    n_detected_feature_controls <- nexprs(object, 
-                                          subset_row = is_feature_control) 
-    df_pdata_this$n_detected_feature_controls <- n_detected_feature_controls
     feature_controls_pdata <- cbind(feature_controls_pdata, df_pdata_this)
     
     ## Compute total_features and find outliers
@@ -254,12 +251,9 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
         total_counts <- colSums(exprs_mat)
         filter_on_total_counts <- isOutlier(total_counts, nmads, log = FALSE)
     }
-
     
     ## Define counts from endogenous features
     qc_pdata <- feature_controls_pdata
-    qc_pdata$exprs_endogenous_features <- colSums(exprs_mat) -
-        feature_controls_pdata$exprs_feature_controls
 
     for (ex in okay.expr.vals) {
         cur_mat <- switch(ex, counts = counts_mat, tpm = tpm_mat, fpkm = fpkm_mat)
@@ -339,8 +333,8 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     if ( !is.null(counts_mat) ) {
         new_pdata$total_counts <- total_counts
         new_pdata$log10_total_counts <- log10(total_counts)
+        new_pdata$filter_on_total_counts <- filter_on_total_counts
     }
-    new_pdata$filter_on_total_counts <- filter_on_total_counts
     new_pdata$total_features <- total_features
     new_pdata$log10_total_features <- log10(total_features)
     new_pdata$filter_on_total_features <- filter_on_total_features
@@ -416,7 +410,7 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     if (calc_top_features) { ## Do we want to calculate exprs accounted for by
         ## top features?
         ## Determine percentage of counts for top features by cell
-        pct_top <- .calc_top_prop(exprs_mat, suffix="features")
+        pct_top <- .calc_top_prop(exprs_mat, suffix = "features")
         if (!is.null(pct_top)) {
             df_pdata_this <- cbind(df_pdata_this, pct_top)
             
@@ -430,8 +424,8 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
                 } else {
                     ## Repeating for the non-control features in the matrix.
                     pct_top_endog <- .calc_top_prop(exprs_mat, 
-                                                    subset_row=-is_feature_control,
-                                                    suffix="endogenous_features")
+                                                    subset_row = -is_feature_control,
+                                                    suffix = "endogenous_features")
                     if (!is.null(pct_top_endog)) { 
                         df_pdata_this <- cbind(df_pdata_this, pct_top_endog)
                     }

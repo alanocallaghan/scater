@@ -203,10 +203,11 @@ example_sceset
 ```
 
 We can also make an `SCESet` object with just a matrix of expression values
-(no count data required) like this:
+(no count data required; here we compute counts-per-million from the 
+`example_sceset` defined above and transform to the log2 scale) like this:
 
 ```{r sceset-make-sceset-exprs-only}
-example2 <- newSCESet(exprsData = edgeR::cpm.default(sc_example_counts))
+example2 <- newSCESet(exprsData = log2(calculateCPM(example_sceset) + 1))
 pData(example2)
 fData(example2)
 ```
@@ -258,8 +259,7 @@ fData(example_sceset) <- fd
 ## replace phenotype data
 pData(example_sceset) <- pd
 ## replace expression data to be used
-exprs(example_sceset) <- edgeR::cpm.default(counts(example_sceset),
-                                            prior.count = 5, log = TRUE)
+exprs(example_sceset) <- log2(calculateCPM(example_sceset) + 1)
 ```
 
 It is possible to get an overall view of the dataset by using the `plot` method
@@ -547,14 +547,14 @@ plotPhenoData(example_sceset, aes(x = total_counts, y = total_features,
 ```
 
 ```{r plot-pdatacol-gene-exprs-2, fig.show = FALSE}
-plotPhenoData(example_sceset, aes(x = pct_exprs_feature_controls,
+plotPhenoData(example_sceset, aes(x = pct_counts_feature_controls,
                                   y = total_features, colour = Gene_0500))
 ```
 
 
 ```{r plot-pdatacol-gene-exprs-3, fig.show = FALSE}
-plotPhenoData(example_sceset, aes(x = pct_exprs_feature_controls,
-                                  y = pct_exprs_top_50_features,
+plotPhenoData(example_sceset, aes(x = pct_counts_feature_controls,
+                                  y = pct_counts_top_50_features,
                                   colour = Gene_0001))
 ```
 
@@ -568,7 +568,7 @@ accounted for by feature controls against total_features.
 
 ```{r plot-pdata-pct-exprs-controls}
 plotPhenoData(example_sceset, aes(x = total_features,
-                                  y = pct_exprs_feature_controls,
+                                  y = pct_counts_feature_controls,
                                   colour = Mutation_Status)) +
     theme(legend.position = "top") +
     stat_smooth(method = "lm", se = FALSE, size = 2, fullrange = TRUE)
@@ -786,8 +786,13 @@ for downstream analysis.
 
 High levels of variability between cells characterise single-cell expression
 data. In almost all settings, many sources of unwanted variation should be
-accounted for before proceeding with more sophisticated analysis. Below, we show
-some of `scater`'s capabilities for normalising data for downstream analyses.
+accounted for before proceeding with more sophisticated analysis. 
+
+The size-factor normalisation method from the [`scran` package](	http://bioconductor.org/packages/scran/) is tightly integrated with `scater` and
+strongly recommended as a first normalization of the data before investigating
+other sources of variability.
+
+Below, we show some of `scater`'s capabilities for normalising data for downstream analyses.
 
 We can use feature controls to help address differences between cells arising from
 different sets of transcripts being expressed and differences in library

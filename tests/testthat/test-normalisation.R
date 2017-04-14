@@ -80,7 +80,7 @@ test_that("we can compute normalised expression values with a design matrix", {
     example_sceset <- calculateQCMetrics(example_sceset[keep_gene,], 
                                          feature_controls = 1:40)
     design <- model.matrix(~example_sceset$Cell_Cycle +
-                               example_sceset$pct_exprs_top_200_features +
+                               example_sceset$pct_counts_top_200_features +
                                example_sceset$pct_dropout +
                                example_sceset$total_features)
     example_sceset <- normaliseExprs(example_sceset, method = "none", 
