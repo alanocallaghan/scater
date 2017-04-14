@@ -532,8 +532,12 @@ plotPCASCESet <- function(object, ntop=500, ncomponents=2,
         }
         use_variable <- varLabels(object) %in% selected_variables
         vars_not_found <- !(selected_variables %in% varLabels(object))
-        if ( any(vars_not_found) )
+        if ( any(vars_not_found) ) {
             message(paste("The following selected_variables were not found in pData(object):", selected_variables[vars_not_found]))
+            message("Other variables from pData(object) can be used by specifying a vector of variable names as the selected_variables argument.")
+            message("PCA is being conducted using the following variables:", 
+                    selected_variables[!vars_not_found])
+        }
         ## scale double variables
         exprs_to_plot <- scale(pData(object)[, use_variable],
                                scale = scale_features)
@@ -544,7 +548,7 @@ plotPCASCESet <- function(object, ntop=500, ncomponents=2,
                                scale = scale_features)
     } else {
         # Subsetting to the desired features (do NOT move below 'scale()')
-        exprs_to_plot <- exprs_mat[feature_set,,drop=FALSE]
+        exprs_to_plot <- exprs_mat[feature_set,, drop = FALSE]
         ## Standardise expression if scale_features argument is TRUE
         exprs_to_plot <- scale(t(exprs_to_plot), scale = scale_features)
     }
