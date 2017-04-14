@@ -391,9 +391,9 @@ setGeneric("setSpike<-", function(object, value) standardGeneric("setSpike<-"))
 #' @export
 setGeneric("whichSpike", function(object) standardGeneric("whichSpike")) 
 
-#' @name magic
-#' @rdname magic
-#' @docType methods
-#' @export
+# #' @name magic
+# #' @rdname magic
+# #' @docType methods
+# #' #@export
 setGeneric("magic", function(object, ...) standardGeneric("magic")) 
 
