@@ -12,6 +12,7 @@ test_that("we can compute standard QC metrics", {
     expect_that(example_sceset, is_a("SCESet"))
 })
 
+
 test_that("we can compute standard QC metrics with feature controls", {
     data("sc_example_counts")
     data("sc_example_cell_info")
@@ -25,18 +26,40 @@ test_that("we can compute standard QC metrics with feature controls", {
 
 test_that("we can compute standard QC metrics with multiple sets of feature and 
           cell controls", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-    example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-    example_sceset <- calculateQCMetrics(
-        example_sceset, feature_controls = list(controls1 = 1:20, 
-                                                controls2 = 500:1000),
-        cell_controls = list(set_1 = 1:5, set_2 = 31:40))
-    
-    expect_that(example_sceset, is_a("SCESet"))
-})
+              data("sc_example_counts")
+              data("sc_example_cell_info")
+              pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+              example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+              example_sceset <- calculateQCMetrics(
+                  example_sceset, feature_controls = list(controls1 = 1:20, 
+                                                          controls2 = 500:1000),
+                  cell_controls = list(set_1 = 1:5, set_2 = 31:40))
+              
+              expect_that(example_sceset, is_a("SCESet"))
+          })
 
+
+test_that("we can compute standard QC metrics with FPKM data", {
+              pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+              rownames(pd) <- pd$Cell
+              gene_df <- data.frame(Gene = rownames(sc_example_counts))
+              rownames(gene_df) <- gene_df$Gene
+              fd <- new("AnnotatedDataFrame", data = gene_df)
+              example_sceset <- newSCESet(
+                  fpkmData = sc_example_counts, phenoData = pd, 
+                  featureData = fd, logExprsOffset = 1)
+              expect_that(example_sceset, is_a("SCESet"))
+              example_sceset <- calculateQCMetrics(
+                  example_sceset, feature_controls = 1:20)
+              expect_that(example_sceset, is_a("SCESet"))
+              example_sceset <- newSCESet(
+                  fpkmData = sc_example_counts, phenoData = pd, 
+                  featureData = fd, logExprsOffset = 0.1)
+              expect_that(example_sceset, is_a("SCESet"))
+              example_sceset <- calculateQCMetrics(
+                  example_sceset, feature_controls = 1:20)
+              expect_that(example_sceset, is_a("SCESet"))
+          })
 
 test_that("failure is as expected for misspecified arg to plotExplanatoryVariables()", {
     data("sc_example_counts")
@@ -68,6 +91,7 @@ test_that("plotHighestExprs works as expected", {
         plotHighestExprs(example_sceset, col_by_variable = "Mutation_Status"), 
         is_a("ggplot"))
 })
+
 
 test_that("plotExplanatoryVariables works as expected", {
     data("sc_example_counts")

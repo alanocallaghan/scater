@@ -228,7 +228,7 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
 
     okay.expr.vals <- c("counts", "cpm", "tpm", "fpkm")
     for (ex in okay.expr.vals) { 
-        cur_mat <- switch(ex, counts=counts_mat, tpm=tpm_mat, fpkm=fpkm_mat)
+        cur_mat <- switch(ex, counts = counts_mat, tpm = tpm_mat, fpkm = fpkm_mat)
         if (is.null(cur_mat)) { next }
         df_pdata_current <- .get_qc_metrics_exprs_mat(
             cur_mat, is_feature_control, pct_feature_controls_threshold,
@@ -247,11 +247,14 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     filter_on_total_features <- isOutlier(total_features, nmads, type = "lower")
 
     ## Compute total_counts if counts are present
-    if ( !is.null(counts_mat) )
+    if ( !is.null(counts_mat) ) {
         total_counts <- colSums(counts_mat)
-    else
+        filter_on_total_counts <- isOutlier(total_counts, nmads, log = TRUE)
+    } else {
         total_counts <- colSums(exprs_mat)
-    filter_on_total_counts <- isOutlier(total_counts, nmads, log = TRUE)
+        filter_on_total_counts <- isOutlier(total_counts, nmads, log = FALSE)
+    }
+
     
     ## Define counts from endogenous features
     qc_pdata <- feature_controls_pdata
@@ -259,9 +262,9 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
         feature_controls_pdata$exprs_feature_controls
 
     for (ex in okay.expr.vals) {
-        cur_mat <- switch(ex, counts=counts_mat, tpm=tpm_mat, fpkm=fpkm_mat)
+        cur_mat <- switch(ex, counts = counts_mat, tpm = tpm_mat, fpkm = fpkm_mat)
         if (is.null(cur_mat)) { next }
-        cur_totals <- switch(ex, counts=total_counts, colSums(cur_mat))
+        cur_totals <- switch(ex, counts = total_counts, colSums(cur_mat))
         qc_pdata[[paste0(ex, "_endogenous_features")]] <- cur_totals -
             feature_controls_pdata[[paste0(ex, "_feature_controls")]]
     }
@@ -333,8 +336,10 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     new_pdata <- new_pdata[, !to_replace, drop = FALSE]
 
     ### Add new QC metrics
-    new_pdata$total_counts <- total_counts
-    new_pdata$log10_total_counts <- log10(total_counts)
+    if ( !is.null(counts_mat) ) {
+        new_pdata$total_counts <- total_counts
+        new_pdata$log10_total_counts <- log10(total_counts)
+    }
     new_pdata$filter_on_total_counts <- filter_on_total_counts
     new_pdata$total_features <- total_features
     new_pdata$log10_total_features <- log10(total_features)
@@ -360,7 +365,7 @@ calculateQCMetrics <- function(object, feature_controls = NULL,
     new_fdata$pct_dropout <- 100 * (1 - new_fdata$n_cells_exprs / ncol(object))
   
     for (ex in okay.expr.vals) {
-        cur_mat <- switch(ex, counts=counts_mat, tpm=tpm_mat, fpkm=fpkm_mat)
+        cur_mat <- switch(ex, counts = counts_mat, tpm = tpm_mat, fpkm = fpkm_mat)
         if (is.null(cur_mat)) { next }
         cur_totals <- sum(as.double(colSums(cur_mat))) # avoid integer overflow
 
