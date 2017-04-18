@@ -397,3 +397,10 @@ setGeneric("whichSpike", function(object) standardGeneric("whichSpike"))
 # #' #@export
 setGeneric("magic", function(object, ...) standardGeneric("magic")) 
 
+#' @name plotRLE
+#' @export
+#' @docType methods
+#' @rdname plotRLE
+setGeneric("plotRLE", function(object, ...) {
+    standardGeneric("plotRLE")
+})

@@ -5,6 +5,8 @@
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/github/davismcc/scater?svg=true)](https://ci.appveyor.com/project/davismcc/scater)
 <!--- [![Linux Build Status](https://travis-ci.org/davismcc/scater.svg?branch=master)](https://travis-ci.org/davismcc/scater) --->
 
+<img src=inst/scater_sticker_300dpi.png height="200">
+
 This package contains useful tools for the analysis of single-cell
 gene expression data using the statistical software R. The package places an
 emphasis on tools for quality control, visualisation and pre-processing of data
@@ -200,7 +202,13 @@ The package leans heavily on previously published work and packages, namely
 and `SCESet` objects in `scater` can be easily converted to and from `monocle's`
 `CellDataSet` objects.
 
+The `scater` sticker is licensed under Creative Commons Attribution
+[CC-BY](https://creativecommons.org/licenses/by/2.0/). Feel free to
+share and adapt, but don't forget to credit the author. Skateboard icon made by 
+[Nikita Golubev](http://www.flaticon.com/authors/nikita-golubev) from 
+[Flaticon](http://www.flaticon.com) is licensed by [Creative Commons BY 3.0](http://creativecommons.org/licenses/by/3.0/).
+
 We hope the `scater` package makes your life easier when analysing single-cell RNA_seq data. Please do try it and contact me with bug reports, feedback, feature
 requests, questions and suggestions to improve the package.
 
-Davis McCarthy, September 2016
+Davis McCarthy, April 2017

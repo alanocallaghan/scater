@@ -37,7 +37,32 @@ test_that("we can compute standard QC metrics with multiple sets of feature and
               
               expect_that(example_sceset, is_a("SCESet"))
           })
+<<<<<<< HEAD
+=======
 
+>>>>>>> master
+
+test_that("we can compute standard QC metrics with FPKM data", {
+              pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+              rownames(pd) <- pd$Cell
+              gene_df <- data.frame(Gene = rownames(sc_example_counts))
+              rownames(gene_df) <- gene_df$Gene
+              fd <- new("AnnotatedDataFrame", data = gene_df)
+              example_sceset <- newSCESet(
+                  fpkmData = sc_example_counts, phenoData = pd, 
+                  featureData = fd, logExprsOffset = 1)
+              expect_that(example_sceset, is_a("SCESet"))
+              example_sceset <- calculateQCMetrics(
+                  example_sceset, feature_controls = 1:20)
+              expect_that(example_sceset, is_a("SCESet"))
+              example_sceset <- newSCESet(
+                  fpkmData = sc_example_counts, phenoData = pd, 
+                  featureData = fd, logExprsOffset = 0.1)
+              expect_that(example_sceset, is_a("SCESet"))
+              example_sceset <- calculateQCMetrics(
+                  example_sceset, feature_controls = 1:20)
+              expect_that(example_sceset, is_a("SCESet"))
+          })
 
 test_that("we can compute standard QC metrics with FPKM data", {
               pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
@@ -134,5 +159,54 @@ test_that("plotExprsFreqVsMean works as expected", {
         cell_controls = list(set_1 = 1:5,
                              set_2 = 31:40))
     expect_that(plotExprsFreqVsMean(ex_sceset), is_a("ggplot"))
+})
+
+
+
+test_that("plotRLE works as expected", {
+    data("sc_example_counts")
+    data("sc_example_cell_info")
+    pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
+    rownames(pd) <- pd$Cell
+    example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+    p <- plotRLE(example_sceset, list(exprs = "exprs", counts = "counts"), 
+                 c(TRUE, FALSE), colour_by = "Mutation_Status")
+    expect_that(p, is_a("ggplot"))
+
+    p <- plotRLE(example_sceset, list(exprs = "exprs", counts = "counts"), 
+                 c(TRUE, FALSE), colour_by = "Gene_0004", style = "minimal")
+    expect_that(p, is_a("ggplot"))
+    
+    p <- plotRLE(example_sceset, list(exprs = "exprs", counts = "counts"), 
+                 c(TRUE, FALSE), colour_by = "Mutation_Status", style = "full",
+                 outlier.alpha = 0.1, outlier.shape = NULL, outlier.size = 0)
+    expect_that(p, is_a("ggplot"))
+    
+    p <- plotRLE(example_sceset, list(exprs = "exprs", counts = "counts"), 
+                 c(TRUE, FALSE), colour_by = "Gene_0004", style = "full",
+                 outlier.alpha = 0.1, outlier.shape = NULL, outlier.size = 0)
+    expect_that(p, is_a("ggplot"))
+
+    p <- plotRLE(example_sceset, 
+                 list(exprs = "exprs", counts = counts(example_sceset)), 
+                 c(TRUE, FALSE), colour_by = "Gene_0004", style = "full",
+                 outlier.alpha = 0.1, outlier.shape = NULL, outlier.size = 0)
+    expect_that(p, is_a("ggplot"))
+    
+    expect_error(plotRLE(example_sceset, 
+                         list("exprs", counts = counts(example_sceset)), 
+                         c(TRUE, FALSE)), 
+                 regexp = "exprs_mats must be a named list")
+
+    expect_error(plotRLE(example_sceset, 
+                         list(exprs = "exprs", counts = counts(example_sceset)[, 1:30]), 
+                         c(TRUE, FALSE)), 
+                 regexp = "Number of cells")
+    
+    expect_error(plotRLE(example_sceset, 
+                         list(exprs = "exprs"), style = "blah", 
+                         c(TRUE, FALSE)), 
+                 regexp = "should be one of")
+        
 })
 
