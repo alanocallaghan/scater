@@ -37,10 +37,7 @@ test_that("we can compute standard QC metrics with multiple sets of feature and
               
               expect_that(example_sceset, is_a("SCESet"))
           })
-<<<<<<< HEAD
-=======
 
->>>>>>> master
 
 test_that("we can compute standard QC metrics with FPKM data", {
               pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
