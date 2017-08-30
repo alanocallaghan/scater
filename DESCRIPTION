@@ -17,8 +17,8 @@ Title: Single-cell analysis toolkit for gene expression data in R
 Description: A collection of tools for doing various analyses of
         single-cell RNA-seq gene expression data, with a focus on
         quality control.
-Depends: R (>= 3.3), Biobase, ggplot2, SingleCellExperiment, SummarizedExperiment
-Imports: biomaRt, BiocGenerics, data.table, dplyr, edgeR, ggbeeswarm, graphics, grid, limma,
+Depends: R (>= 3.4), Biobase, ggplot2, SingleCellExperiment, SummarizedExperiment
+Imports: biomaRt, BiocGenerics, data.table, dplyr, edgeR, ggbeeswarm, grid, limma,
         Matrix, matrixStats, methods, parallel, plyr, reshape2, rhdf5, rjson, 
         S4Vectors, shiny, shinydashboard, stats, tximport, utils, viridis, Rcpp
 Suggests: BiocStyle, beachmat, cowplot, cluster, destiny, knitr, monocle,
@@ -28,7 +28,7 @@ LazyData: true
 biocViews: SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,
         Visualization, DimensionReduction, Transcriptomics,
         GeneExpression, Sequencing, Software, DataImport,
-        DataRepresentation, Infrastructure
+        DataRepresentation, Infrastructure, Coverage
 LinkingTo: Rhdf5lib, Rcpp, beachmat
 SystemRequirements: C++11
 RoxygenNote: 6.0.1

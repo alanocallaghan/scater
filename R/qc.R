@@ -158,6 +158,7 @@
 #' @importFrom S4Vectors DataFrame SimpleList
 #' @importFrom SummarizedExperiment assay assay<- assays assays<- assayNames rowData rowData<- colData colData<-
 #' @importFrom BiocGenerics sizeFactors sizeFactors<-
+#' @importFrom Rcpp sourceCpp
 #' @export
 #' @examples
 #' data("sc_example_counts")

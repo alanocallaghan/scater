@@ -12,7 +12,8 @@ read10xResults(data_dir, min_total_cell_counts = NULL,
 read10XResults(...)
 }
 \arguments{
-\item{data_dir}{Directory containing the matrix.mtx, genes.tsv, and barcodes.tsv
+\item{data_dir}{Directory containing the matrix.mtx, genes.tsv, and 
+barcodes.tsv
 files provided by 10x. A vector or named vector can be given in order to load 
 several data directories. If a named vector is given, the cell barcode names 
 will be prefixed with the name.}

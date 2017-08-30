@@ -173,6 +173,8 @@ newSCESet <- function(exprsData = NULL, countData = NULL, tpmData = NULL,
 #' @param object An object of type \code{SCESet}
 #' @return A matrix representation of expression values.
 #'
+#' @name deprecated
+#' @rdname deprecated
 getExprs <- function(object) {
     stop("Deprecated from scater 1.3.29")
 }
@@ -190,8 +192,8 @@ getExprs <- function(object) {
 #' \code{SCESet}? Should be one of "exprs", "tpm", "fpkm", "counts"
 #'
 #' @export
-#' @rdname toCellDataSet
-#' @name toCellDataSet
+#' @rdname deprecated
+#' @name deprecated
 #' @return An object of class \code{CellDataSet}
 #' @examples
 #' \dontrun{"Deprecated"}
@@ -204,8 +206,6 @@ toCellDataSet <- function(sce, exprs_values = "exprs") {
 #' Deprecated from scater version 1.5.2.
 #'
 #' @param cds A \code{CellDataSet} from the \code{monocle} package
-#' @param exprs_values What should \code{exprs(cds)} be mapped to in the 
-#' \code{SCESet}? Should be one of "exprs", "tpm", "fpkm", "counts"
 #' @param logged logical, if \code{exprs_values="exprs"}, are
 #'  the expression values already on the log2 scale, or not?
 #' @param logExprsOffset numeric, value to add prior to log-transformation.
@@ -213,8 +213,8 @@ toCellDataSet <- function(sce, exprs_values = "exprs") {
 #' @export
 #' @importFrom Biobase featureData
 #' @importFrom Biobase phenoData
-#' @rdname fromCellDataSet
-#' @name fromCellDataSet
+#' @rdname deprecated
+#' @name deprecated
 #' @return An object of class \code{SCESet}
 #' @examples
 #' \dontrun{"Deprecated"}

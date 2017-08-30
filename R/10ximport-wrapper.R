@@ -3,7 +3,8 @@
 #' Creates a full or sparse matrix from a sparse data matrix provided by 10X 
 #' genomics.
 #' 
-#' @param data_dir Directory containing the matrix.mtx, genes.tsv, and barcodes.tsv
+#' @param data_dir Directory containing the matrix.mtx, genes.tsv, and 
+#' barcodes.tsv
 #' files provided by 10x. A vector or named vector can be given in order to load 
 #' several data directories. If a named vector is given, the cell barcode names 
 #' will be prefixed with the name.
@@ -31,7 +32,7 @@
 #' }
 read10xResults <- function(data_dir, min_total_cell_counts = NULL, 
                            min_mean_gene_counts = NULL) { 
-
+    
     nsets <- length(data_dir)
     full_data <- vector("list", nsets)
     gene_info_list <- vector("list", nsets)
@@ -51,9 +52,9 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
             keep_barcode <- (Matrix::colSums(data_mat) >= min_total_cell_counts)
             data_mat <- data_mat[, keep_barcode]
         }
-         
+        
         cell.names <- utils::read.table(barcode.loc, header = FALSE, 
-                                 colClasses = "character")[[1]]
+                                        colClasses = "character")[[1]]
         dataset <- i
         if (!is.null(names(data_dir))) {
             dataset <- names(data_dir)[i]
@@ -62,9 +63,10 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
         full_data[[i]] <- data_mat
         gene_info_list[[i]] <- utils::read.table(gene.loc, header = FALSE, 
                                                  colClasses = "character")
-        cell_info_list[[i]] <- DataFrame(dataset = dataset, barcode = cell.names)
+        cell_info_list[[i]] <- DataFrame(dataset = dataset, 
+                                         barcode = cell.names)
     }
-   
+    
     # Checking gene uniqueness. 
     if (nsets > 1 && length(unique(gene_info_list)) != 1L) {
         stop("gene information differs between runs")
@@ -72,11 +74,11 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
     gene_info <- gene_info_list[[1]]
     colnames(gene_info) <- c("id", "symbol")
     rownames(gene_info) <- gene_info$id
-
+    
     # Forming the full data matrix.
     full_data <- do.call(cbind, full_data)
     rownames(full_data) <- gene_info$id
-
+    
     # Applying some filtering if requested.
     if (!is.null(min_mean_gene_counts)) {
         keep_gene <- (Matrix::rowSums(data_mat) >= min_mean_gene_counts)
