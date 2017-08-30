@@ -3,35 +3,33 @@
 \docType{methods}
 \name{arrange}
 \alias{arrange}
-\alias{arrange,SCESet-method}
 \alias{arrange}
-\alias{arrange.SCESet}
-\alias{arrange,SCESet-method}
-\title{Arrange rows of \code{pData(object)} by variables.}
+\alias{arrange,SingleCellExperiment-method}
+\title{Arrange columns (cells) of a SingleCellExperiment object}
 \usage{
 arrange(object, ...)
 
-\S4method{arrange}{SCESet}(object, ...)
-
-arrange.SCESet(object, ...)
+\S4method{arrange}{SingleCellExperiment}(object, ...)
 }
 \arguments{
-\item{object}{A \code{SCESet} object.}
+\item{object}{A \code{SingleCellExperiment} object.}
 
 \item{...}{Additional arguments to be passed to \code{dplyr::arrange} to
-act on \code{pData(object)}.}
+act on \code{colData(object)}.}
 }
 \value{
-An SCESet object.
+An SingleCellExperiment object.
 }
 \description{
-The \code{SCESet} returned will have cells ordered by the corresponding
-variable in \code{pData(object)}.
+The \code{SingleCellExperiment} returned will have cells ordered by the corresponding
+variable in \code{colData(object)}.
 }
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-example_sceset <- arrange(example_sceset, Cell_Cycle)
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), 
+colData = sc_example_cell_info)
+example_sce <- arrange(example_sce, Cell_Cycle)
+
 }

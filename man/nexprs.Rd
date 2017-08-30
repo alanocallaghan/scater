@@ -4,17 +4,18 @@
 \alias{nexprs}
 \title{Count the number of expressed genes per cell}
 \usage{
-nexprs(object, lowerDetectionLimit = NULL, exprs_values = NULL,
+nexprs(object, lowerDetectionLimit = 0, exprs_values = "counts",
   byrow = FALSE, subset_row = NULL, subset_col = NULL)
 }
 \arguments{
-\item{object}{an \code{SCESet} object}
+\item{object}{a \code{\link{SingleCellExperiment}} object}
 
-\item{lowerDetectionLimit}{numeric scalar providing the value above which observations
-are deemed to be expressed. Defaults to \code{object@lowerDetectionLimit}.}
+\item{lowerDetectionLimit}{numeric scalar providing the value above which 
+observations are deemed to be expressed. Defaults to 
+\code{object@lowerDetectionLimit}.}
 
 \item{exprs_values}{character scalar indicating whether the count data
-(\code{"counts"}), the transformed expression data (\code{"exprs"}),
+(\code{"counts"}), the log-transformed count data (\code{"logcounts"}),
 transcript-per-million (\code{"tpm"}), counts-per-million (\code{"cpm"}) or
 FPKM (\code{"fpkm"}) should be used to define if an observation is expressed
 or not. Defaults to the first available value of those options in the
@@ -45,10 +46,9 @@ An efficient internal function that avoids the need to construct
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data=sc_example_cell_info)
-rownames(pd) <- pd$Cell
-example_sceset <- newSCESet(countData=sc_example_counts, phenoData=pd)
-nexprs(example_sceset)[1:10]
-nexprs(example_sceset, byrow = TRUE)[1:10]
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+nexprs(example_sce)[1:10]
+nexprs(example_sce, byrow = TRUE)[1:10]
 
 }

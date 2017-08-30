@@ -4,10 +4,16 @@
 \alias{calcAverage}
 \title{Calculate average counts, adjusting for size factors or library size}
 \usage{
-calcAverage(object)
+calcAverage(object, size.factors = NULL)
 }
 \arguments{
-\item{object}{an \code{SCESet} object}
+\item{object}{a \code{\link{SingleCellExperiment}} object or a matrix of counts}
+
+\item{size.factors}{numeric(), vector of size factors to use to scale library 
+size in computation of counts-per-million. Extracted from the 
+object if it is a \code{SingleCellExperiment} object; if object is a matrix, then 
+if non-NULL, the provided size factors are used. Default is \code{NULL}, in which
+case size factors are all set to 1 (i.e. library size adjustment only).}
 }
 \value{
 Vector of average count values with same length as number of features.
@@ -20,10 +26,10 @@ counts).
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
 
 ## calculate average counts
-ave_counts <- calcAverage(example_sceset)
+ave_counts <- calcAverage(example_sce)
 
 }

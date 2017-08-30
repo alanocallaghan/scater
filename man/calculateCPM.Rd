@@ -23,7 +23,8 @@ Calculate count-per-million (CPM) values from the count data.
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-example_sceset <- newSCESet(countData = sc_example_counts)
-cpm(example_sceset) <- calculateCPM(example_sceset)
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+cpm(example_sce) <- calculateCPM(example_sce, use.size.factors = FALSE)
 
 }

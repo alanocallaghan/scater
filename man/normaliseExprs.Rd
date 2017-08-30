@@ -4,15 +4,15 @@
 \alias{normaliseExprs}
 \alias{normalizeExprs}
 \alias{normliseExprs}
-\title{Normalise expression expression levels for an SCESet object}
+\title{Normalise expression expression levels for an SingleCellExperiment object}
 \usage{
 normaliseExprs(object, method = "none", design = NULL, feature_set = NULL,
-  exprs_values = NULL, return_norm_as_exprs = TRUE, ...)
+  exprs_values = "counts", return_norm_as_exprs = TRUE, ...)
 
 normalizeExprs(...)
 }
 \arguments{
-\item{object}{an \code{SCESet} object.}
+\item{object}{an \code{SingleCellExperiment} object.}
 
 \item{method}{character string specified the method of calculating
 normalisation factors. Passed to \code{\link[edgeR]{calcNormFactors}}.}
@@ -28,7 +28,7 @@ be indices for features. If logical, vector is used to index features and should
 have length equal to \code{nrow(object)}.}
 
 \item{exprs_values}{character string indicating which slot of the
-assayData from the \code{SCESet} object should be used for the calculations.
+assayData from the \code{SingleCellExperiment} object should be used for the calculations.
 Valid options are \code{'counts'}, \code{'tpm'}, \code{'cpm'}, \code{'fpkm'}
 and \code{'exprs'}. Defaults to the first available value of these options in
 in order shown.}
@@ -43,19 +43,19 @@ of the object.}
 \code{normalizeExprs}) or to \code{\link[edgeR]{calcNormFactors}}.}
 }
 \value{
-an SCESet object
+an SingleCellExperiment object
 }
 \description{
-Compute normalised expression values from an SCESet object and return the
+Compute normalised expression values from an SingleCellExperiment object and return the
 object with the normalised expression values added.
 }
 \details{
 This function allows the user to compute normalised expression
-values from an SCESet object. The 'raw' values used can be the values in the
+values from an SingleCellExperiment object. The 'raw' values used can be the values in the
 \code{'counts'} (default), \code{'tpm'}, \code{'cpm'} or \code{'fpkm'} slot
-of the SCESet. Normalised expression values are computed through
-\code{\link{normalize.SCESet}} and are on the log2-scale, with an offset
-defined by the \code{logExprsOffset} slot of the SCESet object. These are
+of the SingleCellExperiment. Normalised expression values are computed through
+\code{\link{normalizeSCE}} and are on the log2-scale, with an offset
+defined by the \code{logExprsOffset} slot of the SingleCellExperiment object. These are
 dded to the \code{'norm_exprs'} slot of the returned object. If
 \code{'exprs_values'} argument is \code{'counts'}, a \code{'norm_cpm'} slot
 is also added, containing normalised counts-per-million values.
@@ -79,7 +79,7 @@ model fit.
 After normalisation, normalised expression values can be accessed with the
 \code{\link{norm_exprs}} function (with corresponding accessor functions for
 counts, tpm, fpkm, cpm). These functions can also be used to assign normalised
-expression values produced with external tools to an SCESet object.
+expression values produced with external tools to a SingleCellExperiment object.
 
 \code{normalizeExprs} is exactly the same as \code{normaliseExprs}, provided
 for those who prefer North American spelling.
@@ -87,15 +87,15 @@ for those who prefer North American spelling.
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-keep_gene <- rowSums(counts(example_sceset)) > 0
-example_sceset <- example_sceset[keep_gene,]
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+keep_gene <- rowSums(counts(example_sce)) > 0
+example_sce <- example_sce[keep_gene,]
 
 ## Apply TMM normalisation taking into account all genes
-example_sceset <- normaliseExprs(example_sceset, method = "TMM")
+example_sce <- normaliseExprs(example_sce, method = "TMM")
 ## Scale counts relative to a set of control features (here the first 100 features)
-example_sceset <- normaliseExprs(example_sceset, method = "none",
+example_sce <- normaliseExprs(example_sce, method = "none",
 feature_set = 1:100)
 
 }

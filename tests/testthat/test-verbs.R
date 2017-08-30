@@ -6,18 +6,18 @@
 test_that("Mutate correctly adds column name to pData", {
   data("sc_example_counts")
   data("sc_example_cell_info")
-  pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-  example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-  snames <- paste0("sample", 1:ncol(example_sceset))
-  sampleNames(example_sceset) <- snames
+  example_sce <- SingleCellExperiment(
+      assays = list(counts = sc_example_counts), 
+      colData = sc_example_cell_info)
+  snames <- paste0("sample", 1:ncol(example_sce))
+  colnames(example_sce) <- snames
   
-  example_sceset <- mutate(example_sceset, New_CC = Cell_Cycle)
+  example_sce <- mutate(example_sce, New_CC = Cell_Cycle)
   
-  
-  expect_that(example_sceset, is_a("SCESet"))
-  expect_true("New_CC" %in% varLabels(example_sceset))  
-  expect_equal(example_sceset$Cell_Cycle, example_sceset$New_CC)
-  expect_equal(sampleNames(example_sceset), snames)
+  expect_that(example_sce, is_a("SingleCellExperiment"))
+  expect_true("New_CC" %in% colnames(colData(example_sce)))  
+  expect_equal(example_sce$Cell_Cycle, example_sce$New_CC)
+  expect_equal(colnames(example_sce), snames)
 })
 
 
@@ -26,20 +26,20 @@ test_that("Mutate correctly adds column name to pData", {
 test_that("Rename correctly renames columns", {
   data("sc_example_counts")
   data("sc_example_cell_info")
-  pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-  example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-  snames <- paste0("sample", 1:ncol(example_sceset))
-  sampleNames(example_sceset) <- snames
+  example_sce <- SingleCellExperiment(
+      assays = list(counts = sc_example_counts), 
+      colData = sc_example_cell_info)
+  snames <- paste0("sample", 1:ncol(example_sce))
+  colnames(example_sce) <- snames
   
+  old_cc <- example_sce$Cell_Cycle
+  example_sce <- rename(example_sce, Cell_Phase = Cell_Cycle)
   
-  old_cc <- example_sceset$Cell_Cycle
-  example_sceset <- rename(example_sceset, Cell_Phase = Cell_Cycle)
-  
-  expect_that(example_sceset, is_a("SCESet"))
-  expect_true("Cell_Phase" %in% varLabels(example_sceset))
-  expect_false("Cell_Cycle" %in% varLabels(example_sceset))
-  expect_equal(example_sceset$Cell_Phase, old_cc)
-  expect_equal(sampleNames(example_sceset), snames)
+  expect_that(example_sce, is_a("SingleCellExperiment"))
+  expect_true("Cell_Phase" %in% colnames(colData(example_sce)))
+  expect_false("Cell_Cycle" %in% colnames(colData(example_sce)))
+  expect_equal(example_sce$Cell_Phase, old_cc)
+  expect_equal(colnames(example_sce), snames)
 })
 
 
@@ -48,13 +48,14 @@ test_that("Rename correctly renames columns", {
 test_that("Filter correctly chooses cells", {
   data("sc_example_counts")
   data("sc_example_cell_info")
-  pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-  example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+  example_sce <- SingleCellExperiment(
+      assays = list(counts = sc_example_counts), 
+      colData = sc_example_cell_info)
   
-  example_sceset <- filter(example_sceset, Cell_Cycle == "G0")
+  example_sce <- filter(example_sce, Cell_Cycle == "G0")
   
-  expect_that(example_sceset, is_a("SCESet"))
-  expect_equal(example_sceset$Cell_Cycle, rep("G0", ncol(example_sceset)))
+  expect_that(example_sce, is_a("SingleCellExperiment"))
+  expect_equal(example_sce$Cell_Cycle, rep("G0", ncol(example_sce)))
 })
 
 
@@ -63,15 +64,16 @@ test_that("Filter correctly chooses cells", {
 test_that("Arrange correctly orders", {
   data("sc_example_counts")
   data("sc_example_cell_info")
-  pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-  example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+  example_sce <- SingleCellExperiment(
+      assays = list(counts = sc_example_counts), 
+      colData = sc_example_cell_info)
   
-  treatment <- example_sceset$Treatment
+  treatment <- example_sce$Treatment
   n_each <- table(treatment)
   arranged <- c(rep("treat1", n_each[1]), rep("treat2", n_each[2]))
   
-  example_sceset <- arrange(example_sceset, Treatment)
+  example_sce <- arrange(example_sce, Treatment)
 
-  expect_that(example_sceset, is_a("SCESet"))
-  expect_equal(example_sceset$Treatment, arranged)
+  expect_that(example_sce, is_a("SingleCellExperiment"))
+  expect_equal(example_sce$Treatment, arranged)
 })

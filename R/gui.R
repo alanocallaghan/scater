@@ -3,7 +3,7 @@
 #' scater shiny app GUI for workflow for less programmatically inclined users or
 #' those who would like a quick and easy way to view multiple plots.
 #'
-#' @param sce_set SCESet object after running \code{\link{calculateQCMetrics}} 
+#' @param object SinglCellExperiment object after running \code{\link{calculateQCMetrics}} 
 #' on it
 #'
 #' @return Opens a browser window with an interactive shiny app and visualize
@@ -16,22 +16,23 @@
 #' @examples 
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
-#' pd <- new("AnnotatedDataFrame", data=sc_example_cell_info)
-#' rownames(pd) <- pd$Cell
-#' example_sceset <- newSCESet(countData=sc_example_counts, phenoData=pd)
-#' drop_genes <- apply(exprs(example_sceset), 1, function(x) {var(x) == 0})
-#' example_sceset <- example_sceset[!drop_genes, ]
-#' example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:40)
+#' example_sce <- SingleCellExperiment(
+#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#' example_sce <- normalize(example_sce)
+#' drop_genes <- apply(exprs(example_sce), 1, function(x) {var(x) == 0})
+#' example_sce <- example_sce[!drop_genes, ]
+#' example_sce <- calculateQCMetrics(example_sce, 
+#' feature_controls = list(set1 = 1:40))
 #' \dontrun{
-#' scater_gui(example_sceset)
+#' scater_gui(example_sce)
 #' }
-scater_gui <- function(sce_set) {
+scater_gui <- function(object) {
     
-    pd <- names(pData(sce_set))
+    pd <- colnames(colData(object))
     pd.plot <- pd[!grepl("filter_", pd) & !grepl("is_", pd)]
-    featurenames <- featureNames(sce_set)
+    featurenames <- rownames(object)
     
-    exprs_values <- names(Biobase::assayData(sce_set))
+    exprs_values <- assayNames(object)
     exprs_values <- exprs_values[!grepl("is_exprs", exprs_values)]
     
     shinyApp(
@@ -89,7 +90,7 @@ scater_gui <- function(sce_set) {
                                                    selected = pd.plot[4]),
                                        selectInput("exprs_values", "exprs_values:",
                                                    exprs_values,
-                                                   selected = "exprs")
+                                                   selected = "logcounts")
                                 )
                             )
                     ),
@@ -216,7 +217,7 @@ scater_gui <- function(sce_set) {
                                        selectInput("pca_exprs_values",
                                                    "exprs_values:",
                                                    exprs_values, 
-                                                   selected = "exprs"),
+                                                   selected = "logcounts"),
                                        numericInput("pca_ntop",
                                                     "number of most variable features to use:",
                                                     500,
@@ -260,7 +261,7 @@ scater_gui <- function(sce_set) {
                                        selectInput("tsne_exprs_values",
                                                    "exprs_values:",
                                                    exprs_values, 
-                                                   selected = "exprs"),
+                                                   selected = "logcounts"),
                                        numericInput("tsne_ntop",
                                                     "number of most variable features to use:",
                                                     500,
@@ -307,7 +308,7 @@ scater_gui <- function(sce_set) {
                                        selectInput("diffmap_exprs_values",
                                                    "exprs_values:",
                                                    exprs_values, 
-                                                   selected = "exprs"),
+                                                   selected = "logcounts"),
                                        numericInput("diffmap_ntop",
                                                     "number of most variable features to use:",
                                                     500,
@@ -372,7 +373,7 @@ scater_gui <- function(sce_set) {
                                        selectInput("exprs_exprs_values",
                                                    "exprs_values:",
                                                    exprs_values, 
-                                                   selected = "exprs"),
+                                                   selected = "logcounts"),
                                        numericInput("exprs_ncols",
                                                     "number of columns:",
                                                     2, min = 1, max = 8),
@@ -396,19 +397,19 @@ scater_gui <- function(sce_set) {
         ),
         server <- function(input, output, session) {
             output$plot <- renderPlot({
-                plot(sce_set, exprs_values = input$exprs_values,
+                plotScater(object, exprs_values = input$exprs_values,
                      block1 = input$block1,
                      block2 = input$block2,
                      colour_by = input$colour_by)
             })
             output$plotQC <- renderPlot({
-                plotQC(sce_set, type = input$QCtype)
+                plotQC(object, type = input$QCtype)
             })
             output$plotQCfindpc <- renderPlot({
-                plotQC(sce_set, type = "find-pcs", variable = input$QCvar)
+                plotQC(object, type = "find-pcs", variable = input$QCvar)
             })
             output$plotPCA_QC <- renderPlot({
-                plotPCA(sce_set, 
+                plotPCA(object, 
                         ncomponents = input$pcaqc_ncomponents,
                         pca_data_input = "pdata",
                         selected_variables = input$pcaqc_selected_vars,
@@ -421,7 +422,7 @@ scater_gui <- function(sce_set) {
                     theme(legend.position = "bottom")
             })
             output$plotPCA <- renderPlot({
-                plotPCA(sce_set, 
+                plotPCA(object, 
                         ntop = input$pca_ntop,
                         ncomponents = input$pca_ncomponents,
                         exprs_values = input$pca_exprs_values,
@@ -432,7 +433,7 @@ scater_gui <- function(sce_set) {
                     theme(legend.position = "bottom")
             })
             output$plotTSNE <- renderPlot({
-                plotTSNE(sce_set, 
+                plotTSNE(object, 
                         ntop = input$tsne_ntop,
                         ncomponents = input$tsne_ncomponents,
                         exprs_values = input$tsne_exprs_values,
@@ -444,7 +445,7 @@ scater_gui <- function(sce_set) {
                     theme(legend.position = "bottom")
             })
             output$plotDiffusionMap <- renderPlot({
-                plotDiffusionMap(sce_set, 
+                plotDiffusionMap(object, 
                          ntop = input$diffmap_ntop,
                          ncomponents = input$diffmap_ncomponents,
                          exprs_values = input$diffmap_exprs_values,
@@ -457,7 +458,7 @@ scater_gui <- function(sce_set) {
                     theme(legend.position = "bottom")
             })
             output$plotExpression <- renderPlot({
-                plotExpression(sce_set, 
+                plotExpression(object, 
                                features = input$exprs_features,
                                x = input$exprs_x,
                                exprs_values = input$exprs_exprs_values,

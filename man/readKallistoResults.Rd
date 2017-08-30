@@ -33,11 +33,12 @@ Default offset value is \code{1}.}
 \item{verbose}{logical, should function provide output about progress?}
 }
 \value{
-an SCESet object
+a SingleCellExperiment object
 }
 \description{
 After generating transcript/feature abundance results using kallisto for a
-batch of samples, read these abundance values into an \code{SCESet} object.
+batch of samples, read these abundance values into a 
+\code{\link{SingleCellExperiment}} object.
 }
 \details{
 This function expects to find only one set of kallisto abundance

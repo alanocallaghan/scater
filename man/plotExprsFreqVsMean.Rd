@@ -8,11 +8,11 @@ plotExprsFreqVsMean(object, feature_set = NULL, feature_controls = NULL,
   shape = 1, alpha = 0.7, show_smooth = TRUE, se = TRUE, ...)
 }
 \arguments{
-\item{object}{an \code{SCESet} object.}
+\item{object}{an \code{SingleCellExperiment} object.}
 
 \item{feature_set}{character, numeric or logical vector indicating a set of
 features to plot. If character, entries must all be in
-\code{featureNames(object)}. If numeric, values are taken to be indices for
+\code{rownames(object)}. If numeric, values are taken to be indices for
 features. If logical, vector is used to index features and should have length
 equal to \code{nrow(object)}. If \code{NULL}, then the function checks if
 feature controls are defined. If so, then only feature controls are plotted,
@@ -20,7 +20,7 @@ if not, then all features are plotted.}
 
 \item{feature_controls}{character, numeric or logical vector indicating a set of
 features to be used as feature controls for computing technical dropout
-effects. If character, entries must all be in \code{featureNames(object)}. If
+effects. If character, entries must all be in \code{rownames(object)}. If
 numeric, values are taken to be indices for features. If logical, vector is
 used to index features and should have length equal to \code{nrow(object)}.
 If \code{NULL}, then the function checks if feature controls are defined. If
@@ -61,17 +61,20 @@ feature controls previously defined are used.
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data=sc_example_cell_info)
-rownames(pd) <- pd$Cell
-ex_sceset <- newSCESet(countData=sc_example_counts, phenoData=pd)
-ex_sceset <- calculateQCMetrics(ex_sceset)
-plotExprsFreqVsMean(ex_sceset)
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), 
+colData = sc_example_cell_info)
+example_sce <- normalize(example_sce)
 
-ex_sceset <- calculateQCMetrics(
-ex_sceset, feature_controls = list(controls1 = 1:20, 
+example_sce <- calculateQCMetrics(example_sce, 
+                                 feature_controls = list(set1 = 1:500))
+plotExprsFreqVsMean(example_sce)
+
+example_sce <- calculateQCMetrics(
+example_sce, feature_controls = list(controls1 = 1:20, 
                                       controls2 = 500:1000),
                                       cell_controls = list(set_1 = 1:5, 
                                       set_2 = 31:40))
-plotExprsFreqVsMean(ex_sceset)
+plotExprsFreqVsMean(example_sce)
 
 }

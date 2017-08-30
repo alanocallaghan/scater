@@ -7,7 +7,7 @@
 plotQC(object, type = "highest-expression", ...)
 }
 \arguments{
-\item{object}{an SCESet object containing expression values and
+\item{object}{an SingleCellExperiment object containing expression values and
 experimental information. Must have been appropriately prepared.}
 
 \item{type}{character scalar providing type of QC plot to compute:
@@ -35,15 +35,17 @@ of data and identification of potentially problematic features and cells.
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data=sc_example_cell_info)
-rownames(pd) <- pd$Cell
-example_sceset <- newSCESet(countData=sc_example_counts, phenoData=pd)
-drop_genes <- apply(exprs(example_sceset), 1, function(x) {var(x) == 0})
-example_sceset <- example_sceset[!drop_genes, ]
-example_sceset <- calculateQCMetrics(example_sceset)
-plotQC(example_sceset, type="high", col_by_variable="Mutation_Status")
-plotQC(example_sceset, type="find", variable="total_features")
-vars <- names(pData(example_sceset))[c(2:3, 5:14)]
-plotQC(example_sceset, type="expl", variables=vars)
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), 
+colData = sc_example_cell_info)
+example_sce <- normalize(example_sce)
+
+drop_genes <- apply(exprs(example_sce), 1, function(x) {var(x) == 0})
+example_sce <- example_sce[!drop_genes, ]
+example_sce <- calculateQCMetrics(example_sce)
+plotQC(example_sce, type="high", col_by_variable="Mutation_Status")
+plotQC(example_sce, type="find", variable="total_features")
+vars <- names(colData(example_sce))[c(2:3, 5:14)]
+plotQC(example_sce, type="expl", variables=vars)
 
 }

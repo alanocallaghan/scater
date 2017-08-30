@@ -9,5 +9,6 @@
 #'
 #' @name scater-package
 #' @docType package
+#' @useDynLib scater, .registration=TRUE, .fixes="cxx_"
 NULL
 

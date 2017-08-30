@@ -1,6 +1,4 @@
 ## summarise and annotate features
-## Davis McCarthy
-## 18 November 2015
 
 ##----------------------------------------------------------------------------##
 
@@ -8,22 +6,22 @@
 
 #' Get feature annotation information from Biomart
 #' 
-#' Use the \code{biomaRt} package to add feature annotation information to an 
-#' \code{SCESet}. 
+#' Use the biomaRt package to add feature annotation information to an 
+#' \code{\link{SingleCellExperiment}}. 
 #' 
-#' @param object an \code{SCESet} object
+#' @param object an \code{SingleCellExperiment} object
 #' @param filters character vector defining the "filters" terms to pass to the
 #' biomaRt::getBM function.
 #' @param attributes character vector defining the biomaRt attributes to pass to
 #' the \code{attributes} argument of \code{\link[biomaRt]{getBM}}.
 #' @param feature_symbol character string defining the biomaRt attribute to be 
 #' used to define the symbol to be used for each feature (which appears as the 
-#' \code{feature_symbol} in fData(object), subsequently). Default is 
+#' \code{feature_symbol} in rowData(object), subsequently). Default is 
 #' \code{"mgi_symbol"}, gene symbols for mouse. This should be changed if the 
 #' organism is not Mus musculus!
 #' @param feature_id character string defining the biomaRt attribute to be used 
 #' to define the ID to be used for each feature (which appears as the 
-#' \code{feature_id} in fData(object), subsequently). Default is 
+#' \code{feature_id} in rowData(object), subsequently). Default is 
 #' \code{"ensembl_gene_id"}, Ensembl gene IDs for mouse. This should be changed 
 #' if the organism is not Mus musculus!
 #' @param biomart character string defining the biomaRt to be used. Default is 
@@ -37,13 +35,12 @@
 #' version of the biomaRt (now hosted by Ensembl) is used.
 #' 
 #' @details See the documentation for the biomaRt package, specifically for the
-#' functions \code{useMart} and \code{getBM}, for information on what are 
+#' functions \code{useMart} and \code{\link[biomaRt]{getBM}}, for information on what are 
 #' permitted values for the filters, attributes, biomart, dataset and host 
 #' arguments.
 #' 
-#' @return an SCESet object
+#' @return a SingleCellExperiment object
 #' 
-#' @importFrom Biobase featureNames
 #' @importFrom biomaRt useMart
 #' @export
 #' 
@@ -69,8 +66,8 @@ getBMFeatureAnnos <- function(object, filters="ensembl_transcript_id",
     else 
         bmart <- biomaRt::useMart(biomart = biomart, dataset = dataset, 
                                   host = host) 
-    ## Define feature IDs from SCESet object
-    feature_ids <- featureNames(object)
+    ## Define feature IDs from SingleCellExperiment object
+    feature_ids <- rownames(object)
     ## Remove transcript ID artifacts from runKallisto (eg. ENSMUST00000201087.11 -> ENSMUST00000201087)
     feature_ids <- gsub(pattern = "\\.[0-9]+", replacement = "", x = feature_ids)
     ## Get annotations from biomaRt
@@ -89,23 +86,23 @@ getBMFeatureAnnos <- function(object, filters="ensembl_transcript_id",
                       feature_info_full$feature_symbol == "")
     feature_info_full$feature_symbol[na_symbol] <- 
         rownames(feature_info_full)[na_symbol]
-    ## Use rownames from SCESet object (feature IDs) for feature_id if na
+    ## Use rownames from SingleCellExperiment object (feature IDs) for feature_id if na
     feature_info_full$feature_id[is.na(feature_info_full$feature_id)] <-
         rownames(feature_info_full)[is.na(feature_info_full$feature_id)]
     ## Need to drop any duplicated columns that we want to replace
-    old_fdata <- fData(object)
-    keep_cols <- !(colnames(old_fdata) %in% 
+    old_rdata <- rowData(object)
+    keep_cols <- !(colnames(old_rdata) %in% 
                        c("feature_symbol", "feature_id", attributes))
-    if( sum(keep_cols) > 0) {
-        colnames_old_fdata <- colnames(old_fdata)
-        old_fdata <- as.data.frame(old_fdata[, keep_cols])
-        colnames(old_fdata) <- colnames_old_fdata[keep_cols]
-        new_fdata <- cbind(old_fdata, feature_info_full)
+    if (sum(keep_cols) > 0) {
+        colnames_old_rdata <- colnames(old_rdata)
+        old_rdata <- as.data.frame(old_rdata[, keep_cols])
+        colnames(old_rdata) <- colnames_old_rdata[keep_cols]
+        new_rdata <- cbind(old_rdata, feature_info_full)
     } else 
-        new_fdata <- feature_info_full
-    ## Add new feature annotations to SCESet object
-    fData(object) <- new_fdata
-    ## Return SCESet object
+        new_rdata <- feature_info_full
+    ## Add new feature annotations to SingleCellExperiment object
+    rowData(object) <- new_rdata
+    ## Return SingleCellExperiment object
     object
 }
 
@@ -115,16 +112,16 @@ getBMFeatureAnnos <- function(object, filters="ensembl_transcript_id",
 
 #' Summarise expression values across feature
 #' 
-#' Create a new \code{SCESet} with counts summarised at a different feature 
+#' Create a new \code{\link{SingleCellExperiment}} with counts summarised at a different feature 
 #' level. A typical use would be to summarise transcript-level counts at gene
 #' level.
 #' 
-#' @param object an \code{SCESet} object.
+#' @param object an \code{SingleCellExperiment} object.
 #' @param exprs_values character string indicating which slot of the 
-#' assayData from the \code{SCESet} object should be used as expression values. 
-#' Valid options are \code{'exprs'} the expression slot, \code{'tpm'} the 
+#' assayData from the \code{SingleCellExperiment} object should be used as expression values. 
+#' Valid options are \code{'counts'} the counts slot, \code{'tpm'} the 
 #' transcripts-per-million slot or \code{'fpkm'} the FPKM slot.
-#' @param summarise_by character string giving the column of \code{fData(object)}
+#' @param summarise_by character string giving the column of \code{rowData(object)}
 #' that will be used as the features for which summarised expression levels are 
 #' to be produced. Default is \code{'feature_id'}.
 #' @param scaled_tpm_counts logical, should feature-summarised counts be 
@@ -133,7 +130,7 @@ getBMFeatureAnnos <- function(object, filters="ensembl_transcript_id",
 #' the default is \code{TRUE} and it is applied if TPM values are available in
 #' the object.
 #' @param lib_size optional vector of numeric values of same length as the 
-#' number of columns in the \code{SCESet} object providing the total library 
+#' number of columns in the \code{SingleCellExperiment} object providing the total library 
 #' size (e.g. "count of mapped reads") for each cell/sample.
 #' 
 #' @details Only transcripts-per-million (TPM) and fragments per kilobase of 
@@ -148,79 +145,70 @@ getBMFeatureAnnos <- function(object, filters="ensembl_transcript_id",
 #' transcript expression values at the gene level see Sonesen et al, 2016 
 #' (\url{https://f1000research.com/articles/4-1521/v2}).
 #' 
-#' @return an SCESet object
+#' @return an SingleCellExperiment object
 #' 
 #' @export
 #' 
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
-#' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-#' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-#' fd <- new("AnnotatedDataFrame", data = 
-#' data.frame(gene_id = featureNames(example_sceset), 
-#' feature_id = paste("feature", rep(1:500, each = 4), sep = "_")))
-#' rownames(fd) <- featureNames(example_sceset)
-#' fData(example_sceset) <- fd
+#' example_sce <- SingleCellExperiment(
+#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#' rd <- data.frame(gene_id = rownames(example_sce), 
+#' feature_id = paste("feature", rep(1:500, each = 4), sep = "_"))
+#' rownames(rd) <- rownames(example_sce)
+#' rowData(example_sce) <- rd
 #' effective_length <- rep(c(1000, 2000), times = 1000)
-#' tpm(example_sceset) <- calculateTPM(example_sceset, effective_length, calc_from = "counts")
+#' tpm(example_sce) <- calculateTPM(example_sce, effective_length, calc_from = "counts")
 #' 
 #' example_sceset_summarised <- 
-#' summariseExprsAcrossFeatures(example_sceset, exprs_values = "tpm")
+#' summariseExprsAcrossFeatures(example_sce, exprs_values = "tpm")
 #' example_sceset_summarised <- 
-#' summariseExprsAcrossFeatures(example_sceset, exprs_values = "counts")
-#' example_sceset_summarised <- 
-#' summariseExprsAcrossFeatures(example_sceset, exprs_values = "exprs")
+#' summariseExprsAcrossFeatures(example_sce, exprs_values = "counts")
 #' 
 summariseExprsAcrossFeatures <- function(object, exprs_values = "tpm", 
                                          summarise_by = "feature_id",
                                          scaled_tpm_counts = TRUE,
                                          lib_size = NULL) {
-    if ( !is(object, "SCESet") )
-        stop("Object must be an SCESet")
-    if ( !(summarise_by %in% colnames(fData(object))) )
-        stop("The summarise_by argument is not a column of fData(object).")
+    if ( !methods::is(object, "SingleCellExperiment") )
+        stop("Object must be a SingleCellExperiment")
     ## Define an expression matrix depending on which values we're using
-    exprs_values <- match.arg(exprs_values, c("exprs", "tpm", "fpkm", "counts"))
+    exprs_values <- match.arg(exprs_values, c("tpm", "fpkm", "counts"))
     exprs_mat <- switch(exprs_values,
-                        exprs = exprs(object),
                         tpm = tpm(object),
                         fpkm = fpkm(object),
                         counts = counts(object))
-    if ( exprs_values == "exprs" ) 
-        exprs_mat <- 2 ^ exprs_mat - object@logExprsOffset
-    
+    if ( !(summarise_by %in% colnames(rowData(object))) )
+        stop("The summarise_by argument is not a column of rowData(object).")
+
     ## Use reshape2 to make a long version of the expression matrix
-    tmp_exprs <- data.frame(feature = fData(object)[[summarise_by]], exprs_mat)
+    tmp_exprs <- data.frame(feature = rowData(object)[[summarise_by]], exprs_mat)
     tmp_exprs_long <- suppressMessages(reshape2::melt(tmp_exprs))
     exprs_new <- reshape2::acast(tmp_exprs_long, feature ~ variable, sum)
     cat("Collapsing expression to", nrow(exprs_new), "features.")
    
     ## ensure sample names haven't been corrupted
-    colnames(exprs_new) <- sampleNames(object) 
+    colnames(exprs_new) <- colnames(object) 
    
-    ## Create a new SCESet object
-    pd <- new("AnnotatedDataFrame", pData(object))
-    fd <- new("AnnotatedDataFrame",
-              data.frame(exprs_collapsed_to = rownames(exprs_new)))
+    ## Create a new SCE object
+    pd <- colData(object)
+    fd <- data.frame(exprs_collapsed_to = rownames(exprs_new))
     rownames(fd) <- rownames(exprs_new)
-    if ( exprs_values == "exprs" ) 
-        exprs_new <- log2(exprs_new + object@logExprsOffset)
     
     sce_out <- switch(exprs_values,
-                      exprs = newSCESet(exprsData = exprs_new, phenoData = pd, 
-                                        featureData = fd),
-                      tpm = newSCESet(tpmData = exprs_new, phenoData = pd, 
-                                      featureData = fd),
-                      fpkm = newSCESet(fpkmData = exprs_new, phenoData = pd, 
-                                       featureData = fd),
-                      counts = newSCESet(countData = exprs_new, phenoData = pd, 
-                                         featureData = fd))
+                      tpm = SingleCellExperiment(
+                          list(tpm = exprs_new), colData = pd, rowData = fd),
+                      fpkm = SingleCellExperiment(
+                          list(fpkm = exprs_new), colData = pd, rowData = fd),
+                      counts = SingleCellExperiment(
+                          list(counts = exprs_new), colData = pd, rowData = fd))
     ## Summarise other data in the object if present
     ## counts
-    if ( !is.null(tpm(object)) && scaled_tpm_counts ) {
+    tpm_object <- tryCatch(tpm(object), error = function(e) return(NULL))
+    counts_object <- tryCatch(counts(object), error = function(e) return(NULL))
+    if ( !is.null(tpm_object) && scaled_tpm_counts ) {
         if ( is.null(lib_size) ) {
-            if ( is.null(counts(object)) )
+            if ( is.null(counts_object) )
                 stop("If object does not contain count values, lib_size argument must be provided.")
             else 
                 lib_size <- colSums(counts(object))
@@ -228,50 +216,51 @@ summariseExprsAcrossFeatures <- function(object, exprs_values = "tpm",
             if ( length(lib_size) != ncol(object))
                 stop("lib_size argument must have length equal to number of columns of object.")
         }
-        tmp_exprs <- data.frame(feature = fData(object)[[summarise_by]], 
+        tmp_exprs <- data.frame(feature = rowData(object)[[summarise_by]], 
                                 tpm(object))
         tmp_exprs_long <- reshape2::melt(tmp_exprs)
         counts_new <- reshape2::acast(tmp_exprs_long, feature ~ variable, sum)
         ## scale TPM by total library size to get scaled counts
         counts_new <- t(t(counts_new) * lib_size * 1e-06)
-        colnames(counts_new) <- sampleNames(object) 
+        colnames(counts_new) <- colnames(object) 
         counts(sce_out) <- counts_new
         rm(counts_new)   
     } else {
-        if ( exprs_values != "counts" && !is.null(counts(object)) ) {
-            tmp_exprs <- data.frame(feature = fData(object)[[summarise_by]], 
+        if ( exprs_values != "counts" && !is.null(counts_object) ) {
+            tmp_exprs <- data.frame(feature = rowData(object)[[summarise_by]], 
                                     counts(object))
             tmp_exprs_long <- reshape2::melt(tmp_exprs)
             counts_new <- reshape2::acast(tmp_exprs_long, feature ~ variable, sum)
-            colnames(counts_new) <- sampleNames(object) 
+            colnames(counts_new) <- colnames(object) 
             counts(sce_out) <- counts_new
             rm(counts_new)
         }
     }
-    if ( exprs_values != "tpm" && !is.null(tpm(object)) ) {
-        tmp_exprs <- data.frame(feature = fData(object)[[summarise_by]], 
+    if ( exprs_values != "tpm" && !is.null(tpm_object) ) {
+        tmp_exprs <- data.frame(feature = rowData(object)[[summarise_by]], 
                                 tpm(object))
         tmp_exprs_long <- reshape2::melt(tmp_exprs)
         tpm_new <- reshape2::acast(tmp_exprs_long, feature ~ variable, sum)
-        colnames(tpm_new) <- sampleNames(object) 
+        colnames(tpm_new) <- colnames(object) 
         tpm(sce_out) <- tpm_new
         rm(tpm_new)
     }
     if ( exprs_values != "fpkm" && !is.null(fpkm(object)) ) {
-        tmp_exprs <- data.frame(feature = fData(object)[[summarise_by]], 
+        tmp_exprs <- data.frame(feature = rowData(object)[[summarise_by]], 
                                 fpkm(object))
         tmp_exprs_long <- reshape2::melt(tmp_exprs)
         fpkm_new <- reshape2::acast(tmp_exprs_long, feature ~ variable, sum)
-        colnames(fpkm_new) <- sampleNames(object) 
+        colnames(fpkm_new) <- colnames(object) 
         fpkm(sce_out) <- fpkm_new
         rm(fpkm_new)
     }
-    if ( !is.null(cpm(object)) ) {
-        tmp_exprs <- data.frame(feature = fData(object)[[summarise_by]], 
-                                cpm(object))
+    cpm_object <- tryCatch(cpm(object), error = function(e) return(NULL))
+    if ( !is.null(cpm_object) ) {
+        tmp_exprs <- data.frame(feature = rowData(object)[[summarise_by]], 
+                                cpm_object)
         tmp_exprs_long <- reshape2::melt(tmp_exprs)
         cpm_new <- reshape2::acast(tmp_exprs_long, feature ~ variable, sum)
-        colnames(cpm_new) <- sampleNames(object) 
+        colnames(cpm_new) <- colnames(object) 
         cpm(sce_out) <- cpm_new
         rm(cpm_new)
     }

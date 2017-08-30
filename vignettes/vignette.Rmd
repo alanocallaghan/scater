@@ -29,7 +29,8 @@ This document gives an introduction to and overview of the functionality of the
 The `scater` package is contains tools to help with the analysis of single-cell
 transcriptomic data, with the focus on RNA-seq data. The package features:
 
-* A data structure for single-cell expression data;
+* Use of the `SingleCellExperiment` class as a data container for 
+interoperability with a wide range of other Bioconductor packages;
 * Wrappers to [`kallisto`](http://pachterlab.github.io/kallisto/)  and 
 ['Salmon'](https://combine-lab.github.io/salmon/) for rapid
 quantification of transcript abundance and tight integration with `scater`;
@@ -41,74 +42,93 @@ features;
 * Methods for identifying important experimental variables and normalising data
 ahead of downstream statistical analysis and modeling.
 
-Future versions of `scater` may also incorporate:
-
-* Methods for identifying cells at different stages of the cell cycle;
-* Differential testing methods for finding features with differences in
-behaviour between experimental conditions.
-
 To get up and running as quickly as possible, see the [Quick Start](#quickstart)
 section below. For see the various in-depth sections on various aspects of the
 functionality that follow.
+
+NB: as of July 2017, `scater` has switched from the `SCESet` class previously 
+defined within the package to the more widely applicable `SingleCellExperiment`
+class. The functions `toSingleCellExperiment` and `updateSCESet` (for backwards
+compatibility) can be used to convert an old `SCESet` object to a 
+`SingleCellExperiment` object.
+
 
 # Quick Start
 <a name="quickstart"></a>
 
 Assuming you have a matrix containing expression count data summarised at the
-level of some features (gene, exon, region, etc.), then we first need to form an
-`SCESet` object containing the data. An `SCESet` object is the basic data
-container that we use in `scater`.
+level of some features (gene, exon, region, etc.), then we first need to form a
+`SingleCellExperiment` object containing the data. A `SingleCellExperiment` 
+object is the basic data container used in `scater` and many other Bioconductor
+packages for single-cell data analysis.
 
 Here we use the example data provided with the package, which gives us two 
 objects, a matrix of counts and a dataframe with information about the cells we 
 are studying:
 
 ```{r quickstart-load-data, message=FALSE, warning=FALSE}
-library(scater, quietly = TRUE)
+suppressPackageStartupMessages(library(scater))
 data("sc_example_counts")
 data("sc_example_cell_info")
 ```
 
-We use these objects to form an `SCESet` object containing all of the necessary
-information for our analysis:
+We use these objects to form a `SingleCellExperiment` object containing all of 
+the necessary information for our analysis:
 
-```{r quickstart-make-sceset, results='hide'}
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-rownames(pd) <- pd$Cell
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
+```{r quickstart-make-sce, results='hide'}
+example_sce <- SingleCellExperiment(
+    assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+```
+
+We always expect to have (raw) count data in a `SingleCellExperiment` object. In
+almost all cases we will also want to have a log2-scale representation of the 
+data. We expect this to be stored as the `exprs` assay.
+
+Here we use log2-counts-per-million with an offset of 1 as the `exprs` values.
+
+```{r quickstart-add-exprs, results='hide'}
+exprs(example_sce) <- log2(
+    calculateCPM(example_sce, use.size.factors = FALSE) + 1)
 ```
 
 Subsetting is very convenient with this class. For example, we can filter out
 features (genes) that are not expressed in any cells:
 
 ```{r filter-no-exprs}
-keep_feature <- rowSums(exprs(example_sceset) > 0) > 0
-example_sceset <- example_sceset[keep_feature,]
+keep_feature <- rowSums(exprs(example_sce) > 0) > 0
+example_sce <- example_sce[keep_feature,]
 ```
 
 Now we have the expression data neatly stored in a structure that can be used
 for lots of exciting analyses.
 
-It is straight-forward to compute many quality control metrics:
+It is straight-forward to compute many quality control metrics. We typically 
+provide one or more sets of "feature controls", that is sets of genes or 
+features that represent technical features of the expression data or are not of 
+primary biological interest. QC metrics are computed especially for these 
+feature sets are used to assess the quality of cells. Spike-in genes (such as 
+the commonly-used ERCC set) and mitochondrial genes are typically useful as 
+"feature controls". Here, for demonstration, we just use the first 40 features.
 
 ```{r quick-start-calc-qc-metrics, eval=FALSE}
-example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:40)
+example_sce <- calculateQCMetrics(example_sce, feature_controls = 1:40)
 ```
 
 Now you can play around with your data using the graphical user interface (GUI),
 which opens an interactive dashboard in your browser!
 
 ```{r quick-start-gui, eval=FALSE}
-scater_gui(example_sceset)
+scater_gui(example_sce)
 ```
 
 Many plotting functions are available for visualising the data:
 
-* `plot`: a plot method exists for `SCESet` objects, which gives an overview
-of expression across cells.
+* `plot`: a plot method exists for `SingleCellExperiment` objects, which gives 
+an overview of expression across cells.
 * `plotQC`: various methods are available for producing QC diagnostic plots.
 * `plotPCA`: produce a principal components plot for the cells.
-* `plotTSNE`: produce a t-distributed stochastic neighbour embedding (reduced dimension) plot for the cells.
+* `plotTSNE`: produce a t-distributed stochastic neighbour embedding (reduced 
+dimension) plot for the cells.
 * `plotDiffusionMap`: produce a diffusion map (reduced dimension) plot for the
 cells.
 * `plotMDS`: produce a multi-dimensional scaling plot for the cells.
@@ -116,8 +136,8 @@ cells.
 * `plotExpression`: plot expression levels for a defined set of features.
 * `plotPlatePosition`: plot cells in their position on a plate, coloured by 
 cell metadata and QC metrics or feature expression level.
-* `plotPhenoData`: plot cell metadata and QC metrics.
-* `plotFeatureData`: plot feature metadata and QC metrics.
+* `plotColData`: plot cell metadata and QC metrics.
+* `plotRowData`: plot feature metadata and QC metrics.
 
 More detail on all plotting methods is given throughout the vignette below.
 
@@ -139,13 +159,15 @@ ties us to some specific terminology. Some of this terminology may be unfamiliar
 or seem peculiar for the single-cell RNA-seq setting `scater` is designed for.
 
 In Bioconductor terminology we assay numerous "features" for a number of
-"samples".
+"samples". Features, in the context of `scater`, correspond most commonly to 
+genes or transcripts, but could be any general genomic or transcriptomic regions (e.g.
+exon) of interest for which we take measurements. 
 
-Features, in the context of `scater`, correspond most commonly to genes or
-transcripts, but could be any general genomic or transcriptomic regions (e.g.
-exon) of interest for which we take measurements. Thus, a command such as
-`featureNames`, returns the names of the features defined for an `SCESet`
-object, which in typical `scater` usage could correspond to gene IDs. In much of
+With the switch to using the `SingleCellExperiment` class, the terminology has
+become more general again. Now we have "rows" representing features and "cols" 
+representing samples (cells). Thus, applying the `rownames` function returns the
+names of the features defined for a `SingleCellExperiment` object, which in 
+typical `scater` usage would correspond to gene IDs. In much of
 what follows, it may be more intuitive to mentally replace "feature" with "gene"
 or "transcript" (depending on the context of the study) wherever "feature"
 appears.
@@ -155,28 +177,28 @@ assayed. This differs from common usage of "sample" in other contexts, where
 we might usually use "sample" to refer to an individual subject, a biological
 replicate or similar. A "sample" in this sense in `scater` may be referred to as
 a "block" in the more classical statistical sense. Within a "block" (e.g.
-individual) we may have assayed numerous cells. Thus, the function `sampleNames`,
-when applied to an `SCESet` object returns the cell IDs.
+individual) we may have assayed numerous cells. Thus, the function `colnames`,
+when applied to a `SingleCellExperiment` object returns the cell IDs.
 
 
-#  The SCESet class and methods
+#  The `SingleCellExperiment` class and methods
 
-In `scater` we organise single-cell expression data in objects of the `SCESet`
-class. The class inherits the Bioconductor `ExpressionSet` class, which
-provides a common interface familiar to those who have analyzed microarray
-experiments with Bioconductor. The class requires three input files:
+In `scater` we organise single-cell expression data in objects of the 
+`SingleCellExperiment` class. The class inherits the Bioconductor 
+`SummarizedExperiment` class, which provides a common interface across many
+Bioconductor packages. The class requires three input files:
 
   1. `exprs`, a numeric matrix of expression values, where rows are
   features, and columns are cells
-  2. `phenoData`, an `AnnotatedDataFrame` object, where rows are cells, and
+  2. `colData`, a `DataFrame` object, where rows are cells, and
   columns are cell attributes (such as cell type, culture condition, day
   captured, etc.)
-  3. `featureData`, an `AnnotatedDataFrame` object, where rows are features
+  3. `featureData`, an `DataFrame` object, where rows are features
   (e.g. genes), and columns are feature attributes, such as biotype, gc content,
   etc.
 
 For more details about other features inherited from Bioconductor's
-`ExpressionSet` class, type `?ExpressionSet` at the R prompt.
+`SummarizedExperiment` class, type `?SummarizedExperiment` at the R prompt.
 
 The requirements for the `SCESet` class (as with other S4 classes in R and
 Bioconductor) are strict. The idea is that strictness with generating a valid
@@ -192,21 +214,19 @@ the `exprs` slot in the object will be generated as log2(counts-per-million)
 using the `cpm` function from `edgeR`, with a "prior count" value of 1:
 
 ```{r sceset-make-sceset-counts-only}
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-rownames(pd) <- pd$Cell
 gene_df <- data.frame(Gene = rownames(sc_example_counts))
 rownames(gene_df) <- gene_df$Gene
-fd <- new("AnnotatedDataFrame", data = gene_df)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd,
-                            featureData = fd)
-example_sceset
+example_sce <- SingleCellExperiment(assays = list(counts = sc_example_counts), 
+                                    colData = sc_example_cell_info, 
+                                    rowData = gene_df)
+example_sce
 ```
 
 We can also make an `SCESet` object with just a matrix of expression values
 (no count data required; here we compute counts-per-million from the 
 `example_sceset` defined above and transform to the log2 scale) like this:
 
-```{r sceset-make-sceset-exprs-only}
+```{r sceset-make-sceset-exprs-only, eval=FALSE}
 example2 <- newSCESet(exprsData = log2(calculateCPM(example_sceset) + 1))
 pData(example2)
 fData(example2)
@@ -218,7 +238,7 @@ We have accessor functions to access elements of the `SCESet` object:
 no counts are defined for the object, then the counts matrix slot is simpy
 `NULL`.
 
-```{r counts-accessor}
+```{r counts-accessor, eval=FALSE}
 counts(example2)[1:3, 1:6]
 ```
 * `exprs(object)`: returns the matrix of feature expression values. Typically these
@@ -226,22 +246,22 @@ should be log2(counts-per-million) values or log2(reads-per-kilobase-per-million
 appropriately normalised of course. The package will generally assume that
 these are the values to use for expression.
 
-```{r exprs-accessor}
+```{r exprs-accessor, eval=FALSE}
 exprs(example2)[1:3, 1:6]
 ```
 * Generically, we can access any assay data from the object with the `get_exprs` function. We simply supply the function with the `SCESet` object and the name of the desired expression matrix:
-```{r get-exprs}
+```{r get-exprs, eval=FALSE}
 get_exprs(example_sceset, "counts")[1:3, 1:6]
 ```
 
 Similarly we can assign a new (say, transformed) expression matrix to an `SCESet` object using `set_exprs` as follows:
-```{r set-exprs}
+```{r set-exprs, eval=FALSE}
 set_exprs(example2, "counts") <- counts(example_sceset)
 ```
 
 If you later find some count data that you want to add to the `SCESet` object, then you can add it easily with the `counts` assignment function directly (and the same goes for `exprs`, `tpm`, `cpm`, `fpkm` and versions of these with the prefix "norm_"):
 
-```{r sceset-add-count-data}
+```{r sceset-add-count-data, eval=FALSE}
 counts(example2) <- sc_example_counts
 example2
 counts(example2)[1:3, 1:6]
@@ -250,7 +270,7 @@ counts(example2)[1:3, 1:6]
 Handily, it is also easy to replace other data in slots of the `SCESet` object
 using generic accessor and replacement functions.
 
-```{r sceset-demo-replacement}
+```{r sceset-demo-replacement, eval=FALSE}
 gene_df <- data.frame(Gene = rownames(sc_example_counts))
 rownames(gene_df) <- gene_df$Gene
 fd <- new("AnnotatedDataFrame", data = gene_df)
@@ -281,7 +301,7 @@ are not present in the `SCESet` object, then the values in `exprs(object)` will
 be used. Other expression values can be used, specified with the `exprs_values`
 argument
 
-```{r plot-sceset-blocking}
+```{r plot-sceset-blocking, eval=FALSE}
 plot(example_sceset, block1 = "Mutation_Status", block2 = "Treatment",
      colour_by = "Cell_Cycle", nfeatures = 300, exprs_values = "counts")
 ```
@@ -298,7 +318,7 @@ values for a subset of genes or features. This can be particularly useful when
 investigating the some features identified as being of interest from differential
 expression testing or other means.
 
-```{r plot-expression}
+```{r plot-expression, eval=FALSE}
 plotExpression(example_sceset, rownames(example_sceset)[1:6],
                x = "Mutation_Status", exprs_values = "exprs", colour = "Treatment")
 ```
@@ -307,7 +327,7 @@ This function uses `ggplot2`, making it easy to change the theme to whatever you
 prefer. We can also show the median expression level per group on the plot and
 show a violin plot to summarise the distribution of expression values:
 
-```{r plot-expression-theme-bw}
+```{r plot-expression-theme-bw, eval=FALSE}
 plotExpression(example_sceset, rownames(example_sceset)[7:12],
                x = "Mutation_Status", exprs_values = "counts", colour = "Cell_Cycle",
                show_median = TRUE, show_violin = FALSE,  xlab = "Mutation Status",
@@ -338,14 +358,14 @@ in `scater`.
 
 To compute commonly-used QC metrics we have the function `calculateQCMetrics()`:
 
-```{r calc-qc-metrics}
+```{r calc-qc-metrics, eval=FALSE}
 example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:20)
 varLabels(example_sceset)
 ```
 
 More than one set of feature controls can be defined if desired.
 
-```{r calc-qc-metrics-multi-feature-controls}
+```{r calc-qc-metrics-multi-feature-controls, eval=FALSE}
 example_sceset <- calculateQCMetrics(
     example_sceset, feature_controls = list(controls1 = 1:20, controls2 = 500:1000),
     cell_controls = list(set_1 = 1:5, set_2 = 31:40))
@@ -406,7 +426,7 @@ control features are defined by the user.
 * `n_cells_exprs`: the number of cells for which the expression level of the feature
 is above the detection limit (default detection limit is zero).
 
-```{r list-fdata-qc}
+```{r list-fdata-qc, eval=FALSE}
 names(fData(example_sceset))
 ```
 
@@ -442,7 +462,7 @@ features. By default, "expression" is defined using the feature counts (if
 available), but $tpm$, $cpm$, $fpkm$ or the `exprs` values can be used instead,
 if desired.
 
-```{r plot-qc-expression, fig.height=7.5, fig.width=8.5}
+```{r plot-qc-expression, fig.height=7.5, fig.width=8.5, eval=FALSE}
 keep_feature <- rowSums(counts(example_sceset) > 0) > 4
 example_sceset <- example_sceset[keep_feature,]
 ## Plot QC
@@ -470,7 +490,7 @@ to subset the `SCESet` as below. We can compare the most-expressed features in t
 cell controls and in the cells of biological interest with this subsetting, as
 demonstrated in the code below (plot not shown).
 
-```{r plot-qc-expression-cell-controls, fig.height=7.5, fig.width=8.5, fig.show=FALSE}
+```{r plot-qc-expression-cell-controls, fig.height=7.5, fig.width=8.5, fig.show=FALSE, eval=FALSE}
 p1 <- plotQC(example_sceset[, !example_sceset$is_cell_control],
              type = "highest-expression")
 p2 <- plotQC(example_sceset[, example_sceset$is_cell_control],
@@ -486,14 +506,14 @@ but need not be. By default, the function will look for defined feature controls
 (as supplied to `calculateQCMetrics`). If feature controls are found, then these
 will be plotted, if not then all features will be plotted.
 
-```{r plot-qc-exprs-freq-vs-mean-default}
+```{r plot-qc-exprs-freq-vs-mean-default, eval=FALSE}
 plotQC(example_sceset, type = "exprs-freq-vs-mean")
 ```
 
 We can also plot just a subset of features with code like that below (plot not
 shown):
 
-```{r plot-qc-exprs-mean-vs-freq-defined-feature-set, results = 'hide', fig.show = FALSE}
+```{r plot-qc-exprs-mean-vs-freq-defined-feature-set, results = 'hide', fig.show = FALSE, eval=FALSE}
 feature_set_1 <- fData(example_sceset)$is_feature_control_controls1
 plotQC(example_sceset, type = "exprs-freq-vs-mean", feature_set = feature_set_1)
 ```
@@ -501,7 +521,7 @@ plotQC(example_sceset, type = "exprs-freq-vs-mean", feature_set = feature_set_1)
 Beyond these QC plots, we have a neat, general and flexible function for
 plotting two feature metadata variables:
 
-```{r plot-fdata}
+```{r plot-fdata, eval=FALSE}
 plotFeatureData(example_sceset, aes(x = n_cells_exprs, y = pct_total_counts))
 ```
 
@@ -524,12 +544,12 @@ correspond to cells) of `SCESet` objects makes it easy to drop unwanted cells.
 
 We also have neat functions to plot two cell metadata variables:
 
-```{r plot-pdata, echo=FALSE, fig.show=FALSE, results='hide'}
+```{r plot-pdata, echo=FALSE, fig.show=FALSE, results='hide', eval=FALSE}
 plotPhenoData(example_sceset, aes(x = total_counts, y = total_features,
                                   colour = Mutation_Status))
 ```
 
-```{r plot-pdata-cont-col, fig.show = TRUE}
+```{r plot-pdata-cont-col, fig.show = TRUE, eval=FALSE}
 plotPhenoData(example_sceset, aes(x = Mutation_Status, y = total_features,
                                   colour = log10_total_counts))
 ```
@@ -541,18 +561,18 @@ or feature names (i.e. gene/transcript names).
 These sorts of plots can be very useful for finding potentially problematic
 cells.
 
-```{r plot-pdata-col-gene-exprs}
+```{r plot-pdata-col-gene-exprs, eval=FALSE}
 plotPhenoData(example_sceset, aes(x = total_counts, y = total_features,
                                   colour = Gene_1000))
 ```
 
-```{r plot-pdatacol-gene-exprs-2, fig.show = FALSE}
+```{r plot-pdatacol-gene-exprs-2, fig.show = FALSE, eval=FALSE}
 plotPhenoData(example_sceset, aes(x = pct_counts_feature_controls,
                                   y = total_features, colour = Gene_0500))
 ```
 
 
-```{r plot-pdatacol-gene-exprs-3, fig.show = FALSE}
+```{r plot-pdatacol-gene-exprs-3, fig.show = FALSE, eval=FALSE}
 plotPhenoData(example_sceset, aes(x = pct_counts_feature_controls,
                                   y = pct_counts_top_50_features,
                                   colour = Gene_0001))
@@ -566,7 +586,7 @@ Tapping into the powerful capabilities of `ggplot2`, the possibilities are many.
 A particularly useful plot for cell QC is plotting the percentage of expression
 accounted for by feature controls against total_features.
 
-```{r plot-pdata-pct-exprs-controls}
+```{r plot-pdata-pct-exprs-controls, eval=FALSE}
 plotPhenoData(example_sceset, aes(x = total_features,
                                   y = pct_counts_feature_controls,
                                   colour = Mutation_Status)) +
@@ -592,7 +612,7 @@ The `plotPCA` function makes it easy to produce a PCA plot directly from an
 The default plot shows the first two principal components and if any cell
 controls have been defined, plots these cells in a different colour.
 
-```{r plot-pca-default}
+```{r plot-pca-default, eval=FALSE}
 plotPCA(example_sceset)
 ```
 
@@ -614,7 +634,7 @@ plotPCA(example_sceset, exprs_values = "cpm")
 A subset of features can be used to produce a PCA plot. In the code below only
 the features defined as "feature controls" are used for the PCA (plot not shown).
 
-```{r plot-pca-feature-controls, fig.show = FALSE}
+```{r plot-pca-feature-controls, fig.show = FALSE, eval=FALSE}
 plotPCA(example_sceset, feature_set = fData(example_sceset)$is_feature_control)
 ```
 
@@ -622,7 +642,7 @@ The function allows more than just the first two components to be plotted, and
 also allows phenotype variables to be used to define the colour, shape and size
 of points in the scatter plot.
 
-```{r plot-pca-4comp-colby-shapeby, fig.height=5.5}
+```{r plot-pca-4comp-colby-shapeby, fig.height=5.5, eval=FALSE}
 plotPCA(example_sceset, ncomponents = 4, colour_by = "Treatment",
         shape_by = "Mutation_Status")
 ```
@@ -633,7 +653,7 @@ plot matrix show the density for each component.
 We can also use the colour and size of point in the plot to reflect feature
 expression values.
 
-```{r plot-pca-4comp-colby-sizeby-exprs, fig.height=5.5}
+```{r plot-pca-4comp-colby-sizeby-exprs, fig.height=5.5, eval=FALSE}
 plotPCA(example_sceset, colour_by = "Gene_0001", size_by = "Gene_1000")
 ```
 
@@ -642,13 +662,13 @@ Thus, expression levels of two marker genes or transcripts can be shown overlaid
 onto reduced-dimension representations of cells. This also works for `plotTSNE`
 plots.
 
-```{r plot-tsne-1comp-colby-sizeby-exprs, fig.height=5.5}
+```{r plot-tsne-1comp-colby-sizeby-exprs, fig.height=5.5, eval=FALSE}
 plotTSNE(example_sceset, colour_by = "Gene_0001", size_by = "Gene_1000")
 ```
 
 And for diffusion map plots.
 
-```{r plot-difmap-1comp-colby-sizeby-exprs, fig.height=5.5}
+```{r plot-difmap-1comp-colby-sizeby-exprs, fig.height=5.5, eval=FALSE}
 plotDiffusionMap(example_sceset, colour_by = "Gene_0001", size_by = "Gene_1000")
 ```
 
@@ -656,7 +676,7 @@ The `SCESet` matrix has a `reducedDimension` slot, where coordinates for a
 reduced dimension representation of the cells can be stored. If we so wish, the
 top principal components can be added to the `reducedDimension` slot:
 
-```{r plot-pca-4comp-colby-shapeby-save-pcs, fig.show = FALSE}
+```{r plot-pca-4comp-colby-shapeby-save-pcs, fig.show = FALSE, eval=FALSE}
 example_sceset <- plotPCA(example_sceset, ncomponents = 4,
                           colour_by = "Treatment", shape_by = "Mutation_Status",
                           return_SCESet = TRUE, theme_size = 12)
@@ -672,14 +692,14 @@ nearest neighbour embedding (t-SNE) or Gaussian process latent variable models
 or any other dimensionality reduction method. We can store these in the `SCESet`
 object and produce plots just as we did with PCA (plot not shown):
 
-```{r plot-reduceddim-4comp-colby-shapeby, fig.show=FALSE}
+```{r plot-reduceddim-4comp-colby-shapeby, fig.show=FALSE, eval=FALSE}
 plotReducedDim(example_sceset, ncomponents = 4, colour_by = "Treatment",
                shape_by = "Mutation_Status")
 ```
 
 As for the PCA plots we can also colour and size points by feature expression.
 
-```{r plot-reduceddim-4comp-colby-sizeby-exprs, fig.show = FALSE}
+```{r plot-reduceddim-4comp-colby-sizeby-exprs, fig.show = FALSE, eval=FALSE}
 plotReducedDim(example_sceset, ncomponents = 4, colour_by = "Gene_1000",
                size_by = "Gene_0500")
 ```
@@ -691,7 +711,7 @@ Based on PCA or dimensionality reduction plots we may identify outlier cells
 and, if we wish, filter them out of the analysis. There is also an outlier 
 detection option available with the plotPCA function.
 
-```{r plot-pca-outlier}
+```{r plot-pca-outlier, eval=FALSE}
 example_sceset <- plotPCA(example_sceset, pca_data_input = "pdata", 
                           detect_outliers = TRUE, return_SCESet = TRUE)
 
@@ -726,13 +746,13 @@ regressing `exprs` values against just that variable.
 The default approach looks at all variables in `pData(object)` and plots the top
 `nvars_to_plot` variables (default is 10).
 
-```{r plot-qc-expl-variables-all, warning=FALSE}
+```{r plot-qc-expl-variables-all, warning=FALSE, eval=FALSE}
 plotQC(example_sceset, type = "expl")
 ```
 
 Alternatively, we can choose a subset of variables to plot in this manner.
 
-```{r plot-qc-expl-variables-select-variables}
+```{r plot-qc-expl-variables-select-variables, eval=FALSE}
 plotQC(example_sceset, type = "expl",
        variables = c("total_features", "total_counts", "Mutation_Status", "Treatment",
                      "Cell_Cycle"))
@@ -747,7 +767,7 @@ We can also produce a pairs plot of potential explanatory variables ranked by
 their median percentage of expression variance explained in a marginal (only
 one explanatory variable) linear model.
 
-```{r plot-qc-pairs-pc}
+```{r plot-qc-pairs-pc, eval=FALSE}
 plotQC(example_sceset, type = "expl", method = "pairs", theme_size = 6)
 ```
 
@@ -756,7 +776,7 @@ In this small dataset, `total_counts` and `total_features` explain a very large 
 The default is to plot six most-associated principal components against the
 variable of interest.
 
-```{r plot-qc-find-pcs-pcs-vs-vars, fig.width=8, fig.height=7}
+```{r plot-qc-find-pcs-pcs-vs-vars, fig.width=8, fig.height=7, eval=FALSE}
 p1 <- plotQC(example_sceset, type = "find-pcs", variable = "total_features",
         plot_type = "pcs-vs-vars")
 p2 <- plotQC(example_sceset, type = "find-pcs", variable = "Cell_Cycle",
@@ -766,12 +786,12 @@ multiplot(p1, p2, cols = 2)
 
 An alternative is to produce a pairs plot of the top five PCs.
 
-```{r plot-qc-find-pcs-pairs, fig.width=10, fig.height=7}
+```{r plot-qc-find-pcs-pairs, fig.width=10, fig.height=7, eval=FALSE}
 plotQC(example_sceset, type = "find-pcs", variable = "total_features",
        plot_type = "pairs-pcs")
 ```
 
-```{r plot-qc-find-pcs-pairs-2, fig.show=FALSE}
+```{r plot-qc-find-pcs-pairs-2, fig.show=FALSE, eval=FALSE}
 plotQC(example_sceset, type = "find-pcs", variable = "Cell_Cycle",
        plot_type = "pairs-pcs")
 ```
@@ -801,38 +821,6 @@ composition.
 Important experimental variables and latent factors (if used) can be regressed
 out, so that normalised data has these effects removed.
 
-
-#  Feature and cell pairwise distance matrices
-
-In many single-cell expression analyses we may want to generate and store
-pairwise distance matrices for both cells and features.
-
-We can first look at a multidimensional scaling (MDS) plot using Euclidean
-distance between cells.
-
-```{r cell-pairwise-distance-matrices-euclidean, eval=TRUE}
-cell_dist <- dist(t(exprs(example_sceset)))
-cellPairwiseDistances(example_sceset) <- cell_dist
-plotMDS(example_sceset)
-```
-
-Second, we could also look at an MDS plot using the count data and the Canberra
-distance metric (plot not shown).
-
-```{r cell-pairwise-distance-matrices-canberra, eval=TRUE, fig.show = FALSE}
-cell_dist <- dist(t(counts(example_sceset)), method = "canberra")
-cellPairwiseDistances(example_sceset) <- cell_dist
-plotMDS(example_sceset, colour_by = "Mutation_Status")
-```
-
-We could also look at an MDS plot for the features, here using Euclidean
-distance (plot not shown).
-
-```{r feature-pairwise-distance-matrices, eval=FALSE}
-feature_dist <- dist(exprs(example_sceset))
-featurePairwiseDistances(example_sceset) <- feature_dist
-limma::plotMDS(featDist(example_sceset))
-```
 
 
 #  Using **kallisto** and **Salmon** to quantify transcript abundance from within R

@@ -12,7 +12,7 @@ plotHighestExprs(object, col_by_variable = "total_features", n = 50,
 \item{object}{an SCESet object containing expression values and
 experimental information. Must have been appropriately prepared.}
 
-\item{col_by_variable}{variable name (must be a column name of pData(object))
+\item{col_by_variable}{variable name (must be a column name of colData(object))
 to be used to assign colours to cell-level values.}
 
 \item{n}{numeric scalar giving the number of the most expressed features to
@@ -25,12 +25,12 @@ from endogenous rather than synthetic genes.}
 
 \item{exprs_values}{which slot of the \code{assayData} in the \code{object}
 should be used to define expression? Valid options are "counts" (default),
-"tpm", "fpkm" and "exprs".}
+"tpm", "fpkm" and "logcounts".}
 
 \item{feature_names_to_plot}{character scalar indicating which column of the 
 featureData slot in the \code{object} is to be used for the feature names 
 displayed on the plot. Default is \code{NULL}, in which case 
-\code{featureNames(object)} is used.}
+\code{rownames(object)} is used.}
 }
 \value{
 a ggplot plot object
@@ -45,11 +45,12 @@ expressed features across the dataset.
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-rownames(pd) <- pd$Cell
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:500)
-plotHighestExprs(example_sceset, col_by_variable="total_features")
-plotHighestExprs(example_sceset, col_by_variable="Mutation_Status")
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+example_sce <- calculateQCMetrics(example_sce, 
+feature_controls = list(set1 = 1:500))
+plotHighestExprs(example_sce, col_by_variable="total_features")
+plotHighestExprs(example_sce, col_by_variable="Mutation_Status")
+plotQC(example_sce, type = "highest-express")
 
 }

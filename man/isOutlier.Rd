@@ -5,7 +5,7 @@
 \title{Identify if a cell is an outlier based on a metric}
 \usage{
 isOutlier(metric, nmads = 5, type = c("both", "lower", "higher"),
-  log = FALSE, subset = NULL, batch = NULL)
+  log = FALSE, subset = NULL, batch = NULL, min.diff = NA)
 }
 \arguments{
 \item{metric}{numeric or integer vector of values for a metric}
@@ -27,6 +27,11 @@ Missing values will trigger a warning and will be automatically ignored.}
 \item{batch}{factor of length equal to \code{metric}, specifying the batch
 to which each observation belongs. A median/MAD is calculated for each batch,
 and outliers are then identified within each batch.}
+
+\item{min.diff}{numeric scalar indicating the minimum difference from the 
+median to consider as an outlier. The outlier threshold is defined from the 
+larger of \code{nmads} MADs and \code{min.diff}, to avoid calling many 
+outliers when the MAD is very small. If \code{NA}, it is ignored.}
 }
 \value{
 a logical vector of the same length as the \code{metric} argument
@@ -38,13 +43,13 @@ outliers based on median-absolute-deviation (MAD).
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data=sc_example_cell_info)
-rownames(pd) <- pd$Cell
-example_sceset <- newSCESet(countData=sc_example_counts, phenoData=pd)
-example_sceset <- calculateQCMetrics(example_sceset)
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+example_sce <- calculateQCMetrics(example_sce)
 
 ## with a set of feature controls defined
-example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:40)
-isOutlier(example_sceset$total_counts, nmads = 3)
+example_sce <- calculateQCMetrics(example_sce, 
+feature_controls = list(set1 = 1:40))
+isOutlier(example_sce$total_counts, nmads = 3)
 
 }

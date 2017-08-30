@@ -10,8 +10,8 @@ fromCellDataSet(cds, exprs_values = "tpm", logged = FALSE,
 \arguments{
 \item{cds}{A \code{CellDataSet} from the \code{monocle} package}
 
-\item{exprs_values}{What should \code{exprs(cds)} be mapped to in the \code{SCESet}? Should be
-one of "exprs", "tpm", "fpkm", "counts"}
+\item{exprs_values}{What should \code{exprs(cds)} be mapped to in the 
+\code{SCESet}? Should be one of "exprs", "tpm", "fpkm", "counts"}
 
 \item{logged}{logical, if \code{exprs_values="exprs"}, are
 the expression values already on the log2 scale, or not?}
@@ -22,15 +22,8 @@ the expression values already on the log2 scale, or not?}
 An object of class \code{SCESet}
 }
 \description{
-Convert a \code{CellDataSet} to an \code{SCESet}
+Deprecated from scater version 1.5.2.
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-if ( requireNamespace("monocle") ) {
-    # cds <- toCellDataSet(example_sceset) # not run
-    # sceset <- fromCellDataSet(cds) # not run
-}
+\dontrun{"Deprecated"}
 }

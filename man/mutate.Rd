@@ -3,34 +3,31 @@
 \docType{methods}
 \name{mutate}
 \alias{mutate}
-\alias{mutate,SCESet-method}
 \alias{mutate}
-\alias{mutate.SCESet}
-\alias{mutate,SCESet-method}
-\title{Add new variables to \code{pData(object)}.}
+\alias{mutate,SingleCellExperiment-method}
+\title{Add new variables to \code{colData(object)}.}
 \usage{
 mutate(object, ...)
 
-\S4method{mutate}{SCESet}(object, ...)
-
-mutate.SCESet(object, ...)
+\S4method{mutate}{SingleCellExperiment}(object, ...)
 }
 \arguments{
-\item{object}{A \code{SCESet} object.}
+\item{object}{a \code{SingleCellExperiment} object.}
 
 \item{...}{Additional arguments to be passed to \code{dplyr::mutate} to
-act on \code{pData(object)}.}
+act on \code{colData(object)}.}
 }
 \value{
-An SCESet object.
+An SingleCellExperiment object.
 }
 \description{
-Adds new columns to \code{pData(object)} preserving existing variables.
+Adds ne
 }
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-example_sceset <- mutate(example_sceset, is_quiescent = Cell_Cycle == "G0")
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), 
+colData = sc_example_cell_info)
+example_sce <- mutate(example_sce, is_quiescent = Cell_Cycle == "G0")
 }

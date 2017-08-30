@@ -3,36 +3,43 @@
 \docType{methods}
 \name{normalize}
 \alias{normalize}
-\alias{normalize.SCESet}
+\alias{normalizeSCE}
 \alias{normalise}
-\alias{normalize,SCESet-method}
-\alias{normalise,SCESet-method}
-\alias{normalize,SCESet-method}
+\alias{normalize,SingleCellExperiment-method}
+\alias{normalise,SingleCellExperiment-method}
+\alias{normalize,SingleCellExperiment-method}
 \alias{normalize}
 \alias{normalise}
-\title{Normalise an SCESet object using pre-computed size factors}
+\title{Normalise a SingleCellExperiment object using pre-computed size factors}
 \usage{
-normalize.SCESet(object, exprs_values = NULL, logExprsOffset = NULL,
-  centre_size_factors = TRUE, return_norm_as_exprs = TRUE)
+normalizeSCE(object, exprs_values = "counts", return_log = TRUE,
+  log_exprs_offset = NULL, centre_size_factors = TRUE,
+  return_norm_as_exprs = TRUE)
 
-\S4method{normalize}{SCESet}(object, exprs_values = NULL,
-  logExprsOffset = NULL, centre_size_factors = TRUE,
+\S4method{normalize}{SingleCellExperiment}(object, exprs_values = "counts",
+  return_log = TRUE, log_exprs_offset = NULL, centre_size_factors = TRUE,
   return_norm_as_exprs = TRUE)
 
 normalise(...)
 }
 \arguments{
-\item{object}{an \code{SCESet} object.}
+\item{object}{a \code{SingleCellExperiment} object.}
 
 \item{exprs_values}{character string indicating which slot of the
-assayData from the \code{SCESet} object should be used to compute
+assayData from the \code{SingleCellExperiment} object should be used to compute
 log-transformed expression values. Valid options are \code{'counts'},
 \code{'tpm'}, \code{'cpm'} and \code{'fpkm'}. Defaults to the first
 available value of the options in the order shown.}
 
-\item{logExprsOffset}{scalar numeric value giving the offset to add when
-taking log2 of normalised values to return as expression values. If NULL
-(default), then the value from \code{object@logExprsOffset} is used.}
+\item{return_log}{logical(1), should normalized values be returned on the log
+scale? Default is \code{TRUE}. If \code{TRUE}, output is stored as 
+\code{"logcounts"} in the returned object; if \code{FALSE} output is stored
+as \code{"normcounts"}}
+
+\item{log_exprs_offset}{scalar numeric value giving the offset to add when
+taking log2 of normalised values to return as expression values. If \code{NULL},
+value is taken from \code{metadata(object)$log.exprs.offset} if defined,
+otherwise 1.}
 
 \item{centre_size_factors}{logical, should size factors centred
 at unity be stored in the returned object if \code{exprs_values="counts"}?
@@ -49,10 +56,10 @@ normalised expression values will be returned in the
 \item{...}{arguments passed to \code{normalize} when calling \code{normalise}.}
 }
 \value{
-an SCESet object
+an SingleCellExperiment object
 }
 \description{
-Compute normalised expression values from an SCESet object using the size
+Compute normalised expression values from a SingleCellExperiment object using the size
 factors stored in the object. Return the object with the normalised
 expression values added.
 }
@@ -66,39 +73,39 @@ British/Australian spelling.
 Centring the size factors ensures that the computed \code{exprs} can be 
 interpreted as being on the same scale as log-counts. This does not affect
 relative comparisons between cells in the same \code{object}, as all size 
-factors are scaled by the same amount. However, if two different \code{SCESet}
+factors are scaled by the same amount. However, if two different \code{SingleCellExperiment}
 objects are run separately through \code{normalize}, the size factors 
 in each object will be rescaled differently. This means that the size factors
 and \code{exprs} will \emph{not} be comparable between objects.
 
 This lack of comparability is not always obvious. For example, if we subsetted
-an existing \code{SCESet}, and ran \code{normalize} separately on each subset, 
+an existing \code{SingleCellExperiment}, and ran \code{normalize} separately on each subset, 
 the resulting \code{exprs} in each subsetted object would \emph{not} be 
 comparable to each other. This is despite the fact that all cells were 
-originally derived from a single \code{SCESet} object. 
+originally derived from a single \code{SingleCellExperiment} object. 
 
 In general, it is advisable to only compare size factors and \code{exprs}
-between cells in one \code{SCESet} object. If objects are to be combined,
-e.g., with \code{\link{mergeSCESet}}, new size factors should be computed 
+between cells in one \code{SingleCellExperiment} object. If objects are to be combined,
+new size factors should be computed 
 using all cells in the combined object, followed by running \code{normalize}.
 }
 
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-keep_gene <- rowSums(counts(example_sceset)) > 0
-example_sceset <- example_sceset[keep_gene,]
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+keep_gene <- rowSums(counts(example_sce)) > 0
+example_sce <- example_sce[keep_gene,]
 
 ## Apply TMM normalisation taking into account all genes
-example_sceset <- normaliseExprs(example_sceset, method = "TMM")
+example_sce <- normaliseExprs(example_sce, method = "TMM")
 ## Scale counts relative to a set of control features (here the first 100 features)
-example_sceset <- normaliseExprs(example_sceset, method = "none",
+example_sce <- normaliseExprs(example_sce, method = "none",
 feature_set = 1:100)
 
 ## normalize the object using the saved size factors
-example_sceset <- normalize(example_sceset)
+example_sce <- normalize(example_sce)
 
 }
 \author{

@@ -12,7 +12,7 @@ getBMFeatureAnnos(object, filters = "ensembl_transcript_id",
   dataset = "mmusculus_gene_ensembl", host = "www.ensembl.org")
 }
 \arguments{
-\item{object}{an \code{SCESet} object}
+\item{object}{an \code{SingleCellExperiment} object}
 
 \item{filters}{character vector defining the "filters" terms to pass to the
 biomaRt::getBM function.}
@@ -22,13 +22,13 @@ the \code{attributes} argument of \code{\link[biomaRt]{getBM}}.}
 
 \item{feature_symbol}{character string defining the biomaRt attribute to be 
 used to define the symbol to be used for each feature (which appears as the 
-\code{feature_symbol} in fData(object), subsequently). Default is 
+\code{feature_symbol} in rowData(object), subsequently). Default is 
 \code{"mgi_symbol"}, gene symbols for mouse. This should be changed if the 
 organism is not Mus musculus!}
 
 \item{feature_id}{character string defining the biomaRt attribute to be used 
 to define the ID to be used for each feature (which appears as the 
-\code{feature_id} in fData(object), subsequently). Default is 
+\code{feature_id} in rowData(object), subsequently). Default is 
 \code{"ensembl_gene_id"}, Ensembl gene IDs for mouse. This should be changed 
 if the organism is not Mus musculus!}
 
@@ -45,15 +45,15 @@ versions of biomaRt data. Default is \code{"www.ensembl.org"}, in which case the
 version of the biomaRt (now hosted by Ensembl) is used.}
 }
 \value{
-an SCESet object
+a SingleCellExperiment object
 }
 \description{
-Use the \code{biomaRt} package to add feature annotation information to an 
-\code{SCESet}.
+Use the biomaRt package to add feature annotation information to an 
+\code{\link{SingleCellExperiment}}.
 }
 \details{
 See the documentation for the biomaRt package, specifically for the
-functions \code{useMart} and \code{getBM}, for information on what are 
+functions \code{useMart} and \code{\link[biomaRt]{getBM}}, for information on what are 
 permitted values for the filters, attributes, biomart, dataset and host 
 arguments.
 }

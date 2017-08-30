@@ -7,7 +7,7 @@
 areSizeFactorsCentred(object, centre = 1, tol = 1e-06)
 }
 \arguments{
-\item{object}{an \code{SCESet} object containing multiple sets of
+\item{object}{an \code{SingleCellExperiment} object containing multiple sets of
 size factors.}
 
 \item{centre}{a numeric scalar, the value around which all sets of
@@ -17,7 +17,7 @@ size factors should be centred.}
 mean of each size factor set to \code{centre}.}
 }
 \value{
-a \code{SCESet} object with centred size factors
+a \code{SingleCellExperiment} object with centred size factors
 }
 \description{
 Checks if each set of size factors is centred at unity, such that
@@ -27,14 +27,14 @@ with different sets of size factors.
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-keep_gene <- rowSums(counts(example_sceset)) > 0
-example_sceset <- example_sceset[keep_gene,]
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+keep_gene <- rowSums(counts(example_sce)) > 0
+example_sce <- example_sce[keep_gene,]
 
-sizeFactors(example_sceset) <- runif(ncol(example_sceset))
-areSizeFactorsCentred(example_sceset)
-example_sceset <- normalize(example_sceset, centre=TRUE)
-areSizeFactorsCentred(example_sceset)
+sizeFactors(example_sce) <- runif(ncol(example_sce))
+areSizeFactorsCentred(example_sce)
+example_sce <- normalize(example_sce, centre = TRUE)
+areSizeFactorsCentred(example_sce)
 
 }

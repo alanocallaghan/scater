@@ -5,7 +5,7 @@
 \title{Find most important principal components for a given variable}
 \usage{
 findImportantPCs(object, variable = "total_features",
-  plot_type = "pcs-vs-vars", exprs_values = "exprs", ntop = 500,
+  plot_type = "pcs-vs-vars", exprs_values = "logcounts", ntop = 500,
   feature_set = NULL, scale_features = TRUE, theme_size = 10)
 }
 \arguments{
@@ -13,7 +13,7 @@ findImportantPCs(object, variable = "total_features",
 experimental information. Must have been appropriately prepared.}
 
 \item{variable}{character scalar providing a variable name (column from
-\code{pData(object)}) for which to determine the most important PCs.}
+\code{colData(object)}) for which to determine the most important PCs.}
 
 \item{plot_type}{character string, indicating which type of plot to produce.
 Default, \code{"pairs-pcs"} produces a pairs plot for the top 5 PCs based on
@@ -23,7 +23,7 @@ interest.}
 
 \item{exprs_values}{which slot of the \code{assayData} in the \code{object}
 should be used to define expression? Valid options are "counts",
-"tpm", "fpkm" and "exprs" (default), or anything else in the object added manually by 
+"tpm", "fpkm" and "logcounts" (default), or anything else in the object added manually by 
 the user.}
 
 \item{ntop}{numeric scalar indicating the number of most variable features to
@@ -32,7 +32,7 @@ overrided if the \code{feature_set} argument is non-NULL.}
 
 \item{feature_set}{character, numeric or logical vector indicating a set of
 features to use for the PCA. If character, entries must all be in
-\code{featureNames(object)}. If numeric, values are taken to be indices for
+\code{rownames(object)}. If numeric, values are taken to be indices for
 features. If logical, vector is used to index features and should have length
 equal to \code{nrow(object)}.}
 
@@ -56,12 +56,12 @@ of interest.
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-rownames(pd) <- pd$Cell
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-drop_genes <- apply(exprs(example_sceset), 1, function(x) {var(x) == 0})
-example_sceset <- example_sceset[!drop_genes, ]
-example_sceset <- calculateQCMetrics(example_sceset)
-findImportantPCs(example_sceset, variable="total_features")
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+example_sce <- normalize(example_sce)
+drop_genes <- apply(exprs(example_sce), 1, function(x) {var(x) == 0})
+example_sce <- example_sce[!drop_genes, ]
+example_sce <- calculateQCMetrics(example_sce)
+findImportantPCs(example_sce, variable="total_features")
 
 }

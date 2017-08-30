@@ -3,35 +3,33 @@
 \docType{methods}
 \name{filter}
 \alias{filter}
-\alias{filter,SCESet-method}
 \alias{filter}
-\alias{filter.SCESet}
-\alias{filter,SCESet-method}
-\title{Return \code{SCESet} with cells matching conditions.}
+\alias{filter,SingleCellExperiment-method}
+\title{Return \code{SingleCellExperiment} with cells matching conditions.}
 \usage{
 filter(object, ...)
 
-\S4method{filter}{SCESet}(object, ...)
-
-filter.SCESet(object, ...)
+\S4method{filter}{SingleCellExperiment}(object, ...)
 }
 \arguments{
-\item{object}{A \code{SCESet} object.}
+\item{object}{A \code{SingleCellExperiment} object.}
 
 \item{...}{Additional arguments to be passed to \code{dplyr::filter} to
-act on \code{pData(object)}.}
+act on \code{colData(object)}.}
 }
 \value{
-An SCESet object.
+An SingleCellExperiment object.
 }
 \description{
-Subsets the columns (cells) of a \code{SCESet} based on 
-matching conditions in the rows of \code{pData(object)}.
+Subsets the columns (cells) of a \code{SingleCellExperiment} based on
+matching conditions in the rows of \code{colData(object)}.
 }
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-example_sceset_treat1 <- filter(example_sceset, Treatment == "treat1")
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), 
+colData = sc_example_cell_info)
+example_sce_treat1 <- filter(example_sce, Treatment == "treat1")
+
 }

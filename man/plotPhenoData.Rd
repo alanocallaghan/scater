@@ -2,30 +2,39 @@
 % Please edit documentation in R/plotting.R
 \name{plotPhenoData}
 \alias{plotPhenoData}
-\title{Plot phenotype data from an SCESet object}
+\alias{plotColData}
+\alias{plotCellData}
+\title{Plot cell phenotype data from an SingleCellExperiment object}
 \usage{
 plotPhenoData(object, aesth = aes_string(x = "log10(total_counts)", y =
   "total_features"), ...)
+
+plotColData(...)
+
+plotCellData(...)
 }
 \arguments{
-\item{object}{an SCESet object containing expression values and
+\item{object}{an \code{\link{SingleCellExperiment}} object containing expression values and
 experimental information. Must have been appropriately prepared.}
 
 \item{aesth}{aesthetics function call to pass to ggplot. This function
 expects at least x and y variables to be supplied. The default is to plot
 total_features against log10(total_counts).}
 
-\item{...}{arguments passed to \code{\link{plotMetadata}}, e.g. 
-\code{theme_size}, \code{size}, \code{alpha}, \code{shape}.}
+\item{...}{arguments passed to \code{\link{plotPhenoData}} (if
+\code{\link{plotColData}} or \code{\link{plotCellData}}) or to
+\code{\link{plotMetadata}}, e.g.\code{theme_size}, \code{size},
+\code{alpha}, \code{shape}.}
 }
 \value{
 a ggplot plot object
 }
 \description{
-Plot phenotype data from an SCESet object
+\code{plotPhenoData}, \code{plotColData} and \code{plotCellData} are
+synonymous.
 }
 \details{
-Plot phenotype data from an SCESet object. If one variable is
+Plot phenotype data from a SingleCellExperiment object. If one variable is
 supplied then a density plot will be returned. If both variables are
 continuous (numeric) then a scatter plot will be returned. If one variable is
 discrete and one continuous then a violin plot with jittered points overlaid
@@ -36,10 +45,16 @@ plotting options (titles, facets, themes etc) can be added.
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-example_sceset <- calculateQCMetrics(example_sceset)
-plotPhenoData(example_sceset, aesth = aes_string(x = "log10(total_counts)",
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+example_sce <- calculateQCMetrics(example_sce)
+plotPhenoData(example_sce, aesth = aes_string(x = "log10(total_counts)",
+y = "total_features", colour = "Mutation_Status"))
+
+plotColData(example_sce, aesth = aes_string(x = "log10(total_counts)",
+y = "total_features", colour = "Mutation_Status"))
+
+plotCellData(example_sce, aesth = aes_string(x = "log10(total_counts)",
 y = "total_features", colour = "Mutation_Status"))
 
 }

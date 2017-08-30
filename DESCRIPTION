@@ -1,27 +1,27 @@
 Package: scater
 Type: Package
-Maintainer: Davis McCarthy <davis@ebi.ac.uk>
-Author: Davis McCarthy
 Authors@R: c(person("Davis", "McCarthy", role=c("aut", "cre"),
-        email="davis@ebi.ac.uk"), person("Quin", "Wills",
-        role=c("aut"), email="qilin@quinwills.net"), person("Kieran",
-        "Campbell", role=c("aut"),
-        email="kieran.campbell@sjc.ox.ac.uk"),  person("Vladimir",
-        "Kiselev", role=c("ctb"),
-        email="vk6@sanger.ac.uk"), person("Aaron", "Lun", role = c("ctb"),
-        email="aaron.lun@cruk.cam.ac.uk"))
-Version: 1.5.0
-Date: 2017-04-22
+        email="davis@ebi.ac.uk"), person("Kieran", "Campbell", 
+        role=c("aut"), email="kieran.campbell@sjc.ox.ac.uk"),  
+        person("Aaron", "Lun", role = c("aut", "ctb"),
+        email="aaron.lun@cruk.cam.ac.uk"), person("Quin", "Wills",
+        role=c("aut"), email="qilin@quinwills.net"), 
+        person("Vladimir", "Kiselev", role=c("ctb"),
+        email="vk6@sanger.ac.uk"))
+Maintainer: Davis McCarthy <davis@ebi.ac.uk>, Aaron Lun 
+        <aaron.lun@cruk.cam.ac.uk>
+Version: 1.5.11
+Date: 2017-08-30
 License: GPL (>= 2)
 Title: Single-cell analysis toolkit for gene expression data in R
 Description: A collection of tools for doing various analyses of
         single-cell RNA-seq gene expression data, with a focus on
         quality control.
-Depends: R (>= 3.3), Biobase, ggplot2, methods
-Imports: biomaRt, BiocGenerics, data.table, dplyr, edgeR, ggbeeswarm, grid, limma,
-        Matrix, matrixStats, parallel, plyr, reshape2, rhdf5, rjson, shiny,
-        shinydashboard, stats, tximport, utils, viridis
-Suggests: BiocStyle, cowplot, cluster, destiny, knitr, monocle,
+Depends: R (>= 3.3), Biobase, ggplot2, SingleCellExperiment, SummarizedExperiment
+Imports: biomaRt, BiocGenerics, data.table, dplyr, edgeR, ggbeeswarm, graphics, grid, limma,
+        Matrix, matrixStats, methods, parallel, plyr, reshape2, rhdf5, rjson, 
+        S4Vectors, shiny, shinydashboard, stats, tximport, utils, viridis, Rcpp
+Suggests: BiocStyle, beachmat, cowplot, cluster, destiny, knitr, monocle,
         mvoutlier, rmarkdown, Rtsne, testthat, magrittr
 VignetteBuilder: knitr
 LazyData: true
@@ -29,6 +29,8 @@ biocViews: SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,
         Visualization, DimensionReduction, Transcriptomics,
         GeneExpression, Sequencing, Software, DataImport,
         DataRepresentation, Infrastructure
+LinkingTo: Rhdf5lib, Rcpp, beachmat
+SystemRequirements: C++11
 RoxygenNote: 6.0.1
 NeedsCompilation: yes
 URL: http://bioconductor.org/packages/scater/

@@ -6,16 +6,17 @@
 observed counts, transcripts-per-million, counts-per-million, FPKM, or
 defined expression levels.}
 \usage{
-calcIsExprs(object, lowerDetectionLimit = NULL, exprs_values = NULL)
+calcIsExprs(object, lowerDetectionLimit = 0, exprs_values = "counts")
 }
 \arguments{
-\item{object}{an SCESet object with expression and/or count data.}
+\item{object}{a \code{\link{SingleCellExperiment}} object with expression 
+and/or count data.}
 
 \item{lowerDetectionLimit}{numeric scalar giving the minimum expression level
 for an expression observation in a cell for it to qualify as expressed.}
 
 \item{exprs_values}{character scalar indicating whether the count data
-(\code{"counts"}), the transformed expression data (\code{"exprs"}),
+(\code{"counts"}), the log-transformed count data (\code{"logcounts"}),
 transcript-per-million (\code{"tpm"}), counts-per-million (\code{"cpm"}) or
 FPKM (\code{"fpkm"}) should be used to define if an observation is expressed
 or not. Defaults to the first available value of those options in the
@@ -33,7 +34,8 @@ defined expression levels.
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-example_sceset <- newSCESet(countData=sc_example_counts)
-is_exprs(example_sceset) <- calcIsExprs(example_sceset, lowerDetectionLimit = 1,
-exprs_values = "exprs")
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+assay(example_sce, "is_exprs") <- calcIsExprs(example_sce, 
+lowerDetectionLimit = 1, exprs_values = "counts")
 }

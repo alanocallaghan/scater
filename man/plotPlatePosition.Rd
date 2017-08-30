@@ -5,21 +5,21 @@
 \title{Plot cells in plate positions}
 \usage{
 plotPlatePosition(object, plate_position = NULL, colour_by = NULL,
-  x_position = NULL, y_position = NULL, exprs_values = "exprs",
+  x_position = NULL, y_position = NULL, exprs_values = "logcounts",
   theme_size = 24, legend = "auto")
 }
 \arguments{
-\item{object}{an \code{SCESet} object. If \code{object$plate_position} is not
+\item{object}{an \code{SingleCellExperiment} object. If \code{object$plate_position} is not
 \code{NULL}, then this will be used to define each cell's position on the
 plate, unless the \code{plate_position} argument is specified.}
 
 \item{plate_position}{optional character vector providing a position on the
 plate for each cell (e.g. A01, B12, etc, where letter indicates row and
 number indicates column). Specifying this argument overrides any plate
-position information extracted from the SCESet object.}
+position information extracted from the SingleCellExperiment object.}
 
 \item{colour_by}{character string defining the column of \code{pData(object)} to
-be used as a factor by which to colour the points in the plot. Alternatively, a 
+be used as a factor by which to colour the points in the plot. Alternatively, a
 data frame with one column containing values to map to colours for all cells.}
 
 \item{x_position}{numeric vector providing x-axis positions for the cells
@@ -60,17 +60,19 @@ values to be used as x- and y-coordinates by supplying both the
 ## prepare data
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-example_sceset <- calculateQCMetrics(example_sceset)
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+example_sce <- normalize(example_sce)
+example_sce <- calculateQCMetrics(example_sce)
 
 ## define plate positions
-example_sceset$plate_position <- paste0(
+example_sce$plate_position <- paste0(
 rep(LETTERS[1:5], each = 8), rep(formatC(1:8, width = 2, flag = "0"), 5))
 
 ## plot plate positions
-plotPlatePosition(example_sceset, colour_by = "Mutation_Status")
+plotPlatePosition(example_sce, colour_by = "Mutation_Status")
 
-plotPlatePosition(example_sceset, colour_by = "Gene_0004")
+## Must have exprs slot defined in object
+plotPlatePosition(example_sce, colour_by = "Gene_0004")
 
 }

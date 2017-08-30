@@ -2,31 +2,34 @@
 % Please edit documentation in R/plotting.R
 \name{plotFeatureData}
 \alias{plotFeatureData}
-\title{Plot feature (gene) data from an SCESet object}
+\alias{plotRowData}
+\title{Plot feature (gene) data from a SingleCellExperiment object}
 \usage{
-plotFeatureData(object, aesth = aes_string(x = "n_cells_exprs", y =
-  "prop_total_counts"), ...)
+plotFeatureData(object, aesth = aes_string(x = "n_cells_counts", y =
+  "log10_total_counts"), ...)
+
+plotRowData(...)
 }
 \arguments{
-\item{object}{an SCESet object containing expression values and
-experimental information. Must have been appropriately prepared.}
+\item{object}{an \code{\link{SingleCellExperiment}} object containing
+expression values and experimental information. Must have been appropriately prepared.}
 
 \item{aesth}{aesthetics function call to pass to ggplot. This function
 expects at least x and y variables to be supplied. The default is to produce
 a density plot of number of cells expressing the feature (requires
-\code{calculateQCMetrics} to have been run on the SCESet object prior).}
+\code{calculateQCMetrics} to have been run on the \code{SingleCellExperiment} object prior).}
 
-\item{...}{arguments passed to \code{\link{plotMetadata}}, e.g. 
+\item{...}{arguments passed to \code{\link{plotMetadata}}, e.g.
 \code{theme_size}, \code{size}, \code{alpha}, \code{shape}.}
 }
 \value{
 a ggplot plot object
 }
 \description{
-Plot feature (gene) data from an SCESet object
+\code{plotFeatureData} and \code{plotRowData} are synonymous.
 }
 \details{
-Plot feature (gene) data from an SCESet object. If one variable is
+Plot feature (gene) data from an SingleCellExperiment object. If one variable is
 supplied then a density plot will be returned. If both variables are
 continuous (numeric) then a scatter plot will be returned. If one variable is
 discrete and one continuous then a violin plot with jittered points overlaid
@@ -37,9 +40,11 @@ plotting options (titles, facets, themes etc) can be added.
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-example_sceset <- calculateQCMetrics(example_sceset)
-plotFeatureData(example_sceset, aesth=aes(x=n_cells_exprs, y=pct_total_counts))
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+example_sce <- calculateQCMetrics(example_sce)
+plotFeatureData(example_sce, aesth = aes(x = n_cells_counts, y = log10_total_counts))
+
+plotRowData(example_sce, aesth = aes(x = n_cells_counts, y = log10_total_counts))
 
 }

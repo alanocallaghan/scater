@@ -233,16 +233,13 @@ readSalmonResults <- function(Salmon_log = NULL, samples = NULL,
         cat("\n")
     ## Produce SCESet object
     pdata <- pdata[!duplicated(rownames(pdata)), !duplicated(colnames(pdata))]
-    pdata <- new("AnnotatedDataFrame", pdata)
     fdata <- fdata[!duplicated(rownames(fdata)), !duplicated(colnames(fdata))]
-    fdata <- new("AnnotatedDataFrame", fdata)
-    sce_out <- newSCESet(exprsData = log2(tpm + logExprsOffset), 
-                         phenoData = pdata, featureData = fdata, 
-                         countData = est_counts, 
-                         logExprsOffset = logExprsOffset, 
-                         lowerDetectionLimit = 0)
-    tpm(sce_out) <- tpm
-    set_exprs(sce_out, "feature_effective_length") <- feat_eff_len
+    ## Produce SingleCellExperiment object
+    sce_out <- SingleCellExperiment(
+        list(exprs = log2(tpm + logExprsOffset), 
+             counts = est_counts, tpm = tpm, 
+             feature_effective_length = feat_eff_len), 
+        colData = pdata, rowData = fdata)
     if ( verbose )
         cat("Using log2(TPM + 1) as 'exprs' values in output.\n")
     ## Return SCESet object
@@ -419,7 +416,7 @@ runSalmon <- function(targets_file, transcript_index, single_end = FALSE,
     salmon_log
 }
 
-.call_Salmon <- function(scall, salmon_cmd, verbose=TRUE) {
+.call_Salmon <- function(scall, salmon_cmd, verbose = TRUE) {
     out <- tryCatch(ex <- system2(salmon_cmd, scall, stdout = TRUE,
                                   stderr = TRUE),
                     warning = function(w){w}, error = function(e){e})

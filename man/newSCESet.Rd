@@ -2,7 +2,7 @@
 % Please edit documentation in R/SCESet-methods.R
 \name{newSCESet}
 \alias{newSCESet}
-\title{Create a new SCESet object.}
+\title{Create a new SCESet object}
 \usage{
 newSCESet(exprsData = NULL, countData = NULL, tpmData = NULL,
   fpkmData = NULL, cpmData = NULL, phenoData = NULL, featureData = NULL,
@@ -50,56 +50,25 @@ log2-transformations of expression data to avoid trying to take logs of zero.
 Default offset value is \code{1}.}
 }
 \value{
-a new SCESet object
+a \code{\link{SingleCellExperiment}} object
 }
 \description{
-Create a new SCESet object (the basic data container class in scater) from a
-supplied matrix of expression values, plus cell and feature metadata. The
-expression matrix have rows representing features (usually genes) and columns
-representing cells.
+Deprecated from scater version 1.3.29; the package now uses the 
+\code{\link{SingleCellExperiment}} class. To convert an SCESet object to 
+SingleCellExperiment see the \code{\link{toSingleCellExperiment}} function. 
+This function is retained for backwards compatibility.
 }
 \details{
-Scater requires that all data be housed in SCESet objects. SCESet extends
-Bioconductor's ExpressionSet class, and the same basic interface is
-supported. newSCESet() expects a single matrix of expression values of a
-nominated type to be provided, for example a matrix of counts or a matrix of
-transcripts-per-million values. There is a hierarchy applied to the
-expression data: counts > transcripts-per-million (tpm) > counts-per-million
-(cpm) > fragments-per-kilobase-per-million-mapped (fpkm) > generic expression
-values on the log2 scale (exprs). Data types higher in the higher are
-preferred. Data types lower in the hierarchy will be computed from values
-higher in the hierarchy - e.g. counts-per-million and expression values
-(as log2(cpm + offset)) will be computed from counts. Data types higher in
-the hierarchy will never be computed from types lower in the hierarchy (e.g.
-counts will never be computed from exprs values). At a
-minimum, an SCESet object will contain exprs values; these will be computed
-as log2(*pm + offset) values if a data type higher in the hierarchy is
-supplied as the expression matrix.
-
-Per-feature and per-cell metadata can be supplied with the featureData and
-phenoData arguments, respectively. Use of these optional arguments is strongly encouraged.
-
-Many methods are provided in the package that operate on SCESet objects.
-
-Aside from the hierarchy of data types described above, scater is relatively
-agnostic with respect to data the nature of the expression values. Most
-frequently used values are feature counts or transcripts-per-million (tpm),
-but any valid output from a program that calculates expression values from
-RNA-Seq reads is supported. For example, expression values could also be
-values from a single cell qPCR run or some other type of assay.
-
-In some cases it may be desirable to have both tpm and counts in an SCESet
-object. In such cases, expression matrices can be added to an SCESet object
-after it has been produced by using the \code{\link{set_exprs}} function to
-add the expression matrix to the SCESet object.
-
-In many downstream functions it is most convenient if the
-\code{'exprs'} values are on the log2-scale, so this is done by default.
+This function now returns a \code{\link{SingleCellExperiment}} object, 
+whereas earlier versions produced an \code{SCESet} object. The \code{scater}
+package now uses \code{SingleCellExperiment} as its data structure instead
+of \code{SCESet}.
 }
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
 pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-example_sceset
+\dontrun{
+example_sce <- newSCESet(countData = sc_example_counts, phenoData = pd)
+}
 }

@@ -4,10 +4,10 @@
 \alias{scater_gui}
 \title{scater GUI function}
 \usage{
-scater_gui(sce_set)
+scater_gui(object)
 }
 \arguments{
-\item{sce_set}{SCESet object after running \code{\link{calculateQCMetrics}} 
+\item{object}{SinglCellExperiment object after running \code{\link{calculateQCMetrics}} 
 on it}
 }
 \value{
@@ -21,14 +21,15 @@ those who would like a quick and easy way to view multiple plots.
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data=sc_example_cell_info)
-rownames(pd) <- pd$Cell
-example_sceset <- newSCESet(countData=sc_example_counts, phenoData=pd)
-drop_genes <- apply(exprs(example_sceset), 1, function(x) {var(x) == 0})
-example_sceset <- example_sceset[!drop_genes, ]
-example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:40)
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+example_sce <- normalize(example_sce)
+drop_genes <- apply(exprs(example_sce), 1, function(x) {var(x) == 0})
+example_sce <- example_sce[!drop_genes, ]
+example_sce <- calculateQCMetrics(example_sce, 
+feature_controls = list(set1 = 1:40))
 \dontrun{
-scater_gui(example_sceset)
+scater_gui(example_sce)
 }
 }
 \author{

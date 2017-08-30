@@ -8,14 +8,14 @@ summariseExprsAcrossFeatures(object, exprs_values = "tpm",
   summarise_by = "feature_id", scaled_tpm_counts = TRUE, lib_size = NULL)
 }
 \arguments{
-\item{object}{an \code{SCESet} object.}
+\item{object}{an \code{SingleCellExperiment} object.}
 
 \item{exprs_values}{character string indicating which slot of the 
-assayData from the \code{SCESet} object should be used as expression values. 
-Valid options are \code{'exprs'} the expression slot, \code{'tpm'} the 
+assayData from the \code{SingleCellExperiment} object should be used as expression values. 
+Valid options are \code{'counts'} the counts slot, \code{'tpm'} the 
 transcripts-per-million slot or \code{'fpkm'} the FPKM slot.}
 
-\item{summarise_by}{character string giving the column of \code{fData(object)}
+\item{summarise_by}{character string giving the column of \code{rowData(object)}
 that will be used as the features for which summarised expression levels are 
 to be produced. Default is \code{'feature_id'}.}
 
@@ -26,14 +26,14 @@ the default is \code{TRUE} and it is applied if TPM values are available in
 the object.}
 
 \item{lib_size}{optional vector of numeric values of same length as the 
-number of columns in the \code{SCESet} object providing the total library 
+number of columns in the \code{SingleCellExperiment} object providing the total library 
 size (e.g. "count of mapped reads") for each cell/sample.}
 }
 \value{
-an SCESet object
+an SingleCellExperiment object
 }
 \description{
-Create a new \code{SCESet} with counts summarised at a different feature 
+Create a new \code{\link{SingleCellExperiment}} with counts summarised at a different feature 
 level. A typical use would be to summarise transcript-level counts at gene
 level.
 }
@@ -53,21 +53,18 @@ transcript expression values at the gene level see Sonesen et al, 2016
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-fd <- new("AnnotatedDataFrame", data = 
-data.frame(gene_id = featureNames(example_sceset), 
-feature_id = paste("feature", rep(1:500, each = 4), sep = "_")))
-rownames(fd) <- featureNames(example_sceset)
-fData(example_sceset) <- fd
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+rd <- data.frame(gene_id = rownames(example_sce), 
+feature_id = paste("feature", rep(1:500, each = 4), sep = "_"))
+rownames(rd) <- rownames(example_sce)
+rowData(example_sce) <- rd
 effective_length <- rep(c(1000, 2000), times = 1000)
-tpm(example_sceset) <- calculateTPM(example_sceset, effective_length, calc_from = "counts")
+tpm(example_sce) <- calculateTPM(example_sce, effective_length, calc_from = "counts")
 
 example_sceset_summarised <- 
-summariseExprsAcrossFeatures(example_sceset, exprs_values = "tpm")
+summariseExprsAcrossFeatures(example_sce, exprs_values = "tpm")
 example_sceset_summarised <- 
-summariseExprsAcrossFeatures(example_sceset, exprs_values = "counts")
-example_sceset_summarised <- 
-summariseExprsAcrossFeatures(example_sceset, exprs_values = "exprs")
+summariseExprsAcrossFeatures(example_sce, exprs_values = "counts")
 
 }

@@ -2,12 +2,12 @@
 
 ################################################################################
 
-#' Normalise expression expression levels for an SCESet object
+#' Normalise expression expression levels for an SingleCellExperiment object
 #'
-#' Compute normalised expression values from an SCESet object and return the
+#' Compute normalised expression values from an SingleCellExperiment object and return the
 #' object with the normalised expression values added.
 #'
-#' @param object an \code{SCESet} object.
+#' @param object an \code{SingleCellExperiment} object.
 #' @param method character string specified the method of calculating
 #' normalisation factors. Passed to \code{\link[edgeR]{calcNormFactors}}.
 #' @param design design matrix defining the linear model to be fitted to the
@@ -19,7 +19,7 @@
 #' be indices for features. If logical, vector is used to index features and should
 #' have length equal to \code{nrow(object)}.
 #' @param exprs_values character string indicating which slot of the
-#' assayData from the \code{SCESet} object should be used for the calculations.
+#' assayData from the \code{SingleCellExperiment} object should be used for the calculations.
 #' Valid options are \code{'counts'}, \code{'tpm'}, \code{'cpm'}, \code{'fpkm'}
 #' and \code{'exprs'}. Defaults to the first available value of these options in
 #' in order shown.
@@ -32,11 +32,11 @@
 #' \code{normalizeExprs}) or to \code{\link[edgeR]{calcNormFactors}}.
 #'
 #' @details This function allows the user to compute normalised expression
-#' values from an SCESet object. The 'raw' values used can be the values in the
+#' values from an SingleCellExperiment object. The 'raw' values used can be the values in the
 #' \code{'counts'} (default), \code{'tpm'}, \code{'cpm'} or \code{'fpkm'} slot
-#' of the SCESet. Normalised expression values are computed through
-#' \code{\link{normalize.SCESet}} and are on the log2-scale, with an offset
-#' defined by the \code{logExprsOffset} slot of the SCESet object. These are
+#' of the SingleCellExperiment. Normalised expression values are computed through
+#' \code{\link{normalizeSCE}} and are on the log2-scale, with an offset
+#' defined by the \code{logExprsOffset} slot of the SingleCellExperiment object. These are
 #' dded to the \code{'norm_exprs'} slot of the returned object. If
 #' \code{'exprs_values'} argument is \code{'counts'}, a \code{'norm_cpm'} slot
 #' is also added, containing normalised counts-per-million values.
@@ -60,12 +60,12 @@
 #' After normalisation, normalised expression values can be accessed with the
 #' \code{\link{norm_exprs}} function (with corresponding accessor functions for
 #' counts, tpm, fpkm, cpm). These functions can also be used to assign normalised
-#' expression values produced with external tools to an SCESet object.
+#' expression values produced with external tools to a SingleCellExperiment object.
 #'
 #' \code{normalizeExprs} is exactly the same as \code{normaliseExprs}, provided
 #' for those who prefer North American spelling.
 #'
-#' @return an SCESet object
+#' @return an SingleCellExperiment object
 #'
 #' @author Davis McCarthy
 #' @importFrom edgeR calcNormFactors.default
@@ -75,29 +75,25 @@
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
-#' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-#' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-#' keep_gene <- rowSums(counts(example_sceset)) > 0
-#' example_sceset <- example_sceset[keep_gene,]
+#' example_sce <- SingleCellExperiment(
+#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#' keep_gene <- rowSums(counts(example_sce)) > 0
+#' example_sce <- example_sce[keep_gene,]
 #'
 #' ## Apply TMM normalisation taking into account all genes
-#' example_sceset <- normaliseExprs(example_sceset, method = "TMM")
+#' example_sce <- normaliseExprs(example_sce, method = "TMM")
 #' ## Scale counts relative to a set of control features (here the first 100 features)
-#' example_sceset <- normaliseExprs(example_sceset, method = "none",
+#' example_sce <- normaliseExprs(example_sce, method = "none",
 #' feature_set = 1:100)
 #'
 normaliseExprs <- function(object, method = "none", design = NULL, feature_set = NULL,
-                           exprs_values = NULL, return_norm_as_exprs = TRUE,
+                           exprs_values = "counts", return_norm_as_exprs = TRUE,
                            ...) {
-    if ( !is(object, "SCESet") )
-        stop("'object' must be an SCESet")
-
-    ## Define expression values to be used
-    exprs_values <- .exprs_hunter(object, exprs_values)
-
+    if (!methods::is(object, "SingleCellExperiment"))
+        stop("object argument must be a SingleCellExperiment")
     ## If counts, we can compute size factors.
     if (exprs_values == "counts") {
-        exprs_mat <- get_exprs(object, exprs_values, warning = FALSE)
+        exprs_mat <- assay(object, i = exprs_values)
 
         ## Check feature_set
         if (is.character(feature_set)) {
@@ -124,12 +120,13 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
         sizeFactors(object) <- size_factors
 
         ## Computing (normalized) CPMs is also possible.
-        norm_cpm(object) <- calculateCPM(object, use.size.factors = TRUE)
+        assay(object, "norm_cpm") <- calculateCPM(object, 
+                                                  use.size.factors = TRUE)
     }
 
     ## Computing normalized expression values, if we're not working with 'exprs'.
-    if (exprs_values != "exprs") {
-        object <- normalize.SCESet(object, exprs_values = exprs_values,
+    if (exprs_values != "logcounts") {
+        object <- normalizeSCE(object, exprs_values = exprs_values,
                                    return_norm_as_exprs = return_norm_as_exprs)
     }
 
@@ -142,8 +139,11 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
     ## If a design matrix is provided, then normalised expression values are
     ## residuals of a linear model fit to norm_exprs values with that design
     if ( !is.null(design) ) {
-        if (exprs_values != "exprs")
-            norm_exprs_mat <- norm_exprs(object)
+        if (exprs_values != "logcounts")
+            if (return_norm_as_exprs)
+                norm_exprs_mat <- exprs(object)
+            else 
+                norm_exprs_mat <- norm_exprs(object)
         else 
             norm_exprs_mat <- exprs(object)
         limma_fit <- limma::lmFit(norm_exprs_mat, design)
@@ -153,9 +153,9 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
 
     ## Return normalised expression values in exprs(object)?
     if ( return_norm_as_exprs )
-        set_exprs(object, "exprs") <- norm_exprs(object)
+        assay(object, "logcounts") <- norm_exprs(object)
 
-    ## Return SCESet object
+    ## Return SingleCellExperiment object
     object
 }
 
@@ -170,21 +170,26 @@ normalizeExprs <- function(...) {
 
 ################################################################################
 
-#' Normalise an SCESet object using pre-computed size factors
+#' Normalise a SingleCellExperiment object using pre-computed size factors
 #'
-#' Compute normalised expression values from an SCESet object using the size
+#' Compute normalised expression values from a SingleCellExperiment object using the size
 #' factors stored in the object. Return the object with the normalised
 #' expression values added.
 #'
-#' @param object an \code{SCESet} object.
+#' @param object a \code{SingleCellExperiment} object.
 #' @param exprs_values character string indicating which slot of the
-#' assayData from the \code{SCESet} object should be used to compute
+#' assayData from the \code{SingleCellExperiment} object should be used to compute
 #' log-transformed expression values. Valid options are \code{'counts'},
 #' \code{'tpm'}, \code{'cpm'} and \code{'fpkm'}. Defaults to the first
 #' available value of the options in the order shown.
-#' @param logExprsOffset scalar numeric value giving the offset to add when
-#' taking log2 of normalised values to return as expression values. If NULL
-#' (default), then the value from \code{object@logExprsOffset} is used.
+#' @param return_log logical(1), should normalized values be returned on the log
+#' scale? Default is \code{TRUE}. If \code{TRUE}, output is stored as 
+#' \code{"logcounts"} in the returned object; if \code{FALSE} output is stored
+#' as \code{"normcounts"}
+#' @param log_exprs_offset scalar numeric value giving the offset to add when
+#' taking log2 of normalised values to return as expression values. If \code{NULL},
+#' value is taken from \code{metadata(object)$log.exprs.offset} if defined,
+#' otherwise 1.
 #' @param centre_size_factors logical, should size factors centred
 #' at unity be stored in the returned object if \code{exprs_values="counts"}?
 #' Defaults to TRUE. Regardless, centred size factors will always be
@@ -205,111 +210,115 @@ normalizeExprs <- function(...) {
 #' Centring the size factors ensures that the computed \code{exprs} can be 
 #' interpreted as being on the same scale as log-counts. This does not affect
 #' relative comparisons between cells in the same \code{object}, as all size 
-#' factors are scaled by the same amount. However, if two different \code{SCESet}
+#' factors are scaled by the same amount. However, if two different \code{SingleCellExperiment}
 #' objects are run separately through \code{normalize}, the size factors 
 #' in each object will be rescaled differently. This means that the size factors
 #' and \code{exprs} will \emph{not} be comparable between objects.
 #'
 #' This lack of comparability is not always obvious. For example, if we subsetted
-#' an existing \code{SCESet}, and ran \code{normalize} separately on each subset, 
+#' an existing \code{SingleCellExperiment}, and ran \code{normalize} separately on each subset, 
 #' the resulting \code{exprs} in each subsetted object would \emph{not} be 
 #' comparable to each other. This is despite the fact that all cells were 
-#' originally derived from a single \code{SCESet} object. 
+#' originally derived from a single \code{SingleCellExperiment} object. 
 #'
 #' In general, it is advisable to only compare size factors and \code{exprs}
-#' between cells in one \code{SCESet} object. If objects are to be combined,
-#' e.g., with \code{\link{mergeSCESet}}, new size factors should be computed 
+#' between cells in one \code{SingleCellExperiment} object. If objects are to be combined,
+#' new size factors should be computed 
 #' using all cells in the combined object, followed by running \code{normalize}.
 #'
-#' @return an SCESet object
+#' @return an SingleCellExperiment object
 #'
 #' @name normalize
 #' @rdname normalize
-#' @aliases normalize normalise normalize,SCESet-method normalise,SCESet-method
+#' @aliases normalize normalise normalize,SingleCellExperiment-method normalise,SingleCellExperiment-method
 #' @author Davis McCarthy and Aaron Lun
 #' @importFrom BiocGenerics normalize
 #' @importFrom Biobase 'exprs<-'
+#' @importFrom S4Vectors metadata 'metadata<-'
+#' @importFrom SummarizedExperiment assay
 #'
 #' @export
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
-#' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-#' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-#' keep_gene <- rowSums(counts(example_sceset)) > 0
-#' example_sceset <- example_sceset[keep_gene,]
+#' example_sce <- SingleCellExperiment(
+#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#' keep_gene <- rowSums(counts(example_sce)) > 0
+#' example_sce <- example_sce[keep_gene,]
 #'
 #' ## Apply TMM normalisation taking into account all genes
-#' example_sceset <- normaliseExprs(example_sceset, method = "TMM")
+#' example_sce <- normaliseExprs(example_sce, method = "TMM")
 #' ## Scale counts relative to a set of control features (here the first 100 features)
-#' example_sceset <- normaliseExprs(example_sceset, method = "none",
+#' example_sce <- normaliseExprs(example_sce, method = "none",
 #' feature_set = 1:100)
 #'
 #' ## normalize the object using the saved size factors
-#' example_sceset <- normalize(example_sceset)
+#' example_sce <- normalize(example_sce)
 #'
-normalize.SCESet <- function(object, exprs_values = NULL,
-                             logExprsOffset = NULL,
+normalizeSCE <- function(object, exprs_values = "counts",
+                             return_log = TRUE,
+                             log_exprs_offset = NULL,
                              centre_size_factors = TRUE,
                              return_norm_as_exprs = TRUE) {
-    if ( !is(object, "SCESet") )
-        stop("'object' must be an SCESet")
-
-    ## Define expression values to be used
-    exprs_values <- .exprs_hunter(object, exprs_values)
-    if (exprs_values=="exprs") {
-        stop("cannot compute normalized values from 'exprs'")
+    if (exprs_values == "exprs") {
+        exprs_values <- "logcounts"
     }
-    exprs_mat <- get_exprs(object, exprs_values, warning=FALSE)
+    exprs_mat <- assay(object, i = exprs_values)
 
-    if (exprs_values=="counts") {
-        ## extract existing size factors
-        size_factors <- suppressWarnings(sizeFactors(object))
-        if ( is.null(size_factors) ) {
-            warning("skipping normalization of counts as size factors were not defined")
-            return(object)
+    if (exprs_values == "counts") {
+        sf.list <- .get_all_sf_sets(object)
+        if (is.null(sf.list$size.factors[[1]])) {
+            warning("using library sizes as size factors")
+            sf.list$size.factors[[1]] <- colSums(exprs_mat)
         }
 
         ## figuring out how many controls have their own size factors
-        control_list <- .find_control_SF(object)
-        spike.names <- .spike_fcontrol_names(object)
-        no.spike.sf <- ! spike.names %in% names(control_list)
+        spike.names <- spikeNames(object)
+        no.spike.sf <- !spike.names %in% sf.list$available
         if (any(no.spike.sf)) {
             warning(sprintf("spike-in transcripts in '%s' should have their own size factors",
                             spike.names[no.spike.sf][1]))
         }
     } else {
-        size_factors <- rep(1, ncol(object)) # ignoring size factors for non-count data.
-        control_list <- list()
+        # ignoring size factors for non-count data.
+        sf.list <- list(size.factors = rep(1, ncol(object)), index = NULL) 
     }
 
-    ## extract logExprsOffset if argument is NULL
-    if ( is.null(logExprsOffset) )
-        logExprsOffset <- object@logExprsOffset
-
-    ## compute normalised expression values
-    norm_exprs_mat <- .recompute_expr_fun(exprs_mat = exprs_mat,
-                        size_factors = size_factors,
-                        logExprsOffset = logExprsOffset)
-    for (alt in control_list) {
-        norm_exprs_mat[alt$ID,] <- .recompute_expr_fun(
-                                        exprs_mat, size_factors = alt$SF,
-                                        logExprsOffset = logExprsOffset,
-                                        subset_row=alt$ID)
+    ## using logExprsOffset=1 if argument is NULL
+    if ( is.null(log_exprs_offset)) {
+        if (!is.null(metadata(object)$log.exprs.offset)) {
+            log_exprs_offset <- metadata(object)$log.exprs.offset
+        } else {
+            log_exprs_offset <- 1
+        }
     }
+
+    ## Compute normalized expression values.
+    norm_exprs <- .compute_exprs(exprs_mat, sf.list$size.factors, sf_to_use = sf.list$index, 
+                                 log = return_log, sum = FALSE, logExprsOffset = log_exprs_offset,
+                                 subset_row = NULL)
 
     ## add normalised values to object
-    norm_exprs(object) <- norm_exprs_mat
-    if ( return_norm_as_exprs )
-        exprs(object) <- norm_exprs_mat
+    if (return_log) { 
+        assay(object, "logcounts") <- norm_exprs
+        metadata(object)$log.exprs.offset <- log_exprs_offset
+    } else {
+        assay(object, "normcounts") <- norm_exprs
+    }
 
     ## centering all existing size factors if requested
-    if (exprs_values=="counts" && centre_size_factors) {
-        all.sf.fields <- c("size_factor", sprintf("size_factor_%s", names(control_list)))
-        for (sf in all.sf.fields) {
-            cur.sf <- pData(object)[[sf]]
-            cur.sf <- cur.sf/mean(cur.sf)
-            pData(object)[[sf]] <- cur.sf
+    if (exprs_values == "counts" && centre_size_factors) {
+        sf <- sizeFactors(object)
+        if (!is.null(sf)) { 
+            sf <- sf / mean(sf)
+            sizeFactors(object) <- sf
+        }
+
+        # ... and for all controls.
+        for (type in sf.list$available) {
+            sf <- sizeFactors(object, type=type)
+            sf <- sf / mean(sf)
+            sizeFactors(object, type=type) <- sf
         }
     }
 
@@ -317,19 +326,10 @@ normalize.SCESet <- function(object, exprs_values = NULL,
     return(object)
 }
 
-.recompute_expr_fun <- function(exprs_mat, size_factors, logExprsOffset,
-                                subset_row = NULL) {
-    .compute_exprs(exprs_mat, size_factors,
-                   log = TRUE, sum = FALSE,
-                   logExprsOffset = logExprsOffset,
-                   subset_row = subset_row)
-}
-
 #' @rdname normalize
 #' @aliases normalize
 #' @export
-setMethod("normalize", signature(object = "SCESet"),
-          normalize.SCESet)
+setMethod("normalize", "SingleCellExperiment", normalizeSCE)
 
 #' @rdname normalize
 #' @aliases normalise
@@ -346,38 +346,34 @@ normalise <- function(...) {
 #' abundances can be reasonably compared between features normalized
 #' with different sets of size factors.
 #'
-#' @param object an \code{SCESet} object containing multiple sets of
+#' @param object an \code{SingleCellExperiment} object containing multiple sets of
 #' size factors.
 #' @param centre a numeric scalar, the value around which all sets of
 #' size factors should be centred.
 #' @param tol a numeric scalar, the tolerance for testing equality of the
 #' mean of each size factor set to \code{centre}.
 #'
-#' @return a \code{SCESet} object with centred size factors
+#' @return a \code{SingleCellExperiment} object with centred size factors
 #' @export
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
-#' pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-#' example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-#' keep_gene <- rowSums(counts(example_sceset)) > 0
-#' example_sceset <- example_sceset[keep_gene,]
+#' example_sce <- SingleCellExperiment(
+#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#' keep_gene <- rowSums(counts(example_sce)) > 0
+#' example_sce <- example_sce[keep_gene,]
 #'
-#' sizeFactors(example_sceset) <- runif(ncol(example_sceset))
-#' areSizeFactorsCentred(example_sceset)
-#' example_sceset <- normalize(example_sceset, centre=TRUE)
-#' areSizeFactorsCentred(example_sceset)
+#' sizeFactors(example_sce) <- runif(ncol(example_sce))
+#' areSizeFactorsCentred(example_sce)
+#' example_sce <- normalize(example_sce, centre = TRUE)
+#' areSizeFactorsCentred(example_sce)
 #'
 areSizeFactorsCentred <- function(object, centre=1, tol=1e-6) {
-    control_list <- .find_control_SF(object)
-    for (x in names(control_list)) {
-        if (abs(mean(control_list[[x]]$SF) - centre) > tol) {
+    sf.list <- .get_all_sf_sets(object)
+    for (sf in sf.list$size.factors) {
+        if (abs(mean(sf) - centre) > tol) {
             return(FALSE)
         }
-    }
-    sf <- suppressWarnings(sizeFactors(object))
-    if (!is.null(sf) && abs(mean(sf) - centre) > tol) {
-        return(FALSE)
     }
     return(TRUE)
 }

@@ -7,7 +7,7 @@
 calculateFPKM(object, effective_length, use.size.factors = TRUE)
 }
 \arguments{
-\item{object}{an \code{SCESet} object}
+\item{object}{an \code{SingleCellExperiment} object}
 
 \item{effective_length}{vector of class \code{"numeric"} providing the
 effective length for each feature in the \code{SCESet} object}
@@ -24,8 +24,10 @@ values for expression from counts for a set of features.
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-example_sceset <- newSCESet(countData = sc_example_counts)
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
 effective_length <- rep(1000, 2000)
-fpkm(example_sceset) <- calculateFPKM(example_sceset, effective_length)
+fpkm(example_sce) <- calculateFPKM(example_sce, effective_length,
+use.size.factors = FALSE)
 
 }

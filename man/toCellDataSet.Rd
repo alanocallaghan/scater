@@ -2,28 +2,22 @@
 % Please edit documentation in R/SCESet-methods.R
 \name{toCellDataSet}
 \alias{toCellDataSet}
-\title{Convert an \code{SCESet} to a \code{CellDataSet}}
+\title{Convert an \code{SCESet} to a \code{CellDataSet}.}
 \usage{
 toCellDataSet(sce, exprs_values = "exprs")
 }
 \arguments{
 \item{sce}{An \code{SCESet} object}
 
-\item{exprs_values}{What should \code{exprs(cds)} be mapped from in the \code{SCESet}? Should be
-one of "exprs", "tpm", "fpkm", "counts"}
+\item{exprs_values}{What should \code{exprs(cds)} be mapped from in the
+\code{SCESet}? Should be one of "exprs", "tpm", "fpkm", "counts"}
 }
 \value{
-An object of class \code{SCESet}
+An object of class \code{CellDataSet}
 }
 \description{
-Convert an \code{SCESet} to a \code{CellDataSet}
+Deprecated from scater version 1.5.2.
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-if ( requireNamespace("monocle") ) {
-    toCellDataSet(example_sceset)
-}
+\dontrun{"Deprecated"}
 }

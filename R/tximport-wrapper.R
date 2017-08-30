@@ -124,16 +124,12 @@ readTxResults <- function(samples = NULL, files = NULL,
     rownames(est_counts) <- rownames(tpm) <- rownames(feature_length) <- 
         rownames(txi$abundance)
 
-    ## Produce SCESet object
-    pdata <- new("AnnotatedDataFrame", pdata)
-    fdata <- new("AnnotatedDataFrame", fdata)
-    sce_out <- newSCESet(exprsData = log2(tpm + logExprsOffset),
-                         phenoData = pdata, featureData = fdata,
-                         countData = est_counts,
-                         logExprsOffset = logExprsOffset,
-                         lowerDetectionLimit = 0)
-    tpm(sce_out) <- tpm
-    set_exprs(sce_out, "feature_length") <- feature_length
+    ## Produce SingleCellExperiment object
+    sce_out <- SingleCellExperiment(
+        list(exprs = log2(tpm + logExprsOffset), 
+             counts = est_counts, tpm = tpm, 
+             feature_effective_length = feature_length), 
+        colData = pdata, rowData = fdata)
     if ( verbose )
         cat("Using log2(TPM + logExprsOffset) as 'exprs' values in output.")
     ## Return SCESet object

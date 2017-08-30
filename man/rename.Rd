@@ -3,34 +3,32 @@
 \docType{methods}
 \name{rename}
 \alias{rename}
-\alias{rename,SCESet-method}
 \alias{rename}
-\alias{rename.SCESet}
-\alias{rename,SCESet-method}
-\title{Rename variables of \code{pData(object)}.}
+\alias{rename,SingleCellExperiment-method}
+\title{Rename variables of \code{colData(object)}.}
 \usage{
 rename(object, ...)
 
-\S4method{rename}{SCESet}(object, ...)
-
-rename.SCESet(object, ...)
+\S4method{rename}{SingleCellExperiment}(object, ...)
 }
 \arguments{
-\item{object}{A \code{SCESet} object.}
+\item{object}{A \code{SingleCellExperiment} object.}
 
 \item{...}{Additional arguments to be passed to \code{dplyr::rename} to
-act on \code{pData(object)}.}
+act on \code{colData(object)}.}
 }
 \value{
-An SCESet object.
+An SingleCellExperiment object.
 }
 \description{
-Rename variables of \code{pData(object)}.
+Rename variables of \code{colData(object)}.
 }
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-example_sceset <- rename(example_sceset, Cell_Phase = Cell_Cycle)
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), 
+colData = sc_example_cell_info)
+example_sce <- rename(example_sce, Cell_Phase = Cell_Cycle)
+
 }

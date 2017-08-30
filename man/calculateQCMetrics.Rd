@@ -4,12 +4,17 @@
 \alias{calculateQCMetrics}
 \title{Calculate QC metrics}
 \usage{
-calculateQCMetrics(object, feature_controls = NULL, cell_controls = NULL,
-  nmads = 5, pct_feature_controls_threshold = 80)
+calculateQCMetrics(object, exprs_values = "counts", feature_controls = NULL,
+  cell_controls = NULL, nmads = 5, pct_feature_controls_threshold = 80)
 }
 \arguments{
-\item{object}{an SCESet object containing expression values and
+\item{object}{an SingleCellExperiment object containing expression values and
 experimental information. Must have been appropriately prepared.}
+
+\item{exprs_values}{character(1), indicating slot of the \code{assays} of the \code{object}
+should be used to define expression? Valid options are "counts" [default; recommended],
+"tpm", "fpkm" and "logcounts", or anything else in the object added manually by 
+the user.}
 
 \item{feature_controls}{a named list containing one or more vectors 
 (character vector of feature names, logical vector, or a numeric vector of
@@ -33,7 +38,7 @@ flag cells that may be filtered based on high percentage of expression from
 feature controls.}
 }
 \value{
-an SCESet object
+an SingleCellExperiment object
 }
 \description{
 Calculate QC metrics
@@ -110,18 +115,18 @@ The following QC metrics are computed:
     including both blanks and bulks as cell controls).}
 }
 These cell-level QC metrics are added as columns to the ``phenotypeData''
-slot of the \code{SCESet} object so that they can be inspected and are
+slot of the \code{\link{SingleCellExperiment}} object so that they can be inspected and are
 readily available for other functions to use. Furthermore, wherever
 ``counts'' appear in the above metrics, the same metrics will also be
 computed for ``exprs'', ``tpm'' and ``fpkm'' values (if TPM and FPKM values
-are present in the \code{SCESet} object), with the appropriate term
+are present in the \code{SingleCellExperiment} object), with the appropriate term
 replacing ``counts'' in the name. The following feature-level QC metrics are
 also computed:
 \describe{
 \item{mean_exprs:}{The mean expression level of the  gene/feature.}
 \item{exprs_rank:}{The rank of the feature's mean expression level in the
 cell.}
-\item{n_cells_exprs:}{The number of cells for which the expression level of
+\item{n_cells_counts:}{The number of cells for which the expression level of
 the feature is above the detection limit (default detection limit is zero).}
 \item{total_feature_counts:}{The total number of counts assigned to that
 feature across all cells.}
@@ -139,26 +144,27 @@ produced for each control set (e.g. here, \code{is_feature_control_ERCC} and
 the control sets.}
 }
 These feature-level QC metrics are added as columns to the ``featureData''
-slot of the \code{SCESet} object so that they can be inspected and are
+slot of the \code{SingleCellExperiment} object so that they can be inspected and are
 readily available for other functions to use. As with the cell-level metrics,
  wherever ``counts'' appear in the above, the same metrics will also be
  computed for ``exprs'', ``tpm'' and ``fpkm'' values (if TPM and FPKM values
- are present in the \code{SCESet} object), with the appropriate term
+ are present in the \code{SingleCellExperiment} object), with the appropriate term
  replacing ``counts'' in the name.
 }
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data=sc_example_cell_info)
-rownames(pd) <- pd$Cell
-example_sceset <- newSCESet(countData=sc_example_counts, phenoData=pd)
-example_sceset <- calculateQCMetrics(example_sceset)
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), 
+colData = sc_example_cell_info)
+example_sce <- calculateQCMetrics(example_sce)
 
 ## with a set of feature controls defined
-example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:40)
+example_sce <- calculateQCMetrics(example_sce, 
+feature_controls = list(set1 = 1:40))
 
 ## with a named set of feature controls defined
-example_sceset <- calculateQCMetrics(example_sceset, 
+example_sce <- calculateQCMetrics(example_sce, 
                                      feature_controls = list(ERCC = 1:40))
 
 }

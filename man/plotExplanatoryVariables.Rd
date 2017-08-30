@@ -4,12 +4,12 @@
 \alias{plotExplanatoryVariables}
 \title{Plot explanatory variables ordered by percentage of phenotypic variance explained}
 \usage{
-plotExplanatoryVariables(object, method = "density", exprs_values = "exprs",
-  nvars_to_plot = 10, min_marginal_r2 = 0, variables = NULL,
-  return_object = FALSE, theme_size = 10, ...)
+plotExplanatoryVariables(object, method = "density",
+  exprs_values = "logcounts", nvars_to_plot = 10, min_marginal_r2 = 0,
+  variables = NULL, return_object = FALSE, theme_size = 10, ...)
 }
 \arguments{
-\item{object}{an SCESet object containing expression values and
+\item{object}{an SingleCellExperiment object containing expression values and
 experimental information. Must have been appropriately prepared.}
 
 \item{method}{character scalar indicating the type of plot to produce. If
@@ -20,7 +20,7 @@ ordered by the percentage of feature expression variance (as measured by
 R-squared in a marginal linear model) explained.}
 
 \item{exprs_values}{which slot of the \code{assayData} in the \code{object}
-should be used to define expression? Valid options are "exprs" (default),
+should be used to define expression? Valid options are "logcounts" (default),
 "tpm", "fpkm", "cpm", and "counts".}
 
 \item{nvars_to_plot}{integer, the number of variables to plot in the pairs
@@ -31,11 +31,11 @@ median marginal R-squared for a variable to be plotted. Only variables with a
 median marginal R-squared strictly larger than this value will be plotted.}
 
 \item{variables}{optional character vector giving the variables to be plotted.
-Default is \code{NULL}, in which case all variables in \code{pData(object)}
+Default is \code{NULL}, in which case all variables in \code{colData(object)}
 are considered and the \code{nvars_to_plot} variables with the highest median
 marginal R-squared are plotted.}
 
-\item{return_object}{logical, should an \code{SCESet} object with median
+\item{return_object}{logical, should an \code{SingleCellExperiment} object with median
 marginal R-squared values added to \code{varMetadata(object)} be returned?}
 
 \item{theme_size}{numeric scalar giving font size to use for the plotting
@@ -61,13 +61,13 @@ quietly ignored.
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-rownames(pd) <- pd$Cell
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-drop_genes <- apply(exprs(example_sceset), 1, function(x) {var(x) == 0})
-example_sceset <- example_sceset[!drop_genes, ]
-example_sceset <- calculateQCMetrics(example_sceset)
-vars <- names(pData(example_sceset))[c(2:3, 5:14)]
-plotExplanatoryVariables(example_sceset, variables=vars)
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+example_sce <- normalize(example_sce)
+drop_genes <- apply(exprs(example_sce), 1, function(x) {var(x) == 0})
+example_sce <- example_sce[!drop_genes, ]
+example_sce <- calculateQCMetrics(example_sce)
+vars <- names(colData(example_sce))[c(2:3, 5:14)]
+plotExplanatoryVariables(example_sce, variables=vars)
 
 }

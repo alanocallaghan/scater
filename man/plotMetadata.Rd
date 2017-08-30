@@ -36,7 +36,7 @@ a ggplot plot object
 Plot metadata for cells or features
 }
 \details{
-Plot cell or feature metadata from an SCESet object. If one variable
+Plot cell or feature metadata from an SingleCellExperiment object. If one variable
  is supplied then a density plot will be returned. If both variables are
 continuous (numeric) then a scatter plot will be returned. If one variable is
 discrete and one continuous then a violin plot with jittered points overlaid
@@ -47,9 +47,9 @@ plotting options (titles, facets, themes etc) can be added.
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
-pd <- new("AnnotatedDataFrame", data = sc_example_cell_info)
-example_sceset <- newSCESet(countData = sc_example_counts, phenoData = pd)
-example_sceset <- calculateQCMetrics(example_sceset)
-plotMetadata(pData(example_sceset))
+example_sce <- SingleCellExperiment(
+assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+example_sce <- calculateQCMetrics(example_sce)
+plotMetadata(colData(example_sce))
 
 }
