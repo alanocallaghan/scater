@@ -1,6 +1,14 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
+\section{Changes in version 1.5.11,  (August 2017)}{
+  \itemize{
+    \item Complete refactoring of the package to use the SingleCellExperiment
+    class
+  }
+}
+
+
 \section{Changes in version 1.3.49, Bioconductor 3.5 Release (April 2017)}{
   \itemize{
     \item plotRLE() function to make relative log expression plots to assess and
