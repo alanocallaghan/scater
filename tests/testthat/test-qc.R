@@ -109,7 +109,21 @@ test_that("plotHighestExprs works as expected", {
     example_sce <- calculateQCMetrics(example_sce, 
                                       feature_controls = list(set1 = 1:500))
     expect_that(
+        plotHighestExprs(example_sce), 
+        is_a("ggplot"))
+    expect_that(
         plotHighestExprs(example_sce, col_by_variable = "Mutation_Status"), 
+        is_a("ggplot"))
+    
+    sce.blank <- SingleCellExperiment(
+        assays = list(counts = sc_example_counts), 
+        colData = sc_example_cell_info)
+    expect_error(
+        plotHighestExprs(sce.blank), 
+        "col_by_variable not found")
+    sce.blank <- calculateQCMetrics(sce.blank)
+    expect_that(
+        plotHighestExprs(sce.blank), 
         is_a("ggplot"))
 })
 

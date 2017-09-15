@@ -152,6 +152,16 @@ test_that("we can produce expression plots with different expression values", {
     expect_that(plotExpression(example_sce, 1:4), is_a("ggplot"))
     expect_that(plotExpression(example_sce, 1:4, scales = "fixed"), 
                 is_a("ggplot"))
+    expect_that(plotExpression(example_sce, rownames(example_sce)[1:6],
+                   x = "Mutation_Status", exprs_values = "exprs", 
+                   colour = "Treatment"),  is_a("ggplot"))
+    expect_that(plotExpression(example_sce, rownames(example_sce)[1:6],
+                               x = "Mutation_Status", exprs_values = "logcounts", 
+                               colour = "Treatment"),  is_a("ggplot"))
+    expect_error(plotExpression(example_sce, rownames(example_sce)[1:6],
+                               x = "Mutation_Status", exprs_values = "silly", 
+                               colour = "Treatment"), "not found")
+    
 })
 
 test_that("we can plot expression for named genes", {

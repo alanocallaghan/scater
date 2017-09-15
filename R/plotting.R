@@ -1624,6 +1624,10 @@ plotExpression <- function(object, features, x = NULL,
     else
         nfeatures <- length(features)
 
+    if ( exprs_values == "exprs" && !(exprs_values %in% assayNames(object)) )
+        exprs_values <- "logcounts"
+    if ( !(exprs_values %in% assayNames(object)) )
+        stop(paste(exprs_values, "not found in assays(object)."))
     exprs_mat <- assay(object, i = exprs_values)
     exprs_mat <- exprs_mat[features,,drop = FALSE]
     if ( log2_values ) {

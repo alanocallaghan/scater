@@ -1,12 +1,12 @@
 ---
-title: "Introduction to `scater`: Single-cell analysis toolkit for expression in R"
+title: "Expression quantification and import"
 author:
 - name: "Davis McCarthy"
   affiliation: 
   - EMBL-EBI
 package: scater
 output:
-    BiocStyle::html_document2
+    BiocStyle::html_document
 vignette: >
   %\VignetteIndexEntry{An introduction to the scater package}
   %\VignetteEngine{knitr::rmarkdown}
@@ -23,8 +23,10 @@ library(ggplot2)
 theme_set(theme_bw(12))
 ```
 
-This document gives an introduction to and overview of the functionality of the
-`scater` package.
+This document provides details on the import of single-cell data into a 
+`SingleCellExperiment` object for use with the `scater` package (frequent use 
+case) and how to quantify single-cell gene expression from within an R session
+using the popular RNA-seq quantification tools `Salmon` and `kallisto`.
 
 The `scater` package is contains tools to help with the analysis of single-cell
 transcriptomic data, with the focus on RNA-seq data. The package features:

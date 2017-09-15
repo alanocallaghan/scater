@@ -735,8 +735,8 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
                              feature_names_to_plot = NULL) {
     ## Check that variable to colour points exists
     if (!(col_by_variable %in% colnames(colData(object)))) {
-        warning("col_by_variable not found in colData(object).
-             Please make sure colData(object)[, variable] exists. Colours will not be plotted.")
+        stop("col_by_variable not found in colData(object).
+             Please make sure colData(object)[, variable] exists.")
         plot_cols <- FALSE
     } else
         plot_cols <- TRUE
@@ -824,10 +824,11 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
     if ( is.null(rownames(rdata)) )
         rownames(rdata) <- as.character(rdata$feature)
     df_pct_exprs_by_cell_long <- reshape2::melt(df_pct_exprs_by_cell)
+    colnames(df_pct_exprs_by_cell_long) <- c("Cell", "Tags", "value")
     df_pct_exprs_by_cell_long$Feature <- 
-        rdata[as.character(df_pct_exprs_by_cell_long$Var2), "feature"]
-    df_pct_exprs_by_cell_long$Var2 <- factor(
-        df_pct_exprs_by_cell_long$Var2, levels = rownames(object)[rev(oo[1:n])])
+        rdata[as.character(df_pct_exprs_by_cell_long$Tags), "feature"]
+    df_pct_exprs_by_cell_long$Tags <- factor(
+        df_pct_exprs_by_cell_long$Tags, levels = rownames(object)[rev(oo[1:n])])
     df_pct_exprs_by_cell_long$Feature <- factor(
         df_pct_exprs_by_cell_long$Feature, levels = rdata$feature[rev(oo[1:n])])
     

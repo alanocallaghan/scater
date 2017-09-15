@@ -1,0 +1,269 @@
+---
+title: "Data visualisation methods in scater"
+author:
+- name: "Davis McCarthy"
+  affiliation: 
+  - EMBL-EBI
+package: scater
+output:
+    BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{An introduction to the scater package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %VignetteEncoding{UTF-8}
+---
+
+
+```{r knitr-options, echo=FALSE, message=FALSE, warning=FALSE}
+## To render an HTML version that works nicely with github and web pages, do:
+## rmarkdown::render("vignettes/vignette.Rmd", "all")
+library(knitr)
+opts_chunk$set(fig.align = 'center', fig.width = 6, fig.height = 5, dev = 'png')
+library(ggplot2)
+theme_set(theme_bw(12))
+```
+
+This document provides some examples of the many data visualisation functions 
+available in `scater`.
+
+Key `scater` data visualisation functions:
+* `plotScater`: cumulative expression, overview plot
+* `plotExpression`: plot cell expression levels for one or more genes
+* `plotExprsVsTxLength`: plot transcript expression against transcript length
+* `plotPlatePosition()`: plot cell gene expression and metadata with cells in 
+their position on a plate
+* `plotColData`/`plotCellData`/`plotPhenoData`: plot cell-level metadata 
+variables
+* `plotRowData`/`plotFeatureData`: plot row/gene/feature-level metadata 
+variables
+* `plotReducedDim`
+
+
+# Cumulative expression plot
+
+It is possible to get an overall view of the dataset by using the `plotScater`
+function. This method plots the cumulative proportion of
+each cell's library (total counts) that is accounted for by the top 
+highest-expressed features (by default showing the cumulative proportion across 
+the top 500 features).
+
+This type of plot gives an overall idea of differences in expression distributions for different cells. It is used in the same way as per-sample boxplots are for
+microarray or bulk RNA-seq data. Due to the large numbers of zeroes in
+expression values for single-cell RNA-seq data, boxplots are not as useful, so
+instead we focus on the contributions from the most expressed features for each
+cell.
+
+With this function, we can split up the cells based on `colData` variables to
+get a finer-grained look at differences between cells. By default, the plot
+method will try to use count values for the plot, but other data available in 
+the `assays` slot of the object can be used by specifying the `exprs_vales`
+argument. 
+
+```{r plot-sceset-blocking, eval=TRUE}
+suppressPackageStartupMessages(library(scater))
+data("sc_example_counts")
+data("sc_example_cell_info")
+example_sce <- SingleCellExperiment(
+    assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+exprs(example_sce) <- log2(calculateCPM(example_sce, 
+                                        use.size.factors = FALSE) + 1)
+
+plotScater(example_sce, block1 = "Mutation_Status", block2 = "Treatment",
+     colour_by = "Cell_Cycle", nfeatures = 300, exprs_values = "counts")
+```
+
+This sort of approach can help to pick up large differences in expression
+distributions across different experimental blocks (e.g. processing batches or
+similar).
+
+
+#  Plots of expression values
+
+In `scater`, the `plotExpression` function makes it easy to plot expression
+values for a subset of genes or features. This can be particularly useful when
+investigating the some features identified as being of interest from differential
+expression testing, pseudotime analysis or other means.
+
+```{r plot-expression, eval=TRUE}
+plotExpression(example_sce, rownames(example_sce)[1:6],
+               x = "Mutation_Status", exprs_values = "exprs", 
+               colour = "Treatment")
+```
+
+This function uses `ggplot2`, making it easy to change the theme to whatever you
+prefer. We can also show the median expression level per group on the plot and
+show a violin plot to summarise the distribution of expression values:
+
+```{r plot-expression-theme-bw, eval=TRUE}
+plotExpression(example_sce, rownames(example_sce)[7:12],
+               x = "Mutation_Status", exprs_values = "counts", 
+               colour = "Cell_Cycle",
+               show_median = TRUE, show_violin = FALSE,  xlab = "Mutation Status",
+               log = TRUE)
+```
+
+The package also contains the function `plotExprsVsTxLength()` for plotting 
+expression values against transcript length, and the function 
+`plotPlatePosition()` to plot expression values and cell metadata information 
+for cells in their position on a plate.
+
+# Cell metadata plots
+
+The functions `plotColData`, `plotCellData` and `plotPhenoData` are synonymous
+and provide convenient means for plotting cell-level metadata values against 
+each other (cells can also be coloured, sized or shaped by gene expression 
+values). The functions will use the data type for each variable 
+(continous/categorical) to automatically determine an appropriate type of plot 
+without requiring input from the user.
+
+
+```{r plot-pdata, echo=TRUE, fig.show=TRUE, results='hide', eval=TRUE}
+example_sce <- calculateQCMetrics(example_sce, 
+                                  feature_controls = list(dummy = 1:40))
+plotColData(example_sce, aes(x = total_counts, y = total_features,
+                                  colour = Mutation_Status))
+```
+
+Note that ggplot aesthetics will work correctly (in general) for everything
+except `colour` (`color`) and `fill`, which must be either columns of `colData`
+or feature names (i.e. gene/transcript names).
+
+These sorts of plots can be very useful for finding potentially problematic
+cells.
+
+```{r plot-pdatacol-gene-exprs-2, fig.show = TRUE, eval=TRUE}
+plotColData(example_sce, aes(x = pct_counts_feature_control,
+                                  y = total_features, colour = Gene_0500))
+```
+
+
+The output of these functions is a `ggplot` object, which can be added to,
+amended and altered. For example, if we don't like the legend position  we can change it, and we could also add a trend line for each group (see below).
+
+Tapping into the powerful capabilities of `ggplot2`, the possibilities are many.
+
+
+# Gene metadata plots
+
+
+# Dimensionality reduction plots
+
+## Using the `reducedDimension` slot
+
+The `SCESet` matrix has a `reducedDimension` slot, where coordinates for a
+reduced dimension representation of the cells can be stored. If we so wish, the
+top principal components can be added to the `reducedDimension` slot:
+
+```{r plot-pca-4comp-colby-shapeby-save-pcs, fig.show = FALSE, eval=TRUE}
+example_sce <- plotPCA(example_sce, ncomponents = 4,
+                          colour_by = "Treatment", shape_by = "Mutation_Status",
+                          return_SCE = TRUE, theme_size = 12)
+head(reducedDim(example_sce))
+```
+
+As shown above, the function `reducedDimension` (as well as the shorthand
+`redDim`) can be used to access the reduced dimension coordinates.
+
+This means that any other dimension reduction method can be applied and the
+coordinates stored. For example, we might wish to use t-distributed stochastic
+nearest neighbour embedding (t-SNE) or Gaussian process latent variable models
+or any other dimensionality reduction method. We can store these in the `SCESet`
+object and produce plots just as we did with PCA (plot not shown):
+
+```{r plot-reduceddim-4comp-colby-shapeby, fig.show=FALSE, eval=TRUE}
+plotReducedDim(example_sce, use_dimred = "PCA", ncomponents = 4, 
+               colour_by = "Treatment", shape_by = "Mutation_Status")
+```
+
+As for the PCA plots we can also colour and size points by feature expression.
+
+```{r plot-reduceddim-4comp-colby-sizeby-exprs, fig.show = FALSE, eval=TRUE}
+plotReducedDim(example_sce, use_dimred = "PCA", ncomponents = 4, 
+               colour_by = "Gene_1000", size_by = "Gene_0500")
+```
+
+(Here, the dimensionality reduction is just PCA, so we have the same plot as the
+PCA plot above.)
+
+
+
+## PCA
+
+The `plotPCA` function makes it easy to produce a PCA plot directly from an
+`SCESet` object, which is useful for visualising cells.
+
+The default plot shows the first two principal components and if any cell
+controls have been defined, plots these cells in a different colour.
+
+```{r plot-pca-default, eval=TRUE}
+plotPCA(example_sce)
+```
+
+By default, the PCA plot
+is produced using the 500 features with the most variable expression across all
+cells. The number of most-variable features used can be changed with the `ntop`
+argument. Alternatively, a specific set of features to use for the PCA can be
+defined with the `feature_set` argument. This allows, for example, using only
+housekeeping features or control features to produce a PCA plot.
+
+By default the PCA plot uses the expression values in the `logcounts` slot of the
+`SingleCellExperiment` object, but other expression values can be used by 
+specifying the `exprs_values` argument (plot not shown):
+
+```{r plot-pca-cpm, eval=TRUE}
+plotPCA(example_sce, exprs_values = "cpm")
+```
+
+A subset of features can be used to produce a PCA plot. In the code below only
+the features defined as "feature controls" are used for the PCA (plot not shown).
+
+```{r plot-pca-feature-controls, fig.show = FALSE, eval=TRUE}
+plotPCA(example_sce, feature_set = fData(example_sce)$is_feature_control)
+```
+
+The function allows more than just the first two components to be plotted, and
+also allows phenotype variables to be used to define the colour, shape and size
+of points in the scatter plot.
+
+```{r plot-pca-4comp-colby-shapeby, fig.height=5.5, eval=TRUE}
+plotPCA(example_sce, ncomponents = 4, colour_by = "Treatment",
+        shape_by = "Mutation_Status")
+```
+
+When more than two components are plotted, the diagonal boxes in the scatter
+plot matrix show the density for each component.
+
+We can also use the colour and size of point in the plot to reflect feature
+expression values.
+
+```{r plot-pca-4comp-colby-sizeby-exprs, fig.height=5.5, eval=TRUE}
+plotPCA(example_sce, colour_by = "Gene_0001", size_by = "Gene_1000")
+```
+
+
+Thus, expression levels of two marker genes or transcripts can be shown overlaid
+onto reduced-dimension representations of cells. 
+
+## t-SNE
+
+This also works for `plotTSNE`
+plots.
+
+```{r plot-tsne-1comp-colby-sizeby-exprs, fig.height=5.5, eval=TRUE}
+plotTSNE(example_sce, colour_by = "Gene_0001", size_by = "Gene_1000")
+```
+
+## Diffusion maps
+
+And for diffusion map plots.
+
+```{r plot-difmap-1comp-colby-sizeby-exprs, fig.height=5.5, eval=TRUE}
+plotDiffusionMap(example_sce, colour_by = "Gene_0001", size_by = "Gene_1000")
+```
+
+
+
+# QC plots
+
+See the QC vignette for examples of using the `plotQC` function to create visualisations relevant for cell and gene filtering for quality control. 
+
