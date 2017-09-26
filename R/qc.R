@@ -317,10 +317,15 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         rd[[paste0("log10_total_", exprs_type, subset_type)]] <- log10(libsize + 1)
 
         if (!is.null(subset_row)) {
+            margin.stats.all <- .Call(
+                cxx_margin_summary, exprs_mat, 0, 
+                .subset2index(rep(TRUE, nrow(exprs_mat)), 
+                              target = exprs_mat, byrow = TRUE) - 1L, FALSE)
             ## Computing percentages of actual total.
-            rd[[paste0("pct_", exprs_type, subset_type)]] <- 100 * libsize / colSums(exprs_mat)
+            rd[[paste0("pct_", exprs_type, subset_type)]] <- 
+                (100 * libsize / margin.stats.all[[1]])
         }
-
+        
         ## Computing total percentages.
         pct_top <- .calc_top_prop(exprs_mat, subset_row = subset_row, 
                 subset_type = subset_type, exprs_type = exprs_type)
@@ -383,7 +388,11 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
     if (linear) {
         sum_exprs <- margin.stats[[1]]
-        total_exprs <- rowSums(exprs_mat)
+        margin.stats.all <- .Call(
+            cxx_margin_summary, exprs_mat, 0, 
+            .subset2index(rep(TRUE, ncol(exprs_mat)), 
+                          target = exprs_mat, byrow = FALSE) - 1L, TRUE)
+        total_exprs <- margin.stats.all[[1]]
         fd[[paste0("total_", exprs_type, subset_type)]] <- sum_exprs
         fd[[paste0("log10_total_", exprs_type, subset_type)]] <- log10(sum_exprs + 1)
 
