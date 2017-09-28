@@ -36,4 +36,20 @@ test_that("accessor functions for SingleCellExperiment work as expected", {
         example_sce, effective_length = 1000, use.size.factors = FALSE) + 1)
     expect_that(fpkm(example_sce), is_a("matrix"))  
     
+    sce10x <- read10xResults(system.file("extdata", package = "scater"))
+    expect_that(exprs(sce10x), is_null())
+    expect_that(counts(sce10x), is_a("dgCMatrix"))
+    exprs(sce10x) <- log2(calculateCPM(
+        sce10x, use.size.factors = FALSE) + 1)
+    expect_that(exprs(sce10x), is_a("dgeMatrix"))
+    expect_error(cpm(sce10x), "'i' not in names")
+    norm_exprs(sce10x) <- log2(calculateCPM(sce10x, 
+                                                 use.size.factors = FALSE) + 1)
+    expect_that(norm_exprs(sce10x), is_a("dgeMatrix"))  
+    stand_exprs(sce10x) <- log2(calculateCPM(sce10x, 
+                                                  use.size.factors = FALSE) + 1)
+    expect_that(stand_exprs(sce10x), is_a("dgeMatrix"))  
+    fpkm(sce10x) <- log2(calculateFPKM(
+        sce10x, effective_length = 1000, use.size.factors = FALSE) + 1)
+    expect_that(fpkm(sce10x), is_a("dgeMatrix"))  
 })

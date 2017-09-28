@@ -268,7 +268,7 @@ plotScater <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 
     ## Get the proportion of the library accounted for by the top features
     prop_library <- reshape2::melt(t(t(seq_real_estate[to_plot, ]) /
-                                         colSums(exprs_mat)),
+                                         .colSums(exprs_mat)),
                                    value.name = "prop_library")
     colnames(seq_real_estate_long) <- c("Feature", "Cell", exprs_values)
     seq_real_estate_long$Proportion_Library <- prop_library$prop_library

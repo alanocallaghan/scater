@@ -1,5 +1,21 @@
 ## A set of functions for calculating and summarising expression values
 
+.colSums <- function(mat) {
+    subset_row <- .subset2index(NULL, target = mat, byrow = TRUE)
+    margin.stats <- .Call(cxx_margin_summary, mat, 0, 
+                          subset_row - 1L, FALSE)
+    margin.stats[[1]]
+}
+
+.rowSums <- function(mat) {
+    subset_col <- .subset2index(NULL, target = mat, byrow = FALSE)
+    margin.stats <- .Call(cxx_margin_summary, mat, 0, 
+                          subset_col - 1L, TRUE)
+    margin.stats[[1]]
+}
+
+
+
 #' Calculate which features are expressed in which cells using a threshold on
 #' observed counts, transcripts-per-million, counts-per-million, FPKM, or
 #' defined expression levels.
@@ -16,6 +32,7 @@
 #' order shown.
 #' @return a logical matrix indicating whether or not a feature in a particular
 #' cell is expressed.
+#' 
 #' @export
 #' @examples
 #' data("sc_example_counts")
@@ -146,8 +163,8 @@ calculateTPM <- function(object, effective_length = NULL,
     counts0 <- counts
     counts0[counts == 0] <- NA
     rate <- log(counts0) - log(eff_len)
-    denom <- log(colSums(exp(rate), na.rm = TRUE))
-    out <- exp( t(t(rate) - denom) + log(1e6) )
+    denom <- log(.colSums(counts))
+    out <- exp( t(t(as.matrix(rate)) - denom) + log(1e6) )
     out[is.na(out)] <- 0
     out
 }
@@ -157,7 +174,10 @@ calculateTPM <- function(object, effective_length = NULL,
     ## Need to be careful with zero counts
     counts0 <- counts
     counts0[counts == 0] <- NA
-    N <- colSums(counts)
+    subset_row <- .subset2index(NULL, target = counts, byrow = TRUE)
+    margin.stats <- .Call(cxx_margin_summary, counts, 0, 
+                          subset_row - 1L, FALSE)
+    N <- margin.stats[[1]]
     logfpkm <- log(counts0) + log(1e9) - log(eff_len)
     logfpkm <- t(t(logfpkm) - log(N))
     out <- exp( logfpkm )
@@ -167,7 +187,10 @@ calculateTPM <- function(object, effective_length = NULL,
 
 .fpkmToTpm <- function(fpkm) {
     ## Expecting an FPKM matrix of nfeatures x ncells
-    exp( t(t(log(fpkm)) - log(colSums(fpkm))) + log(1e6) )
+    subset_row <- .subset2index(NULL, target = fpkm, byrow = TRUE)
+    margin.stats <- .Call(cxx_margin_summary, fpkm, 0, 
+                          subset_row - 1L, FALSE)
+    exp( t(t(log(as.matrix(fpkm))) - log(margin.stats[[1]])) + log(1e6) )
 }
 
 .countToEffCounts <- function(counts, len, eff_len) {
@@ -198,21 +221,24 @@ calculateCPM <- function(object, use.size.factors = TRUE) {
     if ( !methods::is(object, "SingleCellExperiment") )
         stop("object must be an SingleCellExperiment")
     counts_mat <- counts(object)
+    subset_row <- .subset2index(NULL, target = counts_mat, byrow = TRUE)
+    margin.stats <- .Call(cxx_margin_summary, counts_mat, 0, 
+                          subset_row - 1L, FALSE)
     if (use.size.factors) {
         sf.list <- .get_all_sf_sets(object)
         if (is.null(sf.list$size.factors[[1]])) {
             warning("size factors requested but not specified, 
                     using library sizes instead")
-            sf.list$size.factors[[1]] <- colSums(counts_mat)
+            sf.list$size.factors[[1]] <- margin.stats[[1]]
         }
     } else {
-        sf.list <- list(size.factors = list(colSums(counts_mat)),
+        sf.list <- list(size.factors = list(margin.stats[[1]]),
                         index = rep(1, nrow(object)))
     }
 
     # Scaling the size factors to the library size.
     cpm_mat <- counts_mat
-    mean.lib.size <- mean(colSums(counts_mat))
+    mean.lib.size <- mean(margin.stats[[1]])
     by.type <- split(seq_along(sf.list$index), sf.list$index)
 
     for (g in seq_along(by.type)) {
@@ -228,6 +254,7 @@ calculateCPM <- function(object, use.size.factors = TRUE) {
     colnames(cpm_mat) <- colnames(object)
     return(cpm_mat)
 }
+
 
 #' Calculate fragments per kilobase of exon per million reads mapped (FPKM)
 #'
@@ -294,9 +321,12 @@ calcAverage <- function(object, size.factors=NULL) {
         mat <- object
     }
 
+    subset_row <- .subset2index(NULL, target = mat, byrow = TRUE)
+    margin.stats <- .Call(cxx_margin_summary, mat, 0, 
+                          subset_row - 1L, FALSE)
     # Set size factors to library sizes if not available.
     if (is.null(sf.list$size.factors[[1]])) {
-        sf.list$size.factors[[1]] <- colSums(mat)
+        sf.list$size.factors[[1]] <- margin.stats[[1]]
     }
 
     # Computes the average count, adjusting for size factors or library size.

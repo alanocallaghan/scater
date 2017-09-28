@@ -677,7 +677,7 @@ findImportantPCs <- function(object, variable="total_features",
         sst <- ssr <- numeric(nrow(y))
         for (element in levels(by.chunk)) {
             current <- by.chunk==element
-            out <- .getRSquared_internal(QR, y[current,,drop=FALSE])
+            out <- .getRSquared_internal(QR, y[current,, drop = FALSE])
             sst[current] <- out$sst
             ssr[current] <- out$ssr
         }
@@ -691,13 +691,13 @@ findImportantPCs <- function(object, variable="total_features",
     (ssr/sst)
 }
 
-.getRSquared_internal<- function(QR, y) {
+.getRSquared_internal <- function(QR, y) {
     ## Compute total sum of squares
-    sst <- matrixStats::rowVars(y) * (ncol(y)-1)    
+    sst <- matrixStats::rowVars(y) * (ncol(y) - 1)    
     ## Compute residual sum of squares
     effects <- qr.qty(QR, t(y))
-    ssr <- sst - colSums(effects[-seq_len(QR$rank),,drop=FALSE]^2)
-    return(list(sst=sst, ssr=ssr))
+    ssr <- sst - .colSums(effects[-seq_len(QR$rank),, drop = FALSE] ^ 2)
+    return(list(sst = sst, ssr = ssr))
 }
 
 ################################################################################
@@ -825,7 +825,7 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
     total_exprs <- sum(exprs_mat)
     top50_pctage <- 100 * sum(rowSums(exprs_mat)[oo[1:n]]) / total_exprs
     ## Determine percentage of counts for top features by cell
-    df_pct_exprs_by_cell <- (100 * t(exprs_mat[oo[1:n],]) / colSums(exprs_mat))
+    df_pct_exprs_by_cell <- (100 * t(exprs_mat[oo[1:n],]) / .colSums(exprs_mat))
     pct_total <- 100 * rowSums(exprs_mat) / total_exprs
     rdata[["pct_total"]] <- pct_total
 

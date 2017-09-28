@@ -22,6 +22,7 @@
 #' rows and columns labeled.
 #' 
 #' @importFrom Matrix readMM
+#' @import Matrix
 #' @rdname read10xResults
 #' @aliases read10xResults read10XResults
 #' @export
