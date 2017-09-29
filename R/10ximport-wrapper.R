@@ -77,6 +77,7 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
     
     # Forming the full data matrix.
     full_data <- do.call(cbind, full_data)
+    full_data <- as(full_data, "dgCMatrix")
     rownames(full_data) <- gene_info$id
     
     # Applying some filtering if requested.
