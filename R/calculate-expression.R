@@ -1,20 +1,5 @@
 ## A set of functions for calculating and summarising expression values
 
-.colSums <- function(mat) {
-    subset_row <- .subset2index(NULL, target = mat, byrow = TRUE)
-    margin.stats <- .Call(cxx_margin_summary, mat, 0, 
-                          subset_row - 1L, FALSE)
-    margin.stats[[1]]
-}
-
-.rowSums <- function(mat) {
-    subset_col <- .subset2index(NULL, target = mat, byrow = FALSE)
-    margin.stats <- .Call(cxx_margin_summary, mat, 0, 
-                          subset_col - 1L, TRUE)
-    margin.stats[[1]]
-}
-
-
 
 #' Calculate which features are expressed in which cells using a threshold on
 #' observed counts, transcripts-per-million, counts-per-million, FPKM, or
