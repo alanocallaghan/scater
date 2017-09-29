@@ -79,3 +79,18 @@
           as.logical(sum), subset_row - 1L)
 }
 
+.general_rowVars <- function(x, cols=NULL) 
+# Computes variance of values from each row of 'x', using only
+# columns specified in 'cols' if not NULL.
+{
+    if (is.null(cols)) { cols <- seq_len(ncol(x)) }
+    .Call(cxx_calc_variance, x, cols - 1L, TRUE)
+}
+
+.general_colVars <- function(x, rows=NULL) 
+# Computes variance of values from each column of 'x', using only
+# rows specified in 'rows' if not NULL.
+{
+    if (is.null(rows)) { rows <- seq_len(nrow(x)) }
+    .Call(cxx_calc_variance, x, rows - 1L, FALSE)
+}
