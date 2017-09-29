@@ -151,7 +151,6 @@
 #' @importFrom Biobase fData
 #' @importFrom Biobase exprs
 #' @importFrom Biobase sampleNames<- sampleNames assayDataElement assayDataElement<-
-#' @importFrom matrixStats colCumsums
 #' @importFrom stats cmdscale coef mad median model.matrix nls prcomp quantile var dist
 #' @importFrom methods is new
 #' @importFrom utils read.table
@@ -563,6 +562,7 @@ findImportantPCs <- function(object, variable="total_features",
     }
     df_for_pca <- df_for_pca[feature_set,]
     df_for_pca <- t(df_for_pca)
+
     ## Drop any features with zero variance
     keep_feature <- (matrixStats::colVars(df_for_pca) > 0.001)
     keep_feature[is.na(keep_feature)] <- FALSE
@@ -684,7 +684,7 @@ findImportantPCs <- function(object, variable="total_features",
 
 .getRSquared_internal<- function(QR, y) {
     ## Compute total sum of squares
-    sst <- matrixStats::rowVars(y) * (ncol(y)-1)    
+    sst <- .general_rowVars(y) * (ncol(y)-1)    
     ## Compute residual sum of squares
     effects <- qr.qty(QR, t(y))
     ssr <- sst - colSums(effects[-seq_len(QR$rank),,drop=FALSE]^2)

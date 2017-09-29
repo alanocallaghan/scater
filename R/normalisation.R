@@ -131,7 +131,7 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
     }
 
 #    ## exit if any features have zero variance as this causes problem downstream
-#    if ( any(matrixStats::rowVars(exprs_mat) == 0) )
+#    if ( any(.general_rowVars(exprs_mat) == 0) )
 #        stop("Some features have zero variance.
 #             Please filter out features with zero variance (e.g. all zeros).")
 
