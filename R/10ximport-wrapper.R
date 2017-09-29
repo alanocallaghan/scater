@@ -21,7 +21,7 @@
 #' and log2(cpm + offset) as expression data; else returns a sparse matrix with 
 #' rows and columns labeled.
 #' 
-#' @importFrom Matrix readMM
+#' @importFrom Matrix readMM colSums
 #' @rdname read10xResults
 #' @aliases read10xResults read10XResults
 #' @export
@@ -49,7 +49,7 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
         
         ## define filters
         if (!is.null(min_total_cell_counts)) { 
-            keep_barcode <- (Matrix::colSums(data_mat) >= min_total_cell_counts)
+            keep_barcode <- colSums(data_mat) >= min_total_cell_counts
             data_mat <- data_mat[, keep_barcode]
         }
         
