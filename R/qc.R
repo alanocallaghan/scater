@@ -823,10 +823,10 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
     ## Determine percentage expression accounted for by top features across all
     ## cells
     total_exprs <- sum(exprs_mat)
-    top50_pctage <- 100 * sum(rowSums(exprs_mat)[oo[1:n]]) / total_exprs
+    top50_pctage <- 100 * sum(.rowSums(exprs_mat)[oo[1:n]]) / total_exprs
     ## Determine percentage of counts for top features by cell
     df_pct_exprs_by_cell <- (100 * t(exprs_mat[oo[1:n],]) / .colSums(exprs_mat))
-    pct_total <- 100 * rowSums(exprs_mat) / total_exprs
+    pct_total <- 100 * .rowSums(exprs_mat) / total_exprs
     rdata[["pct_total"]] <- pct_total
 
     ## Melt dataframe so it is conducive to ggplot
