@@ -34,6 +34,21 @@ test_that("we can compute standard QC metrics with feature controls", {
 })
 
 
+test_that("we can compute standard QC metrics on sparse counts matrix", {
+    sce10x <- read10xResults(system.file("extdata", package = "scater"))
+    expect_error(
+        example_sce <- calculateQCMetrics(sce10x, feature_controls = 1:20),
+        "feature_controls should be named")
+    sce10x <- calculateQCMetrics(sce10x, feature_controls = list(set1 = 1:20))
+    expect_that(sce10x, is_a("SingleCellExperiment"))
+    sce10x <- calculateQCMetrics(
+        sce10x, 
+        feature_controls = list(set1 = c(rep(TRUE, 20), 
+                                         rep(FALSE, nrow(sce10x) - 20))))
+    expect_that(sce10x, is_a("SingleCellExperiment"))
+})
+
+
 test_that("we can compute standard QC metrics with multiple sets of feature and 
           cell controls", {
               data("sc_example_counts")
@@ -43,7 +58,7 @@ test_that("we can compute standard QC metrics with multiple sets of feature and
                   colData = sc_example_cell_info)
               example_sce <- calculateQCMetrics(
                   example_sce, feature_controls = list(controls1 = 1:20, 
-                                                          controls2 = 500:1000),
+                                                       controls2 = 500:1000),
                   cell_controls = list(set_1 = 1:5, set_2 = 31:40))
               
               expect_that(example_sce, is_a("SingleCellExperiment"))
@@ -109,7 +124,21 @@ test_that("plotHighestExprs works as expected", {
     example_sce <- calculateQCMetrics(example_sce, 
                                       feature_controls = list(set1 = 1:500))
     expect_that(
+        plotHighestExprs(example_sce), 
+        is_a("ggplot"))
+    expect_that(
         plotHighestExprs(example_sce, col_by_variable = "Mutation_Status"), 
+        is_a("ggplot"))
+    
+    sce.blank <- SingleCellExperiment(
+        assays = list(counts = sc_example_counts), 
+        colData = sc_example_cell_info)
+    expect_error(
+        plotHighestExprs(sce.blank), 
+        "col_by_variable not found")
+    sce.blank <- calculateQCMetrics(sce.blank)
+    expect_that(
+        plotHighestExprs(sce.blank), 
         is_a("ggplot"))
 })
 

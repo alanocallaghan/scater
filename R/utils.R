@@ -94,3 +94,15 @@
     if (is.null(rows)) { rows <- seq_len(nrow(x)) }
     .Call(cxx_calc_variance, x, rows - 1L, FALSE)
 }
+
+.colSums <- function(mat) {
+    margin.stats <- .Call(cxx_margin_summary, mat, 0, 
+                          seq_len(nrow(mat)) - 1L, FALSE)
+    margin.stats[[1]]
+}
+
+.rowSums <- function(mat) {
+    margin.stats <- .Call(cxx_margin_summary, mat, 0, 
+                          seq_len(ncol(mat)) - 1L, TRUE)
+    margin.stats[[1]]
+}

@@ -8,5 +8,9 @@ test_that("newSCESet fails as expected", {
                        newSCESet(countData = sc_example_counts, phenoData = pd)),
                    "deprecated")
     expect_that(example_sceset, is_a("SingleCellExperiment"))
-
+    
+    sceset <- readRDS(system.file("extdata", "test_sceset.rds", package = "scater"))
+    expect_that(toSingleCellExperiment(sceset), is_a("SingleCellExperiment"))
+    expect_that(updateSCESet(sceset), is_a("SingleCellExperiment"))
+    
 })

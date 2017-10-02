@@ -64,8 +64,8 @@ toSingleCellExperiment <- function(object) {
         
     if (nrow(object@reducedDimension) > 0 && 
         ncol(object@reducedDimension) > 0) {
-        new.reddim <- SimpleList(redDim = reducedDim(object))
-        reducedDim(sce) <- new.reddim
+        new.reddim <- SimpleList(redDim = object@reducedDimension)
+        reducedDims(sce) <- new.reddim
     }
 
     sce

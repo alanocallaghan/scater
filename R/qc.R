@@ -316,10 +316,15 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         rd[[paste0("log10_total_", exprs_type, subset_type)]] <- log10(libsize + 1)
 
         if (!is.null(subset_row)) {
+            margin.stats.all <- .Call(
+                cxx_margin_summary, exprs_mat, 0, 
+                .subset2index(rep(TRUE, nrow(exprs_mat)), 
+                              target = exprs_mat, byrow = TRUE) - 1L, FALSE)
             ## Computing percentages of actual total.
-            rd[[paste0("pct_", exprs_type, subset_type)]] <- 100 * libsize / colSums(exprs_mat)
+            rd[[paste0("pct_", exprs_type, subset_type)]] <- 
+                (100 * libsize / margin.stats.all[[1]])
         }
-
+        
         ## Computing total percentages.
         pct_top <- .calc_top_prop(exprs_mat, subset_row = subset_row, 
                 subset_type = subset_type, exprs_type = exprs_type)
@@ -382,7 +387,11 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
     if (linear) {
         sum_exprs <- margin.stats[[1]]
-        total_exprs <- rowSums(exprs_mat)
+        margin.stats.all <- .Call(
+            cxx_margin_summary, exprs_mat, 0, 
+            .subset2index(rep(TRUE, ncol(exprs_mat)), 
+                          target = exprs_mat, byrow = FALSE) - 1L, TRUE)
+        total_exprs <- margin.stats.all[[1]]
         fd[[paste0("total_", exprs_type, subset_type)]] <- sum_exprs
         fd[[paste0("log10_total_", exprs_type, subset_type)]] <- log10(sum_exprs + 1)
 
@@ -668,7 +677,7 @@ findImportantPCs <- function(object, variable="total_features",
         sst <- ssr <- numeric(nrow(y))
         for (element in levels(by.chunk)) {
             current <- by.chunk==element
-            out <- .getRSquared_internal(QR, y[current,,drop=FALSE])
+            out <- .getRSquared_internal(QR, y[current,, drop = FALSE])
             sst[current] <- out$sst
             ssr[current] <- out$ssr
         }
@@ -682,13 +691,13 @@ findImportantPCs <- function(object, variable="total_features",
     (ssr/sst)
 }
 
-.getRSquared_internal<- function(QR, y) {
+.getRSquared_internal <- function(QR, y) {
     ## Compute total sum of squares
     sst <- .general_rowVars(y) * (ncol(y)-1)    
     ## Compute residual sum of squares
     effects <- qr.qty(QR, t(y))
-    ssr <- sst - colSums(effects[-seq_len(QR$rank),,drop=FALSE]^2)
-    return(list(sst=sst, ssr=ssr))
+    ssr <- sst - .colSums(effects[-seq_len(QR$rank),, drop = FALSE] ^ 2)
+    return(list(sst = sst, ssr = ssr))
 }
 
 ################################################################################
@@ -735,8 +744,8 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
                              feature_names_to_plot = NULL) {
     ## Check that variable to colour points exists
     if (!(col_by_variable %in% colnames(colData(object)))) {
-        warning("col_by_variable not found in colData(object).
-             Please make sure colData(object)[, variable] exists. Colours will not be plotted.")
+        stop("col_by_variable not found in colData(object).
+             Please make sure colData(object)[, variable] exists.")
         plot_cols <- FALSE
     } else
         plot_cols <- TRUE
@@ -816,7 +825,7 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
     total_exprs <- sum(exprs_mat)
     top50_pctage <- 100 * sum(rowSums(exprs_mat)[oo[1:n]]) / total_exprs
     ## Determine percentage of counts for top features by cell
-    df_pct_exprs_by_cell <- (100 * t(exprs_mat[oo[1:n],]) / colSums(exprs_mat))
+    df_pct_exprs_by_cell <- (100 * t(exprs_mat[oo[1:n],]) / .colSums(exprs_mat))
     pct_total <- 100 * rowSums(exprs_mat) / total_exprs
     rdata[["pct_total"]] <- pct_total
 
@@ -824,10 +833,11 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
     if ( is.null(rownames(rdata)) )
         rownames(rdata) <- as.character(rdata$feature)
     df_pct_exprs_by_cell_long <- reshape2::melt(df_pct_exprs_by_cell)
+    colnames(df_pct_exprs_by_cell_long) <- c("Cell", "Tags", "value")
     df_pct_exprs_by_cell_long$Feature <- 
-        rdata[as.character(df_pct_exprs_by_cell_long$Var2), "feature"]
-    df_pct_exprs_by_cell_long$Var2 <- factor(
-        df_pct_exprs_by_cell_long$Var2, levels = rownames(object)[rev(oo[1:n])])
+        rdata[as.character(df_pct_exprs_by_cell_long$Tags), "feature"]
+    df_pct_exprs_by_cell_long$Tags <- factor(
+        df_pct_exprs_by_cell_long$Tags, levels = rownames(object)[rev(oo[1:n])])
     df_pct_exprs_by_cell_long$Feature <- factor(
         df_pct_exprs_by_cell_long$Feature, levels = rdata$feature[rev(oo[1:n])])
     

@@ -21,15 +21,14 @@
 #' and log2(cpm + offset) as expression data; else returns a sparse matrix with 
 #' rows and columns labeled.
 #' 
-#' @importFrom Matrix readMM colSums
+#' @importFrom Matrix readMM
+#' @import Matrix
 #' @rdname read10xResults
 #' @aliases read10xResults read10XResults
 #' @export
 #' @examples 
-#' \dontrun{
-#' sce10x <- read10Xxesults("path/to/data/directory")
-#' count_matrix_10x <- read10xResults("path/to/data/directory", expand = FALSE)
-#' }
+#' sce10x <- read10xResults(system.file("extdata", package="scater"))
+#' 
 read10xResults <- function(data_dir, min_total_cell_counts = NULL, 
                            min_mean_gene_counts = NULL) { 
     
@@ -79,7 +78,7 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
     full_data <- do.call(cbind, full_data)
     full_data <- as(full_data, "dgCMatrix")
     rownames(full_data) <- gene_info$id
-    
+
     # Applying some filtering if requested.
     if (!is.null(min_mean_gene_counts)) {
         keep_gene <- (Matrix::rowSums(data_mat) >= min_mean_gene_counts)
@@ -89,6 +88,7 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
     
     # Adding the cell data.
     cell_info <- do.call(rbind, cell_info_list)
+    colnames(full_data) <- cell_info$barcode
     SingleCellExperiment(list(counts = full_data), rowData = gene_info, 
                          colData = cell_info)
 }
