@@ -148,7 +148,7 @@ calculateTPM <- function(object, effective_length = NULL,
     counts0 <- counts
     counts0[counts == 0] <- NA
     rate <- log(counts0) - log(eff_len)
-    denom <- log(.colSums(counts))
+    denom <- log(.general_colSums(counts))
     out <- exp( t(t(as.matrix(rate)) - denom) + log(1e6) )
     out[is.na(out)] <- 0
     out
