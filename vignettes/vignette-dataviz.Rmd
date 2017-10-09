@@ -27,7 +27,8 @@ This document provides some examples of the many data visualisation functions
 available in `scater`.
 
 Key `scater` data visualisation functions:
-* `plotScater`: cumulative expression, overview plot
+* `plotScater`: cumulative expression, overview plot (this replaces the generic
+`plot` function for `SCESet` objects)
 * `plotExpression`: plot cell expression levels for one or more genes
 * `plotExprsVsTxLength`: plot transcript expression against transcript length
 * `plotPlatePosition()`: plot cell gene expression and metadata with cells in 

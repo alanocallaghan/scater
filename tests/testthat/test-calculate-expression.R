@@ -24,6 +24,25 @@ test_that("we can calculate TPM from counts", {
 })
 
 
+test_that("we can calculate CPM from counts", {
+    data("sc_example_counts")
+    data("sc_example_cell_info")
+    example_sce <- SingleCellExperiment(
+        assays = list(counts = sc_example_counts), 
+        colData = sc_example_cell_info)
+    cpm(example_sce) <- calculateCPM(example_sce, use.size.factors = FALSE)
+    
+    expect_that(example_sce, is_a("SingleCellExperiment"))
+    expect_that(sum(cpm(example_sce)), is_more_than(0))
+    
+    sce10x <- read10xResults(system.file("extdata", package = "scater"))
+    cpm(sce10x) <- calculateCPM(sce10x, use.size.factors = FALSE)
+    expect_that(sce10x, is_a("SingleCellExperiment"))
+    expect_that(sum(cpm(sce10x)), is_more_than(0))
+    
+})
+
+
 test_that("we can calculate FPKM from counts", {
     data("sc_example_counts")
     data("sc_example_cell_info")

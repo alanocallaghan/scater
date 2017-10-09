@@ -94,9 +94,9 @@ nexprs <- function(object, lowerDetectionLimit = 0, exprs_values = "counts",
 #' Calculate transcripts-per-million (TPM) values for expression from counts for
 #' a set of features.
 #'
-#' @param object an \code{SCESet} object
+#' @param object a \code{SingleCellExperiment} object
 #' @param effective_length vector of class \code{"numeric"} providing the
-#' effective length for each feature in the \code{SCESet} object
+#' effective length for each feature in the \code{SingleCellExperiment} object
 #' @param calc_from character string indicating whether to compute TPM from
 #' \code{"counts"}, \code{"normcounts"} or \code{"fpkm"}.
 #' Default is to use \code{"counts"}, in which case the \code{effective_length}
@@ -187,7 +187,7 @@ calculateTPM <- function(object, effective_length = NULL,
 #'
 #' Calculate count-per-million (CPM) values from the count data.
 #'
-#' @param object an \code{SCESet} object
+#' @param object an \code{SingleCellExperiment} object
 #' @param use.size.factors a logical scalar specifying whether
 #' the size factors should be used to construct effective library
 #' sizes, or if the library size should be directly defined as
@@ -230,8 +230,9 @@ calculateCPM <- function(object, use.size.factors = TRUE) {
         chosen <- by.type[[g]]
         sf <- sf.list$size.factors[[g]]
         scaled.sf <- sf / mean(sf) * mean.lib.size
-        cpm_mat[chosen,] <- edgeR::cpm(counts_mat[chosen,,drop = FALSE],
-                                       lib.size = scaled.sf)
+        cpm_mat[chosen,] <- .compute_exprs(
+            counts_mat[chosen,,drop = FALSE], sf, sf_to_use = NULL, log = FALSE,
+            sum = FALSE, subset_row = NULL,  logExprsOffset = 0)
     }
 
     # Restoring attributes.
