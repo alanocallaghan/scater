@@ -268,7 +268,7 @@ plotScater <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 
     ## Get the proportion of the library accounted for by the top features
     prop_library <- reshape2::melt(t(t(seq_real_estate[to_plot, ]) /
-                                         .colSums(exprs_mat)),
+                                         .general_colSums(exprs_mat)),
                                    value.name = "prop_library")
     colnames(seq_real_estate_long) <- c("Feature", "Cell", exprs_values)
     seq_real_estate_long$Proportion_Library <- prop_library$prop_library
@@ -405,7 +405,7 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
         
         # Choosing a set of features, if null.
         if (is.null(feature_set)) {
-            rv <- matrixStats::rowVars(exprs_mat)
+            rv <- .general_rowVars(exprs_mat)
             o <- order(rv, decreasing = TRUE)
             feature_set <- o[seq_len(min(ntop, length(rv)))]
         }
@@ -417,7 +417,7 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
     }
 
     ## Drop any features with zero variance
-    keep_feature <- (matrixStats::colVars(exprs_to_plot) > 0.001)
+    keep_feature <- .general_colVars(exprs_to_plot) > 0.001
     keep_feature[is.na(keep_feature)] <- FALSE
     exprs_to_plot <- exprs_to_plot[, keep_feature]
 
@@ -505,8 +505,6 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
 #' @rdname plotPCA
 #' @aliases plotPCA plotPCA,SingleCellExperiment-method
 #' @importFrom BiocGenerics plotPCA
-#' @importFrom matrixStats rowVars
-#' @importFrom matrixStats colVars
 #' @export
 #'
 #' @examples
@@ -656,14 +654,14 @@ runTSNE <- function(object, ntop = 500, ncomponents = 2, exprs_values = "logcoun
         ## Define features to use: either ntop, or if a set of features is
         ## defined, then those
         if ( is.null(feature_set) ) {
-            rv <- matrixStats::rowVars(exprs_mat)
+            rv <- .general_rowVars(exprs_mat)
             ntop <- min(ntop, length(rv))
             feature_set <- order(rv, decreasing = TRUE)[seq_len(ntop)]
         }
 
         ## Drop any features with zero variance
         vals <- exprs_mat[feature_set,,drop = FALSE]
-        keep_feature <- (matrixStats::rowVars(vals) > 0.001)
+        keep_feature <- .general_rowVars(vals) > 0.001
         keep_feature[is.na(keep_feature)] <- FALSE
         vals <- vals[keep_feature,,drop = FALSE]
 
@@ -845,7 +843,7 @@ runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = N
         ## Define features to use: either ntop, or if a set of features is
         ## defined, then those
         if ( is.null(feature_set) ) {
-            rv <- matrixStats::rowVars(exprs_mat)
+            rv <- .general_rowVars(exprs_mat)
             feature_set <-
                 order(rv, decreasing = TRUE)[seq_len(min(ntop, length(rv)))]
         }
@@ -853,7 +851,7 @@ runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = N
         ## Drop any features with zero variance
         vals <- exprs_mat
         vals <- vals[feature_set,,drop = FALSE]
-        keep_feature <- (matrixStats::rowVars(vals) > 0.001)
+        keep_feature <- .general_rowVars(vals) > 0.001
         keep_feature[is.na(keep_feature)] <- FALSE
         vals <- vals[keep_feature,,drop = FALSE]
 
@@ -991,7 +989,7 @@ runMDS <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
         ## Define features to use: either ntop, or if a set of features is
         ## defined, then those
         if ( is.null(feature_set) ) {
-            rv <- matrixStats::rowVars(exprs_mat)
+            rv <- .general_rowVars(exprs_mat)
             feature_set <-
                 order(rv, decreasing = TRUE)[seq_len(min(ntop, length(rv)))]
         }
@@ -999,7 +997,7 @@ runMDS <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
         ## Drop any features with zero variance
         vals <- exprs_mat
         vals <- vals[feature_set,,drop = FALSE]
-        keep_feature <- (matrixStats::rowVars(vals) > 0.001)
+        keep_feature <- .general_rowVars(vals) > 0.001
         keep_feature[is.na(keep_feature)] <- FALSE
         vals <- vals[keep_feature,,drop = FALSE]
 
@@ -2400,7 +2398,7 @@ plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len",
 
     ## compute mean expression and sd of expression values
     exprs_mean <- rowMeans(exprs_mat)
-    exprs_sd <- matrixStats::rowSds(exprs_mat)
+    exprs_sd <- sqrt(.general_rowVars(exprs_mat))
 
     df_to_plot <- data.frame(tx_length_values, exprs_mean, exprs_sd,
                              ymin = exprs_mean - exprs_sd,

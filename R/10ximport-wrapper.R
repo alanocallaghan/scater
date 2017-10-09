@@ -48,7 +48,7 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
         
         ## define filters
         if (!is.null(min_total_cell_counts)) { 
-            keep_barcode <- (Matrix::colSums(data_mat) >= min_total_cell_counts)
+            keep_barcode <- .general_colSums(data_mat) >= min_total_cell_counts
             data_mat <- data_mat[, keep_barcode]
         }
         
@@ -76,13 +76,12 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
     
     # Forming the full data matrix.
     full_data <- do.call(cbind, full_data)
-    if (class(full_data)[1] == "dgTMatrix")
-        full_data <- as(full_data, "dgCMatrix")
+    full_data <- as(full_data, "dgCMatrix")
     rownames(full_data) <- gene_info$id
 
     # Applying some filtering if requested.
     if (!is.null(min_mean_gene_counts)) {
-        keep_gene <- (Matrix::rowSums(data_mat) >= min_mean_gene_counts)
+        keep_gene <- .general_rowSums(data_mat) >= min_mean_gene_counts
         full_data <- full_data[keep_gene,]
         gene_info <- gene_info[keep_gene,]
     }

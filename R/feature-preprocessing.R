@@ -211,7 +211,7 @@ summariseExprsAcrossFeatures <- function(object, exprs_values = "tpm",
             if ( is.null(counts_object) )
                 stop("If object does not contain count values, lib_size argument must be provided.")
             else 
-                lib_size <- .colSums(counts(object))
+                lib_size <- .general_colSums(counts(object))
         } else {
             if ( length(lib_size) != ncol(object))
                 stop("lib_size argument must have length equal to number of columns of object.")
