@@ -1,13 +1,13 @@
 # scater: single-cell analysis toolkit for expression with R
 
-<!--- [![Linux Build Status](https://semaphoreci.com/api/v1/davismcc/scater/branches/master/badge.svg)](https://semaphoreci.com/davismcc/scater) --->
-<!--- [![Coverage Status](https://img.shields.io/codecov/c/github/davismcc/scater/master.svg)](https://codecov.io/github/davismcc/scater?branch=master) --->
-<!--- [![Windows Build status](https://ci.appveyor.com/api/projects/status/github/davismcc/scater?svg=true)](https://ci.appveyor.com/project/davismcc/scater) --->
+[![Linux Build Status](https://semaphoreci.com/api/v1/davismcc/scater/branches/master/badge.svg)](https://semaphoreci.com/davismcc/scater)
+[![Coverage Status](https://img.shields.io/codecov/c/github/davismcc/scater/master.svg)](https://codecov.io/github/davismcc/scater?branch=master)
+[![Windows Build status](https://ci.appveyor.com/api/projects/status/github/davismcc/scater?svg=true)](https://ci.appveyor.com/project/davismcc/scater)
 <!--- [![Linux Build Status](https://travis-ci.org/davismcc/scater.svg?branch=master)](https://travis-ci.org/davismcc/scater) --->
 
 <img src=inst/scater_sticker_300dpi.png height="200">
 
-This package contains useful tools for the analysis of single-cell
+This package contains tools for the analysis of single-cell
 gene expression data using the statistical software R. The package places an
 emphasis on tools for quality control, visualisation and pre-processing of data
 before further downstream analysis.
