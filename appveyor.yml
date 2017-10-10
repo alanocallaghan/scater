@@ -12,6 +12,10 @@ install:
 
 # Adapt as necessary starting from here
 
+environment:
+  global:
+    WARNINGS_ARE_ERRORS: 1
+
 build_script:
   - travis-tool.sh install_bioc_deps
 
@@ -39,3 +43,15 @@ artifacts:
 
   - path: '\*_*.zip'
     name: Bits
+
+notifications:
+ - provider: Email
+   to:
+     - davismcc@gmail.com
+   subject: 'r-appveyor build {{status}}'                  # optional
+   message: "https://ci.appveyor.com/project/davismcc/scater"    # optional
+   on_build_success: false
+   on_build_failure: true
+   on_build_status_changed: true
+   
+   
