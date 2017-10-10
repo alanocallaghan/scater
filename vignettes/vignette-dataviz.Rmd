@@ -146,30 +146,45 @@ Tapping into the powerful capabilities of `ggplot2`, the possibilities are many.
 
 # Gene metadata plots
 
+The functions `plotRowData` and `plotFeatureData` are synonymous
+and provide convenient means for plotting feature-level (row-level) metadata 
+values against each other. The functions will use the data type for each variable 
+(continous/categorical) to automatically determine an appropriate type of plot 
+without requiring input from the user.
+
+
+```{r plot-fdata, echo=TRUE, fig.show=TRUE, results='hide', eval=TRUE}
+plotRowData(example_sce, aes(x = log10_total_counts, y = n_cells_counts,
+                                  colour = log10_mean_counts))
+```
+
 
 # Dimensionality reduction plots
 
 ## Using the `reducedDimension` slot
 
-The `SCESet` matrix has a `reducedDimension` slot, where coordinates for a
-reduced dimension representation of the cells can be stored. If we so wish, the
-top principal components can be added to the `reducedDimension` slot:
+The `SingleCellExperiment` object has a `reducedDimension` slot, where 
+coordinates for reduced dimension representations of the cells can be stored. 
+If we so wish, the top principal components can be added to the `PCA` element of
+the `reducedDimension` slot as follows:
 
 ```{r plot-pca-4comp-colby-shapeby-save-pcs, fig.show = FALSE, eval=TRUE}
 example_sce <- plotPCA(example_sce, ncomponents = 4,
                           colour_by = "Treatment", shape_by = "Mutation_Status",
                           return_SCE = TRUE, theme_size = 12)
+reducedDims(example_sce)
 head(reducedDim(example_sce))
 ```
 
-As shown above, the function `reducedDimension` (as well as the shorthand
-`redDim`) can be used to access the reduced dimension coordinates.
+As shown above, the functions `reducedDim` and `reducedDims`  can be used to 
+access the reduced dimension coordinates.
 
 This means that any other dimension reduction method can be applied and the
 coordinates stored. For example, we might wish to use t-distributed stochastic
 nearest neighbour embedding (t-SNE) or Gaussian process latent variable models
-or any other dimensionality reduction method. We can store these in the `SCESet`
-object and produce plots just as we did with PCA (plot not shown):
+or any other dimensionality reduction method. We can store these in the 
+`SingleCellExperiment` object with the `reducedDim` function and produce plots 
+just as we did with PCA (plot not shown):
 
 ```{r plot-reduceddim-4comp-colby-shapeby, fig.show=FALSE, eval=TRUE}
 plotReducedDim(example_sce, use_dimred = "PCA", ncomponents = 4, 
