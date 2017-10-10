@@ -2,7 +2,7 @@
 
 [![Linux Build Status](https://travis-ci.org/davismcc/scater.svg?branch=master)](https://travis-ci.org/davismcc/scater)
 [![Coverage Status](https://img.shields.io/codecov/c/github/davismcc/scater/master.svg)](https://codecov.io/github/davismcc/scater?branch=master)
-[![Windows Build status](https://ci.appveyor.com/api/projects/status/github/davismcc/scater-winnf?svg=true)](https://ci.appveyor.com/project/davismcc/scater-winnf)
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/1pgkea6q9taeq7te?svg=true)](https://ci.appveyor.com/project/davismcc/scater-winnf)
 <!--- [![Linux Build Status](https://travis-ci.org/davismcc/scater.svg?branch=master)](https://travis-ci.org/davismcc/scater) --->
 
 <img src=inst/scater_sticker_300dpi.png height="200">
