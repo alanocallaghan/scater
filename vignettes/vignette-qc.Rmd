@@ -1,5 +1,5 @@
 ---
-title: "Introduction to `scater`: Single-cell analysis toolkit for expression in R"
+title: "Quality control with `scater`"
 author:
 - name: "Davis McCarthy"
   affiliation: 
@@ -8,7 +8,7 @@ package: scater
 output:
     BiocStyle::html_document
 vignette: >
-  %\VignetteIndexEntry{An introduction to the scater package}
+  %\VignetteIndexEntry{Quality control with scater}
   %\VignetteEngine{knitr::rmarkdown}
   %VignetteEncoding{UTF-8}
 ---
@@ -23,8 +23,8 @@ library(ggplot2)
 theme_set(theme_bw(12))
 ```
 
-This document gives an introduction to and overview of the functionality of the
-`scater` package.
+This document gives an introduction to and overview of the quality control 
+functionality of the `scater` package.
 
 The `scater` package is contains tools to help with the analysis of single-cell
 transcriptomic data, with the focus on RNA-seq data. The package features:

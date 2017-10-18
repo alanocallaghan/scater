@@ -79,20 +79,30 @@
           as.logical(sum), subset_row - 1L)
 }
 
-.colSums <- function(mat) {
-    subset_row <- .subset2index(NULL, target = mat, byrow = TRUE)
+.general_rowVars <- function(x, cols=NULL) 
+# Computes variance of values from each row of 'x', using only
+# columns specified in 'cols' if not NULL.
+{
+    if (is.null(cols)) { cols <- seq_len(ncol(x)) }
+    .Call(cxx_calc_variance, x, cols - 1L, TRUE)
+}
+
+.general_colVars <- function(x, rows=NULL) 
+# Computes variance of values from each column of 'x', using only
+# rows specified in 'rows' if not NULL.
+{
+    if (is.null(rows)) { rows <- seq_len(nrow(x)) }
+    .Call(cxx_calc_variance, x, rows - 1L, FALSE)
+}
+
+.general_colSums <- function(mat) {
     margin.stats <- .Call(cxx_margin_summary, mat, 0, 
-                          subset_row - 1L, FALSE)
+                          seq_len(nrow(mat)) - 1L, FALSE)
     margin.stats[[1]]
 }
 
-.rowSums <- function(mat) {
-    subset_col <- .subset2index(NULL, target = mat, byrow = FALSE)
+.general_rowSums <- function(mat) {
     margin.stats <- .Call(cxx_margin_summary, mat, 0, 
-                          subset_col - 1L, TRUE)
+                          seq_len(ncol(mat)) - 1L, TRUE)
     margin.stats[[1]]
 }
-
-
-
-

@@ -7,10 +7,10 @@
 calculateTPM(object, effective_length = NULL, calc_from = "counts")
 }
 \arguments{
-\item{object}{an \code{SCESet} object}
+\item{object}{a \code{SingleCellExperiment} object}
 
 \item{effective_length}{vector of class \code{"numeric"} providing the
-effective length for each feature in the \code{SCESet} object}
+effective length for each feature in the \code{SingleCellExperiment} object}
 
 \item{calc_from}{character string indicating whether to compute TPM from
 \code{"counts"}, \code{"normcounts"} or \code{"fpkm"}.

@@ -50,8 +50,8 @@ Rcpp::RObject calc_top_features_internal(M mat, Rcpp::RObject topvec, Rcpp::RObj
         } else {
             survivors=input;
         }
-        double total=std::accumulate(survivors.begin(), survivors.end(), 0);
-            
+        double total=std::accumulate(survivors.begin(), survivors.end(), 0.0);
+
         // Sorting in descending order, and computing the accumulated total.
         std::partial_sort(survivors.begin(), survivors.begin() + top[ntop-1], survivors.end(), std::greater<T>());
         size_t x=0;

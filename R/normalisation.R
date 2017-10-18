@@ -108,7 +108,7 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
         ## Compute normalisation factors with calcNormFactors from edgeR
         norm_factors <- edgeR::calcNormFactors.default(exprs_mat_for_norm,
                                                        method = method, ...)
-        lib_size <- .colSums(exprs_mat_for_norm)
+        lib_size <- .general_colSums(exprs_mat_for_norm)
 
         if ( any(is.na(norm_factors)) ) {
             norm_factors[is.na(norm_factors)] <- 1
@@ -131,7 +131,7 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
     }
 
 #    ## exit if any features have zero variance as this causes problem downstream
-#    if ( any(matrixStats::rowVars(exprs_mat) == 0) )
+#    if ( any(.general_rowVars(exprs_mat) == 0) )
 #        stop("Some features have zero variance.
 #             Please filter out features with zero variance (e.g. all zeros).")
 
@@ -269,7 +269,7 @@ normalizeSCE <- function(object, exprs_values = "counts",
         sf.list <- .get_all_sf_sets(object)
         if (is.null(sf.list$size.factors[[1]])) {
             warning("using library sizes as size factors")
-            sf.list$size.factors[[1]] <- .colSums(exprs_mat)
+            sf.list$size.factors[[1]] <- .general_colSums(exprs_mat)
         }
 
         ## figuring out how many controls have their own size factors
