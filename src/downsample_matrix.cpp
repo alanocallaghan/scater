@@ -15,11 +15,14 @@ void downsample_matrix_internal(M mat, O output, Rcpp::NumericVector prop) {
         auto it=mat->get_const_col(i, incoming.begin());
         const double& curprop=prop[i];
         
-        for (auto j=0; j<ngenes; ++j) {
-            const auto& val=*(it+j);
-            if (val) { // i.e., non-zero.
-                outgoing[j]=R::rbinom(int(val), curprop);
+        for (size_t j=0; j<ngenes; ++j) {
+            const auto& val=*it;
+            if (val > 0) { // i.e., non-zero.
+                outgoing[j]=R::rbinom(val, curprop);
+            } else {
+                outgoing[j]=0;
             }
+            ++it;
         }
         
         output->set_col(i, outgoing.begin());
@@ -35,7 +38,7 @@ void downsample_matrix_internal(M mat, O output, Rcpp::NumericVector prop) {
 SEXP downsample_matrix(SEXP rmat, SEXP prop) {
     BEGIN_RCPP
     int rtype=beachmat::find_sexp_type(rmat);
-    auto otype=beachmat::output_param(rmat, true, true);
+    auto otype=beachmat::output_param(rmat, false, true);
     if (rtype==INTSXP) {
         auto mat=beachmat::create_integer_matrix(rmat);
         auto out=beachmat::create_integer_output(mat->get_nrow(), mat->get_ncol(), otype);
