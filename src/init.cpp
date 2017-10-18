@@ -11,6 +11,7 @@ static const R_CallMethodDef all_call_entries[] = {
     REGISTER(margin_summary, 4),
     REGISTER(calc_top_features, 3),
     REGISTER(calc_variance, 3),
+    REGISTER(downsample_matrix, 2),
     {NULL, NULL, 0}
 };
 
