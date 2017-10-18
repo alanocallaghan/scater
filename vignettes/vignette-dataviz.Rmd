@@ -8,7 +8,7 @@ package: scater
 output:
     BiocStyle::html_document
 vignette: >
-  %\VignetteIndexEntry{An introduction to the scater package}
+  %\VignetteIndexEntry{Data visualisation methods in scater}
   %\VignetteEngine{knitr::rmarkdown}
   %VignetteEncoding{UTF-8}
 ---

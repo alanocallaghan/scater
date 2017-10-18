@@ -7,7 +7,7 @@
 calculateCPM(object, use.size.factors = TRUE)
 }
 \arguments{
-\item{object}{an \code{SCESet} object}
+\item{object}{an \code{SingleCellExperiment} object}
 
 \item{use.size.factors}{a logical scalar specifying whether
 the size factors should be used to construct effective library

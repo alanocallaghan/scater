@@ -40,8 +40,6 @@ This function was developed from the \code{Read10X} function from
 the \code{Seurat} package.
 }
 \examples{
-\dontrun{
-sce10x <- read10Xxesults("path/to/data/directory")
-count_matrix_10x <- read10xResults("path/to/data/directory", expand = FALSE)
-}
+sce10x <- read10xResults(system.file("extdata", package="scater"))
+
 }
