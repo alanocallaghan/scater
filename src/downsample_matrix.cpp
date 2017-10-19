@@ -39,7 +39,9 @@ void downsample_matrix_internal(M mat, O output, Rcpp::NumericVector prop) {
 
             if ( (num_total - current)*u < num_sample - num_selected) {
                 // Current read is selected, we advance to that read's "index" (if we had instantiated the full [0, num_total) array).
-                while (cumulative <= current) {
+                while (cumulative <= current 
+                        && iIt!=incoming.end()) { /* Second clause should never trigger, but this assumes exact arithmetic
+                                                     in the probability calculations. We protect against segfaults just in case. */
                     cumulative+=(*iIt);
                     ++iIt;
                     ++oIt;
