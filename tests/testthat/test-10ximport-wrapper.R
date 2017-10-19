@@ -9,49 +9,66 @@ test_that("the system works", {
 })
 
 test_that("downsampling is correct", {
+    CHECKFUN <- function(input, prop) {
+        out <- scater:::downsampleCounts(input, prop)
+        expect_identical(colSums(out), round(colSums(input)*prop))
+        expect_true(all(out <= input))
+        return(invisible(NULL))
+    }
+
+    # Vanilla run.
     set.seed(0)
     ncells <- 100
-    u <- matrix(rpois(20000, 5), ncol=ncells)
-
+    u1 <- matrix(rpois(20000, 5), ncol=ncells)
     set.seed(100)
-    out <- scater:::downsampleCounts(u, 0.1)
-    set.seed(100)
-    ref <- rbinom(length(u), u, 0.1)
-    dim(ref) <- dim(out)
-    expect_identical(out, ref)
+    CHECKFUN(u1, 0.111) # Avoid problems with different rounding of 0.5.
+    CHECKFUN(u1, 0.333) # Avoid problems with different rounding of 0.5.
+    CHECKFUN(u1, 0.777) # Avoid problems with different rounding of 0.5.
 
-    # Checking double-precision values.
-    v <- u
-    storage.mode(v) <- "double"
+    u2 <- matrix(rpois(20000, 1), ncol=ncells)
+    set.seed(101)
+    CHECKFUN(u2, 0.111) # Avoid problems with different rounding of 0.5.
+    CHECKFUN(u2, 0.333) # Avoid problems with different rounding of 0.5.
+    CHECKFUN(u2, 0.777) # Avoid problems with different rounding of 0.5.
 
+    # Checking double-precision inputs.
+    v1 <- u1
+    storage.mode(v1) <- "double"
     set.seed(200)
-    out <- scater:::downsampleCounts(v, 0.1)
-    set.seed(200)
-    ref <- as.numeric(rbinom(length(u), u, 0.1))
-    dim(ref) <- dim(out)
-    expect_equal(out, ref)
+    CHECKFUN(v1, 0.111)
+    CHECKFUN(v1, 0.333)
+    CHECKFUN(v1, 0.777)
+
+    v2 <- u2
+    storage.mode(v2) <- "double"
+    set.seed(202)
+    CHECKFUN(v2, 0.111)
+    CHECKFUN(v2, 0.333)
+    CHECKFUN(v2, 0.777)
 
     # Checking vectors of proportions.
-    props <- runif(ncells)
+    set.seed(300)
+    CHECKFUN(u1, runif(ncells))
+    CHECKFUN(u1, runif(ncells, 0, 0.5))
+    CHECKFUN(u1, runif(ncells, 0.1, 0.2))
 
-    set.seed(300)
-    out <- scater:::downsampleCounts(u, props)
-    set.seed(300)
-    ref <- rbinom(length(u), u, matrix(props, nrow(u), ncol(u), byrow=TRUE))
-    dim(ref) <- dim(out)
-    expect_identical(out, ref)
+    set.seed(303)
+    CHECKFUN(u2, runif(ncells))
+    CHECKFUN(u2, runif(ncells, 0, 0.5))
+    CHECKFUN(u2, runif(ncells, 0.1, 0.2))
 
     # Checking sparse matrix inputs.
-    w <- as(v, "dgCMatrix")
-    
-    set.seed(300)
-    out <- scater:::downsampleCounts(w, 0.2)
-    set.seed(300)
-    ref <- rbinom(length(u), u, 0.2)
-    dim(ref) <- dim(out)
+    library(Matrix)
+    w1 <- as(v1, "dgCMatrix")
+    set.seed(400)
+    CHECKFUN(w1, 0.111)
+    CHECKFUN(w1, 0.333)
+    CHECKFUN(w1, 0.777)
 
-    coerced <- as.matrix(out)
-    dimnames(coerced) <- NULL    
-    expect_equal(coerced, ref)
+    w2 <- as(v2, "dgCMatrix")
+    set.seed(404)
+    CHECKFUN(w2, 0.111)
+    CHECKFUN(w2, 0.333)
+    CHECKFUN(w2, 0.777)
 })
 

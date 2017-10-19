@@ -1,9 +1,9 @@
 #include "scater.h"
 
-template <class V, class M, class O>
+template <class M, class O>
 void downsample_matrix_internal(M mat, O output, Rcpp::NumericVector prop) {
     const size_t ngenes=mat->get_nrow();
-    V incoming(ngenes), outgoing(ngenes);
+    Rcpp::IntegerVector incoming(ngenes), outgoing(ngenes);
 
     const size_t ncells=mat->get_ncol();
     if (prop.size()!=ncells) {
@@ -12,19 +12,44 @@ void downsample_matrix_internal(M mat, O output, Rcpp::NumericVector prop) {
     Rcpp::RNGScope _rng;
     
     for (size_t i=0; i<ncells; ++i) {
-        auto it=mat->get_const_col(i, incoming.begin());
+        mat->get_col(i, incoming.begin());
         const double& curprop=prop[i];
-        
-        for (size_t j=0; j<ngenes; ++j) {
-            const auto& val=*it;
-            if (val > 0) { // i.e., non-zero.
-                outgoing[j]=R::rbinom(val, curprop);
-            } else {
-                outgoing[j]=0;
-            }
-            ++it;
+        if (curprop < 0 || curprop > 1) { 
+            throw std::runtime_error("downsampling proportion must lie in [0, 1]");
         }
-        
+
+        // Getting the total library size and the size to downsample.
+        const int num_total=std::accumulate(incoming.begin(), incoming.end(), 0),
+                  num_sample=std::round(curprop*num_total);
+
+        // Setting up the output vector.
+        std::fill(outgoing.begin(), outgoing.end(), 0);
+        auto oIt=outgoing.begin();
+        auto iIt=incoming.begin();
+        int cumulative=0;
+        if (incoming.size()) { 
+            cumulative+=*iIt;
+            ++iIt;
+        }
+
+        // Sampling scheme adapted from John D. Cook, https://stackoverflow.com/a/311716/15485.
+        int current=0, num_selected=0;
+        while (num_selected < num_sample) {
+            const double u = unif_rand(); 
+
+            if ( (num_total - current)*u < num_sample - num_selected) {
+                // Current read is selected, we advance to that read's "index" (if we had instantiated the full [0, num_total) array).
+                while (cumulative <= current) {
+                    cumulative+=(*iIt);
+                    ++iIt;
+                    ++oIt;
+                }
+                ++(*oIt);
+                ++num_selected;
+            }
+            ++current; 
+        }
+               
         output->set_col(i, outgoing.begin());
     }
 
@@ -42,12 +67,12 @@ SEXP downsample_matrix(SEXP rmat, SEXP prop) {
     if (rtype==INTSXP) {
         auto mat=beachmat::create_integer_matrix(rmat);
         auto out=beachmat::create_integer_output(mat->get_nrow(), mat->get_ncol(), otype);
-        downsample_matrix_internal<Rcpp::IntegerVector>(mat.get(), out.get(), prop);
+        downsample_matrix_internal(mat.get(), out.get(), prop);
         return out->yield();
     } else {
         auto mat=beachmat::create_numeric_matrix(rmat);
         auto out=beachmat::create_numeric_output(mat->get_nrow(), mat->get_ncol(), otype);
-        downsample_matrix_internal<Rcpp::NumericVector>(mat.get(), out.get(), prop);
+        downsample_matrix_internal(mat.get(), out.get(), prop);
         return out->yield();
     }
     END_RCPP    
