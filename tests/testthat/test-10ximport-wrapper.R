@@ -70,5 +70,19 @@ test_that("downsampling is correct", {
     CHECKFUN(w2, 0.111)
     CHECKFUN(w2, 0.333)
     CHECKFUN(w2, 0.777)
+
+    # Checking that the sampling scheme is correct (as much as possible).
+    set.seed(500)
+    known <- matrix(1:5, nrow=5, ncol=10000)
+    prop <- 0.51
+    truth <- known[,1]*prop
+    out <- scater:::downsampleCounts(known, prop)
+    expect_true(all(abs(rowMeans(out)/truth - 1) < 0.1)) # Less than 10% error on the estimated proportions.
+
+    known <- matrix(1:5*10, nrow=5, ncol=10000)
+    prop <- 0.51
+    truth <- known[,1]*prop
+    out <- scater:::downsampleCounts(known, prop)
+    expect_true(all(abs(rowMeans(out)/truth - 1) < 0.01)) # Less than 1% error on the estimated proportions.
 })
 
