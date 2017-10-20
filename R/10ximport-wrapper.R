@@ -100,3 +100,8 @@ read10XResults <- function(...) {
     read10xResults(...)
 }
 
+downsampleCounts <- function(x, prop) {
+    prop <- rep(prop, length.out=ncol(x))
+    .Call(cxx_downsample_matrix, x, prop)
+}
+

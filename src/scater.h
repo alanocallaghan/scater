@@ -23,6 +23,8 @@ SEXP calc_exprs(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 SEXP calc_variance(SEXP, SEXP, SEXP);
 
+SEXP downsample_matrix(SEXP, SEXP);
+
 }
 
 #include "template_methods.h"
