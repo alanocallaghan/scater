@@ -27,9 +27,8 @@ counts below the threshold are filtered out.}
 \item{...}{passed arguments}
 }
 \value{
-If \code{expand} is TRUE, returns an SCESet object with counts data 
-and log2(cpm + offset) as expression data; else returns a sparse matrix with 
-rows and columns labeled.
+Returns an SingleCellExperiment object with counts data stored as a
+sparse matrix with rows and columns labeled.
 }
 \description{
 Creates a full or sparse matrix from a sparse data matrix provided by 10X 

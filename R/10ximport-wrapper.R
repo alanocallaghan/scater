@@ -17,9 +17,8 @@
 #' @details This function was developed from the \code{Read10X} function from 
 #' the \code{Seurat} package.
 #' 
-#' @return If \code{expand} is TRUE, returns an SCESet object with counts data 
-#' and log2(cpm + offset) as expression data; else returns a sparse matrix with 
-#' rows and columns labeled.
+#' @return Returns an SingleCellExperiment object with counts data stored as a
+#' sparse matrix with rows and columns labeled.
 #' 
 #' @importFrom Matrix readMM
 #' @import Matrix
@@ -98,5 +97,31 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
 #' @export
 read10XResults <- function(...) {
     read10xResults(...)
+}
+
+
+#' Downsample a count matrix
+#' 
+#' Downsample a count matrix to a desired proportion.
+#' 
+#' @param x matrix of counts
+#' @param prop numeric scalar or vector of length \code{ncol(x)} in [0, 1] 
+#' indicating the downsampling proportion
+#' 
+#' @details Given multiple 10x batches of very different sequencing depths it
+#' can be beneficial to downsample the deepest batches to match the coverage of
+#' the shallowest batches. This avoids differences in technical noise that can
+#' drive clustering by match.
+#' 
+#' @return a matrix of downsampled counts
+#' 
+#' @export
+#' @examples 
+#' sce10x <- read10xResults(system.file("extdata", package="scater"))
+#' downsampled <- downsampleCounts(counts(sce10x), prop = 0.5)
+#' 
+downsampleCounts <- function(x, prop) {
+    prop <- rep(prop, length.out = ncol(x))
+    .Call(cxx_downsample_matrix, x, prop)
 }
 
