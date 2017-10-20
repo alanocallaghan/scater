@@ -9,8 +9,8 @@ Authors@R: c(person("Davis", "McCarthy", role=c("aut", "cre"),
         person("Vladimir", "Kiselev", role=c("ctb"),
         email="vk6@sanger.ac.uk"))
 Maintainer: Davis McCarthy <davis@ebi.ac.uk>
-Version: 1.5.19
-Date: 2017-10-18
+Version: 1.5.20
+Date: 2017-10-20
 License: GPL (>= 2)
 Title: Single-cell analysis toolkit for gene expression data in R
 Description: A collection of tools for doing various analyses of
