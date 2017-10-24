@@ -1352,7 +1352,7 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2,
     df_to_plot$size_by <- size_by_vals
 
     ## Call default method to make the plot
-    plotReducedDimDefault(df_to_plot, percentVar = percentVar,
+    plotReducedDimDefault(df_to_plot, ncomponents = ncomponents, percentVar = percentVar,
                 colour_by = colour_by, shape_by = shape_by, size_by = size_by, ...)
 }
 
