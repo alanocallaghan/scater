@@ -15,7 +15,7 @@
 #' @param ... passed arguments
 #' 
 #' @details This function was developed from the \code{Read10X} function from 
-#' the \code{Seurat} package.
+#' the \pkg{Seurat} package.
 #' 
 #' @return Returns an SingleCellExperiment object with counts data stored as a
 #' sparse matrix with rows and columns labeled.
@@ -108,12 +108,17 @@ read10XResults <- function(...) {
 #' @param prop numeric scalar or vector of length \code{ncol(x)} in [0, 1] 
 #' indicating the downsampling proportion
 #' 
-#' @details Given multiple 10x batches of very different sequencing depths it
+#' @details Given multiple 10X batches of very different sequencing depths, it
 #' can be beneficial to downsample the deepest batches to match the coverage of
 #' the shallowest batches. This avoids differences in technical noise that can
-#' drive clustering by match.
+#' drive clustering by batch. 
 #' 
-#' @return a matrix of downsampled counts
+#' Downsampling without replacement is performed on the counts in each cell to
+#' generate the output matrix. Each count in the returned matrix is guaranteed
+#' to be smaller than the original value in \code{x}. This provides an 
+#' alternative to downsampling in the CellRanger \code{aggr} function.
+#' 
+#' @return an integer matrix of downsampled counts
 #' 
 #' @export
 #' @examples 
