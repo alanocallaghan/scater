@@ -7,7 +7,8 @@
 \title{Normalise expression expression levels for an SingleCellExperiment object}
 \usage{
 normaliseExprs(object, method = "none", design = NULL, feature_set = NULL,
-  exprs_values = "counts", return_norm_as_exprs = TRUE, ...)
+  exprs_values = "counts", return_norm_as_exprs = TRUE, return_log = TRUE,
+  ...)
 
 normalizeExprs(...)
 }
@@ -39,6 +40,13 @@ FALSE, values in the \code{exprs} slot will be left untouched. Regardless,
 normalised expression values will be returned to the \code{norm_exprs} slot
 of the object.}
 
+\item{return_log}{logical(1), should normalized values be returned on the log
+scale? Default is \code{TRUE}. If \code{TRUE} and \code{return_norm_as_exprs}
+is \code{TRUE} then normalised output is stored as \code{"logcounts"} in the
+returned object; if \code{TRUE} and \code{return_norm_as_exprs}
+is \code{FALSE} then normalised output is stored as \code{"norm_exprs"};
+if \code{FALSE} output is stored as \code{"normcounts"}}
+
 \item{...}{arguments passed to \code{normaliseExprs} (in the case of
 \code{normalizeExprs}) or to \code{\link[edgeR]{calcNormFactors}}.}
 }
@@ -46,19 +54,21 @@ of the object.}
 an SingleCellExperiment object
 }
 \description{
-Compute normalised expression values from an SingleCellExperiment object and return the
-object with the normalised expression values added.
+Compute normalised expression values from an SingleCellExperiment object and
+return the object with the normalised expression values added.
 }
 \details{
 This function allows the user to compute normalised expression
 values from an SingleCellExperiment object. The 'raw' values used can be the values in the
-\code{'counts'} (default), \code{'tpm'}, \code{'cpm'} or \code{'fpkm'} slot
+\code{'counts'} (default), or another specified assay slot
 of the SingleCellExperiment. Normalised expression values are computed through
-\code{\link{normalizeSCE}} and are on the log2-scale, with an offset
-defined by the \code{logExprsOffset} slot of the SingleCellExperiment object. These are
-dded to the \code{'norm_exprs'} slot of the returned object. If
-\code{'exprs_values'} argument is \code{'counts'}, a \code{'norm_cpm'} slot
-is also added, containing normalised counts-per-million values.
+\code{\link{normalizeSCE}} and are on the log2-scale by default (if
+\code{return_log} is TRUE), with an offset defined by the
+\code{metadata(object)$log.exprs.offset} value in the SingleCellExperiment
+object. These are added to the \code{'norm_exprs'} slot of the returned object. If
+\code{'exprs_values'} argument is \code{'counts'} and \code{return_log} is
+\code{FALSE} a \code{'normcounts'} slot is added, containing normalised
+counts-per-million values.
 
 If the raw values are counts, this function will compute size factors using
 methods in \code{\link[edgeR]{calcNormFactors}}. Library sizes are multiplied

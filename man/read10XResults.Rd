@@ -13,8 +13,7 @@ read10XResults(...)
 }
 \arguments{
 \item{data_dir}{Directory containing the matrix.mtx, genes.tsv, and 
-barcodes.tsv
-files provided by 10x. A vector or named vector can be given in order to load 
+barcodes.tsv files provided by 10x. A vector or named vector can be given in order to load 
 several data directories. If a named vector is given, the cell barcode names 
 will be prefixed with the name.}
 
@@ -36,7 +35,7 @@ genomics.
 }
 \details{
 This function was developed from the \code{Read10X} function from 
-the \code{Seurat} package.
+the \pkg{Seurat} package.
 }
 \examples{
 sce10x <- read10xResults(system.file("extdata", package="scater"))
