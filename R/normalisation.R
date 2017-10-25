@@ -4,8 +4,8 @@
 
 #' Normalise expression expression levels for an SingleCellExperiment object
 #'
-#' Compute normalised expression values from an SingleCellExperiment object and return the
-#' object with the normalised expression values added.
+#' Compute normalised expression values from an SingleCellExperiment object and
+#' return the object with the normalised expression values added.
 #'
 #' @param object an \code{SingleCellExperiment} object.
 #' @param method character string specified the method of calculating
@@ -28,18 +28,26 @@
 #' FALSE, values in the \code{exprs} slot will be left untouched. Regardless,
 #' normalised expression values will be returned to the \code{norm_exprs} slot
 #' of the object.
+#' @param return_log logical(1), should normalized values be returned on the log
+#' scale? Default is \code{TRUE}. If \code{TRUE} and \code{return_norm_as_exprs}
+#' is \code{TRUE} then normalised output is stored as \code{"logcounts"} in the
+#' returned object; if \code{TRUE} and \code{return_norm_as_exprs}
+#' is \code{FALSE} then normalised output is stored as \code{"norm_exprs"};
+#' if \code{FALSE} output is stored as \code{"normcounts"}
 #' @param ... arguments passed to \code{normaliseExprs} (in the case of
 #' \code{normalizeExprs}) or to \code{\link[edgeR]{calcNormFactors}}.
 #'
 #' @details This function allows the user to compute normalised expression
 #' values from an SingleCellExperiment object. The 'raw' values used can be the values in the
-#' \code{'counts'} (default), \code{'tpm'}, \code{'cpm'} or \code{'fpkm'} slot
+#' \code{'counts'} (default), or another specified assay slot
 #' of the SingleCellExperiment. Normalised expression values are computed through
-#' \code{\link{normalizeSCE}} and are on the log2-scale, with an offset
-#' defined by the \code{logExprsOffset} slot of the SingleCellExperiment object. These are
-#' dded to the \code{'norm_exprs'} slot of the returned object. If
-#' \code{'exprs_values'} argument is \code{'counts'}, a \code{'norm_cpm'} slot
-#' is also added, containing normalised counts-per-million values.
+#' \code{\link{normalizeSCE}} and are on the log2-scale by default (if
+#' \code{return_log} is TRUE), with an offset defined by the
+#' \code{metadata(object)$log.exprs.offset} value in the SingleCellExperiment
+#' object. These are added to the \code{'norm_exprs'} slot of the returned object. If
+#' \code{'exprs_values'} argument is \code{'counts'} and \code{return_log} is
+#' \code{FALSE} a \code{'normcounts'} slot is added, containing normalised
+#' counts-per-million values.
 #'
 #' If the raw values are counts, this function will compute size factors using
 #' methods in \code{\link[edgeR]{calcNormFactors}}. Library sizes are multiplied
@@ -88,7 +96,7 @@
 #'
 normaliseExprs <- function(object, method = "none", design = NULL, feature_set = NULL,
                            exprs_values = "counts", return_norm_as_exprs = TRUE,
-                           ...) {
+                           return_log = TRUE, ...) {
     if (!methods::is(object, "SingleCellExperiment"))
         stop("object argument must be a SingleCellExperiment")
     ## If counts, we can compute size factors.
@@ -120,39 +128,43 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
         sizeFactors(object) <- size_factors
 
         ## Computing (normalized) CPMs is also possible.
-        assay(object, "norm_cpm") <- calculateCPM(object, 
+        assay(object, "normcounts") <- calculateCPM(object,
                                                   use.size.factors = TRUE)
     }
 
     ## Computing normalized expression values, if we're not working with 'exprs'.
     if (exprs_values != "logcounts") {
-        object <- normalizeSCE(object, exprs_values = exprs_values,
-                                   return_norm_as_exprs = return_norm_as_exprs)
+        object <- normalizeSCE(
+            object, exprs_values = exprs_values, return_log = return_log,
+            return_norm_as_exprs = return_norm_as_exprs)
     }
-
-#    ## exit if any features have zero variance as this causes problem downstream
-#    if ( any(.general_rowVars(exprs_mat) == 0) )
-#        stop("Some features have zero variance.
-#             Please filter out features with zero variance (e.g. all zeros).")
-
 
     ## If a design matrix is provided, then normalised expression values are
     ## residuals of a linear model fit to norm_exprs values with that design
     if ( !is.null(design) ) {
-        if (exprs_values != "logcounts")
-            if (return_norm_as_exprs)
-                norm_exprs_mat <- exprs(object)
-            else 
-                norm_exprs_mat <- norm_exprs(object)
-        else 
+        if (exprs_values != "logcounts") {
+            if (return_log) {
+                if (return_norm_as_exprs)
+                    norm_exprs_mat <- exprs(object)
+                else
+                    norm_exprs_mat <- norm_exprs(object)
+            } else {
+                if (return_norm_as_exprs)
+                    norm_exprs_mat <- normcounts(object)
+            }
+        } else
             norm_exprs_mat <- exprs(object)
         limma_fit <- limma::lmFit(norm_exprs_mat, design)
-        norm_exprs(object) <- limma::residuals.MArrayLM(limma_fit, 
-                                                        norm_exprs_mat)
+        if (return_log)
+            norm_exprs(object) <- limma::residuals.MArrayLM(
+                limma_fit, norm_exprs_mat)
+        else
+            normcounts(object) <- limma::residuals.MArrayLM(
+                limma_fit, norm_exprs_mat)
     }
 
     ## Return normalised expression values in exprs(object)?
-    if ( return_norm_as_exprs )
+    if ( return_norm_as_exprs && return_log && exprs_values == "logcounts" )
         assay(object, "logcounts") <- norm_exprs(object)
 
     ## Return SingleCellExperiment object
@@ -183,7 +195,7 @@ normalizeExprs <- function(...) {
 #' \code{'tpm'}, \code{'cpm'} and \code{'fpkm'}. Defaults to the first
 #' available value of the options in the order shown.
 #' @param return_log logical(1), should normalized values be returned on the log
-#' scale? Default is \code{TRUE}. If \code{TRUE}, output is stored as 
+#' scale? Default is \code{TRUE}. If \code{TRUE}, output is stored as
 #' \code{"logcounts"} in the returned object; if \code{FALSE} output is stored
 #' as \code{"normcounts"}
 #' @param log_exprs_offset scalar numeric value giving the offset to add when
@@ -207,23 +219,23 @@ normalizeExprs <- function(...) {
 #' British/Australian spelling.
 #'
 #' @section Warning about centred size factors:
-#' Centring the size factors ensures that the computed \code{exprs} can be 
+#' Centring the size factors ensures that the computed \code{exprs} can be
 #' interpreted as being on the same scale as log-counts. This does not affect
-#' relative comparisons between cells in the same \code{object}, as all size 
+#' relative comparisons between cells in the same \code{object}, as all size
 #' factors are scaled by the same amount. However, if two different \code{SingleCellExperiment}
-#' objects are run separately through \code{normalize}, the size factors 
+#' objects are run separately through \code{normalize}, the size factors
 #' in each object will be rescaled differently. This means that the size factors
 #' and \code{exprs} will \emph{not} be comparable between objects.
 #'
 #' This lack of comparability is not always obvious. For example, if we subsetted
-#' an existing \code{SingleCellExperiment}, and ran \code{normalize} separately on each subset, 
-#' the resulting \code{exprs} in each subsetted object would \emph{not} be 
-#' comparable to each other. This is despite the fact that all cells were 
-#' originally derived from a single \code{SingleCellExperiment} object. 
+#' an existing \code{SingleCellExperiment}, and ran \code{normalize} separately on each subset,
+#' the resulting \code{exprs} in each subsetted object would \emph{not} be
+#' comparable to each other. This is despite the fact that all cells were
+#' originally derived from a single \code{SingleCellExperiment} object.
 #'
 #' In general, it is advisable to only compare size factors and \code{exprs}
 #' between cells in one \code{SingleCellExperiment} object. If objects are to be combined,
-#' new size factors should be computed 
+#' new size factors should be computed
 #' using all cells in the combined object, followed by running \code{normalize}.
 #'
 #' @return an SingleCellExperiment object
@@ -281,7 +293,7 @@ normalizeSCE <- function(object, exprs_values = "counts",
         }
     } else {
         # ignoring size factors for non-count data.
-        sf.list <- list(size.factors = rep(1, ncol(object)), index = NULL) 
+        sf.list <- list(size.factors = rep(1, ncol(object)), index = NULL)
     }
 
     ## using logExprsOffset=1 if argument is NULL
@@ -294,14 +306,19 @@ normalizeSCE <- function(object, exprs_values = "counts",
     }
 
     ## Compute normalized expression values.
-    norm_exprs <- .compute_exprs(exprs_mat, sf.list$size.factors, sf_to_use = sf.list$index, 
-                                 log = return_log, sum = FALSE, logExprsOffset = log_exprs_offset,
-                                 subset_row = NULL)
+    norm_exprs <- .compute_exprs(
+        exprs_mat, sf.list$size.factors, sf_to_use = sf.list$index,
+        log = return_log, sum = FALSE, logExprsOffset = log_exprs_offset,
+        subset_row = NULL)
 
     ## add normalised values to object
-    if (return_log) { 
-        assay(object, "logcounts") <- norm_exprs
-        metadata(object)$log.exprs.offset <- log_exprs_offset
+    if (return_log) {
+        if (return_norm_as_exprs) {
+            assay(object, "logcounts") <- norm_exprs
+            metadata(object)$log.exprs.offset <- log_exprs_offset
+        } else {
+            assay(object, "norm_exprs") <- norm_exprs
+        }
     } else {
         assay(object, "normcounts") <- norm_exprs
     }
@@ -309,16 +326,16 @@ normalizeSCE <- function(object, exprs_values = "counts",
     ## centering all existing size factors if requested
     if (exprs_values == "counts" && centre_size_factors) {
         sf <- sizeFactors(object)
-        if (!is.null(sf)) { 
+        if (!is.null(sf)) {
             sf <- sf / mean(sf)
             sizeFactors(object) <- sf
         }
 
         # ... and for all controls.
         for (type in sf.list$available) {
-            sf <- sizeFactors(object, type=type)
+            sf <- sizeFactors(object, type = type)
             sf <- sf / mean(sf)
-            sizeFactors(object, type=type) <- sf
+            sizeFactors(object, type = type) <- sf
         }
     }
 

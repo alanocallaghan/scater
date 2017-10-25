@@ -4,8 +4,7 @@
 #' genomics.
 #' 
 #' @param data_dir Directory containing the matrix.mtx, genes.tsv, and 
-#' barcodes.tsv
-#' files provided by 10x. A vector or named vector can be given in order to load 
+#' barcodes.tsv files provided by 10x. A vector or named vector can be given in order to load 
 #' several data directories. If a named vector is given, the cell barcode names 
 #' will be prefixed with the name.
 #' @param min_total_cell_counts integer(1) threshold such that cells (barcodes)
