@@ -307,11 +307,11 @@ calcAverage <- function(object, size.factors=NULL) {
         mat <- object
     }
 
-    subset_row <- .subset2index(NULL, target = mat, byrow = TRUE)
-    margin.stats <- .Call(cxx_margin_summary, mat, 0, 
-                          subset_row - 1L, FALSE)
     # Set size factors to library sizes if not available.
     if (is.null(sf.list$size.factors[[1]])) {
+        subset_row <- .subset2index(NULL, target = mat, byrow = TRUE)
+        margin.stats <- .Call(cxx_margin_summary, mat, 0, 
+                              subset_row - 1L, FALSE)
         sf.list$size.factors[[1]] <- margin.stats[[1]]
     }
 
