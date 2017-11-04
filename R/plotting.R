@@ -382,10 +382,10 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
         if ( is.null(selected_variables) ) {
             selected_variables <- c("pct_counts_top_100_features",
                                     "total_features",
-                                    "pct_counts_feature_controls",
-                                    "total_features_feature_controls",
+                                    "pct_counts_feature_control",
+                                    "total_features_feature_control",
                                     "log10_total_counts_endogenous",
-                                    "log10_total_counts_feature_controls")
+                                    "log10_total_counts_feature_control")
         }
 
         col_data_names <- colnames(colData(object)) 
