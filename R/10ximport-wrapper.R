@@ -17,7 +17,9 @@
 #' the \pkg{Seurat} package.
 #' 
 #' @return Returns an SingleCellExperiment object with counts data stored as a
-#' sparse matrix with rows and columns labeled.
+#' sparse matrix. Rows are named with the gene name and columns are named with 
+#' the cell barcode (if \code{data_dir} contains one element; otherwise the 
+#' columns are unnamed to avoid problems with non-unique barcodes).
 #' 
 #' @importFrom Matrix readMM
 #' @import Matrix
@@ -41,17 +43,19 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
         gene.loc <- file.path(run, "genes.tsv")
         matrix.loc <- file.path(run, "matrix.mtx")
         
-        ## read sparse count matrix
+        ## read sparse count matrix and cell barcodes.
         data_mat <- Matrix::readMM(matrix.loc)
-        
+        data_mat <- as(data_mat, "dgCMatrix")
+        cell.names <- utils::read.table(barcode.loc, header = FALSE, 
+                                        colClasses = "character")[[1]]
+
         ## define filters
         if (!is.null(min_total_cell_counts)) { 
             keep_barcode <- .general_colSums(data_mat) >= min_total_cell_counts
             data_mat <- data_mat[, keep_barcode]
+            cell.names <- cell.names[keep_barcode]
         }
-        
-        cell.names <- utils::read.table(barcode.loc, header = FALSE, 
-                                        colClasses = "character")[[1]]
+
         dataset <- i
         if (!is.null(names(data_dir))) {
             dataset <- names(data_dir)[i]
@@ -74,7 +78,6 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
     
     # Forming the full data matrix.
     full_data <- do.call(cbind, full_data)
-    full_data <- as(full_data, "dgCMatrix")
     rownames(full_data) <- gene_info$id
 
     # Applying some filtering if requested.
@@ -84,9 +87,11 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
         gene_info <- gene_info[keep_gene,]
     }
     
-    # Adding the cell data.
+    # Adding the cell data (only using as colnames if there is only 1 set - guaranteed unique).
     cell_info <- do.call(rbind, cell_info_list)
-    colnames(full_data) <- cell_info$barcode
+    if (nsets==1L) {
+        colnames(full_data) <- cell_info$barcode
+    }
     SingleCellExperiment(list(counts = full_data), rowData = gene_info, 
                          colData = cell_info)
 }
