@@ -62,10 +62,9 @@ Rcpp::RObject calc_exprs_internal (M mat,
     std::vector<std::unique_ptr<beachmat::numeric_output> > holder;
     beachmat::numeric_output* optr=NULL;
     if (!dosum) { 
-        holder.push_back(
-                beachmat::create_numeric_output(slen, ncells,
-                    beachmat::output_param(mat->get_matrix_type(), true, preserve_sparse))
-                );
+        beachmat::output_param OPARAM(mat->get_matrix_type(), true, preserve_sparse);
+        OPARAM.optimize_chunk_dims(slen, ncells);
+        holder.push_back(beachmat::create_numeric_output(slen, ncells, OPARAM));
         optr=holder.front().get();
     }
 
