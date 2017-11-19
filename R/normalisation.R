@@ -185,7 +185,7 @@ normalizeExprs <- function(...) {
 #' Normalise a SingleCellExperiment object using pre-computed size factors
 #'
 #' Compute normalised expression values from a SingleCellExperiment object using the size
-#' factors stored in the object. Return the object with the normalised
+#' factors stored in the object. Return the object with the (log2-)normalised
 #' expression values added.
 #'
 #' @param object a \code{SingleCellExperiment} object.
@@ -194,7 +194,7 @@ normalizeExprs <- function(...) {
 #' log-transformed expression values. Valid options are \code{'counts'},
 #' \code{'tpm'}, \code{'cpm'} and \code{'fpkm'}. Defaults to the first
 #' available value of the options in the order shown.
-#' @param return_log logical(1), should normalized values be returned on the log
+#' @param return_log logical(1), should normalized values be returned on the log2
 #' scale? Default is \code{TRUE}. If \code{TRUE}, output is stored as
 #' \code{"logcounts"} in the returned object; if \code{FALSE} output is stored
 #' as \code{"normcounts"}
