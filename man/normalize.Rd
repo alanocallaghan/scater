@@ -31,7 +31,7 @@ log-transformed expression values. Valid options are \code{'counts'},
 \code{'tpm'}, \code{'cpm'} and \code{'fpkm'}. Defaults to the first
 available value of the options in the order shown.}
 
-\item{return_log}{logical(1), should normalized values be returned on the log
+\item{return_log}{logical(1), should normalized values be returned on the log2
 scale? Default is \code{TRUE}. If \code{TRUE}, output is stored as
 \code{"logcounts"} in the returned object; if \code{FALSE} output is stored
 as \code{"normcounts"}}
@@ -60,7 +60,7 @@ an SingleCellExperiment object
 }
 \description{
 Compute normalised expression values from a SingleCellExperiment object using the size
-factors stored in the object. Return the object with the normalised
+factors stored in the object. Return the object with the (log2-)normalised
 expression values added.
 }
 \details{

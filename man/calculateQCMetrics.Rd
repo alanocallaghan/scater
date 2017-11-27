@@ -143,7 +143,7 @@ produced for each control set (e.g. here, \code{is_feature_control_ERCC} and
 \code{is_feature_control}, which indicates if the feature belongs to any of
 the control sets.}
 }
-These feature-level QC metrics are added as columns to the ``featureData''
+These feature-level QC metrics are added as columns to the ``rowData''
 slot of the \code{SingleCellExperiment} object so that they can be inspected and are
 readily available for other functions to use. As with the cell-level metrics,
  wherever ``counts'' appear in the above, the same metrics will also be
