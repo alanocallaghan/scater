@@ -758,7 +758,7 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
 
     ## Define expression values to be used
     ## Find the most highly expressed features in this dataset
-    exprs_mat <- assay(object, exprs_values)
+    exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
     ave_exprs <- .general_rowSums(exprs_mat)
     oo <- order(ave_exprs, decreasing=TRUE)
     chosen <- oo[seq_len(n)]
@@ -767,13 +767,13 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
     rdata <- rowData(object)
     if (is.null(feature_names_to_plot) || 
         is.null(rowData(object)[[feature_names_to_plot]])) {
-        rdata$Feature <- factor(rownames(object),
-                                levels = rownames(object)[rev(oo)])
+        feature_names <- rownames(object)
     } else {
-        rdata$Feature <- factor(
-            rowData(object)[[feature_names_to_plot]],
-            levels = rowData(object)[[feature_names_to_plot]][rev(oo)])
+        feature_names <- rowData(object)[[feature_names_to_plot]]
+        feature_names <- as.character(feature_names)
     }
+    rownames(exprs_mat) <- feature_names 
+    rdata$Feature <- factor(feature_names, levels=feature_names[rev(oo)])
 
     ## Check if is_feature_control is defined
     if ( is.null(rdata$is_feature_control) ) { 
@@ -802,10 +802,9 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
     colnames(df_exprs_by_cell_long) <- c("Cell", "Tags", "value")
     df_exprs_by_cell_long$Feature <- 
         rdata[as.character(df_exprs_by_cell_long$Tags), "Feature"]
-    df_exprs_by_cell_long$Tags <- factor(
-        df_exprs_by_cell_long$Tags, levels = rownames(object)[rev(chosen)])
     df_exprs_by_cell_long$Feature <- factor(
-        df_exprs_by_cell_long$Feature, levels = rdata$Feature[rev(chosen)])
+        df_exprs_by_cell_long$Feature, 
+        levels = as.character(rdata$Feature[rev(chosen)]))
     
     ## Check that variable to colour points exists
     if (!(col_by_variable %in% colnames(colData(object)))) {
