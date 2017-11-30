@@ -800,10 +800,8 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
     }
     df_exprs_by_cell_long <- reshape2::melt(df_exprs_by_cell)
     colnames(df_exprs_by_cell_long) <- c("Cell", "Tags", "value")
-    df_exprs_by_cell_long$Feature <- 
-        rdata[as.character(df_exprs_by_cell_long$Tags), "Feature"]
     df_exprs_by_cell_long$Feature <- factor(
-        df_exprs_by_cell_long$Feature, 
+        rdata[as.character(df_exprs_by_cell_long$Tags), "Feature"]
         levels = as.character(rdata$Feature[rev(chosen)]))
     
     ## Check that variable to colour points exists
