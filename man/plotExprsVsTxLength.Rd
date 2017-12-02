@@ -11,7 +11,7 @@ plotExprsVsTxLength(object, tx_length = "median_feat_eff_len",
   log2_values = FALSE, size = NULL, se = TRUE)
 }
 \arguments{
-\item{object}{an \code{\link{SingleCellExperiment}} object}
+\item{object}{a \code{\link{SingleCellExperiment}} object}
 
 \item{tx_length}{transcript lengths to plot on the x-axis. Can be one of: (1)
 the name of a column of \code{rowData(object)} containing the transcript length
@@ -77,7 +77,7 @@ the smoothed fit through the cells. (Ignored if \code{show_smooth} is \code{FALS
 a ggplot object
 }
 \description{
-Plot expression values from an \code{\link{SingleCellExperiment}} object
+Plot expression values from a \code{\link{SingleCellExperiment}} object
 against transcript length values defined in the SingleCellExperiment object
 or supplied as an argument.
 }

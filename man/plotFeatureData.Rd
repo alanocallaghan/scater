@@ -11,7 +11,7 @@ plotFeatureData(object, aesth = aes_string(x = "n_cells_counts", y =
 plotRowData(...)
 }
 \arguments{
-\item{object}{an \code{\link{SingleCellExperiment}} object containing
+\item{object}{a \code{\link{SingleCellExperiment}} object containing
 expression values and experimental information. Must have been appropriately prepared.}
 
 \item{aesth}{aesthetics function call to pass to ggplot. This function

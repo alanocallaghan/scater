@@ -171,9 +171,9 @@
 #' Plot an overview of expression for each cell
 #'
 #' Plot the relative proportion of the library accounted for by the most highly
-#' expressed features for each cell for an \code{SingleCellExperiment} dataset.
+#' expressed features for each cell for a \code{SingleCellExperiment} object. 
 #'
-#' @param x an \code{SingleCellExperiment} object
+#' @param x a \code{SingleCellExperiment} object
 #' @param block1 character string defining the column of \code{colData(object)} to
 #' be used as a factor by which to separate the cells into blocks (separate
 #' panels) in the plot. Default is \code{NULL}, in which case there is no
@@ -335,6 +335,12 @@ plotScater <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 
 ################################################################################
 
+#' Run PCA for a SingleCellExperiment object
+#'
+#' Perform a principal components analysis (PCA) based on the data stored in 
+#' a \code{\link{SingleCellExperiment}} object. 
+#'
+#' @param object a \code{\link{SingleCellExperiment}} object
 #' @param ntop numeric scalar indicating the number of most variable features to
 #' use for the PCA. Default is \code{500}, but any \code{ntop} argument is
 #' overrided if the \code{feature_set} argument is non-NULL.
@@ -366,12 +372,26 @@ plotScater <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 #' @param selected_variables character vector indicating which variables in
 #' \code{colData(object)} to use for the phenotype-data based PCA. Ignored if
 #' the argument \code{pca_data_input} is anything other than \code{"pdata"}.
-#' @param detect_outliers logical, should outliers be detected in the PC plot?
-#' Only an option when \code{pca_data_input} argument is \code{"pdata"}. Default
-#' is \code{FALSE}.
+#' @param detect_outliers logical, should outliers be detected based on PCA
+#' coordinates generated from column-level metadata? Only an option when 
+#' \code{pca_data_input} argument is \code{"pdata"} or \code{"coldata"}. 
+#' Default is \code{FALSE}.
 #'
-#' @rdname plotPCA
+#' @rdname runPCA
+#' @seealso \code{\link[scater]{plotPCA}}
 #' @export
+#'
+#' @examples
+#' ## Set up an example SingleCellExperiment
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' example_sce <- SingleCellExperiment(
+#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#' example_sce <- normalize(example_sce)
+#'
+#' example_sce <- runPCA(example_sce)
+#' reducedDimNames(example_sce)
+#' head(reducedDim(example_sce))
 runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
        feature_set = NULL, scale_features = TRUE, pca_data_input = "logcounts",
        selected_variables = NULL, detect_outliers = FALSE) {
@@ -451,37 +471,26 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
 #' Plot PCA for a SingleCellExperiment object
 #'
 #' Produce a principal components analysis (PCA) plot of two or more principal
-#' components for an \code{\link{SingleCellExperiment}} dataset.
+#' components for a \code{\link{SingleCellExperiment}} object. 
 #'
-#' @param object an \code{\link{SingleCellExperiment}} object
+#' @param object a \code{\link{SingleCellExperiment}} object
 #' @param ncomponents numeric scalar indicating the number of principal
 #' components to plot, starting from the first principal component. Default is
 #' 2. If \code{ncomponents} is 2, then a scatterplot of PC2 vs PC1 is produced.
 #' If \code{ncomponents} is greater than 2, a pairs plots for the top components
 #' is produced.
-#' @param colour_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to colour the points in the plot. Alternatively,
-#' a data frame with one column, containing values to map to colours for all cells.
-#' @param shape_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to define the shape of the points in the plot.
-#' Alternatively, a data frame with one column containing values to map to shapes.
-#' @param size_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to define the size of points in the plot.
-#' Alternatively, a data frame with one column containing values to map to sizes.
+#' @param ... Additional arguments to pass to \code{\link{plotReducedDim}}. 
 #' @param rerun logical, should PCA be recomputed even if \code{object} contains a
-#' "PCA" element in the \code{reducedDims} slot?
-#' @param return_SCE logical, should the function return an \code{SingleCellExperiment}
+#' \code{"PCA"} element in the \code{reducedDims} slot?
+#' @param return_SCE logical, should the function return a \code{SingleCellExperiment}
 #' object with principal component values for cells in the
 #' \code{reducedDim} slot. Default is \code{FALSE}, in which case a
 #' \code{ggplot} object is returned.
 #' @param draw_plot logical, should the plot be drawn on the current graphics
 #' device? Only used if \code{return_SCE} is \code{TRUE}, otherwise the plot
 #' is always produced.
-#' @param theme_size numeric scalar giving default font size for plotting theme
-#' (default is 10).
-#' @param legend character, specifying how the legend(s) be shown? Default is
-#' \code{"auto"}, which hides legends that have only one level and shows others.
-#' Alternatives are "all" (show all legends) or "none" (hide all legends).
+#' @param run_args Arguments to pass to \code{\link{runPCA}} when \code{rerun=TRUE}
+#' or if there is no existing \code{"PCA"} element in the \code{reducedDims} slot.
 #'
 #' @details The function \code{\link{prcomp}} is used internally to do the PCA.
 #' The function checks whether the \code{object} has standardised
@@ -505,6 +514,7 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
 #' @rdname plotPCA
 #' @aliases plotPCA plotPCA,SingleCellExperiment-method
 #' @importFrom BiocGenerics plotPCA
+#' @seealso \code{\link{runPCA}}
 #' @export
 #'
 #' @examples
@@ -514,8 +524,6 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
 #' example_sce <- SingleCellExperiment(
 #' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
 #' example_sce <- normalize(example_sce)
-#' drop_genes <- apply(exprs(example_sce), 1, function(x) {var(x) == 0})
-#' example_sce <- example_sce[!drop_genes, ]
 #'
 #' ## Examples plotting PC1 and PC2
 #' plotPCA(example_sce)
@@ -538,24 +546,19 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
 #' plotPCA(example_sce, ncomponents = 4, colour_by = "Treatment",
 #' shape_by = "Mutation_Status")
 #'
-plotPCASCE <- function(object, colour_by = NULL, shape_by = NULL, size_by = NULL,
-                          return_SCE = FALSE, draw_plot = TRUE, theme_size = 10, legend = "auto",
-                          rerun = FALSE, ncomponents = 2, detect_outliers = FALSE, ...) {
+plotPCASCE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, rerun = FALSE, 
+                       ncomponents = 2, run_args=list()) {
     ## Running PCA if necessary.
     if (!("PCA" %in% names(reducedDims(object))) || rerun) {
-        object <- runPCA(object, ncomponents = ncomponents, detect_outliers = detect_outliers, ...)
+        object <- do.call(runPCA, c(list(object = object, ncomponents = ncomponents),
+                                    run_args))
     }
 
-    if (detect_outliers) {
-        colour_by <- "outlier"
-    }
-
-    plot_out <- plotReducedDim(object, ncomponents = ncomponents, use_dimred = "PCA",
-            colour_by = colour_by, shape_by = shape_by, size_by = size_by,
-            theme_size = theme_size, legend = legend)
+    plot_out <- plotReducedDim(object, ncomponents = ncomponents, use_dimred = "PCA", ...)
 
     ## Plot PCA and return appropriate object
     if (return_SCE) {
+        .Deprecated(msg="'return_SCE=TRUE' is deprecated, use 'runPCA' instead")
         if ( draw_plot )
             print(plot_out)
         return(object)
@@ -566,7 +569,6 @@ plotPCASCE <- function(object, colour_by = NULL, shape_by = NULL, size_by = NULL
 
 
 #' @rdname plotPCA
-#' @param ... further arguments passed to \code{\link{plotPCASCE}}
 #' @aliases plotPCA
 #' @export
 setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
@@ -597,6 +599,12 @@ setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
 ################################################################################
 ### plotTSNE
 
+#' Run t-SNE for a SingleCellExperiment object
+#'
+#' Perform t-stochastic neighbour embedding (t-SNE) based on the data stored in 
+#' a \code{\link{SingleCellExperiment}} object.
+#'
+#' @param object a \code{\link{SingleCellExperiment}} object
 #' @param ntop numeric scalar indicating the number of most variable features to
 #' use for the t-SNE Default is \code{500}, but any \code{ntop} argument is
 #' overrided if the \code{feature_set} argument is non-NULL.
@@ -629,9 +637,25 @@ setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
 #' @param perplexity numeric scalar value defining the "perplexity parameter"
 #' for the t-SNE plot. Passed to \code{\link[Rtsne]{Rtsne}} - see documentation
 #' for that package for more details.
+#' @param ... Additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.
 #'
-#' @rdname plotTSNE
+#' @rdname runTSNE
+#' @seealso 
+#' \code{\link[Rtsne]{Rtsne}},
+#' \code{\link[scater]{plotTSNE}}
 #' @export
+#'
+#' @examples
+#' ## Set up an example SingleCellExperiment
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' example_sce <- SingleCellExperiment(
+#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#' example_sce <- normalize(example_sce)
+#'
+#' example_sce <- runTSNE(example_sce)
+#' reducedDimNames(example_sce)
+#' head(reducedDim(example_sce))
 runTSNE <- function(object, ntop = 500, ncomponents = 2, exprs_values = "logcounts",
         feature_set = NULL, use_dimred = NULL, n_dimred = NULL, scale_features = TRUE,
         rand_seed = NULL, perplexity = floor(ncol(object) / 5), ...) {
@@ -687,39 +711,27 @@ runTSNE <- function(object, ntop = 500, ncomponents = 2, exprs_values = "logcoun
 #' Plot t-SNE for an SingleCellExperiment object
 #'
 #' Produce a t-distributed stochastic neighbour embedding (t-SNE) plot of two
-#' components for an \code{SingleCellExperiment} dataset.
+#' components for a \code{SingleCellExperiment} object.
 #'
-#' @param object an \code{SingleCellExperiment} object
+#' @param object a \code{SingleCellExperiment} object
+#' @param ... Additional arguments to pass to \code{\link{plotReducedDim}}.
 #' @param ncomponents numeric scalar indicating the number of t-SNE
 #' components to plot, starting from the first t-SNE component. Default is
 #' 2. If \code{ncomponents} is 2, then a scatterplot of component 1 vs component
 #' 2 is produced. If \code{ncomponents} is greater than 2, a pairs plots for the
 #' top components is produced. NB: computing more than two components for t-SNE
 #' can become very time consuming.
-#' @param colour_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to colour the points in the plot. Alternatively,
-#' a data frame with one column containing values to map to colours for all cells.
-#' @param shape_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to define the shape of the points in the plot.
-#' Alternatively, a data frame with one column containing values to map to shapes.
-#' @param size_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to define the size of points in the plot.
-#' Alternatively, a data frame with one column containing values to map to sizes.
-#' @param return_SCE logical, should the function return an \code{SingleCellExperiment}
+#' @param return_SCE logical, should the function return a \code{SingleCellExperiment}
 #' object with principal component values for cells in the
 #' \code{reducedDims} slot. Default is \code{FALSE}, in which case a
 #' \code{ggplot} object is returned.
 #' @param rerun logical, should PCA be recomputed even if \code{object} contains a
-#' "PCA" element in the \code{reducedDims} slot?
+#' \code{"TSNE"} element in the \code{reducedDims} slot?
 #' @param draw_plot logical, should the plot be drawn on the current graphics
 #' device? Only used if \code{return_SCE} is \code{TRUE}, otherwise the plot
 #' is always produced.
-#' @param theme_size numeric scalar giving default font size for plotting theme
-#' (default is 10).
-#' @param legend character, specifying how the legend(s) be shown? Default is
-#' \code{"auto"}, which hides legends that have only one level and shows others.
-#' Alternatives are "all" (show all legends) or "none" (hide all legends).
-#' @param ... further arguments passed to \code{\link[Rtsne]{Rtsne}}
+#' @param run_args Arguments to pass to \code{\link{runTSNE}} when \code{rerun=TRUE}
+#' or if there is no existing \code{"TSNE"} element in the \code{reducedDims} slot.
 #'
 #' @details The function \code{\link[Rtsne]{Rtsne}} is used internally to
 #' compute the t-SNE. Note that the algorithm is not deterministic, so different
@@ -737,7 +749,7 @@ runTSNE <- function(object, ntop = 500, ncomponents = 2, exprs_values = "logcoun
 #'
 #' @export
 #' @seealso
-#' \code{\link[Rtsne]{Rtsne}}
+#' \code{\link{runTSNE}}
 #' @references
 #' L.J.P. van der Maaten. Barnes-Hut-SNE. In Proceedings of the International
 #' Conference on Learning Representations, 2013.
@@ -766,20 +778,19 @@ runTSNE <- function(object, ntop = 500, ncomponents = 2, exprs_values = "logcoun
 #' perplexity = 10)
 #'
 #'
-plotTSNE <- function(object, colour_by = NULL, shape_by = NULL, size_by = NULL,
-                   return_SCE = FALSE, draw_plot = TRUE,
-                   theme_size = 10, legend = "auto",
-                   rerun = FALSE, ncomponents = 2, ...) {
+plotTSNE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE,
+                   rerun = FALSE, ncomponents = 2, run_args=list()) {
 
     if ( !("TSNE" %in% names(reducedDims(object))) || rerun) {
-        object <- runTSNE(object, ncomponents = ncomponents, ...)
+        object <- do.call(runTSNE, c(list(object=object, ncomponents = ncomponents),
+                                     run_args))
     }
 
     plot_out <- plotReducedDim(object, ncomponents = ncomponents, use_dimred = "TSNE",
-            colour_by = colour_by, shape_by = shape_by, size_by = size_by,
-            theme_size = theme_size, legend = legend)
+            ...)                               
 
     if (return_SCE) {
+        .Deprecated(msg="'return_SCE=TRUE' is deprecated, use 'runTSNE' instead")
         if ( draw_plot )
             print(plot_out)
         return(object)
@@ -791,6 +802,12 @@ plotTSNE <- function(object, colour_by = NULL, shape_by = NULL, size_by = NULL,
 ################################################################################
 ### plotDiffusionMap
 
+#' Create a diffusion map for an SingleCellExperiment object
+#'
+#' Produce a diffusion map plot using data stored in a \code{SingleCellExperiment} 
+#' object.
+#'
+#' @param object a \code{SingleCellExperiment} object
 #' @param ntop numeric scalar indicating the number of most variable features to
 #' use for the diffusion map. Default is \code{500}, but any \code{ntop}
 #' argument is overrided if the \code{feature_set} argument is non-NULL.
@@ -820,14 +837,28 @@ plotTSNE <- function(object, colour_by = NULL, shape_by = NULL, size_by = NULL,
 #' all components of the reduced dimension slot are used.
 #' @param rand_seed (optional) numeric scalar that can be passed to
 #' \code{set.seed} to make plots reproducible.
-#' @param sigma argument passed to \code{\link[destiny]{DiffusionMap}}
-#' @param distance argument passed to \code{\link[destiny]{DiffusionMap}}
+#' @param ... Additional arguments to pass to \code{\link[destiny]{DiffusionMap}}.
 #'
 #' @export
-#' @rdname plotDiffusionMap
+#' @rdname runDiffusionMap
+#' @seealso 
+#' \code{\link[destiny]{destiny}},
+#' \code{\link[scater]{plotDiffusionMap}}
+#'
+#' @examples
+#' ## Set up an example SingleCellExperiment
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' example_sce <- SingleCellExperiment(
+#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#' example_sce <- normalize(example_sce)
+#'
+#' example_sce <- runDiffusionMap(example_sce)
+#' reducedDimNames(example_sce)
+#' head(reducedDim(example_sce))
 runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
         exprs_values = "logcounts", scale_features = TRUE, use_dimred=NULL, n_dimred=NULL,
-        rand_seed = NULL, sigma = NULL, distance = "euclidean", ...) {
+        rand_seed = NULL, ...) {
 
     if (!is.null(use_dimred)) {
         ## Use existing dimensionality reduction results.
@@ -865,7 +896,7 @@ runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = N
     ## Compute DiffusionMap
     if ( !is.null(rand_seed) )
         set.seed(rand_seed)
-    difmap_out <- destiny::DiffusionMap(vals, sigma = sigma, distance = distance, ...)
+    difmap_out <- destiny::DiffusionMap(vals, ...)
 
     reducedDim(object, "DiffusionMap") <- difmap_out@eigenvectors[, seq_len(ncomponents), drop = FALSE]
     return(object)
@@ -873,37 +904,27 @@ runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = N
 
 #' Plot a diffusion map for a SingleCellExperiment object
 #'
-#' Produce a diffusion map plot of two components for an \code{SingleCellExperiment} dataset.
+#' Produce a diffusion map plot of two components for a \code{SingleCellExperiment} object. 
 #'
-#' @param object an \code{SingleCellExperiment} object
+#' @param object a \code{SingleCellExperiment} object
+#' @param ... Additional arguments to pass to \code{\link{plotReducedDim}}.
 #' @param ncomponents numeric scalar indicating the number of principal
 #' components to plot, starting from the first diffusion map component. Default
 #' is 2. If \code{ncomponents} is 2, then a scatterplot of component 1 vs
 #' component 2 is produced. If \code{ncomponents} is greater than 2, a pairs
 #' plots for the top components is produced. NB: computing many components for
 #' the diffusion map can become time consuming.
-#' @param colour_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to colour the points in the plot. Alternatively, a
-#' data frame with one column containing values to map to colours for all cells.
-#' @param shape_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to define the shape of the points in the plot.
-#' @param size_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to define the size of points in the plot.
-#' @param return_SCE logical, should the function return an \code{SingleCellExperiment}
+#' @param return_SCE logical, should the function return a \code{SingleCellExperiment}
 #' object with principal component values for cells in the
 #' \code{reducedDims} slot. Default is \code{FALSE}, in which case a
 #' \code{ggplot} object is returned.
 #' @param rerun logical, should PCA be recomputed even if \code{object} contains a
-#' "PCA" element in the \code{reducedDims} slot?
+#' \code{"DiffusionMap"} element in the \code{reducedDims} slot?
 #' @param draw_plot logical, should the plot be drawn on the current graphics
 #' device? Only used if \code{return_SCE} is \code{TRUE}, otherwise the plot
 #' is always produced.
-#' @param theme_size numeric scalar giving default font size for plotting theme
-#' (default is 10).
-#' @param legend character, specifying how the legend(s) be shown? Default is
-#' \code{"auto"}, which hides legends that have only one level and shows others.
-#' Alternatives are "all" (show all legends) or "none" (hide all legends).
-#' @param ... further arguments passed to \code{\link[destiny]{DiffusionMap}}
+#' @param run_args Arguments to pass to \code{\link{runDiffusionMap}} when \code{rerun=TRUE}
+#' or if there is no existing \code{"DiffusionMap"} element in the \code{reducedDims} slot.
 #'
 #' @details The function \code{\link[destiny]{DiffusionMap}} is used internally
 #' to compute the diffusion map.
@@ -916,7 +937,7 @@ runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = N
 #'
 #' @export
 #' @seealso
-#' \code{\link[destiny]{destiny}}
+#' \code{\link{runDiffusionMap}}
 #' @references
 #' Haghverdi L, Buettner F, Theis FJ. Diffusion maps for high-dimensional single-cell analysis of differentiation data. Bioinformatics. 2015; doi:10.1093/bioinformatics/btv325
 #'
@@ -947,12 +968,12 @@ runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = N
 #' return_SCE = TRUE)
 #' }
 #'
-plotDiffusionMap <- function(object, colour_by = NULL, shape_by = NULL, size_by = NULL,
-      return_SCE = FALSE, draw_plot = TRUE, theme_size = 10, legend = "auto",
-      rerun = FALSE, ncomponents = 2, ...) {
+plotDiffusionMap <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, 
+      rerun = FALSE, ncomponents = 2, run_args=list()) {
 
     if ( !("DiffusionMap" %in% names(reducedDims(object))) || rerun) {
-        object <- runDiffusionMap(object, ncomponents = ncomponents, ...)
+        object <- do.call(runDiffusionMap, c(list(object, ncomponents = ncomponents),
+                                             run_args))
     }
 
     plot_out <- plotReducedDim(object, ncomponents = ncomponents, use_dimred = "DiffusionMap",
@@ -960,6 +981,7 @@ plotDiffusionMap <- function(object, colour_by = NULL, shape_by = NULL, size_by 
             theme_size = theme_size, legend = legend)
 
     if (return_SCE) {
+        .Deprecated(msg="'return_SCE=TRUE' is deprecated, use 'runDiffusionMap' instead")
         if ( draw_plot )
             print(plot_out)
         return(object)
@@ -971,6 +993,56 @@ plotDiffusionMap <- function(object, colour_by = NULL, shape_by = NULL, size_by 
 ################################################################################
 ### plotMDS
 
+#' Run MDS for a SingleCellExperiment object
+#'
+#' Perform multi-dimensional scaling using data stored in a
+#' \code{SingleCellExperiment} object. 
+#'
+#' @param object a \code{SingleCellExperiment} object
+#' @param ntop numeric scalar indicating the number of most variable features to
+#' use for the diffusion map. Default is \code{500}, but any \code{ntop}
+#' argument is overrided if the \code{feature_set} argument is non-NULL.
+#' @param exprs_values character string indicating which values should be used
+#' as the expression values for this plot. Valid arguments are \code{"tpm"}
+#' (transcripts per million), \code{"norm_tpm"} (normalised TPM
+#' values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM
+#' values), \code{"counts"} (counts for each feature), \code{"norm_counts"},
+#' \code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised
+#' counts-per-million), \code{"logcounts"} (log-transformed count data; default),
+#' \code{"norm_exprs"} (normalised
+#' expression values) or \code{"stand_exprs"} (standardised expression values)
+#' or any other named element of the \code{assayData} slot of the \code{SingleCellExperiment}
+#' object that can be accessed with the \code{assay} function.
+#' @param feature_set character, numeric or logical vector indicating a set of
+#' features to use for the diffusion map. If character, entries must all be in
+#' \code{featureNames(object)}. If numeric, values are taken to be indices for
+#' features. If logical, vector is used to index features and should have length
+#' equal to \code{nrow(object)}.
+#' @param scale_features logical, should the expression values be standardised
+#' so that each feature has unit variance? Default is \code{TRUE}.
+#' @param use_dimred character(1), use named reduced dimension representation of cells
+#' stored in \code{SingleCellExperiment} object instead of recomputing (e.g. "PCA").
+#'  Default is \code{NULL}, no reduced dimension values are provided to \code{Rtsne}.
+#' @param n_dimred integer(1), number of components of the reduced dimension slot
+#' to use. Default is \code{NULL}, in which case (if \code{use_dimred} is not \code{NULL})
+#' all components of the reduced dimension slot are used.
+#' @param method string specifying the type of distance to be computed between cells.
+#'
+#' @export
+#' @rdname runMDS
+#' @seealso \code{\link[scater]{plotMDS}}
+#'
+#' @examples
+#' ## Set up an example SingleCellExperiment
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' example_sce <- SingleCellExperiment(
+#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#' example_sce <- normalize(example_sce)
+#'
+#' example_sce <- runMDS(example_sce)
+#' reducedDimNames(example_sce)
+#' head(reducedDim(example_sce))
 runMDS <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
         exprs_values = "logcounts", scale_features = TRUE, use_dimred=NULL, n_dimred=NULL,
         method = "euclidean") {
@@ -1016,40 +1088,28 @@ runMDS <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
 
 #' Produce a multidimensional scaling plot for a SingleCellExperiment object
 #'
-#' #' Produce an MDS plot from the cell pairwise distance data in an
-#' \code{SingleCellExperiment} dataset.
+#' Produce an MDS plot from the cell pairwise distance data in a
+#' \code{SingleCellExperiment} object. 
 #'
-#' @param object an \code{SingleCellExperiment} object
+#' @param object a \code{SingleCellExperiment} object
+#' @param ... Additional arguments to pass to \code{\link{plotReducedDim}}.
 #' @param ncomponents numeric scalar indicating the number of principal
 #' components to plot, starting from the first principal component. Default is
 #' 2. If \code{ncomponents} is 2, then a scatterplot of PC2 vs PC1 is produced.
 #' If \code{ncomponents} is greater than 2, a pairs plots for the top components
 #' is produced. NB: computing more than two components for t-SNE can become very
 #' time consuming.
-#' @param colour_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to colour the points in the plot. Alternatively, a
-#' data frame with one column containing values to map to colours for all cells.
-#' @param shape_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to define the shape of the points in the plot.
-#' @param size_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to define the size of points in the plot.
-#' @param return_SCE logical, should the function return an \code{SingleCellExperiment}
+#' @param return_SCE logical, should the function return a \code{SingleCellExperiment}
 #' object with principal component values for cells in the
 #' \code{reducedDims} slot. Default is \code{FALSE}, in which case a
 #' \code{ggplot} object is returned.
 #' @param rerun logical, should PCA be recomputed even if \code{object} contains a
-#' "PCA" element in the \code{reducedDims} slot?
+#' \code{"MDS"} element in the \code{reducedDims} slot?
 #' @param draw_plot logical, should the plot be drawn on the current graphics
 #' device? Only used if \code{return_SCE} is \code{TRUE}, otherwise the plot
 #' is always produced.
-#' @param exprs_values a string specifying the expression values to use for
-#' colouring the points, if \code{colour_by} or \code{size_by} are set as feature names.
-#' @param theme_size numeric scalar giving default font size for plotting theme
-#' (default is 10).
-#' @param legend character, specifying how the legend(s) be shown? Default is
-#' \code{"auto"}, which hides legends that have only one level and shows others.
-#' Alternatives are "all" (show all legends) or "none" (hide all legends).
-#' @param ... arguments passed to S4 plotMDS method
+#' @param run_args Arguments to pass to \code{\link{runMDS}} when \code{rerun=TRUE}
+#' or if there is no existing \code{"MDS"} element in the \code{reducedDims} slot.
 #'
 #' @details The function \code{\link{cmdscale}} is used internally to
 #' compute the multidimensional scaling components to plot.
@@ -1058,6 +1118,7 @@ runMDS <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
 #' \code{SingleCellExperiment} object, otherwise it returns a \code{ggplot} object.
 #' @name plotMDS
 #' @aliases plotMDS plotMDS,SingleCellExperiment-method
+#' @seealso \code{\link{runMDS}}
 #'
 #' @export
 #'
@@ -1080,20 +1141,18 @@ runMDS <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
 #' plotMDS(example_sce, colour_by = "Cell_Cycle",
 #' shape_by = "Treatment", size_by = "Mutation_Status", method = "canberra")
 #'
-plotMDS <- function(object, ncomponents = 2, colour_by = NULL,
-                    shape_by = NULL, size_by = NULL, return_SCE = FALSE,
-                    rerun = FALSE, draw_plot = TRUE, exprs_values = "logcounts",
-                    theme_size = 10, legend = "auto", ...) {
+plotMDS <- function(object, ..., ncomponents = 2, return_SCE = FALSE,
+                    rerun = FALSE, draw_plot = TRUE, run_args=list()) {
 
     if ( !("MDS" %in% names(reducedDims(object))) || rerun) {
         object <- runMDS(object, ncomponents = ncomponents, ...)
     }
 
     plot_out <- plotReducedDim(object, ncomponents = ncomponents, use_dimred = "MDS",
-            colour_by = colour_by, shape_by = shape_by, size_by = size_by,
-            theme_size = theme_size, legend = legend)
+                               ...)
 
     if (return_SCE) {
+        .Deprecated(msg="'return_SCE=TRUE' is deprecated, use 'runMDS' instead")
         if ( draw_plot )
             print(plot_out)
         return(object)
@@ -2051,7 +2110,7 @@ plotMetadata <- function(object,
 #' \code{plotPhenoData}, \code{plotColData} and \code{plotCellData} are
 #' synonymous.
 #'
-#' @param object an \code{\link{SingleCellExperiment}} object containing expression values and
+#' @param object a \code{\link{SingleCellExperiment}} object containing expression values and
 #' experimental information. Must have been appropriately prepared.
 #' @param aesth aesthetics function call to pass to ggplot. This function
 #' expects at least x and y variables to be supplied. The default is to plot
@@ -2132,7 +2191,7 @@ plotCellData <- function(...) {
 #'
 #' \code{plotFeatureData} and \code{plotRowData} are synonymous.
 #'
-#' @param object an \code{\link{SingleCellExperiment}} object containing
+#' @param object a \code{\link{SingleCellExperiment}} object containing
 #' expression values and experimental information. Must have been appropriately prepared.
 #' @param aesth aesthetics function call to pass to ggplot. This function
 #' expects at least x and y variables to be supplied. The default is to produce
@@ -2274,11 +2333,11 @@ multiplot <- function(..., plotlist = NULL, cols = 1, layout = NULL) {
 
 #' Plot expression against transcript length
 #'
-#' Plot expression values from an \code{\link{SingleCellExperiment}} object
+#' Plot expression values from a \code{\link{SingleCellExperiment}} object
 #' against transcript length values defined in the SingleCellExperiment object
 #' or supplied as an argument.
 #'
-#' @param object an \code{\link{SingleCellExperiment}} object
+#' @param object a \code{\link{SingleCellExperiment}} object
 #' @param tx_length transcript lengths to plot on the x-axis. Can be one of: (1)
 #' the name of a column of \code{rowData(object)} containing the transcript length
 #' values, or (2) the name of an element of \code{assays(object)} containing
