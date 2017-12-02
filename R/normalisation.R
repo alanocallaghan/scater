@@ -385,7 +385,8 @@ normalise <- function(...) {
 #' areSizeFactorsCentred(example_sce)
 #'
 areSizeFactorsCentred <- function(object, centre=1, tol=1e-6) {
-    for (sfname in sizeFactorNames(object)) { 
+    all.sf.sets <- c(list(NULL), as.list(sizeFactorNames(object)))
+    for (sfname in all.sf.sets) {
         sf <- sizeFactors(object, type=sfname)
         if (abs(mean(sf) - centre) > tol) {
             return(FALSE)
