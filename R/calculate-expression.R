@@ -209,11 +209,11 @@ calculateCPM <- function(object, use.size.factors = TRUE) {
     subset_row <- .subset2index(NULL, target = counts_mat, byrow = TRUE)
     margin.stats <- .Call(cxx_margin_summary, counts_mat, 0, 
                           subset_row - 1L, FALSE)
+
     if (use.size.factors) {
         sf.list <- .get_all_sf_sets(object)
         if (is.null(sf.list$size.factors[[1]])) {
-            warning("size factors requested but not specified, 
-                    using library sizes instead")
+            warning("no size factors for non-control genes, using library sizes instead")
             sf.list$size.factors[[1]] <- margin.stats[[1]]
         }
     } else {

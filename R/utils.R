@@ -37,11 +37,11 @@
 
     # Filling up the controls.
     counter <- 1L
-    okay <- character(length(fcontrols))
     for (fc in fcontrols) {
         specific_sf <- sizeFactors(object, type=fc)
-        if (!is.null(specific_sf)) {
-            okay[counter] <- fc
+        if (is.null(specific_sf)) {
+            warning(sprintf("spike-in set '%s' should have its own size factors", fc))
+        } else {
             counter <- counter+1L
             which.current <- isSpike(object, type=fc)
             to.use[which.current] <- counter # after increment, as 1 is the NULL sizeFactors.
@@ -50,8 +50,7 @@
     }
 
     # Returning the output.
-    return(list(size.factors=sf.list[seq_len(counter)], index=to.use, 
-                available=okay[seq_len(counter-1)]))
+    return(list(size.factors=sf.list[seq_len(counter)], index=to.use)) 
 }
 
 .compute_exprs <- function(exprs_mat, size_factors, sf_to_use=NULL, log = TRUE,
