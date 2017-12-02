@@ -6,7 +6,7 @@
 \usage{
 plotHighestExprs(object, col_by_variable = "total_features", n = 50,
   drop_features = NULL, exprs_values = "counts",
-  feature_names_to_plot = NULL)
+  feature_names_to_plot = NULL, as_percentage = TRUE)
 }
 \arguments{
 \item{object}{an SCESet object containing expression values and
@@ -31,6 +31,9 @@ should be used to define expression? Valid options are "counts" (default),
 rowData slot in the \code{object} is to be used for the feature names 
 displayed on the plot. Default is \code{NULL}, in which case 
 \code{rownames(object)} is used.}
+
+\item{as_percentage}{logical scalar indicating whether percentages should be
+plotted. If \code{FALSE}, the raw \code{exprs_values} are shown instead.}
 }
 \value{
 a ggplot plot object
