@@ -1135,6 +1135,8 @@ plotMDS <- function(object, ncomponents = 2, colour_by = NULL,
 #' @param legend character, specifying how the legend(s) be shown? Default is
 #' \code{"auto"}, which hides legends that have only one level and shows others.
 #' Alternatives are "all" (show all legends) or "none" (hide all legends).
+#' @param add_ticks logical scalar indicating whether ticks should be drawn
+#' on the axes corresponding to the location of each point.
 #' @param ... optional arguments (from those listed above) passed to
 #' \code{plotReducedDimDefault}
 #'
@@ -1170,7 +1172,7 @@ plotMDS <- function(object, ncomponents = 2, colour_by = NULL,
 #'
 plotReducedDimDefault <- function(df_to_plot, ncomponents=2, percentVar=NULL,
                            colour_by=NULL, shape_by=NULL, size_by=NULL,
-                           theme_size = 10, legend = "auto") {
+                           theme_size = 10, legend = "auto", add_ticks=TRUE) {
 
     ## check legend argument
     legend <- match.arg(legend, c("auto", "none", "all"), several.ok = FALSE)
@@ -1214,8 +1216,10 @@ plotReducedDimDefault <- function(df_to_plot, ncomponents=2, percentVar=NULL,
         plot_out <- ggplot(df_to_plot, aes_string(x = comps[1], y = comps[2])) +
             xlab(x_lab) +
             ylab(y_lab) +
-            geom_rug(colour = "gray20", alpha = 0.65) +
             theme_bw(theme_size)
+        if (add_ticks) {
+            plot_out <- plot_out + geom_rug(colour = "gray20", alpha = 0.65)
+        }
     }
 
     ## if only one level for the variable, set to NULL
