@@ -330,8 +330,8 @@ normalizeSCE <- function(object, exprs_values = "counts",
             sizeFactors(object) <- sf
         }
 
-        # ... and for all controls.
-        for (type in sf.list$available) {
+        # ... and for all named size factor sets.
+        for (type in sizeFactorNames(object)) { 
             sf <- sizeFactors(object, type = type)
             sf <- sf / mean(sf)
             sizeFactors(object, type = type) <- sf
