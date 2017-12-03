@@ -74,7 +74,7 @@ plotScater(example_sce)
 plotScater(example_sce, exprs_values = "counts", colour_by = "Cell_Cycle")
 plotScater(example_sce, block1 = "Treatment", colour_by = "Cell_Cycle")
 
-cpm(example_sce) <- calculateCPM(example_sce, use.size.factors = FALSE)
+cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
 plotScater(example_sce, exprs_values = "cpm", block1 = "Treatment",
 block2 = "Mutation_Status", colour_by = "Cell_Cycle")
 # Error is thrown if chosen expression values are not available

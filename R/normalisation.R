@@ -129,7 +129,7 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
 
         ## Computing (normalized) CPMs is also possible.
         assay(object, "normcounts") <- calculateCPM(object,
-                                                  use.size.factors = TRUE)
+                                                  use_size_factors = TRUE)
     }
 
     ## Computing normalized expression values, if we're not working with 'exprs'.
