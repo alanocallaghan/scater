@@ -83,7 +83,7 @@ test_that("we can compute normalised expression values with a design matrix", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
     exprs(example_sce) <- log2(calculateCPM(example_sce, 
-                                            use.size.factors = FALSE) + 1)
+                                            use_size_factors = FALSE) + 1)
     keep_gene <- rowSums(counts(example_sce)) > 0
     example_sce <- calculateQCMetrics(example_sce[keep_gene,], 
                                          feature_controls = list(set1 = 1:40))

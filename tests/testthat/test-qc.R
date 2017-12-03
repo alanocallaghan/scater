@@ -106,7 +106,7 @@ test_that("failure is as expected for input with zero-variance features", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
     exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use.size.factors = FALSE) + 1)
+        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
     exprs(example_sce)[1:5,] <- 0
     expect_that(
         plotExplanatoryVariables(example_sce, "density"), is_a("ggplot"))
@@ -120,7 +120,7 @@ test_that("plotHighestExprs works as expected", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
     exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use.size.factors = FALSE) + 1)
+        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
     example_sce <- calculateQCMetrics(example_sce, 
                                       feature_controls = list(set1 = 1:500))
     expect_that(
@@ -133,9 +133,9 @@ test_that("plotHighestExprs works as expected", {
     sce.blank <- SingleCellExperiment(
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
-    expect_error(
+    expect_warning(
         plotHighestExprs(sce.blank), 
-        "col_by_variable not found")
+        "not found")
     sce.blank <- calculateQCMetrics(sce.blank)
     expect_that(
         plotHighestExprs(sce.blank), 
@@ -152,7 +152,7 @@ test_that("plotExplanatoryVariables works as expected", {
     example_sce <- calculateQCMetrics(example_sce, 
                                       feature_controls = list(set1 = 1:500))
     exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use.size.factors = FALSE) + 1)
+        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
     drop_genes <- apply(exprs(example_sce), 1, function(x) { var(x) == 0 })
     example_sce <- example_sce[!drop_genes, ]
     example_sce <- calculateQCMetrics(example_sce)
@@ -199,7 +199,7 @@ test_that("plotRLE works as expected", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
     exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use.size.factors = FALSE) + 1)
+        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
 
     p <- plotRLE(example_sce, list(exprs = "logcounts", counts = "counts"), 
                  c(TRUE, FALSE), colour_by = "Mutation_Status")
