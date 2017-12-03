@@ -129,7 +129,7 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
 
         ## Computing (normalized) CPMs is also possible.
         assay(object, "normcounts") <- calculateCPM(object,
-                                                  use.size.factors = TRUE)
+                                                  use_size_factors = TRUE)
     }
 
     ## Computing normalized expression values, if we're not working with 'exprs'.
@@ -214,7 +214,14 @@ normalizeExprs <- function(...) {
 #' \code{norm_exprs(object)} slot.
 #' @param ... arguments passed to \code{normalize} when calling \code{normalise}.
 #'
-#' @details \code{normalize} is exactly the same as \code{normalise}, the option
+#' @details Features marked as spike-in controls will be normalized with 
+#' control-specific size factors, if these are available. This reflects the
+#' fact that spike-in controls are subject to different biases than those
+#' that are removed by gene-specific size factors (namely, total RNA content).
+#' If size factors for a particular spike-in set are not available, a warning
+#' will be raised.
+#'
+#' \code{normalize} is exactly the same as \code{normalise}, the option
 #' provided for those who have a preference for North American or
 #' British/Australian spelling.
 #'
@@ -283,14 +290,6 @@ normalizeSCE <- function(object, exprs_values = "counts",
             warning("using library sizes as size factors")
             sf.list$size.factors[[1]] <- .general_colSums(exprs_mat)
         }
-
-        ## figuring out how many controls have their own size factors
-        spike.names <- spikeNames(object)
-        no.spike.sf <- !spike.names %in% sf.list$available
-        if (any(no.spike.sf)) {
-            warning(sprintf("spike-in transcripts in '%s' should have their own size factors",
-                            spike.names[no.spike.sf][1]))
-        }
     } else {
         # ignoring size factors for non-count data.
         sf.list <- list(size.factors = rep(1, ncol(object)), index = NULL)
@@ -331,8 +330,8 @@ normalizeSCE <- function(object, exprs_values = "counts",
             sizeFactors(object) <- sf
         }
 
-        # ... and for all controls.
-        for (type in sf.list$available) {
+        # ... and for all named size factor sets.
+        for (type in sizeFactorNames(object)) { 
             sf <- sizeFactors(object, type = type)
             sf <- sf / mean(sf)
             sizeFactors(object, type = type) <- sf
@@ -386,8 +385,9 @@ normalise <- function(...) {
 #' areSizeFactorsCentred(example_sce)
 #'
 areSizeFactorsCentred <- function(object, centre=1, tol=1e-6) {
-    sf.list <- .get_all_sf_sets(object)
-    for (sf in sf.list$size.factors) {
+    all.sf.sets <- c(list(NULL), as.list(sizeFactorNames(object)))
+    for (sfname in all.sf.sets) {
+        sf <- sizeFactors(object, type=sfname)
         if (abs(mean(sf) - centre) > tol) {
             return(FALSE)
         }

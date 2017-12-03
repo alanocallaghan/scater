@@ -64,6 +64,13 @@ factors stored in the object. Return the object with the (log2-)normalised
 expression values added.
 }
 \details{
+Features marked as spike-in controls will be normalized with 
+control-specific size factors, if these are available. This reflects the
+fact that spike-in controls are subject to different biases than those
+that are removed by gene-specific size factors (namely, total RNA content).
+If size factors for a particular spike-in set are not available, a warning
+will be raised.
+
 \code{normalize} is exactly the same as \code{normalise}, the option
 provided for those who have a preference for North American or
 British/Australian spelling.

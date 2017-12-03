@@ -4,12 +4,12 @@
 \alias{calculateCPM}
 \title{Calculate counts per million (CPM)}
 \usage{
-calculateCPM(object, use.size.factors = TRUE)
+calculateCPM(object, use_size_factors = TRUE)
 }
 \arguments{
 \item{object}{an \code{SingleCellExperiment} object}
 
-\item{use.size.factors}{a logical scalar specifying whether
+\item{use_size_factors}{a logical scalar specifying whether
 the size factors should be used to construct effective library
 sizes, or if the library size should be directly defined as
 the sum of counts for each cell.}
@@ -20,11 +20,20 @@ Matrix of CPM values.
 \description{
 Calculate count-per-million (CPM) values from the count data.
 }
+\details{
+If \code{use_size_factors=TRUE}, size factors are used
+to define the effective library sizes by scaling all size factors
+such that the mean scaled size factor is equal to the mean sum of
+counts across all features. Note that effective library sizes will 
+be  computed differently for features marked as spike-in controls, 
+due to the presence of control-specific size factors - see 
+\code{\link{normalizeSCE}} for more details.
+}
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
 example_sce <- SingleCellExperiment(
 assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
-cpm(example_sce) <- calculateCPM(example_sce, use.size.factors = FALSE)
+cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
 
 }
