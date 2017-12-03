@@ -9,7 +9,7 @@ test_that("we can produce default plots for SingleCellExperiment objects", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
     exprs(example_sce) <- log2(calculateCPM(example_sce, 
-                                            use.size.factors = FALSE) + 1)
+                                            use_size_factors = FALSE) + 1)
     example_sce <- calculateQCMetrics(example_sce)
     
     p <- plotScater(example_sce)
@@ -22,7 +22,7 @@ test_that("we can produce default plots for SingleCellExperiment objects", {
         plotScater(example_sce, block1 = "Treatment", colour_by = "Cell_Cycle"),
         is_a("ggplot"))
 
-    cpm(example_sce) <- calculateCPM(example_sce, use.size.factors = FALSE)
+    cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
     expect_that(
         plotScater(example_sce, exprs_values = "cpm", block1 = "Treatment",
              block2 = "Mutation_Status", colour_by = "Cell_Cycle"),
@@ -41,7 +41,7 @@ test_that("we can produce PCA plots with different expression values", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
     exprs(example_sce) <- log2(calculateCPM(example_sce, 
-                                            use.size.factors = FALSE) + 1)
+                                            use_size_factors = FALSE) + 1)
     example_sce <- calculateQCMetrics(example_sce)
     
     expect_that(plotPCA(example_sce), is_a("ggplot"))
@@ -54,7 +54,7 @@ test_that("we can produce t-SNE plots with different expression values", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
     exprs(example_sce) <- log2(calculateCPM(example_sce, 
-                                            use.size.factors = FALSE) + 1)
+                                            use_size_factors = FALSE) + 1)
     example_sce <- calculateQCMetrics(example_sce)
     
     expect_that(plotTSNE(example_sce), is_a("ggplot"))
@@ -68,7 +68,7 @@ test_that("we can produce Diffusion Map plots with different expression values",
                   assays = list(counts = sc_example_counts), 
                   colData = sc_example_cell_info)
               exprs(example_sce) <- log2(
-                  calculateCPM(example_sce, use.size.factors = FALSE) + 1)
+                  calculateCPM(example_sce, use_size_factors = FALSE) + 1)
               example_sce <- calculateQCMetrics(example_sce)
               
               #expect_that(plotDiffusionMap(example_sce), is_a("ggplot"))
@@ -82,7 +82,7 @@ test_that("we can produce MDS plots with different expression values",
                   assays = list(counts = sc_example_counts), 
                   colData = sc_example_cell_info)
               exprs(example_sce) <- log2(
-                  calculateCPM(example_sce, use.size.factors = FALSE) + 1)
+                  calculateCPM(example_sce, use_size_factors = FALSE) + 1)
               example_sce <- calculateQCMetrics(example_sce)
 
               expect_that(plotMDS(example_sce), is_a("ggplot"))
@@ -101,7 +101,7 @@ test_that("plotReducedDim works as expexted",
                   assays = list(counts = sc_example_counts), 
                   colData = sc_example_cell_info)
               exprs(example_sce) <- log2(calculateCPM(
-                  example_sce, use.size.factors = FALSE) + 1)
+                  example_sce, use_size_factors = FALSE) + 1)
               drop_genes <- apply(exprs(example_sce), 1, 
                                   function(x) {var(x) == 0})
               example_sce <- example_sce[!drop_genes, ]
@@ -136,7 +136,7 @@ test_that("we can produce expression plots with different expression values", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
     exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use.size.factors = FALSE) + 1)
+        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
     example_sce <- calculateQCMetrics(example_sce)
 
     expect_that(plotExpression(example_sce, "Gene_0001", x = "Mutation_Status"),
@@ -171,7 +171,7 @@ test_that("we can plot expression for named genes", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
     exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use.size.factors = FALSE) + 1)
+        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
     example_sce <- calculateQCMetrics(example_sce)
     geneset <- rownames(example_sce)[1:6]
     expect_that(plotExpression(example_sce, geneset, "Cell_Cycle"),
@@ -187,7 +187,7 @@ test_that("plotting expression for an object with non-NULL is_exprs() ", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
     exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use.size.factors = FALSE) + 1)
+        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
     example_sce <- calculateQCMetrics(example_sce)
     geneset <- rownames(example_sce)[1:6]
     assay(example_sce, "is_exprs") <- counts(example_sce) > 0.5
@@ -204,7 +204,7 @@ test_that("we can produce plots showing cells in plate position", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
     exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use.size.factors = FALSE) + 1)
+        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
     example_sce <- calculateQCMetrics(example_sce)
     ## define plate positions
     example_sce$plate_position <- paste0(
@@ -232,7 +232,7 @@ test_that("we can produce plots for metadata", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
     exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use.size.factors = FALSE) + 1)
+        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
     example_sce <- calculateQCMetrics(example_sce)
     
     expect_that(plotPhenoData(example_sce, 
@@ -276,7 +276,7 @@ test_that("plotExprsVsTxLength works as expected", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info, rowData = fd)
     exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use.size.factors = FALSE) + 1)
+        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
     rowData(example_sce)$group <- rep(1:4, each = 500)
     
     p1 <- plotExprsVsTxLength(example_sce, "median_tx_length")

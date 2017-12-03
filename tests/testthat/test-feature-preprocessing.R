@@ -34,7 +34,7 @@ test_that("we can summarise expression at feature level", {
     
     ## exprs
     expect_warning(exprs(example_sce) <- log2(calculateCPM(example_sce) + 1),
-                   "size factors requested")
+                   "no size factors for non-control genes, using library sizes instead")
     expect_error(summariseExprsAcrossFeatures(
         example_sce, exprs_values = "exprs"), "'arg' should be one of")
     

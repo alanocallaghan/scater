@@ -67,7 +67,7 @@ data("sc_example_cell_info")
 example_sce <- SingleCellExperiment(
     assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
 exprs(example_sce) <- log2(calculateCPM(example_sce, 
-                                        use.size.factors = FALSE) + 1)
+                                        use_size_factors = FALSE) + 1)
 
 plotScater(example_sce, block1 = "Mutation_Status", block2 = "Treatment",
      colour_by = "Cell_Cycle", nfeatures = 300, exprs_values = "counts")
@@ -234,7 +234,7 @@ A subset of features can be used to produce a PCA plot. In the code below only
 the features defined as "feature controls" are used for the PCA (plot not shown).
 
 ```{r plot-pca-feature-controls, fig.show = FALSE, eval=TRUE}
-plotPCA(example_sce, feature_set = fData(example_sce)$is_feature_control)
+plotPCA(example_sce, feature_set = rowData(example_sce)$is_feature_control)
 ```
 
 The function allows more than just the first two components to be plotted, and

@@ -33,7 +33,7 @@ test_that("we can subset the example SingleCellExperiment", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
     expect_warning(exprs(example_sce) <- log2(calculateCPM(example_sce) + 1),
-                   "size factors requested but not specified")
+                   "no size factors for non-control genes, using library sizes instead")
     example_sce <- plotPCA(example_sce, return_SCE = TRUE)
     ex_subset <- example_sce[1:200, sample(1:40, 25)]
 

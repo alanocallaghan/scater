@@ -9,7 +9,7 @@ plotScater(x, block1 = NULL, block2 = NULL, colour_by = NULL,
   theme_size = 10)
 }
 \arguments{
-\item{x}{an \code{SingleCellExperiment} object}
+\item{x}{a \code{SingleCellExperiment} object}
 
 \item{block1}{character string defining the column of \code{colData(object)} to
 be used as a factor by which to separate the cells into blocks (separate
@@ -50,7 +50,7 @@ a ggplot plot object
 }
 \description{
 Plot the relative proportion of the library accounted for by the most highly
-expressed features for each cell for an \code{SingleCellExperiment} dataset.
+expressed features for each cell for a \code{SingleCellExperiment} object.
 }
 \details{
 Plots produced by this function are intended to provide an overview
@@ -74,7 +74,7 @@ plotScater(example_sce)
 plotScater(example_sce, exprs_values = "counts", colour_by = "Cell_Cycle")
 plotScater(example_sce, block1 = "Treatment", colour_by = "Cell_Cycle")
 
-cpm(example_sce) <- calculateCPM(example_sce, use.size.factors = FALSE)
+cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
 plotScater(example_sce, exprs_values = "cpm", block1 = "Treatment",
 block2 = "Mutation_Status", colour_by = "Cell_Cycle")
 # Error is thrown if chosen expression values are not available
