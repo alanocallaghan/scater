@@ -34,7 +34,7 @@ SET_FUN <- function(exprs_values) {
 #' @param value a numeric matrix (e.g. for \code{exprs})
 #'
 #' @docType methods
-#' @name exprs
+#' @name accessors
 #' @rdname accessors
 #' @importFrom BiocGenerics counts counts<-
 #' @importFrom SingleCellExperiment normcounts normcounts<-

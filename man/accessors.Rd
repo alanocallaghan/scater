@@ -14,6 +14,7 @@
 \alias{fpkm}
 \alias{accessors}
 \alias{fpkm<-}
+\alias{accessors}
 \alias{exprs}
 \alias{exprs,SingleCellExperiment-method,}
 \alias{exprs<-,SingleCellExperiment,ANY-method}
