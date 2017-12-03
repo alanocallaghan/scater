@@ -167,7 +167,7 @@ Or, we use `calculateCPM` directly (with equivalent results):
 
 ```{r cpm, eval=TRUE}
 logcounts(example_sce) <- log2(calculateCPM(example_sce, 
-                                            use.size.factors = FALSE) + 1)
+                                            use_size_factors = FALSE) + 1)
 ```
 
 The log-scale count data is stored in the `logcounts` assay slot of a 
