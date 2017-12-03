@@ -15,6 +15,9 @@ runDiffusionMap(object, ntop = 500, ncomponents = 2, feature_set = NULL,
 use for the diffusion map. Default is \code{500}, but any \code{ntop}
 argument is overrided if the \code{feature_set} argument is non-NULL.}
 
+\item{ncomponents}{numeric scalar indicating the number of diffusion
+components to obtain.}
+
 \item{feature_set}{character, numeric or logical vector indicating a set of
 features to use for the diffusion map. If character, entries must all be in
 \code{featureNames(object)}. If numeric, values are taken to be indices for

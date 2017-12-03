@@ -344,6 +344,8 @@ plotScater <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 #' @param ntop numeric scalar indicating the number of most variable features to
 #' use for the PCA. Default is \code{500}, but any \code{ntop} argument is
 #' overrided if the \code{feature_set} argument is non-NULL.
+#' @param ncomponents numeric scalar indicating the number of principal
+#' components to obtain from \code{\link{prcomp}}.
 #' @param exprs_values character string indicating which values should be used
 #' as the expression values for this plot. Valid arguments are \code{"tpm"}
 #' (transcripts per million), \code{"norm_tpm"} (normalised TPM
@@ -653,6 +655,8 @@ setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
 #' @param ntop numeric scalar indicating the number of most variable features to
 #' use for the t-SNE Default is \code{500}, but any \code{ntop} argument is
 #' overrided if the \code{feature_set} argument is non-NULL.
+#' @param ncomponents numeric scalar indicating the number of t-SNE
+#' components to obtain.
 #' @param exprs_values character string indicating which values should be used
 #' as the expression values for this plot. Valid arguments are \code{"tpm"}
 #' (transcripts per million), \code{"norm_tpm"} (normalised TPM
@@ -867,6 +871,8 @@ plotTSNE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE,
 #' @param ntop numeric scalar indicating the number of most variable features to
 #' use for the diffusion map. Default is \code{500}, but any \code{ntop}
 #' argument is overrided if the \code{feature_set} argument is non-NULL.
+#' @param ncomponents numeric scalar indicating the number of diffusion
+#' components to obtain.
 #' @param exprs_values character string indicating which values should be used
 #' as the expression values for this plot. Valid arguments are \code{"tpm"}
 #' (transcripts per million), \code{"norm_tpm"} (normalised TPM
@@ -967,8 +973,8 @@ runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = N
 #'
 #' @param object a \code{SingleCellExperiment} object
 #' @param ... Additional arguments to pass to \code{\link{plotReducedDim}}.
-#' @param ncomponents numeric scalar indicating the number of principal
-#' components to plot, starting from the first diffusion map component. Default
+#' @param ncomponents numeric scalar indicating the number of diffusion 
+#' components to plot, starting from the first diffusion component. Default
 #' is 2. If \code{ncomponents} is 2, then a scatterplot of component 1 vs
 #' component 2 is produced. If \code{ncomponents} is greater than 2, a pairs
 #' plots for the top components is produced. NB: computing many components for
@@ -1068,6 +1074,8 @@ plotDiffusionMap <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE,
 #' @param ntop numeric scalar indicating the number of most variable features to
 #' use for the diffusion map. Default is \code{500}, but any \code{ntop}
 #' argument is overrided if the \code{feature_set} argument is non-NULL.
+#' @param ncomponents numeric scalar indicating the number of MDS dimensions
+#' to obtain.
 #' @param exprs_values character string indicating which values should be used
 #' as the expression values for this plot. Valid arguments are \code{"tpm"}
 #' (transcripts per million), \code{"norm_tpm"} (normalised TPM
@@ -1162,8 +1170,8 @@ runMDS <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
 #'
 #' @param object a \code{SingleCellExperiment} object
 #' @param ... Additional arguments to pass to \code{\link{plotReducedDim}}.
-#' @param ncomponents numeric scalar indicating the number of principal
-#' components to plot, starting from the first principal component. Default is
+#' @param ncomponents numeric scalar indicating the number of MDS dimensions
+#' to plot, starting from the first dimension. Default is
 #' 2. If \code{ncomponents} is 2, then a scatterplot of PC2 vs PC1 is produced.
 #' If \code{ncomponents} is greater than 2, a pairs plots for the top components
 #' is produced. NB: computing more than two components for t-SNE can become very

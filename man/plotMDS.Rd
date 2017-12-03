@@ -13,8 +13,8 @@ plotMDS(object, ..., ncomponents = 2, return_SCE = FALSE, rerun = FALSE,
 
 \item{...}{Additional arguments to pass to \code{\link{plotReducedDim}}.}
 
-\item{ncomponents}{numeric scalar indicating the number of principal
-components to plot, starting from the first principal component. Default is
+\item{ncomponents}{numeric scalar indicating the number of MDS dimensions
+to plot, starting from the first dimension. Default is
 2. If \code{ncomponents} is 2, then a scatterplot of PC2 vs PC1 is produced.
 If \code{ncomponents} is greater than 2, a pairs plots for the top components
 is produced. NB: computing more than two components for t-SNE can become very

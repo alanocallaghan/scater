@@ -16,6 +16,9 @@ runTSNE(object, ntop = 500, ncomponents = 2, exprs_values = "logcounts",
 use for the t-SNE Default is \code{500}, but any \code{ntop} argument is
 overrided if the \code{feature_set} argument is non-NULL.}
 
+\item{ncomponents}{numeric scalar indicating the number of t-SNE
+components to obtain.}
+
 \item{exprs_values}{character string indicating which values should be used
 as the expression values for this plot. Valid arguments are \code{"tpm"}
 (transcripts per million), \code{"norm_tpm"} (normalised TPM

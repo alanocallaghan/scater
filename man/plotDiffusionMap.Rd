@@ -26,8 +26,8 @@ is always produced.}
 \item{rerun}{logical, should PCA be recomputed even if \code{object} contains a
 \code{"DiffusionMap"} element in the \code{reducedDims} slot?}
 
-\item{ncomponents}{numeric scalar indicating the number of principal
-components to plot, starting from the first diffusion map component. Default
+\item{ncomponents}{numeric scalar indicating the number of diffusion 
+components to plot, starting from the first diffusion component. Default
 is 2. If \code{ncomponents} is 2, then a scatterplot of component 1 vs
 component 2 is produced. If \code{ncomponents} is greater than 2, a pairs
 plots for the top components is produced. NB: computing many components for
