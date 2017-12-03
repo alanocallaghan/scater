@@ -548,13 +548,20 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
 #'
 plotPCASCE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, rerun = FALSE, 
                        ncomponents = 2, run_args=list()) {
+    
+    new_args <- .disambiguate_args(...)    
+    run_args <- c(run_args, new_args$run)
+    plot_args <- new_args$plot
+
     ## Running PCA if necessary.
     if (!("PCA" %in% names(reducedDims(object))) || rerun) {
         object <- do.call(runPCA, c(list(object = object, ncomponents = ncomponents),
                                     run_args))
     }
 
-    plot_out <- plotReducedDim(object, ncomponents = ncomponents, use_dimred = "PCA", ...)
+    plot_out <- do.call(plotReducedDim, 
+                        c(list(object = object, ncomponents = ncomponents, 
+                               use_dimred = "PCA"), plot_args))
 
     ## Plot PCA and return appropriate object
     if (return_SCE) {
@@ -567,6 +574,22 @@ plotPCASCE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, rerun 
     }
 }
 
+.disambiguate_args <- function(...) 
+# This function is only necessary to provide some protection in the transition 
+# from having running arguments in "..." to plotting arguments in "...". It can
+# be removed in the next development cycle. 
+{
+    plot_arg_names <- union(names(formals(plotReducedDim)), 
+                            names(formals(plotReducedDimDefault)))
+    extra_args <- list(...)
+    for_plotting <- !is.na(pmatch(names(extra_args), plot_arg_names))
+    if (!all(for_plotting)) { 
+        warning(sprintf("non-plotting arguments like '%s' should go in 'run_args'", 
+                        names(extra_args)[!for_plotting][1]))
+    }
+    return(list(plot=extra_args[for_plotting],
+                run=extra_args[!for_plotting]))
+}
 
 #' @rdname plotPCA
 #' @aliases plotPCA
@@ -781,13 +804,19 @@ runTSNE <- function(object, ntop = 500, ncomponents = 2, exprs_values = "logcoun
 plotTSNE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE,
                    rerun = FALSE, ncomponents = 2, run_args=list()) {
 
+    new_args <- .disambiguate_args(...)    
+    run_args <- c(run_args, new_args$run)
+    plot_args <- new_args$plot
+
+    # Re-running t-SNE if necessary.
     if ( !("TSNE" %in% names(reducedDims(object))) || rerun) {
         object <- do.call(runTSNE, c(list(object=object, ncomponents = ncomponents),
                                      run_args))
     }
 
-    plot_out <- plotReducedDim(object, ncomponents = ncomponents, use_dimred = "TSNE",
-            ...)                               
+    plot_out <- do.call(plotReducedDim, 
+                        c(list(object = object, ncomponents = ncomponents, 
+                               use_dimred = "TSNE"), plot_args))
 
     if (return_SCE) {
         .Deprecated(msg="'return_SCE=TRUE' is deprecated, use 'runTSNE' instead")
@@ -971,14 +1000,19 @@ runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = N
 plotDiffusionMap <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, 
       rerun = FALSE, ncomponents = 2, run_args=list()) {
 
+    new_args <- .disambiguate_args(...)    
+    run_args <- c(run_args, new_args$run)
+    plot_args <- new_args$plot
+
+    # Re-running the diffusion map if necessary.
     if ( !("DiffusionMap" %in% names(reducedDims(object))) || rerun) {
         object <- do.call(runDiffusionMap, c(list(object, ncomponents = ncomponents),
                                              run_args))
     }
 
-    plot_out <- plotReducedDim(object, ncomponents = ncomponents, use_dimred = "DiffusionMap",
-            colour_by = colour_by, shape_by = shape_by, size_by = size_by,
-            theme_size = theme_size, legend = legend)
+    plot_out <- do.call(plotReducedDim, 
+                        c(list(object = object, ncomponents = ncomponents, 
+                               use_dimred = "DiffusionMap"), plot_args))
 
     if (return_SCE) {
         .Deprecated(msg="'return_SCE=TRUE' is deprecated, use 'runDiffusionMap' instead")
@@ -1144,12 +1178,19 @@ runMDS <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
 plotMDS <- function(object, ..., ncomponents = 2, return_SCE = FALSE,
                     rerun = FALSE, draw_plot = TRUE, run_args=list()) {
 
+    new_args <- .disambiguate_args(...)    
+    run_args <- c(run_args, new_args$run)
+    plot_args <- new_args$plot
+
+    # Re-running the MDS if necessary.
     if ( !("MDS" %in% names(reducedDims(object))) || rerun) {
-        object <- runMDS(object, ncomponents = ncomponents, ...)
+        object <- do.call(runMDS, c(list(object = object, ncomponents = ncomponents),
+                                    run_args))
     }
 
-    plot_out <- plotReducedDim(object, ncomponents = ncomponents, use_dimred = "MDS",
-                               ...)
+    plot_out <- do.call(plotReducedDim,
+                        c(list(object = object, ncomponents = ncomponents, 
+                               use_dimred = "MDS"), plot_args))
 
     if (return_SCE) {
         .Deprecated(msg="'return_SCE=TRUE' is deprecated, use 'runMDS' instead")
