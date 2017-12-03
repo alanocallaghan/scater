@@ -412,10 +412,10 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
         use_variable <- col_data_names %in% selected_variables
         vars_not_found <- !(selected_variables %in% col_data_names)
         if ( any(vars_not_found) ) {
-            message(paste("The following selected_variables were not found in colData(object):", selected_variables[vars_not_found]))
-            message("Other variables from colData(object) can be used by specifying a vector of variable names as the selected_variables argument.")
-            message("PCA is being conducted using the following variables:",
-                    selected_variables[!vars_not_found])
+            for (missing_var in selected_variables[vars_not_found]) {
+                warning(sprintf("selected variable '%s' not found in 'colData(object)'", 
+                                missing_var))
+            }
         }
         ## scale double variables
         exprs_to_plot <- scale(colData(object)[, use_variable],
