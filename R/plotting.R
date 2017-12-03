@@ -371,11 +371,44 @@ plotScater <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 #' do PCA at the feature level.
 #' @param selected_variables character vector indicating which variables in
 #' \code{colData(object)} to use for the phenotype-data based PCA. Ignored if
-#' the argument \code{pca_data_input} is anything other than \code{"pdata"}.
+#' the argument \code{pca_data_input} is anything other than \code{"pdata"}
+#' or \code{"coldata"}.
 #' @param detect_outliers logical, should outliers be detected based on PCA
 #' coordinates generated from column-level metadata? Only an option when 
 #' \code{pca_data_input} argument is \code{"pdata"} or \code{"coldata"}. 
 #' Default is \code{FALSE}.
+#'
+#' @details The function \code{\link{prcomp}} is used internally to do the PCA.
+#' The function checks whether the \code{object} has standardised
+#' expression values (by looking at \code{stand_exprs(object)}). If yes, the
+#' existing standardised expression values are used for the PCA. If not, then
+#' standardised expression values are computed using \code{\link{scale}} (with
+#' feature-wise unit variances or not according to the \code{scale_features}
+#' argument), added to the object and PCA is done using these new standardised
+#' expression values.
+#'
+#' If the arguments \code{detect_outliers} and \code{return_SCE} are both
+#' \code{TRUE}, then the element \code{$outlier} is added to the pData
+#' (phenotype data) slot of the \code{SingleCellExperiment} object. This element contains
+#' indicator values about whether or not each cell has been designated as an
+#' outlier based on the PCA. These values can be accessed for filtering
+#' low quality cells with, for example, \code{example_sce$outlier}.
+#'
+#' When \code{pca_data_input="pdata"} or \code{"coldata"}, the selected variables 
+#' default to a vector containing:
+#' \itemize{
+#' \item \code{"pct_counts_top_100_features"}
+#' \item \code{"total_features"}
+#' \item \code{"pct_counts_feature_control"}
+#' \item \code{"total_features_feature_control"}
+#' \item \code{"log10_total_counts_endogenous"}
+#' \item \code{"log10_total_counts_feature_control"}
+#' }
+#' These metrics were chosen due to their utility in distinguishing low-quality
+#' libraries. However, they can be overriden by setting \code{selected_variables}
+#' manually. In particular, \code{"log10_total_counts"} is more useful than 
+#' the \code{_endogenous} and \code{_control} metrics when spike-ins are not
+#' available.
 #'
 #' @rdname runPCA
 #' @seealso \code{\link[scater]{plotPCA}}
@@ -485,28 +518,17 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
 #' @param return_SCE logical, should the function return a \code{SingleCellExperiment}
 #' object with principal component values for cells in the
 #' \code{reducedDim} slot. Default is \code{FALSE}, in which case a
-#' \code{ggplot} object is returned.
+#' \code{ggplot} object is returned. This will be deprecated in the next 
+#' development cycle in favour of directly calling \code{\link{runPCA}}.
 #' @param draw_plot logical, should the plot be drawn on the current graphics
 #' device? Only used if \code{return_SCE} is \code{TRUE}, otherwise the plot
 #' is always produced.
 #' @param run_args Arguments to pass to \code{\link{runPCA}} when \code{rerun=TRUE}
 #' or if there is no existing \code{"PCA"} element in the \code{reducedDims} slot.
 #'
-#' @details The function \code{\link{prcomp}} is used internally to do the PCA.
-#' The function checks whether the \code{object} has standardised
-#' expression values (by looking at \code{stand_exprs(object)}). If yes, the
-#' existing standardised expression values are used for the PCA. If not, then
-#' standardised expression values are computed using \code{\link{scale}} (with
-#' feature-wise unit variances or not according to the \code{scale_features}
-#' argument), added to the object and PCA is done using these new standardised
-#' expression values.
-#'
-#' If the arguments \code{detect_outliers} and \code{return_SCE} are both
-#' \code{TRUE}, then the element \code{$outlier} is added to the pData
-#' (phenotype data) slot of the \code{SingleCellExperiment} object. This element contains
-#' indicator values about whether or not each cell has been designated as an
-#' outlier based on the PCA. These values can be accessed for filtering
-#' low quality cells with, for example, \code{example_sce$outlier}.
+#' @details For back-compatabibility purposes, users can specify arguments to 
+#' \code{\link{runPCA}} in \code{...}. This will trigger a warning as it will be
+#' deprecated in the next development cycle.
 #'
 #' @return either a ggplot plot object or an SingleCellExperiment object
 #'
@@ -662,6 +684,14 @@ setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
 #' for that package for more details.
 #' @param ... Additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.
 #'
+#' @details The function \code{\link[Rtsne]{Rtsne}} is used internally to
+#' compute the t-SNE. Note that the algorithm is not deterministic, so different
+#' runs of the function will produce differing plots (see \code{\link{set.seed}}
+#' to set a random seed for replicable results). The value of the
+#' \code{perplexity} parameter can have a large effect on the resulting plot, so
+#' it can often be worthwhile to try multiple values to find the most appealing
+#' visualisation and to ensure that the conclusions are robust.
+#'
 #' @rdname runTSNE
 #' @seealso 
 #' \code{\link[Rtsne]{Rtsne}},
@@ -747,7 +777,8 @@ runTSNE <- function(object, ntop = 500, ncomponents = 2, exprs_values = "logcoun
 #' @param return_SCE logical, should the function return a \code{SingleCellExperiment}
 #' object with principal component values for cells in the
 #' \code{reducedDims} slot. Default is \code{FALSE}, in which case a
-#' \code{ggplot} object is returned.
+#' \code{ggplot} object is returned. This will be deprecated in the next 
+#' development cycle in favour of directly calling \code{\link{runTSNE}}.
 #' @param rerun logical, should PCA be recomputed even if \code{object} contains a
 #' \code{"TSNE"} element in the \code{reducedDims} slot?
 #' @param draw_plot logical, should the plot be drawn on the current graphics
@@ -756,13 +787,9 @@ runTSNE <- function(object, ntop = 500, ncomponents = 2, exprs_values = "logcoun
 #' @param run_args Arguments to pass to \code{\link{runTSNE}} when \code{rerun=TRUE}
 #' or if there is no existing \code{"TSNE"} element in the \code{reducedDims} slot.
 #'
-#' @details The function \code{\link[Rtsne]{Rtsne}} is used internally to
-#' compute the t-SNE. Note that the algorithm is not deterministic, so different
-#' runs of the function will produce differing plots (see \code{\link{set.seed}}
-#' to set a random seed for replicable results). The value of the
-#' \code{perplexity} parameter can have a large effect on the resulting plot, so
-#' it can often be worthwhile to try multiple values to find the most appealing
-#' visualisation.
+#' @details For back-compatabibility purposes, users can specify arguments to 
+#' \code{\link{runTSNE}} in \code{...}. This will trigger a warning as it will be
+#' deprecated in the next development cycle.
 #'
 #' @return If \code{return_SCE} is \code{TRUE}, then the function returns a
 #' \code{SingleCellExperiment} object, otherwise it returns a \code{ggplot} object.
@@ -868,6 +895,9 @@ plotTSNE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE,
 #' \code{set.seed} to make plots reproducible.
 #' @param ... Additional arguments to pass to \code{\link[destiny]{DiffusionMap}}.
 #'
+#' @details The function \code{\link[destiny]{DiffusionMap}} is used internally
+#' to compute the diffusion map.
+#'
 #' @export
 #' @rdname runDiffusionMap
 #' @seealso 
@@ -946,7 +976,8 @@ runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = N
 #' @param return_SCE logical, should the function return a \code{SingleCellExperiment}
 #' object with principal component values for cells in the
 #' \code{reducedDims} slot. Default is \code{FALSE}, in which case a
-#' \code{ggplot} object is returned.
+#' \code{ggplot} object is returned. This will be deprecated in the next 
+#' development cycle in favour of directly calling \code{\link{runDiffusionMap}}.
 #' @param rerun logical, should PCA be recomputed even if \code{object} contains a
 #' \code{"DiffusionMap"} element in the \code{reducedDims} slot?
 #' @param draw_plot logical, should the plot be drawn on the current graphics
@@ -955,8 +986,9 @@ runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = N
 #' @param run_args Arguments to pass to \code{\link{runDiffusionMap}} when \code{rerun=TRUE}
 #' or if there is no existing \code{"DiffusionMap"} element in the \code{reducedDims} slot.
 #'
-#' @details The function \code{\link[destiny]{DiffusionMap}} is used internally
-#' to compute the diffusion map.
+#' @details For back-compatabibility purposes, users can specify arguments to 
+#' \code{\link{runDiffusionMap}} in \code{...}. This will trigger a warning as it will be
+#' deprecated in the next development cycle.
 #'
 #' @return If \code{return_SCE} is \code{TRUE}, then the function returns an
 #' \code{SingleCellExperiment} object, otherwise it returns a \code{ggplot} object.
@@ -1062,6 +1094,9 @@ plotDiffusionMap <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE,
 #' all components of the reduced dimension slot are used.
 #' @param method string specifying the type of distance to be computed between cells.
 #'
+#' @details The function \code{\link{cmdscale}} is used internally to
+#' compute the multidimensional scaling components to plot.
+#'
 #' @export
 #' @rdname runMDS
 #' @seealso \code{\link[scater]{plotMDS}}
@@ -1136,7 +1171,8 @@ runMDS <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
 #' @param return_SCE logical, should the function return a \code{SingleCellExperiment}
 #' object with principal component values for cells in the
 #' \code{reducedDims} slot. Default is \code{FALSE}, in which case a
-#' \code{ggplot} object is returned.
+#' \code{ggplot} object is returned. This will be deprecated in the next 
+#' development cycle in favour of directly calling \code{\link{runMDS}}.
 #' @param rerun logical, should PCA be recomputed even if \code{object} contains a
 #' \code{"MDS"} element in the \code{reducedDims} slot?
 #' @param draw_plot logical, should the plot be drawn on the current graphics
@@ -1145,8 +1181,9 @@ runMDS <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
 #' @param run_args Arguments to pass to \code{\link{runMDS}} when \code{rerun=TRUE}
 #' or if there is no existing \code{"MDS"} element in the \code{reducedDims} slot.
 #'
-#' @details The function \code{\link{cmdscale}} is used internally to
-#' compute the multidimensional scaling components to plot.
+#' @details For back-compatabibility purposes, users can specify arguments to 
+#' \code{\link{runMDS}} in \code{...}. This will trigger a warning as it will be
+#' deprecated in the next development cycle.
 #'
 #' @return If \code{return_SCE} is \code{TRUE}, then the function returns an
 #' \code{SingleCellExperiment} object, otherwise it returns a \code{ggplot} object.

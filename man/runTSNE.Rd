@@ -58,6 +58,15 @@ for that package for more details.}
 Perform t-stochastic neighbour embedding (t-SNE) based on the data stored in 
 a \code{\link{SingleCellExperiment}} object.
 }
+\details{
+The function \code{\link[Rtsne]{Rtsne}} is used internally to
+compute the t-SNE. Note that the algorithm is not deterministic, so different
+runs of the function will produce differing plots (see \code{\link{set.seed}}
+to set a random seed for replicable results). The value of the
+\code{perplexity} parameter can have a large effect on the resulting plot, so
+it can often be worthwhile to try multiple values to find the most appealing
+visualisation and to ensure that the conclusions are robust.
+}
 \examples{
 ## Set up an example SingleCellExperiment
 data("sc_example_counts")

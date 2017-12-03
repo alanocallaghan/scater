@@ -50,6 +50,10 @@ all components of the reduced dimension slot are used.}
 Perform multi-dimensional scaling using data stored in a
 \code{SingleCellExperiment} object.
 }
+\details{
+The function \code{\link{cmdscale}} is used internally to
+compute the multidimensional scaling components to plot.
+}
 \examples{
 ## Set up an example SingleCellExperiment
 data("sc_example_counts")

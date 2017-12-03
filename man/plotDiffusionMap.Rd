@@ -16,7 +16,8 @@ plotDiffusionMap(object, ..., return_SCE = FALSE, draw_plot = TRUE,
 \item{return_SCE}{logical, should the function return a \code{SingleCellExperiment}
 object with principal component values for cells in the
 \code{reducedDims} slot. Default is \code{FALSE}, in which case a
-\code{ggplot} object is returned.}
+\code{ggplot} object is returned. This will be deprecated in the next 
+development cycle in favour of directly calling \code{\link{runDiffusionMap}}.}
 
 \item{draw_plot}{logical, should the plot be drawn on the current graphics
 device? Only used if \code{return_SCE} is \code{TRUE}, otherwise the plot
@@ -43,8 +44,9 @@ If \code{return_SCE} is \code{TRUE}, then the function returns an
 Produce a diffusion map plot of two components for a \code{SingleCellExperiment} object.
 }
 \details{
-The function \code{\link[destiny]{DiffusionMap}} is used internally
-to compute the diffusion map.
+For back-compatabibility purposes, users can specify arguments to 
+\code{\link{runDiffusionMap}} in \code{...}. This will trigger a warning as it will be
+deprecated in the next development cycle.
 }
 \examples{
 ## Set up an example SingleCellExperiment

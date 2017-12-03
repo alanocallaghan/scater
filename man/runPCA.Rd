@@ -46,7 +46,8 @@ do PCA at the feature level.}
 
 \item{selected_variables}{character vector indicating which variables in
 \code{colData(object)} to use for the phenotype-data based PCA. Ignored if
-the argument \code{pca_data_input} is anything other than \code{"pdata"}.}
+the argument \code{pca_data_input} is anything other than \code{"pdata"}
+or \code{"coldata"}.}
 
 \item{detect_outliers}{logical, should outliers be detected based on PCA
 coordinates generated from column-level metadata? Only an option when 
@@ -56,6 +57,39 @@ Default is \code{FALSE}.}
 \description{
 Perform a principal components analysis (PCA) based on the data stored in 
 a \code{\link{SingleCellExperiment}} object.
+}
+\details{
+The function \code{\link{prcomp}} is used internally to do the PCA.
+The function checks whether the \code{object} has standardised
+expression values (by looking at \code{stand_exprs(object)}). If yes, the
+existing standardised expression values are used for the PCA. If not, then
+standardised expression values are computed using \code{\link{scale}} (with
+feature-wise unit variances or not according to the \code{scale_features}
+argument), added to the object and PCA is done using these new standardised
+expression values.
+
+If the arguments \code{detect_outliers} and \code{return_SCE} are both
+\code{TRUE}, then the element \code{$outlier} is added to the pData
+(phenotype data) slot of the \code{SingleCellExperiment} object. This element contains
+indicator values about whether or not each cell has been designated as an
+outlier based on the PCA. These values can be accessed for filtering
+low quality cells with, for example, \code{example_sce$outlier}.
+
+When \code{pca_data_input="pdata"} or \code{"coldata"}, the selected variables 
+default to a vector containing:
+\itemize{
+\item \code{"pct_counts_top_100_features"}
+\item \code{"total_features"}
+\item \code{"pct_counts_feature_control"}
+\item \code{"total_features_feature_control"}
+\item \code{"log10_total_counts_endogenous"}
+\item \code{"log10_total_counts_feature_control"}
+}
+These metrics were chosen due to their utility in distinguishing low-quality
+libraries. However, they can be overriden by setting \code{selected_variables}
+manually. In particular, \code{"log10_total_counts"} is more useful than 
+the \code{_endogenous} and \code{_control} metrics when spike-ins are not
+available.
 }
 \examples{
 ## Set up an example SingleCellExperiment

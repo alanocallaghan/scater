@@ -23,7 +23,8 @@ plotPCASCE(object, ..., return_SCE = FALSE, draw_plot = TRUE,
 \item{return_SCE}{logical, should the function return a \code{SingleCellExperiment}
 object with principal component values for cells in the
 \code{reducedDim} slot. Default is \code{FALSE}, in which case a
-\code{ggplot} object is returned.}
+\code{ggplot} object is returned. This will be deprecated in the next 
+development cycle in favour of directly calling \code{\link{runPCA}}.}
 
 \item{draw_plot}{logical, should the plot be drawn on the current graphics
 device? Only used if \code{return_SCE} is \code{TRUE}, otherwise the plot
@@ -49,21 +50,9 @@ Produce a principal components analysis (PCA) plot of two or more principal
 components for a \code{\link{SingleCellExperiment}} object.
 }
 \details{
-The function \code{\link{prcomp}} is used internally to do the PCA.
-The function checks whether the \code{object} has standardised
-expression values (by looking at \code{stand_exprs(object)}). If yes, the
-existing standardised expression values are used for the PCA. If not, then
-standardised expression values are computed using \code{\link{scale}} (with
-feature-wise unit variances or not according to the \code{scale_features}
-argument), added to the object and PCA is done using these new standardised
-expression values.
-
-If the arguments \code{detect_outliers} and \code{return_SCE} are both
-\code{TRUE}, then the element \code{$outlier} is added to the pData
-(phenotype data) slot of the \code{SingleCellExperiment} object. This element contains
-indicator values about whether or not each cell has been designated as an
-outlier based on the PCA. These values can be accessed for filtering
-low quality cells with, for example, \code{example_sce$outlier}.
+For back-compatabibility purposes, users can specify arguments to 
+\code{\link{runPCA}} in \code{...}. This will trigger a warning as it will be
+deprecated in the next development cycle.
 }
 \examples{
 ## Set up an example SingleCellExperiment

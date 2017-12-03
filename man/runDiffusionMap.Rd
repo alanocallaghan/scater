@@ -53,6 +53,10 @@ all components of the reduced dimension slot are used.}
 Produce a diffusion map plot using data stored in a \code{SingleCellExperiment} 
 object.
 }
+\details{
+The function \code{\link[destiny]{DiffusionMap}} is used internally
+to compute the diffusion map.
+}
 \examples{
 ## Set up an example SingleCellExperiment
 data("sc_example_counts")

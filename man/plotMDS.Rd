@@ -23,7 +23,8 @@ time consuming.}
 \item{return_SCE}{logical, should the function return a \code{SingleCellExperiment}
 object with principal component values for cells in the
 \code{reducedDims} slot. Default is \code{FALSE}, in which case a
-\code{ggplot} object is returned.}
+\code{ggplot} object is returned. This will be deprecated in the next 
+development cycle in favour of directly calling \code{\link{runMDS}}.}
 
 \item{rerun}{logical, should PCA be recomputed even if \code{object} contains a
 \code{"MDS"} element in the \code{reducedDims} slot?}
@@ -44,8 +45,9 @@ Produce an MDS plot from the cell pairwise distance data in a
 \code{SingleCellExperiment} object.
 }
 \details{
-The function \code{\link{cmdscale}} is used internally to
-compute the multidimensional scaling components to plot.
+For back-compatabibility purposes, users can specify arguments to 
+\code{\link{runMDS}} in \code{...}. This will trigger a warning as it will be
+deprecated in the next development cycle.
 }
 \examples{
 ## Set up an example SingleCellExperiment

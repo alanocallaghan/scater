@@ -16,7 +16,8 @@ plotTSNE(object, ..., return_SCE = FALSE, draw_plot = TRUE, rerun = FALSE,
 \item{return_SCE}{logical, should the function return a \code{SingleCellExperiment}
 object with principal component values for cells in the
 \code{reducedDims} slot. Default is \code{FALSE}, in which case a
-\code{ggplot} object is returned.}
+\code{ggplot} object is returned. This will be deprecated in the next 
+development cycle in favour of directly calling \code{\link{runTSNE}}.}
 
 \item{draw_plot}{logical, should the plot be drawn on the current graphics
 device? Only used if \code{return_SCE} is \code{TRUE}, otherwise the plot
@@ -44,13 +45,9 @@ Produce a t-distributed stochastic neighbour embedding (t-SNE) plot of two
 components for a \code{SingleCellExperiment} object.
 }
 \details{
-The function \code{\link[Rtsne]{Rtsne}} is used internally to
-compute the t-SNE. Note that the algorithm is not deterministic, so different
-runs of the function will produce differing plots (see \code{\link{set.seed}}
-to set a random seed for replicable results). The value of the
-\code{perplexity} parameter can have a large effect on the resulting plot, so
-it can often be worthwhile to try multiple values to find the most appealing
-visualisation.
+For back-compatabibility purposes, users can specify arguments to 
+\code{\link{runTSNE}} in \code{...}. This will trigger a warning as it will be
+deprecated in the next development cycle.
 }
 \examples{
 ## Set up an example SingleCellExperiment
