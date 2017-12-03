@@ -187,7 +187,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         linear <- FALSE
     }
 
-    ## Adding general metrics for each cell.
+    ## Adding general metrics for each cell.
     cd <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
             subset_row = NULL, subset_type = NULL, linear = TRUE)
     rd <- DataFrame(is_feature_control = logical(nrow(exprs_mat)), 
