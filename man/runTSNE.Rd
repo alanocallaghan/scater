@@ -57,6 +57,11 @@ for that package for more details.}
 
 \item{...}{Additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.}
 }
+\value{
+A \code{SingleCellExperiment} object containing the coordinates of
+the first \code{ncomponent} t-SNE dimensions for each cell in the \code{"TSNE"}
+entry of the \code{reducedDims} slot.
+}
 \description{
 Perform t-stochastic neighbour embedding (t-SNE) based on the data stored in 
 a \code{\link{SingleCellExperiment}} object.

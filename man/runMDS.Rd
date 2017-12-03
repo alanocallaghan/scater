@@ -49,6 +49,11 @@ all components of the reduced dimension slot are used.}
 
 \item{method}{string specifying the type of distance to be computed between cells.}
 }
+\value{
+A \code{SingleCellExperiment} object containing the coordinates of the 
+first \code{ncomponent} MDS dimensions for each cell in the #' \code{"MDS"} 
+entry of the \code{reducedDims} slot.
+}
 \description{
 Perform multi-dimensional scaling using data stored in a
 \code{SingleCellExperiment} object.

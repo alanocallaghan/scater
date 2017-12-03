@@ -57,6 +57,11 @@ coordinates generated from column-level metadata? Only an option when
 \code{pca_data_input} argument is \code{"pdata"} or \code{"coldata"}. 
 Default is \code{FALSE}.}
 }
+\value{
+A \code{SingleCellExperiment} object containing the first 
+\code{ncomponent} principal coordinates for each cell in the \code{"PCA"}
+entry of the \code{reducedDims} slot.
+}
 \description{
 Perform a principal components analysis (PCA) based on the data stored in 
 a \code{\link{SingleCellExperiment}} object.

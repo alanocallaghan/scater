@@ -412,6 +412,10 @@ plotScater <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 #' the \code{_endogenous} and \code{_control} metrics when spike-ins are not
 #' available.
 #'
+#' @return A \code{SingleCellExperiment} object containing the first 
+#' \code{ncomponent} principal coordinates for each cell in the \code{"PCA"}
+#' entry of the \code{reducedDims} slot.
+#'
 #' @rdname runPCA
 #' @seealso \code{\link[scater]{plotPCA}}
 #' @export
@@ -688,6 +692,10 @@ setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
 #' for that package for more details.
 #' @param ... Additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.
 #'
+#' @return A \code{SingleCellExperiment} object containing the coordinates of
+#' the first \code{ncomponent} t-SNE dimensions for each cell in the \code{"TSNE"}
+#' entry of the \code{reducedDims} slot.
+#'
 #' @details The function \code{\link[Rtsne]{Rtsne}} is used internally to
 #' compute the t-SNE. Note that the algorithm is not deterministic, so different
 #' runs of the function will produce differing plots (see \code{\link{set.seed}}
@@ -904,6 +912,10 @@ plotTSNE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE,
 #' @details The function \code{\link[destiny]{DiffusionMap}} is used internally
 #' to compute the diffusion map.
 #'
+#' @return A \code{SingleCellExperiment} object containing the coordinates of the first 
+#' \code{ncomponent} diffusion map components for each cell in the \code{"DiffusionMap"} 
+#' entry of the \code{reducedDims} slot.
+#'
 #' @export
 #' @rdname runDiffusionMap
 #' @seealso 
@@ -1101,6 +1113,10 @@ plotDiffusionMap <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE,
 #' to use. Default is \code{NULL}, in which case (if \code{use_dimred} is not \code{NULL})
 #' all components of the reduced dimension slot are used.
 #' @param method string specifying the type of distance to be computed between cells.
+#'
+#' @return A \code{SingleCellExperiment} object containing the coordinates of the 
+#' first \code{ncomponent} MDS dimensions for each cell in the #' \code{"MDS"} 
+#' entry of the \code{reducedDims} slot.
 #'
 #' @details The function \code{\link{cmdscale}} is used internally to
 #' compute the multidimensional scaling components to plot.

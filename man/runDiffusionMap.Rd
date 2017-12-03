@@ -52,6 +52,11 @@ all components of the reduced dimension slot are used.}
 
 \item{...}{Additional arguments to pass to \code{\link[destiny]{DiffusionMap}}.}
 }
+\value{
+A \code{SingleCellExperiment} object containing the coordinates of the first 
+\code{ncomponent} diffusion map components for each cell in the \code{"DiffusionMap"} 
+entry of the \code{reducedDims} slot.
+}
 \description{
 Produce a diffusion map plot using data stored in a \code{SingleCellExperiment} 
 object.
