@@ -88,7 +88,7 @@ Here we use log2-counts-per-million with an offset of 1 as the `exprs` values.
 
 ```{r quickstart-add-exprs, results='hide'}
 exprs(example_sce) <- log2(
-    calculateCPM(example_sce, use.size.factors = FALSE) + 1)
+    calculateCPM(example_sce, use_size_factors = FALSE) + 1)
 ```
 
 Subsetting is very convenient with this class. For example, we can filter out

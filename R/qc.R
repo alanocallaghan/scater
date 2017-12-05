@@ -137,7 +137,7 @@
 #' \code{is_feature_control}, which indicates if the feature belongs to any of
 #' the control sets.}
 #' }
-#' These feature-level QC metrics are added as columns to the ``featureData''
+#' These feature-level QC metrics are added as columns to the ``rowData''
 #' slot of the \code{SingleCellExperiment} object so that they can be inspected and are
 #' readily available for other functions to use. As with the cell-level metrics,
 #'  wherever ``counts'' appear in the above, the same metrics will also be
@@ -187,7 +187,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         linear <- FALSE
     }
 
-    ## Adding general metrics for each cell.
+    ## Adding general metrics for each cell.
     cd <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
             subset_row = NULL, subset_type = NULL, linear = TRUE)
     rd <- DataFrame(is_feature_control = logical(nrow(exprs_mat)), 
@@ -718,9 +718,11 @@ findImportantPCs <- function(object, variable="total_features",
 #' should be used to define expression? Valid options are "counts" (default),
 #' "tpm", "fpkm" and "logcounts".
 #' @param feature_names_to_plot character scalar indicating which column of the 
-#' featureData slot in the \code{object} is to be used for the feature names 
+#' rowData slot in the \code{object} is to be used for the feature names 
 #' displayed on the plot. Default is \code{NULL}, in which case 
 #' \code{rownames(object)} is used.
+#' @param as_percentage logical scalar indicating whether percentages should be
+#' plotted. If \code{FALSE}, the raw \code{exprs_values} are shown instead.
 #'
 #' @details Plot the percentage of counts accounted for by the top n most highly
 #' expressed features across the dataset.
@@ -741,143 +743,127 @@ findImportantPCs <- function(object, variable="total_features",
 #'
 plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
                              drop_features = NULL, exprs_values = "counts",
-                             feature_names_to_plot = NULL) {
-    ## Check that variable to colour points exists
-    if (!(col_by_variable %in% colnames(colData(object)))) {
-        stop("col_by_variable not found in colData(object).
-             Please make sure colData(object)[, variable] exists.")
-        plot_cols <- FALSE
-    } else
-        plot_cols <- TRUE
-    x <- colData(object)[, col_by_variable]
-    #     x_na <- is.na(x)
-    #     x <- x[!x_na]
-    ## Determine type of variable
-    typeof_x <- .getTypeOfVariable(object, col_by_variable)
+                             feature_names_to_plot = NULL, as_percentage = TRUE) {
     ## Figure out which features to drop
-    if ( !(is.null(drop_features) | length(drop_features) == 0) ) {
-        if (is.character(drop_features))
+    if ( !(is.null(drop_features) || length(drop_features) == 0) ) {
+        if (is.character(drop_features)) {
             drop_features <- which(rownames(object) %in% drop_features)
-        if (is.logical(drop_features))
+        }
+        if (is.logical(drop_features)) {
             object <- object[!drop_features,]
-        else
+        } else {
             object <- object[-drop_features,]
+        }
     }
-    ## Compute QC metrics on the (possibly) modified SingleCellExperiment object to make sure
-    ## we have the relevant values for this set of features
-    if ( !is.null(rowData(object)$is_feature_control) )
-        object <- calculateQCMetrics(
-            object, 
-            feature_controls = list(all = rowData(object)$is_feature_control))
-    else
-        object <- calculateQCMetrics(object)
 
     ## Define expression values to be used
-    exprs_values <- match.arg(exprs_values,
-                              c("logcounts", "tpm", "cpm", "fpkm", "counts"))
-    exprs_mat <- assay(object, exprs_values)
-    if ( is.null(exprs_mat) && !is.null(counts(object)) ) {
-        exprs_mat <- counts(object)
-        message("Using counts as expression values.")
-        exprs_values <- "counts"
-    } else if ( is.null(exprs_mat) ) {
-        exprs_mat <- exprs(object)
-        message("Using exprs(object) values as expression values.")
-        exprs_values <- "logcounts"
-    }
-    if ( exprs_values == "logcounts" ) 
-        exprs_mat <- 2 ^ exprs_mat - object@logExprsOffset
-
     ## Find the most highly expressed features in this dataset
-    ### Order by total feature counts across whole dataset
-    rdata <- rowData(object)
-    if ( paste0("rank_", exprs_values) %in% colnames(rdata) )
-        oo <- order(rdata[[paste0("rank_", exprs_values)]],
-                    decreasing = TRUE)
-    else {
-        if ( "rank_counts" %in% colnames(rdata) ) {
-            oo <- order(rdata[["rank_counts"]], decreasing = TRUE)
-            exprs_values <- "counts"
-            message("Using counts to order total expression of features.")
-        }
-        else {
-            exprs_values <- "logcounts"
-            oo <- order(rdata[["rank_exprs"]], decreasing = TRUE)
-            message("Using 'exprs' to order total expression of features.")
-        }
-    }
+    exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
+    ave_exprs <- .general_rowSums(exprs_mat)
+    oo <- order(ave_exprs, decreasing=TRUE)
+    chosen <- oo[seq_len(n)]
+
     ## define feature names for plot
+    rdata <- rowData(object)
     if (is.null(feature_names_to_plot) || 
-        is.null(rowData(object)[[feature_names_to_plot]]))
-        rdata$feature <- factor(rownames(object),
-                                levels = rownames(object)[rev(oo)])
-    else 
-        rdata$feature <- factor(
-            rowData(object)[[feature_names_to_plot]],
-            levels = rowData(object)[[feature_names_to_plot]][rev(oo)])
-    rdata$Feature <- rdata$feature
+        is.null(rowData(object)[[feature_names_to_plot]])) {
+        feature_names <- rownames(object)
+    } else {
+        feature_names <- rowData(object)[[feature_names_to_plot]]
+        feature_names <- as.character(feature_names)
+    }
+    rownames(exprs_mat) <- feature_names 
+    rdata$Feature <- factor(feature_names, levels=feature_names[rev(oo)])
+
     ## Check if is_feature_control is defined
-    if ( is.null(rdata$is_feature_control) )
+    if ( is.null(rdata$is_feature_control) ) { 
         rdata$is_feature_control <- rep(FALSE, nrow(rdata))
+    }
 
     ## Determine percentage expression accounted for by top features across all
-    ## cells
-    total_exprs <- sum(exprs_mat)
-    top50_pctage <- 100 * sum(.general_rowSums(exprs_mat)[oo[1:n]]) / total_exprs
-    ## Determine percentage of counts for top features by cell
-    df_pct_exprs_by_cell <- (100 * t(exprs_mat[oo[1:n],]) / .general_colSums(exprs_mat))
-    pct_total <- 100 * .general_rowSums(exprs_mat) / total_exprs
-    rdata[["pct_total"]] <- pct_total
+    ## cells, and determine percentage of counts for top features by cell
+    df_exprs_by_cell <- t(exprs_mat[chosen,])
+    if (as_percentage) { 
+        total_exprs <- sum(ave_exprs)
+        top50_pctage <- 100 * sum(ave_exprs[chosen]) / total_exprs
+        df_exprs_by_cell <- 100 * df_exprs_by_cell / .general_colSums(exprs_mat)
+        pct_total <- 100 * ave_exprs / total_exprs
+        rdata[["pct_total"]] <- pct_total
+    } else {
+        rdata[[exprs_values]] <- ave_exprs
+    }
+    df_exprs_by_cell <- as.matrix(df_exprs_by_cell)
 
     ## Melt dataframe so it is conducive to ggplot
-    if ( is.null(rownames(rdata)) )
-        rownames(rdata) <- as.character(rdata$feature)
-    df_pct_exprs_by_cell_long <- reshape2::melt(df_pct_exprs_by_cell)
-    colnames(df_pct_exprs_by_cell_long) <- c("Cell", "Tags", "value")
-    df_pct_exprs_by_cell_long$Feature <- 
-        rdata[as.character(df_pct_exprs_by_cell_long$Tags), "feature"]
-    df_pct_exprs_by_cell_long$Tags <- factor(
-        df_pct_exprs_by_cell_long$Tags, levels = rownames(object)[rev(oo[1:n])])
-    df_pct_exprs_by_cell_long$Feature <- factor(
-        df_pct_exprs_by_cell_long$Feature, levels = rdata$feature[rev(oo[1:n])])
+    if ( is.null(rownames(rdata)) ) { 
+        rownames(rdata) <- as.character(rdata$Feature)
+    }
+    df_exprs_by_cell_long <- reshape2::melt(df_exprs_by_cell)
+    colnames(df_exprs_by_cell_long) <- c("Cell", "Tags", "value")
+    df_exprs_by_cell_long$Feature <- factor(
+        rdata[as.character(df_exprs_by_cell_long$Tags), "Feature"],
+        levels = as.character(rdata$Feature[rev(chosen)]))
     
-    ## Add colour variable information
-    if (typeof_x == "discrete")
-        df_pct_exprs_by_cell_long$colour_by <- factor(x)
-    else
-        df_pct_exprs_by_cell_long$colour_by <- x
+    ## Check that variable to colour points exists
+    if (!(col_by_variable %in% colnames(colData(object)))) {
+        warning(sprintf("'%s' not found in colData(object)", col_by_variable))
+        plot_x <- FALSE
+        aes_to_use <- aes_string(y="Feature", x="value")
+    } else {
+        plot_x <- TRUE
+        x <- colData(object)[, col_by_variable]
+        typeof_x <- .getTypeOfVariable(object, col_by_variable)
+
+        ## Add colour variable information
+        if (typeof_x == "discrete") {
+            df_exprs_by_cell_long$colour_by <- factor(x)
+        } else {
+            df_exprs_by_cell_long$colour_by <- x
+        }
+
+        aes_to_use <- aes_string(y="Feature", x="value", colour="colour_by")
+    }
+
     ## Make plot
-    plot_most_expressed <- ggplot(df_pct_exprs_by_cell_long,
-                                  aes_string(y = "Feature", x = "value",
-                                             colour = "colour_by")) +
-        geom_point(alpha = 0.6, shape = 124) +
-        ggtitle(paste0("Top ", n, " account for ",
-                       format(top50_pctage, digits = 3), "% of total")) +
-        ylab("Feature") +
-        xlab(paste0("% of total ", exprs_values)) +
-        theme_bw(8) +
+    plot_most_expressed <- ggplot(df_exprs_by_cell_long, aes_to_use) +
+        geom_point(alpha = 0.6, shape = 124)
+
+    if (as_percentage) { 
+        plot_most_expressed <- plot_most_expressed + ggtitle(paste0("Top ", n, 
+            " account for ", format(top50_pctage, digits = 3), "% of total")) +
+            xlab(paste0("% of total ", exprs_values))
+        legend_val <- "as.numeric(pct_total)"
+    } else {
+        plot_most_expressed <- plot_most_expressed + xlab(exprs_values)
+        legend_val <- sprintf("as.numeric(%s)", exprs_values)
+    }
+
+    plot_most_expressed <- plot_most_expressed + ylab("Feature") + theme_bw(8) +
         theme(legend.position = c(1, 0), legend.justification = c(1, 0),
               axis.text.x = element_text(colour = "gray35"),
               axis.text.y = element_text(colour = "gray35"),
               axis.title.x = element_text(colour = "gray35"),
               axis.title.y = element_text(colour = "gray35"),
               title = element_text(colour = "gray35"))
+
     ## Sort of colouring of points
-    if (typeof_x == "discrete") {
-        plot_most_expressed <- .resolve_plot_colours(
-            plot_most_expressed, df_pct_exprs_by_cell_long$colour_by,
-            col_by_variable)
+    if (plot_x) { 
+        if (typeof_x == "discrete") {
+            plot_most_expressed <- .resolve_plot_colours(
+                plot_most_expressed, df_exprs_by_cell_long$colour_by,
+                col_by_variable)
 #         plot_most_expressed <- plot_most_expressed +
 #             ggthemes::scale_colour_tableau(name = col_by_variable)
-    } else {
-        plot_most_expressed <- plot_most_expressed +
-            scale_colour_gradient(name = col_by_variable, low = "lightgoldenrod",
-                                  high = "firebrick4", space = "Lab")
+        } else {
+            plot_most_expressed <- plot_most_expressed +
+                scale_colour_gradient(name = col_by_variable, low = "lightgoldenrod",
+                                      high = "firebrick4", space = "Lab")
+        }
     }
+
     plot_most_expressed + geom_point(
-        aes_string(x = "as.numeric(pct_total)",
-                   y = "Feature", fill = "is_feature_control"),
-        data = as.data.frame(rdata[oo[1:n],]), colour = "gray30", shape = 21) +
+        aes_string(x = legend_val, y = "Feature", fill = "is_feature_control"),
+        data = as.data.frame(rdata[chosen,]), colour = "gray30", shape = 21) +
         scale_fill_manual(values = c("aliceblue", "wheat")) +
         guides(fill = guide_legend(title = "Feature control?"))
 }

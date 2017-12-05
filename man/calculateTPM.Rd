@@ -34,7 +34,7 @@ tpm(example_sce) <- calculateTPM(example_sce, effective_length = 5e04,
 
 ## calculate from FPKM
 fpkm(example_sce) <- calculateFPKM(example_sce, effective_length = 5e04,
-use.size.factors = FALSE)
+use_size_factors = FALSE)
 tpm(example_sce) <- calculateTPM(example_sce, effective_length = 5e04,
                                     calc_from = "fpkm")
 }

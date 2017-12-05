@@ -10,7 +10,7 @@
 \usage{
 plotReducedDimDefault(df_to_plot, ncomponents = 2, percentVar = NULL,
   colour_by = NULL, shape_by = NULL, size_by = NULL, theme_size = 10,
-  legend = "auto")
+  legend = "auto", add_ticks = TRUE)
 
 plotReducedDim(object, use_dimred, ncomponents = 2, colour_by = NULL,
   shape_by = NULL, size_by = NULL, exprs_values = "logcounts",
@@ -46,6 +46,9 @@ be used as a factor by which to define the size of points in the plot.}
 \item{legend}{character, specifying how the legend(s) be shown? Default is
 \code{"auto"}, which hides legends that have only one level and shows others.
 Alternatives are "all" (show all legends) or "none" (hide all legends).}
+
+\item{add_ticks}{logical scalar indicating whether ticks should be drawn
+on the axes corresponding to the location of each point.}
 
 \item{object}{an \code{SingleCellExperiment} object with a non-NULL \code{reducedDimension}
 slot.}

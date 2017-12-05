@@ -114,7 +114,7 @@ nexprs <- function(object, lowerDetectionLimit = 0, exprs_values = "counts",
 #'
 #' ## calculate from FPKM
 #' fpkm(example_sce) <- calculateFPKM(example_sce, effective_length = 5e04,
-#' use.size.factors = FALSE)
+#' use_size_factors = FALSE)
 #' tpm(example_sce) <- calculateTPM(example_sce, effective_length = 5e04,
 #'                                     calc_from = "fpkm")
 calculateTPM <- function(object, effective_length = NULL, 
@@ -188,10 +188,18 @@ calculateTPM <- function(object, effective_length = NULL,
 #' Calculate count-per-million (CPM) values from the count data.
 #'
 #' @param object an \code{SingleCellExperiment} object
-#' @param use.size.factors a logical scalar specifying whether
+#' @param use_size_factors a logical scalar specifying whether
 #' the size factors should be used to construct effective library
 #' sizes, or if the library size should be directly defined as
 #' the sum of counts for each cell.
+#'
+#' @details If \code{use_size_factors=TRUE}, size factors are used
+#' to define the effective library sizes by scaling all size factors
+#' such that the mean scaled size factor is equal to the mean sum of
+#' counts across all features. Note that effective library sizes will 
+#' be  computed differently for features marked as spike-in controls, 
+#' due to the presence of control-specific size factors - see 
+#' \code{\link{normalizeSCE}} for more details.
 #'
 #' @return Matrix of CPM values.
 #' @export
@@ -200,20 +208,21 @@ calculateTPM <- function(object, effective_length = NULL,
 #' data("sc_example_cell_info")
 #' example_sce <- SingleCellExperiment(
 #' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
-#' cpm(example_sce) <- calculateCPM(example_sce, use.size.factors = FALSE)
+#' cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
 #'
-calculateCPM <- function(object, use.size.factors = TRUE) {
-    if ( !methods::is(object, "SingleCellExperiment") )
+calculateCPM <- function(object, use_size_factors = TRUE) {
+    if ( !methods::is(object, "SingleCellExperiment") ) {
         stop("object must be an SingleCellExperiment")
+    }
     counts_mat <- counts(object)
     subset_row <- .subset2index(NULL, target = counts_mat, byrow = TRUE)
     margin.stats <- .Call(cxx_margin_summary, counts_mat, 0, 
                           subset_row - 1L, FALSE)
-    if (use.size.factors) {
+
+    if (use_size_factors) {
         sf.list <- .get_all_sf_sets(object)
         if (is.null(sf.list$size.factors[[1]])) {
-            warning("size factors requested but not specified, 
-                    using library sizes instead")
+            warning("no size factors for non-control genes, using library sizes instead")
             sf.list$size.factors[[1]] <- margin.stats[[1]]
         }
     } else {
@@ -250,7 +259,7 @@ calculateCPM <- function(object, use.size.factors = TRUE) {
 #' @param object an \code{SingleCellExperiment} object
 #' @param effective_length vector of class \code{"numeric"} providing the
 #' effective length for each feature in the \code{SCESet} object
-#' @param use.size.factors a logical scalar, see \code{\link{calculateCPM}}
+#' @param use_size_factors a logical scalar, see \code{\link{calculateCPM}}
 #'
 #' @return Matrix of FPKM values.
 #' @export
@@ -261,12 +270,12 @@ calculateCPM <- function(object, use.size.factors = TRUE) {
 #' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
 #' effective_length <- rep(1000, 2000)
 #' fpkm(example_sce) <- calculateFPKM(example_sce, effective_length,
-#' use.size.factors = FALSE)
+#' use_size_factors = FALSE)
 #'
-calculateFPKM <- function(object, effective_length, use.size.factors=TRUE) {
+calculateFPKM <- function(object, effective_length, use_size_factors=TRUE) {
     if ( !methods::is(object, "SingleCellExperiment") )
         stop("object must be an SingleCellExperiment")
-    cpms <- calculateCPM(object, use.size.factors = use.size.factors)
+    cpms <- calculateCPM(object, use_size_factors = use_size_factors)
     effective_length <- effective_length / 1e3
     cpms / effective_length
 }
@@ -279,11 +288,17 @@ calculateFPKM <- function(object, effective_length, use.size.factors=TRUE) {
 #' counts).
 #'
 #' @param object a \code{\link{SingleCellExperiment}} object or a matrix of counts
-#' @param size.factors numeric(), vector of size factors to use to scale library 
-#' size in computation of counts-per-million. Extracted from the 
+#' @param size_factors numeric vector of size factors to use to downscale the counts.
+#' prior to computing averages. Extracted from the 
 #' object if it is a \code{SingleCellExperiment} object; if object is a matrix, then 
-#' if non-NULL, the provided size factors are used. Default is \code{NULL}, in which
-#' case size factors are all set to 1 (i.e. library size adjustment only).
+#' if non-NULL, the provided size factors are used. Default is \code{NULL}, where
+#' size factors are defined to be proportional to the library sizes.
+#'
+#' @details For spike-in controls in a \code{SingleCellExperiment}, control-specific 
+#' size factors will be used if available (see \code{\link{normalizeSCE}}). If
+#' no size factors are available for any gene, the library sizes are used instead.
+#' All library sizes are scaled so that the mean is 1 across all cells, to ensure
+#' that the averages are interpretable on the scale of the raw counts. 
 #'
 #' @return Vector of average count values with same length as number of features.
 #' @export
@@ -296,22 +311,22 @@ calculateFPKM <- function(object, effective_length, use.size.factors=TRUE) {
 #' ## calculate average counts
 #' ave_counts <- calcAverage(example_sce)
 #'
-calcAverage <- function(object, size.factors=NULL) {
+calcAverage <- function(object, size_factors=NULL) {
     if (methods::is(object, "SingleCellExperiment")) {
         sf.list <- .get_all_sf_sets(object)
         mat <- counts(object)
     } else {
         # Using the lone set of size factors, if provided.
         sf.list <- list(index = rep(1L, nrow(object)), 
-                        size.factors = list(size.factors))
+                        size.factors = list(size_factors))
         mat <- object
     }
 
-    subset_row <- .subset2index(NULL, target = mat, byrow = TRUE)
-    margin.stats <- .Call(cxx_margin_summary, mat, 0, 
-                          subset_row - 1L, FALSE)
     # Set size factors to library sizes if not available.
     if (is.null(sf.list$size.factors[[1]])) {
+        subset_row <- .subset2index(NULL, target = mat, byrow = TRUE)
+        margin.stats <- .Call(cxx_margin_summary, mat, 0, 
+                              subset_row - 1L, FALSE)
         sf.list$size.factors[[1]] <- margin.stats[[1]]
     }
 

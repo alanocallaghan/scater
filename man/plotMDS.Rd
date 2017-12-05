@@ -5,65 +5,49 @@
 \alias{plotMDS,SingleCellExperiment-method}
 \title{Produce a multidimensional scaling plot for a SingleCellExperiment object}
 \usage{
-plotMDS(object, ncomponents = 2, colour_by = NULL, shape_by = NULL,
-  size_by = NULL, return_SCE = FALSE, rerun = FALSE, draw_plot = TRUE,
-  exprs_values = "logcounts", theme_size = 10, legend = "auto", ...)
+plotMDS(object, ..., ncomponents = 2, return_SCE = FALSE, rerun = FALSE,
+  draw_plot = TRUE, run_args = list())
 }
 \arguments{
-\item{object}{an \code{SingleCellExperiment} object}
+\item{object}{a \code{SingleCellExperiment} object}
 
-\item{ncomponents}{numeric scalar indicating the number of principal
-components to plot, starting from the first principal component. Default is
+\item{...}{Additional arguments to pass to \code{\link{plotReducedDim}}.}
+
+\item{ncomponents}{numeric scalar indicating the number of MDS dimensions
+to plot, starting from the first dimension. Default is
 2. If \code{ncomponents} is 2, then a scatterplot of PC2 vs PC1 is produced.
 If \code{ncomponents} is greater than 2, a pairs plots for the top components
 is produced. NB: computing more than two components for t-SNE can become very
 time consuming.}
 
-\item{colour_by}{character string defining the column of \code{pData(object)} to
-be used as a factor by which to colour the points in the plot. Alternatively, a
-data frame with one column containing values to map to colours for all cells.}
-
-\item{shape_by}{character string defining the column of \code{pData(object)} to
-be used as a factor by which to define the shape of the points in the plot.}
-
-\item{size_by}{character string defining the column of \code{pData(object)} to
-be used as a factor by which to define the size of points in the plot.}
-
-\item{return_SCE}{logical, should the function return an \code{SingleCellExperiment}
+\item{return_SCE}{logical, should the function return a \code{SingleCellExperiment}
 object with principal component values for cells in the
 \code{reducedDims} slot. Default is \code{FALSE}, in which case a
-\code{ggplot} object is returned.}
+\code{ggplot} object is returned. This will be deprecated in the next 
+development cycle in favour of directly calling \code{\link{runMDS}}.}
 
 \item{rerun}{logical, should PCA be recomputed even if \code{object} contains a
-"PCA" element in the \code{reducedDims} slot?}
+\code{"MDS"} element in the \code{reducedDims} slot?}
 
 \item{draw_plot}{logical, should the plot be drawn on the current graphics
 device? Only used if \code{return_SCE} is \code{TRUE}, otherwise the plot
 is always produced.}
 
-\item{exprs_values}{a string specifying the expression values to use for
-colouring the points, if \code{colour_by} or \code{size_by} are set as feature names.}
-
-\item{theme_size}{numeric scalar giving default font size for plotting theme
-(default is 10).}
-
-\item{legend}{character, specifying how the legend(s) be shown? Default is
-\code{"auto"}, which hides legends that have only one level and shows others.
-Alternatives are "all" (show all legends) or "none" (hide all legends).}
-
-\item{...}{arguments passed to S4 plotMDS method}
+\item{run_args}{Arguments to pass to \code{\link{runMDS}} when \code{rerun=TRUE}
+or if there is no existing \code{"MDS"} element in the \code{reducedDims} slot.}
 }
 \value{
 If \code{return_SCE} is \code{TRUE}, then the function returns an
 \code{SingleCellExperiment} object, otherwise it returns a \code{ggplot} object.
 }
 \description{
-#' Produce an MDS plot from the cell pairwise distance data in an
-\code{SingleCellExperiment} dataset.
+Produce an MDS plot from the cell pairwise distance data in a
+\code{SingleCellExperiment} object.
 }
 \details{
-The function \code{\link{cmdscale}} is used internally to
-compute the multidimensional scaling components to plot.
+For back-compatabibility purposes, users can specify arguments to 
+\code{\link{runMDS}} in \code{...}. This will trigger a warning as it will be
+deprecated in the next development cycle.
 }
 \examples{
 ## Set up an example SingleCellExperiment
@@ -84,4 +68,7 @@ plotMDS(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment")
 plotMDS(example_sce, colour_by = "Cell_Cycle",
 shape_by = "Treatment", size_by = "Mutation_Status", method = "canberra")
 
+}
+\seealso{
+\code{\link{runMDS}}
 }

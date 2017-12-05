@@ -4,7 +4,7 @@
 \alias{calculateFPKM}
 \title{Calculate fragments per kilobase of exon per million reads mapped (FPKM)}
 \usage{
-calculateFPKM(object, effective_length, use.size.factors = TRUE)
+calculateFPKM(object, effective_length, use_size_factors = TRUE)
 }
 \arguments{
 \item{object}{an \code{SingleCellExperiment} object}
@@ -12,7 +12,7 @@ calculateFPKM(object, effective_length, use.size.factors = TRUE)
 \item{effective_length}{vector of class \code{"numeric"} providing the
 effective length for each feature in the \code{SCESet} object}
 
-\item{use.size.factors}{a logical scalar, see \code{\link{calculateCPM}}}
+\item{use_size_factors}{a logical scalar, see \code{\link{calculateCPM}}}
 }
 \value{
 Matrix of FPKM values.
@@ -28,6 +28,6 @@ example_sce <- SingleCellExperiment(
 assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
 effective_length <- rep(1000, 2000)
 fpkm(example_sce) <- calculateFPKM(example_sce, effective_length,
-use.size.factors = FALSE)
+use_size_factors = FALSE)
 
 }

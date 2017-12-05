@@ -4,16 +4,16 @@
 \alias{calcAverage}
 \title{Calculate average counts, adjusting for size factors or library size}
 \usage{
-calcAverage(object, size.factors = NULL)
+calcAverage(object, size_factors = NULL)
 }
 \arguments{
 \item{object}{a \code{\link{SingleCellExperiment}} object or a matrix of counts}
 
-\item{size.factors}{numeric(), vector of size factors to use to scale library 
-size in computation of counts-per-million. Extracted from the 
+\item{size_factors}{numeric vector of size factors to use to downscale the counts.
+prior to computing averages. Extracted from the 
 object if it is a \code{SingleCellExperiment} object; if object is a matrix, then 
-if non-NULL, the provided size factors are used. Default is \code{NULL}, in which
-case size factors are all set to 1 (i.e. library size adjustment only).}
+if non-NULL, the provided size factors are used. Default is \code{NULL}, where
+size factors are defined to be proportional to the library sizes.}
 }
 \value{
 Vector of average count values with same length as number of features.
@@ -22,6 +22,13 @@ Vector of average count values with same length as number of features.
 Calculate average counts per feature, adjusting them as appropriate to take
 into account for size factors for normalization or library sizes (total
 counts).
+}
+\details{
+For spike-in controls in a \code{SingleCellExperiment}, control-specific 
+size factors will be used if available (see \code{\link{normalizeSCE}}). If
+no size factors are available for any gene, the library sizes are used instead.
+All library sizes are scaled so that the mean is 1 across all cells, to ensure
+that the averages are interpretable on the scale of the raw counts.
 }
 \examples{
 data("sc_example_counts")

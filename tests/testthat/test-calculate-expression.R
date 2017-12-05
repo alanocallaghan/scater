@@ -30,13 +30,13 @@ test_that("we can calculate CPM from counts", {
     example_sce <- SingleCellExperiment(
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
-    cpm(example_sce) <- calculateCPM(example_sce, use.size.factors = FALSE)
+    cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
     
     expect_that(example_sce, is_a("SingleCellExperiment"))
     expect_that(sum(cpm(example_sce)), is_more_than(0))
     
     sce10x <- read10xResults(system.file("extdata", package = "scater"))
-    cpm(sce10x) <- calculateCPM(sce10x, use.size.factors = FALSE)
+    cpm(sce10x) <- calculateCPM(sce10x, use_size_factors = FALSE)
     expect_that(sce10x, is_a("SingleCellExperiment"))
     expect_that(sum(cpm(sce10x)), is_more_than(0))
     
@@ -51,14 +51,14 @@ test_that("we can calculate FPKM from counts", {
         colData = sc_example_cell_info)
     effective_length <- rep(1000, 2000)
     fpkm(example_sce) <- calculateFPKM(
-        example_sce, effective_length, use.size.factors = FALSE)
+        example_sce, effective_length, use_size_factors = FALSE)
     
     expect_that(example_sce, is_a("SingleCellExperiment"))
     expect_that(sum(fpkm(example_sce)), is_more_than(0))
     
     sce10x <- read10xResults(system.file("extdata", package = "scater"))
     fpkm(sce10x) <- calculateFPKM(sce10x, effective_length, 
-                                  use.size.factors = FALSE)
+                                  use_size_factors = FALSE)
     expect_that(sce10x, is_a("SingleCellExperiment"))
     expect_that(sum(fpkm(sce10x)), is_more_than(0))
     
@@ -73,7 +73,7 @@ test_that("we can calculate TPM from FPKM", {
         colData = sc_example_cell_info)
     effective_length <- rep(1000, 2000)
     fpkm(example_sce) <- calculateFPKM(example_sce, effective_length,
-                                       use.size.factors = FALSE)
+                                       use_size_factors = FALSE)
     tpm(example_sce) <- calculateTPM(example_sce, effective_length, 
                                         calc_from = "fpkm")
     expect_that(example_sce, is_a("SingleCellExperiment"))
@@ -81,7 +81,7 @@ test_that("we can calculate TPM from FPKM", {
     
     sce10x <- read10xResults(system.file("extdata", package = "scater"))
     fpkm(sce10x) <- calculateFPKM(sce10x, effective_length,
-                                       use.size.factors = FALSE)
+                                       use_size_factors = FALSE)
     tpm(sce10x) <- calculateTPM(sce10x, effective_length, 
                                      calc_from = "fpkm")
     expect_that(sce10x, is_a("SingleCellExperiment"))

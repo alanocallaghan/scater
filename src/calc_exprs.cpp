@@ -54,12 +54,19 @@ Rcpp::RObject calc_exprs_internal (M mat,
     }
     const bool dosum=Rcpp::LogicalVector(sum)[0];
 
-    // Setting up output object (Making a zero length matrix if we don't actually need it).
+    // Setting up output object (complicated setup to avoid initializing the matrix if summing).
     V input(ngenes);
     Rcpp::NumericVector output(slen);
     const bool preserve_sparse=(prior==1 && dolog) || (prior==0 && !dolog); // Deciding whether or not to preserve sparsity.
-    auto outmat=beachmat::create_numeric_output(slen, (dosum ? 0 : ncells), 
-            beachmat::output_param(mat->get_matrix_type(), true, preserve_sparse));
+
+    std::vector<std::unique_ptr<beachmat::numeric_output> > holder;
+    beachmat::numeric_output* optr=NULL;
+    if (!dosum) { 
+        beachmat::output_param OPARAM(mat->get_matrix_type(), true, preserve_sparse);
+        OPARAM.optimize_chunk_dims(slen, ncells);
+        holder.push_back(beachmat::create_numeric_output(slen, ncells, OPARAM));
+        optr=holder.front().get();
+    }
 
     /* Computing normalized expression values for each cell, plus a prior.
      * We may or may not log-transform, and we may or may not sum across genes.
@@ -100,7 +107,7 @@ Rcpp::RObject calc_exprs_internal (M mat,
 
         // Adding the result.
         if (!dosum) {
-            outmat->set_col(c, output.begin());
+            optr->set_col(c, output.begin());
         }
     }
 
@@ -113,7 +120,7 @@ Rcpp::RObject calc_exprs_internal (M mat,
         }
         return output;
     } else {
-        return outmat->yield();
+        return optr->yield();
     }
 }
 

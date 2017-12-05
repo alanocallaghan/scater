@@ -13,9 +13,9 @@ read10XResults(...)
 }
 \arguments{
 \item{data_dir}{Directory containing the matrix.mtx, genes.tsv, and 
-barcodes.tsv files provided by 10x. A vector or named vector can be given in order to load 
-several data directories. If a named vector is given, the cell barcode names 
-will be prefixed with the name.}
+barcodes.tsv files provided by 10x. A vector or named vector can be given in 
+order to load several data directories. If a named vector is given, the cell 
+barcode names will be prefixed with the name.}
 
 \item{min_total_cell_counts}{integer(1) threshold such that cells (barcodes)
 with total counts below the threshold are filtered out}
@@ -27,7 +27,9 @@ counts below the threshold are filtered out.}
 }
 \value{
 Returns an SingleCellExperiment object with counts data stored as a
-sparse matrix with rows and columns labeled.
+sparse matrix. Rows are named with the gene name and columns are named with 
+the cell barcode (if \code{data_dir} contains one element; otherwise the 
+columns are unnamed to avoid problems with non-unique barcodes).
 }
 \description{
 Creates a full or sparse matrix from a sparse data matrix provided by 10X 
