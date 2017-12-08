@@ -4,9 +4,9 @@
 #' genomics.
 #' 
 #' @param data_dir Directory containing the matrix.mtx, genes.tsv, and 
-#' barcodes.tsv files provided by 10x. A vector or named vector can be given in order to load 
-#' several data directories. If a named vector is given, the cell barcode names 
-#' will be prefixed with the name.
+#' barcodes.tsv files provided by 10x. A vector or named vector can be given in 
+#' order to load several data directories. If a named vector is given, the cell 
+#' barcode names will be prefixed with the name.
 #' @param min_total_cell_counts integer(1) threshold such that cells (barcodes)
 #' with total counts below the threshold are filtered out
 #' @param min_mean_gene_counts numeric(1) threshold such that genes with mean 
@@ -89,7 +89,7 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
     
     # Adding the cell data (only using as colnames if there is only 1 set - guaranteed unique).
     cell_info <- do.call(rbind, cell_info_list)
-    if (nsets==1L) {
+    if (nsets == 1L) {
         colnames(full_data) <- cell_info$barcode
     }
     SingleCellExperiment(list(counts = full_data), rowData = gene_info, 

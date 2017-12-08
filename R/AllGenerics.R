@@ -1,4 +1,4 @@
-#' @name accessors
+#' @name norm_exprs
 #' @aliases norm_exprs
 #' @export
 #' @docType methods
@@ -6,14 +6,14 @@
 #' @rdname accessors
 setGeneric("norm_exprs", function(object) standardGeneric("norm_exprs"))
 
-#' @name accessors
+#' @name norm_exprs<-
 #' @aliases norm_exprs<-
 #' @export
 #' @docType methods
 #' @rdname accessors
 setGeneric("norm_exprs<-", function(object, value) standardGeneric("norm_exprs<-"))
 
-#' @name accessors
+#' @name stand_exprs
 #' @aliases stand_exprs
 #' @export
 #' @docType methods
@@ -21,7 +21,7 @@ setGeneric("norm_exprs<-", function(object, value) standardGeneric("norm_exprs<-
 #' @rdname accessors
 setGeneric("stand_exprs", function(object) standardGeneric("stand_exprs"))
 
-#' @name accessors
+#' @name stand_exprs<-
 #' @aliases stand_exprs<-
 #' @export
 #' @docType methods
@@ -40,7 +40,7 @@ setGeneric("bootstraps", function(object) standardGeneric("bootstraps"))
 #' @rdname bootstraps
 setGeneric("bootstraps<-", function(object, value) standardGeneric("bootstraps<-"))
 
-#' @name accessors
+#' @name fpkm
 #' @aliases  fpkm
 #' @export
 #' @docType methods
@@ -48,7 +48,7 @@ setGeneric("bootstraps<-", function(object, value) standardGeneric("bootstraps<-
 #' @rdname accessors
 setGeneric("fpkm", function(object) standardGeneric("fpkm"))
 
-#' @name accessors
+#' @name fpkm<-
 #' @aliases  fpkm<-
 #' @export
 #' @docType methods

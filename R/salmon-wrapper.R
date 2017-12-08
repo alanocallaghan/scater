@@ -241,7 +241,7 @@ readSalmonResults <- function(Salmon_log = NULL, samples = NULL,
     fdata <- fdata[!duplicated(rownames(fdata)), !duplicated(colnames(fdata))]
     ## Produce SingleCellExperiment object
     sce_out <- SingleCellExperiment(
-        list(exprs = log2(tpm + logExprsOffset), 
+        list(logcounts = log2(tpm + logExprsOffset), 
              counts = est_counts, tpm = tpm, 
              feature_effective_length = feat_eff_len), 
         colData = pdata, rowData = fdata)

@@ -13,9 +13,9 @@ read10XResults(...)
 }
 \arguments{
 \item{data_dir}{Directory containing the matrix.mtx, genes.tsv, and 
-barcodes.tsv files provided by 10x. A vector or named vector can be given in order to load 
-several data directories. If a named vector is given, the cell barcode names 
-will be prefixed with the name.}
+barcodes.tsv files provided by 10x. A vector or named vector can be given in 
+order to load several data directories. If a named vector is given, the cell 
+barcode names will be prefixed with the name.}
 
 \item{min_total_cell_counts}{integer(1) threshold such that cells (barcodes)
 with total counts below the threshold are filtered out}
