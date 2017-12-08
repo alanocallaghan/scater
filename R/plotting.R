@@ -254,24 +254,15 @@ plotScater <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 
     ## Define an expression matrix depending on which values we're using
     exprs_mat <- assay(x, i = exprs_values)
+    nfeatures <- min(nfeatures, nrow(exprs_mat))
 
-    ## Use plyr to get the sequencing real estate accounted for by features
-    nfeatures_total <- nrow(exprs_mat)
-    seq_real_estate <- t(plyr::aaply(exprs_mat, 2, .fun = function(x) {
-        cumsum(sort(x, decreasing = TRUE))
-    }))
-    rownames(seq_real_estate) <- seq_len(nfeatures_total)
-    nfeatures_to_plot <- nfeatures
-    to_plot <- seq_len(nfeatures_to_plot)
-    seq_real_estate_long <- reshape2::melt(seq_real_estate[to_plot, ],
-                                           value.name = exprs_values)
-
-    ## Get the proportion of the library accounted for by the top features
-    prop_library <- reshape2::melt(t(t(seq_real_estate[to_plot, ]) /
-                                         .general_colSums(exprs_mat)),
-                                   value.name = "prop_library")
-    colnames(seq_real_estate_long) <- c("Feature", "Cell", exprs_values)
-    seq_real_estate_long$Proportion_Library <- prop_library$prop_library
+    ## Use C++ to get the sequencing real estate accounted for by features
+    to_plot <- seq_len(nfeatures)
+    ncells <- ncol(exprs_mat)
+    seq_real_estate <- .Call(cxx_calc_top_features, exprs_mat, to_plot, NULL)
+    seq_real_estate_long <- data.frame(Feature=rep(to_plot, each=ncells),
+                                       Cell=rep(seq_len(ncells), nfeatures))
+    seq_real_estate_long$Proportion_Library <- unlist(seq_real_estate) / 100
 
     ## Add block and colour_by information if provided
     if ( !is.null(block1) )
