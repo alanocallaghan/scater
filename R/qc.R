@@ -304,7 +304,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     }
 
     subset_row <- .subset2index(subset_row, target = exprs_mat, byrow = TRUE)
-    nfeatures <- nexprs(exprs_mat, rows = subset_row, byrow = FALSE)
+    nfeatures <- nexprs(exprs_mat, subset_row = subset_row, byrow = FALSE)
     rd <- DataFrame(nfeatures, log10(nfeatures + 1), row.names = colnames(exprs_mat))
     colnames(rd) <- paste0(c("", "log10_"), "total_features", subset_type)
 
@@ -374,7 +374,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     fd <- DataFrame(ave, log10(ave + 1), rank(ave), row.names = rownames(exprs_mat))
     colnames(fd) <- paste0(c("mean", "log10_mean", "rank"), "_", exprs_type, subset_type)
 
-    ncells.exprs <- nexprs(exprs_mat, col = subset_col, byrow = TRUE)
+    ncells.exprs <- nexprs(exprs_mat, subset_col = subset_col, byrow = TRUE)
     fd[[paste0("n_cells_", exprs_type, subset_type)]] <- ncells.exprs
     fd[[paste0("pct_dropout_", exprs_type, subset_type)]] <- 100 * (1 - ncells.exprs/total.cells)
 

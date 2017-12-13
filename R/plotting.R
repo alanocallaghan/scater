@@ -268,15 +268,15 @@ plotScater <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
     if ( !is.null(block1) )
         seq_real_estate_long <- dplyr::mutate(
             seq_real_estate_long, block1 = as.factor(rep(x[[block1]],
-                                                         each = nfeatures_to_plot)))
+                                                         each = nfeatures)))
     if ( !is.null(block2) )
         seq_real_estate_long <- dplyr::mutate(
             seq_real_estate_long, block2 = as.factor(rep(x[[block2]],
-                                                         each = nfeatures_to_plot)))
+                                                         each = nfeatures)))
     if ( !is.null(colour_by) )
         seq_real_estate_long <- dplyr::mutate(
             seq_real_estate_long, colour_by = rep(colour_by_vals,
-                                                  each = nfeatures_to_plot))
+                                                  each = nfeatures))
 
     ## Set up plot
     if ( is.null(colour_by) ) {
