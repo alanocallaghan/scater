@@ -116,7 +116,7 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
         ## Compute normalisation factors with calcNormFactors from edgeR
         norm_factors <- edgeR::calcNormFactors.default(exprs_mat_for_norm,
                                                        method = method, ...)
-        lib_size <- .general_colSums(exprs_mat_for_norm)
+        lib_size <- .colSums(exprs_mat_for_norm)
 
         if ( any(is.na(norm_factors)) ) {
             norm_factors[is.na(norm_factors)] <- 1
@@ -288,7 +288,7 @@ normalizeSCE <- function(object, exprs_values = "counts",
         sf.list <- .get_all_sf_sets(object)
         if (is.null(sf.list$size.factors[[1]])) {
             warning("using library sizes as size factors")
-            sf.list$size.factors[[1]] <- .general_colSums(exprs_mat)
+            sf.list$size.factors[[1]] <- .colSums(exprs_mat)
         }
     } else {
         # ignoring size factors for non-count data.

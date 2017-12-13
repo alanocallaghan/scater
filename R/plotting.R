@@ -455,7 +455,7 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
         
         # Choosing a set of features, if null.
         if (is.null(feature_set)) {
-            rv <- .general_rowVars(exprs_mat)
+            rv <- .rowVars(exprs_mat)
             o <- order(rv, decreasing = TRUE)
             feature_set <- o[seq_len(min(ntop, length(rv)))]
         }
@@ -467,7 +467,7 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
     }
 
     ## Drop any features with zero variance
-    keep_feature <- .general_colVars(exprs_to_plot) > 0.001
+    keep_feature <- .colVars(exprs_to_plot) > 0.001
     keep_feature[is.na(keep_feature)] <- FALSE
     exprs_to_plot <- exprs_to_plot[, keep_feature]
 
@@ -734,14 +734,14 @@ runTSNE <- function(object, ntop = 500, ncomponents = 2, exprs_values = "logcoun
         ## Define features to use: either ntop, or if a set of features is
         ## defined, then those
         if ( is.null(feature_set) ) {
-            rv <- .general_rowVars(exprs_mat)
+            rv <- .rowVars(exprs_mat)
             ntop <- min(ntop, length(rv))
             feature_set <- order(rv, decreasing = TRUE)[seq_len(ntop)]
         }
 
         ## Drop any features with zero variance
         vals <- exprs_mat[feature_set,,drop = FALSE]
-        keep_feature <- .general_rowVars(vals) > 0.001
+        keep_feature <- .rowVars(vals) > 0.001
         keep_feature[is.na(keep_feature)] <- FALSE
         vals <- vals[keep_feature,,drop = FALSE]
 
@@ -942,7 +942,7 @@ runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = N
         ## Define features to use: either ntop, or if a set of features is
         ## defined, then those
         if ( is.null(feature_set) ) {
-            rv <- .general_rowVars(exprs_mat)
+            rv <- .rowVars(exprs_mat)
             feature_set <-
                 order(rv, decreasing = TRUE)[seq_len(min(ntop, length(rv)))]
         }
@@ -950,7 +950,7 @@ runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = N
         ## Drop any features with zero variance
         vals <- exprs_mat
         vals <- vals[feature_set,,drop = FALSE]
-        keep_feature <- .general_rowVars(vals) > 0.001
+        keep_feature <- .rowVars(vals) > 0.001
         keep_feature[is.na(keep_feature)] <- FALSE
         vals <- vals[keep_feature,,drop = FALSE]
 
@@ -1145,7 +1145,7 @@ runMDS <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
         ## Define features to use: either ntop, or if a set of features is
         ## defined, then those
         if ( is.null(feature_set) ) {
-            rv <- .general_rowVars(exprs_mat)
+            rv <- .rowVars(exprs_mat)
             feature_set <-
                 order(rv, decreasing = TRUE)[seq_len(min(ntop, length(rv)))]
         }
@@ -1153,7 +1153,7 @@ runMDS <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
         ## Drop any features with zero variance
         vals <- exprs_mat
         vals <- vals[feature_set,,drop = FALSE]
-        keep_feature <- .general_rowVars(vals) > 0.001
+        keep_feature <- .rowVars(vals) > 0.001
         keep_feature[is.na(keep_feature)] <- FALSE
         vals <- vals[keep_feature,,drop = FALSE]
 
@@ -2554,7 +2554,7 @@ plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len",
 
     ## compute mean expression and sd of expression values
     exprs_mean <- rowMeans(exprs_mat)
-    exprs_sd <- sqrt(.general_rowVars(exprs_mat))
+    exprs_sd <- sqrt(.rowVars(exprs_mat))
 
     df_to_plot <- data.frame(tx_length_values, exprs_mean, exprs_sd,
                              ymin = exprs_mean - exprs_sd,
