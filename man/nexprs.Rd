@@ -27,21 +27,28 @@ cells per feature (i.e. gene) and if \code{FALSE} to count expressing
 features (i.e. genes) per cell.}
 
 \item{subset_row}{logical, integeror character vector indicating which rows
-(i.e. features/genes) to use when calculating the number of expressed
-features in each cell, when \code{byrow=FALSE}.}
+(i.e. features/genes) to use.}
 
 \item{subset_col}{logical, integer or character vector indicating which columns
-(i.e., cells) to use to calculate the number of cells expressing each gene
-when \code{byrow=TRUE}.}
+(i.e., cells) to use.}
 }
 \value{
-a numeric vector of the same length as the number of features if
-\code{byrow} argument is \code{TRUE} and the same length as the number of
-cells if \code{byrow} is \code{FALSE}
+If \code{byrow=TRUE}, an integer vector containing the number of cells 
+expressing each feature, of the same length as the number of features in 
+\code{subset_row} (all features in \code{exprs_mat} if \code{subset_row=NULL}).
+
+If \code{byrow=FALSE}, an integer vector containing the number of genes 
+expressed in each cell, of the same length as the number of cells specified in
+\code{subset_col} (all cells in \code{exprs_mat} if \code{subset_col=NULL}).
 }
 \description{
 An efficient internal function that avoids the need to construct
 'is_exprs_mat' by counting the number of expressed genes per cell on the fly.
+}
+\details{
+Setting \code{subset_row} or \code{subset_col} is equivalent to 
+subsetting \code{object} before calling \code{nexprs}, but more efficient
+as a new copy of the matrix is not constructed.
 }
 \examples{
 data("sc_example_counts")
