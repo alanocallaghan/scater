@@ -1,36 +1,56 @@
 #include "scater.h"
 
+/* Sorting rows and column subset indices for rapid matrix access. */
+
+Rcpp::List reorganize_subset(Rcpp::IntegerVector sub1, Rcpp::IntegerVector sub2) {
+    Rcpp::IntegerVector sorted1 = Rcpp::clone(sub1).sort();
+    Rcpp::IntegerVector ordering = Rcpp::match(sorted1, sub1);  
+    for (auto& o : ordering) { 
+        --o;
+    }
+
+    Rcpp::IntegerVector sorted2 = Rcpp::clone(sub2).sort();
+    int first=sorted2[0], last=sorted2[sorted2.size()-1]+1; // sub2 should be non-empty by this point.
+    for (auto& x : sorted2) { 
+        x-=first;
+    }
+
+    return Rcpp::List::create(sorted1, ordering, sorted2, 
+            Rcpp::IntegerVector::create(first, last));
+}
+
 /* Function to calculate the variance across each row. */
 
 template <typename T, class V, class M>
-Rcpp::RObject row_vars_internal(M mat, Rcpp::RObject subset_row, Rcpp::RObject subset_col) {
-    const size_t& ncells=mat->get_ncol();
-    const size_t& ngenes=mat->get_nrow();
-
-    Rcpp::IntegerVector rows=process_subset_vector(subset_row, mat, true);
-    Rcpp::IntegerVector cols=process_subset_vector(subset_col, mat, false);
-    Rcpp::NumericVector outvar(rows.size());
-    
+Rcpp::RObject row_vars_internal(M mat, Rcpp::IntegerVector rows, Rcpp::IntegerVector cols) {
     if (cols.size() < 2) { 
-        std::fill(outvar.begin(), outvar.end(), R_NaReal);
-        return outvar;
+        return Rcpp::NumericVector(rows.size(), R_NaReal);
     }
-   
-    V incoming(ncells);
-    auto ovIt=outvar.begin();
-    for (const auto& r : rows) {
-        mat->get_row(r, incoming.begin());
+
+    Rcpp::List reorganized=reorganize_subset(rows, cols);
+    Rcpp::IntegerVector rowcopy(reorganized[0]);
+    Rcpp::IntegerVector roworder(reorganized[1]);
+    Rcpp::IntegerVector colcopy(reorganized[2]);
+    Rcpp::IntegerVector offsets(reorganized[3]);
+    int first=offsets[0], last=offsets[1]; 
+
+    Rcpp::NumericVector outvar(rows.size());  
+    V incoming(mat->get_ncol());
+    auto roIt=roworder.begin();
+
+    for (const auto& r : rowcopy) {
+        mat->get_row(r, incoming.begin(), first, last);
         
         // Computing the mean.
         double curmean=0;
-        for (const auto& c : cols) {
+        for (const auto& c : colcopy) {
             curmean+=incoming[c];
         }
         curmean/=cols.size();
 
         // Computing the variance.
-        double& curval=(*(ovIt++));
-        for (const auto& c : cols) {
+        double& curval=outvar[*(roIt++)];
+        for (const auto& c : colcopy) {
             const double tmp=incoming[c] - curmean;
             curval += tmp * tmp;
         }
@@ -58,34 +78,34 @@ SEXP row_vars(SEXP exprs, SEXP subset_row, SEXP subset_col) {
 /* Function to calculate the variance across each column. */
 
 template <typename T, class V, class M>
-Rcpp::RObject col_vars_internal(M mat, Rcpp::RObject subset_row, Rcpp::RObject subset_col) {
-    const size_t& ncells=mat->get_ncol();
-    const size_t& ngenes=mat->get_nrow();
-
-    Rcpp::IntegerVector rows=process_subset_vector(subset_row, mat, true);
-    Rcpp::IntegerVector cols=process_subset_vector(subset_col, mat, false);
-    Rcpp::NumericVector outvar(cols.size());
-    
+Rcpp::RObject col_vars_internal(M mat, Rcpp::IntegerVector rows, Rcpp::IntegerVector cols) { 
     if (rows.size() < 2) { 
-        std::fill(outvar.begin(), outvar.end(), R_NaReal);
-        return outvar;
+        return Rcpp::NumericVector(cols.size(), R_NaReal);
     }
-
-    V incoming(ngenes);
-    auto ovIt=outvar.begin();
-    for (const auto& c : cols) { 
-        auto iIt=mat->get_const_col(c, incoming.begin());
+   
+    Rcpp::List reorganized=reorganize_subset(cols, rows);
+    Rcpp::IntegerVector colcopy(reorganized[0]);
+    Rcpp::IntegerVector colorder(reorganized[1]);
+    Rcpp::IntegerVector rowcopy(reorganized[2]);
+    Rcpp::IntegerVector offsets(reorganized[3]);
+    int first=offsets[0], last=offsets[1]; 
+ 
+    Rcpp::NumericVector outvar(cols.size()); 
+    V incoming(mat->get_nrow());
+    auto coIt=colorder.begin();
+    for (const auto& c : colcopy) { 
+        auto iIt=mat->get_const_col(c, incoming.begin(), first, last);
 
         // Computing the mean.
         double curmean=0;
-        for (const auto& r : rows) {
+        for (const auto& r : rowcopy) {
             curmean+=*(iIt+r);
         }
         curmean/=rows.size();
 
         // Computing the variance.
-        double& curval=(*(ovIt++));
-        for (const auto& r : rows) {
+        double& curval=outvar[*(coIt++)];
+        for (const auto& r : rowcopy) {
             const double tmp=*(iIt+r) - curmean;
             curval += tmp*tmp;
         }
@@ -113,25 +133,27 @@ SEXP col_vars(SEXP exprs, SEXP subset_row, SEXP subset_col) {
 /* Function to calculate the sum across each row. */
 
 template <typename T, class V, class M>
-Rcpp::RObject row_sums_internal(M mat, Rcpp::RObject subset_row, Rcpp::RObject subset_col) {
-    const size_t& ncells=mat->get_ncol();
-    const size_t& ngenes=mat->get_nrow();
-
-    Rcpp::IntegerVector rows=process_subset_vector(subset_row, mat, true);
-    Rcpp::IntegerVector cols=process_subset_vector(subset_col, mat, false);
+Rcpp::RObject row_sums_internal(M mat, Rcpp::IntegerVector rows, Rcpp::IntegerVector cols) {
     V outsum(rows.size());
     if (!cols.size()) { 
         return outsum;
     }
-   
-    V incoming(ncells);
-    auto osIt=outsum.begin();
-    for (const auto& r : rows) {
-        mat->get_row(r, incoming.begin());
+
+    Rcpp::List reorganized=reorganize_subset(rows, cols);
+    Rcpp::IntegerVector rowcopy(reorganized[0]);
+    Rcpp::IntegerVector roworder(reorganized[1]);
+    Rcpp::IntegerVector colcopy(reorganized[2]);
+    Rcpp::IntegerVector offsets(reorganized[3]);
+    int first=offsets[0], last=offsets[1]; 
+    
+    V incoming(mat->get_ncol());
+    auto roIt=roworder.begin();
+    for (const auto& r : rowcopy) {
+        mat->get_row(r, incoming.begin(), first, last);
         
         // Computing the mean.
-        T& cursum=(*(osIt++));
-        for (const auto& c : cols) {
+        T& cursum=outsum[*(roIt++)];
+        for (const auto& c : colcopy) {
             cursum+=incoming[c];
         }
     }
@@ -157,26 +179,28 @@ SEXP row_sums(SEXP exprs, SEXP subset_row, SEXP subset_col) {
 /* Function to calculate the sum across each column. */
 
 template <typename T, class V, class M>
-Rcpp::RObject col_sums_internal(M mat, Rcpp::RObject subset_row, Rcpp::RObject subset_col) {
-    const size_t& ncells=mat->get_ncol();
-    const size_t& ngenes=mat->get_nrow();
-
-    Rcpp::IntegerVector rows=process_subset_vector(subset_row, mat, true);
-    Rcpp::IntegerVector cols=process_subset_vector(subset_col, mat, false);
+Rcpp::RObject col_sums_internal(M mat, Rcpp::IntegerVector rows, Rcpp::IntegerVector cols) { 
     V outsum(cols.size());
     if (!rows.size()) { 
         return outsum;
     }
-
-    V incoming(ngenes);
-    auto osIt=outsum.begin();
-    for (const auto& c : cols) { 
-        auto iIt=mat->get_const_col(c, incoming.begin());
+    
+    Rcpp::List reorganized=reorganize_subset(cols, rows);
+    Rcpp::IntegerVector colcopy(reorganized[0]);
+    Rcpp::IntegerVector colorder(reorganized[1]);
+    Rcpp::IntegerVector rowcopy(reorganized[2]);
+    Rcpp::IntegerVector offsets(reorganized[3]);
+    int first=offsets[0], last=offsets[1]; 
+ 
+    V incoming(mat->get_nrow());
+    auto coIt=colorder.begin();
+    for (const auto& c : colcopy) { 
+        auto iIt=mat->get_const_col(c, incoming.begin(), first, last);
 
         // Computing the mean.
-        T& outsum=(*(osIt++));
-        for (const auto& r : rows) {
-            outsum+=*(iIt+r);
+        T& cursum=outsum[*(coIt++)];
+        for (const auto& r : rowcopy) {
+            cursum+=*(iIt+r);
         }
     }
 
@@ -201,12 +225,7 @@ SEXP col_sums(SEXP exprs, SEXP subset_row, SEXP subset_col) {
 /* Function to count the incidences of particular value across each row. */
 
 template <typename T, class V, class M>
-Rcpp::RObject row_above_internal(M mat, Rcpp::RObject subset_row, Rcpp::RObject subset_col, Rcpp::RObject val) {
-    const size_t& ncells=mat->get_ncol();
-    const size_t& ngenes=mat->get_nrow();
-
-    Rcpp::IntegerVector rows=process_subset_vector(subset_row, mat, true);
-    Rcpp::IntegerVector cols=process_subset_vector(subset_col, mat, false);
+Rcpp::RObject row_above_internal(M mat, Rcpp::IntegerVector rows, Rcpp::IntegerVector cols, Rcpp::RObject val) {
     Rcpp::IntegerVector outcount(rows.size());
     if (!cols.size()) { 
         return outcount;
@@ -218,14 +237,21 @@ Rcpp::RObject row_above_internal(M mat, Rcpp::RObject subset_row, Rcpp::RObject 
         throw std::runtime_error("value to find must be a scalar");
     }
     const T& objective=target[0];
-   
-    V incoming(ncells);
-    auto ocIt=outcount.begin();
-    for (const auto& r : rows) {
-        mat->get_row(r, incoming.begin());
+
+    Rcpp::List reorganized=reorganize_subset(rows, cols);
+    Rcpp::IntegerVector rowcopy(reorganized[0]);
+    Rcpp::IntegerVector roworder(reorganized[1]);
+    Rcpp::IntegerVector colcopy(reorganized[2]);
+    Rcpp::IntegerVector offsets(reorganized[3]);
+    int first=offsets[0], last=offsets[1]; 
+
+    V incoming(mat->get_ncol());
+    auto roIt=roworder.begin();
+    for (const auto& r : rowcopy) {
+        mat->get_row(r, incoming.begin(), first, last);
         
-        int& curcount=(*(ocIt++));
-        for (const auto& c : cols) {
+        int& curcount=outcount[*(roIt++)];
+        for (const auto& c : colcopy) {
             if (incoming[c] > objective) { 
                 ++curcount;
             }
@@ -253,12 +279,7 @@ SEXP row_above(SEXP exprs, SEXP subset_row, SEXP subset_col, SEXP value) {
 /* Function to count the incidences of particular value across each column. */
 
 template <typename T, class V, class M>
-Rcpp::RObject col_above_internal(M mat, Rcpp::RObject subset_row, Rcpp::RObject subset_col, Rcpp::RObject val) {
-    const size_t& ncells=mat->get_ncol();
-    const size_t& ngenes=mat->get_nrow();
-
-    Rcpp::IntegerVector rows=process_subset_vector(subset_row, mat, true);
-    Rcpp::IntegerVector cols=process_subset_vector(subset_col, mat, false);
+Rcpp::RObject col_above_internal(M mat, Rcpp::IntegerVector rows, Rcpp::IntegerVector cols, Rcpp::RObject val) {
     Rcpp::IntegerVector outcount(cols.size());
     if (!rows.size()) { 
         return outcount;
@@ -270,14 +291,21 @@ Rcpp::RObject col_above_internal(M mat, Rcpp::RObject subset_row, Rcpp::RObject 
         throw std::runtime_error("value to find must be a scalar");
     }
     const T& objective=target[0];
- 
-    V incoming(ngenes);
-    auto ocIt=outcount.begin();
-    for (const auto& c : cols) { 
-        auto iIt=mat->get_const_col(c, incoming.begin());
 
-        int& curcount=(*(ocIt++));
-        for (const auto& r : rows) {
+    Rcpp::List reorganized=reorganize_subset(cols, rows);
+    Rcpp::IntegerVector colcopy(reorganized[0]);
+    Rcpp::IntegerVector colorder(reorganized[1]);
+    Rcpp::IntegerVector rowcopy(reorganized[2]);
+    Rcpp::IntegerVector offsets(reorganized[3]);
+    int first=offsets[0], last=offsets[1]; 
+ 
+    V incoming(mat->get_nrow());
+    auto coIt=colorder.begin();
+    for (const auto& c : colcopy) { 
+        auto iIt=mat->get_const_col(c, incoming.begin(), first, last);
+
+        int& curcount=outcount[*(coIt++)];
+        for (const auto& r : rowcopy) {
             if (*(iIt+r) > objective) { 
                 ++curcount;
             }
