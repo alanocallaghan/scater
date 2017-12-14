@@ -3,10 +3,19 @@
 /* Sorting rows and column subset indices for rapid matrix access. */
 
 Rcpp::List reorganize_subset(Rcpp::IntegerVector sub1, Rcpp::IntegerVector sub2) {
-    Rcpp::IntegerVector sorted1 = Rcpp::clone(sub1).sort();
-    Rcpp::IntegerVector ordering = Rcpp::match(sorted1, sub1);  
-    for (auto& o : ordering) { 
-        --o;
+    const size_t N=sub1.size();
+    std::vector<std::pair<int, int> > paired(N);
+    for (size_t i=0; i<N; ++i) {
+        paired[i].first=sub1[i];
+        paired[i].second=i;
+    }
+    std::sort(paired.begin(), paired.end()); // Not the fastest but duplicate-safe.
+
+    Rcpp::IntegerVector sorted1(N), ordering(N);
+    for (size_t i=0; i<N; ++i) {
+        const auto& current=paired[i];
+        sorted1[i]=current.first;
+        ordering[i]=current.second;
     }
 
     Rcpp::IntegerVector sorted2 = Rcpp::clone(sub2).sort();
