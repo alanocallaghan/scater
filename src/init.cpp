@@ -8,10 +8,14 @@ extern "C" {
 
 static const R_CallMethodDef all_call_entries[] = {
     REGISTER(calc_exprs, 7),
-    REGISTER(margin_summary, 4),
     REGISTER(calc_top_features, 3),
-    REGISTER(calc_variance, 3),
     REGISTER(downsample_matrix, 2),
+    REGISTER(row_vars, 3),
+    REGISTER(col_vars, 3),
+    REGISTER(row_sums, 3),
+    REGISTER(col_sums, 3),
+    REGISTER(row_above, 4),
+    REGISTER(col_above, 4),
     {NULL, NULL, 0}
 };
 

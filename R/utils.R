@@ -78,30 +78,51 @@
           as.logical(sum), subset_row - 1L)
 }
 
-.general_rowVars <- function(x, cols=NULL) 
-# Computes variance of values from each row of 'x', using only
-# columns specified in 'cols' if not NULL.
-{
-    if (is.null(cols)) { cols <- seq_len(ncol(x)) }
-    .Call(cxx_calc_variance, x, cols - 1L, TRUE)
+########################################################
+# matrixStats equivalents that are yet to have a home. #
+########################################################
+
+.realize_subsets <- function(x, rows, cols) {
+    if (is.null(cols)) { 
+        cols <- seq_len(ncol(x)) 
+    } else {
+        cols <- .subset2index(cols, x, byrow=FALSE)
+    }
+    if (is.null(rows)) { 
+        rows <- seq_len(nrow(x))
+    } else {
+        rows <- .subset2index(rows, x, byrow=TRUE)
+    }
+    return(list(rows=rows, cols=cols))
 }
 
-.general_colVars <- function(x, rows=NULL) 
-# Computes variance of values from each column of 'x', using only
-# rows specified in 'rows' if not NULL.
-{
-    if (is.null(rows)) { rows <- seq_len(nrow(x)) }
-    .Call(cxx_calc_variance, x, rows - 1L, FALSE)
+.rowVars <- function(x, rows=NULL, cols=NULL) {
+    converted <- .realize_subsets(x, rows=rows, cols=cols)
+    .Call(cxx_row_vars, x, converted$rows - 1L, converted$cols - 1L)
 }
 
-.general_colSums <- function(mat) {
-    margin.stats <- .Call(cxx_margin_summary, mat, 0, 
-                          seq_len(nrow(mat)) - 1L, FALSE)
-    margin.stats[[1]]
+.colVars <- function(x, rows=NULL, cols=NULL) {
+    converted <- .realize_subsets(x, rows=rows, cols=cols)
+    .Call(cxx_col_vars, x, converted$rows - 1L, converted$cols - 1L)
 }
 
-.general_rowSums <- function(mat) {
-    margin.stats <- .Call(cxx_margin_summary, mat, 0, 
-                          seq_len(ncol(mat)) - 1L, TRUE)
-    margin.stats[[1]]
+.rowSums <- function(x, rows=NULL, cols=NULL) {
+    converted <- .realize_subsets(x, rows=rows, cols=cols)
+    .Call(cxx_row_sums, x, converted$rows - 1L, converted$cols - 1L)
 }
+
+.colSums <- function(x, rows=NULL, cols=NULL) {
+    converted <- .realize_subsets(x, rows=rows, cols=cols)
+    .Call(cxx_col_sums, x, converted$rows - 1L, converted$cols - 1L)
+}
+
+.rowAbove <- function(x, rows=NULL, cols=NULL, value=0) {
+    converted <- .realize_subsets(x, rows=rows, cols=cols)
+    .Call(cxx_row_above, x, converted$rows - 1L, converted$cols - 1L, value)
+}
+
+.colAbove <- function(x, rows=NULL, cols=NULL, value=0) {
+    converted <- .realize_subsets(x, rows=rows, cols=cols)
+    .Call(cxx_col_above, x, converted$rows - 1L, converted$cols - 1L, value)
+}
+

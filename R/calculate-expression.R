@@ -34,7 +34,8 @@ calcIsExprs <- function(object, lowerDetectionLimit = 0,
 #' Count the number of expressed genes per cell
 #'
 #'
-#' @param object a \code{\link{SingleCellExperiment}} object
+#' @param object a \code{\link{SingleCellExperiment}} object or a numeric
+#' matrix of expression values.
 #' @param lowerDetectionLimit numeric scalar providing the value above which 
 #' observations are deemed to be expressed. Defaults to 
 #' \code{object@lowerDetectionLimit}.
@@ -49,18 +50,24 @@ calcIsExprs <- function(object, lowerDetectionLimit = 0,
 #' cells per feature (i.e. gene) and if \code{FALSE} to count expressing
 #' features (i.e. genes) per cell.
 #' @param subset_row logical, integeror character vector indicating which rows
-#' (i.e. features/genes) to use when calculating the number of expressed
-#' features in each cell, when \code{byrow=FALSE}.
+#' (i.e. features/genes) to use.
 #' @param subset_col logical, integer or character vector indicating which columns
-#' (i.e., cells) to use to calculate the number of cells expressing each gene
-#' when \code{byrow=TRUE}.
+#' (i.e., cells) to use.
 #'
+#' @details Setting \code{subset_row} or \code{subset_col} is equivalent to 
+#' subsetting \code{object} before calling \code{nexprs}, but more efficient
+#' as a new copy of the matrix is not constructed. 
+#' 
 #' @description An efficient internal function that avoids the need to construct
 #' 'is_exprs_mat' by counting the number of expressed genes per cell on the fly.
 #'
-#' @return a numeric vector of the same length as the number of features if
-#' \code{byrow} argument is \code{TRUE} and the same length as the number of
-#' cells if \code{byrow} is \code{FALSE}
+#' @return If \code{byrow=TRUE}, an integer vector containing the number of cells 
+#' expressing each feature, of the same length as the number of features in 
+#' \code{subset_row} (all features in \code{exprs_mat} if \code{subset_row=NULL}).
+#'
+#' If \code{byrow=FALSE}, an integer vector containing the number of genes 
+#' expressed in each cell, of the same length as the number of cells specified in
+#' \code{subset_col} (all cells in \code{exprs_mat} if \code{subset_col=NULL}).
 #'
 #' @import SingleCellExperiment
 #' @export
@@ -74,18 +81,18 @@ calcIsExprs <- function(object, lowerDetectionLimit = 0,
 #'
 nexprs <- function(object, lowerDetectionLimit = 0, exprs_values = "counts", 
                    byrow = FALSE, subset_row = NULL, subset_col = NULL) {
-    exprs_mat <- assay(object, i = exprs_values)
+    if (methods::is(object, "SingleCellExperiment")) { 
+        exprs_mat <- assay(object, i = exprs_values)
+    } else {
+        exprs_mat <- object
+    }
     subset_row <- .subset2index(subset_row, target = exprs_mat, byrow = TRUE)
     subset_col <- .subset2index(subset_col, target = exprs_mat, byrow = FALSE)
 
     if (!byrow) {
-        margin.stats <- .Call(cxx_margin_summary, exprs_mat, lowerDetectionLimit,
-                subset_row - 1L, FALSE)
-        return(margin.stats[[2]][subset_col])
+        return(.colAbove(exprs_mat, rows=subset_row, cols=subset_col, value=lowerDetectionLimit))
     } else {
-        margin.stats <- .Call(cxx_margin_summary, exprs_mat, lowerDetectionLimit,
-                subset_col - 1L, TRUE)
-        return(margin.stats[[2]][subset_row])
+        return(.rowAbove(exprs_mat, rows=subset_row, cols=subset_col, value=lowerDetectionLimit))
     }
 }
 
@@ -148,7 +155,7 @@ calculateTPM <- function(object, effective_length = NULL,
     counts0 <- counts
     counts0[counts == 0] <- NA
     rate <- log(counts0) - log(eff_len)
-    denom <- log(.general_colSums(counts))
+    denom <- log(.colSums(counts))
     out <- exp( t(t(as.matrix(rate)) - denom) + log(1e6) )
     out[is.na(out)] <- 0
     out
@@ -159,12 +166,8 @@ calculateTPM <- function(object, effective_length = NULL,
     ## Need to be careful with zero counts
     counts0 <- counts
     counts0[counts == 0] <- NA
-    subset_row <- .subset2index(NULL, target = counts, byrow = TRUE)
-    margin.stats <- .Call(cxx_margin_summary, counts, 0, 
-                          subset_row - 1L, FALSE)
-    N <- margin.stats[[1]]
     logfpkm <- log(counts0) + log(1e9) - log(eff_len)
-    logfpkm <- t(t(logfpkm) - log(N))
+    logfpkm <- t(t(logfpkm) - log(.colSums(counts)))
     out <- exp( logfpkm )
     out[is.na(out)] <- 0
     out
@@ -172,10 +175,7 @@ calculateTPM <- function(object, effective_length = NULL,
 
 .fpkmToTpm <- function(fpkm) {
     ## Expecting an FPKM matrix of nfeatures x ncells
-    subset_row <- .subset2index(NULL, target = fpkm, byrow = TRUE)
-    margin.stats <- .Call(cxx_margin_summary, fpkm, 0, 
-                          subset_row - 1L, FALSE)
-    exp( t(t(log(as.matrix(fpkm))) - log(margin.stats[[1]])) + log(1e6) )
+    exp( t(t(log(as.matrix(fpkm))) - log(.colSums(fpkm))) + log(1e6) )
 }
 
 .countToEffCounts <- function(counts, len, eff_len) {
@@ -216,23 +216,22 @@ calculateCPM <- function(object, use_size_factors = TRUE) {
     }
     counts_mat <- counts(object)
     subset_row <- .subset2index(NULL, target = counts_mat, byrow = TRUE)
-    margin.stats <- .Call(cxx_margin_summary, counts_mat, 0, 
-                          subset_row - 1L, FALSE)
+    lib.sizes <- .colSums(counts_mat)
 
     if (use_size_factors) {
         sf.list <- .get_all_sf_sets(object)
         if (is.null(sf.list$size.factors[[1]])) {
             warning("no size factors for non-control genes, using library sizes instead")
-            sf.list$size.factors[[1]] <- margin.stats[[1]]
+            sf.list$size.factors[[1]] <- lib.sizes
         }
     } else {
-        sf.list <- list(size.factors = list(margin.stats[[1]]),
+        sf.list <- list(size.factors = list(lib.sizes),
                         index = rep(1, nrow(object)))
     }
 
     # Scaling the size factors to the library size.
     cpm_mat <- counts_mat
-    mean.lib.size <- mean(margin.stats[[1]])
+    mean.lib.size <- mean(lib.sizes)
     by.type <- split(seq_along(sf.list$index), sf.list$index)
 
     for (g in seq_along(by.type)) {
@@ -325,9 +324,7 @@ calcAverage <- function(object, size_factors=NULL) {
     # Set size factors to library sizes if not available.
     if (is.null(sf.list$size.factors[[1]])) {
         subset_row <- .subset2index(NULL, target = mat, byrow = TRUE)
-        margin.stats <- .Call(cxx_margin_summary, mat, 0, 
-                              subset_row - 1L, FALSE)
-        sf.list$size.factors[[1]] <- margin.stats[[1]]
+        sf.list$size.factors[[1]] <- .colSums(mat)
     }
 
     # Computes the average count, adjusting for size factors or library size.

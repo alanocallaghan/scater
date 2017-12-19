@@ -51,7 +51,7 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
 
         ## define filters
         if (!is.null(min_total_cell_counts)) { 
-            keep_barcode <- .general_colSums(data_mat) >= min_total_cell_counts
+            keep_barcode <- .colSums(data_mat) >= min_total_cell_counts
             data_mat <- data_mat[, keep_barcode]
             cell.names <- cell.names[keep_barcode]
         }
@@ -82,7 +82,7 @@ read10xResults <- function(data_dir, min_total_cell_counts = NULL,
 
     # Applying some filtering if requested.
     if (!is.null(min_mean_gene_counts)) {
-        keep_gene <- .general_rowSums(data_mat) >= min_mean_gene_counts
+        keep_gene <- .rowSums(data_mat) >= min_mean_gene_counts
         full_data <- full_data[keep_gene,]
         gene_info <- gene_info[keep_gene,]
     }

@@ -254,38 +254,29 @@ plotScater <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 
     ## Define an expression matrix depending on which values we're using
     exprs_mat <- assay(x, i = exprs_values)
+    nfeatures <- min(nfeatures, nrow(exprs_mat))
 
-    ## Use plyr to get the sequencing real estate accounted for by features
-    nfeatures_total <- nrow(exprs_mat)
-    seq_real_estate <- t(plyr::aaply(exprs_mat, 2, .fun = function(x) {
-        cumsum(sort(x, decreasing = TRUE))
-    }))
-    rownames(seq_real_estate) <- seq_len(nfeatures_total)
-    nfeatures_to_plot <- nfeatures
-    to_plot <- seq_len(nfeatures_to_plot)
-    seq_real_estate_long <- reshape2::melt(seq_real_estate[to_plot, ],
-                                           value.name = exprs_values)
-
-    ## Get the proportion of the library accounted for by the top features
-    prop_library <- reshape2::melt(t(t(seq_real_estate[to_plot, ]) /
-                                         .general_colSums(exprs_mat)),
-                                   value.name = "prop_library")
-    colnames(seq_real_estate_long) <- c("Feature", "Cell", exprs_values)
-    seq_real_estate_long$Proportion_Library <- prop_library$prop_library
+    ## Use C++ to get the sequencing real estate accounted for by features
+    to_plot <- seq_len(nfeatures)
+    ncells <- ncol(exprs_mat)
+    seq_real_estate <- .Call(cxx_calc_top_features, exprs_mat, to_plot, NULL)
+    seq_real_estate_long <- data.frame(Feature=rep(to_plot, each=ncells),
+                                       Cell=rep(seq_len(ncells), nfeatures))
+    seq_real_estate_long$Proportion_Library <- unlist(seq_real_estate) / 100
 
     ## Add block and colour_by information if provided
     if ( !is.null(block1) )
         seq_real_estate_long <- dplyr::mutate(
             seq_real_estate_long, block1 = as.factor(rep(x[[block1]],
-                                                         each = nfeatures_to_plot)))
+                                                         each = nfeatures)))
     if ( !is.null(block2) )
         seq_real_estate_long <- dplyr::mutate(
             seq_real_estate_long, block2 = as.factor(rep(x[[block2]],
-                                                         each = nfeatures_to_plot)))
+                                                         each = nfeatures)))
     if ( !is.null(colour_by) )
         seq_real_estate_long <- dplyr::mutate(
             seq_real_estate_long, colour_by = rep(colour_by_vals,
-                                                  each = nfeatures_to_plot))
+                                                  each = nfeatures))
 
     ## Set up plot
     if ( is.null(colour_by) ) {
@@ -464,7 +455,7 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
         
         # Choosing a set of features, if null.
         if (is.null(feature_set)) {
-            rv <- .general_rowVars(exprs_mat)
+            rv <- .rowVars(exprs_mat)
             o <- order(rv, decreasing = TRUE)
             feature_set <- o[seq_len(min(ntop, length(rv)))]
         }
@@ -476,7 +467,7 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
     }
 
     ## Drop any features with zero variance
-    keep_feature <- .general_colVars(exprs_to_plot) > 0.001
+    keep_feature <- .colVars(exprs_to_plot) > 0.001
     keep_feature[is.na(keep_feature)] <- FALSE
     exprs_to_plot <- exprs_to_plot[, keep_feature]
 
@@ -743,14 +734,14 @@ runTSNE <- function(object, ntop = 500, ncomponents = 2, exprs_values = "logcoun
         ## Define features to use: either ntop, or if a set of features is
         ## defined, then those
         if ( is.null(feature_set) ) {
-            rv <- .general_rowVars(exprs_mat)
+            rv <- .rowVars(exprs_mat)
             ntop <- min(ntop, length(rv))
             feature_set <- order(rv, decreasing = TRUE)[seq_len(ntop)]
         }
 
         ## Drop any features with zero variance
         vals <- exprs_mat[feature_set,,drop = FALSE]
-        keep_feature <- .general_rowVars(vals) > 0.001
+        keep_feature <- .rowVars(vals) > 0.001
         keep_feature[is.na(keep_feature)] <- FALSE
         vals <- vals[keep_feature,,drop = FALSE]
 
@@ -951,7 +942,7 @@ runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = N
         ## Define features to use: either ntop, or if a set of features is
         ## defined, then those
         if ( is.null(feature_set) ) {
-            rv <- .general_rowVars(exprs_mat)
+            rv <- .rowVars(exprs_mat)
             feature_set <-
                 order(rv, decreasing = TRUE)[seq_len(min(ntop, length(rv)))]
         }
@@ -959,7 +950,7 @@ runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = N
         ## Drop any features with zero variance
         vals <- exprs_mat
         vals <- vals[feature_set,,drop = FALSE]
-        keep_feature <- .general_rowVars(vals) > 0.001
+        keep_feature <- .rowVars(vals) > 0.001
         keep_feature[is.na(keep_feature)] <- FALSE
         vals <- vals[keep_feature,,drop = FALSE]
 
@@ -1154,7 +1145,7 @@ runMDS <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
         ## Define features to use: either ntop, or if a set of features is
         ## defined, then those
         if ( is.null(feature_set) ) {
-            rv <- .general_rowVars(exprs_mat)
+            rv <- .rowVars(exprs_mat)
             feature_set <-
                 order(rv, decreasing = TRUE)[seq_len(min(ntop, length(rv)))]
         }
@@ -1162,7 +1153,7 @@ runMDS <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
         ## Drop any features with zero variance
         vals <- exprs_mat
         vals <- vals[feature_set,,drop = FALSE]
-        keep_feature <- .general_rowVars(vals) > 0.001
+        keep_feature <- .rowVars(vals) > 0.001
         keep_feature[is.na(keep_feature)] <- FALSE
         vals <- vals[keep_feature,,drop = FALSE]
 
@@ -2563,7 +2554,7 @@ plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len",
 
     ## compute mean expression and sd of expression values
     exprs_mean <- rowMeans(exprs_mat)
-    exprs_sd <- sqrt(.general_rowVars(exprs_mat))
+    exprs_sd <- sqrt(.rowVars(exprs_mat))
 
     df_to_plot <- data.frame(tx_length_values, exprs_mean, exprs_sd,
                              ymin = exprs_mean - exprs_sd,

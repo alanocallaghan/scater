@@ -303,26 +303,21 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         subset_type <- paste0("_", subset_type)
     }
 
-    margin.stats <- .Call(cxx_margin_summary, exprs_mat, 0, 
-            .subset2index(subset_row, target = exprs_mat, byrow = TRUE) - 1L, FALSE)
-    nfeatures <- margin.stats[[2]]
+    subset_row <- .subset2index(subset_row, target = exprs_mat, byrow = TRUE)
+    nfeatures <- nexprs(exprs_mat, subset_row = subset_row, byrow = FALSE)
     rd <- DataFrame(nfeatures, log10(nfeatures + 1), row.names = colnames(exprs_mat))
     colnames(rd) <- paste0(c("", "log10_"), "total_features", subset_type)
 
     if (linear) {
         ## Adding the total sum.
-        libsize <- margin.stats[[1]]
+        libsize <- .colSums(exprs_mat, rows = subset_row)
         rd[[paste0("total_", exprs_type, subset_type)]] <- libsize
         rd[[paste0("log10_total_", exprs_type, subset_type)]] <- log10(libsize + 1)
 
         if (!is.null(subset_row)) {
-            margin.stats.all <- .Call(
-                cxx_margin_summary, exprs_mat, 0, 
-                .subset2index(rep(TRUE, nrow(exprs_mat)), 
-                              target = exprs_mat, byrow = TRUE) - 1L, FALSE)
             ## Computing percentages of actual total.
             rd[[paste0("pct_", exprs_type, subset_type)]] <- 
-                (100 * libsize / margin.stats.all[[1]])
+                (100 * libsize / .colSums(exprs_mat))
         }
         
         ## Computing total percentages.
@@ -369,33 +364,26 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     }
     if (is.null(subset_col)) {
         total.cells <- ncol(exprs_mat)
-    } else if (is.logical(subset_col)) { 
-        total.cells <- sum(subset_col)
     } else {
+        subset_col <- .subset2index(subset_col, target = exprs_mat, byrow = FALSE) 
         total.cells <- length(subset_col)
     }
 
-    margin.stats <- .Call(cxx_margin_summary, exprs_mat, 0, 
-            .subset2index(subset_col, target = exprs_mat, byrow = FALSE) - 1L, TRUE)
-    ave <- margin.stats[[1]]/total.cells
+    sum_exprs <- .rowSums(exprs_mat, col = subset_col)
+    ave <- sum_exprs/total.cells
     fd <- DataFrame(ave, log10(ave + 1), rank(ave), row.names = rownames(exprs_mat))
     colnames(fd) <- paste0(c("mean", "log10_mean", "rank"), "_", exprs_type, subset_type)
 
-    ncells.exprs <- margin.stats[[2]]
+    ncells.exprs <- nexprs(exprs_mat, subset_col = subset_col, byrow = TRUE)
     fd[[paste0("n_cells_", exprs_type, subset_type)]] <- ncells.exprs
     fd[[paste0("pct_dropout_", exprs_type, subset_type)]] <- 100 * (1 - ncells.exprs/total.cells)
 
     if (linear) {
-        sum_exprs <- margin.stats[[1]]
-        margin.stats.all <- .Call(
-            cxx_margin_summary, exprs_mat, 0, 
-            .subset2index(rep(TRUE, ncol(exprs_mat)), 
-                          target = exprs_mat, byrow = FALSE) - 1L, TRUE)
-        total_exprs <- margin.stats.all[[1]]
         fd[[paste0("total_", exprs_type, subset_type)]] <- sum_exprs
         fd[[paste0("log10_total_", exprs_type, subset_type)]] <- log10(sum_exprs + 1)
 
         if (!is.null(subset_col)) { 
+            total_exprs <- .rowSums(exprs_mat)
             fd[[paste0("pct_", exprs_type, subset_type)]] <- sum_exprs/total_exprs * 100
         }
     }
@@ -693,10 +681,10 @@ findImportantPCs <- function(object, variable="total_features",
 
 .getRSquared_internal <- function(QR, y) {
     ## Compute total sum of squares
-    sst <- .general_rowVars(y) * (ncol(y)-1)    
+    sst <- .rowVars(y) * (ncol(y)-1)    
     ## Compute residual sum of squares
     effects <- qr.qty(QR, t(y))
-    ssr <- sst - colSums(effects[-seq_len(QR$rank),, drop = FALSE] ^ 2) # no need for .general, as this is always dense.
+    ssr <- sst - colSums(effects[-seq_len(QR$rank),, drop = FALSE] ^ 2) # no need for .colSums, as this is always dense.
     return(list(sst = sst, ssr = ssr))
 }
 
@@ -759,7 +747,7 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
     ## Define expression values to be used
     ## Find the most highly expressed features in this dataset
     exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
-    ave_exprs <- .general_rowSums(exprs_mat)
+    ave_exprs <- .rowSums(exprs_mat)
     oo <- order(ave_exprs, decreasing=TRUE)
     chosen <- oo[seq_len(n)]
 
@@ -786,7 +774,7 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
     if (as_percentage) { 
         total_exprs <- sum(ave_exprs)
         top50_pctage <- 100 * sum(ave_exprs[chosen]) / total_exprs
-        df_exprs_by_cell <- 100 * df_exprs_by_cell / .general_colSums(exprs_mat)
+        df_exprs_by_cell <- 100 * df_exprs_by_cell / .colSums(exprs_mat)
         pct_total <- 100 * ave_exprs / total_exprs
         rdata[["pct_total"]] <- pct_total
     } else {
