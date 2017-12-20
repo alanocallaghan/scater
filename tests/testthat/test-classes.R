@@ -34,7 +34,9 @@ test_that("we can subset the example SingleCellExperiment", {
         colData = sc_example_cell_info)
     expect_warning(exprs(example_sce) <- log2(calculateCPM(example_sce) + 1),
                    "no size factors for non-control genes, using library sizes instead")
-    example_sce <- plotPCA(example_sce, return_SCE = TRUE)
+    expect_warning(plotPCA(example_sce, return_SCE = TRUE),
+                   "deprecated")
+    example_sce <- runPCA(example_sce)
     ex_subset <- example_sce[1:200, sample(1:40, 25)]
 
     expect_equal(as.integer(nrow(ex_subset)), 200L)
