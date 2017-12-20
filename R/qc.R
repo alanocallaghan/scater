@@ -369,7 +369,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         total.cells <- length(subset_col)
     }
 
-    sum_exprs <- .rowSums(exprs_mat, col = subset_col)
+    sum_exprs <- .rowSums(exprs_mat, cols = subset_col)
     ave <- sum_exprs/total.cells
     fd <- DataFrame(ave, log10(ave + 1), rank(ave), row.names = rownames(exprs_mat))
     colnames(fd) <- paste0(c("mean", "log10_mean", "rank"), "_", exprs_type, subset_type)
