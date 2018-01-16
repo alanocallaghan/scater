@@ -107,7 +107,7 @@ test_that("nexprs works as expected", {
                  unname(colSums(counts(example_sce)[20:40,] > 0)))
     expect_equal(nexprs(example_sce, byrow = TRUE, subset_col = 20:40), 
                  unname(rowSums(counts(example_sce)[,20:40] > 0)))
-    expect_equal(nexprs(example_sce, byrow = TRUE, lowerDetectionLimit=5),
+    expect_equal(nexprs(example_sce, byrow = TRUE, detection_limit=5),
                  unname(rowSums(counts(example_sce) > 5)))
     
     ## Testing nexprs on a sparse matrix.
