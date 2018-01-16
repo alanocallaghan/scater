@@ -61,7 +61,7 @@
 #' assigned to \code{Z}.
 #' 
 #' In addition to the user-specified control sets, two other sets are automatically
-#' generated - the \code{"featureControls"} set, containing a union of all sets;
+#' generated - the \code{"feature_controls"} set, containing a union of all sets;
 #' and an \code{"endogenous"} set, containing all genes not in any control set.
 #' Metrics are also computed for these sets in the same manner described above.
 #'
@@ -100,8 +100,8 @@
 #' be labelled as \code{mean_X_Z}. 
 #' 
 #' In addition to the user-specified control sets, two other sets are automatically
-#' generated - the \code{"cellControls"} set, containing a union of all sets;
-#' and an \code{"nonControls"} set, containing all genes not in any control set.
+#' generated - the \code{"cell_controls"} set, containing a union of all sets;
+#' and an \code{"non_controls"} set, containing all genes not in any control set.
 #' Metrics are also computed for these sets in the same manner described above.
 #'
 #' Finally, there is the \code{is_feature_control} field, which indicates whether
@@ -187,7 +187,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
         # Running through all feature controls.
         cd_fcon <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
-                subset_row = is_fcon, subset_type = "featureControl", 
+                subset_row = is_fcon, subset_type = "feature_controls", 
                 percent_top = percent_top, detection_limit = detection_limit)
 
         # Running through each of the feature controls.
@@ -228,12 +228,12 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         # Adding statistics for non-control cells.
         is_noncon <- which(!cd$is_cell_control)
         rd_noncon <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
-                subset_col = is_noncon, subset_type = "nonControl", 
+                subset_col = is_noncon, subset_type = "non_controls", 
                 detection_limit = detection_limit)
 
         # Adding statistics for all control cells.
         rd_con <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
-                subset_col = is_ccon, subset_type = "cellControl", 
+                subset_col = is_ccon, subset_type = "cell_controls", 
                 detection_limit = detection_limit)
 
         # Adding statistics for each set of control cells.
