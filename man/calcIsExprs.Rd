@@ -6,13 +6,13 @@
 observed counts, transcripts-per-million, counts-per-million, FPKM, or
 defined expression levels.}
 \usage{
-calcIsExprs(object, lowerDetectionLimit = 0, exprs_values = "counts")
+calcIsExprs(object, detection_limit = 0, exprs_values = "counts")
 }
 \arguments{
 \item{object}{a \code{\link{SingleCellExperiment}} object with expression 
 and/or count data.}
 
-\item{lowerDetectionLimit}{numeric scalar giving the minimum expression level
+\item{detection_limit}{numeric scalar giving the minimum expression level
 for an expression observation in a cell for it to qualify as expressed.}
 
 \item{exprs_values}{character scalar indicating whether the count data
@@ -37,5 +37,5 @@ data("sc_example_cell_info")
 example_sce <- SingleCellExperiment(
 assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
 assay(example_sce, "is_exprs") <- calcIsExprs(example_sce, 
-lowerDetectionLimit = 1, exprs_values = "counts")
+detection_limit = 1, exprs_values = "counts")
 }

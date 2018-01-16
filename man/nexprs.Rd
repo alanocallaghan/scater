@@ -4,16 +4,16 @@
 \alias{nexprs}
 \title{Count the number of expressed genes per cell}
 \usage{
-nexprs(object, lowerDetectionLimit = 0, exprs_values = "counts",
+nexprs(object, detection_limit = 0, exprs_values = "counts",
   byrow = FALSE, subset_row = NULL, subset_col = NULL)
 }
 \arguments{
 \item{object}{a \code{\link{SingleCellExperiment}} object or a numeric
 matrix of expression values.}
 
-\item{lowerDetectionLimit}{numeric scalar providing the value above which 
+\item{detection_limit}{numeric scalar providing the value above which 
 observations are deemed to be expressed. Defaults to 
-\code{object@lowerDetectionLimit}.}
+\code{object@detection_limit}.}
 
 \item{exprs_values}{character scalar indicating whether the count data
 (\code{"counts"}), the log-transformed count data (\code{"logcounts"}),
@@ -21,7 +21,7 @@ transcript-per-million (\code{"tpm"}), counts-per-million (\code{"cpm"}) or
 FPKM (\code{"fpkm"}) should be used to define if an observation is expressed
 or not. Defaults to the first available value of those options in the
 order shown. However, if \code{is_exprs(object)} is present, it will be
-used directly; \code{exprs_values} and \code{lowerDetectionLimit} are ignored.}
+used directly; \code{exprs_values} and \code{detection_limit} are ignored.}
 
 \item{byrow}{logical scalar indicating if \code{TRUE} to count expressing
 cells per feature (i.e. gene) and if \code{FALSE} to count expressing

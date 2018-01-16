@@ -27,7 +27,7 @@
 #' @param percent_top An integer vector. Each element is treated as a number of top 
 #' genes to compute the percentage of library size occupied by the most highly
 #' expressed genes in each cell, see \code{pct_X_top_Y_features} below.
-#' @param lowerDetectionLimit A numeric scalar to be passed to \code{\link{nexprs}},
+#' @param detection_limit A numeric scalar to be passed to \code{\link{nexprs}},
 #' specifying the lower detection limit for expression.
 #'
 #' @details 
@@ -144,7 +144,7 @@
 calculateQCMetrics <- function(object, exprs_values="counts", 
                                feature_controls = NULL, cell_controls = NULL,
                                percent_top = c(50, 100, 200, 500),
-                               lowerDetectionLimit = 0) {
+                               detection_limit = 0) {
 
     if ( !methods::is(object, "SingleCellExperiment")) {
         stop("object must be a SingleCellExperiment")
@@ -155,7 +155,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     ## Adding general metrics for each cell.
     cd <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
             subset_row = NULL, subset_type = NULL, percent_top = percent_top,
-            lowerDetectionLimit = lowerDetectionLimit)
+            detection_limit = detection_limit)
     rd <- DataFrame(is_feature_control = logical(nrow(exprs_mat)), 
             row.names = rownames(exprs_mat))
 
@@ -183,12 +183,12 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         is_endog <- which(!rd$is_feature_control)
         cd_endog <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
                 subset_row = is_endog, subset_type = "endogenous", 
-                percent_top = percent_top, lowerDetectionLimit = lowerDetectionLimit)
+                percent_top = percent_top, detection_limit = detection_limit)
 
         # Running through all feature controls.
         cd_fcon <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
                 subset_row = is_fcon, subset_type = "featureControl", 
-                percent_top = percent_top, lowerDetectionLimit = lowerDetectionLimit)
+                percent_top = percent_top, detection_limit = detection_limit)
 
         # Running through each of the feature controls.
         cd_per_fcon <- vector("list", n_feature_sets)
@@ -196,7 +196,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
             cd_per_fcon[[f]] <- .get_qc_metrics_per_cell(
                 exprs_mat, exprs_type = exprs_values,
                 subset_row = reindexed[[f]], subset_type = names(reindexed)[f], 
-                percent_top = percent_top, lowerDetectionLimit = lowerDetectionLimit)
+                percent_top = percent_top, detection_limit = detection_limit)
         }
 
         cd <- do.call(cbind, c(list(cd, cd_endog, cd_fcon), cd_per_fcon))
@@ -206,7 +206,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     ### Determine if vector or list
     rd_all <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
             subset_col = NULL, subset_type = NULL, 
-            lowerDetectionLimit = lowerDetectionLimit)
+            detection_limit = detection_limit)
     rd <- cbind(rd, rd_all)
     cd$is_cell_control <- logical(ncol(exprs_mat))
 
@@ -229,19 +229,19 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         is_noncon <- which(!cd$is_cell_control)
         rd_noncon <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
                 subset_col = is_noncon, subset_type = "nonControl", 
-                lowerDetectionLimit = lowerDetectionLimit)
+                detection_limit = detection_limit)
 
         # Adding statistics for all control cells.
         rd_con <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
                 subset_col = is_ccon, subset_type = "cellControl", 
-                lowerDetectionLimit = lowerDetectionLimit)
+                detection_limit = detection_limit)
 
         # Adding statistics for each set of control cells.
         rd_collected <- vector("list", n_cell_sets)
         for (cx in seq_len(n_cell_sets)) {
             rd_current <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
                     subset_col = reindexed[[cx]], subset_type = names(reindexed)[cx], 
-                    lowerDetectionLimit = lowerDetectionLimit)
+                    detection_limit = detection_limit)
             rd_collected[[cx]] <- rd_current
         }
 
@@ -264,7 +264,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
 
 .get_qc_metrics_per_cell <- function(exprs_mat, exprs_type = "counts",
-        subset_row = NULL, subset_type = NULL, lowerDetectionLimit = 0,
+        subset_row = NULL, subset_type = NULL, detection_limit = 0,
         percent_top = integer(0)) {        
     
     if (is.null(subset_type)) {
@@ -275,7 +275,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
     subset_row <- .subset2index(subset_row, target = exprs_mat, byrow = TRUE)
     nfeatures <- nexprs(exprs_mat, subset_row = subset_row, byrow = FALSE,
-                        lowerDetectionLimit = lowerDetectionLimit)
+                        detection_limit = detection_limit)
 
     rd <- DataFrame(nfeatures, log10(nfeatures + 1), row.names = colnames(exprs_mat))
     colnames(rd) <- paste0(c("", "log10_"), "total_features", subset_type)
@@ -324,7 +324,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
 
 .get_qc_metrics_per_gene <- function(exprs_mat, exprs_type="counts", 
-        subset_col=NULL, subset_type=NULL, lowerDetectionLimit=0) {
+        subset_col=NULL, subset_type=NULL, detection_limit=0) {
 
     if (is.null(subset_type)) {
         subset_type <- ""
@@ -345,7 +345,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     colnames(fd) <- paste0(c("mean", "log10_mean", "rank"), "_", exprs_type, subset_type)
 
     ncells.exprs <- nexprs(exprs_mat, subset_col = subset_col, byrow = TRUE,
-                           lowerDetectionLimit = lowerDetectionLimit)
+                           detection_limit = detection_limit)
     fd[[paste0("n_cells_", exprs_type, subset_type)]] <- ncells.exprs
     fd[[paste0("pct_dropout_", exprs_type, subset_type)]] <- 100 * (1 - ncells.exprs/total.cells)
 

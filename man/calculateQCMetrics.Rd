@@ -6,7 +6,7 @@
 \usage{
 calculateQCMetrics(object, exprs_values = "counts", feature_controls = NULL,
   cell_controls = NULL, percent_top = c(50, 100, 200, 500),
-  lowerDetectionLimit = 0)
+  detection_limit = 0)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values, usually counts.}
@@ -27,7 +27,7 @@ to identify cell controls, e.g., blank wells or bulk controls.}
 genes to compute the percentage of library size occupied by the most highly
 expressed genes in each cell, see \code{pct_X_top_Y_features} below.}
 
-\item{lowerDetectionLimit}{A numeric scalar to be passed to \code{\link{nexprs}},
+\item{detection_limit}{A numeric scalar to be passed to \code{\link{nexprs}},
 specifying the lower detection limit for expression.}
 }
 \value{

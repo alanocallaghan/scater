@@ -7,7 +7,7 @@
 #'
 #' @param object a \code{\link{SingleCellExperiment}} object with expression 
 #' and/or count data.
-#' @param lowerDetectionLimit numeric scalar giving the minimum expression level
+#' @param detection_limit numeric scalar giving the minimum expression level
 #' for an expression observation in a cell for it to qualify as expressed.
 #' @param exprs_values character scalar indicating whether the count data
 #' (\code{"counts"}), the log-transformed count data (\code{"logcounts"}),
@@ -25,10 +25,10 @@
 #' example_sce <- SingleCellExperiment(
 #' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
 #' assay(example_sce, "is_exprs") <- calcIsExprs(example_sce, 
-#' lowerDetectionLimit = 1, exprs_values = "counts")
-calcIsExprs <- function(object, lowerDetectionLimit = 0, 
+#' detection_limit = 1, exprs_values = "counts")
+calcIsExprs <- function(object, detection_limit = 0, 
                         exprs_values = "counts") {
-    assay(object, i = exprs_values) > lowerDetectionLimit
+    assay(object, i = exprs_values) > detection_limit
 }
 
 #' Count the number of expressed genes per cell
@@ -36,16 +36,16 @@ calcIsExprs <- function(object, lowerDetectionLimit = 0,
 #'
 #' @param object a \code{\link{SingleCellExperiment}} object or a numeric
 #' matrix of expression values.
-#' @param lowerDetectionLimit numeric scalar providing the value above which 
+#' @param detection_limit numeric scalar providing the value above which 
 #' observations are deemed to be expressed. Defaults to 
-#' \code{object@lowerDetectionLimit}.
+#' \code{object@detection_limit}.
 #' @param exprs_values character scalar indicating whether the count data
 #' (\code{"counts"}), the log-transformed count data (\code{"logcounts"}),
 #' transcript-per-million (\code{"tpm"}), counts-per-million (\code{"cpm"}) or
 #' FPKM (\code{"fpkm"}) should be used to define if an observation is expressed
 #' or not. Defaults to the first available value of those options in the
 #' order shown. However, if \code{is_exprs(object)} is present, it will be
-#' used directly; \code{exprs_values} and \code{lowerDetectionLimit} are ignored.
+#' used directly; \code{exprs_values} and \code{detection_limit} are ignored.
 #' @param byrow logical scalar indicating if \code{TRUE} to count expressing
 #' cells per feature (i.e. gene) and if \code{FALSE} to count expressing
 #' features (i.e. genes) per cell.
@@ -79,7 +79,7 @@ calcIsExprs <- function(object, lowerDetectionLimit = 0,
 #' nexprs(example_sce)[1:10]
 #' nexprs(example_sce, byrow = TRUE)[1:10]
 #'
-nexprs <- function(object, lowerDetectionLimit = 0, exprs_values = "counts", 
+nexprs <- function(object, detection_limit = 0, exprs_values = "counts", 
                    byrow = FALSE, subset_row = NULL, subset_col = NULL) {
     if (methods::is(object, "SingleCellExperiment")) { 
         exprs_mat <- assay(object, i = exprs_values)
@@ -90,9 +90,9 @@ nexprs <- function(object, lowerDetectionLimit = 0, exprs_values = "counts",
     subset_col <- .subset2index(subset_col, target = exprs_mat, byrow = FALSE)
 
     if (!byrow) {
-        return(.colAbove(exprs_mat, rows=subset_row, cols=subset_col, value=lowerDetectionLimit))
+        return(.colAbove(exprs_mat, rows=subset_row, cols=subset_col, value=detection_limit))
     } else {
-        return(.rowAbove(exprs_mat, rows=subset_row, cols=subset_col, value=lowerDetectionLimit))
+        return(.rowAbove(exprs_mat, rows=subset_row, cols=subset_col, value=detection_limit))
     }
 }
 
