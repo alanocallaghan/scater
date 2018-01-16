@@ -15,21 +15,26 @@
 #' Calculate QC metrics
 #'
 #' @param object A SingleCellExperiment object containing expression values, usually counts.
-#' @param exprs_values character(1), indicating which slot of the \code{assays} of the \code{object}
-#' should be used to define expression? Defaults to \code{"counts"}.
-#' @param feature_controls A named list containing one or more vectors 
-#' (character vector of feature names, a logical vector, or a numeric vector of
+#' @param exprs_values A string indicating which \code{assays} in the \code{object}
+#' should be used to define expression.
+#' @param feature_controls A named list containing one or more vectors (a 
+#' character vector of feature names, a logical vector, or a numeric vector of
 #' indices) used to identify feature controls such as ERCC spike-in sets or 
-#' mitochondrial genes, etc). 
-#' @param cell_controls A character vector of cell (sample) names, or a logical
-#' vector, or a numeric vector of indices used to identify cell controls, e.g.,
-#' blank wells or bulk controls).
+#' mitochondrial genes. 
+#' @param cell_controls A named list containing one or more vectors (a character 
+#' vector of cell (sample) names, a logical vector, or a numeric vector of indices)
+#' to identify cell controls, e.g., blank wells or bulk controls.
 #' @param lowerDetectionLimit A numeric scalar to be passed to \code{\link{nexprs}},
 #' specifying the lower detection limit for expression.
 #'
 #' @details 
 #' This function calculates useful quality control metrics to help with pre-processing
 #' of data and identification of potentially problematic features and cells. 
+#' 
+#' Names of \code{feature_controls} and \code{cell_controls} are advised not to 
+#' have underscores, to make it easier to parse the names of the QC metrics.
+#' Similarly, we suggest naming \code{assays(objects)} without underscores for 
+#' use in \code{exprs_values}.
 #'
 #' @section Cell-level QC metrics:
 #' Denote the value of \code{exprs_values} as \code{X}. Cell-level metrics include:
@@ -53,7 +58,7 @@
 #' assigned to \code{Z}.
 #' 
 #' In addition to the user-specified control sets, two other sets are automatically
-#' generated - the \code{"feature_controls"} set, containing a union of all sets;
+#' generated - the \code{"featureControls"} set, containing a union of all sets;
 #' and an \code{"endogenous"} set, containing all genes not in any control set.
 #' Metrics are also computed for these sets in the same manner described above.
 #'
@@ -76,12 +81,12 @@
 #'  across all cells.}
 #'  \item{\code{rank_X}:}{Rank of each gene based on its mean expression 
 #'  value. More highly expressed genes are more highly ranked.}
-#'  \item{\code{total_X}:}{Sum of expression values for each gene across 
-#'  all cells.}
 #'  \item{\code{n_cells_X}:}{Number of cells with expression values above
 #'  the detection limit for each gene.}
 #'  \item{\code{pct_dropout_X}:}{Percentage of cells with expression values 
 #'  below the detection limit for each gene.}
+#'  \item{\code{total_X}:}{Sum of expression values for each gene across 
+#'  all cells.}
 #'  \item{\code{log10_total_X}:}{Log10-sum of expression values for each gene 
 #'  across all cells.}
 #' }
@@ -92,8 +97,8 @@
 #' be labelled as \code{mean_X_Z}. 
 #' 
 #' In addition to the user-specified control sets, two other sets are automatically
-#' generated - the \code{"cell_controls"} set, containing a union of all sets;
-#' and an \code{"non_controls"} set, containing all genes not in any control set.
+#' generated - the \code{"cellControls"} set, containing a union of all sets;
+#' and an \code{"nonControls"} set, containing all genes not in any control set.
 #' Metrics are also computed for these sets in the same manner described above.
 #'
 #' Finally, there is the \code{is_feature_control} field, which indicates whether
@@ -177,7 +182,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
         # Running through all feature controls.
         cd_fcon <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
-                subset_row = is_fcon, subset_type = "feature_control", 
+                subset_row = is_fcon, subset_type = "featureControl", 
                 lowerDetectionLimit = lowerDetectionLimit)
 
         # Running through each of the feature controls.
@@ -218,12 +223,12 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         # Adding statistics for non-control cells.
         is_noncon <- which(!cd$is_cell_control)
         rd_noncon <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
-                subset_col = is_noncon, subset_type = "non_control", 
+                subset_col = is_noncon, subset_type = "nonControl", 
                 lowerDetectionLimit = lowerDetectionLimit)
 
         # Adding statistics for all control cells.
         rd_con <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
-                subset_col = is_ccon, subset_type = "cell_control", 
+                subset_col = is_ccon, subset_type = "cellControl", 
                 lowerDetectionLimit = lowerDetectionLimit)
 
         # Adding statistics for each set of control cells.
@@ -329,7 +334,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
     sum_exprs <- .rowSums(exprs_mat, cols = subset_col)
     ave <- sum_exprs/total.cells
-    fd <- DataFrame(ave, log10(ave + 1), rank(ave), row.names = rownames(exprs_mat))
+    fd <- DataFrame(ave, log10(ave + 1), rank(-ave), row.names = rownames(exprs_mat))
     colnames(fd) <- paste0(c("mean", "log10_mean", "rank"), "_", exprs_type, subset_type)
 
     ncells.exprs <- nexprs(exprs_mat, subset_col = subset_col, byrow = TRUE,

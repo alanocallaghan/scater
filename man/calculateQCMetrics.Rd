@@ -10,17 +10,17 @@ calculateQCMetrics(object, exprs_values = "counts", feature_controls = NULL,
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values, usually counts.}
 
-\item{exprs_values}{character(1), indicating which slot of the \code{assays} of the \code{object}
-should be used to define expression? Defaults to \code{"counts"}.}
+\item{exprs_values}{A string indicating which \code{assays} in the \code{object}
+should be used to define expression.}
 
-\item{feature_controls}{A named list containing one or more vectors 
-(character vector of feature names, a logical vector, or a numeric vector of
+\item{feature_controls}{A named list containing one or more vectors (a 
+character vector of feature names, a logical vector, or a numeric vector of
 indices) used to identify feature controls such as ERCC spike-in sets or 
-mitochondrial genes, etc).}
+mitochondrial genes.}
 
-\item{cell_controls}{A character vector of cell (sample) names, or a logical
-vector, or a numeric vector of indices used to identify cell controls, e.g.,
-blank wells or bulk controls).}
+\item{cell_controls}{A named list containing one or more vectors (a character 
+vector of cell (sample) names, a logical vector, or a numeric vector of indices)
+to identify cell controls, e.g., blank wells or bulk controls.}
 
 \item{lowerDetectionLimit}{A numeric scalar to be passed to \code{\link{nexprs}},
 specifying the lower detection limit for expression.}
@@ -33,7 +33,12 @@ Calculate QC metrics
 }
 \details{
 This function calculates useful quality control metrics to help with pre-processing
-of data and identification of potentially problematic features and cells.
+of data and identification of potentially problematic features and cells. 
+
+Names of \code{feature_controls} and \code{cell_controls} are advised not to 
+have underscores, to make it easier to parse the names of the QC metrics.
+Similarly, we suggest naming \code{assays(objects)} without underscores for 
+use in \code{exprs_values}.
 }
 \section{Cell-level QC metrics}{
 
@@ -83,12 +88,12 @@ Denote the value of \code{exprs_values} as \code{X}. Feature-level metrics inclu
  across all cells.}
  \item{\code{rank_X}:}{Rank of each gene based on its mean expression 
  value. More highly expressed genes are more highly ranked.}
- \item{\code{total_X}:}{Sum of expression values for each gene across 
- all cells.}
  \item{\code{n_cells_X}:}{Number of cells with expression values above
  the detection limit for each gene.}
  \item{\code{pct_dropout_X}:}{Percentage of cells with expression values 
  below the detection limit for each gene.}
+ \item{\code{total_X}:}{Sum of expression values for each gene across 
+ all cells.}
  \item{\code{log10_total_X}:}{Log10-sum of expression values for each gene 
  across all cells.}
 }
