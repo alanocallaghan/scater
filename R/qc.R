@@ -1,4 +1,4 @@
-## Convenience function for computing QC metrics and adding to pData & rowData
+## Convenience function for computing QC metrics and adding to colData & rowData
 ### This file contains definitions for the following functions:
 ### * calculateQCMetrics
 ### * findImportantPCs
@@ -14,143 +14,92 @@
 ################################################################################
 #' Calculate QC metrics
 #'
-#' @param object an SingleCellExperiment object containing expression values and
-#' experimental information. Must have been appropriately prepared.
-#' @param exprs_values character(1), indicating slot of the \code{assays} of the \code{object}
-#' should be used to define expression? Valid options are "counts" [default; recommended],
-#' "tpm", "fpkm" and "logcounts", or anything else in the object added manually by 
-#' the user.
+#' @param object A SingleCellExperiment object containing expression values, usually counts.
+#' @param exprs_values character(1), indicating which slot of the \code{assays} of the \code{object}
+#' should be used to define expression? Defaults to \code{"counts"}.
 #' @param feature_controls a named list containing one or more vectors 
-#' (character vector of feature names, logical vector, or a numeric vector of
-#' indices are all acceptable) used to identify feature controls 
-#' (for example, ERCC spike-in genes, mitochondrial genes, etc). 
+#' (character vector of feature names, a logical vector, or a numeric vector of
+#' indices) used to identify feature controls such as ERCC spike-in sets or 
+#' mitochondrial genes, etc). 
 #' @param cell_controls a character vector of cell (sample) names, or a logical
-#' vector, or a numeric vector of indices used to identify cell controls (for
-#' example, blank wells or bulk controls).
-#' @param nmads numeric scalar giving the number of median absolute deviations 
-#' to be used to flag potentially problematic cells based on total_counts (total
-#' number of counts for the cell, or library size) and total_features (number of
-#' features with non-zero expression). For total_features, cells are flagged for
-#' filtering only if total_features is \code{nmads} below the median. Default 
-#' value is 5.
-#' @param pct_feature_controls_threshold numeric scalar giving a threshold for
-#' percentage of expression values accounted for by feature controls. Used as to
-#' flag cells that may be filtered based on high percentage of expression from
-#' feature controls.
+#' vector, or a numeric vector of indices used to identify cell controls, e.g.,
+#' blank wells or bulk controls).
 #'
-#' @details Calculate useful quality control metrics to help with pre-processing
+#' @details 
+#' This function calculates useful quality control metrics to help with pre-processing
 #' of data and identification of potentially problematic features and cells. 
+#'
+#' @section Cell-level QC metrics:
+#' Denote the value of \code{exprs_values} as \code{X}. Cell-level metrics include:
+#' \describe{
+#'  \item{\code{total_X}:}{Sum of expression values for each cell (i.e., the library 
+#'  size, when counts are the expression values).}
+#'  \item{\code{log10_total_X}:}{Values of \code{total_X} after log10-transformation, 
+#'  after adding a pseudo-count of 1.}
+#'  \item{\code{total_features}:}{The number of features that have expression values 
+#'  above zero.}
+#'  \item{\code{pct_X_top_Y_features}:}{The percentage of the total that 
+#'  is contained within the top Y most highly expressed features in each cell.}
+#' }
 #' 
-#' The following QC metrics are computed:
-#' \describe{
-#'  \item{total_counts:}{Total number of counts for the cell (aka ``library 
-#'  size'')}
-#'  \item{log10_total_counts:}{Total counts on the log10-scale}
-#'  \item{total_features:}{The number of endogenous features (i.e. not control
-#'  features) for the cell that have expression above the detection limit
-#'   (default detection limit is zero)}
-#'  \item{filter_on_depth:}{Would this cell be filtered out based on its
-#'  log10-depth being (by default) more than 5 median absolute deviations from
-#'  the median log10-depth for the dataset?}
-#'  \item{filter_on_coverage:}{Would this cell be filtered out based on its
-#'  coverage being (by default) more than 5 median absolute deviations from the
-#'  median coverage for the dataset?}
-#'  \item{filter_on_pct_counts_feature_controls:}{Should the cell be filtered
-#'  out on the basis of having a high percentage of counts assigned to control
-#'  features? Default threshold is 80 percent (i.e. cells with more than 80
-#'  percent of counts assigned to feature controls are flagged).}
-#'  \item{counts_feature_controls:}{Total number of counts for the cell
-#'  that come from (one or more sets of user-defined) control features. Defaults
-#'   to zero if no control features are indicated. If more than one set of
-#'   feature controls are defined (for example, ERCC and MT genes are defined
-#'   as controls), then this metric is produced for all sets, plus the union of
-#'   all sets (so here, we get columns
-#'   \code{counts_feature_controls_ERCC},
-#'   \code{counts_feature_controls_MT} and
-#'   \code{counts_feature_controls}).}
-#'  \item{log10_counts_feature_controls:}{Just as above, the total
-#'   number of counts from feature controls, but on the log10-scale. Defaults
-#'   to zero (i.e.~log10(0 + 1), offset to avoid negative infinite values) if
-#'   no feature control are indicated.}
-#'  \item{pct_counts_feature_controls:}{Just as for the counts
-#'   described above, but expressed as a percentage of the total counts.
-#'   Defined for all control sets and their union, just like the raw counts.
-#'   Defaults to zero if no feature controls are defined.}
-#'  \item{filter_on_pct_counts_feature_controls:}{Would this cell be
-#'   filtered out on the basis that the percentage of counts from feature
-#'   controls is higher than a defined threhold (default is 80\%)? Just as with
-#'   \code{counts_feature_controls}, this is defined for all control sets
-#'   and their union.}
-#'  \item{pct_counts_top_50_features:}{What percentage of the total counts is accounted for by the 50 highest-count features? Also computed for the top 100 and top 200 features, with the obvious changes to the column names. Note that the top ``X'' percentage will not be computed if the total number of genes is less than ``X''.}
-#'  \item{pct_dropout:}{Percentage of features that are not ``detectably 
-#'  expressed'', i.e. have expression below the \code{lowerDetectionLimit} 
-#'  threshold.}
-#'  \item{counts_endogenous_features:}{Total number of counts for the cell
-#'   that come from endogenous features (i.e. not control features). Defaults
-#'   to `depth` if no control features are indicated.}
-#'  \item{log10_counts_endogenous_features:}{Total number of counts from
-#'   endogenous features on the log10-scale. Defaults to all counts if no 
-#'   control features are indicated.}
-#'  \item{n_detected_feature_controls:}{Number of defined feature controls
-#'    that have expression greater than the threshold defined in the object
-#'    (that is, they are ``detectably expressed''; see
-#'    \code{object@lowerDetectionLimit} to check the threshold). As with other
-#'    metrics for feature controls, defined for all sets of feature controls
-#'    (set names appended as above) and their union. So we might commonly get
-#'    columns \code{n_detected_feature_controls_ERCC},
-#'    \code{n_detected_feature_controls_MT} and
-#'    \code{n_detected_feature_controls} (ERCC and MT genes detected).}
-#'  \item{is_cell_control:}{Has the cell been defined as a cell control? If
-#'    more than one set of cell controls are defined (for example, blanks and
-#'    bulk libraries are defined as cell controls), then this metric is produced
-#'     for all sets, plus the union of all sets (so we could typically get
-#'     columns \code{is_cell_control_Blank},
-#'     \code{is_cell_control_Bulk}, and \code{is_cell_control}, the latter
-#'     including both blanks and bulks as cell controls).}
-#' }
-#' These cell-level QC metrics are added as columns to the ``phenotypeData''
-#' slot of the \code{\link{SingleCellExperiment}} object so that they can be inspected and are
-#' readily available for other functions to use. Furthermore, wherever
-#' ``counts'' appear in the above metrics, the same metrics will also be
-#' computed for ``exprs'', ``tpm'' and ``fpkm'' values (if TPM and FPKM values
-#' are present in the \code{SingleCellExperiment} object), with the appropriate term
-#' replacing ``counts'' in the name. The following feature-level QC metrics are
-#' also computed:
-#' \describe{
-#' \item{mean_exprs:}{The mean expression level of the  gene/feature.}
-#' \item{exprs_rank:}{The rank of the feature's mean expression level in the
-#' cell.}
-#' \item{n_cells_counts:}{The number of cells for which the expression level of
-#' the feature is above the detection limit (default detection limit is zero).}
-#' \item{total_feature_counts:}{The total number of counts assigned to that
-#' feature across all cells.}
-#' \item{log10_total_feature_counts:}{Total feature counts on the log10-scale.}
-#' \item{pct_total_counts:}{The percentage of all counts that are accounted for
-#' by the counts assigned to the feature.}
-#' \item{pct_dropout:}{The percentage of all cells that have no detectable 
-#' expression (i.e. \code{is_exprs(object)} is \code{FALSE}) for the feature.}
-#' \item{is_feature_control:}{Is the feature a control feature? Default is
-#' `FALSE` unless control features are defined by the user. If more than one
-#' feature control set is defined (as above), then a column of this type is
-#' produced for each control set (e.g. here, \code{is_feature_control_ERCC} and
-#' \code{is_feature_control_MT}) as well as the column named
-#' \code{is_feature_control}, which indicates if the feature belongs to any of
-#' the control sets.}
-#' }
-#' These feature-level QC metrics are added as columns to the ``rowData''
-#' slot of the \code{SingleCellExperiment} object so that they can be inspected and are
-#' readily available for other functions to use. As with the cell-level metrics,
-#'  wherever ``counts'' appear in the above, the same metrics will also be
-#'  computed for ``exprs'', ``tpm'' and ``fpkm'' values (if TPM and FPKM values
-#'  are present in the \code{SingleCellExperiment} object), with the appropriate term
-#'  replacing ``counts'' in the name.
+#' If any controls are specified in \code{feature_controls}, the above metrics
+#' will be recomputed using only the features in each control set. For example,
+#' the sum of expression values for all genes in a control set \code{Z} would 
+#' be labelled as \code{total_X_Z}. Each control set is also assigned a \code{pct_X_Z}
+#' metric for additive \code{X}, representing the percentage of expression values 
+#' assigned to \code{Z}.
+#' 
+#' In addition to the user-specified control sets, two other sets are automatically
+#' generated - the \code{"feature_controls"} set, containing a union of all sets;
+#' and an \code{"endogenous"} set, containing all genes not in any control set.
+#' Metrics are also computed for these sets in the same manner described above.
 #'
-#' @return an SingleCellExperiment object
+#' Finally, there is the \code{is_cell_control} field, which indicates whether
+#' each cell has been defined as a cell control by \code{cell_controls}. If 
+#' multiple sets of cell controls are defined (e.g., blanks or bulk libraries),
+#' a metric \code{is_cell_control_C} is produced for each cell control set 
+#' \code{C}, and \code{is_cell_control} represents the union of all sets.
 #'
-#' @importFrom Biobase pData
-#' @importFrom Biobase fData
+#' These cell-level QC metrics are added as columns to the \code{colData}
+#' slot of the SingleCellExperiment object so that they can be inspected and are
+#' readily available for other functions to use. 
+#'
+#' @section Feature-level QC metrics:
+#' Denote the value of \code{exprs_values} as \code{X}. Feature-level metrics include:
+#' \describe{
+#'  \item{\code{mean_X}:}{Mean expression value for each gene across all cells.}
+#'  \item{\code{log10_mean_X}:}{Log10-mean expression value for each gene across all cells.}
+#'  \item{\code{rank_X}:}{Rank of each gene based on its mean expression value.
+#'  More highly expressed genes are more highly ranked.}
+#'  \item{\code{total_X}:}{Sum of expression values for each gene across all cells.}
+#'  \item{\code{n_cells_X}:}{Number of cells with non-zero expression values for each gene.}
+#'  \item{\code{pct_dropout_X}:}{Percentage of cells with zero expression values for each gene.}
+#'  \item{\code{log10_total_X}:}{Log10-sum of expression values for each gene across all cells.}
+#' }
+#'
+#' If any controls are specified in \code{cell_controls}, the above metrics
+#' will be recomputed using only the cells in each control set. For example,
+#' the means of expression values for all cells in a control set \code{Z} would 
+#' be labelled as \code{mean_X_Z}. 
+#' 
+#' In addition to the user-specified control sets, two other sets are automatically
+#' generated - the \code{"cell_controls"} set, containing a union of all sets;
+#' and an \code{"non_controls"} set, containing all genes not in any control set.
+#' Metrics are also computed for these sets in the same manner described above.
+#'
+#' Finally, there is the \code{is_feature_control} field, which indicates whether
+#' each feature has been defined as a control by \code{feature_controls}. If 
+#' multiple sets of feature controls are defined (e.g., ERCCs, mitochondrial genes),
+#' a metric \code{is_feature_control_F} is produced for each feature control set 
+#' \code{F}, and \code{is_feature_control} represents the union of all sets.
+#'
+#' These feature-level QC metrics are added as columns to the \code{rowData}
+#' slot of the SingleCellExperiment object so that they can be inspected and are
+#' readily available for other functions to use. 
+#'
+#' @return A SingleCellExperiment object containing QC metrics in the row and column metadata.
+#'
 #' @importFrom Biobase exprs
-#' @importFrom Biobase sampleNames<- sampleNames assayDataElement assayDataElement<-
 #' @importFrom stats cmdscale coef mad median model.matrix nls prcomp quantile var dist
 #' @importFrom methods is new
 #' @importFrom utils read.table
@@ -176,12 +125,13 @@
 #'                                      feature_controls = list(ERCC = 1:40))
 #' 
 calculateQCMetrics <- function(object, exprs_values="counts", 
-                               feature_controls = NULL, cell_controls = NULL, 
-                               nmads = 5, pct_feature_controls_threshold = 80) {
-    if ( !methods::is(object, "SingleCellExperiment"))
+                               feature_controls = NULL, cell_controls = NULL) {
+
+    if ( !methods::is(object, "SingleCellExperiment")) {
         stop("object must be a SingleCellExperiment")
+    }
     exprs_mat <- assay(object, i = exprs_values)
-    if (exprs_values == "counts" || exprs_values == "cpm") { 
+    if (exprs_values == "counts" || exprs_values == "cpm" || exprs_values=="tpm") { 
         linear <- TRUE
     } else { 
         linear <- FALSE
