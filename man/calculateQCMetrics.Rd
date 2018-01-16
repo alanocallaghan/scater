@@ -5,7 +5,8 @@
 \title{Calculate QC metrics}
 \usage{
 calculateQCMetrics(object, exprs_values = "counts", feature_controls = NULL,
-  cell_controls = NULL, lowerDetectionLimit = 0)
+  cell_controls = NULL, percent_top = c(50, 100, 200, 500),
+  lowerDetectionLimit = 0)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values, usually counts.}
@@ -21,6 +22,10 @@ mitochondrial genes.}
 \item{cell_controls}{A named list containing one or more vectors (a character 
 vector of cell (sample) names, a logical vector, or a numeric vector of indices)
 to identify cell controls, e.g., blank wells or bulk controls.}
+
+\item{percent_top}{An integer vector. Each element is treated as a number of top 
+genes to compute the percentage of library size occupied by the most highly
+expressed genes in each cell, see \code{pct_X_top_Y_features} below.}
 
 \item{lowerDetectionLimit}{A numeric scalar to be passed to \code{\link{nexprs}},
 specifying the lower detection limit for expression.}
@@ -63,7 +68,7 @@ metric for additive \code{X}, representing the percentage of expression values
 assigned to \code{Z}.
 
 In addition to the user-specified control sets, two other sets are automatically
-generated - the \code{"feature_controls"} set, containing a union of all sets;
+generated - the \code{"featureControls"} set, containing a union of all sets;
 and an \code{"endogenous"} set, containing all genes not in any control set.
 Metrics are also computed for these sets in the same manner described above.
 
@@ -104,8 +109,8 @@ the means of expression values for all cells in a control set \code{Z} would
 be labelled as \code{mean_X_Z}. 
 
 In addition to the user-specified control sets, two other sets are automatically
-generated - the \code{"cell_controls"} set, containing a union of all sets;
-and an \code{"non_controls"} set, containing all genes not in any control set.
+generated - the \code{"cellControls"} set, containing a union of all sets;
+and an \code{"nonControls"} set, containing all genes not in any control set.
 Metrics are also computed for these sets in the same manner described above.
 
 Finally, there is the \code{is_feature_control} field, which indicates whether

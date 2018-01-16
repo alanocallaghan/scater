@@ -24,6 +24,9 @@
 #' @param cell_controls A named list containing one or more vectors (a character 
 #' vector of cell (sample) names, a logical vector, or a numeric vector of indices)
 #' to identify cell controls, e.g., blank wells or bulk controls.
+#' @param percent_top An integer vector. Each element is treated as a number of top 
+#' genes to compute the percentage of library size occupied by the most highly
+#' expressed genes in each cell, see \code{pct_X_top_Y_features} below.
 #' @param lowerDetectionLimit A numeric scalar to be passed to \code{\link{nexprs}},
 #' specifying the lower detection limit for expression.
 #'
@@ -140,16 +143,18 @@
 #' 
 calculateQCMetrics <- function(object, exprs_values="counts", 
                                feature_controls = NULL, cell_controls = NULL,
+                               percent_top = c(50, 100, 200, 500),
                                lowerDetectionLimit = 0) {
 
     if ( !methods::is(object, "SingleCellExperiment")) {
         stop("object must be a SingleCellExperiment")
     }
     exprs_mat <- assay(object, i = exprs_values)
+    percent_top <- as.integer(percent_top)
 
     ## Adding general metrics for each cell.
     cd <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
-            subset_row = NULL, subset_type = NULL, 
+            subset_row = NULL, subset_type = NULL, percent_top = percent_top,
             lowerDetectionLimit = lowerDetectionLimit)
     rd <- DataFrame(is_feature_control = logical(nrow(exprs_mat)), 
             row.names = rownames(exprs_mat))
@@ -178,12 +183,12 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         is_endog <- which(!rd$is_feature_control)
         cd_endog <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
                 subset_row = is_endog, subset_type = "endogenous", 
-                lowerDetectionLimit = lowerDetectionLimit)
+                percent_top = percent_top, lowerDetectionLimit = lowerDetectionLimit)
 
         # Running through all feature controls.
         cd_fcon <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
                 subset_row = is_fcon, subset_type = "featureControl", 
-                lowerDetectionLimit = lowerDetectionLimit)
+                percent_top = percent_top, lowerDetectionLimit = lowerDetectionLimit)
 
         # Running through each of the feature controls.
         cd_per_fcon <- vector("list", n_feature_sets)
@@ -191,7 +196,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
             cd_per_fcon[[f]] <- .get_qc_metrics_per_cell(
                 exprs_mat, exprs_type = exprs_values,
                 subset_row = reindexed[[f]], subset_type = names(reindexed)[f], 
-                lowerDetectionLimit = lowerDetectionLimit)
+                percent_top = percent_top, lowerDetectionLimit = lowerDetectionLimit)
         }
 
         cd <- do.call(cbind, c(list(cd, cd_endog, cd_fcon), cd_per_fcon))
@@ -259,7 +264,9 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
 
 .get_qc_metrics_per_cell <- function(exprs_mat, exprs_type = "counts",
-        subset_row = NULL, subset_type = NULL, lowerDetectionLimit = 0) {
+        subset_row = NULL, subset_type = NULL, lowerDetectionLimit = 0,
+        percent_top = integer(0)) {        
+    
     if (is.null(subset_type)) {
         subset_type <- ""
     } else {
@@ -285,17 +292,17 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     }
     
     ## Computing total percentages.
-    pct_top <- .calc_top_prop(exprs_mat, subset_row = subset_row, 
+    pct_top <- .calc_top_prop(exprs_mat, subset_row = subset_row, percent_top = percent_top,
                               subset_type = subset_type, exprs_type = exprs_type)
     rd <- cbind(rd, pct_top)
     return(rd)
 }
 
 
-.calc_top_prop <- function(exprs_mat, top.number = c(50L, 100L, 200L, 500L),
-        subset_row = NULL, subset_type="", exprs_type="features") {
-    ## Calculate the proportion of expression belonging to the top set of genes.
-    ## Produces a matrix of proportions for each top number.
+.calc_top_prop <- function(exprs_mat, percent_top, subset_row = NULL, subset_type="", exprs_type="features") 
+## Calculate the proportion of expression belonging to the top set of genes.
+## Produces a matrix of proportions for each top number.
+{
     
     if (is.null(subset_row)) { 
         total_nrows <- nrow(exprs_mat)
@@ -305,11 +312,11 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         total_nrows <- length(subset_row)
     }
 
-    can.calculate <- top.number <= total_nrows
+    can.calculate <- percent_top <= total_nrows
     if (any(can.calculate)) { 
-        top.number <- top.number[can.calculate]
-        pct_exprs_top_out <- .Call(cxx_calc_top_features, exprs_mat, top.number, subset_row)
-        names(pct_exprs_top_out) <- paste0("pct_", exprs_type, "_top_", top.number, "_features", subset_type)
+        percent_top <- percent_top[can.calculate]
+        pct_exprs_top_out <- .Call(cxx_calc_top_features, exprs_mat, percent_top, subset_row)
+        names(pct_exprs_top_out) <- paste0("pct_", exprs_type, "_top_", percent_top, "_features", subset_type)
         return(do.call(data.frame, pct_exprs_top_out))
     }
     return(data.frame(row.names = seq_len(ncol(exprs_mat))))
