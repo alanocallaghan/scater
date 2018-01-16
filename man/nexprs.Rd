@@ -8,7 +8,8 @@ nexprs(object, lowerDetectionLimit = 0, exprs_values = "counts",
   byrow = FALSE, subset_row = NULL, subset_col = NULL)
 }
 \arguments{
-\item{object}{a \code{\link{SingleCellExperiment}} object}
+\item{object}{a \code{\link{SingleCellExperiment}} object or a numeric
+matrix of expression values.}
 
 \item{lowerDetectionLimit}{numeric scalar providing the value above which 
 observations are deemed to be expressed. Defaults to 

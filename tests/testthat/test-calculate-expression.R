@@ -99,50 +99,21 @@ test_that("nexprs works as expected", {
     
     ## Testing nexprs on the counts themselves.
     expect_equal(nexprs(example_sce), unname(colSums(counts(example_sce) > 0)))
+    expect_equal(nexprs(example_sce), nexprs(counts(example_sce)))
+
     expect_equal(nexprs(example_sce, byrow = TRUE), 
                  unname(rowSums(counts(example_sce) > 0)))
     expect_equal(nexprs(example_sce, subset_row = 20:40), 
                  unname(colSums(counts(example_sce)[20:40,] > 0)))
     expect_equal(nexprs(example_sce, byrow = TRUE, subset_col = 20:40), 
                  unname(rowSums(counts(example_sce)[,20:40] > 0)))
-
-    ## Checking what happens when 'is_exprs' is available.
-    assay(example_sce, "is_exprs") <- calcIsExprs(example_sce, 
-                                                  lowerDetectionLimit = 5)
-    expect_identical(assay(example_sce, "is_exprs"), counts(example_sce) > 5)
-    expect_equal(nexprs(example_sce, lowerDetectionLimit = 5), 
-                 unname(colSums(counts(example_sce) > 5)))
-    expect_equal(nexprs(example_sce, lowerDetectionLimit = 5, byrow = TRUE), 
+    expect_equal(nexprs(example_sce, byrow = TRUE, lowerDetectionLimit=5),
                  unname(rowSums(counts(example_sce) > 5)))
-    expect_equal(nexprs(example_sce, lowerDetectionLimit = 5, subset_row = 20:40), 
-                 unname(colSums(counts(example_sce)[20:40,] > 5)))
-    expect_equal(nexprs(example_sce, lowerDetectionLimit = 5, byrow = TRUE, 
-                        subset_col = 20:40), 
-                 unname(rowSums(counts(example_sce)[,20:40] > 5)))
     
+    ## Testing nexprs on a sparse matrix.
     sce10x <- read10xResults(system.file("extdata", package = "scater"))
-    ## Testing nexprs on the counts themselves.
     expect_equal(nexprs(sce10x), unname(Matrix::colSums(counts(sce10x) > 0)))
-    expect_equal(nexprs(sce10x, byrow = TRUE), 
-                 unname(Matrix::rowSums(counts(sce10x) > 0)))
-    expect_equal(nexprs(sce10x, subset_row = 20:40), 
-                 unname(Matrix::colSums(counts(sce10x)[20:40,] > 0)))
-    expect_equal(nexprs(sce10x, byrow = TRUE, subset_col = 20:40), 
-                 unname(Matrix::rowSums(counts(sce10x)[,20:40] > 0)))
-    
-    ## Checking what happens when 'is_exprs' is available.
-    assay(sce10x, "is_exprs") <- calcIsExprs(sce10x, 
-                                                  lowerDetectionLimit = 5)
-    expect_identical(assay(sce10x, "is_exprs"), counts(sce10x) > 5)
-    expect_equal(nexprs(sce10x, lowerDetectionLimit = 5), 
-                 unname(Matrix::colSums(counts(sce10x) > 5)))
-    expect_equal(nexprs(sce10x, lowerDetectionLimit = 5, byrow = TRUE), 
-                 unname(Matrix::rowSums(counts(sce10x) > 5)))
-    expect_equal(nexprs(sce10x, lowerDetectionLimit = 5, subset_row = 20:40), 
-                 unname(Matrix::colSums(counts(sce10x)[20:40,] > 5)))
-    expect_equal(nexprs(sce10x, lowerDetectionLimit = 5, byrow = TRUE, 
-                        subset_col = 20:40), 
-                 unname(Matrix::rowSums(counts(sce10x)[,20:40] > 5)))
+    expect_equal(nexprs(sce10x), nexprs(counts(sce10x)))
 })
 
 test_that("calcAverage works as expected", {
@@ -152,20 +123,32 @@ test_that("calcAverage works as expected", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
     
-    ## calculate average counts
+    ## Calculate average counts
     ave_counts <- calcAverage(example_sce)
     lib.sizes <- colSums(counts(example_sce))
     expected_vals <- colMeans(t(counts(example_sce)) / 
                                   (lib.sizes/mean(lib.sizes)))
     expect_equal(ave_counts, expected_vals)
+    expect_equal(ave_counts, calcAverage(counts(example_sce)))
+
+    ## Responsive to size factors.
+    sizeFactors(example_sce) <- runif(ncol(example_sce))
+    ave_counts <- calcAverage(example_sce)
+    expect_equal(ave_counts, calcAverage(counts(example_sce),
+                                         size_factors=sizeFactors(example_sce)))
     
+    sf <- sizeFactors(example_sce) 
+    sf <- sf/mean(sf)    
+    expected_vals <- colMeans(t(counts(example_sce)) / sf)
+    expect_equal(ave_counts, expected_vals)
+
+    ## Repeating with a sparse matrix.    
     sce10x <- read10xResults(system.file("extdata", package = "scater"))
-    ## calculate average counts
+    
     ave_counts <- calcAverage(sce10x)
     lib.sizes <- Matrix::colSums(counts(sce10x))
     expected_vals <- Matrix::colMeans(Matrix::t(counts(sce10x)) / 
                                   (lib.sizes/mean(lib.sizes)))
-    expect_equal(ave_counts, expected_vals)
-    
+    expect_equal(ave_counts, expected_vals)  
 })
 
