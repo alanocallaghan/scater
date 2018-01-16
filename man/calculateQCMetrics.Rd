@@ -5,7 +5,7 @@
 \title{Calculate QC metrics}
 \usage{
 calculateQCMetrics(object, exprs_values = "counts", feature_controls = NULL,
-  cell_controls = NULL)
+  cell_controls = NULL, lowerDetectionLimit = 0)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values, usually counts.}
@@ -13,14 +13,17 @@ calculateQCMetrics(object, exprs_values = "counts", feature_controls = NULL,
 \item{exprs_values}{character(1), indicating which slot of the \code{assays} of the \code{object}
 should be used to define expression? Defaults to \code{"counts"}.}
 
-\item{feature_controls}{a named list containing one or more vectors 
+\item{feature_controls}{A named list containing one or more vectors 
 (character vector of feature names, a logical vector, or a numeric vector of
 indices) used to identify feature controls such as ERCC spike-in sets or 
 mitochondrial genes, etc).}
 
-\item{cell_controls}{a character vector of cell (sample) names, or a logical
+\item{cell_controls}{A character vector of cell (sample) names, or a logical
 vector, or a numeric vector of indices used to identify cell controls, e.g.,
 blank wells or bulk controls).}
+
+\item{lowerDetectionLimit}{A numeric scalar to be passed to \code{\link{nexprs}},
+specifying the lower detection limit for expression.}
 }
 \value{
 A SingleCellExperiment object containing QC metrics in the row and column metadata.
@@ -41,9 +44,10 @@ Denote the value of \code{exprs_values} as \code{X}. Cell-level metrics include:
  \item{\code{log10_total_X}:}{Values of \code{total_X} after log10-transformation, 
  after adding a pseudo-count of 1.}
  \item{\code{total_features}:}{The number of features that have expression values 
- above zero.}
+ above the detection limit.}
  \item{\code{pct_X_top_Y_features}:}{The percentage of the total that 
- is contained within the top Y most highly expressed features in each cell.}
+ is contained within the top \code{Y} most highly expressed features in each cell.
+ This is only reported when there are more than \code{Y} features.}
 }
 
 If any controls are specified in \code{feature_controls}, the above metrics
@@ -73,14 +77,20 @@ readily available for other functions to use.
 
 Denote the value of \code{exprs_values} as \code{X}. Feature-level metrics include:
 \describe{
- \item{\code{mean_X}:}{Mean expression value for each gene across all cells.}
- \item{\code{log10_mean_X}:}{Log10-mean expression value for each gene across all cells.}
- \item{\code{rank_X}:}{Rank of each gene based on its mean expression value.
- More highly expressed genes are more highly ranked.}
- \item{\code{total_X}:}{Sum of expression values for each gene across all cells.}
- \item{\code{n_cells_X}:}{Number of cells with non-zero expression values for each gene.}
- \item{\code{pct_dropout_X}:}{Percentage of cells with zero expression values for each gene.}
- \item{\code{log10_total_X}:}{Log10-sum of expression values for each gene across all cells.}
+ \item{\code{mean_X}:}{Mean expression value for each gene across all 
+ cells.}
+ \item{\code{log10_mean_X}:}{Log10-mean expression value for each gene 
+ across all cells.}
+ \item{\code{rank_X}:}{Rank of each gene based on its mean expression 
+ value. More highly expressed genes are more highly ranked.}
+ \item{\code{total_X}:}{Sum of expression values for each gene across 
+ all cells.}
+ \item{\code{n_cells_X}:}{Number of cells with expression values above
+ the detection limit for each gene.}
+ \item{\code{pct_dropout_X}:}{Percentage of cells with expression values 
+ below the detection limit for each gene.}
+ \item{\code{log10_total_X}:}{Log10-sum of expression values for each gene 
+ across all cells.}
 }
 
 If any controls are specified in \code{cell_controls}, the above metrics
@@ -118,6 +128,6 @@ feature_controls = list(set1 = 1:40))
 
 ## with a named set of feature controls defined
 example_sce <- calculateQCMetrics(example_sce, 
-                                     feature_controls = list(ERCC = 1:40))
+     feature_controls = list(ERCC = 1:40))
 
 }
