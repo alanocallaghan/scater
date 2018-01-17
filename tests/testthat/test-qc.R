@@ -14,9 +14,9 @@ test_that("we can compute standard QC metrics", {
 
     # Testing total metrics for cells.
     expect_equal(example_sce$total_counts, unname(colSums(counts(example_sce))))
-    expect_equal(example_sce$total_features, unname(colSums(counts(example_sce) > 0)))
+    expect_equal(example_sce$total_features_by_counts, unname(colSums(counts(example_sce) > 0)))
     expect_equal(example_sce$log10_total_counts, log10(example_sce$total_counts+1))
-    expect_equal(example_sce$log10_total_features, log10(example_sce$total_features+1))
+    expect_equal(example_sce$log10_total_features_by_counts, log10(example_sce$total_features_by_counts+1))
 
     # Testing percentage metrics for cells.
     for (i in seq_len(ncol(example_sce))) { 
@@ -34,10 +34,9 @@ test_that("we can compute standard QC metrics", {
     # Testing mean metrics for genes.
     expect_equal(rowData(example_sce)$mean_counts, unname(rowMeans(counts(example_sce))))
     expect_equal(rowData(example_sce)$total_counts, unname(rowSums(counts(example_sce))))
-    expect_equal(rowData(example_sce)$n_cells_counts, unname(rowSums(counts(example_sce) > 0)))
-    expect_equal(rowData(example_sce)$pct_dropout_counts, unname(100 * rowMeans(counts(example_sce)==0)))
+    expect_equal(rowData(example_sce)$n_cells_by_counts, unname(rowSums(counts(example_sce) > 0)))
+    expect_equal(rowData(example_sce)$pct_dropout_by_counts, unname(100 * rowMeans(counts(example_sce)==0)))
 
-    expect_equal(rowData(example_sce)$rank_counts, unname(rank(-rowData(example_sce)$mean_counts)))
     expect_equal(rowData(example_sce)$log10_mean_counts, unname(log10(rowData(example_sce)$mean_counts+1)))
     expect_equal(rowData(example_sce)$log10_total_counts, unname(log10(rowData(example_sce)$total_counts+1)))
 })
@@ -65,11 +64,11 @@ test_that("we can compute standard QC metrics with feature controls", {
 
     sub_counts <- counts(example_sce)[rowData(example_sce)$is_feature_control_set1,]
     expect_equal(example_sce$total_counts_set1, unname(colSums(sub_counts)))
-    expect_equal(example_sce$total_features_set1, unname(colSums(sub_counts > 0)))
+    expect_equal(example_sce$total_features_by_counts_set1, unname(colSums(sub_counts > 0)))
     expect_equal(example_sce$pct_counts_set1, example_sce$total_counts_set1/example_sce$total_counts * 100)
 
     expect_equal(example_sce$log10_total_counts_set1, log10(example_sce$total_counts_set1+1))
-    expect_equal(example_sce$log10_total_features_set1, log10(example_sce$total_features_set1+1))
+    expect_equal(example_sce$log10_total_features_by_counts_set1, log10(example_sce$total_features_by_counts_set1+1))
 
     # Same output with logical vectors.
     example_sce2 <- calculateQCMetrics(
@@ -94,11 +93,11 @@ test_that("we can compute standard QC metrics with feature controls", {
 
         NAMER <- function(x) { paste0(x, "_", set) }
         expect_equal(example_sce[[NAMER("total_counts")]], unname(colSums(sub_counts)))
-        expect_equal(example_sce[[NAMER("total_features")]], unname(colSums(sub_counts > 0)))
+        expect_equal(example_sce[[NAMER("total_features_by_counts")]], unname(colSums(sub_counts > 0)))
         expect_equal(example_sce[[NAMER("pct_counts")]], example_sce[[NAMER("total_counts")]]/example_sce$total_counts * 100)
     
         expect_equal(example_sce[[NAMER("log10_total_counts")]], log10(example_sce[[NAMER("total_counts")]]+1))
-        expect_equal(example_sce[[NAMER("log10_total_features")]], log10(example_sce[[NAMER("total_features")]]+1))
+        expect_equal(example_sce[[NAMER("log10_total_features_by_counts")]], log10(example_sce[[NAMER("total_features_by_counts")]]+1))
     }
 })
 
@@ -124,10 +123,9 @@ test_that("we can compute standard QC metrics with cell controls", {
     sub_counts <- counts(example_sce)[,example_sce$is_cell_control_set1]
     expect_equal(rowData(example_sce)$mean_counts_set1, unname(rowMeans(sub_counts)))
     expect_equal(rowData(example_sce)$total_counts_set1, unname(rowSums(sub_counts)))
-    expect_equal(rowData(example_sce)$n_cells_counts_set1, unname(rowSums(sub_counts > 0)))
-    expect_equal(rowData(example_sce)$pct_dropout_counts_set1, unname(100 * rowMeans(sub_counts==0)))
+    expect_equal(rowData(example_sce)$n_cells_by_counts_set1, unname(rowSums(sub_counts > 0)))
+    expect_equal(rowData(example_sce)$pct_dropout_by_counts_set1, unname(100 * rowMeans(sub_counts==0)))
 
-    expect_equal(rowData(example_sce)$rank_counts_set1, unname(rank(-rowData(example_sce)$mean_counts_set1)))
     expect_equal(rowData(example_sce)$log10_mean_counts_set1, unname(log10(rowData(example_sce)$mean_counts_set1+1)))
     expect_equal(rowData(example_sce)$log10_total_counts_set1, unname(log10(rowData(example_sce)$total_counts_set1+1)))
 
@@ -154,10 +152,9 @@ test_that("we can compute standard QC metrics with cell controls", {
         NAMER <- function(x) { paste0(x, "_", set) }
         expect_equal(rowData(example_sce)[[NAMER("mean_counts")]], unname(rowMeans(sub_counts)))
         expect_equal(rowData(example_sce)[[NAMER("total_counts")]], unname(rowSums(sub_counts)))
-        expect_equal(rowData(example_sce)[[NAMER("n_cells_counts")]], unname(rowSums(sub_counts > 0)))
-        expect_equal(rowData(example_sce)[[NAMER("pct_dropout_counts")]], unname(100 * rowMeans(sub_counts==0)))
+        expect_equal(rowData(example_sce)[[NAMER("n_cells_by_counts")]], unname(rowSums(sub_counts > 0)))
+        expect_equal(rowData(example_sce)[[NAMER("pct_dropout_by_counts")]], unname(100 * rowMeans(sub_counts==0)))
 
-        expect_equal(rowData(example_sce)[[NAMER("rank_counts")]], unname(rank(-rowData(example_sce)[[NAMER("mean_counts")]])))
         expect_equal(rowData(example_sce)[[NAMER("log10_mean_counts")]], unname(log10(rowData(example_sce)[[NAMER("mean_counts")]]+1)))
         expect_equal(rowData(example_sce)[[NAMER("log10_total_counts")]], unname(log10(rowData(example_sce)[[NAMER("total_counts")]]+1)))
     }
@@ -247,7 +244,7 @@ test_that("we can compute standard QC metrics with the compact format", {
 
     # Checking the column data.
     expect_equal(ref$total_counts, compact$scater_qc$all$total_counts)  
-    expect_equal(ref$total_features, compact$scater_qc$all$total_features)  
+    expect_equal(ref$total_features_by_counts, compact$scater_qc$all$total_features_by_counts)  
     expect_equal(ref$total_counts_controls1, compact$scater_qc$feature_control_controls1$total_counts)  
     expect_equal(ref$total_counts_controls2, compact$scater_qc$feature_control_controls2$total_counts)  
 

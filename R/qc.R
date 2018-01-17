@@ -271,7 +271,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     nfeatures <- nexprs(exprs_mat, subset_row = subset_row, byrow = FALSE,
                         detection_limit = detection_limit)
     rd <- DataFrame(nfeatures, log10(nfeatures + 1), row.names = colnames(exprs_mat))
-    colnames(rd) <- paste0(c("", "log10_"), "total_features")
+    colnames(rd) <- paste0(c("", "log10_"), "total_features_by_", exprs_type)
 
     ## Adding the total sum.
     libsize <- .colSums(exprs_mat, rows = subset_row)
@@ -287,6 +287,12 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     pct_top <- .calc_top_prop(exprs_mat, subset_row = subset_row, percent_top = percent_top,
                               exprs_type = exprs_type)
     rd <- cbind(rd, pct_top)
+
+    # Adding for legacy purposes; this is not safe when different exprs_type are used.
+    rd2 <- DataFrame(nfeatures, log10(nfeatures + 1), row.names = colnames(exprs_mat))
+    colnames(rd2) <- paste0(c("", "log10_"), "total_features", exprs_type)
+    rd <- cbind(rd, rd2)
+
     return(rd)
 }
 
@@ -312,16 +318,9 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     return(new("DataFrame", nrows=ncol(exprs_mat)))
 }
 
-
 .get_qc_metrics_per_gene <- function(exprs_mat, exprs_type="counts", 
-        subset_col=NULL, subset_type=NULL, detection_limit=0, 
+        subset_col=NULL, detection_limit=0, 
         total_exprs = .rowSums(exprs_mat)) {
-
-    if (is.null(subset_type)) {
-        subset_type <- ""
-    } else {
-        subset_type <- paste0("_", subset_type)
-    }
 
     if (is.null(subset_col)) {
         total.cells <- ncol(exprs_mat)
@@ -332,21 +331,24 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
     sum_exprs <- .rowSums(exprs_mat, cols = subset_col)
     ave <- sum_exprs/total.cells
-    fd <- DataFrame(ave, log10(ave + 1), rank(-ave), row.names = rownames(exprs_mat))
-    colnames(fd) <- paste0(c("mean", "log10_mean", "rank"), "_", exprs_type, subset_type)
+    fd <- DataFrame(ave, log10(ave + 1), row.names = rownames(exprs_mat))
+    colnames(fd) <- paste0(c("mean", "log10_mean"), "_", exprs_type)
 
     ncells.exprs <- nexprs(exprs_mat, subset_col = subset_col, byrow = TRUE,
                            detection_limit = detection_limit)
-    fd[[paste0("n_cells_", exprs_type, subset_type)]] <- ncells.exprs
-    fd[[paste0("pct_dropout_", exprs_type, subset_type)]] <- 100 * (1 - ncells.exprs/total.cells)
+    fd[[paste0("n_cells_by_", exprs_type)]] <- ncells.exprs
+    fd[[paste0("pct_dropout_by_", exprs_type)]] <- 100 * (1 - ncells.exprs/total.cells)
 
-    fd[[paste0("total_", exprs_type, subset_type)]] <- sum_exprs
-    fd[[paste0("log10_total_", exprs_type, subset_type)]] <- log10(sum_exprs + 1)
+    fd[[paste0("total_", exprs_type)]] <- sum_exprs
+    fd[[paste0("log10_total_", exprs_type)]] <- log10(sum_exprs + 1)
     
     if (!is.null(subset_col)) { 
-        fd[[paste0("pct_", exprs_type, subset_type)]] <- sum_exprs/total_exprs * 100
+        fd[[paste0("pct_", exprs_type)]] <- sum_exprs/total_exprs * 100
     }
 
+    # Adding for legacy purposes; this is not safe when different exprs_type are used.
+    fd[[paste0("n_cells_", exprs_type)]] <- ncells.exprs
+    fd[[paste0("pct_dropout_", exprs_type)]] <- 100 * (1 - ncells.exprs/total.cells)
     return(fd) 
 }
 
@@ -377,6 +379,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         if (x!="all") { 
             colnames(current) <- sprintf("%s_%s", colnames(current), trim.fun(x))
         }
+
         collected[[x]] <- current
     }
 
@@ -1166,8 +1169,8 @@ plotExprsFreqVsMean <- function(object, feature_set = NULL,
                                 show_smooth = TRUE, se = TRUE, ...) {
     if ( !is(object, "SingleCellExperiment") )
         stop("Object must be an SingleCellExperiment")
-    if ( is.null(rowData(object)$n_cells_counts) ) {
-        stop("rowData(object) does not have a 'n_cells_counts' column. Try running 'calculateQCMetrics' on this object (ensuring that the object contains counts data) and then rerun this command.")
+    if ( is.null(rowData(object)$n_cells_by_counts) ) {
+        stop("rowData(object) does not have a 'n_cells_by_counts' column. Try running 'calculateQCMetrics' on this object (ensuring that the object contains counts data) and then rerun this command.")
     }
     if ( !is.null(feature_set) && feature_set != "feature_controls" &&
          typeof(feature_set) == "character" ) {
@@ -1216,7 +1219,7 @@ plotExprsFreqVsMean <- function(object, feature_set = NULL,
     }
 
     ## define percentage of cells expressing a gene
-    rowData(object)$pct_cells_exprs <- (100 * rowData(object)$n_cells_counts /
+    rowData(object)$pct_cells_exprs <- (100 * rowData(object)$n_cells_by_counts /
                                           ncol(object))
     y_lab <- paste0("Frequency of expression (% of ", ncol(object), " cells)")
 
