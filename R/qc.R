@@ -144,7 +144,7 @@
 calculateQCMetrics <- function(object, exprs_values="counts", 
                                feature_controls = NULL, cell_controls = NULL,
                                percent_top = c(50, 100, 200, 500),
-                               detection_limit = 0) {
+                               detection_limit = 0, future = FALSE) {
 
     if ( !methods::is(object, "SingleCellExperiment")) {
         stop("object must be a SingleCellExperiment")
@@ -152,161 +152,143 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     exprs_mat <- assay(object, i = exprs_values)
     percent_top <- as.integer(percent_top)
 
-    ## Adding general metrics for each cell.
-    cd <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
-            subset_row = NULL, subset_type = NULL, percent_top = percent_top,
-            detection_limit = detection_limit)
-    total_exprs <- cd[[paste0("total_", exprs_values)]]
-    rd <- DataFrame(is_feature_control = logical(nrow(exprs_mat)), 
-            row.names = rownames(exprs_mat))
+    ### Adding general metrics for each cell. ### 
 
-    ## Adding metrics for the technical controls.
-    n_feature_sets <- length(feature_controls)
-    if (n_feature_sets) { 
+    # We first assemble thie list of all metrics (all MUST be first).
+    all_feature_sets <- list(all=NULL)
+    feature_set_rdata <- list()
+
+    if (length(feature_controls)) { 
         if (is.null(names(feature_controls))) {
             stop("feature_controls should be named")
         }
         
         # Converting to integer indices for all applications.
-        reindexed <- lapply(feature_controls, FUN = .subset2index, 
-                            target = exprs_mat)
+        reindexed <- lapply(feature_controls, FUN = .subset2index, target = exprs_mat)
+        names(reindexed) <- sprintf("feature_control_%s", names(reindexed))
+
         is_fcon <- Reduce(union, reindexed)
-        rd$is_feature_control[is_fcon] <- TRUE
+        is_endog <- seq_len(nrow(exprs_mat))[-is_fcon]
 
-        # Adding feature controls.
-        for (f in seq_len(n_feature_sets)) {
-            cur.index <- logical(nrow(exprs_mat))
-            cur.index[reindexed[[f]]] <- TRUE
-            rd[[paste0("is_feature_control_", names(reindexed)[f])]] <- cur.index
+        all_feature_sets <- c(all_feature_sets, list(endogenous=is_endog,
+                     feature_control=is_fcon), reindexed)
+
+        feature_set_rdata <- vector("list", length(reindexed)+1)
+        names(feature_set_rdata) <-  c("feature_control", names(reindexed)
+        for (set in names(feature_set_rdata)) { 
+            new_set <- logical(nrow(exprs_mat))
+            new_set[reindexed[[set]]] <- TRUE
+            feature_set_rdata[[set]] <- new_set
         }
+    }
 
-        # Running through all endogenous genes.
-        is_endog <- which(!rd$is_feature_control)
-        cd_endog <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
-                subset_row = is_endog, subset_type = "endogenous", 
-                percent_top = percent_top, detection_limit = detection_limit,
-                total_exprs = total_exprs)
+    # Computing the cell-level metrics for each set.
+    all_feature_stats <- all_feature_sets
+    total_exprs <- NULL
 
-        # Running through all feature controls.
-        cd_fcon <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
-                subset_row = is_fcon, subset_type = "feature_control", 
-                percent_top = percent_top, detection_limit = detection_limit,
-                total_exprs = total_exprs)
+    for (set in names(all_feature_sets)) {
+        all_feature_stats[[set]] <-.get_qc_metrics_per_cell(exprs_mat, 
+            exprs_type = exprs_values, subset_row = all_feature_sets[[set]],
+            percent_top = percent_top, detection_limit = detection_limit,
+            total_exprs = total_exprs)
 
-        # Running through each of the feature controls.
-        cd_per_fcon <- vector("list", n_feature_sets)
-        for (f in seq_len(n_feature_sets)) {
-            cd_per_fcon[[f]] <- .get_qc_metrics_per_cell(
-                exprs_mat, exprs_type = exprs_values,
-                subset_row = reindexed[[f]], subset_type = names(reindexed)[f], 
-                percent_top = percent_top, detection_limit = detection_limit,
-                total_exprs = total_exprs)
+        if (set=="all") { 
+            total_exprs <- all_feature_stats[[set]][[paste0("total_", exprs_values)]]
         }
-
-        cd <- do.call(cbind, c(list(cd, cd_endog, cd_fcon), cd_per_fcon))
     }
     
-    ## Define cell controls
-    ### Determine if vector or list
-    rd_all <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
-            subset_col = NULL, subset_type = NULL, 
-            detection_limit = detection_limit)
-    total_exprs <- rd_all[[paste0("total_", exprs_values)]]
-    rd <- cbind(rd, rd_all)
-    cd$is_cell_control <- logical(ncol(exprs_mat))
+    ### Adding general metrics for each feature. ### 
 
-    n_cell_sets <- length(cell_controls)
-    if (n_cell_sets) {
-        # Converting indices to integer.
-        reindexed <- lapply(cell_controls, FUN = .subset2index, 
-                            target = exprs_mat, byrow = FALSE)
-        is_ccon <- Reduce(union, reindexed)
-        cd$is_cell_control[is_ccon] <- TRUE
+    # We first assemble thie list of all metrics (all MUST be first).
+    all_cell_sets <- list(all=NULL)
+    cell_set_rdata <- list()
+
+    if (length(cell_controls)) { 
+        if (is.null(names(cell_controls))) {
+            stop("cell_controls should be named")
+        }
         
-        # Adding sets to the colData.
-        for (cx in seq_len(n_cell_sets)) {
-            current_control <- logical(ncol(exprs_mat))
-            current_control[reindexed[[cx]]] <- TRUE
-            cd[[paste0("is_cell_control_", names(reindexed)[cx])]] <- current_control
+        # Converting to integer indices for all applications.
+        reindexed <- lapply(cell_controls, FUN = .subset2index, target = exprs_mat, byrow=FALSE)
+        names(reindexed) <- sprintf("cell_control_%s", names(reindexed))
+
+        is_ccon <- Reduce(union, reindexed)
+        is_ncon <- seq_len(ncol(exprs_mat))[-is_ccon]
+
+        all_feature_sets <- c(all_feature_sets, list(non_control=is_ncon,
+                     cell_control=is_fcon), reindexed)
+
+        cell_set_cdata <- vector("list", length(reindexed)+1)
+        names(cell_set_cdata) <-  c("cell_control", names(reindexed)
+        for (set in names(cell_set_cdata)) { 
+            new_set <- logical(ncol(exprs_mat))
+            new_set[reindexed[[set]]] <- TRUE
+            feature_set_rdata[[set]] <- new_set
         }
-
-        # Adding statistics for non-control cells.
-        is_noncon <- which(!cd$is_cell_control)
-        rd_noncon <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
-                subset_col = is_noncon, subset_type = "non_control", 
-                detection_limit = detection_limit, 
-                total_exprs = total_exprs)
-
-        # Adding statistics for all control cells.
-        rd_con <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
-                subset_col = is_ccon, subset_type = "cell_control", 
-                detection_limit = detection_limit,
-                total_exprs = total_exprs)
-
-        # Adding statistics for each set of control cells.
-        rd_collected <- vector("list", n_cell_sets)
-        for (cx in seq_len(n_cell_sets)) {
-            rd_current <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
-                    subset_col = reindexed[[cx]], subset_type = names(reindexed)[cx], 
-                    detection_limit = detection_limit,
-                    total_exprs = total_exprs)
-            rd_collected[[cx]] <- rd_current
-        }
-
-        rd <- do.call(cbind, c(list(rd, rd_con, rd_noncon), rd_collected))
     }
 
-    ### Remove columns to be replaced
-    old_rd <- rowData(object)
-    old_rd <- old_rd[, !(colnames(old_rd) %in% colnames(rd)), drop = FALSE]
-    rd <- cbind(old_rd, rd)
-    rowData(object) <- rd
+    # Computing the cell-level metrics for each set.
+    all_cell_stats <- all_cell_sets
+    total_exprs <- NULL
 
-    old_cd <- colData(object)
-    old_cd <- old_cd[, !(colnames(old_cd) %in% colnames(cd)), drop = FALSE]
-    cd <- cbind(old_cd, cd)
-    colData(object) <- cd
+    for (set in names(all_cell_sets)) {
+        all_cell_stats[[set]] <-.get_qc_metrics_per_cell(exprs_mat, 
+            exprs_type = exprs_values, subset_row = all_cell_sets[[set]],
+            percent_top = percent_top, detection_limit = detection_limit,
+            total_exprs = total_exprs)
 
+        if (set=="all") { 
+            total_exprs <- all_cell_stats[[set]][[paste0("total_", exprs_values)]]
+        }
+    }
+
+    ### Formatting output depending on whether we're compacting or not. ###
+
+    if (compact) {
+        # Converting them to nested dataframes.
+        scater_cd <- .convert_to_nested_DataFrame(cell_set_cdata, all_feature_stats)
+        scater_rd <- .convert_to_nested_DataFrame(feature_set_rdata, all_cell_stats)
+        colData(object)$scater_qc <- scater_cd
+        rowData(object)$scater_qc <- scater_rd
+    } else {
+        # Flattening them to dataframes and replacing old entries.
+        scater_cd <- .convert_to_full_DataFrame(colData(object), cell_set_cdata, all_feature_stats)
+        colData(object) <- scater_cd
+        scater_rd <- .convert_to_full_DataFrame(rowData(object), feature_set_rdata, all_cell_stats)
+        rowData(object) <- scater_rd
+    }
     return(object)
 }
 
-
 .get_qc_metrics_per_cell <- function(exprs_mat, exprs_type = "counts",
-        subset_row = NULL, subset_type = NULL, detection_limit = 0,
+        subset_row = NULL, detection_limit = 0,
         percent_top = integer(0), total_exprs = .colSums(exprs_mat)) {
-    
-    if (is.null(subset_type)) {
-        subset_type <- ""
-    } else {
-        subset_type <- paste0("_", subset_type)
-    }
-
+   
     subset_row <- .subset2index(subset_row, target = exprs_mat, byrow = TRUE)
     nfeatures <- nexprs(exprs_mat, subset_row = subset_row, byrow = FALSE,
                         detection_limit = detection_limit)
 
     rd <- DataFrame(nfeatures, log10(nfeatures + 1), row.names = colnames(exprs_mat))
-    colnames(rd) <- paste0(c("", "log10_"), "total_features", subset_type)
+    colnames(rd) <- paste0(c("", "log10_"), "total_features")
 
     ## Adding the total sum.
     libsize <- .colSums(exprs_mat, rows = subset_row)
-    rd[[paste0("total_", exprs_type, subset_type)]] <- libsize
-    rd[[paste0("log10_total_", exprs_type, subset_type)]] <- log10(libsize + 1)
+    rd[[paste0("total_", exprs_type)]] <- libsize
+    rd[[paste0("log10_total_", exprs_type)]] <- log10(libsize + 1)
     
     if (!is.null(subset_row)) {
         ## Computing percentages of actual total.
-        rd[[paste0("pct_", exprs_type, subset_type)]] <- 100 * libsize / total_exprs
+        rd[[paste0("pct_", exprs_type)]] <- 100 * libsize / total_exprs
     }
     
     ## Computing total percentages.
     pct_top <- .calc_top_prop(exprs_mat, subset_row = subset_row, percent_top = percent_top,
-                              subset_type = subset_type, exprs_type = exprs_type)
+                              exprs_type = exprs_type)
     rd <- cbind(rd, pct_top)
     return(rd)
 }
 
-
-.calc_top_prop <- function(exprs_mat, percent_top, subset_row = NULL, subset_type="", exprs_type="features") 
+.calc_top_prop <- function(exprs_mat, percent_top, subset_row = NULL, exprs_type = "counts") 
 ## Calculate the proportion of expression belonging to the top set of genes.
 ## Produces a matrix of proportions for each top number.
 {
@@ -323,7 +305,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     if (any(can.calculate)) { 
         percent_top <- percent_top[can.calculate]
         pct_exprs_top_out <- .Call(cxx_calc_top_features, exprs_mat, percent_top, subset_row)
-        names(pct_exprs_top_out) <- paste0("pct_", exprs_type, "_top_", percent_top, "_features", subset_type)
+        names(pct_exprs_top_out) <- paste0("pct_", exprs_type, "_top_", percent_top, "_features")
         return(do.call(data.frame, pct_exprs_top_out))
     }
     return(data.frame(row.names = seq_len(ncol(exprs_mat))))
@@ -365,6 +347,35 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     }
 
     return(fd) 
+}
+
+.convert_to_nested_DataFrame <- function(set_list, stat_list, exprs_values = "counts") {
+    output <- do.call(DataFrame, set_list)
+    colnames(output) <- sprintf("is_%s", colnames(output)) 
+
+    sub_output <- new("DataFrame", nrows=length(stat_list[[1]][[1]]))
+    for (x in names(stat_list)) { 
+        sub_output[[x]] <- do.call(DataFrame, stat_list[[x]])
+    }
+
+    output[[exprs_values]] <- sub_output
+    return(output)
+}
+
+.convert_to_full_DataFrame <- function(existing, set_list, stat_list) {
+    output <- do.call(DataFrame, set_list)
+    colnames(output) <- sprintf("is_%s", colnames(output)) 
+
+    collected <- stat_list
+    for (x in names(stat_list)) { 
+        current <- do.call(DataFrame, stat_list[[x]])
+        colnames(current) <- sprintf("%s_%s", colnames(current), x)
+        collected[[x]] <- current
+    }
+
+    combined <- do.call(cbind, c(list(output), collected))
+    existing <- existing[, !(colnames(existing) %in% colnames(combined)), drop = FALSE]
+    cbind(existing, combined)
 }
 
 ################################################################################
