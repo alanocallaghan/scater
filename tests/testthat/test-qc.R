@@ -227,7 +227,7 @@ test_that("we can compute standard QC metrics with multiple sets of feature and 
                  unname(rowSums(counts(reref)[,5:10])))
 })
 
-test_that("we can compute standard QC metrics with the compactness format", {
+test_that("we can compute standard QC metrics with the compact format", {
     data("sc_example_counts")
     data("sc_example_cell_info")
 
@@ -246,19 +246,19 @@ test_that("we can compute standard QC metrics with the compactness format", {
         cell_controls = list(set1 = 1:5, set2 = 10:20), compact=TRUE)
 
     # Checking the column data.
-    expect_equal(ref$total_counts, compact$scater_qc$counts$all$total_counts)  
-    expect_equal(ref$total_features, compact$scater_qc$counts$all$total_features)  
-    expect_equal(ref$total_counts_controls1, compact$scater_qc$counts$feature_control_controls1$total_counts)  
-    expect_equal(ref$total_counts_controls2, compact$scater_qc$counts$feature_control_controls2$total_counts)  
+    expect_equal(ref$total_counts, compact$scater_qc$all$total_counts)  
+    expect_equal(ref$total_features, compact$scater_qc$all$total_features)  
+    expect_equal(ref$total_counts_controls1, compact$scater_qc$feature_control_controls1$total_counts)  
+    expect_equal(ref$total_counts_controls2, compact$scater_qc$feature_control_controls2$total_counts)  
 
     expect_identical(ref$is_cell_control, compact$scater_qc$is_cell_control)
     expect_identical(ref$is_cell_control_controls1, compact$scater_qc$is_cell_control_controls1)
     expect_identical(ref$is_cell_control_controls2, compact$scater_qc$is_cell_control_controls2)
 
     # Checking the row data.
-    expect_equal(rowData(ref)$mean_counts, rowData(compact)$scater_qc$counts$all$mean_counts) 
-    expect_equal(rowData(ref)$mean_counts_set1, rowData(compact)$scater_qc$counts$cell_control_set1$mean_counts)  
-    expect_equal(rowData(ref)$mean_counts_set2, rowData(compact)$scater_qc$counts$cell_control_set2$mean_counts) 
+    expect_equal(rowData(ref)$mean_counts, rowData(compact)$scater_qc$all$mean_counts) 
+    expect_equal(rowData(ref)$mean_counts_set1, rowData(compact)$scater_qc$cell_control_set1$mean_counts)  
+    expect_equal(rowData(ref)$mean_counts_set2, rowData(compact)$scater_qc$cell_control_set2$mean_counts) 
 
     expect_identical(rowData(ref)$is_feature_control, rowData(compact)$scater_qc$is_feature_control)
     expect_identical(rowData(ref)$is_feature_control_set1, rowData(compact)$scater_qc$is_feature_control_set1)
@@ -269,11 +269,11 @@ test_that("we can compute standard QC metrics with the compactness format", {
                                     cell_controls = list(set2 = 5:10), compact=TRUE)
 
     expect_identical(which(rowData(recompact)$scater_qc$is_feature_control_controls1), 20:50)
-    expect_equal(recompact$scater_qc$counts$feature_control_controls1$total_counts, 
+    expect_equal(recompact$scater_qc$feature_control_controls1$total_counts, 
                  unname(colSums(counts(recompact)[20:50,])))
 
     expect_identical(which(recompact$scater_qc$is_cell_control_set2), 5:10)
-    expect_equal(rowData(recompact)$scater_qc$counts$cell_control_set2$total_counts, 
+    expect_equal(rowData(recompact)$scater_qc$cell_control_set2$total_counts, 
                  unname(rowSums(counts(recompact)[,5:10])))
 })
 

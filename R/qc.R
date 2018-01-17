@@ -356,10 +356,12 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
     sub_output <- new("DataFrame", nrows=n_values)
     for (x in names(stat_list)) { 
-        sub_output[[x]] <- stat_list[[x]] # need to do it this way to store DataFrames as columns.
+        current <- stat_list[[x]] # need to do it via "[[<-" to store DataFrames as columns.
+        current <- .cbind_overwrite_DataFrames(existing[[x]], current)
+        sub_output[[x]] <- current
     }
-    output[[exprs_values]] <- sub_output
-
+    
+    output <- cbind(output, sub_output)
     .cbind_overwrite_DataFrames(existing, output)
 }
 
