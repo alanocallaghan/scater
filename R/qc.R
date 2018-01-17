@@ -393,6 +393,9 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 }
 
 .cbind_overwrite_DataFrames <- function(existing, updated) {
+    if (is.null(existing)) { 
+        return(updated)
+    }
     existing <- existing[, !(colnames(existing) %in% colnames(updated)), drop = FALSE]
     cbind(existing, updated)   
 } 
