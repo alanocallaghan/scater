@@ -144,7 +144,7 @@
 calculateQCMetrics <- function(object, exprs_values="counts", 
                                feature_controls = NULL, cell_controls = NULL,
                                percent_top = c(50, 100, 200, 500),
-                               detection_limit = 0, future = FALSE) {
+                               detection_limit = 0, compact = FALSE) {
 
     if ( !methods::is(object, "SingleCellExperiment")) {
         stop("object must be a SingleCellExperiment")
@@ -169,17 +169,18 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
         is_fcon <- Reduce(union, reindexed)
         is_endog <- seq_len(nrow(exprs_mat))[-is_fcon]
+        all_feature_sets <- c(all_feature_sets, list(endogenous=is_endog, feature_control=is_fcon), reindexed)
 
-        all_feature_sets <- c(all_feature_sets, list(endogenous=is_endog,
-                     feature_control=is_fcon), reindexed)
-
+        # But storing logical vectors in the metadata.
         feature_set_rdata <- vector("list", length(reindexed)+1)
-        names(feature_set_rdata) <-  c("feature_control", names(reindexed)
+        names(feature_set_rdata) <-  c("feature_control", names(reindexed))
         for (set in names(feature_set_rdata)) { 
             new_set <- logical(nrow(exprs_mat))
-            new_set[reindexed[[set]]] <- TRUE
+            new_set[all_feature_sets[[set]]] <- TRUE
             feature_set_rdata[[set]] <- new_set
         }
+    } else {
+        feature_set_rdata <- list(feature_control=logical(nrow(object)))
     }
 
     # Computing the cell-level metrics for each set.
@@ -201,7 +202,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
     # We first assemble thie list of all metrics (all MUST be first).
     all_cell_sets <- list(all=NULL)
-    cell_set_rdata <- list()
+    cell_set_cdata <- list()
 
     if (length(cell_controls)) { 
         if (is.null(names(cell_controls))) {
@@ -214,28 +215,28 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
         is_ccon <- Reduce(union, reindexed)
         is_ncon <- seq_len(ncol(exprs_mat))[-is_ccon]
+        all_cell_sets <- c(all_cell_sets, list(non_control=is_ncon, cell_control=is_ccon), reindexed)
 
-        all_feature_sets <- c(all_feature_sets, list(non_control=is_ncon,
-                     cell_control=is_fcon), reindexed)
-
+        # But storing logical vectors in the metadata.
         cell_set_cdata <- vector("list", length(reindexed)+1)
-        names(cell_set_cdata) <-  c("cell_control", names(reindexed)
+        names(cell_set_cdata) <-  c("cell_control", names(reindexed))
         for (set in names(cell_set_cdata)) { 
             new_set <- logical(ncol(exprs_mat))
-            new_set[reindexed[[set]]] <- TRUE
-            feature_set_rdata[[set]] <- new_set
+            new_set[all_cell_sets[[set]]] <- TRUE
+            cell_set_cdata[[set]] <- new_set
         }
+    } else {
+        cell_set_cdata <- list(cell_control=logical(ncol(object)))
     }
 
-    # Computing the cell-level metrics for each set.
+    # Computing the feature-level metrics for each set.
     all_cell_stats <- all_cell_sets
     total_exprs <- NULL
 
     for (set in names(all_cell_sets)) {
-        all_cell_stats[[set]] <-.get_qc_metrics_per_cell(exprs_mat, 
-            exprs_type = exprs_values, subset_row = all_cell_sets[[set]],
-            percent_top = percent_top, detection_limit = detection_limit,
-            total_exprs = total_exprs)
+        all_cell_stats[[set]] <-.get_qc_metrics_per_gene(exprs_mat, 
+            exprs_type = exprs_values, subset_col = all_cell_sets[[set]],
+            detection_limit = detection_limit, total_exprs = total_exprs)
 
         if (set=="all") { 
             total_exprs <- all_cell_stats[[set]][[paste0("total_", exprs_values)]]
@@ -245,16 +246,18 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     ### Formatting output depending on whether we're compacting or not. ###
 
     if (compact) {
-        # Converting them to nested dataframes.
-        scater_cd <- .convert_to_nested_DataFrame(cell_set_cdata, all_feature_stats)
-        scater_rd <- .convert_to_nested_DataFrame(feature_set_rdata, all_cell_stats)
+        scater_cd <- .convert_to_nested_DataFrame(colData(object)$scater_qc, 
+            cell_set_cdata, all_feature_stats)
+        scater_rd <- .convert_to_nested_DataFrame(rowData(object)$scater_qc,
+            feature_set_rdata, all_cell_stats)
         colData(object)$scater_qc <- scater_cd
         rowData(object)$scater_qc <- scater_rd
     } else {
-        # Flattening them to dataframes and replacing old entries.
-        scater_cd <- .convert_to_full_DataFrame(colData(object), cell_set_cdata, all_feature_stats)
+        scater_cd <- .convert_to_full_DataFrame(colData(object), cell_set_cdata, 
+            all_feature_stats, trim.fun=function(x) sub("^feature_control_", "", x))
+        scater_rd <- .convert_to_full_DataFrame(rowData(object), feature_set_rdata, 
+            all_cell_stats, trim.fun=function(x) sub("^cell_control_", "", x))
         colData(object) <- scater_cd
-        scater_rd <- .convert_to_full_DataFrame(rowData(object), feature_set_rdata, all_cell_stats)
         rowData(object) <- scater_rd
     }
     return(object)
@@ -263,11 +266,10 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 .get_qc_metrics_per_cell <- function(exprs_mat, exprs_type = "counts",
         subset_row = NULL, detection_limit = 0,
         percent_top = integer(0), total_exprs = .colSums(exprs_mat)) {
-   
-    subset_row <- .subset2index(subset_row, target = exprs_mat, byrow = TRUE)
+  
+    # Adding the total number of features. 
     nfeatures <- nexprs(exprs_mat, subset_row = subset_row, byrow = FALSE,
                         detection_limit = detection_limit)
-
     rd <- DataFrame(nfeatures, log10(nfeatures + 1), row.names = colnames(exprs_mat))
     colnames(rd) <- paste0(c("", "log10_"), "total_features")
 
@@ -296,7 +298,6 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     if (is.null(subset_row)) { 
         total_nrows <- nrow(exprs_mat)
     } else {
-        subset_row <- .subset2index(subset_row, exprs_mat) 
         subset_row <- subset_row - 1L # zero indexing needed for this C++ code.
         total_nrows <- length(subset_row)
     }
@@ -306,9 +307,9 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         percent_top <- percent_top[can.calculate]
         pct_exprs_top_out <- .Call(cxx_calc_top_features, exprs_mat, percent_top, subset_row)
         names(pct_exprs_top_out) <- paste0("pct_", exprs_type, "_top_", percent_top, "_features")
-        return(do.call(data.frame, pct_exprs_top_out))
+        return(do.call(DataFrame, pct_exprs_top_out))
     }
-    return(data.frame(row.names = seq_len(ncol(exprs_mat))))
+    return(new("DataFrame", nrows=ncol(exprs_mat)))
 }
 
 
@@ -349,34 +350,52 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     return(fd) 
 }
 
-.convert_to_nested_DataFrame <- function(set_list, stat_list, exprs_values = "counts") {
-    output <- do.call(DataFrame, set_list)
-    colnames(output) <- sprintf("is_%s", colnames(output)) 
+.convert_to_nested_DataFrame <- function(existing, set_list, stat_list, exprs_values = "counts") {
+    n_values <- length(stat_list[[1]][[1]]) # There should be at least one statistic.
+    output <- .create_outer_DataFrame(set_list, n_values)
 
-    sub_output <- new("DataFrame", nrows=length(stat_list[[1]][[1]]))
+    sub_output <- new("DataFrame", nrows=n_values)
     for (x in names(stat_list)) { 
-        sub_output[[x]] <- do.call(DataFrame, stat_list[[x]])
+        sub_output[[x]] <- stat_list[[x]] # need to do it this way to store DataFrames as columns.
     }
-
     output[[exprs_values]] <- sub_output
-    return(output)
+
+    .cbind_overwrite_DataFrames(existing, output)
 }
 
-.convert_to_full_DataFrame <- function(existing, set_list, stat_list) {
-    output <- do.call(DataFrame, set_list)
-    colnames(output) <- sprintf("is_%s", colnames(output)) 
+.convert_to_full_DataFrame <- function(existing, set_list, stat_list, trim.fun=identity) {
+    n_values <- length(stat_list[[1]][[1]]) # There should be at least one statistic.
+    output <- .create_outer_DataFrame(set_list, n_values)
 
     collected <- stat_list
     for (x in names(stat_list)) { 
-        current <- do.call(DataFrame, stat_list[[x]])
-        colnames(current) <- sprintf("%s_%s", colnames(current), x)
+        current <- stat_list[[x]]
+
+        # For consistency with old output.
+        if (x!="all") { 
+            colnames(current) <- sprintf("%s_%s", colnames(current), trim.fun(x))
+        }
         collected[[x]] <- current
     }
 
-    combined <- do.call(cbind, c(list(output), collected))
-    existing <- existing[, !(colnames(existing) %in% colnames(combined)), drop = FALSE]
-    cbind(existing, combined)
+    combined <- do.call(cbind, c(list(output), unname(collected)))
+    .cbind_overwrite_DataFrames(existing, combined)
 }
+
+.create_outer_DataFrame <- function(set_list, n_values) {
+    if (length(set_list)) { 
+        output <- do.call(DataFrame, set_list)
+        colnames(output) <- sprintf("is_%s", colnames(output)) 
+    } else {
+        output <- new("DataFrame", nrows=n_values)
+    }
+    return(output)
+}
+
+.cbind_overwrite_DataFrames <- function(existing, updated) {
+    existing <- existing[, !(colnames(existing) %in% colnames(updated)), drop = FALSE]
+    cbind(existing, updated)   
+} 
 
 ################################################################################
 
