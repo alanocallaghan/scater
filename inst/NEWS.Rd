@@ -1,7 +1,15 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
-\section{Changes in version 1.5.11,  (August 2017)}{
+\section{Changes in version 1.7.4, Bioconductor 3.7 Release}{
+  \itemize{
+    \item Refactored calculateQCMetrics() to ignore potential non-linearity,
+     rank genes by highest expression, rename automatically generated 
+     union sets, allow for output of a compact format. 
+  }
+}
+
+\section{Changes in version 1.5.11, Bioconductor 3.6 Release (September 2017)}{
   \itemize{
     \item Complete refactoring of the package to use the SingleCellExperiment
     class
