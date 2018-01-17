@@ -156,6 +156,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     cd <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
             subset_row = NULL, subset_type = NULL, percent_top = percent_top,
             detection_limit = detection_limit)
+    total_exprs <- cd[[paste0("total_", exprs_values)]]
     rd <- DataFrame(is_feature_control = logical(nrow(exprs_mat)), 
             row.names = rownames(exprs_mat))
 
@@ -183,12 +184,14 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         is_endog <- which(!rd$is_feature_control)
         cd_endog <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
                 subset_row = is_endog, subset_type = "endogenous", 
-                percent_top = percent_top, detection_limit = detection_limit)
+                percent_top = percent_top, detection_limit = detection_limit,
+                total_exprs = total_exprs)
 
         # Running through all feature controls.
         cd_fcon <- .get_qc_metrics_per_cell(exprs_mat, exprs_type = exprs_values,
                 subset_row = is_fcon, subset_type = "feature_control", 
-                percent_top = percent_top, detection_limit = detection_limit)
+                percent_top = percent_top, detection_limit = detection_limit,
+                total_exprs = total_exprs)
 
         # Running through each of the feature controls.
         cd_per_fcon <- vector("list", n_feature_sets)
@@ -196,7 +199,8 @@ calculateQCMetrics <- function(object, exprs_values="counts",
             cd_per_fcon[[f]] <- .get_qc_metrics_per_cell(
                 exprs_mat, exprs_type = exprs_values,
                 subset_row = reindexed[[f]], subset_type = names(reindexed)[f], 
-                percent_top = percent_top, detection_limit = detection_limit)
+                percent_top = percent_top, detection_limit = detection_limit,
+                total_exprs = total_exprs)
         }
 
         cd <- do.call(cbind, c(list(cd, cd_endog, cd_fcon), cd_per_fcon))
@@ -207,6 +211,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     rd_all <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
             subset_col = NULL, subset_type = NULL, 
             detection_limit = detection_limit)
+    total_exprs <- rd_all[[paste0("total_", exprs_values)]]
     rd <- cbind(rd, rd_all)
     cd$is_cell_control <- logical(ncol(exprs_mat))
 
@@ -229,19 +234,22 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         is_noncon <- which(!cd$is_cell_control)
         rd_noncon <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
                 subset_col = is_noncon, subset_type = "non_control", 
-                detection_limit = detection_limit)
+                detection_limit = detection_limit, 
+                total_exprs = total_exprs)
 
         # Adding statistics for all control cells.
         rd_con <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
                 subset_col = is_ccon, subset_type = "cell_control", 
-                detection_limit = detection_limit)
+                detection_limit = detection_limit,
+                total_exprs = total_exprs)
 
         # Adding statistics for each set of control cells.
         rd_collected <- vector("list", n_cell_sets)
         for (cx in seq_len(n_cell_sets)) {
             rd_current <- .get_qc_metrics_per_gene(exprs_mat, exprs_type = exprs_values,
                     subset_col = reindexed[[cx]], subset_type = names(reindexed)[cx], 
-                    detection_limit = detection_limit)
+                    detection_limit = detection_limit,
+                    total_exprs = total_exprs)
             rd_collected[[cx]] <- rd_current
         }
 
@@ -265,7 +273,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
 .get_qc_metrics_per_cell <- function(exprs_mat, exprs_type = "counts",
         subset_row = NULL, subset_type = NULL, detection_limit = 0,
-        percent_top = integer(0)) {        
+        percent_top = integer(0), total_exprs = .colSums(exprs_mat)) {
     
     if (is.null(subset_type)) {
         subset_type <- ""
@@ -287,8 +295,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     
     if (!is.null(subset_row)) {
         ## Computing percentages of actual total.
-        rd[[paste0("pct_", exprs_type, subset_type)]] <- 
-            (100 * libsize / .colSums(exprs_mat))
+        rd[[paste0("pct_", exprs_type, subset_type)]] <- 100 * libsize / total_exprs
     }
     
     ## Computing total percentages.
@@ -324,7 +331,8 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
 
 .get_qc_metrics_per_gene <- function(exprs_mat, exprs_type="counts", 
-        subset_col=NULL, subset_type=NULL, detection_limit=0) {
+        subset_col=NULL, subset_type=NULL, detection_limit=0, 
+        total_exprs = .rowSums(exprs_mat)) {
 
     if (is.null(subset_type)) {
         subset_type <- ""
@@ -353,7 +361,6 @@ calculateQCMetrics <- function(object, exprs_values="counts",
     fd[[paste0("log10_total_", exprs_type, subset_type)]] <- log10(sum_exprs + 1)
     
     if (!is.null(subset_col)) { 
-        total_exprs <- .rowSums(exprs_mat)
         fd[[paste0("pct_", exprs_type, subset_type)]] <- sum_exprs/total_exprs * 100
     }
 
