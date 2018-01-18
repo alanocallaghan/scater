@@ -20,7 +20,7 @@ Depends: R (>= 3.5), Biobase, ggplot2, SingleCellExperiment, SummarizedExperimen
 Imports: biomaRt, BiocGenerics, data.table, dplyr, edgeR, ggbeeswarm, grid, limma,
         Matrix, DelayedMatrixStats, methods, parallel, plyr, reshape2, rhdf5, 
         rjson, S4Vectors, shiny, shinydashboard, stats, tximport, utils, viridis, 
-        Rcpp (>= 0.12.14)
+        Rcpp (>= 0.12.14), DelayedArray
 Suggests: BiocStyle, beachmat, cowplot, cluster, destiny, knitr, monocle,
         mvoutlier, rmarkdown, Rtsne, testthat, magrittr, pheatmap
 VignetteBuilder: knitr

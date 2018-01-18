@@ -1525,6 +1525,7 @@ plotQC <- function(object, type = "highest-expression", ...) {
 #' @aliases plotRLE plotRLE,SingleCellExperiment-method
 #' @export
 #'
+#' @importFrom DelayedArray DelayedArray
 #' @importFrom DelayedMatrixStats colQuantiles rowMedians
 #' 
 #' @examples 
@@ -1690,7 +1691,7 @@ plotRLE <- function(object, exprs_mats = list(logcounts = "logcounts"), exprs_lo
     if (!logged)
         exprs_mat <- log2(exprs_mat + 1)
     features_meds <- rowMedians(DelayedArray(exprs_mat))
-    med_devs <- exprs_mat - features_meds
+    med_devs <- as.matrix(exprs_mat - features_meds)
     med_devs
 }
 
