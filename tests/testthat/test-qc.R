@@ -148,29 +148,22 @@ test_that("we can compute standard QC metrics with cell controls", {
 })
 
 test_that("we can compute standard QC metrics on sparse counts matrix", {
-    original <- read10xResults(system.file("extdata", package = "scater"))
+    library(Matrix)
+    counts(original) <- as(counts(original), "dgCMatrix")
 
-    sce10x <- original
     expect_error(
-        example_sce <- calculateQCMetrics(sce10x, feature_controls = 1:20),
+        example_sce <- calculateQCMetrics(original, feature_controls = 1:20),
         "feature_controls should be named")
 
-    sce10x <- calculateQCMetrics(sce10x, feature_controls = list(set1 = 1:20))
-    expect_that(sce10x, is_a("SingleCellExperiment"))
-
-    sce10x <- calculateQCMetrics(
-        sce10x, 
-        feature_controls = list(set1 = c(rep(TRUE, 20), 
-                                         rep(FALSE, nrow(sce10x) - 20))))
-    expect_that(sce10x, is_a("SingleCellExperiment"))
+    sparsified <- calculateQCMetrics(original, feature_controls = list(set1 = 1:20))
+    expect_that(sparsified, is_a("SingleCellExperiment"))
 
     # Checking the values against a reference.
-    library(Matrix)
-    ref <- original
+    ref <- original 
     counts(ref) <- as.matrix(counts(original))
     ref <- calculateQCMetrics(ref, feature_controls=list(set1=1:20))
-    expect_equal(rowData(ref), rowData(sce10x))
-    expect_equal(colData(ref), colData(sce10x))
+    expect_equal(rowData(ref), rowData(sparsified))
+    expect_equal(colData(ref), colData(sparsified))
 })
 
 #######################################################################
