@@ -295,6 +295,8 @@ readKallistoResultsOneSample <- function(directory, read_h5=FALSE,
 #' @name kallisto-wrapper
 #' @rdname kallisto-wrapper
 #'
+#' @importFrom DelayedMatrixStats rowMedians
+#'
 #' @export
 #' @examples
 #' \dontrun{
@@ -412,7 +414,7 @@ readKallistoResults <- function(kallisto_log = NULL, samples = NULL,
         }
     }
     ## Add median feature effective length to fData
-    fdata$median_effective_length <- matrixStats::rowMedians(feat_eff_len)
+    fdata$median_effective_length <- DelayedMatrixStats::rowMedians(DelayedArray(feat_eff_len))
     
     if ( verbose )
         cat("\n")

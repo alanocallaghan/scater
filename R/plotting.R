@@ -2605,6 +2605,8 @@ multiplot <- function(..., plotlist = NULL, cols = 1, layout = NULL) {
 #' @return a ggplot object
 #' @export
 #'
+#' @importFrom DelayedMatrixStats rowMedians
+#' 
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
@@ -2654,7 +2656,7 @@ plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len",
         else {
             if ( tx_length %in% SummarizedExperiment::assayNames(object) ) {
                 tx_length_mat <- assay(object, tx_length)
-                tx_length_values <- matrixStats::rowMedians(tx_length_mat)
+                tx_length_values <- DelayedMatrixStats::rowMedians(DelayedArray(tx_length_mat))
             } else
                 stop("the argument 'tx_length' should specify a column of rowData(object) or an element of assayNames(object) [see names(assayNames(object))")
         }

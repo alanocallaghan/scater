@@ -232,7 +232,7 @@ readSalmonResults <- function(Salmon_log = NULL, samples = NULL,
         }
     }
     ## Add median feature effective length to fData
-    fdata$median_effective_length <- matrixStats::rowMedians(feat_eff_len)
+    fdata$median_effective_length <- rowMedians(DelayedArray(feat_eff_len))
     
     if ( verbose )
         cat("\n")

@@ -663,7 +663,7 @@ findImportantPCs <- function(object, variable="total_features",
     if ( is.null(df_for_pca) )
         stop("The supplied 'exprs_values' argument not found in assayData(object). Try 'exprs' or similar.")
     if ( is.null(feature_set) ) {
-        rv <- matrixStats::rowVars(df_for_pca)
+        rv <- .rowVars(df_for_pca)
         feature_set <-
             order(rv, decreasing = TRUE)[seq_len(min(ntop, length(rv)))]
     }
@@ -671,7 +671,7 @@ findImportantPCs <- function(object, variable="total_features",
     df_for_pca <- t(df_for_pca)
 
     ## Drop any features with zero variance
-    keep_feature <- (matrixStats::colVars(df_for_pca) > 0.001)
+    keep_feature <- .colVars(df_for_pca) > 0.001
     keep_feature[is.na(keep_feature)] <- FALSE
     df_for_pca <- df_for_pca[, keep_feature]
     ## compute PCA
@@ -1524,6 +1524,8 @@ plotQC <- function(object, type = "highest-expression", ...) {
 #' @name plotRLE
 #' @aliases plotRLE plotRLE,SingleCellExperiment-method
 #' @export
+#'
+#' @importFrom DelayedMatrixStats colQuantiles rowMedians
 #' 
 #' @examples 
 #' data("sc_example_counts")
@@ -1628,7 +1630,7 @@ plotRLE <- function(object, exprs_mats = list(logcounts = "logcounts"), exprs_lo
 }
 
 .rle_boxplot_stats <- function(mat) {
-    boxstats <- matrixStats::colQuantiles(mat)
+    boxstats <- colQuantiles(DelayedArray(mat))
     colnames(boxstats) <- c("q0", "q25", "q50", "q75", "q100")
     boxdf <- dplyr::as_data_frame(boxstats)
     interqr <- boxstats[, 4] - boxstats[, 2]
@@ -1687,7 +1689,7 @@ plotRLE <- function(object, exprs_mats = list(logcounts = "logcounts"), exprs_lo
 .calc_RLE <- function(exprs_mat, logged = TRUE) {
     if (!logged)
         exprs_mat <- log2(exprs_mat + 1)
-    features_meds <- matrixStats::rowMedians(exprs_mat)
+    features_meds <- rowMedians(DelayedArray(exprs_mat))
     med_devs <- exprs_mat - features_meds
     med_devs
 }
