@@ -1,16 +1,19 @@
-## Test functions for QC
+# Test functions for QC
 
 context("test controls functionality")
 
+data("sc_example_counts")
+data("sc_example_cell_info")
+original <- SingleCellExperiment(
+    assays = list(counts = sc_example_counts), 
+    colData = sc_example_cell_info)
+
 test_that("we can compute standard QC metrics", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    example_sce <- calculateQCMetrics(example_sce)
-    
+    example_sce <- calculateQCMetrics(original)
     expect_that(example_sce, is_a("SingleCellExperiment"))
+    expect_identical(counts(example_sce), counts(original))
+    expect_identical(example_sce$Cell, original$Cell)
+    expect_identical(colData(original), colData(example_sce)[,colnames(colData(original))])
 
     # Testing total metrics for cells.
     expect_equal(example_sce$total_counts, unname(colSums(counts(example_sce))))
@@ -26,7 +29,7 @@ test_that("we can compute standard QC metrics", {
 
         for (x in c(50, 100, 200, 500)) { 
             chosen <- o[seq_len(x)]
-            expect_equal(example_sce[[paste0("pct_counts_top_", x, "_features")]][i],
+            expect_equal(example_sce[[paste0("pct_counts_in_top_", x, "_features")]][i],
                          sum(cur_counts[chosen])/lib_size * 100) 
         }
     }
@@ -43,18 +46,11 @@ test_that("we can compute standard QC metrics", {
 
 
 test_that("we can compute standard QC metrics with feature controls", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    original <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-
-    example_sce <- original
     expect_error(
-        example_sce <- calculateQCMetrics(example_sce, feature_controls = 1:20),
+        example_sce <- calculateQCMetrics(original, feature_controls = 1:20),
         "feature_controls should be named")
 
-    example_sce <- calculateQCMetrics(example_sce, 
+    example_sce <- calculateQCMetrics(original, 
                                       feature_controls = list(set1 = 1:20))
     expect_that(example_sce, is_a("SingleCellExperiment"))
 
@@ -71,8 +67,7 @@ test_that("we can compute standard QC metrics with feature controls", {
     expect_equal(example_sce$log10_total_features_by_counts_set1, log10(example_sce$total_features_by_counts_set1+1))
 
     # Same output with logical vectors.
-    example_sce2 <- calculateQCMetrics(
-        example_sce, 
+    example_sce2 <- calculateQCMetrics(original, 
         feature_controls = list(set1 = c(rep(c(TRUE, FALSE),
                                              c(20, nrow(example_sce) - 20)))))
     expect_equal(example_sce2, example_sce)
@@ -102,18 +97,11 @@ test_that("we can compute standard QC metrics with feature controls", {
 })
 
 test_that("we can compute standard QC metrics with cell controls", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    original <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-
-    example_sce <- original
     expect_error(
-        example_sce <- calculateQCMetrics(example_sce, cell_controls = 1:20),
+        example_sce <- calculateQCMetrics(original, cell_controls = 1:20),
         "cell_controls should be named")
 
-    example_sce <- calculateQCMetrics(example_sce, 
+    example_sce <- calculateQCMetrics(original, 
                                       cell_controls = list(set1 = 1:20))
     expect_that(example_sce, is_a("SingleCellExperiment"))
 
@@ -130,8 +118,7 @@ test_that("we can compute standard QC metrics with cell controls", {
     expect_equal(rowData(example_sce)$log10_total_counts_set1, unname(log10(rowData(example_sce)$total_counts_set1+1)))
 
      #Same output with logical vectors.
-    example_sce2 <- calculateQCMetrics(
-        example_sce, 
+    example_sce2 <- calculateQCMetrics(original,
         cell_controls = list(set1 = c(rep(c(TRUE, FALSE),
                                              c(20, nrow(example_sce) - 20)))))
     expect_equal(example_sce2, example_sce)
@@ -186,33 +173,29 @@ test_that("we can compute standard QC metrics on sparse counts matrix", {
     expect_equal(colData(ref), colData(sce10x))
 })
 
-test_that("we can compute standard QC metrics with multiple sets of feature and cell controls", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    original <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
+#######################################################################
+# Repeating with multiple feature and cell controls:
 
-    example_sce <- calculateQCMetrics(
-        original, feature_controls = list(controls1 = 1:20, 
-            controls2 = 500:1000),
+multi_qc <- calculateQCMetrics(
+    original, feature_controls = list(controls1 = 1:20, controls2 = 500:1000),
         cell_controls = list(set1 = 1:5, set2 = 10:20))
 
+test_that("we can compute standard QC metrics with multiple sets of feature and cell controls", {
+    expect_that(multi_qc, is_a("SingleCellExperiment"))
+   
     ref1 <- calculateQCMetrics(
         original, feature_controls = list(controls1 = 1:20, 
             controls2 = 500:1000))
     expect_equal(colData(ref1)[,colnames(colData(ref1))!="is_cell_control"],
-        colData(example_sce)[,!grepl("is_cell_control", colnames(colData(example_sce)))])
+        colData(multi_qc)[,!grepl("is_cell_control", colnames(colData(multi_qc)))])
 
     ref2 <- calculateQCMetrics(
         original, cell_controls = list(set1 = 1:5, set2 = 10:20))
     expect_equal(rowData(ref2)[,colnames(rowData(ref2))!="is_feature_control"],
-        rowData(example_sce)[,!grepl("is_feature_control", colnames(rowData(example_sce)))])
-
-    expect_that(example_sce, is_a("SingleCellExperiment"))
+        rowData(multi_qc)[,!grepl("is_feature_control", colnames(rowData(multi_qc)))])
 
     # Checking for correct overwriting of elements.
-    reref <- calculateQCMetrics(example_sce, feature_controls = list(controls1 = 20:50),
+    reref <- calculateQCMetrics(original, feature_controls = list(controls1 = 20:50),
                                     cell_controls = list(set2 = 5:10))
 
     expect_identical(which(rowData(reref)$is_feature_control_controls1), 20:50)
@@ -225,41 +208,29 @@ test_that("we can compute standard QC metrics with multiple sets of feature and 
 })
 
 test_that("we can compute standard QC metrics with the compact format", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-
-    original <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-
-    ref <- calculateQCMetrics(
-        original, feature_controls = list(controls1 = 1:20, 
-            controls2 = 500:1000),
-        cell_controls = list(set1 = 1:5, set2 = 10:20))
-    
     compact <- calculateQCMetrics(
         original, feature_controls = list(controls1 = 1:20, 
             controls2 = 500:1000),
         cell_controls = list(set1 = 1:5, set2 = 10:20), compact=TRUE)
 
     # Checking the column data.
-    expect_equal(ref$total_counts, compact$scater_qc$all$total_counts)  
-    expect_equal(ref$total_features_by_counts, compact$scater_qc$all$total_features_by_counts)  
-    expect_equal(ref$total_counts_controls1, compact$scater_qc$feature_control_controls1$total_counts)  
-    expect_equal(ref$total_counts_controls2, compact$scater_qc$feature_control_controls2$total_counts)  
+    expect_equal(multi_qc$total_counts, compact$scater_qc$all$total_counts)  
+    expect_equal(multi_qc$total_features_by_counts, compact$scater_qc$all$total_features_by_counts)  
+    expect_equal(multi_qc$total_counts_controls1, compact$scater_qc$feature_control_controls1$total_counts)  
+    expect_equal(multi_qc$total_counts_controls2, compact$scater_qc$feature_control_controls2$total_counts)  
 
-    expect_identical(ref$is_cell_control, compact$scater_qc$is_cell_control)
-    expect_identical(ref$is_cell_control_controls1, compact$scater_qc$is_cell_control_controls1)
-    expect_identical(ref$is_cell_control_controls2, compact$scater_qc$is_cell_control_controls2)
+    expect_identical(multi_qc$is_cell_control, compact$scater_qc$is_cell_control)
+    expect_identical(multi_qc$is_cell_control_controls1, compact$scater_qc$is_cell_control_controls1)
+    expect_identical(multi_qc$is_cell_control_controls2, compact$scater_qc$is_cell_control_controls2)
 
     # Checking the row data.
-    expect_equal(rowData(ref)$mean_counts, rowData(compact)$scater_qc$all$mean_counts) 
-    expect_equal(rowData(ref)$mean_counts_set1, rowData(compact)$scater_qc$cell_control_set1$mean_counts)  
-    expect_equal(rowData(ref)$mean_counts_set2, rowData(compact)$scater_qc$cell_control_set2$mean_counts) 
+    expect_equal(rowData(multi_qc)$mean_counts, rowData(compact)$scater_qc$all$mean_counts) 
+    expect_equal(rowData(multi_qc)$mean_counts_set1, rowData(compact)$scater_qc$cell_control_set1$mean_counts)  
+    expect_equal(rowData(multi_qc)$mean_counts_set2, rowData(compact)$scater_qc$cell_control_set2$mean_counts) 
 
-    expect_identical(rowData(ref)$is_feature_control, rowData(compact)$scater_qc$is_feature_control)
-    expect_identical(rowData(ref)$is_feature_control_set1, rowData(compact)$scater_qc$is_feature_control_set1)
-    expect_identical(rowData(ref)$is_feature_control_set2, rowData(compact)$scater_qc$is_feature_control_set2)
+    expect_identical(rowData(multi_qc)$is_feature_control, rowData(compact)$scater_qc$is_feature_control)
+    expect_identical(rowData(multi_qc)$is_feature_control_set1, rowData(compact)$scater_qc$is_feature_control_set1)
+    expect_identical(rowData(multi_qc)$is_feature_control_set2, rowData(compact)$scater_qc$is_feature_control_set2)
 
     # Checking for correct overwriting of elements.
     recompact <- calculateQCMetrics(compact, feature_controls = list(controls1 = 20:50),
@@ -274,6 +245,8 @@ test_that("we can compute standard QC metrics with the compact format", {
                  unname(rowSums(counts(recompact)[,5:10])))
 })
 
+#######################################################################
+# Checking for failure with other metrics:
 
 test_that("computing standard QC metrics with FPKM data fails as expected", {
     gene_df <- data.frame(Gene = rownames(sc_example_counts))
@@ -298,6 +271,9 @@ test_that("computing standard QC metrics with TPM data fails as expected", {
         example_sce, feature_controls = list(set1 = 1:20)),
         "not in names")
 })
+
+#######################################################################
+# Checking the QC-related plotting functions:
 
 test_that("failure is as expected for misspecified arg to plotExplanatoryVariables()", {
     data("sc_example_counts")
