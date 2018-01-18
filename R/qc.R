@@ -793,7 +793,7 @@ findImportantPCs <- function(object, variable="total_features",
     ## Compute total sum of squares
     sst <- .rowVars(y) * (ncol(y)-1)    
     ## Compute residual sum of squares
-    effects <- qr.qty(QR, t(y))
+    effects <- qr.qty(QR, as.matrix(t(y)))
     ssr <- sst - colSums(effects[-seq_len(QR$rank),, drop = FALSE] ^ 2) # no need for .colSums, as this is always dense.
     return(list(sst = sst, ssr = ssr))
 }
