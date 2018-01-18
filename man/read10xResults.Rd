@@ -36,8 +36,9 @@ Creates a full or sparse matrix from a sparse data matrix provided by 10X
 genomics.
 }
 \details{
-This function was developed from the \code{Read10X} function from 
-the \pkg{Seurat} package.
+This function calls \code{\link[DropletUtils]{read10xCounts}}
+from the \pkg{DropletUtils} package. It is deprecated and will be removed
+in the next release.
 }
 \examples{
 sce10x <- read10xResults(system.file("extdata", package="scater"))

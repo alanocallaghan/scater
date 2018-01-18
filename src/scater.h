@@ -19,8 +19,6 @@ SEXP calc_top_features(SEXP, SEXP, SEXP);
 
 SEXP calc_exprs(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
-SEXP downsample_matrix(SEXP, SEXP);
-
 SEXP row_vars(SEXP, SEXP, SEXP);
 
 SEXP col_vars(SEXP, SEXP, SEXP);

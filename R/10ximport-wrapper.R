@@ -13,7 +13,9 @@
 #' counts below the threshold are filtered out.
 #' @param ... passed arguments
 #' 
-#' @details This function calls \code{\link[DropletUtils]{read10xCounts}}.
+#' @details This function calls \code{\link[DropletUtils]{read10xCounts}}
+#' from the \pkg{DropletUtils} package. It is deprecated and will be removed
+#' in the next release.
 #' 
 #' @return Returns an SingleCellExperiment object with counts data stored as a
 #' sparse matrix. Rows are named with the gene name and columns are named with 
@@ -62,6 +64,8 @@ read10XResults <- function(...) {
 #' indicating the downsampling proportion
 #' 
 #' @details This function calls \code{\link[DropletUtils]{downsampleMatrix}}.
+#' from the \pkg{DropletUtils} package. It is deprecated and will be removed
+#' in the next release.
 #' 
 #' @return an integer matrix of downsampled counts
 #' 

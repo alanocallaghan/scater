@@ -19,15 +19,9 @@ an integer matrix of downsampled counts
 Downsample a count matrix to a desired proportion.
 }
 \details{
-Given multiple 10X batches of very different sequencing depths, it
-can be beneficial to downsample the deepest batches to match the coverage of
-the shallowest batches. This avoids differences in technical noise that can
-drive clustering by batch. 
-
-Downsampling without replacement is performed on the counts in each cell to
-generate the output matrix. Each count in the returned matrix is guaranteed
-to be smaller than the original value in \code{x}. This provides an 
-alternative to downsampling in the CellRanger \code{aggr} function.
+This function calls \code{\link[DropletUtils]{downsampleMatrix}}.
+from the \pkg{DropletUtils} package. It is deprecated and will be removed
+in the next release.
 }
 \examples{
 sce10x <- read10xResults(system.file("extdata", package="scater"))
