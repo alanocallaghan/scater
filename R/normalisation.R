@@ -388,7 +388,7 @@ areSizeFactorsCentred <- function(object, centre=1, tol=1e-6) {
     all.sf.sets <- c(list(NULL), as.list(sizeFactorNames(object)))
     for (sfname in all.sf.sets) {
         sf <- sizeFactors(object, type=sfname)
-        if (abs(mean(sf) - centre) > tol) {
+        if (!is.null(sf) && abs(mean(sf) - centre) > tol) {
             return(FALSE)
         }
     }
