@@ -1998,8 +1998,8 @@ plotExpressionDefault <- function(object, aesth, ncol = 2, xlab = NULL,
 #' \code{NULL}, it defaults to the range of the expression matrix.
 #' @param symmetric A logical scalar specifying whether the default \code{zlim}
 #' should be symmetric around zero. If \code{TRUE}, the maximum absolute
-#' expression value will be computed and multiplied by \code{c(-1, 1)} to 
-#' define \code{zlim}.
+#' value of \code{zlim} will be computed and multiplied by \code{c(-1, 1)} to 
+#' redefine \code{zlim}.
 #' @param color A vector of colours specifying the palette to use for mapping 
 #' expression values to colours. This defaults to the default setting in 
 #' \code{\link[pheatmap]{pheatmap}}.
@@ -2050,10 +2050,10 @@ plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts"
     # Winsorizing to preserve the dynamic range.
     if (is.null(zlim)) {
         zlim <- range(heat.vals)
-        if (symmetric) {
-            extreme <- max(abs(zlim))
-            zlim <- c(-extreme, extreme)
-        }
+    }
+    if (symmetric) {
+        extreme <- max(abs(zlim))
+        zlim <- c(-extreme, extreme)
     }
     heat.vals[heat.vals < zlim[1]] <- zlim[1]
     heat.vals[heat.vals > zlim[2]] <- zlim[2]

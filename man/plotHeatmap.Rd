@@ -30,8 +30,8 @@ prior to plotting (but after centering, if \code{center=TRUE}. If
 
 \item{symmetric}{A logical scalar specifying whether the default \code{zlim}
 should be symmetric around zero. If \code{TRUE}, the maximum absolute
-expression value will be computed and multiplied by \code{c(-1, 1)} to 
-define \code{zlim}.}
+value of \code{zlim} will be computed and multiplied by \code{c(-1, 1)} to 
+redefine \code{zlim}.}
 
 \item{color}{A vector of colours specifying the palette to use for mapping 
 expression values to colours. This defaults to the default setting in 
