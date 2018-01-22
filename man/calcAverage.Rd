@@ -4,16 +4,21 @@
 \alias{calcAverage}
 \title{Calculate average counts, adjusting for size factors or library size}
 \usage{
-calcAverage(object, size_factors = NULL)
+calcAverage(object, exprs_values = "counts", use_size_factors = TRUE,
+  size_factors = NULL)
 }
 \arguments{
-\item{object}{a \code{\link{SingleCellExperiment}} object or a matrix of counts}
+\item{object}{A SingleCellExperiment object or count matrix.}
 
-\item{size_factors}{numeric vector of size factors to use to downscale the counts.
-prior to computing averages. Extracted from the 
-object if it is a \code{SingleCellExperiment} object; if object is a matrix, then 
-if non-NULL, the provided size factors are used. Default is \code{NULL}, where
-size factors are defined to be proportional to the library sizes.}
+\item{exprs_values}{A string specifying the assay of \code{object}
+containing the count matrix, if \code{object} is a SingleCellExperiment.}
+
+\item{use_size_factors}{a logical scalar specifying whether
+the size factors in \code{object} should be used to construct 
+effective library sizes.}
+
+\item{size_factors}{A numeric vector containing size factors to 
+use for all non-spike-in features.}
 }
 \value{
 Vector of average count values with same length as number of features.
@@ -24,11 +29,16 @@ into account for size factors for normalization or library sizes (total
 counts).
 }
 \details{
-For spike-in controls in a \code{SingleCellExperiment}, control-specific 
-size factors will be used if available (see \code{\link{normalizeSCE}}). If
-no size factors are available for any gene, the library sizes are used instead.
-All library sizes are scaled so that the mean is 1 across all cells, to ensure
-that the averages are interpretable on the scale of the raw counts.
+The size-adjusted average count is defined by dividing each count by the size factor and taking the average across cells.
+All sizes factors are scaled so that the mean is 1 across all cells, to ensure that the averages are interpretable on the scale of the raw counts. 
+
+If \code{use_size_factors=TRUE} and \code{object} is a SingleCellExperiment, size factors are automatically extracted from the object.
+For spike-in controls, control-specific size factors will be used if available (see \code{\link{normalizeSCE}}). 
+If \code{use_size_factors=FALSE} or \code{object} is a matrix, the library size for each cell is used as the size factor via \code{\link{computeLibSizeFactors}}.
+
+If \code{size_factors} is supplied, it will override the any size factors for non-spike-in features in \code{object} (if it is a SingleCellExperiment).
+The spike-in size factors will still be used. 
+If \code{object} is a matrix, \code{size_factors} will be used instead of the library size.
 }
 \examples{
 data("sc_example_counts")

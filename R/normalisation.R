@@ -413,7 +413,7 @@ areSizeFactorsCentred <- function(object, centre=1, tol=1e-6) {
 #' summary(computeLibSizeFactors(sc_example_counts))
 #'
 computeLibSizeFactors <- function(object, exprs_values="counts") {
-    if (!is.matrix(object)) {
+    if (is(object, 'SingleCellExperiment')) { 
         object <- assay(object, i=exprs_values)
     }
     lib_sizes <- .colSums(object)

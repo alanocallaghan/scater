@@ -187,19 +187,30 @@ calculateTPM <- function(object, effective_length = NULL,
 #'
 #' Calculate count-per-million (CPM) values from the count data.
 #'
-#' @param object an \code{SingleCellExperiment} object
+#' @param object A SingleCellExperiment object or count matrix.
+#' @param exprs_values A string specifying the assay of \code{object}
+#' containing the count matrix, if \code{object} is a SingleCellExperiment.
 #' @param use_size_factors a logical scalar specifying whether
-#' the size factors should be used to construct effective library
-#' sizes, or if the library size should be directly defined as
-#' the sum of counts for each cell.
+#' the size factors in \code{object} should be used to construct 
+#' effective library sizes.
+#' @param size_factors A numeric vector containing size factors to 
+#' use for all non-spike-in features.
 #'
-#' @details If \code{use_size_factors=TRUE}, size factors are used
-#' to define the effective library sizes by scaling all size factors
-#' such that the mean scaled size factor is equal to the mean sum of
-#' counts across all features. Note that effective library sizes will 
-#' be  computed differently for features marked as spike-in controls, 
-#' due to the presence of control-specific size factors - see 
-#' \code{\link{normalizeSCE}} for more details.
+#' @details 
+#' If requested, size factors are used to define the effective library sizes. 
+#' This is done by scaling all size factors such that the mean scaled size factor is equal to the mean sum of counts across all features. 
+#' The effective library sizes are then used to compute the CPM matrix.
+#'
+#' If \code{use_size_factors=TRUE} and \code{object} is a SingleCellExperiment, size factors are automatically extracted from the object.
+#' If \code{use_size_factors=FALSE} or \code{object} is a matrix, the sum of counts for each cell is directly used as the library size.
+#'
+#' Note that effective library sizes may be computed differently for features marked as spike-in controls.
+#' This is due to the presence of control-specific size factors in \code{object}. 
+#' See \code{\link{normalizeSCE}} for more details.
+#' 
+#' If \code{size_factors} is supplied, it will override the any size factors for non-spike-in features in \code{object} (if it is a SingleCellExperiment).
+#' The spike-in size factors will still be used. 
+#' If \code{object} is a matrix, \code{size_factors} will be used instead of the library size.
 #'
 #' @return Matrix of CPM values.
 #' @export
@@ -210,39 +221,32 @@ calculateTPM <- function(object, effective_length = NULL,
 #' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
 #' cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
 #'
-calculateCPM <- function(object, use_size_factors = TRUE) {
-    if ( !methods::is(object, "SingleCellExperiment") ) {
-        stop("object must be an SingleCellExperiment")
-    }
-    counts_mat <- counts(object)
-    subset_row <- .subset2index(NULL, target = counts_mat, byrow = TRUE)
-    lib.sizes <- .colSums(counts_mat)
-
-    if (use_size_factors) {
-        sf.list <- .get_all_sf_sets(object)
-        if (is.null(sf.list$size.factors[[1]])) {
-            warning("no size factors for non-control genes, using library sizes instead")
-            sf.list$size.factors[[1]] <- lib.sizes
+calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE, size_factors = NULL) 
+{
+    sf_list <- list(size.factors=list(NULL), index = rep(1L, nrow(object)))
+    if (is(object, 'SingleCellExperiment')) { 
+        if (use_size_factors) {
+            sf_list <- .get_all_sf_sets(object)
         }
-    } else {
-        sf.list <- list(size.factors = list(lib.sizes),
-                        index = rep(1, nrow(object)))
+        object <- assay(object, i=exprs_values)
     }
 
-    # Scaling the size factors to the library size.
-    cpm_mat <- counts_mat
-    mean.lib.size <- mean(lib.sizes)
-    by.type <- split(seq_along(sf.list$index), sf.list$index)
-
-    for (g in seq_along(by.type)) {
-        chosen <- by.type[[g]]
-        sf <- sf.list$size.factors[[g]]
-        scaled.sf <- sf / mean(sf) * mean.lib.size
-        cpm_mat[chosen,] <- .compute_exprs(
-            counts_mat[chosen,,drop = FALSE], sf, sf_to_use = NULL, log = FALSE,
-            sum = FALSE, subset_row = NULL,  logExprsOffset = 0)
+    # Overwriting size factors if provided, otherwise defaulting to lib sizes.
+    if (!is.null(size_factors)) {
+        sf_list$size.factors[[1]] <- size_factors
+    } else if (is.null(sf_list$size.factors[[1]])) {
+        sf_list$size.factors[[1]] <- computeLibSizeFactors(object)
     }
 
+    # Computing a CPM matrix. Size factors are centered at 1, so 
+    # all we have to do is to divide further by the library size (in millions).
+    cpm_mat <- .compute_exprs(object, sf_list$size.factors, 
+                              sf_to_use = sf_list$index,
+                              log = FALSE, sum = FALSE, 
+                              logExprsOffset = 0, subset_row = NULL)
+    lib_sizes <- .colSums(object)
+    cpm_mat <- cpm_mat / (mean(lib_sizes)/1e6)
+    
     # Restoring attributes.
     rownames(cpm_mat) <- rownames(object)
     colnames(cpm_mat) <- colnames(object)
@@ -258,7 +262,7 @@ calculateCPM <- function(object, use_size_factors = TRUE) {
 #' @param object an \code{SingleCellExperiment} object
 #' @param effective_length vector of class \code{"numeric"} providing the
 #' effective length for each feature in the \code{SCESet} object
-#' @param use_size_factors a logical scalar, see \code{\link{calculateCPM}}
+#' @param ... Further arguments to pass to \code{\link{calculateCPM}}.
 #'
 #' @return Matrix of FPKM values.
 #' @export
@@ -271,10 +275,10 @@ calculateCPM <- function(object, use_size_factors = TRUE) {
 #' fpkm(example_sce) <- calculateFPKM(example_sce, effective_length,
 #' use_size_factors = FALSE)
 #'
-calculateFPKM <- function(object, effective_length, use_size_factors=TRUE) {
+calculateFPKM <- function(object, effective_length, ...) {
     if ( !methods::is(object, "SingleCellExperiment") )
         stop("object must be an SingleCellExperiment")
-    cpms <- calculateCPM(object, use_size_factors = use_size_factors)
+    cpms <- calculateCPM(object, ...)
     effective_length <- effective_length / 1e3
     cpms / effective_length
 }
@@ -286,18 +290,26 @@ calculateFPKM <- function(object, effective_length, use_size_factors=TRUE) {
 #' into account for size factors for normalization or library sizes (total
 #' counts).
 #'
-#' @param object a \code{\link{SingleCellExperiment}} object or a matrix of counts
-#' @param size_factors numeric vector of size factors to use to downscale the counts.
-#' prior to computing averages. Extracted from the 
-#' object if it is a \code{SingleCellExperiment} object; if object is a matrix, then 
-#' if non-NULL, the provided size factors are used. Default is \code{NULL}, where
-#' size factors are defined to be proportional to the library sizes.
+#' @param object A SingleCellExperiment object or count matrix.
+#' @param exprs_values A string specifying the assay of \code{object}
+#' containing the count matrix, if \code{object} is a SingleCellExperiment.
+#' @param use_size_factors a logical scalar specifying whether
+#' the size factors in \code{object} should be used to construct 
+#' effective library sizes.
+#' @param size_factors A numeric vector containing size factors to 
+#' use for all non-spike-in features.
 #'
-#' @details For spike-in controls in a \code{SingleCellExperiment}, control-specific 
-#' size factors will be used if available (see \code{\link{normalizeSCE}}). If
-#' no size factors are available for any gene, the library sizes are used instead.
-#' All library sizes are scaled so that the mean is 1 across all cells, to ensure
-#' that the averages are interpretable on the scale of the raw counts. 
+#' @details 
+#' The size-adjusted average count is defined by dividing each count by the size factor and taking the average across cells.
+#' All sizes factors are scaled so that the mean is 1 across all cells, to ensure that the averages are interpretable on the scale of the raw counts. 
+#'
+#' If \code{use_size_factors=TRUE} and \code{object} is a SingleCellExperiment, size factors are automatically extracted from the object.
+#' For spike-in controls, control-specific size factors will be used if available (see \code{\link{normalizeSCE}}). 
+#' If \code{use_size_factors=FALSE} or \code{object} is a matrix, the library size for each cell is used as the size factor via \code{\link{computeLibSizeFactors}}.
+#' 
+#' If \code{size_factors} is supplied, it will override the any size factors for non-spike-in features in \code{object} (if it is a SingleCellExperiment).
+#' The spike-in size factors will still be used. 
+#' If \code{object} is a matrix, \code{size_factors} will be used instead of the library size.
 #'
 #' @return Vector of average count values with same length as number of features.
 #' @export
@@ -310,30 +322,30 @@ calculateFPKM <- function(object, effective_length, use_size_factors=TRUE) {
 #' ## calculate average counts
 #' ave_counts <- calcAverage(example_sce)
 #'
-calcAverage <- function(object, size_factors=NULL) {
-    if (methods::is(object, "SingleCellExperiment")) {
-        sf.list <- .get_all_sf_sets(object)
-        mat <- counts(object)
-    } else {
-        # Using the lone set of size factors, if provided.
-        sf.list <- list(index = rep(1L, nrow(object)), 
-                        size.factors = list(size_factors))
-        mat <- object
+calcAverage <- function(object, exprs_values="counts", use_size_factors=TRUE, size_factors=NULL) 
+{
+    sf_list <- list(size.factors=list(NULL), index = rep(1L, nrow(object)))
+    if (is(object, 'SingleCellExperiment')) { 
+        if (use_size_factors) {
+            sf_list <- .get_all_sf_sets(object)
+        }
+        object <- assay(object, i=exprs_values)
     }
 
-    # Set size factors to library sizes if not available.
-    if (is.null(sf.list$size.factors[[1]])) {
-        subset_row <- .subset2index(NULL, target = mat, byrow = TRUE)
-        sf.list$size.factors[[1]] <- .colSums(mat)
+    # Overwriting size factors if provided, otherwise defaulting to lib sizes.
+    if (!is.null(size_factors)) {
+        sf_list$size.factors[[1]] <- size_factors
+    } else if (is.null(sf_list$size.factors[[1]])) {
+        sf_list$size.factors[[1]] <- computeLibSizeFactors(object)
     }
 
     # Computes the average count, adjusting for size factors or library size.
-    all.ave <- .compute_exprs(mat, sf.list$size.factors, 
-                              sf_to_use = sf.list$index,
+    all.ave <- .compute_exprs(object, sf_list$size.factors, 
+                              sf_to_use = sf_list$index,
                               log = FALSE, sum = TRUE, logExprsOffset = 0,
                               subset_row = NULL)
 
-    names(all.ave) <- rownames(mat)
-    return(all.ave / ncol(mat))
+    names(all.ave) <- rownames(object)
+    return(all.ave / ncol(object))
 }
 
