@@ -7,8 +7,8 @@
 areSizeFactorsCentred(object, centre = 1, tol = 1e-06)
 }
 \arguments{
-\item{object}{an \code{SingleCellExperiment} object containing multiple sets of
-size factors.}
+\item{object}{A SingleCellExperiment object containing any
+number of (or zero) sets of size factors.}
 
 \item{centre}{a numeric scalar, the value around which all sets of
 size factors should be centred.}
@@ -17,7 +17,8 @@ size factors should be centred.}
 mean of each size factor set to \code{centre}.}
 }
 \value{
-a \code{SingleCellExperiment} object with centred size factors
+A logical scalar indicating whether all sets of size factors are 
+centered. If no size factors are available, \code{TRUE} is returned.
 }
 \description{
 Checks if each set of size factors is centred at unity, such that

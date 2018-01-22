@@ -362,14 +362,16 @@ normalise <- function(...) {
 #' abundances can be reasonably compared between features normalized
 #' with different sets of size factors.
 #'
-#' @param object an \code{SingleCellExperiment} object containing multiple sets of
-#' size factors.
+#' @param object A SingleCellExperiment object containing any
+#' number of (or zero) sets of size factors.
 #' @param centre a numeric scalar, the value around which all sets of
 #' size factors should be centred.
 #' @param tol a numeric scalar, the tolerance for testing equality of the
 #' mean of each size factor set to \code{centre}.
 #'
-#' @return a \code{SingleCellExperiment} object with centred size factors
+#' @return A logical scalar indicating whether all sets of size factors are 
+#' centered. If no size factors are available, \code{TRUE} is returned.
+#'
 #' @export
 #' @examples
 #' data("sc_example_counts")
@@ -394,3 +396,27 @@ areSizeFactorsCentred <- function(object, centre=1, tol=1e-6) {
     }
     return(TRUE)
 }
+
+#' Compute library size factors
+#' 
+#' Define size factors from the library sizes after centering.
+#'
+#' @param object A count matrix or SingleCellExperiment object containing counts.
+#' @param exprs_values A string indicating the assay of \code{object} containing
+#' the counts, if \code{object} is a SingleCellExperiment.
+#'
+#' @return A numeric vector of size factors.
+#'
+#' @export
+#' @examples
+#' data("sc_example_counts")
+#' summary(computeLibSizeFactors(sc_example_counts))
+#'
+computeLibSizeFactors <- function(object, exprs_values="counts") {
+    if (!is.matrix(object)) {
+        object <- assay(object, i=exprs_values)
+    }
+    lib_sizes <- .colSums(object)
+    lib_sizes/mean(lib_sizes)
+}
+
