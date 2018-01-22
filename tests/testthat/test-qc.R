@@ -200,6 +200,30 @@ test_that("we can compute standard QC metrics with multiple sets of feature and 
                  unname(rowSums(counts(reref)[,5:10])))
 })
 
+test_that("we can compute standard QC metrics with spike-in sets", {
+    alt_object <- original
+    isSpike(alt_object, "controls1") <- 1:20
+    isSpike(alt_object, "controls2") <- 500:1000
+    
+    # Should get the same results without specifying the spike-in set.
+    another_qc <- calculateQCMetrics(alt_object, cell_controls = list(set1 = 1:5, set2 = 10:20))
+    expect_equal(colData(another_qc), colData(multi_qc))
+    expect_equal(rowData(another_qc), rowData(multi_qc))
+
+    # Specified feature controls should override internal spike-ins.
+    isSpike(alt_object, "controls1") <- 500:600
+    expect_warning(another_qc <- calculateQCMetrics(alt_object, 
+        feature_controls = list(controls1 = 1:20),
+        cell_controls = list(set1 = 1:5, set2 = 10:20)), "spike-in set")
+    expect_equal(colData(another_qc), colData(multi_qc))
+    expect_equal(rowData(another_qc), rowData(multi_qc))
+
+    expect_warning(another_qc <- calculateQCMetrics(alt_object, 
+        feature_controls = list(controls1 = 1:20, controls2 = 500:1000),
+        cell_controls = list(set1 = 1:5, set2 = 10:20),
+        use_spike=FALSE), NA)
+})
+
 test_that("we can compute standard QC metrics with the compact format", {
     compact <- calculateQCMetrics(
         original, feature_controls = list(controls1 = 1:20, 

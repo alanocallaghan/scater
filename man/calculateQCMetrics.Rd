@@ -6,7 +6,7 @@
 \usage{
 calculateQCMetrics(object, exprs_values = "counts", feature_controls = NULL,
   cell_controls = NULL, percent_top = c(50, 100, 200, 500),
-  detection_limit = 0, compact = FALSE)
+  detection_limit = 0, use_spikes = TRUE, compact = FALSE)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values, usually counts.}
@@ -29,6 +29,10 @@ expressed genes in each cell, see \code{pct_X_top_Y_features} below.}
 
 \item{detection_limit}{A numeric scalar to be passed to \code{\link{nexprs}},
 specifying the lower detection limit for expression.}
+
+\item{use_spikes}{A logical scalar indicating whether existing spike-in sets
+in \code{object} should be automatically added to \code{feature_controls},
+see \code{?\link{isSpike}}.}
 
 \item{compact}{A logical scalar indicating whether the metrics should be 
 returned in a compact format as a nested DataFrame.}

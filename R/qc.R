@@ -29,6 +29,9 @@
 #' expressed genes in each cell, see \code{pct_X_top_Y_features} below.
 #' @param detection_limit A numeric scalar to be passed to \code{\link{nexprs}},
 #' specifying the lower detection limit for expression.
+#' @param use_spikes A logical scalar indicating whether existing spike-in sets
+#' in \code{object} should be automatically added to \code{feature_controls},
+#' see \code{?\link{isSpike}}.
 #' @param compact A logical scalar indicating whether the metrics should be 
 #' returned in a compact format as a nested DataFrame.
 #'
@@ -227,7 +230,8 @@
 calculateQCMetrics <- function(object, exprs_values="counts", 
                                feature_controls = NULL, cell_controls = NULL,
                                percent_top = c(50, 100, 200, 500),
-                               detection_limit = 0, compact = FALSE) {
+                               detection_limit = 0, use_spikes = TRUE,
+                               compact = FALSE) {
 
     if ( !methods::is(object, "SingleCellExperiment")) {
         stop("object must be a SingleCellExperiment")
@@ -237,10 +241,26 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
     ### Adding general metrics for each cell. ### 
 
-    # We first assemble thie list of all metrics (all MUST be first).
+    # We first assemble the list of all metrics (all MUST be first).
+    # We also add any existing spike-ins to this set unless otherwise specified.
     all_feature_sets <- list(all=NULL)
-    feature_set_rdata <- list()
+    existing_spikes <- spikeNames(object)
+    if (use_spikes && length(existing_spikes)) {
+        existing <- vector("list", length(existing_spikes))
+        names(existing) <- existing_spikes
+        for (spset in existing_spikes) {
+            existing[[spset]] <- isSpike(object, type=spset)
+        }
 
+        already_there <- names(existing) %in% names(feature_controls)
+        if (any(already_there)) {
+            warning(sprintf("spike-in set '%s' overwritten by feature_controls set of the same name",
+                    names(existing)[already_there][1]))
+        }
+        feature_controls <- c(feature_controls, existing[!already_there])
+    }
+
+    feature_set_rdata <- list()
     if (length(feature_controls)) { 
         if (is.null(names(feature_controls))) {
             stop("feature_controls should be named")
