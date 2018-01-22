@@ -33,8 +33,7 @@ test_that("we can summarise expression at feature level", {
     expect_that(example_sce_summarised, is_a("SingleCellExperiment"))
     
     ## exprs
-    expect_warning(exprs(example_sce) <- log2(calculateCPM(example_sce) + 1),
-                   "no size factors for non-control genes, using library sizes instead")
+    exprs(example_sce) <- log2(calculateCPM(example_sce) + 1)
     expect_error(summariseExprsAcrossFeatures(
         example_sce, exprs_values = "exprs"), "'arg' should be one of")
     
