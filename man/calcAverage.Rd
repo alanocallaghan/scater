@@ -34,7 +34,7 @@ All sizes factors are scaled so that the mean is 1 across all cells, to ensure t
 
 If \code{use_size_factors=TRUE} and \code{object} is a SingleCellExperiment, size factors are automatically extracted from the object.
 For spike-in controls, control-specific size factors will be used if available (see \code{\link{normalizeSCE}}). 
-If \code{use_size_factors=FALSE} or \code{object} is a matrix, the library size for each cell is used as the size factor via \code{\link{computeLibSizeFactors}}.
+If \code{use_size_factors=FALSE} or \code{object} is a matrix, the library size for each cell is used as the size factor via \code{\link{librarySizeFactors}}.
 
 If \code{size_factors} is supplied, it will override the any size factors for non-spike-in features in \code{object} (if it is a SingleCellExperiment).
 The spike-in size factors will still be used. 
