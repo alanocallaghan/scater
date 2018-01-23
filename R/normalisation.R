@@ -410,9 +410,9 @@ areSizeFactorsCentred <- function(object, centre=1, tol=1e-6) {
 #' @export
 #' @examples
 #' data("sc_example_counts")
-#' summary(computeLibSizeFactors(sc_example_counts))
+#' summary(librarySizeFactors(sc_example_counts))
 #'
-computeLibSizeFactors <- function(object, exprs_values="counts") {
+librarySizeFactors <- function(object, exprs_values="counts") {
     if (is(object, 'SingleCellExperiment')) { 
         object <- assay(object, i=exprs_values)
     }

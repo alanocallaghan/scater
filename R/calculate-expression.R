@@ -235,7 +235,7 @@ calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE,
     if (!is.null(size_factors)) {
         sf_list$size.factors[[1]] <- size_factors
     } else if (is.null(sf_list$size.factors[[1]])) {
-        sf_list$size.factors[[1]] <- computeLibSizeFactors(object)
+        sf_list$size.factors[[1]] <- librarySizeFactors(object)
     }
 
     # Computing a CPM matrix. Size factors are centered at 1, so 
@@ -305,7 +305,7 @@ calculateFPKM <- function(object, effective_length, ...) {
 #'
 #' If \code{use_size_factors=TRUE} and \code{object} is a SingleCellExperiment, size factors are automatically extracted from the object.
 #' For spike-in controls, control-specific size factors will be used if available (see \code{\link{normalizeSCE}}). 
-#' If \code{use_size_factors=FALSE} or \code{object} is a matrix, the library size for each cell is used as the size factor via \code{\link{computeLibSizeFactors}}.
+#' If \code{use_size_factors=FALSE} or \code{object} is a matrix, the library size for each cell is used as the size factor via \code{\link{librarySizeFactors}}.
 #' 
 #' If \code{size_factors} is supplied, it will override the any size factors for non-spike-in features in \code{object} (if it is a SingleCellExperiment).
 #' The spike-in size factors will still be used. 
@@ -336,7 +336,7 @@ calcAverage <- function(object, exprs_values="counts", use_size_factors=TRUE, si
     if (!is.null(size_factors)) {
         sf_list$size.factors[[1]] <- size_factors
     } else if (is.null(sf_list$size.factors[[1]])) {
-        sf_list$size.factors[[1]] <- computeLibSizeFactors(object)
+        sf_list$size.factors[[1]] <- librarySizeFactors(object)
     }
 
     # Computes the average count, adjusting for size factors or library size.
