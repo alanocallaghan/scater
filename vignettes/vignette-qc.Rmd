@@ -18,7 +18,8 @@ vignette: >
 ## To render an HTML version that works nicely with github and web pages, do:
 ## rmarkdown::render("vignettes/vignette.Rmd", "all")
 library(knitr)
-opts_chunk$set(fig.align = 'center', fig.width = 6, fig.height = 5, dev = 'png')
+opts_chunk$set(fig.align = 'center', fig.width = 6, fig.height = 5, 
+    error=FALSE, warning=FALSE, message=FALSE, dev = 'png')
 library(ggplot2)
 theme_set(theme_bw(12))
 ```
@@ -110,8 +111,9 @@ feature sets are used to assess the quality of cells. Spike-in genes (such as
 the commonly-used ERCC set) and mitochondrial genes are typically useful as 
 "feature controls". Here, for demonstration, we just use the first 40 features.
 
-```{r quick-start-calc-qc-metrics, eval=FALSE}
-example_sce <- calculateQCMetrics(example_sce, feature_controls = 1:40)
+```{r quick-start-calc-qc-metrics}
+example_sce <- calculateQCMetrics(example_sce, 
+    feature_controls = list(Spikes=1:40))
 ```
 
 Now you can play around with your data using the graphical user interface (GUI),
