@@ -3,7 +3,10 @@ title: "Quality control with `scater`"
 author:
 - name: "Davis McCarthy"
   affiliation: 
-  - EMBL-EBI
+  - EMBL European Bioinformatics Institute
+- name: "Aaron Lun"
+  affiliation:
+  - Cancer Research UK Cambridge Institute, University of Cambridge
 package: scater
 output:
     BiocStyle::html_document
@@ -12,7 +15,6 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %VignetteEncoding{UTF-8}
 ---
-
 
 ```{r knitr-options, echo=FALSE, message=FALSE, warning=FALSE}
 ## To render an HTML version that works nicely with github and web pages, do:
@@ -24,549 +26,316 @@ library(ggplot2)
 theme_set(theme_bw(12))
 ```
 
-This document gives an introduction to and overview of the quality control 
-functionality of the `scater` package.
+# Overview 
 
-The `scater` package is contains tools to help with the analysis of single-cell
-transcriptomic data, with the focus on RNA-seq data. The package features:
-
-* Use of the `SingleCellExperiment` class as a data container for 
-interoperability with a wide range of other Bioconductor packages;
-* Wrappers to [`kallisto`](http://pachterlab.github.io/kallisto/)  and 
-['Salmon'](https://combine-lab.github.io/salmon/) for rapid
-quantification of transcript abundance and tight integration with `scater`;
-* Simple calculation of many quality control metrics from the expression data;
-* Many tools for visualising scRNA-seq data, especially diagnostic plots
-for quality control;
-* Subsetting and many other methods for filtering out problematic cells and
-features;
-* Methods for identifying important experimental variables and normalising data
-ahead of downstream statistical analysis and modeling.
-
-To get up and running as quickly as possible, see the [Quick Start](#quickstart)
-section below. For see the various in-depth sections on various aspects of the
-functionality that follow.
-
-NB: as of July 2017, `scater` has switched from the `SCESet` class previously 
-defined within the package to the more widely applicable `SingleCellExperiment`
-class. The functions `toSingleCellExperiment` and `updateSCESet` (for backwards
-compatibility) can be used to convert an old `SCESet` object to a 
-`SingleCellExperiment` object.
-
-
-# Quick Start
-<a name="quickstart"></a>
-
-Assuming you have a matrix containing expression count data summarised at the
-level of some features (gene, exon, region, etc.), then we first need to form a
-`SingleCellExperiment` object containing the data. A `SingleCellExperiment` 
-object is the basic data container used in `scater` and many other Bioconductor
-packages for single-cell data analysis.
-
-Here we use the example data provided with the package, which gives us two 
-objects, a matrix of counts and a dataframe with information about the cells we 
-are studying:
-
-```{r quickstart-load-data, message=FALSE, warning=FALSE}
-suppressPackageStartupMessages(library(scater))
-data("sc_example_counts")
-data("sc_example_cell_info")
-```
-
-We use these objects to form a `SingleCellExperiment` object containing all of 
-the necessary information for our analysis:
-
-```{r quickstart-make-sce, results='hide'}
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
-```
-
-We always expect to have (raw) count data in a `SingleCellExperiment` object. In
-almost all cases we will also want to have a log2-scale representation of the 
-data. We expect this to be stored as the `exprs` assay.
-
-Here we use log2-counts-per-million with an offset of 1 as the `exprs` values.
-
-```{r quickstart-add-exprs, results='hide'}
-exprs(example_sce) <- log2(
-    calculateCPM(example_sce, use_size_factors = FALSE) + 1)
-```
-
-Subsetting is very convenient with this class. For example, we can filter out
-features (genes) that are not expressed in any cells:
-
-```{r filter-no-exprs}
-keep_feature <- rowSums(exprs(example_sce) > 0) > 0
-example_sce <- example_sce[keep_feature,]
-```
-
-Now we have the expression data neatly stored in a structure that can be used
-for lots of exciting analyses.
-
-It is straight-forward to compute many quality control metrics. We typically 
-provide one or more sets of "feature controls", that is sets of genes or 
-features that represent technical features of the expression data or are not of 
-primary biological interest. QC metrics are computed especially for these 
-feature sets are used to assess the quality of cells. Spike-in genes (such as 
-the commonly-used ERCC set) and mitochondrial genes are typically useful as 
-"feature controls". Here, for demonstration, we just use the first 40 features.
-
-```{r quick-start-calc-qc-metrics}
-example_sce <- calculateQCMetrics(example_sce, 
-    feature_controls = list(Spikes=1:40))
-```
-
-Now you can play around with your data using the graphical user interface (GUI),
-which opens an interactive dashboard in your browser!
-
-```{r quick-start-gui, eval=FALSE}
-scater_gui(example_sce)
-```
-
-Many plotting functions are available for visualising the data:
-
-* `plot`: a plot method exists for `SingleCellExperiment` objects, which gives 
-an overview of expression across cells.
-* `plotQC`: various methods are available for producing QC diagnostic plots.
-* `plotPCA`: produce a principal components plot for the cells.
-* `plotTSNE`: produce a t-distributed stochastic neighbour embedding (reduced 
-dimension) plot for the cells.
-* `plotDiffusionMap`: produce a diffusion map (reduced dimension) plot for the
-cells.
-* `plotMDS`: produce a multi-dimensional scaling plot for the cells.
-* `plotReducedDim`: plot a reduced-dimension representation of the cells.
-* `plotExpression`: plot expression levels for a defined set of features.
-* `plotPlatePosition`: plot cells in their position on a plate, coloured by 
-cell metadata and QC metrics or feature expression level.
-* `plotColData`: plot cell metadata and QC metrics.
-* `plotRowData`: plot feature metadata and QC metrics.
-
-More detail on the QC plotting methods is given throughout the vignette below. 
-The many other plotting methods are shown in detail in the data visualisation
-vignette. Visualisations can highlight features and cells to be filtered out,
-which can be done easily with the subsetting capabilities of `scater`.
-
-The QC plotting functions also enable the identification of important
-experimental variables, which can be conditioned out in the data normalisation
-step.
-
-After QC and data normalisation (methods are available in `scater`), the dataset
-is ready for downstream statistical modeling.
-
-# Overview plot of a dataset
-
-It is possible to get an overall view of the dataset by using the `plotScater`
-method available for `SingleCellExperiment` objects. (NB: this function replaces
-the generic `plot` method that was previously available for `SCESet` objects.) 
-
-This method plots the cumulative proportion of each cell's library that is
-accounted for by the top highest-expressed features (by default showing the
-cumulative proportion across the top 500 features).
-
-This type of plot gives an overall idea of differences in expression 
-distributions for different cells. It is used in the same way as per-sample
-boxplots are for microarray or bulk RNA-seq data. Due to the large numbers of
-zeroes in expression values for single-cell RNA-seq data, boxplots are not as
-useful, so instead we focus on the contributions from the most expressed 
-features for each cell.
-
-With this function, we can split up the cells based on cell metadata variables 
-to get a finer-grained look at differences between cells. By default, the plot
-method will try to use count values for the plot. If these
-are not present in the `SingleCellExperiment` object, then the values to use 
-should be specified using the `exprs_values` argument.
-
-```{r plot-sceset-blocking, eval=FALSE}
-plot(example_sceset, block1 = "Mutation_Status", block2 = "Treatment",
-     colour_by = "Cell_Cycle", nfeatures = 300, exprs_values = "counts")
-```
-
-This sort of approach can help to pick up large differences in expression
-distributions across different experimental blocks (e.g. processing batches or
-similar.)
-
-
-#  Quality control
-
-The `scater` package puts a focus on aiding with quality control (QC) and
-pre-processing of single-cell RNA-seq data before further downstream analysis.
-
+The `scater` package puts a focus on aiding with quality control (QC) and pre-processing of single-cell RNA-seq data before further downstream analysis.
 We see QC as consisting of three distinct steps:
 
-1. QC and filtering of features (genes)
-2. QC and filtering of cells
+1. QC and filtering of cells
+2. QC and filtering of features (genes)
 3. QC of experimental variables
 
-Following QC, we can proceed with data normalisation before downstream analysis
-and modelling.
+Following QC, we can proceed with data normalisation before downstream analysis and modelling.
+We will demonstrate on some example data generated below:
 
-In the next few sections we discuss the QC and filtering capabilities available
-in `scater`.
-
-## Calculate QC metrics
-
-To compute commonly-used QC metrics we have the function `calculateQCMetrics()`:
-
-```{r calc-qc-metrics, eval=FALSE}
-example_sceset <- calculateQCMetrics(example_sceset, feature_controls = 1:20)
-varLabels(example_sceset)
+```{r}
+library(scater)
+data("sc_example_counts")
+data("sc_example_cell_info")
+example_sce <- SingleCellExperiment(
+    assays = list(counts = sc_example_counts), 
+    colData = sc_example_cell_info
+)
+example_sce
 ```
 
-More than one set of feature controls can be defined if desired.
+# Calculating QC metrics
 
-```{r calc-qc-metrics-multi-feature-controls, eval=FALSE}
-example_sceset <- calculateQCMetrics(
-    example_sceset, feature_controls = list(controls1 = 1:20, controls2 = 500:1000),
-    cell_controls = list(set_1 = 1:5, set_2 = 31:40))
-varLabels(example_sceset)
+## Introducing the `calculateQCMetrics` function
+
+The `calculateQCMetrics` function computes a number of quality control metrics for each cell and feature, stored in the `colData` and `rowData` respectively.
+By default, the QC metrics are computed from the count data, but this can be changed through the `exprs_values` argument.
+
+```{r calc-qc-metrics}
+example_sce <- calculateQCMetrics(example_sce)
+colnames(colData(example_sce))
+colnames(rowData(example_sce))
 ```
 
-### Cell-level QC metrics
+Control sets can be defined for features (e.g., spike-in transcripts, mitochondrial genes) or cells (e.g., empty wells, visually damaged cells).
+The function will subsequently compute metrics for each control set, e.g., the proportion of counts assigned to spike-in transcripts.
 
-This function adds the following columns to `pData(object)`:
+```{r calc-qc-metrics-multi-feature-controls}
+example_sce <- calculateQCMetrics(example_sce, 
+    feature_controls = list(ERCC = 1:20, mito = 500:1000),
+    cell_controls = list(empty = 1:5, damaged = 31:40))
 
-* `total_counts`: total number of counts for the cell (aka 'library size')
-* `log10_total_counts`: total_counts on the log10-scale
-* `total_features`: the number of features for the cell that have expression above the
-detection limit (default detection limit is zero)
-* `filter_on_total_counts`: would this cell be filtered out based on its log10-total_counts
-being (by default) more than 5 median absolute deviations from the median
-log10-total_counts for the dataset?
-* `filter_on_total_features`: would this cell be filtered out based on its total_features
-being (by default) more than 5 median absolute deviations from the median
-total_features for the dataset?
-* `counts_feature_controls`: total number of counts for the cell that come from
-(a set of user-defined) control features. Defaults to zero if no control features are
-indicated.
-* `counts_endogenous_features`: total number of counts for the cell that come from
-endogenous features (i.e. not control features). Defaults to `total_counts` if no control features are
-indicated.
-* `log10_counts_feature_controls`: total number of counts from control features on
-the log10-scale. Defaults to zero (i.e. log10(0 + 1), offset to avoid infinite
-values) if no control features are indicated.
-* `log10_counts_endogenous_features`: total number of counts from endogenous
-features on the log10-scale. Defaults to zero (i.e. log10(0 + 1), offset to avoid
-infinite values) if no control features are indicated.
-* `n_detected_feature_controls`: number of defined feature controls that have
-expression greater than the threshold defined in the object.
-*`pct_counts_feature_controls`: percentage of all counts that come from the
-defined control features. Defaults to zero if no control features are defined.
-
-If we define multiple sets of feature controls, then the above will be supplied for
-all feature sets, plus the set of all feature controls combined, as appropriate.
-
-Furthermore, where "counts" appear in the above, the same metrics will also be
-computed for "exprs", "tpm" and "fpkm" (if tpm and fpkm are present in the
-`SCESet` object).
-
-### Feature-level QC metrics
-
-The function further adds the following columns to `fData(object)`:
-
-* `mean_exprs`: the mean expression level of the gene/feature.
-* `exprs_rank`: the rank of the feature's expression level in the cell.
-* `total_feature_counts`: the total number of counts mapped to that feature across all
-cells.
-* `log10_total_feature_counts`: total feature counts on the log10-scale.
-* `pct_total_counts`: the percentage of all counts that are accounted for by the
-counts mapping to the feature.
-* `is_feature_control`: is the feature a control feature? Default is `FALSE` unless
-control features are defined by the user.
-* `n_cells_exprs`: the number of cells for which the expression level of the feature
-is above the detection limit (default detection limit is zero).
-
-```{r list-fdata-qc, eval=FALSE}
-names(fData(example_sceset))
+all_col_qc <- colnames(colData(example_sce))
+all_col_qc <- all_col_qc[grep("ERCC", all_col_qc)]
 ```
 
-As above, where "counts" appear in the above, the same metrics will also be
-computed for "exprs", "tpm" and "fpkm" (if tpm and fpkm are present in the
-`SCESet` object).
+Metrics are also computed for the union of all control sets, and for the set of all features/cells that are not marked as controls.
+These sets are labelled as `"feature_control"` and `"endogenous"` for features, and `"cell_control"` and `"non_control"` for cells.
+Users should avoid using these names for their own sets.
 
+## Cell-level QC metrics
 
-## Produce diagnostic plots for QC
+We refer users to the `?calculateQCMetrics` for a full list of the computed cell-level metrics.
+However, we will describe some of the more popular ones here:
 
-Visualising the data and metadata in various ways can be very helpful for QC. We
-have a suite of plotting functions to produce diagnostic plots for:
+* `total_counts`: total number of counts for the cell (i.e., the library size).
+* `total_features_by_counts`: the number of features for the cell that have counts above the detection limit (default of zero).
+* `pct_counts_X`: percentage of all counts that come from the feature control set named X.
 
-1. Plotting the most expressed features across the dataset.
-2. Finding the most important principal components for a given cell phenotype or
-metadata variable (from `pData(object)`).
-3. Plotting a set of cell phenotype/metadata variables against each other and
-calculating the (marginal) percentage of feature expression variance that they
-explain.
+If `exprs_values` is set to something other than `"counts"`, the names of the metrics will be changed by swapping `"counts"` for whatever named assay was used.
 
-These three QC plots can all be accessed through the function `plotQC` (we need
-to make sure there are no features with zero or constant expression).
+## Feature-level QC metrics
 
+Feature-level metrics include:
 
-## QC and filtering of features
+* `mean_counts`: the mean count of the gene/feature.
+* `pct_dropout_by_counts`: the percentage of cells with counts of zero for each gene.
+* `pct_counts_Y`: percentage of all counts that come from the cell control set named Y.
 
-The first step in the QC process is filtering out unwanted features. We will
-typically filter out features with very low overall expression, and any others
-that plots or other metrics indicate may be problematic.
+Again, if a different `exprs_values` was used, the names of the metrics will change correspondingly.
 
-First we look at a plot that shows the top 50 (by default) most-expressed
-features. By default, "expression" is defined using the feature counts (if
-available), but $tpm$, $cpm$, $fpkm$ or the `exprs` values can be used instead,
-if desired.
+# Producing diagnostic plots for QC
 
-```{r plot-qc-expression, fig.height=7.5, fig.width=8.5, eval=FALSE}
-keep_feature <- rowSums(counts(example_sceset) > 0) > 4
-example_sceset <- example_sceset[keep_feature,]
-## Plot QC
-plotQC(example_sceset, type = "highest-expression", exprs_values = "counts")
+## Examining the most expressed features
+
+We look at a plot that shows the top 50 (by default) most-expressed features. 
+Each row in the plot below corresponds to a gene, and each bar corresponds to the expression of a gene in a single cell.
+The circle indicates the median expression of each gene, with which genes are sorted.
+By default, "expression" is defined using the feature counts (if available), but other expression values can be used instead by changing `exprs_values`.
+
+```{r plot-highest, fig.asp=2, fig.wide=TRUE}
+plotQC(example_sce, type = "highest-expression", exprs_values = "counts")
 ```
 
+We expect to see the "usual suspects", i.e., mitochondrial genes, actin, ribosomal protein, MALAT1. 
+A few spike-in transcripts may also be present here, though if all of the spike-ins are in the top 50, it suggests that too much spike-in RNA was added.
+A large number of pseudo-genes or predicted genes may indicate problems with alignment.
 
-The `multiplot` function allows a very simple way to plot multiple `ggplot2`
-plots on the same page. For more sophisticated possibilities for arranging
-multiple `ggplot2` plots, check out the excellent [`cowplot`](http://cran.r-project.org/web/packages/cowplot/vignettes/introduction.html)
-package, available on CRAN. If you have `cowplot` installed (highly
-recommended), then `scater` will automatically use it to create particularly
-attractive plots.
+## Frequency of expression as a function of the mean
 
-It can also be particularly useful to inspect the most-expressed features in
-just the cell controls (for example blanks or bulk samples). Subsetting
-capabilities for `SCESet` objects allow us to do this easily. In the previous
-section, we defined two sets of cell controls in the call to
-`calculateQCMetrics`. That function added the `is_cell_control` column to the
-phenotype data of the `SCESet` object `example_sceset`, which indicates if a
-cell is defined as a cell control across any of the cell control sets.
-
-The `$` operator makes it easy to access the `is_cell_control` column and use it
-to subset the `SCESet` as below. We can compare the most-expressed features in the
-cell controls and in the cells of biological interest with this subsetting, as
-demonstrated in the code below (plot not shown).
-
-```{r plot-qc-expression-cell-controls, fig.height=7.5, fig.width=8.5, fig.show=FALSE, eval=FALSE}
-p1 <- plotQC(example_sceset[, !example_sceset$is_cell_control],
-             type = "highest-expression")
-p2 <- plotQC(example_sceset[, example_sceset$is_cell_control],
-       type = "highest-expression")
-multiplot(p1, p2, cols = 2)
+Another useful plot is that of the frequency of expression (i.e., number of cells with non-zero expression) against the mean.
+These two metrics should be positively correlated with each other for most genes.
+ 
+```{r plot-qc-exprs-freq-vs-mean-default}
+plotQC(example_sce, type = "exprs-freq-vs-mean")
 ```
 
-Another way to obtain an idea of the level of technical noise in the dataset is
-to plot the frequency of expression (that is, number of cells with expression
-for the gene above the defined threshold (default is zero)) against mean
-expression expression level . A set of specific features to plot can be defined,
-but need not be. By default, the function will look for defined feature controls
-(as supplied to `calculateQCMetrics`). If feature controls are found, then these
-will be plotted, if not then all features will be plotted.
+Outliers from the trend may warrant further investigation.
+For example, alignment errors for pseudo-genes of highly-expressed genes will result in features with low means that are expressed in all cells.
+Conversely, PCR amplification biases (or the presence of rare populations) may result in genes with very high means that are expressed in very few cells.
 
-```{r plot-qc-exprs-freq-vs-mean-default, eval=FALSE}
-plotQC(example_sceset, type = "exprs-freq-vs-mean")
-```
+## Percentage of counts assigned to feature controls
 
-We can also plot just a subset of features with code like that below (plot not
-shown):
+A particularly useful plot for cell QC is plotting the percentage of expression accounted for by feature controls against total_features.
+These two metadata variables can be plotted against each other as shown below.
+We take advantage of the `r CRANpkg("ggplot2")` semantics to fine-tune the plot aesthetics and to add a smoothing curve:
 
-```{r plot-qc-exprs-mean-vs-freq-defined-feature-set, results = 'hide', fig.show = FALSE, eval=FALSE}
-feature_set_1 <- fData(example_sceset)$is_feature_control_controls1
-plotQC(example_sceset, type = "exprs-freq-vs-mean", feature_set = feature_set_1)
-```
-
-Beyond these QC plots, we have a neat, general and flexible function for
-plotting two feature metadata variables:
-
-```{r plot-fdata, eval=FALSE}
-plotFeatureData(example_sceset, aes(x = n_cells_exprs, y = pct_total_counts))
-```
-
-We can see that there is a small number of features that are ubiquitously
-expressed expressed in all cells (`n_cells_exprs`) and account for a large
-proportion of all counts observed (`pct_total_counts`; more than 0.5% of all
-counts).
-
-The subsetting of rows of `SCESet` objects makes it easy to drop unwanted
-features.
-
-
-## QC and filtering of cells
-
-See `plotPhenoData` and other QC plots below. The subsetting of columns (which
-correspond to cells) of `SCESet` objects makes it easy to drop unwanted cells.
-
-
-### Plotting cell metadata variables
-
-We also have neat functions to plot two cell metadata variables:
-
-```{r plot-pdata, echo=FALSE, fig.show=FALSE, results='hide', eval=FALSE}
-plotPhenoData(example_sceset, aes(x = total_counts, y = total_features,
-                                  colour = Mutation_Status))
-```
-
-```{r plot-pdata-cont-col, fig.show = TRUE, eval=FALSE}
-plotPhenoData(example_sceset, aes(x = Mutation_Status, y = total_features,
-                                  colour = log10_total_counts))
-```
-
-Note that ggplot aesthetics will work correctly (in general) for everything
-except `colour` (`color`) and `fill`, which must be either columns of `pData`
-or feature names (i.e. gene/transcript names).
-
-These sorts of plots can be very useful for finding potentially problematic
-cells.
-
-```{r plot-pdata-col-gene-exprs, eval=FALSE}
-plotPhenoData(example_sceset, aes(x = total_counts, y = total_features,
-                                  colour = Gene_1000))
-```
-
-```{r plot-pdatacol-gene-exprs-2, fig.show = FALSE, eval=FALSE}
-plotPhenoData(example_sceset, aes(x = pct_counts_feature_controls,
-                                  y = total_features, colour = Gene_0500))
-```
-
-
-```{r plot-pdatacol-gene-exprs-3, fig.show = FALSE, eval=FALSE}
-plotPhenoData(example_sceset, aes(x = pct_counts_feature_controls,
-                                  y = pct_counts_top_50_features,
-                                  colour = Gene_0001))
-```
-
-The output of these functions is a `ggplot` object, which can be added to,
-amended and altered. For example, if we don't like the legend position  we can change it, and we could also add a trend line for each group (see below).
-
-Tapping into the powerful capabilities of `ggplot2`, the possibilities are many.
-
-A particularly useful plot for cell QC is plotting the percentage of expression
-accounted for by feature controls against total_features.
-
-```{r plot-pdata-pct-exprs-controls, eval=FALSE}
-plotPhenoData(example_sceset, aes(x = total_features,
-                                  y = pct_counts_feature_controls,
-                                  colour = Mutation_Status)) +
+```{r plot-pdata-pct-exprs-controls}
+plotPhenoData(example_sce, aes(x = total_features_by_counts,
+    y = pct_counts_feature_control, colour = Mutation_Status)) +
     theme(legend.position = "top") +
     stat_smooth(method = "lm", se = FALSE, size = 2, fullrange = TRUE)
 ```
 
-On real data, we expect to see well-behaved cells with relatively high total_features
-(number of features with detectable expression) and low percentage of expression
-from feature controls. High percentage expression from feature controls and low
-total_features are indicative of blank and failed cells.
+Well-behaved cells should have a large number of expressed features and and a low percentage of expression from feature controls. 
+High percentage expression from feature controls and few expressed features are indicative of blank and failed cells.
 
-The `plotPhenoData` function is useful for exploring the relationships between
-the many QC metrics computed by `calculateQCMetrics` above. Often, problematic
-cells can be identified from such plots.
+## Other quality control plots
 
+Two feature metadata variables can be easily plotted against each other using the `plotFeatureData` function:
 
-Based on PCA or dimensionality reduction plots (described in detail in the 
-data visualisation vignette) we may identify outlier cells and, if we wish, 
-filter them out of the analysis. There is also an outlier detection option
-available with the plotPCA function. This performs PCA on QC metrics to 
-highlight cells that differ from other cells based on technical features.
-
-```{r plot-pca-outlier, eval=FALSE}
-example_sceset <- plotPCA(example_sceset, pca_data_input = "pdata", 
-                          detect_outliers = TRUE, return_SCESet = TRUE)
-
+```{r plot-fdata}
+plotFeatureData(example_sce, aes(x = n_cells_by_counts, y = mean_counts))
 ```
 
-The `$outlier` element of the pData (phenotype data) slot of the `SCESet` 
-contains indicator values about whether or not each cell has been designated as
-an outlier based on the PCA. Here, these values can be accessed for filtering 
-low quality cells with `example_sceset$outlier`. Automatic outlier detection can be informative, but a close inspection of QC metrics and tailored filtering for the specifics of the dataset at hand is strongly recommended.
+The `multiplot` function also allows multiple plots to be generated on the same page, as demonstrated below.
 
-
-
-### Filtering cells
-
-On this example dataset there are no cells that need filtering, but the
-subsetting capabilities of `scater` make it easy to filter out unwanted cells.
-Column subsetting selects cells, while row subsetting selects features (genes
-or transcripts). In particular, there is a function `filter` (inspired by the function of the same name in the `dplyr` package and operating in exactly the same) that can be used to very conviently subset (i.e. filter) the cells of an `SCESet` object based on `pData` variables of the object.
-
-
-## QC of experimental variables
-
-See the `plotQC` options below. The various plotting functions enable
-visualisation of the relationship betwen experimental variables and the
-expression data.
-
-We can look at the relative importance of different explanatory variables with
-some of the `plotQC` function options. We can compute the median marginal $R^2$
-for each variable in `pData(example_sceset)` when fitting a linear model
-regressing `exprs` values against just that variable.
-
-The default approach looks at all variables in `pData(object)` and plots the top
-`nvars_to_plot` variables (default is 10).
-
-```{r plot-qc-expl-variables-all, warning=FALSE, eval=FALSE}
-plotQC(example_sceset, type = "expl")
+```{r plot-pdata-2, fig.wide=TRUE, fig.asp=0.3}
+p1 <- plotPhenoData(example_sce, aes(x = total_counts, 
+    y = total_features_by_counts))
+p2 <- plotPhenoData(example_sce, aes(x = pct_counts_feature_control,
+    y = total_features_by_counts))
+p3 <- plotPhenoData(example_sce, aes(x = pct_counts_feature_control,
+    y = pct_counts_top_50_features))
+multiplot(p1, p2, p3, cols = 3)
 ```
 
-Alternatively, we can choose a subset of variables to plot in this manner.
+This is especially useful for side-by-side comparisons between control sets, as demonstrated below for the plot of highest-expressing features.
+A plot for non-control cells is shown on the left while the plot for the controls is shown on the right.
 
-```{r plot-qc-expl-variables-select-variables, eval=FALSE}
-plotQC(example_sceset, type = "expl",
-       variables = c("total_features", "total_counts", "Mutation_Status", "Treatment",
-                     "Cell_Cycle"))
-```
-
-We can also easily produce plots to identify PCs that correlate with
-experimental and QC variables of interest. The function ranks the principal
-components in decreasing order of $R^2$ from a linear model regressing PC value
-against the variable of interest.
-
-We can also produce a pairs plot of potential explanatory variables ranked by
-their median percentage of expression variance explained in a marginal (only
-one explanatory variable) linear model.
-
-```{r plot-qc-pairs-pc, eval=FALSE}
-plotQC(example_sceset, type = "expl", method = "pairs", theme_size = 6)
-```
-
-In this small dataset, `total_counts` and `total_features` explain a very large proportion of the variance in feature expression. The proportion of variance that they explain for a real dataset should be much smaller (say 1-5%).
-
-The default is to plot six most-associated principal components against the
-variable of interest.
-
-```{r plot-qc-find-pcs-pcs-vs-vars, fig.width=8, fig.height=7, eval=FALSE}
-p1 <- plotQC(example_sceset, type = "find-pcs", variable = "total_features",
-        plot_type = "pcs-vs-vars")
-p2 <- plotQC(example_sceset, type = "find-pcs", variable = "Cell_Cycle",
-       plot_type = "pcs-vs-vars")
+```{r highest-2, fig.wide=TRUE}
+p1 <- plotQC(example_sce[, !example_sce$is_cell_control],
+    type = "highest-expression")
+p2 <- plotQC(example_sce[, example_sce$is_cell_control],
+    type = "highest-expression")
 multiplot(p1, p2, cols = 2)
 ```
 
-An alternative is to produce a pairs plot of the top five PCs.
+# Filtering the `SingleCellExperiment`
 
-```{r plot-qc-find-pcs-pairs, fig.width=10, fig.height=7, eval=FALSE}
-plotQC(example_sceset, type = "find-pcs", variable = "total_features",
-       plot_type = "pairs-pcs")
+## By cells
+
+### Overview 
+
+Column subsetting of the `SingeCellExperiment` object will only retain the selected cells, thus removing low-quality or otherwise unwanted cells.
+We demonstrate below by retaining the first 40 cells.
+(This happens to be all the cells in this particular dataset, which are already known to be high-quality.)
+
+```{r}
+example_sce <- example_sce[,1:40]
 ```
 
-```{r plot-qc-find-pcs-pairs-2, fig.show=FALSE, eval=FALSE}
-plotQC(example_sceset, type = "find-pcs", variable = "Cell_Cycle",
-       plot_type = "pairs-pcs")
+`r Biocpkg("scater")` also provides a `filter` function, inspired by the function of the same name in the `dplyr` package and operating in exactly the same manner.
+This can be used to very conviently subset (i.e. filter) the cells of an `SingleCellExperiment` object based on its `colData` variables.
+
+```{r}
+filter(example_sce, Treatment == "treat1")
 ```
 
+### Identifying filtering thresholds
 
-Combined with the excellent subsetting capabilities of the 
-`SingleCellExperiment` class, we have convenient tools for conducting QC and
-pre-processing (e.g. filtering) data for downstream analysis.
+We can identify high-quality cells to retain by setting a fixed threshold on particular metrics.
+For example, we could retain only cells that have at least 100,000 total counts _and_ at least 500 expressed features:
 
+```{r}
+keep.total <- example_sce$total_counts > 1e5
+keep.n <- example_sce$total_features_by_counts > 500
+filtered <- example_sce[,keep.total & keep.n]
+dim(filtered)
+```
 
-#  Data normalisation
+A more flexible way of choosing thresholds is through the `isOutlier` function.
+This defines the threshold at a certain number of median absolute deviations (MADs) away from the median.
+Values beyond this threshold are considered outliers and can be filtered out, assuming that they correspond to low-quality cells.
+Here, we define small outliers (using `type="lower"`) for the _log_-total counts at 3 MADs from the median.
 
-High levels of variability between cells characterise single-cell expression
-data. In almost all settings, many sources of unwanted variation should be
-accounted for before proceeding with more sophisticated analysis. 
+```{r}
+keep.total <- isOutlier(example_sce$total_counts, nmads=3, 
+    type="lower", log=TRUE)
+filtered <- example_sce[,keep.total]
+```
 
-The size-factor normalisation method from the [`scran` package](	http://bioconductor.org/packages/scran/) is tightly integrated with `scater` and
-strongly recommended as a first normalization of the data before investigating
-other sources of variability.
+The `isOutlier` approach adjusts to experiment-specific aspects of the data, e.g., sequencing depth, amount of spike-in RNA added, cell type.
+In contrast, a fixed threshold would require manual adjustment to account for changes to the experimental protocol or system.
 
-Below, we show some of `scater`'s capabilities for normalising data for downstream analyses.
+### Identifying outliers on the QC metrics
 
-We can use feature controls to help address differences between cells arising from
-different sets of transcripts being expressed and differences in library
-composition.
+Outlier cells can also be identified by using the `r CRANpkg("mvoutlier")` package on the QC metrics for all cells.
+This will identify cells that have substantially different QC metrics from the others, possibly corresponding to low-quality cells.
+We can visualize any outliers using a principal components plot as shown below:
 
-Important experimental variables and latent factors (if used) can be regressed
-out, so that normalised data has these effects removed.
+```{r plot-pca-outlier}
+example_sce <- runPCA(example_sce, pca_data_input = "coldata", 
+    detect_outliers = TRUE)
+plotPCA(example_sce)
+```
+
+Column subsetting can then be performed based on the `$outlier` slot, which indicates whether or not each cell has been designated as an outlier. 
+Automatic outlier detection can be informative, but a close inspection of QC metrics and tailored filtering for the specifics of the dataset at hand is strongly recommended.
+
+```{r}
+summary(example_sce$outlier)
+```
+
+## By features 
+
+It is common to filter out low-abundance features prior to further analyses.
+This is easily achieved by row subsetting of the `SingleCellExperiment` object.
+In the example below, genes are only retained if they are expressed in four or more cells:
+
+```{r}
+keep_feature <- nexprs(example_sce, byrow=TRUE) >= 4
+example_sce <- example_sce[keep_feature,]
+dim(example_sce)
+```
+
+Other filtering can be done using existing annotation.
+For example, ribosomal protein genes and predicted genes can be identified (and removed) using regular expressions or biotype information.
+Such genes are often (but not always) uninteresting for characterizing population heterogeneity.
+
+# Relationships between experimental factors and expression
+
+We can investigate the relative importance of different explanatory factors with some of the `plotQC` function options. 
+We compute the $R^2$ for each factor in `colData(example_sce)` when fitting a linear model regressing expression values for each gene against that factor.
+This is best done on the log-expression values to reduce the effect of the mean on the variance - hence, we run `normalize` first.
+
+```{r plot-qc-expl-factors-all}
+example_sce <- normalize(example_sce)
+plotQC(example_sce, type = "expl")
+```
+
+Each line corresponds to one factor and represents the distribution of R^2^ values across all genes.
+Alternatively, we can choose a subset of factors to plot in this manner.
+
+```{r plot-qc-expl-variables-select-variables}
+plotQC(example_sce, type = "expl",
+    variables = c("total_features_by_counts", "total_counts",
+        "Mutation_Status", "Treatment", "Cell_Cycle"))
+```
+
+We can also produce pairwise scatter plots of potential explanatory variables.
+Variables are ranked by their median percentage of expression variance explained in a linear model.
+
+```{r plot-qc-pairs-pc}
+plotQC(example_sce, type = "expl", method = "pairs", theme_size = 6)
+```
+
+In this small dataset, `total_counts` and `total_features_by_counts` explain a very large proportion of the variance in feature expression. 
+The proportion of variance that they explain for a real dataset should be much smaller (say 1-5%).
+
+# Removing technical biases
+
+## Scaling normalization
+
+Scaling normalization accounts for cell-specific biases that scale expression up or down for all genes in a particular cell, e.g., coverage or capture efficiency.
+The simplest approach to scaling normalization defines the size factors from the scaled library sizes of all cells.
+is done so that the mean size factor is equal to unity, ensuring that the normalized values are on the same scale as the original counts.
+
+```{r}
+sizeFactors(example_sce) <- librarySizeFactors(example_sce)
+summary(sizeFactors(example_sce))
+```
+
+Log-transformed normalized expression values can then be computed with `normalize`, which stores the output in the `"logcounts"` slot.
+
+```{r}
+example_sce <- normalize(example_sce)
+```
+
+While simple, library size normalization does not account for composition biases that are often present in high-throughput sequencing data.
+It also fails to account for differences in the biases affecting spike-in transcripts.
+We strongly suggest using the `computeSumFactors` and `computeSpikeFactors` functions from the `r Biocpkg("scran")` package.
+
+## Batch correction
+
+Batch correction accounts for systematic differences in expression between cells in different batches.
+Unlike scaling biases, these are usually constant across all cells in a given batch but different for each gene.
+
+Batch effects can be regressed out by using the `removeBatchEffect` function from the `r Biocpkg("limma")` package.
+This applies a linear model, usually on the log-expression values to avoid issues with the mean-variance relationship.
+To illustrate:
+
+```{r}
+library(limma)
+batch <- rep(1:2, each=20)
+corrected <- removeBatchEffect(logcounts(example_sce), block=batch)
+assay(example_sce, "corrected_logcounts") <- corrected
+```
+
+Factors of interest can be included in `design` to avoid regressing them out.
+This is necessary when they are not orthogonal to the `block`.
+However, this assumes that your model is fully specified, which may not be possible when the factors of interest are unknown.
+In such cases, an alternative method is to use the `mnnCorrect` approach from `r Biocpkg("scran")`.
+
+# Session information {.unnumbered}
+
+```{r}
+sessionInfo()
+```
 
 
