@@ -3,7 +3,10 @@ title: "Introduction to `scater`: Single-cell analysis toolkit for expression in
 author:
 - name: "Davis McCarthy"
   affiliation: 
-  - EMBL-EBI
+  - EMBL European Bioinformatics Institute
+- name: "Aaron Lun"
+  affiliation:
+  - Cancer Research UK Cambridge Institute, University of Cambridge
 package: scater
 output:
     BiocStyle::html_document
@@ -18,152 +21,146 @@ vignette: >
 ## To render an HTML version that works nicely with github and web pages, do:
 ## rmarkdown::render("vignettes/vignette.Rmd", "all")
 library(knitr)
-opts_chunk$set(fig.align = 'center', fig.width = 6, fig.height = 5, dev = 'png')
+opts_chunk$set(fig.align = 'center', fig.width = 6, fig.height = 5, dev = 'png',
+    warning=FALSE, error=FALSE, message=FALSE)
 library(ggplot2)
 theme_set(theme_bw(12))
 ```
 
-This document gives an introduction to and overview of the functionality of the
-`scater` package.
+# Introduction
 
-The `scater` package is contains tools to help with the analysis of single-cell
-transcriptomic data, with the focus on RNA-seq data. The package features:
+This document gives an introduction to and overview of the quality control functionality of the `r Biocpkg("scater")` package.
+`r Biocpkg("scater")` contains tools to help with the analysis of single-cell transcriptomic data, focusing on RNA-seq data. 
+The package features:
 
-* Use of the `SingleCellExperiment` class as a data container for 
-interoperability with a wide range of other Bioconductor packages;
-* Wrappers to [`kallisto`](http://pachterlab.github.io/kallisto/)  and 
-['Salmon'](https://combine-lab.github.io/salmon/) for rapid
-quantification of transcript abundance and tight integration with `scater`;
+* Use of the `SingleCellExperiment` class as a data container for interoperability with a wide range of other Bioconductor packages;
+* Wrappers to [_kallisto_](http://pachterlab.github.io/kallisto/) and [_Salmon_](https://combine-lab.github.io/salmon/) for rapid quantification of transcript abundance; 
 * Simple calculation of many quality control metrics from the expression data;
-* Many tools for visualising scRNA-seq data, especially diagnostic plots
-for quality control;
-* Subsetting and many other methods for filtering out problematic cells and
-features;
-* Methods for identifying important experimental variables and normalising data
-ahead of downstream statistical analysis and modeling.
+* Many tools for visualising scRNA-seq data, especially diagnostic plots for quality control;
+* Subsetting and many other methods for filtering out problematic cells and features;
+* Methods for identifying important experimental variables and normalising data ahead of downstream statistical analysis and modeling.
 
-To get up and running as quickly as possible, see the [Quick Start](#quickstart)
-section below. For see the various in-depth sections on various aspects of the
-functionality that follow.
+# Creating a `SingleCellExperiment` object
 
-NB: as of July 2017, `scater` has switched from the `SCESet` class previously 
-defined within the package to the more widely applicable `SingleCellExperiment`
-class. The functions `toSingleCellExperiment` and `updateSCESet` (for backwards
-compatibility) can be used to convert an old `SCESet` object to a 
-`SingleCellExperiment` object.
-
-
-# Quick Start
-<a name="quickstart"></a>
-
-Assuming you have a matrix containing expression count data summarised at the
-level of some features (gene, exon, region, etc.), then we first need to form a
-`SingleCellExperiment` object containing the data. A `SingleCellExperiment` 
-object is the basic data container used in `scater` and many other Bioconductor
-packages for single-cell data analysis.
-
-Here we use the example data provided with the package, which gives us two 
-objects, a matrix of counts and a dataframe with information about the cells we 
-are studying:
+We assume that you have a matrix containing expression count data summarised at the level of some features (gene, exon, region, etc.).
+First, we create a `SingleCellExperiment` object containing the data, as demonstrated below with some example data (`"sc_example_counts"`) and metadata (`"sc_example_cell_info"`): 
+Rows of the object correspond to features, while columns correspond to samples, i.e., cells in the context of single-cell 'omics data.
 
 ```{r quickstart-load-data, message=FALSE, warning=FALSE}
-suppressPackageStartupMessages(library(scater))
+library(scater)
 data("sc_example_counts")
 data("sc_example_cell_info")
-```
-
-We use these objects to form a `SingleCellExperiment` object containing all of 
-the necessary information for our analysis:
-
-```{r quickstart-make-sce, results='hide'}
 example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+    assays = list(counts = sc_example_counts), 
+    colData = sc_example_cell_info
+)
+example_sce
 ```
 
-We always expect to have (raw) count data in a `SingleCellExperiment` object. In
-almost all cases we will also want to have a log2-scale representation of the 
-data. We expect this to be stored as the `exprs` assay.
-
-Here we use log2-counts-per-million with an offset of 1 as the `exprs` values.
+We usually expect (raw) count data to be labelled as `"counts"` in the assays, which can be easily retrieved with the `counts` accessor.
+Getters and setters are also provided for `exprs`, `tpm`, `cpm`, `fpkm` and versions of these with the prefix `norm_`.
 
 ```{r quickstart-add-exprs, results='hide'}
-exprs(example_sce) <- log2(
-    calculateCPM(example_sce, use_size_factors = FALSE) + 1)
+str(counts(example_sce))
 ```
 
-Subsetting is very convenient with this class. For example, we can filter out
-features (genes) that are not expressed in any cells:
+Row and column-level metadata are easily accessed (or modified) as shown below.
+There are also dedicated getters and setters for spike-in specifiers (`isSpike`); size factor values (`sizeFactors`); and reduced dimensionality results (`reducedDim`).
+
+```{r}
+example_sce$whee <- sample(LETTERS, ncol(example_sce), replace=TRUE)
+colData(example_sce)
+rowData(example_sce)$stuff <- runif(nrow(example_sce))
+rowData(example_sce)
+```
+
+Subsetting is very convenient with this class, as both data and metadata are processed in a synchronized manner.
+For example, we can filter out features (genes) that are not expressed in any cells:
 
 ```{r filter-no-exprs}
-keep_feature <- rowSums(exprs(example_sce) > 0) > 0
+keep_feature <- rowSums(counts(example_sce) > 0) > 0
 example_sce <- example_sce[keep_feature,]
 ```
 
-Now we have the expression data neatly stored in a structure that can be used
-for lots of exciting analyses.
+More details about the `SingleCellExperiment` class can be found in the documentation for `r Biocpkg("SingleCellExperiment")` package.
 
-It is straight-forward to compute many quality control metrics. We typically 
-provide one or more sets of "feature controls", that is sets of genes or 
-features that represent technical features of the expression data or are not of 
-primary biological interest. QC metrics are computed especially for these 
-feature sets are used to assess the quality of cells. Spike-in genes (such as 
-the commonly-used ERCC set) and mitochondrial genes are typically useful as 
-"feature controls". Here, for demonstration, we just use the first 40 features.
+# Calculating a variety of expression values
 
-```{r quick-start-calc-qc-metrics, eval=TRUE}
-example_sce <- calculateQCMetrics(example_sce, 
-                                  feature_controls = list(eg = 1:40))
+We calculate counts-per-million using the aptly-named `calculateCPM` function.
+The output is most appropriately stored as an assay named `"cpm"` in the assays of the `SingleCellExperiment` object.
+
+```{r}
+cpm(example_sce) <- calculateCPM(example_sce)
 ```
 
-Now you can play around with your data using the graphical user interface (GUI),
-which opens an interactive dashboard in your browser!
+Another option is to use the `normalize` function, which calculates log~2~-transformed normalized expression values.
+This is done by dividing each count by its size factor (or scaled library size, if no size factors are defined), adding a pseudo-count and log-transforming.
+The resulting values can be interpreted on the same scale as log-transformed counts, and are stored in `"logcounts"`.
 
-```{r quick-start-gui, eval=FALSE}
-scater_gui(example_sce)
+```{r}
+example_sce <- normalize(example_sce)
+assayNames(example_sce)
 ```
 
-Many plotting functions are available for visualising the data:
+Note that `exprs` is a synonym for `logcounts` when accessing or setting data.
+This is done for backwards compatibility with older verions of _scater_.
 
-* `plotScater`: a plot method exists for `SingleCellExperiment` objects, which 
-gives an overview of expression across cells.
-* `plotQC`: various methods are available for producing QC diagnostic plots.
-* `plotPCA`: produce a principal components plot for the cells.
-* `plotTSNE`: produce a t-distributed stochastic neighbour embedding (reduced 
-dimension) plot for the cells.
-* `plotDiffusionMap`: produce a diffusion map (reduced dimension) plot for the
-cells.
-* `plotMDS`: produce a multi-dimensional scaling plot for the cells.
-* `plotReducedDim`: plot a reduced-dimension representation of the cells.
-* `plotExpression`: plot expression levels for a defined set of features.
-* `plotPlatePosition`: plot cells in their position on a plate, coloured by 
-cell metadata and QC metrics or feature expression level.
-* `plotColData`: plot cell metadata and QC metrics.
-* `plotRowData`: plot feature metadata and QC metrics.
+```{r}
+identical(exprs(example_sce), logcounts(example_sce))
+```
 
-More detail on all plotting methods is provided in the data visualisation 
-vignette.
+Of course, users can construct any arbitrary matrix of the same dimensions as the count matrix and store it as an assay.
 
-Visualisations can highlight features and cells to be filtered out, which can be
-done easily with the subsetting capabilities of scater.
+```{r}
+assay(example_sce, "is_expr") <- counts(example_sce)>0
+```
 
-The QC plotting functions also enable the identification of important
-experimental variables, which can be conditioned out in the data normalisation
-step.
+# Other methods of data import 
 
-After QC and data normalisation (methods are available in `scater`), the dataset
-is ready for downstream statistical modeling.
+Count matrices stored as CSV files or equivalent can be easily read into R session using `read.table` from _utils_ or `fread` from the `r CRANpkg("data.table")` package.
+It is advisable to coerce the resulting object into a matrix before storing it in a `SingleCellExperiment` object.
 
+Data from 10X Genomics experiments can be read in using the `read10xCounts` function from the `r Biocpkg("DropletUtils")` package.
+This will automatically generate a `SingleCellExperiment` with a sparse matrix, see the documentation for more details.
 
-# Where to find out more
+`r Biocpkg("scater")` also provides wrapper functions to `kallisto` and `Salmon` for easy and extremely fast quantification of transcript abundance from within R.
+An example of how to use these functions is shown below:
 
-1. For more information about using the `SingleCellExperiment` class, including
-transitioning from `SCESet` objects in previous versions of `scater`, see the
-`"Transitioning from SCESet to SingleCellExperiment"` vignette;
-2. For guidance on using `scater` for quality control, see the 
-`Quality control with scater` vignette;
-3. For demonstrations of the data visualisation capabilities of `scater`, see
-the `Data visualisation methods in scater` vignette;
-4. For more details about importing expression data into `scater`, see the
-`Expression quantification and import` vignette.
+```{r, eval=FALSE}
+# Example if in the kallisto/test directory
+setwd("/home/davis/kallisto/test")
+kallisto_log <- runKallisto("targets.txt", "transcripts.idx", single_end=FALSE,
+            output_prefix="output", verbose=TRUE, n_bootstrap_samples=10)
+sce_test <- readKallistoResults(kallisto_log, read_h5=TRUE)
+sce_test
+```
 
+# Transitioning from the `SCESet` class
+
+As of July 2017, `scater` has switched from the `SCESet` class previously defined within the package to the more widely applicable `SingleCellExperiment` class. 
+From Bioconductor 3.6 (October 2017), the release version of `scater` will use `SingleCellExperiment`. 
+`SingleCellExperiment` is a more modern and robust class that provides a common data structure used by many single-cell Bioconductor packages. 
+Advantages include support for sparse data matrices and the capability for on-disk storage of data to minimise memory usage for large single-cell datasets.
+
+It should be straight-forward to convert existing scripts based on `SCESet` objects to `SingleCellExperiment` objects, with key changes outlined immediately below.
+
+* The functions `toSingleCellExperiment` and `updateSCESet` (for backwards compatibility) can be used to convert an old `SCESet` object to a `SingleCellExperiment` object;
+* Create a new `SingleCellExperiment` object with the function `SingleCellExperiment` (actually less fiddly than creating a new `SCESet`);
+* `scater` functions have been refactored to take `SingleCellExperiment`  objects, so once data is in a `SingleCellExperiment` object, the user experience is almost identical to that with the `SCESet` class.
+
+Users may need to be aware of the following when updating their own scripts:
+
+* Cell names can now be accessed/assigned with the `colnames` function (instead of `sampleNames` or `cellNames` for an `SCESet` object);
+* Feature (gene/transcript) names should now be accessed/assigned with the `rownames` function (instead of `featureNames`);
+* Cell metadata, stored as `phenoData` in an `SCESet`, corresponds to `colData` in a `SingleCellExperiment` object and is accessed/assigned with the `colData` function (this replaces the `pData` function);
+* Individual cell-level variables can still be accessed with the `$` operator (e.g. `sce$total_counts`);
+* Feature metadata, stored as `featureData` in an `SCESet`, corresponds to `rowData` in a `SingleCellExperiment` object and is accessed/assigned with the `rowData` function (this replaces the `fData` function);
+* `plotScater`, which produces a cumulative expression, overview plot, replaces 
+the generic `plot` function for `SCESet` objects.
+
+# Session information {.unnumbered}
+
+```{r}
+sessionInfo()
+```
 
