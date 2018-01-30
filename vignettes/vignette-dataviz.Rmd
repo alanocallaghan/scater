@@ -56,15 +56,14 @@ This can be particularly useful for further examination of features identified f
 
 ```{r plot-expression}
 plotExpression(example_sce, rownames(example_sce)[1:6],
-    x = "Mutation_Status", exprs_values = "logcounts", 
-    colour = "Treatment")
+    x = "Mutation_Status", exprs_values = "logcounts") 
 ```
 
 By default, it uses expression values in the `"logcounts"` assay, but this can be changed through the `exprs_values` argument.
 Setting `x` will determine the covariate to be shown on the x-axis, resulting in grouped violins (categorical) or scatter plots (continuous).
 The points can also be coloured, shaped or resized by diferent variables.
 
-```{r plot-expression}
+```{r plot-expression-col}
 plotExpression(example_sce, rownames(example_sce)[1:6],
     x = "Gene_0001", colour = "Mutation_Status")
 ```
@@ -72,7 +71,7 @@ plotExpression(example_sce, rownames(example_sce)[1:6],
 This function uses `ggplot2`, making it easy for users to customize the theme and aesthetics.
 We can also show the median expression level per group on the plot and show a violin plot to summarise the distribution of expression values:
 
-```{r plot-expression-theme-bw, eval=TRUE}
+```{r plot-expression-theme-bw}
 plotExpression(example_sce, rownames(example_sce)[7:12],
     x = "Mutation_Status", exprs_values = "counts", 
     colour = "Cell_Cycle", show_median = TRUE, 
@@ -96,14 +95,14 @@ reducedDimNames(example_sce)
 Any reduced dimension results can be plotted using the `plotReducedDim` function:
 
 ```{r plot-reduceddim-4comp-colby-shapeby}
-plotReducedDim(example_sce, use_dimred = "PCA", ncomponents = 4, 
+plotReducedDim(example_sce, use_dimred = "PCA", 
     colour_by = "Treatment", shape_by = "Mutation_Status")
 ```
 
 We can also colour and size points by the expression of particular features:
 
 ```{r plot-reduceddim-4comp-colby-sizeby-exprs}
-plotReducedDim(example_sce, use_dimred = "PCA", ncomponents = 4, 
+plotReducedDim(example_sce, use_dimred = "PCA", 
     colour_by = "Gene_1000", size_by = "Gene_0500")
 ```
 
@@ -135,6 +134,7 @@ Multiple components can be plotted in a series of pairwise plots.
 When more than two components are plotted, the diagonal boxes in the scatter plot matrix show the density for each component.
 
 ```{r plot-pca-4comp-colby-shapeby}
+example_sce <- runPCA(example_sce, ncomponents=4)
 plotPCA(example_sce, ncomponents = 4, colour_by = "Treatment",
         shape_by = "Mutation_Status")
 ```
@@ -153,7 +153,8 @@ The same procedure described for PCA plots can be applied to generate _t_-SNE pl
 We strongly recommend generating plots with different random seeds and perplexity values, to ensure that any conclusions are robust to different visualizations.
 
 ```{r plot-tsne-1comp-colby-sizeby-exprs}
-example_sce <- runTSNE(example_sce, perplexity=30, rand_seed=1000)
+# Perplexity of 10 just chosen here arbitrarily. 
+example_sce <- runTSNE(example_sce, perplexity=10, rand_seed=1000)
 plotTSNE(example_sce, colour_by = "Gene_0001", size_by = "Gene_1000")
 ```
 
@@ -162,7 +163,7 @@ This is useful as it improves speed by using a low-rank approximation of the exp
 The code below uses the first 10 principal components to perform the _t_-SNE.
 
 ```{r plot-tsne-from-pca}
-example_sce <- runTSNE(example_pca, perplexity=30, rand_seed=1000,
+example_sce <- runTSNE(example_sce, perplexity=10, rand_seed=1000,
     use_dimred="PCA", n_dimred)
 plotTSNE(example_sce, colour_by="Treatment")
 ```
@@ -176,7 +177,7 @@ The same applies for the other `plot*` and `run*` arguments.
 Again, the same can be done for diffusion maps using `plotDiffusionMap`, with coordinates obtained using `runDiffusionMap` via the `r Biocpkg("destiny")` package.
 
 ```{r plot-difmap-1comp-colby-sizeby-exprs}
-example_sce <- run
+example_sce <- runDiffusionMap(example_sce)
 plotDiffusionMap(example_sce, colour_by = "Gene_0001", size_by = "Gene_1000")
 ```
 

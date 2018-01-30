@@ -167,7 +167,13 @@ For plate-based experiments, it is useful to see how expression or factors vary 
 This can be visualized using the `plotPlatePosition` function:
 
 ```{r}
-plotPlatePosition(example_sce, colour_by = "Gene_0001")
+example_sce2 <- example_sce
+example_sce2$plate_position <- paste0(
+     rep(LETTERS[1:5], each = 8), 
+     rep(formatC(1:8, width = 2, flag = "0"), 5)
+)
+plotPlatePosition(example_sce2, colour_by = "Gene_0001", 
+    exprs_values = "counts") # or 'logcounts'.
 ```
 
 Systematic trends in expression with the plate position may indicate that there were issues with processing.
