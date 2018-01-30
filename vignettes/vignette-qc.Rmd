@@ -131,7 +131,7 @@ Conversely, PCR amplification biases (or the presence of rare populations) may r
 
 ## Percentage of counts assigned to feature controls
 
-A particularly useful plot for cell QC is plotting the percentage of expression accounted for by feature controls against total_features.
+A particularly useful plot for cell-level QC involves percentage of expression in feature controls against the total number of expressed features.
 These two metadata variables can be plotted against each other as shown below.
 We take advantage of the `r CRANpkg("ggplot2")` semantics to fine-tune the plot aesthetics and to add a smoothing curve:
 
@@ -144,6 +144,34 @@ plotPhenoData(example_sce, aes(x = total_features_by_counts,
 
 Well-behaved cells should have a large number of expressed features and and a low percentage of expression from feature controls. 
 High percentage expression from feature controls and few expressed features are indicative of blank and failed cells.
+
+## Cumulative expression plot
+
+The `plotScater` method plots the cumulative proportion of each cell's library assigned to the top highest-expressed features (default 500).
+This type of plot visualizes differences in expression distributions for different cells, in the same manner as per-sample boxplots for microarray or bulk RNA-seq data.
+Cumulative expression plots are more effective for single-cell data where it is not easy to examine hundreds or thousands of boxplots at once.
+
+With this function, we can split up the cells based on `colData` variables to examine differences in the expression distributions between cells. 
+By default, the plot method will try to use count values for the plot, but other data available in the `assays` slot of the object can be used by specifying `exprs_values`.
+
+```{r plot-sceset-blocking}
+plotScater(example_sce, block1 = "Mutation_Status", block2 = "Treatment",
+     colour_by = "Cell_Cycle", nfeatures = 300, exprs_values = "counts")
+```
+
+This approach can allow users to identify large differences in expression distributions across different experimental blocks (e.g., processing batches).
+
+## Plate position plot
+
+For plate-based experiments, it is useful to see how expression or factors vary with the position of cell on the plate.
+This can be visualized using the `plotPlatePosition` function:
+
+```{r}
+plotPlatePosition(example_sce, colour_by = "Gene_0001")
+```
+
+Systematic trends in expression with the plate position may indicate that there were issues with processing.
+The same approach can be used with experimental factors to determine whether cells are appropriately randomized across the plate.
 
 ## Other quality control plots
 
@@ -180,7 +208,7 @@ multiplot(p1, p2, cols = 2)
 
 ## By cells
 
-### Overview 
+### Column subsetting 
 
 Column subsetting of the `SingeCellExperiment` object will only retain the selected cells, thus removing low-quality or otherwise unwanted cells.
 We demonstrate below by retaining the first 40 cells.
@@ -222,8 +250,9 @@ filtered <- example_sce[,keep.total]
 
 The `isOutlier` approach adjusts to experiment-specific aspects of the data, e.g., sequencing depth, amount of spike-in RNA added, cell type.
 In contrast, a fixed threshold would require manual adjustment to account for changes to the experimental protocol or system.
+We refer readers to the [_simpleSingleCell_](https://www.bioconductor.org/help/workflows/simpleSingleCell/intro) workflow for more details.
 
-### Identifying outliers on the QC metrics
+### Identifying outliers on all QC metrics
 
 Outlier cells can also be identified by using the `r CRANpkg("mvoutlier")` package on the QC metrics for all cells.
 This will identify cells that have substantially different QC metrics from the others, possibly corresponding to low-quality cells.
