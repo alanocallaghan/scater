@@ -2,8 +2,11 @@
 title: "Data visualisation methods in scater"
 author:
 - name: "Davis McCarthy"
-  affiliation: 
-  - EMBL-EBI
+  affiliation:
+    - EMBL European Bioinformatics Institute
+- name: "Aaron Lun"
+  affiliation:
+  - Cancer Research UK Cambridge Institute, University of Cambridge
 package: scater
 output:
     BiocStyle::html_document
@@ -18,268 +21,167 @@ vignette: >
 ## To render an HTML version that works nicely with github and web pages, do:
 ## rmarkdown::render("vignettes/vignette.Rmd", "all")
 library(knitr)
-opts_chunk$set(fig.align = 'center', fig.width = 6, fig.height = 5, dev = 'png')
+opts_chunk$set(fig.align = 'center', fig.width = 6, fig.height = 5, dev = 'png',
+    error=FALSE, message=FALSE, warning=FALSE)
 library(ggplot2)
 theme_set(theme_bw(12))
 ```
 
-This document provides some examples of the many data visualisation functions 
-available in `scater`.
+# Introduction
 
-Key `scater` data visualisation functions:
-* `plotScater`: cumulative expression, overview plot (this replaces the generic
-`plot` function for `SCESet` objects)
-* `plotExpression`: plot cell expression levels for one or more genes
-* `plotExprsVsTxLength`: plot transcript expression against transcript length
-* `plotPlatePosition()`: plot cell gene expression and metadata with cells in 
-their position on a plate
-* `plotColData`/`plotCellData`/`plotPhenoData`: plot cell-level metadata 
-variables
-* `plotRowData`/`plotFeatureData`: plot row/gene/feature-level metadata 
-variables
-* `plotReducedDim`
+This document provides some examples of the data visualisation functions available in `r Biocpkg("scater")`.
 
+* `plotExpression`: plot cell expression levels for one or more genes;
+* `plotReducedDim`: plot (and/or calculate) reduced dimension coordinates;
+* various QC plots, described in the QC vignette.
 
-# Cumulative expression plot
+We will demonstrate on some example data generated below:
 
-It is possible to get an overall view of the dataset by using the `plotScater`
-function. This method plots the cumulative proportion of
-each cell's library (total counts) that is accounted for by the top 
-highest-expressed features (by default showing the cumulative proportion across 
-the top 500 features).
-
-This type of plot gives an overall idea of differences in expression distributions for different cells. It is used in the same way as per-sample boxplots are for
-microarray or bulk RNA-seq data. Due to the large numbers of zeroes in
-expression values for single-cell RNA-seq data, boxplots are not as useful, so
-instead we focus on the contributions from the most expressed features for each
-cell.
-
-With this function, we can split up the cells based on `colData` variables to
-get a finer-grained look at differences between cells. By default, the plot
-method will try to use count values for the plot, but other data available in 
-the `assays` slot of the object can be used by specifying the `exprs_vales`
-argument. 
-
-```{r plot-sceset-blocking, eval=TRUE}
-suppressPackageStartupMessages(library(scater))
+```{r}
+library(scater)
 data("sc_example_counts")
 data("sc_example_cell_info")
 example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
-exprs(example_sce) <- log2(calculateCPM(example_sce, 
-                                        use_size_factors = FALSE) + 1)
-
-plotScater(example_sce, block1 = "Mutation_Status", block2 = "Treatment",
-     colour_by = "Cell_Cycle", nfeatures = 300, exprs_values = "counts")
+    assays = list(counts = sc_example_counts),
+    colData = sc_example_cell_info
+) 
+example_sce <- normalize(example_sce)
+example_sce
 ```
 
-This sort of approach can help to pick up large differences in expression
-distributions across different experimental blocks (e.g. processing batches or
-similar).
+# Plots of expression values
 
+The `plotExpression` function makes it easy to plot expression values for a subset of genes or features. 
+This can be particularly useful for further examination of features identified from differential expression testing, pseudotime analysis or other analyses.
 
-#  Plots of expression values
-
-In `scater`, the `plotExpression` function makes it easy to plot expression
-values for a subset of genes or features. This can be particularly useful when
-investigating the some features identified as being of interest from differential
-expression testing, pseudotime analysis or other means.
-
-```{r plot-expression, eval=TRUE}
+```{r plot-expression}
 plotExpression(example_sce, rownames(example_sce)[1:6],
-               x = "Mutation_Status", exprs_values = "exprs", 
-               colour = "Treatment")
+    x = "Mutation_Status", exprs_values = "logcounts", 
+    colour = "Treatment")
 ```
 
-This function uses `ggplot2`, making it easy to change the theme to whatever you
-prefer. We can also show the median expression level per group on the plot and
-show a violin plot to summarise the distribution of expression values:
+By default, it uses expression values in the `"logcounts"` assay, but this can be changed through the `exprs_values` argument.
+Setting `x` will determine the covariate to be shown on the x-axis, resulting in grouped violins (categorical) or scatter plots (continuous).
+The points can also be coloured, shaped or resized by diferent variables.
+
+```{r plot-expression}
+plotExpression(example_sce, rownames(example_sce)[1:6],
+    x = "Gene_0001", colour = "Mutation_Status")
+```
+
+This function uses `ggplot2`, making it easy for users to customize the theme and aesthetics.
+We can also show the median expression level per group on the plot and show a violin plot to summarise the distribution of expression values:
 
 ```{r plot-expression-theme-bw, eval=TRUE}
 plotExpression(example_sce, rownames(example_sce)[7:12],
-               x = "Mutation_Status", exprs_values = "counts", 
-               colour = "Cell_Cycle",
-               show_median = TRUE, show_violin = FALSE,  xlab = "Mutation Status",
-               log = TRUE)
+    x = "Mutation_Status", exprs_values = "counts", 
+    colour = "Cell_Cycle", show_median = TRUE, 
+    show_violin = FALSE,  xlab = "Mutation Status",
+    log = TRUE)
 ```
-
-The package also contains the function `plotExprsVsTxLength()` for plotting 
-expression values against transcript length, and the function 
-`plotPlatePosition()` to plot expression values and cell metadata information 
-for cells in their position on a plate.
-
-# Cell metadata plots
-
-The functions `plotColData`, `plotCellData` and `plotPhenoData` are synonymous
-and provide convenient means for plotting cell-level metadata values against 
-each other (cells can also be coloured, sized or shaped by gene expression 
-values). The functions will use the data type for each variable 
-(continous/categorical) to automatically determine an appropriate type of plot 
-without requiring input from the user.
-
-
-```{r plot-pdata, echo=TRUE, fig.show=TRUE, results='hide', eval=TRUE}
-example_sce <- calculateQCMetrics(example_sce, 
-                                  feature_controls = list(dummy = 1:40))
-plotColData(example_sce, aes(x = total_counts, y = total_features,
-                                  colour = Mutation_Status))
-```
-
-Note that ggplot aesthetics will work correctly (in general) for everything
-except `colour` (`color`) and `fill`, which must be either columns of `colData`
-or feature names (i.e. gene/transcript names).
-
-These sorts of plots can be very useful for finding potentially problematic
-cells.
-
-```{r plot-pdatacol-gene-exprs-2, fig.show = TRUE, eval=TRUE}
-plotColData(example_sce, aes(x = pct_counts_feature_control,
-                                  y = total_features, colour = Gene_0500))
-```
-
-
-The output of these functions is a `ggplot` object, which can be added to,
-amended and altered. For example, if we don't like the legend position  we can change it, and we could also add a trend line for each group (see below).
-
-Tapping into the powerful capabilities of `ggplot2`, the possibilities are many.
-
-
-# Gene metadata plots
-
-The functions `plotRowData` and `plotFeatureData` are synonymous
-and provide convenient means for plotting feature-level (row-level) metadata 
-values against each other. The functions will use the data type for each variable 
-(continous/categorical) to automatically determine an appropriate type of plot 
-without requiring input from the user.
-
-
-```{r plot-fdata, echo=TRUE, fig.show=TRUE, results='hide', eval=TRUE}
-plotRowData(example_sce, aes(x = log10_total_counts, y = n_cells_counts,
-                                  colour = log10_mean_counts))
-```
-
 
 # Dimensionality reduction plots
 
-## Using the `reducedDimension` slot
+## Using the `reducedDims` slot
 
-The `SingleCellExperiment` object has a `reducedDimension` slot, where 
-coordinates for reduced dimension representations of the cells can be stored. 
-If we so wish, the top principal components can be added to the `PCA` element of
-the `reducedDimension` slot as follows:
+The `SingleCellExperiment` object has a `reducedDims` slot, where coordinates for reduced dimension representations of the cells can be stored. 
+These can be accessed using the `reducedDim` and `reducedDims` functions, which are described in more detail in the `r Biocpkg("SingleCellExperiment")` documentation.
+In the code below, we perform a principal components analysis (PCA) and store the results in the `"PCA"` slot.
 
-```{r plot-pca-4comp-colby-shapeby-save-pcs, fig.show = FALSE, eval=TRUE}
-example_sce <- plotPCA(example_sce, ncomponents = 4,
-                          colour_by = "Treatment", shape_by = "Mutation_Status",
-                          return_SCE = TRUE, theme_size = 12)
-reducedDims(example_sce)
-head(reducedDim(example_sce))
+```{r}
+example_sce <- runPCA(example_sce)
+reducedDimNames(example_sce)
 ```
 
-As shown above, the functions `reducedDim` and `reducedDims`  can be used to 
-access the reduced dimension coordinates.
+Any reduced dimension results can be plotted using the `plotReducedDim` function:
 
-This means that any other dimension reduction method can be applied and the
-coordinates stored. For example, we might wish to use t-distributed stochastic
-nearest neighbour embedding (t-SNE) or Gaussian process latent variable models
-or any other dimensionality reduction method. We can store these in the 
-`SingleCellExperiment` object with the `reducedDim` function and produce plots 
-just as we did with PCA (plot not shown):
-
-```{r plot-reduceddim-4comp-colby-shapeby, fig.show=FALSE, eval=TRUE}
+```{r plot-reduceddim-4comp-colby-shapeby}
 plotReducedDim(example_sce, use_dimred = "PCA", ncomponents = 4, 
-               colour_by = "Treatment", shape_by = "Mutation_Status")
+    colour_by = "Treatment", shape_by = "Mutation_Status")
 ```
 
-As for the PCA plots we can also colour and size points by feature expression.
+We can also colour and size points by the expression of particular features:
 
-```{r plot-reduceddim-4comp-colby-sizeby-exprs, fig.show = FALSE, eval=TRUE}
+```{r plot-reduceddim-4comp-colby-sizeby-exprs}
 plotReducedDim(example_sce, use_dimred = "PCA", ncomponents = 4, 
-               colour_by = "Gene_1000", size_by = "Gene_0500")
+    colour_by = "Gene_1000", size_by = "Gene_0500")
 ```
 
-(Here, the dimensionality reduction is just PCA, so we have the same plot as the
-PCA plot above.)
+## Generating PCA plots
 
+The `plotPCA` function makes it easy to produce a PCA plot directly from a `SingleCellExperiment` object, which is useful for visualising the relationships between cells.
+The default plot shows the first two principal components, if `"PCA"` is already in the `reducedDims` slot.
 
-
-## PCA
-
-The `plotPCA` function makes it easy to produce a PCA plot directly from an
-`SCESet` object, which is useful for visualising cells.
-
-The default plot shows the first two principal components and if any cell
-controls have been defined, plots these cells in a different colour.
-
-```{r plot-pca-default, eval=TRUE}
+```{r plot-pca-default}
 plotPCA(example_sce)
 ```
 
-By default, the PCA plot
-is produced using the 500 features with the most variable expression across all
-cells. The number of most-variable features used can be changed with the `ntop`
-argument. Alternatively, a specific set of features to use for the PCA can be
-defined with the `feature_set` argument. This allows, for example, using only
-housekeeping features or control features to produce a PCA plot.
+If pre-existing `"PCA"` results are not present, the function will automatically call `runPCA` to generate the results prior to plotting.
+However, it may be preferable for users to call `runPCA` manually if multiple plots are to be generated from the same results.
+This avoids re-calculation of the reduced dimension results, which can be time-consuming for very large data sets.
 
-By default the PCA plot uses the expression values in the `logcounts` slot of the
-`SingleCellExperiment` object, but other expression values can be used by 
-specifying the `exprs_values` argument (plot not shown):
+By default, `runPCA` performs PCA on the log-counts using the 500 features with the most variable expression across all cells. 
+The number of most-variable features used can be changed with the `ntop` argument. 
+Alternatively, a specific set of features to use for PCA can be defined with the `feature_set` argument.
+This is demonstrated with the feature controls below, to identify technical factors of variation:.
 
-```{r plot-pca-cpm, eval=TRUE}
-plotPCA(example_sce, exprs_values = "cpm")
+```{r plot-pca-feature-controls}
+example_sce2 <- runPCA(example_sce, 
+    feature_set = rowData(example_sce)$is_feature_control)
+plotPCA(example_sce2)
 ```
 
-A subset of features can be used to produce a PCA plot. In the code below only
-the features defined as "feature controls" are used for the PCA (plot not shown).
+Multiple components can be plotted in a series of pairwise plots.
+When more than two components are plotted, the diagonal boxes in the scatter plot matrix show the density for each component.
 
-```{r plot-pca-feature-controls, fig.show = FALSE, eval=TRUE}
-plotPCA(example_sce, feature_set = rowData(example_sce)$is_feature_control)
-```
-
-The function allows more than just the first two components to be plotted, and
-also allows phenotype variables to be used to define the colour, shape and size
-of points in the scatter plot.
-
-```{r plot-pca-4comp-colby-shapeby, fig.height=5.5, eval=TRUE}
+```{r plot-pca-4comp-colby-shapeby}
 plotPCA(example_sce, ncomponents = 4, colour_by = "Treatment",
         shape_by = "Mutation_Status")
 ```
 
-When more than two components are plotted, the diagonal boxes in the scatter
-plot matrix show the density for each component.
+As shown above, various metadata variables can be used to define the colour, shape and size of points in the scatter plot.
+We can also use the colour and size of point in the plot to reflect feature expression values.
 
-We can also use the colour and size of point in the plot to reflect feature
-expression values.
-
-```{r plot-pca-4comp-colby-sizeby-exprs, fig.height=5.5, eval=TRUE}
+```{r plot-pca-4comp-colby-sizeby-exprs}
 plotPCA(example_sce, colour_by = "Gene_0001", size_by = "Gene_1000")
 ```
 
+## Generating _t_-SNE plots
 
-Thus, expression levels of two marker genes or transcripts can be shown overlaid
-onto reduced-dimension representations of cells. 
+_t_-distributed stochastic neighbour embedding (_t_-SNE) is widely used for visualizing complex single-cell data sets.
+The same procedure described for PCA plots can be applied to generate _t_-SNE plots using `plotTSNE`, with coordinates obtained using `runTSNE` via the `r CRANpkg("Rtsne")` package.
+We strongly recommend generating plots with different random seeds and perplexity values, to ensure that any conclusions are robust to different visualizations.
 
-## t-SNE
-
-This also works for `plotTSNE`
-plots.
-
-```{r plot-tsne-1comp-colby-sizeby-exprs, fig.height=5.5, eval=TRUE}
+```{r plot-tsne-1comp-colby-sizeby-exprs}
+example_sce <- runTSNE(example_sce, perplexity=30, rand_seed=1000)
 plotTSNE(example_sce, colour_by = "Gene_0001", size_by = "Gene_1000")
 ```
 
-## Diffusion maps
+It is also possible to use the pre-existing PCA results as input into the _t_-SNE algorithm.
+This is useful as it improves speed by using a low-rank approximation of the expression matrix; and reduces random noise, by focusing on the major factors of variation.
+The code below uses the first 10 principal components to perform the _t_-SNE.
 
-And for diffusion map plots.
+```{r plot-tsne-from-pca}
+example_sce <- runTSNE(example_pca, perplexity=30, rand_seed=1000,
+    use_dimred="PCA", n_dimred)
+plotTSNE(example_sce, colour_by="Treatment")
+```
 
-```{r plot-difmap-1comp-colby-sizeby-exprs, fig.height=5.5, eval=TRUE}
+Users can force `plotTSNE` to call `runTSNE` by setting `rerun=TRUE`, even when `"TSNE"` already exists in the input `SingleCellExperiment` object.
+Users can also pass parameters for `runTSNE` directly to `plotTSNE` via the `run.args` argument.
+The same applies for the other `plot*` and `run*` arguments.
+
+## Generating diffusion maps
+
+Again, the same can be done for diffusion maps using `plotDiffusionMap`, with coordinates obtained using `runDiffusionMap` via the `r Biocpkg("destiny")` package.
+
+```{r plot-difmap-1comp-colby-sizeby-exprs}
+example_sce <- run
 plotDiffusionMap(example_sce, colour_by = "Gene_0001", size_by = "Gene_1000")
 ```
 
+# Session information {.unnumbered}
 
-
-# QC plots
-
-See the QC vignette for examples of using the `plotQC` function to create visualisations relevant for cell and gene filtering for quality control. 
-
+```{r}
+sessionInfo()
+```
