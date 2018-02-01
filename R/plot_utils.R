@@ -139,3 +139,27 @@
 
     return(list(name = by, val = vals))
 }
+
+
+.makePairs <- function(data_matrix) 
+# with thanks to Gaston Sanchez, who posted this code online
+# https://gastonsanchez.wordpress.com/2012/08/27/scatterplot-matrices-with-ggplot/
+{
+    if ( is.null(names(data_matrix)) )
+        names(data_matrix) <- paste0("row", 1:nrow(data_matrix))
+    exp_grid <- expand.grid(x = 1:ncol(data_matrix), y = 1:ncol(data_matrix))
+    exp_grid <- exp_grid[exp_grid$x != exp_grid$y,]
+    all_panels <- do.call("rbind", lapply(1:nrow(exp_grid), function(i) {
+        xcol <- exp_grid[i, "x"]
+        ycol <- exp_grid[i, "y"]
+        data.frame(xvar = names(data_matrix)[ycol], yvar = names(data_matrix)[xcol],
+                   x = data_matrix[, xcol], y = data_matrix[, ycol], data_matrix)
+    }))
+    all_panels$xvar <- factor(all_panels$xvar, levels = names(data_matrix))
+    all_panels$yvar <- factor(all_panels$yvar, levels = names(data_matrix))
+    densities <- do.call("rbind", lapply(1:ncol(data_matrix), function(i) {
+        data.frame(xvar = names(data_matrix)[i], yvar = names(data_matrix)[i],
+                   x = data_matrix[, i])
+    }))
+    list(all = all_panels, densities = densities)
+}

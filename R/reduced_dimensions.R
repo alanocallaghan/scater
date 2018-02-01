@@ -203,6 +203,9 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
 #' it can often be worthwhile to try multiple values to find the most appealing
 #' visualisation and to ensure that the conclusions are robust.
 #'
+#' @references
+#' L.J.P. van der Maaten. Barnes-Hut-SNE. In Proceedings of the International Conference on Learning Representations, 2013.
+#'
 #' @rdname runTSNE
 #' @seealso 
 #' \code{\link[Rtsne]{Rtsne}},
@@ -313,6 +316,9 @@ runTSNE <- function(object, ntop = 500, ncomponents = 2, exprs_values = "logcoun
 #' @seealso 
 #' \code{\link[destiny]{destiny}},
 #' \code{\link[scater]{plotDiffusionMap}}
+#'
+#' @references
+#' Haghverdi L, Buettner F, Theis FJ. Diffusion maps for high-dimensional single-cell analysis of differentiation data. Bioinformatics. 2015; doi:10.1093/bioinformatics/btv325
 #'
 #' @examples
 #' ## Set up an example SingleCellExperiment
