@@ -66,9 +66,7 @@
 #' \item \code{"DiffusionMap"} and \code{\link{runDiffusionMap}} for \code{plotDiffusionMap}
 #' \item \code{"MDS"} and \code{\link{runMDS}} for \code{"plotMDS"}
 #' }
-#'
-#' For back-compatabibility purposes, users can specify arguments to \code{\link{runPCA}} in \code{...}. 
-#' This will trigger a warning as it will be deprecated in the next development cycle.
+#' Users can specify arguments to \code{\link{run*}} functions in \code{...}. 
 #'
 #' @return A ggplot plot object or an SingleCellExperiment object, depending on \code{return_SCE}.
 #'
@@ -108,16 +106,16 @@
 #' plotPCA(example_sce, ncomponents = 4, colour_by = "Treatment",
 #' shape_by = "Mutation_Status")
 #'
-#' Same for TSNE:
+#' ## Same for TSNE:
 #' plotTSNE(example_sce, perplexity = 10)
 #' plotTSNE(example_sce, colour_by = "Cell_Cycle", perplexity = 10)
 #' plotTSNE(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment",
 #'     size_by = "Mutation_Status", perplexity = 10)
 #'
-#' Same for DiffusionMaps:
+#' ## Same for DiffusionMaps:
 #' plotDiffusionMap(example_sce)
 #'
-#' Same for MDS plots:
+#' ## Same for MDS plots:
 #' plotMDS(example_sce)
 #' plotMDS(example_sce, colour_by = "Cell_Cycle")
 #' plotMDS(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment")
@@ -128,12 +126,12 @@ plotPCASCE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, rerun 
                       return_SCE=return_SCE, draw_plot=draw_plot)
 }
 
-#' @rdname plotPCA
+#' @rdname plotRDSCE
 #' @aliases plotPCA
 #' @export
 setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
 
-#' @rdname plotTSNE
+#' @rdname plotRDSCE
 #' @aliases plotTSNE 
 #' @export
 plotTSNE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, rerun = FALSE, ncomponents = 2, run_args=list()) {
@@ -142,7 +140,7 @@ plotTSNE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, rerun = 
                       return_SCE=return_SCE, draw_plot=draw_plot)
 }
 
-#' @rdname plotDiffusionMap
+#' @rdname plotRDSCE
 #' @aliases plotDiffusionMap 
 #' @export
 plotDiffusionMap <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, rerun = FALSE, ncomponents = 2, run_args=list()) {
@@ -151,7 +149,7 @@ plotDiffusionMap <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, 
                       return_SCE=return_SCE, draw_plot=draw_plot)
 }
 
-#' @name plotMDS
+#' @rdname plotRDSCE
 #' @aliases plotMDS 
 #' @export
 plotMDS <- function(object, ..., ncomponents = 2, return_SCE = FALSE, rerun = FALSE, draw_plot = TRUE, run_args=list()) {
