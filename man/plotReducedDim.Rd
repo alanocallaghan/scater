@@ -2,33 +2,24 @@
 % Please edit documentation in R/plot_reddim.R
 \name{plotReducedDim}
 \alias{plotReducedDim}
-\alias{plotReducedDimDefault}
-\alias{plotReducedDim,SingleCellExperiment-method}
-\alias{plotReducedDim,data.frame-method}
-\alias{plotReducedDim}
 \title{Plot reduced dimension representation of cells}
 \usage{
-plotReducedDimDefault(df_to_plot, ncomponents = 2, percentVar = NULL,
-  colour_by = NULL, shape_by = NULL, size_by = NULL, theme_size = 10,
-  legend = "auto", add_ticks = TRUE)
-
 plotReducedDim(object, use_dimred, ncomponents = 2, colour_by = NULL,
   shape_by = NULL, size_by = NULL, exprs_values = "logcounts",
-  percentVar = NULL, ...)
+  percentVar = NULL, theme_size = 10, legend = "auto", add_ticks = TRUE)
 }
 \arguments{
-\item{df_to_plot}{data.frame containing a reduced dimension represenation of
-cells and optional metadata for the plot.}
+\item{object}{an \code{SingleCellExperiment} object with a non-NULL \code{reducedDimension}
+slot.}
+
+\item{use_dimred}{character, name of reduced dimension representation of cells
+stored in \code{SingleCellExperiment} object to plot (e.g. "PCA", "TSNE", etc).}
 
 \item{ncomponents}{numeric scalar indicating the number of principal
 components to plot, starting from the first principal component. Default is
 2. If \code{ncomponents} is 2, then a scatterplot of Dimension 2 vs Dimension
 1 is produced. If \code{ncomponents} is greater than 2, a pairs plots for the
  top dimensions is produced.}
-
-\item{percentVar}{numeric vector giving the proportion of variance in
-expression explained by each reduced dimension. Only expected to be used
-internally in the \code{\link[scater]{plotPCA}} function.}
 
 \item{colour_by}{character string defining the column of \code{pData(object)} to
 be used as a factor by which to colour the points in the plot. Alternatively, a
@@ -40,6 +31,13 @@ be used as a factor by which to define the shape of the points in the plot.}
 \item{size_by}{character string defining the column of \code{pData(object)} to
 be used as a factor by which to define the size of points in the plot.}
 
+\item{exprs_values}{a string specifying the expression values to use for
+colouring the points, if \code{colour_by} or \code{size_by} are set as feature names.}
+
+\item{percentVar}{numeric vector giving the proportion of variance in
+expression explained by each reduced dimension. Only expected to be used
+internally in the \code{\link[scater]{plotPCA}} function.}
+
 \item{theme_size}{numeric scalar giving default font size for plotting theme
 (default is 10).}
 
@@ -49,45 +47,32 @@ Alternatives are "all" (show all legends) or "none" (hide all legends).}
 
 \item{add_ticks}{logical scalar indicating whether ticks should be drawn
 on the axes corresponding to the location of each point.}
-
-\item{object}{an \code{SingleCellExperiment} object with a non-NULL \code{reducedDimension}
-slot.}
-
-\item{use_dimred}{character, name of reduced dimension representation of cells
-stored in \code{SingleCellExperiment} object to plot (e.g. "PCA", "TSNE", etc).}
-
-\item{exprs_values}{a string specifying the expression values to use for
-colouring the points, if \code{colour_by} or \code{size_by} are set as feature names.}
-
-\item{...}{optional arguments (from those listed above) passed to
-\code{plotReducedDimDefault}}
 }
 \value{
-a ggplot plot object
+A ggplot plot object
 }
 \description{
 Plot reduced dimension representation of cells
-}
-\details{
-The function \code{plotReducedDim.default} assumes that the first
-\code{ncomponents} columns of \code{df_to_plot} contain the reduced dimension
- components to plot, and that any subsequent columns define factors for
- \code{colour_by}, \code{shape_by} and \code{size_by} in the plot.
 }
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
 example_sce <- SingleCellExperiment(
-assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+    assays = list(counts = sc_example_counts), 
+    colData = sc_example_cell_info
+)
 example_sce <- normalize(example_sce)
 drop_genes <- apply(exprs(example_sce), 1, function(x) {var(x) == 0})
 example_sce <- example_sce[!drop_genes, ]
 
-reducedDim(example_sce, "PCA") <- prcomp(t(exprs(example_sce)), scale. = TRUE)$x
+example_sce <- runPCA(example_sce)
 plotReducedDim(example_sce, "PCA")
 plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle")
 plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", shape_by="Treatment")
-plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", size_by="Treatment")
+plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", size_by="Gene_0001")
+plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", 
+   shape_by="Mutation_Status", size_by="Gene_0001")
+
 plotReducedDim(example_sce, "PCA", ncomponents=5)
 plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle", shape_by="Treatment")
 plotReducedDim(example_sce, "PCA", colour_by="Gene_0001")

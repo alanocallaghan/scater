@@ -164,8 +164,6 @@ plotMDS <- function(object, ..., ncomponents = 2, return_SCE = FALSE, rerun = FA
 #' slot.
 #' @param use_dimred character, name of reduced dimension representation of cells
 #' stored in \code{SingleCellExperiment} object to plot (e.g. "PCA", "TSNE", etc).
-#' @param df_to_plot data.frame containing a reduced dimension represenation of
-#' cells and optional metadata for the plot.
 #' @param ncomponents numeric scalar indicating the number of principal
 #' components to plot, starting from the first principal component. Default is
 #' 2. If \code{ncomponents} is 2, then a scatterplot of Dimension 2 vs Dimension
@@ -190,18 +188,11 @@ plotMDS <- function(object, ..., ncomponents = 2, return_SCE = FALSE, rerun = FA
 #' Alternatives are "all" (show all legends) or "none" (hide all legends).
 #' @param add_ticks logical scalar indicating whether ticks should be drawn
 #' on the axes corresponding to the location of each point.
-#' @param ... optional arguments (from those listed above) passed to
-#' \code{plotReducedDimDefault}
 #'
-#' @details The function \code{plotReducedDim.default} assumes that the first
-#' \code{ncomponents} columns of \code{df_to_plot} contain the reduced dimension
-#'  components to plot, and that any subsequent columns define factors for
-#'  \code{colour_by}, \code{shape_by} and \code{size_by} in the plot.
-#'
-#' @return a ggplot plot object
+#' @return A ggplot plot object
 #'
 #' @name plotReducedDim
-#' @aliases plotReducedDim plotReducedDim,SingleCellExperiment-method plotReducedDim,data.frame-method
+#' @aliases plotReducedDim 
 #' @import viridis
 #' @export
 #'
@@ -209,43 +200,90 @@ plotMDS <- function(object, ..., ncomponents = 2, return_SCE = FALSE, rerun = FA
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
 #' example_sce <- SingleCellExperiment(
-#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#'     assays = list(counts = sc_example_counts), 
+#'     colData = sc_example_cell_info
+#' )
 #' example_sce <- normalize(example_sce)
 #' drop_genes <- apply(exprs(example_sce), 1, function(x) {var(x) == 0})
 #' example_sce <- example_sce[!drop_genes, ]
 #'
-#' reducedDim(example_sce, "PCA") <- prcomp(t(exprs(example_sce)), scale. = TRUE)$x
+#' example_sce <- runPCA(example_sce, ncomponents=5)
 #' plotReducedDim(example_sce, "PCA")
 #' plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle")
 #' plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", shape_by="Treatment")
-#' plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", size_by="Treatment")
+#' plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", size_by="Gene_0001")
+#' plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", 
+#'    shape_by="Mutation_Status", size_by="Gene_0001")
+#'
 #' plotReducedDim(example_sce, "PCA", ncomponents=5)
-#' plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle", shape_by="Treatment")
+#' plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle", 
+#'     shape_by="Treatment")
 #' plotReducedDim(example_sce, "PCA", colour_by="Gene_0001")
 #'
-plotReducedDimDefault <- function(df_to_plot, ncomponents=2, percentVar=NULL,
-                           colour_by=NULL, shape_by=NULL, size_by=NULL,
+plotReducedDim <- function(object, use_dimred, ncomponents = 2,
+                           colour_by = NULL, shape_by = NULL, size_by = NULL,
+                           exprs_values = "logcounts", percentVar = NULL, 
                            theme_size = 10, legend = "auto", add_ticks=TRUE) {
 
-    ## check legend argument
-    legend <- match.arg(legend, c("auto", "none", "all"), several.ok = FALSE)
+    ## Check arguments are valid
+    colour_by_out <- .choose_vis_values(object, colour_by, mode = "column", search = "any",
+                                        exprs_values = exprs_values)
+    colour_by <- colour_by_out$name
+    colour_by_vals <- colour_by_out$val
 
-    ## Define plot
+    shape_by_out <- .choose_vis_values(object, shape_by, mode = "column", search = "any",
+                                       exprs_values = exprs_values, coerce_factor = TRUE, level_limit = 10)
+    shape_by <- shape_by_out$name
+    shape_by_vals <- shape_by_out$val
+
+    size_by_out <- .choose_vis_values(object, size_by, mode = "column", search="any",
+                                      exprs_values = exprs_values)
+    size_by <- size_by_out$name
+    size_by_vals <- size_by_out$val
+
+    ## Extract reduced dimension representation of cells
+    red_dim <- reducedDim(object, use_dimred)
+    if ( ncomponents > ncol(red_dim) ) {
+        stop(sprintf("'ncomponents' is larger than 'ncols(reducedDim(object, '%s'))'", use_dimred))
+    }
+    if (is.null(percentVar)) {
+        percentVar <- attr(red_dim, "percentVar")
+    }
+
+    ## Define data.frame for plotting (avoid clash between column names)
+    colnames(red_dim) <- NULL 
+    df_to_plot <- data.frame(red_dim[, seq_len(ncomponents),drop=FALSE])
+    df_to_plot$colour_by <- colour_by_vals
+    df_to_plot$shape_by <- shape_by_vals
+    df_to_plot$size_by <- size_by_vals
+
+    ## Call default method to make the plot
+    plotReducedDimDefault(df_to_plot, ncomponents = ncomponents, percentVar = percentVar,
+        colour_by = colour_by, shape_by = shape_by, size_by = size_by,
+        theme_size = theme_size, legend = legend, add_ticks = add_ticks)
+}
+
+plotReducedDimDefault <- function(df_to_plot, ncomponents=2, percentVar=NULL,
+    colour_by=NULL, shape_by=NULL, size_by=NULL,
+    theme_size = 10, legend = "auto", add_ticks=TRUE) 
+# Internal helper function that does the heavy lifting of creating 
+# the reduced dimension plot - either a scatter plot or a pairs plot, 
+# depending on the number of specified components.
+{
     if ( ncomponents > 2 ) {
-        ## expanding numeric columns for pairs plot
-        df_to_expand <- df_to_plot[, 1:ncomponents]
+        to_plot <- seq_len(ncomponents)
+
+        df_to_expand <- df_to_plot[, to_plot]
         if ( is.null(percentVar) ) {
-            colnames(df_to_expand) <- colnames(df_to_plot)[1:ncomponents]
+            colnames(df_to_expand) <- colnames(df_to_plot)[to_plot]
         } else {
-            colnames(df_to_expand) <- paste0(
-                colnames(df_to_plot)[1:ncomponents], ": ",
-                round(percentVar[1:ncomponents] * 100), "% variance")
+            colnames(df_to_expand) <- paste0(colnames(df_to_plot)[to_plot], ": ", round(percentVar[to_plot] * 100), "% variance")
         }
+
         gg1 <- .makePairs(df_to_expand)
-        ## new data frame
-        df_to_plot_big <- data.frame(gg1$all, df_to_plot[, -c(1:ncomponents)])
-        colnames(df_to_plot_big)[-c(1:4)] <- colnames(df_to_plot)
-        ## pairs plot
+        df_to_plot_big <- data.frame(gg1$all, df_to_plot[, -to_plot])
+        colnames(df_to_plot_big)[-seq_len(4)] <- colnames(df_to_plot)
+
         plot_out <- ggplot(df_to_plot_big, aes_string(x = "x", y = "y")) +
             facet_grid(xvar ~ yvar, scales = "free") +
             stat_density(aes_string(x = "x",
@@ -256,160 +294,96 @@ plotReducedDimDefault <- function(df_to_plot, ncomponents=2, percentVar=NULL,
             ylab("") +
             theme_bw(theme_size)
     } else {
-        comps <- colnames(df_to_plot)[1:2]
+        comps <- colnames(df_to_plot)[seq_len(2)]
         if ( is.null(percentVar) ) {
             x_lab <- "Dimension 1"
             y_lab <- "Dimension 2"
         } else {
-            x_lab <- paste0("Component 1: ", round(percentVar[1] * 100),
-                            "% variance")
-            y_lab <- paste0("Component 2: ", round(percentVar[2] * 100),
-                            "% variance")
+            x_lab <- paste0("Component 1: ", round(percentVar[1] * 100), "% variance")
+            y_lab <- paste0("Component 2: ", round(percentVar[2] * 100), "% variance")
         }
+
         plot_out <- ggplot(df_to_plot, aes_string(x = comps[1], y = comps[2])) +
             xlab(x_lab) +
             ylab(y_lab) +
             theme_bw(theme_size)
+
         if (add_ticks) {
             plot_out <- plot_out + geom_rug(colour = "gray20", alpha = 0.65)
         }
     }
 
     ## if only one level for the variable, set to NULL
+    legend <- match.arg(legend, c("auto", "none", "all"), several.ok = FALSE)
     if ( legend == "auto" ) {
-        if ( !is.null(colour_by) && length(unique(df_to_plot$colour_by)) == 1)
+        if ( !is.null(colour_by) && length(unique(df_to_plot$colour_by)) == 1) {
             colour_by <- NULL
-        if ( !is.null(shape_by) && length(unique(df_to_plot$shape_by)) == 1)
+        }
+        if ( !is.null(shape_by) && length(unique(df_to_plot$shape_by)) == 1) {
             shape_by  <- NULL
-        if ( !is.null(size_by) && length(unique(df_to_plot$size_by)) == 1)
+        }
+        if ( !is.null(size_by) && length(unique(df_to_plot$size_by)) == 1) {
             size_by <- NULL
-    }
-
-    ## Apply colour_by, shape_by and size_by variables if defined
-    if ( !is.null(colour_by) && !is.null(shape_by) && !is.null(size_by) ) {
-        plot_out <- plot_out +
-            geom_point(aes_string(colour = "colour_by", shape = "shape_by",
-                                  size = "size_by"), alpha = 0.65) +
-            guides(size = guide_legend(title = size_by),
-                   shape = guide_legend(title = shape_by))
-        plot_out <- .resolve_plot_colours(plot_out, df_to_plot$colour_by,
-                                          colour_by)
-    } else {
-        if  ( sum(is.null(colour_by) + is.null(shape_by) + is.null(size_by)) == 1 ) {
-            if ( !is.null(colour_by) && !is.null(shape_by) ) {
-                plot_out <- plot_out +
-                    geom_point(aes_string(colour = "colour_by",
-                                          shape = "shape_by"),
-                               alpha = 0.65) +
-                    guides(shape = guide_legend(title = shape_by))
-                plot_out <- .resolve_plot_colours(plot_out,
-                                                  df_to_plot$colour_by,
-                                                  colour_by)
-            }
-            if ( !is.null(colour_by) && !is.null(size_by) ) {
-                plot_out <- plot_out +
-                    geom_point(aes_string(fill = "colour_by", size = "size_by"),
-                               shape = 21, colour = "gray70", alpha = 0.65) +
-                    guides(size = guide_legend(title = size_by))
-                plot_out <- .resolve_plot_colours(plot_out,
-                                                  df_to_plot$colour_by,
-                                                  colour_by, fill = TRUE)
-            }
-            if ( !is.null(shape_by) && !is.null(size_by) ) {
-                plot_out <- plot_out +
-                    geom_point(aes_string(shape = "shape_by", size = "size_by"),
-                               fill = "gray20", colour = "gray20",
-                               alpha = 0.65) +
-                    guides(size = guide_legend(title = size_by),
-                           shape = guide_legend(title = shape_by))
-            }
-        } else {
-            if ( sum(is.null(colour_by) + is.null(shape_by) +
-                     is.null(size_by)) == 2 ) {
-                if ( !is.null(colour_by) ) {
-                    plot_out <- plot_out +
-                        geom_point(aes_string(fill = "colour_by"),
-                                   shape = 21, colour = "gray70", alpha = 0.65)
-                    plot_out <- .resolve_plot_colours(plot_out,
-                                                      df_to_plot$colour_by,
-                                                      colour_by, fill = TRUE)
-                }
-                if ( !is.null(shape_by) ) {
-                    plot_out <- plot_out +
-                        geom_point(aes_string(shape = "shape_by"),
-                                   colour = "gray20", alpha = 0.65) +
-                        guides(shape = guide_legend(title = shape_by))
-                }
-                if ( !is.null(size_by) ) {
-                    plot_out <- plot_out +
-                        geom_point(aes_string(size = "size_by"),
-                                   fill = "gray20", shape = 21,
-                                   colour = "gray70", alpha = 0.65) +
-                        guides(size = guide_legend(title = size_by))
-                }
-            } else {
-                plot_out <- plot_out +
-                    geom_point(fill = "gray20", shape = 21,
-                               colour = "gray70", alpha = 0.65)
-            }
         }
     }
 
-    ## Define plotting theme
-    if ( requireNamespace("cowplot", quietly = TRUE) )
-        plot_out <- plot_out + cowplot::theme_cowplot(theme_size)
-    else
-        plot_out <- plot_out + theme_bw(theme_size)
+    ## Setting up the point addition with various aesthetics.
+    ## Note the use of colour instead of fill when shape_by is set, as not all shapes have fill.
+    ## (Fill is still the default as it looks nicer.)
+    aes_args <- list()
+    fill_colour <- TRUE
+    if (!is.null(shape_by)) {
+        aes_args$shape <- "shape_by"
+        fill_colour <- FALSE
+    }
+    if (!is.null(colour_by)) {
+        if (fill_colour) {
+            aes_args$fill <- "colour_by"
+        } else {
+            aes_args$colour <- "colour_by"
+        }
+    }
+    if (!is.null(size_by)) {
+        aes_args$size <- "size_by"
+    }
+    new_aes <- do.call(aes_string, aes_args)
+
+    geom_args <- list(mapping=new_aes, alpha=0.65)
+    if (is.null(colour_by) || fill_colour) {
+        geom_args$colour <- "grey70"
+    }
+    if (is.null(colour_by) || !fill_colour) { # set fill when there is no fill colour, to distinguish between e.g., pch=16 and pch=21.
+        geom_args$fill <- "grey20"
+    }
+    if (is.null(shape_by)) {
+        geom_args$shape <- 21
+    }
+    geom_cmd <- do.call(geom_point, geom_args)
+
+    # Adding the points to the plot.
+    plot_out <- plot_out + geom_cmd
+    if (!is.null(colour_by)) { 
+        plot_out <- .resolve_plot_colours(plot_out, df_to_plot$colour_by, colour_by, fill=fill_colour)
+    } 
+    
+    # Adding an extra legend.   
+    guide_args <- list()
+    if (!is.null(shape_by)) {
+        guide_args$shape <- guide_legend(title = shape_by)
+    }
+    if (!is.null(size_by)) { 
+        guide_args$size <- guide_legend(title = size_by)
+    }
+    if (length(guide_args)) { 
+        plot_out <- plot_out + do.call(guides, guide_args)
+    }
 
     ## remove legend if so desired
-    if ( legend == "none" )
+    if ( legend == "none" ) {
         plot_out <- plot_out + theme(legend.position = "none")
+    }
 
     ## Return plot
     plot_out
-}
-
-#' @rdname plotReducedDim
-#' @aliases plotReducedDim
-#' @export
-plotReducedDim <- function(object, use_dimred, ncomponents = 2,
-                              colour_by = NULL, shape_by = NULL, size_by = NULL,
-                              exprs_values = "logcounts", percentVar = NULL, ...) {
-
-    ## Check arguments are valid
-    colour_by_out <- .choose_vis_values(
-        object, colour_by, cell_control_default = TRUE, check_features = TRUE,
-        exprs_values = exprs_values)
-    colour_by <- colour_by_out$name
-    colour_by_vals <- colour_by_out$val
-
-    shape_by_out <- .choose_vis_values(
-        object, shape_by, cell_control_default = TRUE, coerce_factor = TRUE,
-        level_limit = 10)
-    shape_by <- shape_by_out$name
-    shape_by_vals <- shape_by_out$val
-
-    size_by_out <- .choose_vis_values(
-        object, size_by, check_features = TRUE, exprs_values = exprs_values)
-    size_by <- size_by_out$name
-    size_by_vals <- size_by_out$val
-
-    ## Extract reduced dimension representation of cells
-    red_dim <- reducedDim(object, use_dimred)
-    if ( ncomponents > ncol(red_dim) )
-        stop("ncomponents to plot is larger than number of columns of reducedDimension(object)")
-    if (is.null(percentVar)) {
-        percentVar <- attr(red_dim, "percentVar")
-    }
-
-    ## Define data.frame for plotting
-    df_to_plot <- data.frame(red_dim[, seq_len(ncomponents),drop=FALSE])
-    df_to_plot$colour_by <- colour_by_vals
-    df_to_plot$shape_by <- shape_by_vals
-    df_to_plot$size_by <- size_by_vals
-
-    ## Call default method to make the plot
-    plotReducedDimDefault(df_to_plot, ncomponents = ncomponents, percentVar = percentVar,
-                colour_by = colour_by, shape_by = shape_by, size_by = size_by, ...)
 }
 

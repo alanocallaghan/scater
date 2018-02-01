@@ -73,7 +73,7 @@
 }
 
 .choose_vis_values <- function(x, by, mode=c("column", "row"), 
-    check_metadata=TRUE, check_features=FALSE,
+    search=c("any", "metadata", "feature"),
     exprs_values = "logcounts", coerce_factor = FALSE, level_limit = NA) 
 # This function looks through the visualization data and returns the
 # values to be visualized. Either 'by' itself, or a column of colData,
@@ -82,7 +82,36 @@
     vals <- NULL
     if (is.character(by)) {
         mode <- match.arg(mode)
+        search <- match.arg(search)
 
+        # Determining what to check, based on input 'by'.
+        if (search=="any") { 
+            check_metadata <- check_features <- TRUE
+
+            if (length(by)==0) {
+                check_metadata <- FALSE 
+                check_features <- FALSE
+            } else if (length(by)>1) {
+                check_metadata <- TRUE
+                check_features <- FALSE
+            } else if (length(by)==1L) {
+                cur_name <- names(by)
+                if (!is.null(cur_name) && !is.na(cur_name)) { 
+                    if (cur_name=="Feature") {
+                        check_features <- TRUE
+                        check_metadata <- FALSE
+                    } else if (cur_name=="Metadata") {
+                        check_features <- FALSE
+                        check_metadata <- TRUE
+                    }
+                }
+            }
+        } else {
+            check_metadata <- (search=="metadata")
+            check_features <- !check_metadata            
+        }
+           
+        # Checking the metadata; note the loop to account for nesting.
         if (check_metadata) { 
             if (mode=="column") {
                 meta_data <- colData(x)
@@ -90,20 +119,18 @@
                 meta_data <- rowData(x)
             }
             
-            # Looped to account for nesting.
-            for (x in by) {
-                if (!x %in% colnames(meta_data)) {
+            for (field in by) {
+                if (!field %in% colnames(meta_data)) {
                     break
                 }
-                cur_val <- meta_data[[x]]
-                metadata <- cur_val
+                vals <- meta_data[[field]]
+                metadata <- vals
             }
+            by <- paste(by, collapse=":") # collapsing to a single string for output.
         }
 
+        # Metadata takes priority, so we don't bother searching if 'vals' is non-NULL.
         if (check_features) {
-            if (length(by)!=1) {
-                stop("'*_by' for feature names should be a character vector of length 1") 
-            }
             if (is.null(vals) && by %in% rownames(x)) {
                 exprs <- assay(x, i = exprs_values)
                 if (mode=="column") {
@@ -114,6 +141,9 @@
             }
         }
 
+        if (is.null(vals) && (check_metadata || check_features)) {
+            stop("cannot find the supplied '*_by' in features or metadata")
+        }
     } else if (is.data.frame(by)) {
         if (ncol(by) != 1L) {
             stop("'*_by' should be a data frame with one column")
@@ -139,7 +169,6 @@
 
     return(list(name = by, val = vals))
 }
-
 
 .makePairs <- function(data_matrix) 
 # with thanks to Gaston Sanchez, who posted this code online
