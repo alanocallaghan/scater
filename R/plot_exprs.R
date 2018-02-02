@@ -144,7 +144,11 @@ plotExpression <- function(object, features, x = NULL,
     } else {
         ylab <- paste0("Expression (", exprs_values, ")")
     }
+
+    ## Melt the expression data and metadata into a convenient form
     to_melt <- as.matrix(exprs_mat)
+    evals_long <- reshape2::melt(to_melt, value.name = "evals")
+    colnames(evals_long) <- c("Feature", "Cell", "evals")
 
     ## check x-coordinates are valid
     x_by_out <- .choose_vis_values(object, x, mode="column", search = "any", exprs_values = exprs_values)
@@ -173,25 +177,11 @@ plotExpression <- function(object, features, x = NULL,
     size_by <- size_by_out$name
     size_by_vals <- size_by_out$val
 
-    ## Melt the expression data and metadata into a convenient form
-    evals_long <- reshape2::melt(to_melt, value.name = "evals")
-    colnames(evals_long) <- c("Feature", "Cell", "evals")
-
     ## Prepare the samples information
     samps <- data.frame(row.names = colnames(object))
-    if ( !is.null(xcoord) ) samps[[x]] <- xcoord
-
-    ## Construct a ggplot2 aesthetic for the plot
-    aesth <- aes()
-    if ( is.null(x) ) {
-        aesth$x <- as.symbol("Feature")
-        one_facet <- TRUE
-    } else {
-        aesth$x <- as.symbol(x)
-        one_facet <- FALSE
+    if ( !is.null(xcoord) ) { 
+        samps$X <- xcoord
     }
-    aesth$y <- as.symbol("evals")
-
     if ( !is.null(shape_by) ) { # do NOT use the supplied names, these may clash with internal names.
         samps$shape_by <- shape_by_vals
     }
@@ -201,15 +191,11 @@ plotExpression <- function(object, features, x = NULL,
     if ( !is.null(colour_by) ) {
         samps$colour_by <- colour_by_vals
     }
-
-    ## Extend the sample information, combine with the expression values
     samples_long <- samps[rep(seq_len(ncol(object)), each = nfeatures), , drop = FALSE]
-
-    ## create plotting object
     object <- cbind(evals_long, samples_long)
 
     ## Make the plot
-    plot_out <- plotExpressionDefault(object, aesth, ncol = ncol, xlab = xlab, ylab = ylab,
+    plot_out <- plotExpressionDefault(object, ncol = ncol, xlab = xlab, ylab = ylab,
                                       shape_by = shape_by, colour_by = colour_by, size_by = size_by, 
                                       show_median = show_median, show_violin = show_violin, show_smooth =show_smooth,
                                       theme_size = theme_size, alpha = alpha, size = size, legend = legend, 
@@ -227,7 +213,7 @@ plotExpression <- function(object, features, x = NULL,
     plot_out
 }
 
-plotExpressionDefault <- function(object, aesth, ncol = 2, xlab = NULL, ylab = NULL, 
+plotExpressionDefault <- function(object, ncol = 2, xlab = NULL, ylab = NULL, 
                                   colour_by = NULL, shape_by = NULL, size_by = NULL,
                                   show_median = FALSE, show_violin = TRUE, show_smooth = FALSE,
                                   theme_size = 10, alpha = 0.6, size = NULL, legend = "auto", 
@@ -235,7 +221,16 @@ plotExpressionDefault <- function(object, aesth, ncol = 2, xlab = NULL, ylab = N
 # Internal helper function that does the heavy lifting of creating 
 # the expression plot, with one or more panels.
 {
-    x_groupable <- !is.numeric(object[[as.character(aesth$x)]])
+    aesth <- aes(y=evals) 
+    if ( is.null(object$X) ) { 
+        aesth$x <- as.symbol("Feature") 
+        one_facet <- TRUE 
+    } else { 
+        aesth$x <- as.symbol("X")
+        one_facet <- FALSE 
+    }
+
+    x_groupable <- !is.numeric(object$X)
     if (x_groupable) {
         show_smooth <- FALSE
         aesth$group <- aesth$x
