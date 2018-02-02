@@ -6,7 +6,8 @@
 \usage{
 plotReducedDim(object, use_dimred, ncomponents = 2, colour_by = NULL,
   shape_by = NULL, size_by = NULL, exprs_values = "logcounts",
-  percentVar = NULL, theme_size = 10, legend = "auto", add_ticks = TRUE)
+  percentVar = NULL, theme_size = 10, alpha = 0.6, size = NULL,
+  legend = "auto", add_ticks = TRUE)
 }
 \arguments{
 \item{object}{an \code{SingleCellExperiment} object with a non-NULL \code{reducedDimension}
@@ -65,7 +66,7 @@ example_sce <- normalize(example_sce)
 drop_genes <- apply(exprs(example_sce), 1, function(x) {var(x) == 0})
 example_sce <- example_sce[!drop_genes, ]
 
-example_sce <- runPCA(example_sce)
+example_sce <- runPCA(example_sce, ncomponents=5)
 plotReducedDim(example_sce, "PCA")
 plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle")
 plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", shape_by="Treatment")
@@ -74,7 +75,8 @@ plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle",
    shape_by="Mutation_Status", size_by="Gene_0001")
 
 plotReducedDim(example_sce, "PCA", ncomponents=5)
-plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle", shape_by="Treatment")
+plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle", 
+    shape_by="Treatment")
 plotReducedDim(example_sce, "PCA", colour_by="Gene_0001")
 
 }

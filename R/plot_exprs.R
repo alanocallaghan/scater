@@ -51,6 +51,9 @@
 #' @param size numeric scalar optionally providing size for points if
 #' \code{size_by} argument is not given. Default is \code{NULL}, in which case
 #' \pkg{ggplot2} default is used.
+#' @param legend character, specifying how the legend(s) be shown? Default is
+#' \code{"auto"}, which hides legends that have only one level and shows others.
+#' Alternatives are "all" (show all legends) or "none" (hide all legends).
 #' @param scales character scalar, should scales be fixed ("fixed"),
 #' free ("free"), or free in one dimension ("free_x"; "free_y", the default).
 #' Passed to the \code{scales} argument in the \code{\link[ggplot2]{facet_wrap}} function
@@ -91,7 +94,9 @@
 #' plotExpression(example_sce, 1:15, jitter = "jitter")
 #'
 #' ## plot expression against an x-axis value
-#' plotExpression(example_sce, 1:6, "Mutation_Status")
+#' plotExpression(example_sce, 1:6, colour_by = "Mutation_Status")
+#' plotExpression(example_sce, 1:6, colour_by = "Mutation_Status",
+#'      shape_by = "Treatment", size_by = "Gene_0010")
 #'
 #' ## explore options
 #' plotExpression(example_sce, 1:6, x = "Mutation_Status", exprs_values = "logcounts",

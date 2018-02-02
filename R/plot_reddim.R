@@ -265,7 +265,8 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2,
     ## Call default method to make the plot
     plotReducedDimDefault(df_to_plot, ncomponents = ncomponents, percentVar = percentVar,
         colour_by = colour_by, shape_by = shape_by, size_by = size_by,
-        theme_size = theme_size, legend = legend, add_ticks = add_ticks)
+        theme_size = theme_size, legend = legend, alpha = alpha, size = size,
+        add_ticks = add_ticks)
 }
 
 plotReducedDimDefault <- function(df_to_plot, ncomponents=2, percentVar=NULL,
