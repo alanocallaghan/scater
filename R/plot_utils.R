@@ -101,13 +101,14 @@
             } else if (length(by)==1L) {
                 cur_name <- names(by)
                 if (!is.null(cur_name) && !is.na(cur_name)) { 
-                    if (cur_name=="Feature") {
-                        check_features <- TRUE
-                        check_metadata <- FALSE
-                    } else if (cur_name=="Metadata") {
+                    if (cur_name=="Metadata") {
                         check_features <- FALSE
                         check_metadata <- TRUE
-                    }
+                    } else if ((mode=="column" && cur_name=="Feature")
+                               || (mode=="row" && cur_name=="Cell")) {
+                        check_features <- TRUE
+                        check_metadata <- FALSE
+                    } 
                 }
             }
         } else {
@@ -135,7 +136,7 @@
 
         # Metadata takes priority, so we don't bother searching if 'vals' is non-NULL.
         if (check_features) {
-            if (is.null(vals) && by %in% rownames(x)) {
+            if (is.null(vals)){
                 exprs <- assay(x, i = exprs_values)
                 if (mode=="column") {
                     vals <- exprs[by,] # coloring columns, so we take the row values.
