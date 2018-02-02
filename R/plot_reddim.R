@@ -223,7 +223,8 @@ plotMDS <- function(object, ..., ncomponents = 2, return_SCE = FALSE, rerun = FA
 plotReducedDim <- function(object, use_dimred, ncomponents = 2,
                            colour_by = NULL, shape_by = NULL, size_by = NULL,
                            exprs_values = "logcounts", percentVar = NULL, 
-                           theme_size = 10, legend = "auto", add_ticks=TRUE) {
+                           theme_size = 10, alpha = 0.6, size = NULL,
+                           legend = "auto", add_ticks=TRUE) {
 
     ## Check arguments are valid
     colour_by_out <- .choose_vis_values(object, colour_by, mode = "column", search = "any",
@@ -265,14 +266,15 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2,
 
 plotReducedDimDefault <- function(df_to_plot, ncomponents=2, percentVar=NULL,
     colour_by=NULL, shape_by=NULL, size_by=NULL,
-    theme_size = 10, legend = "auto", add_ticks=TRUE) 
+    theme_size = 10, alpha = 0.6, size = NULL,
+    legend = "auto", add_ticks=TRUE) 
 # Internal helper function that does the heavy lifting of creating 
 # the reduced dimension plot - either a scatter plot or a pairs plot, 
 # depending on the number of specified components.
 {
     if ( ncomponents > 2 ) {
+        # Creating a pairs plot.
         to_plot <- seq_len(ncomponents)
-
         df_to_expand <- df_to_plot[, to_plot]
         if ( is.null(percentVar) ) {
             colnames(df_to_expand) <- colnames(df_to_plot)[to_plot]
@@ -294,6 +296,7 @@ plotReducedDimDefault <- function(df_to_plot, ncomponents=2, percentVar=NULL,
             ylab("") +
             theme_bw(theme_size)
     } else {
+        # Creating a scatter plot.
         comps <- colnames(df_to_plot)[seq_len(2)]
         if ( is.null(percentVar) ) {
             x_lab <- "Dimension 1"
@@ -328,57 +331,14 @@ plotReducedDimDefault <- function(df_to_plot, ncomponents=2, percentVar=NULL,
     }
 
     ## Setting up the point addition with various aesthetics.
-    ## Note the use of colour instead of fill when shape_by is set, as not all shapes have fill.
-    ## (Fill is still the default as it looks nicer.)
-    aes_args <- list()
-    fill_colour <- TRUE
-    if (!is.null(shape_by)) {
-        aes_args$shape <- "shape_by"
-        fill_colour <- FALSE
-    }
-    if (!is.null(colour_by)) {
-        if (fill_colour) {
-            aes_args$fill <- "colour_by"
-        } else {
-            aes_args$colour <- "colour_by"
-        }
-    }
-    if (!is.null(size_by)) {
-        aes_args$size <- "size_by"
-    }
-    new_aes <- do.call(aes_string, aes_args)
-
-    geom_args <- list(mapping=new_aes, alpha=0.65)
-    if (is.null(colour_by) || fill_colour) {
-        geom_args$colour <- "grey70"
-    }
-    if (is.null(colour_by) || !fill_colour) { # set fill when there is no fill colour, to distinguish between e.g., pch=16 and pch=21.
-        geom_args$fill <- "grey20"
-    }
-    if (is.null(shape_by)) {
-        geom_args$shape <- 21
-    }
-    geom_cmd <- do.call(geom_point, geom_args)
-
-    # Adding the points to the plot.
-    plot_out <- plot_out + geom_cmd
+    point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = alpha, size = size)
+    plot_out <- plot_out + do.call(geom_point, point_out$args)
     if (!is.null(colour_by)) { 
-        plot_out <- .resolve_plot_colours(plot_out, df_to_plot$colour_by, colour_by, fill=fill_colour)
+        plot_out <- .resolve_plot_colours(plot_out, df_to_plot$colour_by, colour_by, fill=point_out$fill)
     } 
     
-    # Adding an extra legend.   
-    guide_args <- list()
-    if (!is.null(shape_by)) {
-        guide_args$shape <- guide_legend(title = shape_by)
-    }
-    if (!is.null(size_by)) { 
-        guide_args$size <- guide_legend(title = size_by)
-    }
-    if (length(guide_args)) { 
-        plot_out <- plot_out + do.call(guides, guide_args)
-    }
-
-    ## remove legend if so desired
+    # Setting the legend details.
+    plot_out <- .add_extra_guide(plot_out, shape_by, size_by)
     if ( legend == "none" ) {
         plot_out <- plot_out + theme(legend.position = "none")
     }
