@@ -223,8 +223,7 @@ plotMDS <- function(object, ..., ncomponents = 2, return_SCE = FALSE, rerun = FA
 plotReducedDim <- function(object, use_dimred, ncomponents = 2,
                            colour_by = NULL, shape_by = NULL, size_by = NULL,
                            exprs_values = "logcounts", percentVar = NULL, 
-                           theme_size = 10, alpha = 0.6, size = NULL,
-                           legend = "auto", add_ticks=TRUE) 
+                           legend = "auto", ..., add_ticks=TRUE) 
 {
     ## Extract reduced dimension representation of cells
     red_dim <- reducedDim(object, use_dimred)
@@ -249,47 +248,10 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2,
     size_by <- vis_out$size_by
     legend <- vis_out$legend
 
-    ## Call default method to make the plot
-    plotReducedDimDefault(df_to_plot, ncomponents = ncomponents, percentVar = percentVar,
-        colour_by = colour_by, shape_by = shape_by, size_by = size_by,
-        theme_size = theme_size, legend = legend, alpha = alpha, size = size,
-        add_ticks = add_ticks)
-}
+    ## Dispatching to the central plotter in the simple case of two dimensions.
+    if ( ncomponents==2L ) {
+        colnames(df_to_plot)[seq_len(2)] <- c("X", "Y")
 
-plotReducedDimDefault <- function(df_to_plot, ncomponents=2, percentVar=NULL,
-    colour_by=NULL, shape_by=NULL, size_by=NULL,
-    theme_size = 10, alpha = 0.6, size = NULL,
-    legend = "auto", add_ticks=TRUE) 
-# Internal helper function that does the heavy lifting of creating 
-# the reduced dimension plot - either a scatter plot or a pairs plot, 
-# depending on the number of specified components.
-{
-    if ( ncomponents > 2 ) {
-        # Creating a pairs plot.
-        to_plot <- seq_len(ncomponents)
-        df_to_expand <- df_to_plot[, to_plot]
-        if ( is.null(percentVar) ) {
-            colnames(df_to_expand) <- colnames(df_to_plot)[to_plot]
-        } else {
-            colnames(df_to_expand) <- paste0(colnames(df_to_plot)[to_plot], ": ", round(percentVar[to_plot] * 100), "% variance")
-        }
-
-        gg1 <- .makePairs(df_to_expand)
-        df_to_plot_big <- data.frame(gg1$all, df_to_plot[, -to_plot])
-        colnames(df_to_plot_big)[-seq_len(4)] <- colnames(df_to_plot)
-
-        plot_out <- ggplot(df_to_plot_big, aes_string(x = "x", y = "y")) +
-            facet_grid(xvar ~ yvar, scales = "free") +
-            stat_density(aes_string(x = "x",
-                                    y = "(..scaled.. * diff(range(x)) + min(x))"),
-                         data = gg1$densities, position = "identity",
-                         colour = "grey20", geom = "line") +
-            xlab("") +
-            ylab("") +
-            theme_bw(theme_size)
-    } else {
-        # Creating a scatter plot.
-        comps <- colnames(df_to_plot)[seq_len(2)]
         if ( is.null(percentVar) ) {
             x_lab <- "Dimension 1"
             y_lab <- "Dimension 2"
@@ -298,30 +260,66 @@ plotReducedDimDefault <- function(df_to_plot, ncomponents=2, percentVar=NULL,
             y_lab <- paste0("Component 2: ", round(percentVar[2] * 100), "% variance")
         }
 
-        plot_out <- ggplot(df_to_plot, aes_string(x = comps[1], y = comps[2])) +
-            xlab(x_lab) +
-            ylab(y_lab) +
-            theme_bw(theme_size)
-
+        plot_out <- .central_plotter(df_to_plot, xlab = x_lab, ylab = y_lab,
+                                     colour_by = colour_by, size_by = size_by, shape_by = shape_by, 
+                                     legend=legend, ...)
         if (add_ticks) {
             plot_out <- plot_out + geom_rug(colour = "gray20", alpha = 0.65)
         }
+
+        return(plot_out)
     }
 
+    ## Otherwise, creating a paired reddim plot.
+    paired_reddim_plot(df_to_plot, ncomponents = ncomponents, percentVar = percentVar,
+        colour_by = colour_by, shape_by = shape_by, size_by = size_by,
+        theme_size = theme_size, ...)
+}
+
+paired_reddim_plot <- function(df_to_plot, ncomponents=2, percentVar=NULL,
+    colour_by=NULL, shape_by=NULL, size_by=NULL,
+    legend = "auto", ...) 
+# Internal helper function that does the heavy lifting of creating 
+# the reduced dimension plot - either a scatter plot or a pairs plot, 
+# depending on the number of specified components.
+{
+
+    # Creating a pairs plot.
+    to_plot <- seq_len(ncomponents)
+    df_to_expand <- df_to_plot[, to_plot]
+    if ( is.null(percentVar) ) {
+        colnames(df_to_expand) <- colnames(df_to_plot)[to_plot]
+    } else {
+        colnames(df_to_expand) <- paste0(colnames(df_to_plot)[to_plot], ": ", round(percentVar[to_plot] * 100), "% variance")
+    }
+
+    gg1 <- .makePairs(df_to_expand)
+    df_to_plot_big <- data.frame(gg1$all, df_to_plot[, -to_plot])
+    colnames(df_to_plot_big)[-seq_len(4)] <- colnames(df_to_plot)
+
+    plot_out <- ggplot(df_to_plot_big, aes_string(x = "x", y = "y")) +
+        facet_grid(xvar ~ yvar, scales = "free") +
+        stat_density(aes_string(x = "x",
+                                y = "(..scaled.. * diff(range(x)) + min(x))"),
+                     data = gg1$densities, position = "identity",
+                     colour = "grey20", geom = "line") +
+        xlab("") +
+        ylab("") +
+        theme_bw(theme_size)
+    
     ## Setting up the point addition with various aesthetics.
     point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = alpha, size = size)
     plot_out <- plot_out + do.call(geom_point, point_out$args)
     if (!is.null(colour_by)) { 
         plot_out <- .resolve_plot_colours(plot_out, df_to_plot$colour_by, colour_by, fill=point_out$fill)
     } 
-    
+ 
     # Setting the legend details.
     plot_out <- .add_extra_guide(plot_out, shape_by, size_by)
     if ( legend == "none" ) {
         plot_out <- plot_out + theme(legend.position = "none")
     }
 
-    ## Return plot
     plot_out
 }
 

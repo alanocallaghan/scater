@@ -152,17 +152,20 @@ plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len", exprs
         xlab <- "Median transcript length"
     }
 
-    plot_out <- .central_plotter(df_to_plot, xlab = xlab, ylab = ylab,
-                                 shape_by = shape_by, colour_by = colour_by, size_by = size_by, 
-                                 alpha = alpha, size = size, ...)
-           
+    ## Overriding the point function to get error bars, if requested.
     if (show_exprs_sd) {
-        args <- .get_point_args(colour_by, shape_by, size_by, alpha=alpha, size=size) 
-        args$args$mapping$ymin <- as.symbol("ymin")
-        args$args$mapping$ymax <- as.symbol("ymax")
-        plot_out <- plot_out + do.call(geom_pointrange, args$args)
+        point_FUN <- function(mapping, ...) {
+            mapping$ymin <- as.symbol("ymin")
+            mapping$ymax <- as.symbol("ymax")
+            geom_pointrange(mapping, ...)
+        }
+    } else {
+        point_FUN <- NULL
     }
 
+    plot_out <- .central_plotter(df_to_plot, xlab = xlab, ylab = ylab,
+                                 shape_by = shape_by, colour_by = colour_by, size_by = size_by, 
+                                 alpha = alpha, size = size, point_FUN=point_FUN, ...)
     plot_out
 }
 

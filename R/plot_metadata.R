@@ -31,7 +31,8 @@
 
     # Creating the plot object:
     .central_plotter(df_to_plot, xlab = x_lab, ylab = y_lab,
-                     colour_by = colour_by, size_by = size_by, shape_by = shape_by, ...)
+                     colour_by = colour_by, size_by = size_by, shape_by = shape_by, 
+                     legend=legend, ...)
 }
 
 #' Plot cell phenotype data from an SingleCellExperiment object

@@ -1,7 +1,8 @@
 .central_plotter <- function(object, xlab = NULL, ylab = NULL,
-                             colour_by = NULL, shape_by = NULL, size_by = NULL, force_x_colour = FALSE,
+                             colour_by = NULL, shape_by = NULL, size_by = NULL, fill_by = NULL,
                              show_median = FALSE, show_violin = TRUE, show_smooth = FALSE, show_se = TRUE,
-                             theme_size = 10, alpha = 0.6, size = NULL, legend = "auto", jitter = "swarm") 
+                             theme_size = 10, alpha = 0.6, size = NULL, legend = "auto", 
+                             point_FUN = NULL, jitter = "swarm")
 # Internal ggplot-creating function to plot anything that involves points.
 # Creates either a scatter plot, (horizontal) violin plots, or a rectangle plot.
 {
@@ -17,21 +18,14 @@
             ylab <- tmp
         }
 
-        # Deciding whether or not to force x colours. 
-        # Obviously, this is purely for aesthetic purposes.
-        force_x_colour <- is.null(colour_by) && force_x_colour
-        if (force_x_colour) {
-            viol_args <- list(mapping=aes_string(fill = "X"))
-            colour_by <- "X"
-            colour_vals <- object$X
-        } else {
-            viol_args <- list(fill='grey90')
-            colour_vals <- object$colour_by
-        }
-
         # Adding violins.
         plot_out <- ggplot(object, aes(x=X, y=Y)) + xlab(xlab) + ylab(ylab)
         if (show_violin) {
+            if (is.null(fill_by)) { 
+                viol_args <- list(fill="grey90")
+            } else {
+                viol_args <- list(mapping=aes(fill=fill_by))
+            }
             plot_out <- plot_out + do.call(geom_violin, c(viol_args, list(colour = "gray60", alpha = 0.2, scale = "width")))
         }
 
@@ -43,26 +37,14 @@
 
         # Adding points.
         point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = alpha, size = size)
-        if (force_x_colour) {
-            if (!is.null(point_out$args$mapping$fill)) {
-                point_out$args$mapping$fill <- as.symbol("X")
+        if (is.null(point_FUN)) {
+            if (jitter=="swarm") {
+                point_FUN <- function(...) ggbeeswarm::geom_quasirandom(..., groupOnX=TRUE)
+            } else {
+                point_FUN <- function(...) geom_jitter(..., position = position_jitter(height = 0))
             }
-            if (!is.null(point_out$args$mapping$colour)) {
-                point_out$args$mapping$colour <- as.symbol("X")
-            }
-        }
-
-        if (jitter=="swarm") {
-            point_FUN <- function(...) ggbeeswarm::geom_quasirandom(..., groupOnX=TRUE)
-        } else {
-            point_FUN <- function(...) geom_jitter(..., position = position_jitter(height = 0))
         }
         plot_out <- plot_out + do.call(point_FUN, point_out$args)
-
-        # Adding color.
-        if (!is.null(colour_by)) { 
-            plot_out <- .resolve_plot_colours(plot_out, colour_vals, colour_by, fill = point_out$fill)
-        }
 
         # Flipping.
         if (flipped) {
@@ -73,11 +55,12 @@
         # Creating a scatter plot.
         plot_out <- ggplot(object, aes(x=X, y=Y)) + xlab(xlab) + ylab(ylab)
 
+        # Adding points.
         point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = alpha, size = size)
-        plot_out <- plot_out + do.call(geom_point, point_out$args)
-        if ( !is.null(colour_by) ) {
-            plot_out <- .resolve_plot_colours(plot_out, object$colour_by, colour_by, fill = point_out$fill)
+        if (is.null(point_FUN)) {
+            point_FUN <- geom_point
         }
+        plot_out <- plot_out + do.call(point_FUN, point_out$args)
 
         # Adding smoothing, if requested.
         if (show_smooth) {
@@ -85,7 +68,10 @@
         }
 
     } else {
-        # Defining the box boundaries:.
+        object$X <- as.factor(object$X)
+        object$Y <- as.factor(object$Y)
+
+        # Defining the box boundaries:
         summary.data <- as.data.frame(with(object, table(X, Y)))
         summary.data$Proportion <- with(summary.data, Freq / sum(Freq))
         summary.data$Radius <- 0.49*with(summary.data, sqrt(Proportion/max(Proportion)))
@@ -100,17 +86,20 @@
 
         # Creating the plot:
         plot_out <- ggplot(object, aes(x=X, y=Y)) + xlab(xlab) + ylab(ylab)
-        plot_out <- plot_out + geom_tile(aes(x = X, y = Y, height = 2*Radius, width = 2*Radius), 
-                                         summary.data, color = 'grey60', fill = 'grey90', size = 0.5)
+        plot_out <- plot_out + geom_tile(aes(x = X, y = Y, height = 2*Radius, width = 2*Radius),
+                                         data=summary.data, color = 'grey60', size = 0.5, fill='grey90')
 
         # Adding points.
         point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = alpha, size = size)
-        plot_out <- plot_out + do.call(geom_point, point_out$args)
-
-        # Adding colour.       
-        if ( !is.null(colour_by) ) {
-            plot_out <- .resolve_plot_colours(plot_out, object$colour_by, colour_by, fill = point_out$fill)
+        if (is.null(point_FUN)) {
+            point_FUN <- geom_point
         }
+        plot_out <- plot_out + do.call(point_FUN, point_out$args)
+    }
+
+    # Adding colour.       
+    if ( !is.null(colour_by) ) {
+        plot_out <- .resolve_plot_colours(plot_out, object$colour_by, colour_by, fill = point_out$fill)
     }
 
     ## Setting the legend details.
@@ -185,5 +174,3 @@
     }
     return(plot_out)
 }
-
-

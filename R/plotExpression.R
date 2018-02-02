@@ -181,23 +181,35 @@ plotExpression <- function(object, features, x = NULL,
         one_facet <- FALSE 
     }
 
-    ## Creating the plot.
+    # Setting up feature colours, for aesthetic appeal:
+    feature_colours <- (feature_colours && one_facet && is.null(colour_by))
+    if (feature_colours) { 
+        evals_long$fill_by <- evals_long$colour_by <- evals_long$Feature
+        fill_by <- colour_by <- "Feature"
+    } else {
+        fill_by <- NULL
+    } 
+
+    # Creating the plot with faceting.        
     plot_out <- .central_plotter(evals_long, xlab = xlab, ylab = ylab,
-                                 shape_by = shape_by, colour_by = colour_by, size_by = size_by, 
-                                 legend = legend, force_x_colour = feature_colours & one_facet, 
-                                 ...)
+                                 shape_by = shape_by, colour_by = colour_by, size_by = size_by, fill_by = fill_by,
+                                 legend = legend, ...)
     if (!one_facet) {
         plot_out <- plot_out + facet_wrap(~Feature, ncol = ncol, scales = scales)
     }
-
-    if ( is.null(x) ) { ## in this case, do not show x-axis ticks or labels
+        
+    # Do not show x-axis ticks or labels if there is no X.
+    if ( is.null(x) ) { 
         plot_out <- plot_out + theme(
             axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1),
             axis.ticks.x = element_blank(),
             plot.margin = unit(c(.03, .02, .05, .02), "npc"))
-        if (is.null(colour_by)) {
-            plot_out <- plot_out + guides(fill = "none", colour = "none")
-        }
     }
+
+    # Destroying colour legend if feature_colours was used.
+    if (feature_colours) { 
+        plot_out <- plot_out + guides(fill = "none", colour = "none")
+    }
+
     plot_out
 }
