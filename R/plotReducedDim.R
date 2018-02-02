@@ -256,8 +256,8 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2,
             x_lab <- "Dimension 1"
             y_lab <- "Dimension 2"
         } else {
-            x_lab <- paste0("Component 1: ", round(percentVar[1] * 100), "% variance")
-            y_lab <- paste0("Component 2: ", round(percentVar[2] * 100), "% variance")
+            x_lab <- paste0("Dimension 1: ", round(percentVar[1] * 100), "% variance")
+            y_lab <- paste0("Dimension 2: ", round(percentVar[2] * 100), "% variance")
         }
 
         plot_out <- .central_plotter(df_to_plot, xlab = x_lab, ylab = y_lab,
@@ -272,25 +272,19 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2,
 
     ## Otherwise, creating a paired reddim plot.
     paired_reddim_plot(df_to_plot, ncomponents = ncomponents, percentVar = percentVar,
-        colour_by = colour_by, shape_by = shape_by, size_by = size_by,
-        theme_size = theme_size, ...)
+        colour_by = colour_by, shape_by = shape_by, size_by = size_by, ...)
 }
 
 paired_reddim_plot <- function(df_to_plot, ncomponents=2, percentVar=NULL,
     colour_by=NULL, shape_by=NULL, size_by=NULL,
-    legend = "auto", ...) 
-# Internal helper function that does the heavy lifting of creating 
-# the reduced dimension plot - either a scatter plot or a pairs plot, 
-# depending on the number of specified components.
+    legend = "auto", theme_size = 10, alpha = 0.6, size = NULL) 
 {
-
-    # Creating a pairs plot.
     to_plot <- seq_len(ncomponents)
     df_to_expand <- df_to_plot[, to_plot]
     if ( is.null(percentVar) ) {
-        colnames(df_to_expand) <- colnames(df_to_plot)[to_plot]
+        colnames(df_to_expand) <- sprintf("Dim %i", to_plot)
     } else {
-        colnames(df_to_expand) <- paste0(colnames(df_to_plot)[to_plot], ": ", round(percentVar[to_plot] * 100), "% variance")
+        colnames(df_to_expand) <- sprintf("Dim %i: %i%%", to_plot, round(percentVar[to_plot] * 100))
     }
 
     gg1 <- .makePairs(df_to_expand)
