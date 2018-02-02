@@ -1,6 +1,6 @@
 .metadata_dispatcher <- function(object, mode, y, x = NULL, 
                         colour_by = NULL, shape_by = NULL, size_by = NULL, 
-                        exprs_values = "logcounts", ...)
+                        exprs_values = "logcounts", legend = "auto", ...)
 # Internal function to create the data frames, given an indication of 
 # whether we are looking at row or column-level metadata.    
 {
@@ -20,24 +20,14 @@
     }
 
     ## checking visualization arguments
-    colour_by_out <- .choose_vis_values(object, colour_by, mode = mode, search = "any", 
-                                        exprs_values = exprs_values)
-    colour_by <- colour_by_out$name
-    colour_by_vals <- colour_by_out$val
-    
-    shape_by_out <- .choose_vis_values(object, shape_by, mode = mode, search = "any", 
-                                       exprs_values = exprs_values, coerce_factor = TRUE, level_limit = 10)
-    shape_by <- shape_by_out$name
-    shape_by_vals <- shape_by_out$val
-    
-    size_by_out <- .choose_vis_values(object, size_by, mode = mode, search = "any", 
-                                      exprs_values = exprs_values)
-    size_by <- size_by_out$name
-    size_by_vals <- size_by_out$val
-
-    df_to_plot$shape_by <- shape_by_vals
-    df_to_plot$size_by <- size_by_vals
-    df_to_plot$colour_by <- colour_by_vals
+    vis_out <- .incorporate_common_vis(df_to_plot, se = object, mode = "column", 
+                                       colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
+                                       by_exprs_values = exprs_values, legend = legend)
+    df_to_plot <- vis_out$df
+    colour_by <- vis_out$colour_by
+    shape_by <- vis_out$shape_by
+    size_by <- vis_out$size_by
+    legend <- vis_out$legend
 
     # Creating the plot object:
     .central_plotter(df_to_plot, xlab = x_lab, ylab = y_lab,

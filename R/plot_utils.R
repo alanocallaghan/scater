@@ -180,6 +180,34 @@
     return(list(name = by, val = vals))
 }
 
+.incorporate_common_vis <- function(df, se, mode, colour_by, size_by, shape_by, by_exprs_values, legend='auto') 
+# A convenience wrapper to incorporate colour, size and shape arguments into the data.frame for plotting.
+# Do NOT use the supplied names to name fields in 'df', as these may clash with internal names.
+{
+    legend <- match.arg(legend, c("auto", "none", "all"))
+    discard_solo <- legend=="auto"
+
+    ## check colour argument:
+    colour_by_out <- .choose_vis_values(se, colour_by, mode = mode, search = "any", discard_solo = discard_solo,
+                                        exprs_values = by_exprs_values)
+    colour_by <- colour_by_out$name
+    df$colour_by <- colour_by_out$val
+
+    ## check shape argument (note the limiter):
+    shape_by_out <- .choose_vis_values(se, shape_by, mode = mode, search = "any",  discard_solo = discard_solo,
+                                       exprs_values = by_exprs_values, coerce_factor = TRUE, level_limit = 10)
+    shape_by <- shape_by_out$name
+    df$shape_by <- shape_by_out$val
+
+    ## check size argument:
+    size_by_out <- .choose_vis_values(se, size_by, mode = mode, search = "any", discard_solo = discard_solo,
+                                      exprs_values = by_exprs_values)
+    size_by <- size_by_out$name
+    df$size_by <- size_by_out$val
+
+    return(list(df=df, colour_by = colour_by, shape_by = shape_by, size_by = size_by, legend = legend))
+}
+
 ################################################
 ## Creating pair plots.
 

@@ -226,26 +226,6 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2,
                            theme_size = 10, alpha = 0.6, size = NULL,
                            legend = "auto", add_ticks=TRUE) 
 {
-    legend <- match.arg(legend, c("auto", "none", "all"))
-    discard_solo <- legend=="auto"
-
-    ## Check arguments are valid
-    colour_by_out <- .choose_vis_values(object, colour_by, mode = "column", search = "any",
-                                        exprs_values = exprs_values, discard_solo = discard_solo)
-    colour_by <- colour_by_out$name
-    colour_by_vals <- colour_by_out$val
-
-    shape_by_out <- .choose_vis_values(object, shape_by, mode = "column", search = "any",
-                                       exprs_values = exprs_values, discard_solo = discard_solo,
-                                       coerce_factor = TRUE, level_limit = 10)
-    shape_by <- shape_by_out$name
-    shape_by_vals <- shape_by_out$val
-
-    size_by_out <- .choose_vis_values(object, size_by, mode = "column", search="any",
-                                      exprs_values = exprs_values, discard_solo = discard_solo)
-    size_by <- size_by_out$name
-    size_by_vals <- size_by_out$val
-
     ## Extract reduced dimension representation of cells
     red_dim <- reducedDim(object, use_dimred)
     if ( ncomponents > ncol(red_dim) ) {
@@ -258,9 +238,16 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2,
     ## Define data.frame for plotting (avoid clash between column names)
     colnames(red_dim) <- NULL 
     df_to_plot <- data.frame(red_dim[, seq_len(ncomponents),drop=FALSE])
-    df_to_plot$colour_by <- colour_by_vals
-    df_to_plot$shape_by <- shape_by_vals
-    df_to_plot$size_by <- size_by_vals
+
+    ## checking visualization arguments
+    vis_out <- .incorporate_common_vis(df_to_plot, se = object, mode = "column", 
+                                       colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
+                                       by_exprs_values = exprs_values, legend = legend)
+    df_to_plot <- vis_out$df
+    colour_by <- vis_out$colour_by
+    shape_by <- vis_out$shape_by
+    size_by <- vis_out$size_by
+    legend <- vis_out$legend
 
     ## Call default method to make the plot
     plotReducedDimDefault(df_to_plot, ncomponents = ncomponents, percentVar = percentVar,

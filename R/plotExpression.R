@@ -154,47 +154,26 @@ plotExpression <- function(object, features, x = NULL,
     if (is.null(xlab)) {
         xlab <- x_by_out$name
     }
+    evals_long$X <- rep(xcoord, each=nfeatures)
 
     ## checking visualization arguments
-    legend <- match.arg(legend, c("auto", "none", "all"))
-    discard_solo <- legend=="auto"
+    vis_out <- .incorporate_common_vis(data.frame(integer(ncol(object)))[,0], # initializing an empty dataframe.
+                                       se = object, mode = "column", 
+                                       colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
+                                       by_exprs_values = exprs_values, legend = legend)
+    
+    colour_by <- vis_out$colour_by
+    shape_by <- vis_out$shape_by
+    size_by <- vis_out$size_by
+    legend <- vis_out$legend
 
-    colour_by_out <- .choose_vis_values(object, colour_by, mode = "column", search = "any", 
-                                        exprs_values = exprs_values, discard_solo = discard_solo)
-    colour_by <- colour_by_out$name
-    colour_by_vals <- colour_by_out$val
-
-    shape_by_out <- .choose_vis_values(object, shape_by, mode = "column", search = "any", 
-                                       exprs_values = exprs_values, discard_solo = discard_solo,
-                                       coerce_factor = TRUE, level_limit = 10)
-    shape_by <- shape_by_out$name
-    shape_by_vals <- shape_by_out$val
-
-    size_by_out <- .choose_vis_values(object, size_by, mode = "column", search = "any", 
-                                      exprs_values = exprs_values, discard_solo = discard_solo)
-    size_by <- size_by_out$name
-    size_by_vals <- size_by_out$val
-
-    ## Prepare the samples information
-    samps <- data.frame(row.names = colnames(object))
-    if ( !is.null(xcoord) ) { 
-        samps$X <- xcoord
-    }
-    if ( !is.null(shape_by) ) { # do NOT use the supplied names, these may clash with internal names.
-        samps$shape_by <- shape_by_vals
-    }
-    if ( !is.null(size_by) ) {
-        samps$size_by <- size_by_vals
-    }
-    if ( !is.null(colour_by) ) {
-        samps$colour_by <- colour_by_vals
-    }
-    samples_long <- samps[rep(seq_len(ncol(object)), each = nfeatures), , drop = FALSE]
-    object <- cbind(evals_long, samples_long)
+    evals_long$shape_by <- rep(vis_out$df$shape_by, each=nfeatures)
+    evals_long$size_by <- rep(vis_out$df$size_by, each=nfeatures)
+    evals_long$colour_by <- rep(vis_out$df$colour_by, each=nfeatures)
 
     ## Set up the faceting.
-    if ( is.null(object$X) ) { 
-        object$X <- object$Feature
+    if ( is.null(evals_long$X) ) { 
+        evals_long$X <- evals_long$Feature
         if (is.null(one_facet)) { 
             one_facet <- TRUE 
         }
@@ -203,7 +182,7 @@ plotExpression <- function(object, features, x = NULL,
     }
 
     ## Creating the plot.
-    plot_out <- .central_plotter(object, xlab = xlab, ylab = ylab,
+    plot_out <- .central_plotter(evals_long, xlab = xlab, ylab = ylab,
                                  shape_by = shape_by, colour_by = colour_by, size_by = size_by, 
                                  legend = legend, force_x_colour = feature_colours & one_facet, 
                                  ...)

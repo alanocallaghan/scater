@@ -62,8 +62,10 @@
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
 #' rd <- DataFrame(gene_id = rownames(sc_example_counts),
-#'         feature_id = paste("feature", rep(1:500, each = 4), sep = "_"),
-#'      median_tx_length = rnorm(2000, mean = 5000, sd = 500))
+#'     feature_id = paste("feature", rep(1:500, each = 4), sep = "_"),
+#'     median_tx_length = rnorm(2000, mean = 5000, sd = 500),
+#'     other = sample(LETTERS, 2000, replace = TRUE)
+#' )
 #' rownames(rd) <- rownames(sc_example_counts)
 #' example_sce <- SingleCellExperiment(
 #'     assays = list(counts = sc_example_counts),
@@ -74,7 +76,7 @@
 #' plotExprsVsTxLength(example_sce, "median_tx_length")
 #' plotExprsVsTxLength(example_sce, "median_tx_length", show_smooth = TRUE)
 #' plotExprsVsTxLength(example_sce, "median_tx_length", show_smooth = TRUE,
-#' show_exprs_sd = TRUE)
+#'     colour_by = "other", show_exprs_sd = TRUE)
 #'
 #' ## using matrix of tx length values in assays(object)
 #' mat <- matrix(rnorm(ncol(example_sce) * nrow(example_sce), mean = 5000,
@@ -90,7 +92,7 @@
 #'
 plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len", exprs_values = "logcounts",
                                 colour_by = NULL, shape_by = NULL, size_by = NULL, 
-                                xlab = NULL, alpha = 0.6, size = NULL, 
+                                xlab = NULL, legend = "auto", alpha = 0.6, size = NULL, 
                                 show_exprs_sd = FALSE, log2_values = FALSE, ...) 
 {
     ## Check object is an SingleCellExperiment object
@@ -135,20 +137,17 @@ plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len", exprs
                              ymin=exprs_mean - exprs_sd,
                              ymax=exprs_mean + exprs_sd)
 
-    ## check colour, size, shape arguments
-    colour_by_out <- .choose_vis_values(object, colour_by, mode = "row", search = "any")
-    colour_by <- colour_by_out$name
-    df_to_plot$colour_by <- colour_by_out$val
+    ## Setting up visualization parameters
+    vis_out <- .incorporate_common_vis(df_to_plot, se = object, mode = "row", 
+                                       colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
+                                       by_exprs_values = exprs_values, legend = legend)
+    df_to_plot <- vis_out$df
+    colour_by <- vis_out$colour_by
+    shape_by <- vis_out$shape_by
+    size_by <- vis_out$size_by
+    legend <- vis_out$legend
 
-    shape_by_out <- .choose_vis_values(object, shape_by, mode = "row", search = "any", coerce_factor = TRUE, level_limit = 10)
-    shape_by <- shape_by_out$name
-    df_to_plot$shape_by <- shape_by_out$val
-
-    size_by_out <- .choose_vis_values(object, size_by, mode = "row", search = "any")
-    size_by <- size_by_out$name
-    df_to_plot$size_by <- size_by_out$val
-
-    # Creating a plot object.
+    ## Creating a plot object
     if ( is.null(xlab) ){ 
         xlab <- "Median transcript length"
     }
@@ -158,10 +157,10 @@ plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len", exprs
                                  alpha = alpha, size = size, ...)
            
     if (show_exprs_sd) {
-        args <- list(mapping=aes(ymin=ymin, ymax=ymax))
-        args$alpha <- alpha * 0.9
-        args$size <- size
-        plot_out <- plot_out + do.call(geom_pointrange, args)
+        args <- .get_point_args(colour_by, shape_by, size_by, alpha=alpha, size=size) 
+        args$args$mapping$ymin <- as.symbol("ymin")
+        args$args$mapping$ymax <- as.symbol("ymax")
+        plot_out <- plot_out + do.call(geom_pointrange, args$args)
     }
 
     plot_out
