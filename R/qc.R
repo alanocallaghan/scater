@@ -461,8 +461,8 @@ Old names are currently maintained for back-compatibility, but may be removed in
 
     ### Legacy metric names. ###
     if (legacy) { 
-        feature_data[[paste0("n_cells_", exprs_type)]] <- feature_data[[paste0("total_", exprs_type)]]
-        feature_data[[paste0("pct_dropout_", exprs_type)]] <- feature_data[[paste0("log10_total_", exprs_type)]] 
+        feature_data[[paste0("n_cells_", exprs_type)]] <- feature_data[[paste0("n_cells_by_", exprs_type)]]
+        feature_data[[paste0("pct_dropout_", exprs_type)]] <- feature_data[[paste0("pct_dropout_by_", exprs_type)]] 
     }
 
     return(feature_data) 
@@ -1587,8 +1587,7 @@ plotRLE <- function(object, exprs_mats = list(logcounts = "logcounts"), exprs_lo
     legend <- match.arg(legend, c("auto", "none", "all"))
     style <- match.arg(style, c("full", "minimal"))
     ## Check arguments are valid
-    colour_by_out <- .choose_vis_values(object, colour_by, cell_control_default = TRUE,
-                                        check_features = TRUE, exprs_values = "logcounts")
+    colour_by_out <- .choose_vis_values(object, colour_by, mode = "column", search = "any", exprs_values = "logcounts")
     colour_by <- colour_by_out$name
     colour_by_vals <- colour_by_out$val
     ncells <- NULL
