@@ -181,63 +181,6 @@
 }
 
 ################################################
-## Integrating shape/colour/size_by choices.
-
-.get_point_args <- function(colour_by, shape_by, size_by, alpha=0.65, size=NULL) 
-## Note the use of colour instead of fill when shape_by is set, as not all shapes have fill.
-## (Fill is still the default as it looks nicer.)
-{
-    aes_args <- list()
-    fill_colour <- TRUE
-    if (!is.null(shape_by)) {
-        aes_args$shape <- "shape_by"
-        fill_colour <- FALSE
-    }
-    if (!is.null(colour_by)) {
-        if (fill_colour) {
-            aes_args$fill <- "colour_by"
-        } else {
-            aes_args$colour <- "colour_by"
-        }
-    }
-    if (!is.null(size_by)) {
-        aes_args$size <- "size_by"
-    }
-    new_aes <- do.call(aes_string, aes_args)
-    
-    geom_args <- list(mapping=new_aes, alpha=alpha)
-    if (is.null(colour_by) || fill_colour) {
-        geom_args$colour <- "grey70"
-    }
-    if (is.null(colour_by) || !fill_colour) { # set fill when there is no fill colour, to distinguish between e.g., pch=16 and pch=21.
-        geom_args$fill <- "grey20"
-    }
-    if (is.null(shape_by)) {
-        geom_args$shape <- 21
-    }
-    if (is.null(size_by)) {
-        geom_args$size <- size
-    }
-    return(list(args=geom_args, fill=fill_colour))
-}
-
-.add_extra_guide <- function(plot_out, shape_by, size_by) 
-# Adding extra legend information on the shape and size.
-{
-    guide_args <- list()
-    if (!is.null(shape_by)) {
-        guide_args$shape <- guide_legend(title = shape_by)
-    }
-    if (!is.null(size_by)) { 
-        guide_args$size <- guide_legend(title = size_by)
-    }
-    if (length(guide_args)) { 
-        plot_out <- plot_out + do.call(guides, guide_args)
-    }
-    return(plot_out)
-}
-
-################################################
 ## Creating pair plots.
 
 .makePairs <- function(data_matrix) 

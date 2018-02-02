@@ -116,11 +116,9 @@
 plotExpression <- function(object, features, x = NULL,
                            exprs_values = "logcounts", log2_values = FALSE,
                            colour_by = NULL, shape_by = NULL, size_by = NULL,
-                           ncol = 2, xlab = NULL, 
-                           show_median = FALSE, show_violin = TRUE, show_smooth = FALSE,
-                           theme_size = 10, alpha = 0.6, size = NULL, 
-                           legend = "auto", scales = "fixed",
-                           one_facet = FALSE, se = TRUE, jitter = "swarm") 
+                           xlab = NULL, feature_colours = TRUE, legend = "auto", 
+                           one_facet = NULL, ncol = 2, scales = "fixed", 
+                           ...) 
 {
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")
@@ -147,8 +145,8 @@ plotExpression <- function(object, features, x = NULL,
 
     ## Melt the expression data and metadata into a convenient form
     to_melt <- as.matrix(exprs_mat)
-    evals_long <- reshape2::melt(to_melt, value.name = "evals")
-    colnames(evals_long) <- c("Feature", "Cell", "evals")
+    evals_long <- reshape2::melt(to_melt)
+    colnames(evals_long) <- c("Feature", "Cell", "Y")
 
     ## check x-coordinates are valid
     x_by_out <- .choose_vis_values(object, x, mode="column", search = "any", exprs_values = exprs_values)
@@ -194,12 +192,24 @@ plotExpression <- function(object, features, x = NULL,
     samples_long <- samps[rep(seq_len(ncol(object)), each = nfeatures), , drop = FALSE]
     object <- cbind(evals_long, samples_long)
 
-    ## Make the plot
-    plot_out <- plotExpressionDefault(object, ncol = ncol, xlab = xlab, ylab = ylab,
-                                      shape_by = shape_by, colour_by = colour_by, size_by = size_by, 
-                                      show_median = show_median, show_violin = show_violin, show_smooth =show_smooth,
-                                      theme_size = theme_size, alpha = alpha, size = size, legend = legend, 
-                                      scales = scales, one_facet = one_facet, se = se, jitter = jitter)
+    ## Set up the faceting.
+    if ( is.null(object$X) ) { 
+        object$X <- object$Feature
+        if (is.null(one_facet)) { 
+            one_facet <- TRUE 
+        }
+    } else { 
+        one_facet <- FALSE 
+    }
+
+    ## Creating the plot.
+    plot_out <- .central_plotter(object, xlab = xlab, ylab = ylab,
+                                 shape_by = shape_by, colour_by = colour_by, size_by = size_by, 
+                                 legend = legend, force_x_colour = feature_colours & one_facet, 
+                                 ...)
+    if (!one_facet) {
+        plot_out <- plot_out + facet_wrap(~Feature, ncol = ncol, scales = scales)
+    }
 
     if ( is.null(x) ) { ## in this case, do not show x-axis ticks or labels
         plot_out <- plot_out + theme(
@@ -210,101 +220,5 @@ plotExpression <- function(object, features, x = NULL,
             plot_out <- plot_out + guides(fill = "none", colour = "none")
         }
     }
-    plot_out
-}
-
-plotExpressionDefault <- function(object, ncol = 2, xlab = NULL, ylab = NULL, 
-                                  colour_by = NULL, shape_by = NULL, size_by = NULL,
-                                  show_median = FALSE, show_violin = TRUE, show_smooth = FALSE,
-                                  theme_size = 10, alpha = 0.6, size = NULL, legend = "auto", 
-                                  scales = "fixed", one_facet = FALSE, se = TRUE, jitter = "swarm") 
-# Internal helper function that does the heavy lifting of creating 
-# the expression plot, with one or more panels.
-{
-    aesth <- aes(y=evals) 
-    if ( is.null(object$X) ) { 
-        aesth$x <- as.symbol("Feature") 
-        one_facet <- TRUE 
-    } else { 
-        aesth$x <- as.symbol("X")
-        one_facet <- FALSE 
-    }
-
-    x_groupable <- !is.numeric(object$X)
-    if (x_groupable) {
-        show_smooth <- FALSE
-        aesth$group <- aesth$x
-    } else {
-        aesth$group <- 1
-        show_violin <- FALSE
-        show_median <- FALSE
-    }
-    
-    ## Define the plot
-    recolor <- FALSE
-    if (one_facet) {
-        if (is.null(colour_by)) {
-            recolor <- TRUE
-        }
-        plot_out <- ggplot(object, aesth)
-    } else {
-        plot_out <- ggplot(object, aesth) + facet_wrap(~Feature, ncol = ncol, scales = scales)
-    }
-    plot_out <- plot_out + xlab(xlab) + ylab(ylab)
-
-    ## Adding points; if x-axis is not numeric, jitter points horizontally
-    if ( ! x_groupable ) {
-        point_FUN <- geom_point
-    } else if (jitter=="swarm") {
-        point_FUN <- function(...) ggbeeswarm::geom_quasirandom(..., groupOnX=TRUE)
-    } else {
-        point_FUN <- function(...) geom_jitter(..., position = position_jitter(height = 0))
-    }
-
-    if (recolor) {
-        point_out <- .get_point_args("Feature", shape_by, size_by, alpha = alpha, size = size)
-        point_out$args$mapping$fill <- as.symbol("Feature")
-    } else {
-        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = alpha, size = size)
-    }
-    plot_out <- plot_out + do.call(point_FUN, point_out$args)
-
-    ## If colour aesthetic is defined, then choose sensible colour palette
-    if ( !is.null(colour_by) ) {
-        plot_out <- .resolve_plot_colours(plot_out, object$colour_by, colour_by, fill = point_out$fill)
-    } else if (recolor) {
-        plot_out <- .resolve_plot_colours(plot_out, object$Feature, "Feature", fill = point_out$fill)
-    }
-
-    ## show optional decorations on plot if desired
-    if (show_violin) {
-        if (one_facet && recolor) {  
-            plot_out <- plot_out + geom_violin(aes_string(fill = "Feature"), colour = "gray60", alpha = 0.2, scale = "width")
-        } else {
-            plot_out <- plot_out + geom_violin(colour = "gray60", alpha = 0.3, fill = "gray90", scale = "width")
-        }
-    }
-    if (show_median) {
-        plot_out <- plot_out +
-            stat_summary(fun.y = median, fun.ymin = median, fun.ymax = median,
-                         geom = "crossbar", width = 0.3, alpha = 0.8)
-    }
-    if (show_smooth) {
-        plot_out <- plot_out + stat_smooth(colour = "firebrick", linetype = 2, se = se)
-    }
-    
-    ## Setting the legend details.
-    plot_out <- .add_extra_guide(plot_out, shape_by, size_by)
-    if ( legend == "none" ) {
-        plot_out <- plot_out + theme(legend.position = "none")
-    }
-
-    ## Define plotting theme
-    if ( requireNamespace("cowplot", quietly = TRUE) ) {
-        plot_out <- plot_out + cowplot::theme_cowplot(theme_size)
-    } else {
-        plot_out <- plot_out + theme_bw(theme_size)
-    }
-
     plot_out
 }

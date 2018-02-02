@@ -1,89 +1,3 @@
-plotMetadata <- function(object, xlab = NULL, ylab = NULL,
-                         colour_by = NULL, shape_by = NULL, size_by = NULL,
-                         theme_size = 10, alpha = 0.6, size = NULL, legend = "auto") 
-# Internal helper function to plot metadata fields, given a dataframe.
-# Creates either a scatter plot, (horizontal) violin plots, or a rectangle plot.
-{
-    if (is.numeric(object$Y) || is.numeric(object$X)) {
-        ## Making a (horizontal) violin plot or a scatter plot.
-        x_groupable <- !is.numeric(object$X)
-        flipped <- (is.numeric(object$X) && !is.numeric(object$Y))
-        if (flipped) { 
-            x_groupable <- TRUE
-            tmp <- object$X 
-            object$X <- object$Y
-            object$Y <- tmp
-            tmp <- xlab
-            xlab <- ylab
-            ylab <- tmp
-        }
-        plot_out <- ggplot(object, aes(x=X, y=Y)) + xlab(xlab) + ylab(ylab)
-
-        # Adding points.
-        if ( ! x_groupable ) {
-            point_FUN <- geom_point
-        } else {
-            point_FUN <- function(...) ggbeeswarm::geom_quasirandom(..., groupOnX=TRUE)
-        }
-        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = alpha, size = size)
-        plot_out <- plot_out + do.call(point_FUN, point_out$args)
-
-        # Adding colour.       
-        if ( !is.null(colour_by) ) {
-            plot_out <- .resolve_plot_colours(plot_out, object$colour_by, colour_by, fill = point_out$fill)
-        }
-
-        # Adding violins, if groupable.
-        if (x_groupable) { 
-            plot_out <- plot_out + geom_violin(colour = "gray60", alpha = 0.3, fill = "gray90", scale = "width")
-        }
-        if (flipped) {
-            plot_out <- plot_out + coord_flip()
-        }
-    } else {
-        # Defining the box boundaries:.
-        summary.data <- as.data.frame(with(object, table(X, Y)))
-        summary.data$Proportion <- with(summary.data, Freq / sum(Freq))
-        summary.data$Radius <- 0.49*with(summary.data, sqrt(Proportion/max(Proportion)))
-
-        # Adding manual jitter:
-        object$Marker <- seq_len(nrow(object))
-        combined <- merge(object, summary.data, by=c('X', 'Y'), all.x=TRUE)
-        point.radius <- combined$Radius[order(combined$Marker)];
-        object$Marker <- NULL
-        object$X <- as.integer(object$X) + point.radius*runif(nrow(object), -1, 1);
-        object$Y <- as.integer(object$Y) + point.radius*runif(nrow(object), -1, 1)
-
-        # Creating the plot:
-        plot_out <- ggplot(object, aes(x=X, y=Y)) + xlab(xlab) + ylab(ylab)
-        plot_out <- plot_out + geom_tile(aes(x = X, y = Y, height = 2*Radius, width = 2*Radius), 
-                                         summary.data, color = 'grey60', fill = 'grey90', size = 0.5)
-
-        # Adding points.
-        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = alpha, size = size)
-        plot_out <- plot_out + do.call(geom_point, point_out$args)
-
-        # Adding colour.       
-        if ( !is.null(colour_by) ) {
-            plot_out <- .resolve_plot_colours(plot_out, object$colour_by, colour_by, fill = point_out$fill)
-        }
-    }
-
-    ## Setting the legend details.
-    plot_out <- .add_extra_guide(plot_out, shape_by, size_by)
-    if ( legend == "none" ) {
-        plot_out <- plot_out + theme(legend.position = "none")
-    }
-
-    ## Define plotting theme
-    if ( requireNamespace("cowplot", quietly = TRUE) )
-        plot_out <- plot_out + cowplot::theme_cowplot(theme_size)
-    else
-        plot_out <- plot_out + theme_bw(theme_size)
-
-    plot_out
-}
-
 .metadata_dispatcher <- function(object, mode, y, x = NULL, 
                         colour_by = NULL, shape_by = NULL, size_by = NULL, 
                         exprs_values = "logcounts", ...)
@@ -126,8 +40,8 @@ plotMetadata <- function(object, xlab = NULL, ylab = NULL,
     df_to_plot$colour_by <- colour_by_vals
 
     # Creating the plot object:
-    plotMetadata(df_to_plot, xlab = x_lab, ylab = y_lab,
-                 colour_by = colour_by, size_by = size_by, shape_by = shape_by, ...)
+    .central_plotter(df_to_plot, xlab = x_lab, ylab = y_lab,
+                     colour_by = colour_by, size_by = size_by, shape_by = shape_by, ...)
 }
 
 #' Plot cell phenotype data from an SingleCellExperiment object
