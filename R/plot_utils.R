@@ -77,7 +77,8 @@
 ## Choosing visualization values.
 
 .choose_vis_values <- function(x, by, mode=c("column", "row"), search=c("any", "metadata", "feature"),
-                               exprs_values = "logcounts", coerce_factor = FALSE, level_limit = NA) 
+                               exprs_values = "logcounts", coerce_factor = FALSE, level_limit = NA,
+                               discard_solo = FALSE) 
 # This function looks through the visualization data and returns the
 # values to be visualized. Either 'by' itself, or a column of colData,
 # or a column of rowData, or the expression values of a feature.
@@ -169,7 +170,12 @@
             stop(sprintf("number of unique levels exceeds %i", level_limit))
         }
     }
-
+    
+    # If only one level for the variable, set to NULL.
+    if (length(unique(vals))<=1L && discard_solo) { 
+        by <- NULL
+        vals <- NULL
+    }
     return(list(name = by, val = vals))
 }
 

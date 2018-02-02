@@ -224,21 +224,25 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2,
                            colour_by = NULL, shape_by = NULL, size_by = NULL,
                            exprs_values = "logcounts", percentVar = NULL, 
                            theme_size = 10, alpha = 0.6, size = NULL,
-                           legend = "auto", add_ticks=TRUE) {
+                           legend = "auto", add_ticks=TRUE) 
+{
+    legend <- match.arg(legend, c("auto", "none", "all"))
+    discard_solo <- legend=="auto"
 
     ## Check arguments are valid
     colour_by_out <- .choose_vis_values(object, colour_by, mode = "column", search = "any",
-                                        exprs_values = exprs_values)
+                                        exprs_values = exprs_values, discard_solo = discard_solo)
     colour_by <- colour_by_out$name
     colour_by_vals <- colour_by_out$val
 
     shape_by_out <- .choose_vis_values(object, shape_by, mode = "column", search = "any",
-                                       exprs_values = exprs_values, coerce_factor = TRUE, level_limit = 10)
+                                       exprs_values = exprs_values, discard_solo = discard_solo,
+                                       coerce_factor = TRUE, level_limit = 10)
     shape_by <- shape_by_out$name
     shape_by_vals <- shape_by_out$val
 
     size_by_out <- .choose_vis_values(object, size_by, mode = "column", search="any",
-                                      exprs_values = exprs_values)
+                                      exprs_values = exprs_values, discard_solo = discard_solo)
     size_by <- size_by_out$name
     size_by_vals <- size_by_out$val
 
@@ -313,20 +317,6 @@ plotReducedDimDefault <- function(df_to_plot, ncomponents=2, percentVar=NULL,
 
         if (add_ticks) {
             plot_out <- plot_out + geom_rug(colour = "gray20", alpha = 0.65)
-        }
-    }
-
-    ## if only one level for the variable, set to NULL
-    legend <- match.arg(legend, c("auto", "none", "all"), several.ok = FALSE)
-    if ( legend == "auto" ) {
-        if ( !is.null(colour_by) && length(unique(df_to_plot$colour_by)) == 1) {
-            colour_by <- NULL
-        }
-        if ( !is.null(shape_by) && length(unique(df_to_plot$shape_by)) == 1) {
-            shape_by  <- NULL
-        }
-        if ( !is.null(size_by) && length(unique(df_to_plot$size_by)) == 1) {
-            size_by <- NULL
         }
     }
 

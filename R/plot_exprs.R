@@ -113,7 +113,8 @@ plotExpression <- function(object, features, x = NULL,
                            colour_by = NULL, shape_by = NULL, size_by = NULL,
                            ncol = 2, xlab = NULL, 
                            show_median = FALSE, show_violin = TRUE, show_smooth = FALSE,
-                           theme_size = 10, alpha = 0.6, size = NULL, scales = "fixed",
+                           theme_size = 10, alpha = 0.6, size = NULL, 
+                           legend = "auto", scales = "fixed",
                            one_facet = FALSE, se = TRUE, jitter = "swarm") 
 {
     if (!is(object, "SingleCellExperiment")) {
@@ -148,18 +149,22 @@ plotExpression <- function(object, features, x = NULL,
     }
 
     ## checking visualization arguments
+    legend <- match.arg(legend, c("auto", "none", "all"))
+    discard_solo <- legend=="auto"
+
     colour_by_out <- .choose_vis_values(object, colour_by, mode = "column", search = "any", 
-                                        exprs_values = exprs_values)
+                                        exprs_values = exprs_values, discard_solo = discard_solo)
     colour_by <- colour_by_out$name
     colour_by_vals <- colour_by_out$val
 
     shape_by_out <- .choose_vis_values(object, shape_by, mode = "column", search = "any", 
-                                       exprs_values = exprs_values, coerce_factor = TRUE, level_limit = 10)
+                                       exprs_values = exprs_values, discard_solo = discard_solo,
+                                       coerce_factor = TRUE, level_limit = 10)
     shape_by <- shape_by_out$name
     shape_by_vals <- shape_by_out$val
 
     size_by_out <- .choose_vis_values(object, size_by, mode = "column", search = "any", 
-                                      exprs_values = exprs_values)
+                                      exprs_values = exprs_values, discard_solo = discard_solo)
     size_by <- size_by_out$name
     size_by_vals <- size_by_out$val
 
@@ -202,8 +207,8 @@ plotExpression <- function(object, features, x = NULL,
     plot_out <- plotExpressionDefault(object, aesth, ncol = ncol, xlab = xlab, ylab = ylab,
                                       shape_by = shape_by, colour_by = colour_by, size_by = size_by, 
                                       show_median = show_median, show_violin = show_violin, show_smooth =show_smooth,
-                                      theme_size = theme_size, alpha = alpha, size = size, scales = scales,
-                                      one_facet = one_facet, se = se, jitter = jitter)
+                                      theme_size = theme_size, alpha = alpha, size = size, legend = legend, 
+                                      scales = scales, one_facet = one_facet, se = se, jitter = jitter)
 
     if ( is.null(x) ) { ## in this case, do not show x-axis ticks or labels
         plot_out <- plot_out + theme(
@@ -220,8 +225,8 @@ plotExpression <- function(object, features, x = NULL,
 plotExpressionDefault <- function(object, aesth, ncol = 2, xlab = NULL, ylab = NULL, 
                                   colour_by = NULL, shape_by = NULL, size_by = NULL,
                                   show_median = FALSE, show_violin = TRUE, show_smooth = FALSE,
-                                  theme_size = 10, alpha = 0.6, size = NULL, scales = "fixed",
-                                  one_facet = FALSE, se = TRUE, jitter = "swarm") 
+                                  theme_size = 10, alpha = 0.6, size = NULL, legend = "auto", 
+                                  scales = "fixed", one_facet = FALSE, se = TRUE, jitter = "swarm") 
 # Internal helper function that does the heavy lifting of creating 
 # the expression plot, with one or more panels.
 {
@@ -276,7 +281,7 @@ plotExpressionDefault <- function(object, aesth, ncol = 2, xlab = NULL, ylab = N
         if (one_facet && recolor) {  
             plot_out <- plot_out + geom_violin(aes_string(fill = "Feature"), colour = "gray60", alpha = 0.2, scale = "width")
         } else {
-            plot_out <- plot_out + geom_violin(colour = "gray60", alpha = 0.3, fill = "gray80", scale = "width")
+            plot_out <- plot_out + geom_violin(colour = "gray60", alpha = 0.3, fill = "gray90", scale = "width")
         }
     }
     if (show_median) {
@@ -290,9 +295,9 @@ plotExpressionDefault <- function(object, aesth, ncol = 2, xlab = NULL, ylab = N
     
     ## Setting the legend details.
     plot_out <- .add_extra_guide(plot_out, shape_by, size_by)
-#    if ( legend == "none" ) {
-#        plot_out <- plot_out + theme(legend.position = "none")
-#    }
+    if ( legend == "none" ) {
+        plot_out <- plot_out + theme(legend.position = "none")
+    }
 
     ## Define plotting theme
     if ( requireNamespace("cowplot", quietly = TRUE) ) {
