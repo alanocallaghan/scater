@@ -1,6 +1,3 @@
-################################################################################
-### Plot expression against transcript length
-
 #' Plot expression against transcript length
 #'
 #' Plot expression values from a \code{\link{SingleCellExperiment}} object
@@ -69,8 +66,9 @@
 #'      median_tx_length = rnorm(2000, mean = 5000, sd = 500))
 #' rownames(rd) <- rownames(sc_example_counts)
 #' example_sce <- SingleCellExperiment(
-#' assays = list(counts = sc_example_counts),
-#' colData = sc_example_cell_info, rowData = rd)
+#'     assays = list(counts = sc_example_counts),
+#'     colData = sc_example_cell_info, rowData = rd
+#' )
 #' example_sce <- normalize(example_sce)
 #'
 #' plotExprsVsTxLength(example_sce, "median_tx_length")
@@ -90,17 +88,15 @@
 #' ## using a vector of tx length values
 #' plotExprsVsTxLength(example_sce, rnorm(2000, mean = 5000, sd = 500))
 #'
-plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len",
-                                exprs_values = "logcounts",
-                                colour_by = NULL, shape_by = NULL,
-                                size_by = NULL, xlab = NULL,
-                                show_exprs_sd = FALSE,
-                                show_smooth = FALSE, alpha = 0.6,
-                                theme_size = 10, log2_values = FALSE, size = NULL,
-                                se = TRUE) {
+plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len", exprs_values = "logcounts",
+                                colour_by = NULL, shape_by = NULL, size_by = NULL, 
+                                xlab = NULL, alpha = 0.6, size = NULL, 
+                                show_exprs_sd = FALSE, log2_values = FALSE, ...) 
+{
     ## Check object is an SingleCellExperiment object
-    if ( !is(object, "SingleCellExperiment") )
+    if ( !is(object, "SingleCellExperiment") ) {
         stop("object must be an SingleCellExperiment")
+    }
 
     tx_length_values <- rep(NA, nrow(object))
     ## Check arguments are valid
@@ -135,76 +131,39 @@ plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len",
     exprs_mean <- rowMeans(exprs_mat)
     exprs_sd <- sqrt(.rowVars(exprs_mat))
 
-    df_to_plot <- data.frame(tx_length_values, exprs_mean, exprs_sd,
-                             ymin = exprs_mean - exprs_sd,
-                             ymax = exprs_mean + exprs_sd)
+    df_to_plot <- data.frame(X=tx_length_values, Y=exprs_mean, 
+                             ymin=exprs_mean - exprs_sd,
+                             ymax=exprs_mean + exprs_sd)
 
     ## check colour, size, shape arguments
-    colour_by_out <- .choose_vis_values(object, colour_by, check_coldata = FALSE)
+    colour_by_out <- .choose_vis_values(object, colour_by, mode = "row", search = "any")
     colour_by <- colour_by_out$name
-    if (!is.null(colour_by)) df_to_plot[[colour_by]] <- colour_by_out$val
+    df_to_plot$colour_by <- colour_by_out$val
 
-    shape_by_out <- .choose_vis_values(object, shape_by, check_coldata = FALSE,
-                                       coerce_factor = TRUE, level_limit = 10)
+    shape_by_out <- .choose_vis_values(object, shape_by, mode = "row", search = "any", coerce_factor = TRUE, level_limit = 10)
     shape_by <- shape_by_out$name
-    if (!is.null(shape_by)) df_to_plot[[shape_by]] <- shape_by_out$val
+    df_to_plot$shape_by <- shape_by_out$val
 
-    size_by_out <- .choose_vis_values(object, size_by, check_coldata = FALSE)
+    size_by_out <- .choose_vis_values(object, size_by, mode = "row", search = "any")
     size_by <- size_by_out$name
-    if (!is.null(size_by)) df_to_plot[[size_by]] <- size_by_out$val
+    df_to_plot$size_by <- size_by_out$val
 
-    ## Construct a ggplot2 aesthetic for the plot
-    aesth <- aes()
-    aesth$x <- as.symbol("tx_length_values")
-    aesth$y <- as.symbol("exprs_mean")
-    aesth$ymin <- as.symbol("ymin")
-    aesth$ymax <- as.symbol("ymax")
-
-    if ( !is.null(colour_by) )
-        aesth$colour <- as.symbol(colour_by)
-    if ( !is.null(shape_by) )
-        aesth$shape <- as.symbol(shape_by)
-    if ( !is.null(size_by) )
-        aesth$size <- as.symbol(size_by)
-
-    ## Define sensible x-axis label if NULL
-    if ( is.null(xlab) )
+    # Creating a plot object.
+    if ( is.null(xlab) ){ 
         xlab <- "Median transcript length"
-
-    ## Make the plot
-    plot_out <- ggplot2::ggplot(df_to_plot, aesth) + xlab(xlab) + ylab(ylab)
-
-    ## if colour aesthetic is defined, then choose sensible colour palette
-    if ( !is.null(aesth$colour) )
-        plot_out <- .resolve_plot_colours(plot_out,
-                                          df_to_plot[[as.character(aesth$colour)]],
-                                          as.character(aesth$colour))
-
-    if ( is.null(aesth$size) & !is.null(size) ) {
-        ## add SDs
-        if ( show_exprs_sd )
-            plot_out <- plot_out + geom_pointrange(size = size, alpha = 0.9 * alpha)
-        ## add points to plot
-        plot_out <- plot_out + geom_point(size = size, alpha = alpha)
-    }  else {
-        ## add SDs
-        if ( show_exprs_sd )
-            plot_out <- plot_out + geom_pointrange(alpha = 0.9 * alpha)
-        ## add points to plot
-        plot_out <- plot_out + geom_point(alpha = alpha)
     }
 
-    ## show optional decorations on plot if desired
-    if (show_smooth) {
-        plot_out <- plot_out + stat_smooth(colour = "firebrick", linetype = 2,
-                                           se = se)
+    plot_out <- .central_plotter(df_to_plot, xlab = xlab, ylab = ylab,
+                                 shape_by = shape_by, colour_by = colour_by, size_by = size_by, 
+                                 alpha = alpha, size = size, ...)
+           
+    if (show_exprs_sd) {
+        args <- list(mapping=aes(ymin=ymin, ymax=ymax))
+        args$alpha <- alpha * 0.9
+        args$size <- size
+        plot_out <- plot_out + do.call(geom_pointrange, args)
     }
 
-    ## Define plotting theme
-    if ( requireNamespace("cowplot", quietly = TRUE) )
-        plot_out <- plot_out + cowplot::theme_cowplot(theme_size)
-    else
-        plot_out <- plot_out + theme_bw(theme_size)
     plot_out
 }
 
