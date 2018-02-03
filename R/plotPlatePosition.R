@@ -93,28 +93,14 @@ plotPlatePosition <- function(object, plate_position = NULL,
     df_to_plot <- data.frame(X=x_position, Y=y_position)
 
     ## checking visualization arguments
-    legend <- match.arg(legend, c("auto", "none", "all"))
-    discard_solo <- legend=="auto"
-
-    colour_by_out <- .choose_vis_values(object, colour_by, mode = "column", search = "any", 
-                                        exprs_values = exprs_values, discard_solo = discard_solo)
-    colour_by <- colour_by_out$name
-    colour_by_vals <- colour_by_out$val
-
-    shape_by_out <- .choose_vis_values(object, shape_by, mode = "column", search = "any", 
-                                       exprs_values = exprs_values, discard_solo = discard_solo,
-                                       coerce_factor = TRUE, level_limit = 10)
-    shape_by <- shape_by_out$name
-    shape_by_vals <- shape_by_out$val
-
-    size_by_out <- .choose_vis_values(object, size_by, mode = "column", search = "any", 
-                                      exprs_values = exprs_values, discard_solo = discard_solo)
-    size_by <- size_by_out$name
-    size_by_vals <- size_by_out$val
-
-    df_to_plot$colour_by <- colour_by_vals
-    df_to_plot$shape_by <- shape_by_vals
-    df_to_plot$size_by <- size_by_vals
+    vis_out <- .incorporate_common_vis(df_to_plot, se = object, mode = "column", 
+                                       colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
+                                       by_exprs_values = exprs_values, legend = legend)
+    df_to_plot <- vis_out$df
+    colour_by <- vis_out$colour_by
+    shape_by <- vis_out$shape_by
+    size_by <- vis_out$size_by
+    legend <- vis_out$legend
 
     ## make the plot with appropriate colours.
     plot_out <- ggplot(df_to_plot, aes(x=X, y=Y))
@@ -134,6 +120,7 @@ plotPlatePosition <- function(object, plate_position = NULL,
         guides(fill = guide_legend(override.aes = list(size = theme_size / 2)))
 
     ## remove legend if so desired
+    plot_out <- .add_extra_guide(plot_out, shape_by, size_by)
     if ( legend == "none" ) {
         plot_out <- plot_out + theme(legend.position = "none")
     }

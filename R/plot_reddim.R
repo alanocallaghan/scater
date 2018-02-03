@@ -32,7 +32,7 @@
 #'
 #' @name plotPCA 
 #' @rdname plotPCA
-#' @aliases plotPCA plotPCA,SingleCellExperiment-method
+#' @aliases plotPCASCE
 #' @importFrom BiocGenerics plotPCA
 #' @seealso \code{\link{runPCA}} \code{\link{runDiffusionMap}} \code{\link{runTSNE}} \code{\link{runMDS}} \code{\link{plotReducedDim}}
 #' @export
@@ -80,11 +80,6 @@
 #' plotMDS(example_sce, colour_by = "Cell_Cycle")
 #' plotMDS(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment")
 #'
-setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
-
-#' @rdname plotPCA
-#' @aliases plotPCASCE
-#' @export
 plotPCASCE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, rerun = FALSE, ncomponents = 2, run_args=list()) {
    .reddim_dispatcher(object=object, ncomponents=ncomponents, reddim_name="PCA", 
                       rerun=rerun, reddim_FUN=runPCA, ..., run_args=run_args,
@@ -117,6 +112,12 @@ plotMDS <- function(object, ..., ncomponents = 2, return_SCE = FALSE, rerun = FA
                       rerun=rerun, reddim_FUN=runMDS, ..., run_args=run_args,
                       return_SCE=return_SCE, draw_plot=draw_plot)
 }
+
+#' @rdname plotPCA
+#' @aliases plotPCA plotPCA,SingleCellExperiment-method
+#' @export
+setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
+
 
 .reddim_dispatcher <- function(object, ncomponents, reddim_name, rerun, reddim_FUN, ..., run_args, return_SCE, draw_plot) 
 # Central function to dispatch to the various run* function
