@@ -1,3 +1,51 @@
+#' General visualization parameters
+#'
+#' \pkg{scater} functions that plot points share a number of visualization parameters, which are described on this page.
+#' 
+#' @section Aesthetic parameters:
+#' \describe{
+#' \item{\code{theme_size}:}{Integer, specifying the font size.
+#' Defaults to 10.}
+#' \item{\code{alpha}:}{Numeric in [0, 1], specifying the transparency.
+#' Defaults to 0.6.}
+#' \item{\code{size}:}{Numeric, specifying the size of the points.
+#' Defaults to \code{NULL}.}
+#' }
+#'
+#' @section Legend specification:
+#' The \code{legend} argument is a string that has three settings:
+#' \describe{
+#' \item{\code{"none"}:}{No legend is shown.}
+#' \item{\code{"auto"}:}{A legend is only shown when there is more than one level for a particular aspect (e.g., colour, size, shape).
+#' Otherwise, it is set to the default for all points, and no legend is shown for that aspect.
+#' This is generally the default setting for most plotting functions.
+#' }
+#' \item{\code{"all"}:}{A legend is shown for all non-default aspects, regardless of how many levels were present.}
+#' } 
+#'
+#' @section Distributional calculations:
+#' \describe{
+#' \item{\code{show_median}:}{Logical, should the median of the distribution be shown for violin plots?
+#' Defaults to \code{FALSE}.}
+#' \item{\code{show_violin}:}{Logical, should the outline of a violin plot be shown?
+#' Defaults to \code{TRUE}.}
+#' \item{\code{show_smooth}:}{Logical, should a smoother be fitted to a scatter plot?
+#' Defaults to \code{FALSE}.}
+#' \item{\code{show_se}:}{Logical, should standard errors for the fitted line be shown on a scatter plot when \code{show_smooth=TRUE}?
+#' Defaults to \code{TRUE}.}
+#' }
+#'
+#' @name scater-plot-args
+#'
+#' @seealso
+#' \code{\link{plotColData}}, 
+#' \code{\link{plotRowData}}, 
+#' \code{\link{plotReducedDim}}, 
+#' \code{\link{plotExpression}}, 
+#' \code{\link{plotPlatePosition}},
+#' and most other plotting functions.
+NULL
+
 .central_plotter <- function(object, xlab = NULL, ylab = NULL,
                              colour_by = NULL, shape_by = NULL, size_by = NULL, fill_by = NULL,
                              show_median = FALSE, show_violin = TRUE, show_smooth = FALSE, show_se = TRUE,
@@ -117,9 +165,6 @@
 
     plot_out
 }
-
-################################################
-## Integrating shape/colour/size_by choices.
 
 .get_point_args <- function(colour_by, shape_by, size_by, alpha=0.65, size=NULL) 
 ## Note the use of colour instead of fill when shape_by is set, as not all shapes have fill.
