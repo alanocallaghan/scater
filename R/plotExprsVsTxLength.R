@@ -6,8 +6,10 @@
 #'
 #' @param object A SingleCellExperiment object.
 #' @param tx_length Transcript lengths for all features, to plot on the x-axis. 
-#' This can take any of the values described in \code{?"\link{scater-vis-var}"} for feature-level metadata.
-#' Data in \code{assays(object)} will \emph{not} be searched.
+#' If \code{length_is_assay=FALSE}, this can take any of the values described in \code{?"\link{scater-vis-var}"} for feature-level metadata;
+#' data in \code{assays(object)} will \emph{not} be searched.
+#' Otherwise, if \code{length_is_assay=TRUE}, \code{tx_length} should be the name or index of an assay in \code{object}.
+#' @param length_is_assay Logical scalar indicating whether \code{tx_length} refers to an assay of \code{object} containing transcript lengths for all features in all cells.
 #' @param exprs_values A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from.
 #' @param log2_values Logical scalar, specifying whether the expression values be transformed to the log2-scale for plotting (with an offset of 1 to avoid logging zeroes).
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
@@ -45,17 +47,18 @@
 #'
 #' ## using matrix of tx length values in assays(object)
 #' mat <- matrix(rnorm(ncol(example_sce) * nrow(example_sce), mean = 5000,
-#'  sd = 500), nrow = nrow(example_sce))
+#'     sd = 500), nrow = nrow(example_sce))
 #' dimnames(mat) <- dimnames(example_sce)
 #' assay(example_sce, "tx_len") <- mat
 #'
 #' plotExprsVsTxLength(example_sce, "tx_len", show_smooth = TRUE,
-#' show_exprs_sd = TRUE)
+#'     length_is_assay = TRUE, show_exprs_sd = TRUE)
 #'
 #' ## using a vector of tx length values
-#' plotExprsVsTxLength(example_sce, rnorm(2000, mean = 5000, sd = 500))
+#' plotExprsVsTxLength(example_sce, 
+#'     data.frame(rnorm(2000, mean = 5000, sd = 500)))
 #'
-plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len", 
+plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len", length_is_assay = FALSE,
                                 exprs_values = "logcounts", log2_values = FALSE, 
                                 colour_by = NULL, shape_by = NULL, size_by = NULL, 
                                 legend = "auto", xlab = "Median transcript length", 
@@ -74,14 +77,20 @@ plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len",
         ylab <- paste0("Expression (", exprs_values, ")")
     }
 
+    # Extract length information.
+    if (length_is_assay) {
+        tx_length_mat <- assay(object, tx_length)
+        tx_length_values <- DelayedMatrixStats::rowMedians(DelayedArray(tx_length_mat))
+    } else {
+        tx_length_out <- .choose_vis_values(object, tx_length, mode = "row", search = "metadata")
+        tx_length_values <- tx_length_out$val
+    }
+
     ## compute mean expression and sd of expression values
     exprs_mean <- rowMeans(exprs_mat)
     exprs_sd <- sqrt(.rowVars(exprs_mat))
 
-    tx_length_out <- .choose_vis_values(object, tx_length, mode = "row", search = "metadata")
-    tx_length <- tx_length_out$name
-
-    df_to_plot <- data.frame(X=tx_length_out$val, Y=exprs_mean, 
+    df_to_plot <- data.frame(X=tx_length_values, Y=exprs_mean, 
                              ymin=exprs_mean - exprs_sd,
                              ymax=exprs_mean + exprs_sd)
 
@@ -113,7 +122,7 @@ plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len",
 
     plot_out <- .central_plotter(df_to_plot, xlab = xlab, ylab = ylab,
                                  shape_by = shape_by, colour_by = colour_by, size_by = size_by, 
-                                 alpha = alpha, size = size, point_FUN=point_FUN, ...)
+                                 point_FUN=point_FUN, ...)
     plot_out
 }
 

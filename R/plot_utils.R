@@ -42,6 +42,7 @@
 #' Visualization will then use the expression profile for all features in that cell.
 #' This tends to be a rather unusual choice for colouring, but we will not judge.
 #' \item Named character strings should use \code{"Cell"} instead of \code{"Feature"}.
+#' \item A data frame input should have number of rows equal to the number of features.
 #' }
 #'
 #' @name scater-vis-var
@@ -131,8 +132,13 @@ NULL
     } else if (is.data.frame(by)) {
         if (ncol(by) != 1L) {
             stop("'*_by' should be a data frame with one column")
-        } else if (nrow(by) != ncol(x)) {
-            stop("'nrow(*_by)' should be equal to number of columns in 'x'")
+        } else {
+            if (mode=="column" && nrow(by) != ncol(x)) {
+                stop("'nrow(*_by)' should be equal to number of columns in 'x'")
+            }
+            if (mode=="row" && nrow(by) != nrow(x)) {
+                stop("'nrow(*_by)' should be equal to number of rows in 'x'")
+            }
         }
 
         ## Allow arbitrary values to be specified.
