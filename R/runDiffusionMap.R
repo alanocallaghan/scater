@@ -1,39 +1,30 @@
-#' Create a diffusion map for an SingleCellExperiment object
+#' Create a diffusion map from cell-level data
 #'
-#' Produce a diffusion map plot using data stored in a \code{SingleCellExperiment} 
-#' object.
+#' Produce a diffusion map for the cells, based on the data in a SingleCellExperiment object.
 #'
-#' @param object a \code{SingleCellExperiment} object
-#' @param ntop numeric scalar indicating the number of most variable features to
-#' use for the diffusion map. Default is \code{500}, but any \code{ntop}
-#' argument is overrided if the \code{feature_set} argument is non-NULL.
-#' @param ncomponents numeric scalar indicating the number of diffusion
-#' components to obtain.
-#' @param exprs_values Integer or character string indicating which values should be used #' as the expression values for this plot. 
-#' Defaults to \code{"logcounts"}, but any other element of the \code{assays} slot of the \code{SingleCellExperiment} object can be used.
-#' @param feature_set character, numeric or logical vector indicating a set of
-#' features to use for the diffusion map. If character, entries must all be in
-#' \code{featureNames(object)}. If numeric, values are taken to be indices for
-#' features. If logical, vector is used to index features and should have length
-#' equal to \code{nrow(object)}.
-#' @param scale_features logical, should the expression values be standardised
-#' so that each feature has unit variance? Default is \code{TRUE}.
-#' @param use_dimred character(1), use named reduced dimension representation of cells
-#' stored in \code{SingleCellExperiment} object instead of recomputing (e.g. "PCA").
-#'  Default is \code{NULL}, no reduced dimension values are provided to \code{Rtsne}.
-#' @param n_dimred integer(1), number of components of the reduced dimension slot
-#' to use. Default is \code{NULL}, in which case (if \code{use_dimred} is not \code{NULL})
-#' all components of the reduced dimension slot are used.
-#' @param rand_seed (optional) numeric scalar that can be passed to
-#' \code{set.seed} to make plots reproducible.
+#' @param object A SingleCellExperiment object
+#' @param ncomponents Numeric scalar indicating the number of diffusion components to obtain.
+#' @param ntop Numeric scalar specifying the number of most variable features to use for constructing the diffusion map. 
+#' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use to construct the diffusion map. 
+#' This will override any \code{ntop} argument if specified.
+#' @param exprs_values Integer scalar or string indicating which assay of \code{object} should be used to obtain the expression values for the calculations.
+#' @param scale_features Logical scalar, should the expression values be standardised so that each feature has unit variance?
+#' @param use_dimred String or integer scalar specifying the entry of \code{reducedDims(object)} to use as input to \code{\link[destiny]{DiffusionMap}}.
+#' Default is to not use existing reduced dimension results.
+#' @param n_dimred Integer scalar, number of dimensions of the reduced dimension slot to use when \code{use_dimred} is supplied.
+#' Defaults to all available dimensions.
+#' @param rand_seed Numeric scalar that can be passed to \code{set.seed} to make the results reproducible.
 #' @param ... Additional arguments to pass to \code{\link[destiny]{DiffusionMap}}.
 #'
-#' @details The function \code{\link[destiny]{DiffusionMap}} is used internally
-#' to compute the diffusion map.
+#' @details 
+#' The function \code{\link[destiny]{DiffusionMap}} is used internally to compute the diffusion map.
+#' 
+#' Setting \code{use_dimred} allows users to easily construct a diffusion map from low-rank approximations of the original expression matrix (e.g., after PCA).
+#' In such cases, arguments such as \code{ntop}, \code{feature_set}, \code{exprs_values} and \code{scale_features} will be ignored. 
 #'
-#' @return A \code{SingleCellExperiment} object containing the coordinates of the first 
-#' \code{ncomponent} diffusion map components for each cell in the \code{"DiffusionMap"} 
-#' entry of the \code{reducedDims} slot.
+#' @return 
+#' A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} diffusion map components for each cell.
+#' This is stored in the \code{"DiffusionMap"} entry of the \code{reducedDims} slot.
 #'
 #' @export
 #' @rdname runDiffusionMap
@@ -49,13 +40,15 @@
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
 #' example_sce <- SingleCellExperiment(
-#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#'     assays = list(counts = sc_example_counts),
+#'     colData = sc_example_cell_info
+#' )
 #' example_sce <- normalize(example_sce)
 #'
 #' example_sce <- runDiffusionMap(example_sce)
 #' reducedDimNames(example_sce)
 #' head(reducedDim(example_sce))
-runDiffusionMap <- function(object, ntop = 500, ncomponents = 2, feature_set = NULL,
+runDiffusionMap <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
         exprs_values = "logcounts", scale_features = TRUE, use_dimred=NULL, n_dimred=NULL,
         rand_seed = NULL, ...) {
 

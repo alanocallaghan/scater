@@ -1,47 +1,36 @@
-#' Run t-SNE for a SingleCellExperiment object
+#' Perform t-SNE on cell-level data
 #'
-#' Perform t-stochastic neighbour embedding (t-SNE) based on the data stored in 
-#' a \code{\link{SingleCellExperiment}} object.
+#' Perform t-stochastic neighbour embedding (t-SNE) for the cells, based on the data in a SingleCellExperiment object.
 #'
-#' @param object a \code{\link{SingleCellExperiment}} object
-#' @param ntop numeric scalar indicating the number of most variable features to
-#' use for the t-SNE Default is \code{500}, but any \code{ntop} argument is
-#' overrided if the \code{feature_set} argument is non-NULL.
-#' @param ncomponents numeric scalar indicating the number of t-SNE
-#' components to obtain.
-#' @param exprs_values Integer or character string indicating which values should be used #' as the expression values for this plot. 
-#' Defaults to \code{"logcounts"}, but any other element of the \code{assays} slot of the \code{SingleCellExperiment} object can be used.
-#' @param feature_set character, numeric or logical vector indicating a set of
-#' features to use for the t-SNE calculation. If character, entries must all be
-#' in \code{featureNames(object)}. If numeric, values are taken to be indices for
-#' features. If logical, vector is used to index features and should have length
-#' equal to \code{nrow(object)}.
-#' @param use_dimred character(1), use named reduced dimension representation of cells
-#' stored in \code{SingleCellExperiment} object instead of recomputing (e.g. "PCA").
-#'  Default is \code{NULL}, no reduced dimension values are provided to \code{Rtsne}.
-#' @param n_dimred integer(1), number of components of the reduced dimension slot
-#' to use. Default is \code{NULL}, in which case (if \code{use_dimred} is not \code{NULL})
-#' all components of the reduced dimension slot are used.
-#' @param scale_features logical, should the expression values be standardised
-#' so that each feature has unit variance? Default is \code{TRUE}.
-#' @param rand_seed (optional) numeric scalar that can be passed to
-#' \code{set.seed} to make plots reproducible.
-#' @param perplexity numeric scalar value defining the "perplexity parameter"
-#' for the t-SNE plot. Passed to \code{\link[Rtsne]{Rtsne}} - see documentation
-#' for that package for more details.
+#' @param object A SingleCellExperiment object.
+#' @param ncomponents Numeric scalar indicating the number of t-SNE dimensions to obtain.
+#' @param ntop Numeric scalar specifying the number of most variable features to use for t-SNE.
+#' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for t-SNE.
+#' This will override any \code{ntop} argument if specified.
+#' @param exprs_values Integer scalar or string indicating which assay of \code{object} should be used to obtain the expression values for the calculations.
+#' @param scale_features Logical scalar, should the expression values be standardised so that each feature has unit variance?
+#' @param use_dimred String or integer scalar specifying the entry of \code{reducedDims(object)} to use as input to \code{\link[Rtsne]{Rtsne}}.
+#' Default is to not use existing reduced dimension results.
+#' @param n_dimred Integer scalar, number of dimensions of the reduced dimension slot to use when \code{use_dimred} is supplied.
+#' Defaults to all available dimensions.
+#' @param rand_seed Numeric scalar that can be passed to \code{set.seed} to make the results reproducible.
+#' @param perplexity Numeric scalar defining the perplexity parameter, see \code{?\link[Rtsne]{Rtsne}} for more details.
 #' @param ... Additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.
 #'
-#' @return A \code{SingleCellExperiment} object containing the coordinates of
-#' the first \code{ncomponent} t-SNE dimensions for each cell in the \code{"TSNE"}
-#' entry of the \code{reducedDims} slot.
+#' @return 
+#' A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} t-SNE dimensions for each cell.
+#' This is stored in the \code{"TSNE"} entry of the \code{reducedDims} slot.
 #'
-#' @details The function \code{\link[Rtsne]{Rtsne}} is used internally to
-#' compute the t-SNE. Note that the algorithm is not deterministic, so different
-#' runs of the function will produce differing plots (see \code{\link{set.seed}}
-#' to set a random seed for replicable results). The value of the
-#' \code{perplexity} parameter can have a large effect on the resulting plot, so
-#' it can often be worthwhile to try multiple values to find the most appealing
-#' visualisation and to ensure that the conclusions are robust.
+#' @details 
+#' The function \code{\link[Rtsne]{Rtsne}} is used internally to compute the t-SNE. 
+#' Note that the algorithm is not deterministic, so different runs of the function will produce differing results. 
+#' Users are advised to test multiple random seed, and then use \code{rand_seed} to set a random seed for replicable results. 
+#'
+#' The value of the \code{perplexity} parameter can have a large effect on the results.
+#' It can often be worthwhile to try multiple values to ensure that the conclusions are robust.
+#'
+#' Setting \code{use_dimred} allows users to easily perform t-SNE on low-rank approximations of the original expression matrix (e.g., after PCA).
+#' In such cases, arguments such as \code{ntop}, \code{feature_set}, \code{exprs_values} and \code{scale_features} will be ignored. 
 #'
 #' @references
 #' L.J.P. van der Maaten. Barnes-Hut-SNE. In Proceedings of the International Conference on Learning Representations, 2013.
@@ -57,14 +46,17 @@
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
 #' example_sce <- SingleCellExperiment(
-#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#'     assays = list(counts = sc_example_counts), 
+#'     colData = sc_example_cell_info
+#' )
 #' example_sce <- normalize(example_sce)
 #'
 #' example_sce <- runTSNE(example_sce)
 #' reducedDimNames(example_sce)
 #' head(reducedDim(example_sce))
-runTSNE <- function(object, ntop = 500, ncomponents = 2, exprs_values = "logcounts",
-        feature_set = NULL, use_dimred = NULL, n_dimred = NULL, scale_features = TRUE,
+runTSNE <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL, 
+        exprs_values = "logcounts", scale_features = TRUE,
+        use_dimred = NULL, n_dimred = NULL, 
         rand_seed = NULL, perplexity = floor(ncol(object) / 5), ...) {
 
     if (!is.null(use_dimred)) {
@@ -78,8 +70,7 @@ runTSNE <- function(object, ntop = 500, ncomponents = 2, exprs_values = "logcoun
         pca_dims <- ncol(vals)
 
     } else {
-        ## Define an expression matrix depending on which values we're
-        ## using
+        ## Define an expression matrix depending on which values we're using
         exprs_mat <- assay(object, i = exprs_values)
 
         ## Define features to use: either ntop, or if a set of features is
