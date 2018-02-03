@@ -1,4 +1,4 @@
-#' Plot specific reduced dimensions for a SingleCellExperiment object
+#' Plot specific reduced dimensions 
 #'
 #' Wrapper functions to create plots for specific types of reduced dimension results in a SingleCellExperiment object,
 #' or, if they are not already present, to calculate those results and then plot them.

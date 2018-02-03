@@ -1,6 +1,6 @@
 #' Plot cells in plate positions
 #'
-#' Plots cells in their position on a plate, coloured by phenotype data or feature expression.
+#' Plots cells in their position on a plate, coloured by metadata variables or feature expression values from a SingleCellExperiment object.
 #'
 #' @param object A SingleCellExperiment object. 
 #' @param plate_position A character vector specifying the plate position for each cell (e.g., A01, B12, and so on, where letter indicates row and number indicates column).

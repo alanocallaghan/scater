@@ -1,4 +1,6 @@
-#' Plot cell phenotype data from an SingleCellExperiment object
+#' Plot column metadata
+#'
+#' Plot column-level (i.e., cell) metadata in an SingleCellExperiment object.
 #'
 #' @param object A SingleCellExperiment object containing expression values and experimental information.
 #' @param y Specification of the column-level metadata to show on the y-axis, see \code{?"\link{scater-vis-var}"} for possible values.
@@ -80,7 +82,9 @@ plotCellData <- function(...) {
     plotColData(...)
 }
 
-#' Plot feature (gene) data from a SingleCellExperiment object
+#' Plot row metadata
+#'
+#' Plot row-level (i.e., gene) metadata from a SingleCellExperiment object.
 #'
 #' @param object A SingleCellExperiment object containing expression values and experimental information.
 #' @param y Specification of the row-level metadata to show on the y-axis, see \code{?"\link{scater-vis-var}"} for possible values.

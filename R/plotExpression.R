@@ -1,4 +1,6 @@
-#' Plot expression values for a set of features (e.g. genes or transcripts)
+#' Plot expression values for all cells
+#'
+#' Plot expression values for a set of features (e.g. genes or transcripts) in a SingleExperiment object, against a continuous or categorical covariate for all cells.
 #'
 #' @param object A SingleCellExperiment object containing expression values and other metadata.
 #' @param features A character vector (of feature names), a logical vector or numeric vector (of indices) specifying the features to plot.

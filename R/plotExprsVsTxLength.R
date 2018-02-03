@@ -1,8 +1,6 @@
 #' Plot expression against transcript length
 #'
-#' Plot expression values from a \code{\link{SingleCellExperiment}} object
-#' against transcript length values defined in the SingleCellExperiment object
-#' or supplied as an argument.
+#' Plot mean expression values for all features in a SingleCellExperiment object against transcript length values.
 #'
 #' @param object A SingleCellExperiment object.
 #' @param tx_length Transcript lengths for all features, to plot on the x-axis. 
@@ -20,6 +18,10 @@
 #' @param show_exprs_sd Logical scalar indicating whether the standard deviation of expression values for each feature should be plotted.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
+#' @details
+#' If \code{length_is_assay=TRUE}, the median transcript length of each feature across all cells is used.
+#' This may be necessary if the effective transcript length differs across cells, e.g., as observed in the results from pseudo-aligners.
+#' 
 #' @return A ggplot object.
 #' @export
 #'

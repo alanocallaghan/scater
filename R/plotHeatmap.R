@@ -1,5 +1,7 @@
 #' Plot heatmap of gene expression values
 #'
+#' Create a heatmap of expression values for each cell and specified features in a SingleCellExperiment object.
+#'
 #' @param object A SingleCellExperiment object.
 #' @param features A character vector of row names, a logical vector of integer vector of indices specifying rows of \code{object} to show in the heatmap.
 #' @param columns A vector specifying the subset of columns in \code{object} to show as columns in the heatmp. 

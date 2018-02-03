@@ -1,4 +1,6 @@
-#' Plot reduced dimension representation of cells
+#' Plot reduced dimensions
+#'
+#' Plot cell-level reduced dimension results stored in a SingleCellExperiment object.
 #'
 #' @param object A SingleCellExperiment object.
 #' @param use_dimred A string or integer scalar indicating the reduced dimension result in \code{reducedDims(object)} to plot.
@@ -15,7 +17,7 @@
 #' @param add_ticks Logical scalar indicating whether ticks should be drawn on the axes corresponding to the location of each point.
 #'
 #' @details
-#' If \code{ncomponents} is 2, then a scatterplot of the first two dimensions is produced. 
+#' If \code{ncomponents} is 2, a scatterplot of the first two dimensions is produced. 
 #' If \code{ncomponents} is greater than 2, a pairs plots for the top dimensions is produced.
 #'
 #' @return A ggplot object
