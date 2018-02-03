@@ -1,39 +1,26 @@
 #' Plot cells in plate positions
 #'
-#' Plots cells in their position on a plate, coloured by phenotype data or
-#' feature expression.
+#' Plots cells in their position on a plate, coloured by phenotype data or feature expression.
 #'
-#' @param object an \code{SingleCellExperiment} object. If \code{object$plate_position} is not
-#' \code{NULL}, then this will be used to define each cell's position on the
-#' plate, unless the \code{plate_position} argument is specified.
-#' @param plate_position optional character vector providing a position on the
-#' plate for each cell (e.g. A01, B12, etc, where letter indicates row and
-#' number indicates column). Specifying this argument overrides any plate
-#' position information extracted from the SingleCellExperiment object.
-#' @param colour_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to colour the points in the plot. Alternatively, a
-#' data frame with one column containing values to map to colours for all cells.
-#' @param x_position numeric vector providing x-axis positions for the cells
-#' (ignored if \code{plate_position} is not \code{NULL})
-#' @param y_position numeric vector providing y-axis positions for the cells
-#' (ignored if \code{plate_position} is not \code{NULL})
-#' @param exprs_values a string specifying the expression values to use for
-#' colouring the points, if \code{colour_by} is set as a feature name.
-#' @param theme_size numeric scalar giving default font size for plotting theme
-#' (default is 10).
-#' @param legend character, specifying how the legend(s) be shown? Default is
-#' \code{"auto"}, which hides legends that have only one level and shows others.
-#' Alternatives are "all" (show all legends) or "none" (hide all legends).
+#' @param object A SingleCellExperiment object. 
+#' @param plate_position A character vector specifying the plate position for each cell (e.g., A01, B12, and so on, where letter indicates row and number indicates column).
+#' If \code{NULL}, the function will attempt to extract this from \code{object$plate_position}.
+#' Alternatively, a list of two factors (\code{"row"} and \code{"column"}) can be supplied, specifying the row and column for each cell in \code{object}.
+#' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param legend String specifying how the legend(s) be shown, see \code{?"\link{scater-plot-args}"} for details.
+#' @param exprs_values A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from, for use in colouring, shaping or sizing.
+#' @param theme_size Numeric scalar, see \code{?"\link{scater-plot-args}"} for details.
+#' @param alpha Numeric scalar, see \code{?"\link{scater-plot-args}"} for details.
+#' @param size Numeric scalar, see \code{?"\link{scater-plot-args}"} for details.
+#' @param legend String, see \code{?"\link{scater-plot-args}"} for details.
 #'
-#' @details This function expects plate positions to be given in a charcter
-#' format where a letter indicates the row on the plate and a numeric value
-#' indicates the column. So each cell has a plate position such as "A01", "B12",
-#' "K24" and so on. From these plate positions, the row is extracted as the
-#' letter, and the column as the numeric part. If \code{object$plate_position}
-#' or the \code{plate_position} argument are used to define plate positions,
-#' then positions should be provided in this format. Alternatively, numeric
-#' values to be used as x- and y-coordinates by supplying both the
-#' \code{x_position} and \code{y_position} arguments to the function.
+#' @details 
+#' This function expects plate positions to be given in a charcter format where a letter indicates the row on the plate and a numeric value  indicates the column. 
+#' Each cell has a plate position such as "A01", "B12", "K24" and so on. 
+#' From these plate positions, the row is extracted as the letter, and the column as the numeric part. 
+#' Alternatively, the row and column identities can be directly supplied by setting \code{plate_position} as a list of two factors.
 #'
 #' @return
 #' A ggplot object.
@@ -45,13 +32,17 @@
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
 #' example_sce <- SingleCellExperiment(
-#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#'     assays = list(counts = sc_example_counts),
+#'     colData = sc_example_cell_info
+#' )
 #' example_sce <- normalize(example_sce)
 #' example_sce <- calculateQCMetrics(example_sce)
 #'
 #' ## define plate positions
 #' example_sce$plate_position <- paste0(
-#' rep(LETTERS[1:5], each = 8), rep(formatC(1:8, width = 2, flag = "0"), 5))
+#'     rep(LETTERS[1:5], each = 8), 
+#'     rep(formatC(1:8, width = 2, flag = "0"), 5)
+#' )
 #'
 #' ## plot plate positions
 #' plotPlatePosition(example_sce, colour_by = "Mutation_Status")
@@ -63,8 +54,8 @@
 #'
 plotPlatePosition <- function(object, plate_position = NULL,
                               colour_by = NULL, size_by = NULL, shape_by = NULL,
-                              exprs_values = "logcounts", size = 24, alpha = 0.6, 
-                              theme_size = 24, legend = "auto") 
+                              legend = "auto", exprs_values = "logcounts", 
+                              theme_size = 24, alpha = 0.6, size = 24) 
 {
     ## check object is SingleCellExperiment object
     if ( !is(object, "SingleCellExperiment") ) {
@@ -83,8 +74,8 @@ plotPlatePosition <- function(object, plate_position = NULL,
         x_position <- as.integer(gsub("[A-Z]*", "", plate_position))
 
     } else {
-        x_position <- plate_position$x
-        y_position <- plate_position$y
+        x_position <- plate_position$row
+        y_position <- plate_position$column
         plate_position <- NULL
     }
     x_position <- as.factor(x_position)
