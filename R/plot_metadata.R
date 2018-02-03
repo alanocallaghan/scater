@@ -10,6 +10,7 @@
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param exprs_values A string or integer scalar specifying the assay to obtain expression values for colouring or shaping or sizing points by.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -96,6 +97,7 @@ plotCellData <- function(...) {
 #' @param colour_by Specification of a row metadata field or a cell to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param shape_by Specification of a row metadata field or a cell to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param size_by Specification of a row metadata field or a cell to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param exprs_values A string or integer scalar specifying the assay to obtain expression values for colouring or shaping or sizing points by.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
