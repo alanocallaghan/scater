@@ -53,30 +53,44 @@ example_sce
 
 The `plotExpression` function makes it easy to plot expression values for a subset of genes or features. 
 This can be particularly useful for further examination of features identified from differential expression testing, pseudotime analysis or other analyses.
+By default, it uses expression values in the `"logcounts"` assay, but this can be changed through the `exprs_values` argument.
 
 ```{r plot-expression}
 plotExpression(example_sce, rownames(example_sce)[1:6],
     x = "Mutation_Status", exprs_values = "logcounts") 
 ```
 
-By default, it uses expression values in the `"logcounts"` assay, but this can be changed through the `exprs_values` argument.
-Setting `x` will determine the covariate to be shown on the x-axis, resulting in grouped violins (categorical) or scatter plots (continuous).
-The points can also be coloured, shaped or resized by diferent variables.
+Setting `x` will determine the covariate to be shown on the x-axis.
+This can be a field in the column metadata or the name of a feature (to obtain the expression profile across cells).
+Categorical covariates will yield grouped violins as shown above, with one panel per feature.
+By comparison, continuous covariates will generate a scatter plot in each panel, as shown below.
+
+```{r plot-expression-scatter}
+plotExpression(example_sce, rownames(example_sce)[1:6],
+    x = "Gene_0001")
+```
+
+The points can also be coloured, shaped or resized by the column metadata or expression values.
 
 ```{r plot-expression-col}
 plotExpression(example_sce, rownames(example_sce)[1:6],
-    x = "Gene_0001", colour = "Mutation_Status")
+    colour_by = "Cell_Cycle", shape_by = "Mutation_Status", 
+    size_by = "Gene_0002")
 ```
 
-This function uses `ggplot2`, making it easy for users to customize the theme and aesthetics.
-We can also show the median expression level per group on the plot and show a violin plot to summarise the distribution of expression values:
+For categorical `x`, we can also show the median expression level per group on the plot to summarise the distribution of expression values:
 
 ```{r plot-expression-theme-bw}
 plotExpression(example_sce, rownames(example_sce)[7:12],
     x = "Mutation_Status", exprs_values = "counts", 
     colour = "Cell_Cycle", show_median = TRUE, 
-    show_violin = FALSE,  xlab = "Mutation Status",
-    log = TRUE)
+    xlab = "Mutation Status", log = TRUE)
+```
+
+Directly plotting the gene expression without any `x` or other visual parameters will generate a set of grouped violin plots, coloured in an aesthetically pleasing manner.
+
+```{r plot-expression-many}
+plotExpression(example_sce, rownames(example_sce)[1:6])
 ```
 
 # Dimensionality reduction plots
@@ -134,7 +148,7 @@ Multiple components can be plotted in a series of pairwise plots.
 When more than two components are plotted, the diagonal boxes in the scatter plot matrix show the density for each component.
 
 ```{r plot-pca-4comp-colby-shapeby}
-example_sce <- runPCA(example_sce, ncomponents=4)
+example_sce <- runPCA(example_sce, ncomponents=20)
 plotPCA(example_sce, ncomponents = 4, colour_by = "Treatment",
         shape_by = "Mutation_Status")
 ```
@@ -164,7 +178,7 @@ The code below uses the first 10 principal components to perform the _t_-SNE.
 
 ```{r plot-tsne-from-pca}
 example_sce <- runTSNE(example_sce, perplexity=10, rand_seed=1000,
-    use_dimred="PCA", n_dimred)
+    use_dimred="PCA", n_dimred = 10)
 plotTSNE(example_sce, colour_by="Treatment")
 ```
 
