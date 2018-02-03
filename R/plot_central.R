@@ -10,6 +10,8 @@
 #' Defaults to 0.6.}
 #' \item{\code{size}:}{Numeric, specifying the size of the points.
 #' Defaults to \code{NULL}.}
+#' \item{\code{jitter}:}{String to define whether points are to be jittered (\code{"jitter"}) or presented in a \dQuote{beeswarm} style (if \code{"swarm"}, default).
+#' The latter usually looks more attractive, but for datasets with a large number of cells, or for dense plots, the jitter option may work better.}
 #' }
 #'
 #' @section Legend specification:

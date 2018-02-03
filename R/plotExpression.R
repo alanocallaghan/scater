@@ -1,74 +1,40 @@
 #' Plot expression values for a set of features (e.g. genes or transcripts)
 #'
-#' @param object A SingleCellExperiment object containing expression values and
-#' experimental information. 
-#' @param features a character vector of feature names or Boolean
-#' vector or numeric vector of indices indicating which features should have
-#' their expression values plotted
-#' @param x character string providing a column name of \code{pData(object)} or
-#' a feature name (i.e. gene or transcript) to plot on the x-axis in the
-#' expression plot(s). If a feature name, then expression values for the feature
-#' will be plotted on the x-axis for each subplot.
-#' @param exprs_values character string indicating which values should be used
-#' as the expression values for this plot. Valid arguments are \code{"tpm"}
-#' (transcripts per million), \code{"norm_tpm"} (normalised TPM
-#' values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM
-#' values), \code{"counts"} (counts for each feature), \code{"norm_counts"},
-#' \code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised
-#' counts-per-million), \code{"logcounts"} (log-transformed count data; default),
-#' \code{"norm_exprs"} (normalised
-#' expression values) or \code{"stand_exprs"} (standardised expression values)
-#' or any other slots that have been added to the \code{"assayData"} slot by
-#' the user.
-#' @param colour_by optional character string supplying name of a column of
-#' \code{pData(object)} which will be used as a variable by which to colour
-#' expression values on the plot. Alternatively, a data frame with one column,
-#' containing a value for each cell that will be mapped to a colour.
-#' @param shape_by optional character string supplying name of a column of
-#' \code{pData(object)} which will be used as a variable to define the shape of
-#' points for expression values on the plot. Alternatively, a data frame with
-#' one column containing values to map to shapes.
-#' @param size_by optional character string supplying name of a column of
-#' \code{pData(object)} which will be used as a variable to define the size of
-#' points for expression values on the plot. Alternatively, a data frame with
-#' one column containing values to map to sizes.
-#' @param ncol number of columns to be used for the panels of the plot
-#' @param xlab label for x-axis; if \code{NULL} (default), then \code{x} will be
-#' used as the x-axis label
-#' @param show_median logical, show the median for each group on the plot
-#' @param show_violin logical, show a violin plot for the distribution
-#' for each group on the plot
-#' @param show_smooth logical, show a smoothed fit through the expression values
-#'  on the plot
-#' @param alpha numeric value between 0 (completely transparent) and 1 (completely
-#' solid) defining how transparent plotted points (cells) should be.
-#' Points are jittered horizontally if the x-axis value is categorical rather
-#' than numeric to avoid overplotting.
-#' @param theme_size numeric scalar giving default font size for plotting theme
-#' (default is 10)
-#' @param log2_values should the expression values be transformed to the
-#' log2-scale for plotting (with an offset of 1 to avoid logging zeroes)?
-#' @param size numeric scalar optionally providing size for points if
-#' \code{size_by} argument is not given. Default is \code{NULL}, in which case
-#' \pkg{ggplot2} default is used.
-#' @param legend character, specifying how the legend(s) be shown? Default is
-#' \code{"auto"}, which hides legends that have only one level and shows others.
-#' Alternatives are "all" (show all legends) or "none" (hide all legends).
-#' @param scales character scalar, should scales be fixed ("fixed"),
-#' free ("free"), or free in one dimension ("free_x"; "free_y", the default).
-#' Passed to the \code{scales} argument in the \code{\link[ggplot2]{facet_wrap}} function
-#' from the \code{ggplot2} package.
-#' @param se logical, should standard errors be shown (default \code{TRUE}) for
-#' the smoothed fit through the cells. (Ignored if \code{show_smooth} is \code{FALSE}).
-#' @param jitter character scalar to define whether points are to be jittered
-#' (\code{"jitter"}) or presented in a "beeswarm" style (if \code{"swarm"}; default).
-#' "Beeswarm" style usually looks more attractive, but for datasets with a large
-#' number of cells, or for dense plots, the jitter option may work better.
+#' @param object A SingleCellExperiment object containing expression values and other metadata.
+#' @param features A character vector (of feature names), a logical vector or numeric vector (of indices) specifying the features to plot.
+#' @param x Specification of a column metadata field or a feature to show on the x-axis, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param exprs_values A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from.
+#' @param log2_values Logical scalar, specifying whether the expression values be transformed to the log2-scale for plotting (with an offset of 1 to avoid logging zeroes).
+#' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param legend String specifying how the legend(s) be shown, see \code{?"\link{scater-plot-args}"} for details.
+#' @param xlab String specifying the label for x-axis.
+#' If \code{NULL} (default), \code{x} will be used as the x-axis label.
+#' @param feature_colours Logical scalar indicating whether violins should be coloured by feature when \code{x} and \code{colour_by} are not specified and \code{one_facet=TRUE}.
+#' @param one_facet Logical scalar indicating whether grouped violin plots for multiple features should be put onto one facet.
+#' Only relevant when \code{x=NULL}.
+#' @param ncol Integer scalar, specifying the number of columns to be used for the panels of a multi-facet plot.
+#' @param scales String indicating whether should multi-facet scales be fixed (\code{"fixed"}), free (\code{"free"}), or free in one dimension (\code{"free_x"}, \code{"free_y"}).
+#' Passed to the \code{scales} argument in the \code{\link[ggplot2]{facet_wrap}} when multiple facets are generated.
+#' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
-#' @details Plot expression values (default log2(counts-per-million +
-#' 1), if available) for a set of features.
+#' @details 
+#' This function plots expression values for one or more features.
+#' If \code{x} is not specified, a violin plot will be generated of expression values.
+#' If \code{x} is categorical, a grouped violin plot will be generated, with one violin for each level of \code{x}.
+#' If \code{x} is continuous, a scatter plot will be generated.
 #'
-#' @return a ggplot plot object
+#' If multiple features are requested and \code{x} is not specified and \code{one_facet=TRUE}, a grouped violin plot will be generated with one violin per feature.
+#' This will be coloured by feature if \code{colour_by=NULL} and \code{feature_colours=TRUE}, to yield a more aesthetically pleasing plot.
+#' Otherwise, if \code{x} is specified or \code{one_facet=FALSE}, a multi-panel plot will be generated where each panel corresponds to a feature.
+#' Each panel will be a scatter plot or (grouped) violin plot, depending on the nature of \code{x}.
+#'
+#' Note that this assumes that the expression values are numeric.
+#' If not, and \code{x} is continuous, horizontal violin plots will be generated.
+#' If \code{x} is missing or categorical, rectangule plots will be generated where the area of a rectangle is proportional to the number of points for a combination of factors.
+#'
+#' @return A ggplot object.
 #'
 #' @name plotExpression
 #' @aliases plotExpression
@@ -116,8 +82,8 @@
 plotExpression <- function(object, features, x = NULL,
                            exprs_values = "logcounts", log2_values = FALSE,
                            colour_by = NULL, shape_by = NULL, size_by = NULL,
-                           xlab = NULL, feature_colours = TRUE, legend = "auto", 
-                           one_facet = NULL, ncol = 2, scales = "fixed", 
+                           legend = "auto", xlab = NULL, feature_colours = TRUE, 
+                           one_facet = TRUE, ncol = 2, scales = "fixed", 
                            ...) 
 {
     if (!is(object, "SingleCellExperiment")) {
@@ -174,9 +140,6 @@ plotExpression <- function(object, features, x = NULL,
     ## Set up the faceting.
     if ( is.null(evals_long$X) ) { 
         evals_long$X <- evals_long$Feature
-        if (is.null(one_facet)) { 
-            one_facet <- TRUE 
-        }
     } else { 
         one_facet <- FALSE 
     }
