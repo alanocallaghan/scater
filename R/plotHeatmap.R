@@ -1,41 +1,31 @@
 #' Plot heatmap of gene expression values
 #'
-#' @param object A \code{\link{SingleCellExperiment}} object.
-#' @param features A character vector containing row names of \code{object} 
-#' to be shown as rows in the heatmap.
-#' @param columns A vector specifying the subset of columns in \code{object}
-#' to show as columns in the heatmp. All columns are used by default.
-#' @param exprs_values A string indicating which assay of \code{object}
-#' should be used as expression values for colouring in the heatmap.
-#' @param center A logical scalar indicating whether each row should be 
-#' centered at zero prior to plotting. Setting this to \code{TRUE} 
-#' @param zlim A numeric vector of length 2, specifying the upper and lower
-#' bounds for the expression values. This winsorizes the expression matrix
-#' prior to plotting (but after centering, if \code{center=TRUE}. If 
-#' \code{NULL}, it defaults to the range of the expression matrix.
-#' @param symmetric A logical scalar specifying whether the default \code{zlim}
-#' should be symmetric around zero. If \code{TRUE}, the maximum absolute
-#' value of \code{zlim} will be computed and multiplied by \code{c(-1, 1)} to 
-#' redefine \code{zlim}.
-#' @param color A vector of colours specifying the palette to use for mapping 
-#' expression values to colours. This defaults to the default setting in 
-#' \code{\link[pheatmap]{pheatmap}}.
-#' @param colour_columns_by A character vector of column metadata names 
-#' in \code{colData(object)} or of gene names, to use to annotate the columns
-#' by colour.
+#' @param object A SingleCellExperiment object.
+#' @param features A character vector of row names, a logical vector of integer vector of indices specifying rows of \code{object} to show in the heatmap.
+#' @param columns A vector specifying the subset of columns in \code{object} to show as columns in the heatmp. 
+#' By default, all columns are used in their original order.
+#' @param exprs_values A string or integer scalar indicating which assay of \code{object} should be used as expression values for colouring in the heatmap.
+#' @param center A logical scalar indicating whether each row should have its mean expression centered at zero prior to plotting. 
+#' @param zlim A numeric vector of length 2, specifying the upper and lower bounds for the expression values. 
+#' This winsorizes the expression matrix prior to plotting (but after centering, if \code{center=TRUE}). 
+#' If \code{NULL}, it defaults to the range of the expression matrix.
+#' @param symmetric A logical scalar specifying whether the default \code{zlim} should be symmetric around zero. 
+#' If \code{TRUE}, the maximum absolute value of \code{zlim} will be computed and multiplied by \code{c(-1, 1)} to redefine \code{zlim}.
+#' @param color A vector of colours specifying the palette to use for mapping expression values to colours. 
+#' This defaults to the default setting in \code{\link[pheatmap]{pheatmap}}.
+#' @param colour_columns_by A list of values specifying how the columns should be annotated with colours.
+#' Each entry of the list can be of the form described by \code{?"\link{scater-vis-var}"}.
+#' A character vector can also be supplied and will be treated as a list of strings.
 #' @param ... Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.
 #'
-#' @details Setting \code{center=TRUE} is useful for examining log-fold 
-#' changes of each cell's expression profile from the average across all cells.
-#' This avoids issues with the entire row appearing a certain colour because
-#' the gene is highly/lowly expressed across all cells.
+#' @details Setting \code{center=TRUE} is useful for examining log-fold changes of each cell's expression profile from the average across all cells.
+#' This avoids issues with the entire row appearing a certain colour because the gene is highly/lowly expressed across all cells.
 #'
-#' Setting \code{zlim} preserves the dynamic range of colours in the presence 
-#' of outliers. Otherwise, the plot may be dominated by a few genes,
-#' which will \dQuote{flatten} the observed colours for the rest of the heatmap.
+#' Setting \code{zlim} preserves the dynamic range of colours in the presence  of outliers. 
+#' Otherwise, the plot may be dominated by a few genes, which will \dQuote{flatten} the observed colours for the rest of the heatmap.
 #'
-#' @return A heatmap is produced on the current graphics device. The output
-#' of \code{\link[pheatmap]{pheatmap}} is invisibly returned.
+#' @return A heatmap is produced on the current graphics device. 
+#' The output of \code{\link[pheatmap]{pheatmap}} is invisibly returned.
 #'
 #' @seealso \code{\link[pheatmap]{pheatmap}}
 #'
