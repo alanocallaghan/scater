@@ -9,7 +9,7 @@
 \alias{plotMDS}
 \alias{plotPCA,SingleCellExperiment-method}
 \alias{plotPCA}
-\title{Plot specific reduced dimensions for a SingleCellExperiment object}
+\title{Plot specific reduced dimensions}
 \usage{
 plotPCASCE(object, ..., return_SCE = FALSE, draw_plot = TRUE,
   rerun = FALSE, ncomponents = 2, run_args = list())
@@ -107,4 +107,7 @@ plotMDS(example_sce)
 \code{\link{runTSNE}}, 
 \code{\link{runMDS}},
 \code{\link{plotReducedDim}}
+}
+\author{
+Davis McCarthy, with modifications by Aaron Lun
 }

@@ -49,6 +49,7 @@ The scheme is mostly the same as described above, with a few differences:
 Visualization will then use the expression profile for all features in that cell.
 This tends to be a rather unusual choice for colouring, but we will not judge.
 \item Named character strings should use \code{"Cell"} instead of \code{"Feature"}.
+\item A data frame input should have number of rows equal to the number of features.
 }
 }
 

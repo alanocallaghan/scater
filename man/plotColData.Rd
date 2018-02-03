@@ -4,7 +4,7 @@
 \alias{plotColData}
 \alias{plotPhenoData}
 \alias{plotCellData}
-\title{Plot cell phenotype data from an SingleCellExperiment object}
+\title{Plot column metadata}
 \usage{
 plotColData(object, y, x = NULL, colour_by = NULL, shape_by = NULL,
   size_by = NULL, exprs_values = "logcounts", ...)
@@ -28,13 +28,15 @@ Again, only metadata fields will be searched, \code{assays} will not be used.}
 
 \item{size_by}{Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values.}
 
+\item{exprs_values}{A string or integer scalar specifying the assay to obtain expression values for colouring or shaping or sizing points by.}
+
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }
 \value{
 A ggplot object.
 }
 \description{
-Plot cell phenotype data from an SingleCellExperiment object
+Plot column-level (i.e., cell) metadata in an SingleCellExperiment object.
 }
 \details{
 If \code{y} is continuous and \code{x=NULL}, a violin plot is generated.
@@ -76,4 +78,7 @@ plotColData(example_sce, y = "Mutation_Status",
 plotColData(example_sce, y = "Mutation_Status", 
    x = "Cell_Cycle", colour_by = "Mutation_Status",
    size_by = "Gene_0001", shape_by = "Treatment")
+}
+\author{
+Davis McCarthy, with modifications by Aaron Lun
 }
