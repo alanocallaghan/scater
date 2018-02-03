@@ -160,7 +160,7 @@ test_that("we can produce expression plots with different expression values", {
                                colour = "Treatment"),  is_a("ggplot"))
     expect_error(plotExpression(example_sce, rownames(example_sce)[1:6],
                                x = "Mutation_Status", exprs_values = "silly", 
-                               colour = "Treatment"), "not found")
+                               colour = "Treatment"), "not in names")
     
 })
 
@@ -219,8 +219,8 @@ test_that("we can produce plots showing cells in plate position", {
                                   colour_by = "Gene_0004"), is_a("ggplot"))
     example_sce$plate_position <- NULL
     expect_that(plotPlatePosition(example_sce, 
-                                  y_position = rep(1:5, each = 8), 
-                                  x_position = rep(1:8, 5), 
+                                  list(column=rep(1:8, 5), 
+                                       row=rep(1:5, each = 8)), 
                                   colour_by = "Gene_0004"), is_a("ggplot"))
     
 })
@@ -235,33 +235,29 @@ test_that("we can produce plots for metadata", {
         calculateCPM(example_sce, use_size_factors = FALSE) + 1)
     example_sce <- calculateQCMetrics(example_sce)
     
-    expect_that(plotPhenoData(example_sce, 
-                              aesth = aes_string(x = "log10(total_counts)",
-    y = "total_features", colour = "Mutation_Status")), is_a("ggplot"))
+    expect_that(plotColData(example_sce, x = "total_counts",
+        y = "total_features_by_counts", colour = "Mutation_Status"), is_a("ggplot"))
 
-    expect_that(plotColData(example_sce, aesth = aes_string(x = "log10(total_counts)",
-    y = "total_features", colour = "Mutation_Status")), is_a("ggplot"))
+    expect_that(plotColData(example_sce, x = "total_counts",
+        y = "total_features_by_counts", colour = "Mutation_Status"), is_a("ggplot"))
 
-    expect_that(plotCellData(example_sce, aesth = aes_string(x = "log10(total_counts)",
-    y = "total_features", colour = "Mutation_Status")), is_a("ggplot"))
+    expect_that(plotColData(example_sce, x = "total_counts",
+        y = "total_features_by_counts", colour = "Mutation_Status"), is_a("ggplot"))
     
-    expect_that(plotPhenoData(example_sce, aesth = aes_string(x = "log10(total_counts)",
-    y = "total_features", colour = "Mutation_Status")), is_a("ggplot"))
+    expect_that(plotColData(example_sce, x = "total_counts",
+        y = "total_features_by_counts", colour = "Mutation_Status"), is_a("ggplot"))
 
-    expect_that(plotColData(example_sce, aesth = aes_string(x = "log10(total_counts)",
-    y = "total_features", colour = "Mutation_Status")), is_a("ggplot"))
+    expect_that(plotColData(example_sce, x = "total_counts",
+        y = "total_features_by_counts", colour = "Mutation_Status"), is_a("ggplot"))
 
-    expect_that(plotCellData(example_sce, aesth = aes_string(x = "log10(total_counts)",
-    y = "total_features", colour = "Mutation_Status")), is_a("ggplot"))
+    expect_that(plotColData(example_sce, x = "total_counts",
+        y = "total_features_by_counts", colour = "Mutation_Status"), is_a("ggplot"))
 
-    expect_that(plotFeatureData(
-        example_sce, aesth = aes(x = n_cells_counts, y = log10_total_counts)),
-        is_a("ggplot"))
+    expect_that(plotRowData(example_sce, x = "n_cells_by_counts", 
+        y = "log10_total_counts"), is_a("ggplot"))
 
-    expect_that(plotRowData(
-        example_sce, aesth = aes(x = n_cells_counts, y = log10_total_counts)),
-        is_a("ggplot"))
-    
+    expect_that(plotRowData(example_sce, x = "n_cells_by_counts", 
+        y = "log10_total_counts"), is_a("ggplot"))
 })
 
 test_that("plotExprsVsTxLength works as expected", {
@@ -310,18 +306,12 @@ test_that("plotExprsVsTxLength works as expected", {
   
     dimnames(mat) <- dimnames(example_sce)
     assay(example_sce, "tx_len") <- mat
-    p1 <-  plotExprsVsTxLength(example_sce, "tx_len", show_smooth = TRUE,
-                               show_exprs_sd = TRUE)
+    p1 <-  plotExprsVsTxLength(example_sce, "tx_len", length_is_assay = TRUE,
+                               show_smooth = TRUE, show_exprs_sd = TRUE)
     expect_that(p1, is_a("ggplot"))
     
     ## using a vector of tx length values
-    p1 <- plotExprsVsTxLength(example_sce, rnorm(2000, mean = 5000, sd = 500))
+    p1 <- plotExprsVsTxLength(example_sce, data.frame(Length=rnorm(2000, mean = 5000, sd = 500)))
     expect_that(p1, is_a("ggplot"))
-    
-    ## test errors
-    expect_error(plotExprsVsTxLength(example_sce, "foot"), 
-                 "should specify a column")
-    expect_error(plotExprsVsTxLength(example_sce, 1:10), 
-                 "must have length equal")
 })
 

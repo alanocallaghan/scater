@@ -1,80 +1,64 @@
-## Suite of utilities to help with plotting.
+#' Variable selection for visualization
+#'
+#' A number of \pkg{scater} functions accept a SingleCellExperiment object and extract (meta)data from it for use in a plot.
+#' These values are then used on the x- or y-axes (e.g., \code{\link{plotColData}}) or for tuning visual parameters, e.g.,
+#' \code{colour_by}, \code{shape_by}, \code{size_by}.
+#' This page describes how the selection of these values can be controlled by the user,
+#' by passing appropriate values to the arguments of the desired plotting function.
+#' 
+#' @section When plotting by cells:
+#' Here, we assume that each visual feature of interest (e.g., point or line) corresponds to a cell in the SingleCellExperiment object \code{sce}.
+#' We will also assume that the user wants to change the colour of each feature according to the cell (meta)data.
+#' To do so, the user can pass to \code{colour_by}:
+#' \itemize{
+#' \item An unnamed character string.
+#' This is initially assumed to be the name of a column-level metadata field.
+#' The function will first search the column names of \code{colData(sce)}, and extract metadata for all cells if a matching field is found.
+#' If no match is found, the function will assume that the string represents a gene name.
+#' It will search \code{rownames(sce)} and extract gene expression values for any matching row across all cells.
+#' Otherwise, an error is raised.
+#' \item A named character string, where the name is either \code{"Feature"} or \code{"Metadata"}.
+#' This forces the function to only search for the name in \code{rownames(sce)} or \code{colnames(colData(sce))}, respectively.
+#' Adding an explicit name is useful when the same field exists in both the row names and column metadata names.
+#' \item A character vector of length greater than 1.
+#' This will search for nested fields in \code{colData(sce)}.
+#' For example, supplying a character vector \code{c("A", "B", "C")} will retrieve \code{colData(sce)$A$B$C}, 
+#' where both \code{A} and \code{B} contain nested DataFrames.
+#' See \code{\link{calculateQCMetrics}} with \code{compact=TRUE} for an example of how these can be formed.
+#' \item A data frame with one column and number of rows equal to the number of cells.
+#' This should contain values to use for visualization (in this case, for colouring by).
+#' In this manner, the user can use new information without manually adding it to the SingleCellExperiment object.
+#' The column name of the data frame will be used in the legend.
+#' }
+#' Of course, the same logic applies for other visualization parameters such as \code{shape_by} and \code{size_by}.
+#' Other arguments may also use the same scheme, but this depends on the context; see the documentation for each function for details.
+#' 
+#' @section When plotting by features:
+#' Here, we assume that each visual feature of interest (e.g., point or line) corresponds to a feature in the SingleCellExperiment object \code{sce}.
+#' The scheme is mostly the same as described above, with a few differences:
+#' \itemize{
+#' \item \code{rowData} is used instead of \code{colData}, as we are extracting metadata for each feature.
+#' \item When extracting expression values, the name of a single cell must be specified.
+#' Visualization will then use the expression profile for all features in that cell.
+#' This tends to be a rather unusual choice for colouring, but we will not judge.
+#' \item Named character strings should use \code{"Cell"} instead of \code{"Feature"}.
+#' \item A data frame input should have number of rows equal to the number of features.
+#' }
+#'
+#' @name scater-vis-var
+#'
+#' @seealso
+#' \code{\link{plotColData}}, 
+#' \code{\link{plotRowData}}, 
+#' \code{\link{plotReducedDim}}, 
+#' \code{\link{plotExpression}}, 
+#' \code{\link{plotPlatePosition}},
+#' and most other plotting functions.
+NULL
 
-.get_palette <- function(palette_name) 
-# Function to define color palettes.
-{
-    switch(palette_name,
-           tableau20 = c("#1F77B4", "#AEC7E8", "#FF7F0E", "#FFBB78", "#2CA02C",
-                         "#98DF8A", "#D62728", "#FF9896", "#9467BD", "#C5B0D5",
-                         "#8C564B", "#C49C94", "#E377C2", "#F7B6D2", "#7F7F7F",
-                         "#C7C7C7", "#BCBD22", "#DBDB8D", "#17BECF", "#9EDAE5"),
-           tableau10medium = c("#729ECE", "#FF9E4A", "#67BF5C", "#ED665D",
-                               "#AD8BC9", "#A8786E", "#ED97CA", "#A2A2A2",
-                               "#CDCC5D", "#6DCCDA"),
-           colorblind10 = c("#006BA4", "#FF800E", "#ABABAB", "#595959",
-                            "#5F9ED1", "#C85200", "#898989", "#A2C8EC",
-                            "#FFBC79", "#CFCFCF"),
-           trafficlight = c("#B10318", "#DBA13A", "#309343", "#D82526",
-                            "#FFC156", "#69B764", "#F26C64", "#FFDD71",
-                            "#9FCD99"),
-           purplegray12 = c("#7B66D2", "#A699E8", "#DC5FBD", "#FFC0DA",
-                            "#5F5A41", "#B4B19B", "#995688", "#D898BA",
-                            "#AB6AD5", "#D098EE", "#8B7C6E", "#DBD4C5"),
-           bluered12 = c("#2C69B0", "#B5C8E2", "#F02720", "#FFB6B0", "#AC613C",
-                         "#E9C39B", "#6BA3D6", "#B5DFFD", "#AC8763", "#DDC9B4",
-                         "#BD0A36", "#F4737A"),
-           greenorange12 = c("#32A251", "#ACD98D", "#FF7F0F", "#FFB977",
-                             "#3CB7CC", "#98D9E4", "#B85A0D", "#FFD94A",
-                             "#39737C", "#86B4A9", "#82853B", "#CCC94D"),
-           cyclic = c("#1F83B4", "#1696AC", "#18A188", "#29A03C", "#54A338",
-                      "#82A93F", "#ADB828", "#D8BD35", "#FFBD4C", "#FFB022",
-                      "#FF9C0E", "#FF810E", "#E75727", "#D23E4E", "#C94D8C",
-                      "#C04AA7", "#B446B3", "#9658B1", "#8061B4", "#6F63BB")
-    )
-}
-
-.resolve_plot_colours <- function(plot_out, colour_by, colour_by_name, fill = FALSE) 
-# Get nice plotting colour schemes for very general colour variables
-{
-    if ( is.null(colour_by) ) {
-        return(plot_out)
-    }
-
-    # Picking whether to fill or not.
-    if ( fill ) {
-        VIRIDFUN <- viridis::scale_fill_viridis
-        SCALEFUN <- scale_fill_manual
-    } else {
-        VIRIDFUN <- viridis::scale_color_viridis
-        SCALEFUN <- scale_color_manual
-    }
-
-    # Set a sensible colour scheme and return the plot_out object
-    if ( is.numeric(colour_by) ) {
-        plot_out <- plot_out + VIRIDFUN(name = colour_by_name)
-    } else {
-        nlevs_colour_by <- nlevels(as.factor(colour_by))
-        if (nlevs_colour_by <= 10) {
-            plot_out <- plot_out + SCALEFUN(
-                values = .get_palette("tableau10medium"),
-                name = colour_by_name)
-        } else {
-            if (nlevs_colour_by > 10 && nlevs_colour_by <= 20) {
-                plot_out <- plot_out + SCALEFUN(
-                    values = .get_palette("tableau20"),
-                    name = colour_by_name)
-            } else {
-                plot_out <- plot_out + VIRIDFUN(
-                    name = colour_by_name, discrete = TRUE)
-            }
-        }
-    }
-    plot_out
-}
-
-.choose_vis_values <- function(x, by, mode=c("column", "row"), 
-    check_metadata=TRUE, check_features=FALSE,
-    exprs_values = "logcounts", coerce_factor = FALSE, level_limit = NA) 
+.choose_vis_values <- function(x, by, mode=c("column", "row"), search=c("any", "metadata", "feature"),
+                               exprs_values = "logcounts", coerce_factor = FALSE, level_limit = NA,
+                               discard_solo = FALSE) 
 # This function looks through the visualization data and returns the
 # values to be visualized. Either 'by' itself, or a column of colData,
 # or a column of rowData, or the expression values of a feature.
@@ -82,7 +66,37 @@
     vals <- NULL
     if (is.character(by)) {
         mode <- match.arg(mode)
+        search <- match.arg(search)
 
+        # Determining what to check, based on input 'by'.
+        if (search=="any") { 
+            check_metadata <- check_features <- TRUE
+
+            if (length(by)==0) {
+                check_metadata <- FALSE 
+                check_features <- FALSE
+            } else if (length(by)>1) {
+                check_metadata <- TRUE
+                check_features <- FALSE
+            } else if (length(by)==1L) {
+                cur_name <- names(by)
+                if (!is.null(cur_name) && !is.na(cur_name)) { 
+                    if (cur_name=="Metadata") {
+                        check_features <- FALSE
+                        check_metadata <- TRUE
+                    } else if ((mode=="column" && cur_name=="Feature")
+                               || (mode=="row" && cur_name=="Cell")) {
+                        check_features <- TRUE
+                        check_metadata <- FALSE
+                    } 
+                }
+            }
+        } else {
+            check_metadata <- (search=="metadata")
+            check_features <- !check_metadata            
+        }
+           
+        # Checking the metadata; note the loop to account for nesting.
         if (check_metadata) { 
             if (mode=="column") {
                 meta_data <- colData(x)
@@ -90,21 +104,19 @@
                 meta_data <- rowData(x)
             }
             
-            # Looped to account for nesting.
-            for (x in by) {
-                if (!x %in% colnames(meta_data)) {
+            for (field in by) {
+                if (!field %in% colnames(meta_data)) {
                     break
                 }
-                cur_val <- meta_data[[x]]
-                metadata <- cur_val
+                vals <- meta_data[[field]]
+                metadata <- vals
             }
+            by <- paste(by, collapse=":") # collapsing to a single string for output.
         }
 
+        # Metadata takes priority, so we don't bother searching if 'vals' is non-NULL.
         if (check_features) {
-            if (length(by)!=1) {
-                stop("'*_by' for feature names should be a character vector of length 1") 
-            }
-            if (is.null(vals) && by %in% rownames(x)) {
+            if (is.null(vals)){
                 exprs <- assay(x, i = exprs_values)
                 if (mode=="column") {
                     vals <- exprs[by,] # coloring columns, so we take the row values.
@@ -114,11 +126,19 @@
             }
         }
 
+        if (is.null(vals) && (check_metadata || check_features)) {
+            stop("cannot find the supplied '*_by' in features or metadata")
+        }
     } else if (is.data.frame(by)) {
         if (ncol(by) != 1L) {
             stop("'*_by' should be a data frame with one column")
-        } else if (nrow(by) != ncol(x)) {
-            stop("'nrow(*_by)' should be equal to number of columns in 'x'")
+        } else {
+            if (mode=="column" && nrow(by) != ncol(x)) {
+                stop("'nrow(*_by)' should be equal to number of columns in 'x'")
+            }
+            if (mode=="row" && nrow(by) != nrow(x)) {
+                stop("'nrow(*_by)' should be equal to number of rows in 'x'")
+            }
         }
 
         ## Allow arbitrary values to be specified.
@@ -136,10 +156,45 @@
             stop(sprintf("number of unique levels exceeds %i", level_limit))
         }
     }
-
+    
+    # If only one level for the variable, set to NULL.
+    if (length(unique(vals))<=1L && discard_solo) { 
+        by <- NULL
+        vals <- NULL
+    }
     return(list(name = by, val = vals))
 }
 
+.incorporate_common_vis <- function(df, se, mode, colour_by, size_by, shape_by, by_exprs_values, legend='auto') 
+# A convenience wrapper to incorporate colour, size and shape arguments into the data.frame for plotting.
+# Do NOT use the supplied names to name fields in 'df', as these may clash with internal names.
+{
+    legend <- match.arg(legend, c("auto", "none", "all"))
+    discard_solo <- legend=="auto"
+
+    ## check colour argument:
+    colour_by_out <- .choose_vis_values(se, colour_by, mode = mode, search = "any", discard_solo = discard_solo,
+                                        exprs_values = by_exprs_values)
+    colour_by <- colour_by_out$name
+    df$colour_by <- colour_by_out$val
+
+    ## check shape argument (note the limiter):
+    shape_by_out <- .choose_vis_values(se, shape_by, mode = mode, search = "any",  discard_solo = discard_solo,
+                                       exprs_values = by_exprs_values, coerce_factor = TRUE, level_limit = 10)
+    shape_by <- shape_by_out$name
+    df$shape_by <- shape_by_out$val
+
+    ## check size argument:
+    size_by_out <- .choose_vis_values(se, size_by, mode = mode, search = "any", discard_solo = discard_solo,
+                                      exprs_values = by_exprs_values)
+    size_by <- size_by_out$name
+    df$size_by <- size_by_out$val
+
+    return(list(df=df, colour_by = colour_by, shape_by = shape_by, size_by = size_by, legend = legend))
+}
+
+################################################
+## Creating pair plots.
 
 .makePairs <- function(data_matrix) 
 # with thanks to Gaston Sanchez, who posted this code online
