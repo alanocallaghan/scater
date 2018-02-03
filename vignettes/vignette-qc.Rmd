@@ -136,8 +136,8 @@ These two metadata variables can be plotted against each other as shown below.
 We take advantage of the `r CRANpkg("ggplot2")` semantics to fine-tune the plot aesthetics and to add a smoothing curve:
 
 ```{r plot-pdata-pct-exprs-controls}
-plotPhenoData(example_sce, aes(x = total_features_by_counts,
-    y = pct_counts_feature_control, colour = Mutation_Status)) +
+plotColData(example_sce, x = "total_features_by_counts",
+    y = "pct_counts_feature_control", colour = "Mutation_Status") +
     theme(legend.position = "top") +
     stat_smooth(method = "lm", se = FALSE, size = 2, fullrange = TRUE)
 ```
@@ -184,18 +184,18 @@ The same approach can be used with experimental factors to determine whether cel
 Two feature metadata variables can be easily plotted against each other using the `plotFeatureData` function:
 
 ```{r plot-fdata}
-plotFeatureData(example_sce, aes(x = n_cells_by_counts, y = mean_counts))
+plotRowData(example_sce, x = "n_cells_by_counts", y = "mean_counts")
 ```
 
 The `multiplot` function also allows multiple plots to be generated on the same page, as demonstrated below.
 
 ```{r plot-pdata-2, fig.wide=TRUE, fig.asp=0.3}
-p1 <- plotPhenoData(example_sce, aes(x = total_counts, 
-    y = total_features_by_counts))
-p2 <- plotPhenoData(example_sce, aes(x = pct_counts_feature_control,
-    y = total_features_by_counts))
-p3 <- plotPhenoData(example_sce, aes(x = pct_counts_feature_control,
-    y = pct_counts_top_50_features))
+p1 <- plotColData(example_sce, x = "total_counts", 
+    y = "total_features_by_counts")
+p2 <- plotColData(example_sce, x = "pct_counts_feature_control",
+    y = "total_features_by_counts")
+p3 <- plotColData(example_sce, x = "pct_counts_feature_control",
+    y = "pct_counts_top_50_features")
 multiplot(p1, p2, p3, cols = 3)
 ```
 
@@ -265,9 +265,9 @@ This will identify cells that have substantially different QC metrics from the o
 We can visualize any outliers using a principal components plot as shown below:
 
 ```{r plot-pca-outlier}
-example_sce <- runPCA(example_sce, pca_data_input = "coldata", 
+example_sce <- runPCA(example_sce, use_coldata = TRUE,
     detect_outliers = TRUE)
-plotPCA(example_sce)
+plotReducedDim(example_sce, use_dimred="PCA_coldata")
 ```
 
 Column subsetting can then be performed based on the `$outlier` slot, which indicates whether or not each cell has been designated as an outlier. 
