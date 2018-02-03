@@ -1,44 +1,28 @@
 #' Plot an overview of expression for each cell
 #'
-#' Plot the relative proportion of the library accounted for by the most highly
-#' expressed features for each cell for a \code{SingleCellExperiment} object. 
+#' Plot the relative proportion of the library size that is accounted for by the most highly expressed features for each cell in a SingleCellExperiment object. 
 #'
-#' @param x a \code{SingleCellExperiment} object
-#' @param block1 character string defining the column of \code{colData(object)} to
-#' be used as a factor by which to separate the cells into blocks (separate
-#' panels) in the plot. Default is \code{NULL}, in which case there is no
-#' blocking.
-#' @param block2 character string defining the column of \code{colData(object)} to
-#' be used as a factor by which to separate the cells into blocks (separate
-#' panels) in the plot. Default is \code{NULL}, in which case there is no
-#' blocking.
-#' @param colour_by character string defining the column of \code{colData(object)} to
-#' be used as a factor by which to colour the points in the plot. Alternatively,
-#' a data frame with one column containing a value for each cell, which will be
-#' mapped to a corresponding colour.
-#' @param nfeatures numeric scalar indicating the number of features to include
-#' in the plot.
-#' @param exprs_values character string indicating which values should be used
-#' as the expression values for this plot. Valid arguments are \code{"tpm"}
-#' (transcripts per million), \code{"counts"} (raw counts) [default], \code{"cpm"}
-#' (counts per million), or \code{"fpkm"} (FPKM values).
-#' @param linewidth numeric scalar giving the "size" parameter (in ggplot2
-#' parlance) for the lines plotted. Default is 1.5.
-#' @param ... arguments passed to \code{plotSCE}
-#' @param ncol number of columns to use for \code{facet_wrap} if only one block is
-#' defined.
-#' @param theme_size numeric scalar giving font size to use for the plotting
-#' theme
+#' @param x A SingleCellExperiment object.
+#' @param block1 Specification of a factor by which to separate the cells into blocks (separate panels) in the plot. 
+#' This can be any type of value described in \code{?"\link{scater-vis-var}"} for column-level metadata.
+#' Default is \code{NULL}, in which case there is no blocking.
+#' @param block2 Same as \code{block1}, providing another level of blocking.
+#' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' The curve for each cell will be coloured according to this specification.
+#' @param nfeatures Numeric scalar indicating the number of top-expressed features to show n the plot.
+#' @param exprs_values String or integer scalar indicating which assay of \code{object} should be used to obtain the expression values for this plot. 
+#' @param ncol Number of columns to use for \code{\link{facet_wrap}} if only one block is defined.
+#' @param line_width Numeric scalar specifying the line width.
+#' @param theme_size Numeric scalar specifying the font size to use for the plotting theme.
 #'
-#' @details Plots produced by this function are intended to provide an overview
-#' of large-scale differences between cells. For each cell, the features are
-#' ordered from most-expressed to least-expressed and the cumulative proportion
-#' of the total expression for the cell is computed across the top
-#' \code{nfeatures} features. These plots can flag cells with a very high
-#' proportion of the library coming from a small number of features; such cells
-#' are likely to be problematic for analyses. Using the colour and blocking
-#' arguments can flag overall differences in cells under different experimental
-#' conditions or affected by different batch and other variables.
+#' @details 
+#' For each cell, the features are ordered from most-expressed to least-expressed.
+#' The cumulative proportion of the total expression for the cell is computed across the top \code{nfeatures} features. 
+#' These plots can flag cells with a very high proportion of the library coming from a small number of features; such cells are likely to be problematic for downstream analyses.
+#' 
+#' Using the colour and blocking arguments can flag overall differences in cells under different experimental conditions or affected by different batch and other variables.
+#' If only one of \code{block1} and \code{block2} are specified, each panel corresponds to a separate level of the specified blocking factor.
+#' If both are specified, each panel corresponds to a combination of levels.
 #'
 #' @return a ggplot plot object
 #'
@@ -66,7 +50,7 @@
 #'
 plotScater <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
                     nfeatures = 500, exprs_values = "counts", ncol = 3,
-                    linewidth = 1.5, theme_size = 10)
+                    line_width = 1.5, theme_size = 10)
 {
     if (!is(x, "SingleCellExperiment")) {
         stop("x must be of class SingleCellExperiment")
@@ -109,7 +93,7 @@ plotScater <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
         aes$colour <- as.symbol("colour_by")
     }
     plot_out <- ggplot(seq_real_estate_long, aes) +
-        geom_line(linetype = "solid", alpha = 0.3, size = linewidth)
+        geom_line(linetype = "solid", alpha = 0.3, size = line_width)
 
     ## Deal with blocks for grid
     if (!is.null(block1) && !is.null(block2)) {
