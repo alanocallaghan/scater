@@ -56,7 +56,7 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
        feature_set = NULL, scale_features = TRUE, use_coldata = FALSE,
        selected_variables = NULL, detect_outliers = FALSE) {
 
-    if ( pca_data_input == "pdata" || pca_data_input == "coldata" ) {
+    if ( use_coldata ) {
         ## select pData features to use
         if ( is.null(selected_variables) ) {
             selected_variables <- c("pct_counts_top_100_features",

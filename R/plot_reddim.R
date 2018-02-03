@@ -148,8 +148,7 @@ setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
 # from having running arguments in "..." to plotting arguments in "...". It can
 # be removed in the next development cycle. 
 {
-    plot_arg_names <- union(names(formals(plotReducedDim)), 
-                            names(formals(plotReducedDimDefault)))
+    plot_arg_names <- Reduce(union, list(names(formals(plotReducedDim)), formals(.central_plotter), formals(paired_reddim_plot)))
     extra_args <- list(...)
     for_plotting <- !is.na(pmatch(names(extra_args), plot_arg_names))
     if (!all(for_plotting)) { 
