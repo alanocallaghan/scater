@@ -26,6 +26,8 @@
 #' A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} diffusion map components for each cell.
 #' This is stored in the \code{"DiffusionMap"} entry of the \code{reducedDims} slot.
 #'
+#' @author Aaron Lun, based on code by Davis McCarthy
+#'
 #' @export
 #' @rdname runDiffusionMap
 #' @seealso 

@@ -153,6 +153,8 @@
 #' 
 #' @return A SingleCellExperiment object containing QC metrics in the row and column metadata.
 #'
+#' @author Davis McCarthy, with (many!) modifications by Aaron Lun
+#'
 #' @importFrom Biobase exprs
 #' @importFrom stats cmdscale coef mad median model.matrix nls prcomp quantile var dist
 #' @importFrom methods is new
