@@ -1,35 +1,24 @@
 #' Plot reduced dimension representation of cells
 #'
-#' @param object an \code{SingleCellExperiment} object with a non-NULL \code{reducedDimension}
-#' slot.
-#' @param use_dimred character, name of reduced dimension representation of cells
-#' stored in \code{SingleCellExperiment} object to plot (e.g. "PCA", "TSNE", etc).
-#' @param ncomponents numeric scalar indicating the number of principal
-#' components to plot, starting from the first principal component. Default is
-#' 2. If \code{ncomponents} is 2, then a scatterplot of Dimension 2 vs Dimension
-#' 1 is produced. If \code{ncomponents} is greater than 2, a pairs plots for the
-#'  top dimensions is produced.
-#' @param colour_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to colour the points in the plot. Alternatively, a
-#' data frame with one column containing values to map to colours for all cells.
-#' @param shape_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to define the shape of the points in the plot.
-#' @param size_by character string defining the column of \code{pData(object)} to
-#' be used as a factor by which to define the size of points in the plot.
-#' @param percentVar numeric vector giving the proportion of variance in
-#' expression explained by each reduced dimension. Only expected to be used
-#' internally in the \code{\link[scater]{plotPCA}} function.
-#' @param exprs_values a string specifying the expression values to use for
-#' colouring the points, if \code{colour_by} or \code{size_by} are set as feature names.
-#' @param theme_size numeric scalar giving default font size for plotting theme
-#' (default is 10).
-#' @param legend character, specifying how the legend(s) be shown? Default is
-#' \code{"auto"}, which hides legends that have only one level and shows others.
-#' Alternatives are "all" (show all legends) or "none" (hide all legends).
-#' @param add_ticks logical scalar indicating whether ticks should be drawn
-#' on the axes corresponding to the location of each point.
+#' @param object A SingleCellExperiment object.
+#' @param use_dimred A string or integer scalar indicating the reduced dimension result in \code{reducedDims(object)} to plot.
+#' @param ncomponents A numeric scalar indicating the number of dimensions to plot, starting from the first dimension.
+#' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param legend String specifying how the legend(s) be shown, see \code{?"\link{scater-plot-args}"} for details.
+#' @param exprs_values A string or integer scalar specifying the assay from which to obtain expression values for colouring, sizing or shaping the points.
+#' @param legend String specifying how the legend(s) be shown, see \code{?"\link{scater-plot-args}"} for details.
+#' @param percentVar A numeric vector giving the proportion of variance in expression explained by each reduced dimension. 
+#' Only expected to be used internally in the \code{\link[scater]{plotPCA}} function.
+#' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
+#' @param add_ticks Logical scalar indicating whether ticks should be drawn on the axes corresponding to the location of each point.
 #'
-#' @return A ggplot plot object
+#' @details
+#' If \code{ncomponents} is 2, then a scatterplot of the first two dimensions is produced. 
+#' If \code{ncomponents} is greater than 2, a pairs plots for the top dimensions is produced.
+#'
+#' @return A ggplot object
 #'
 #' @name plotReducedDim
 #' @aliases plotReducedDim 
@@ -51,19 +40,19 @@
 #' plotReducedDim(example_sce, "PCA")
 #' plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle")
 #' plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", shape_by="Treatment")
-#' plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", size_by="Gene_0001")
+#'
+#' plotReducedDim(example_sce, "PCA", colour_by="Gene_0001")
 #' plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", 
 #'    shape_by="Mutation_Status", size_by="Gene_0001")
 #'
 #' plotReducedDim(example_sce, "PCA", ncomponents=5)
 #' plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle", 
 #'     shape_by="Treatment")
-#' plotReducedDim(example_sce, "PCA", colour_by="Gene_0001")
 #'
 plotReducedDim <- function(object, use_dimred, ncomponents = 2,
                            colour_by = NULL, shape_by = NULL, size_by = NULL,
-                           exprs_values = "logcounts", percentVar = NULL, 
-                           legend = "auto", ..., add_ticks=TRUE) 
+                           exprs_values = "logcounts", 
+                           legend = "auto", percentVar = NULL, ..., add_ticks=TRUE) 
 {
     ## Extract reduced dimension representation of cells
     red_dim <- reducedDim(object, use_dimred)
