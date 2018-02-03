@@ -14,11 +14,11 @@
 #' This will be deprecated in the next release in favour of directly calling the underlying \code{run*} functions to compute the results.
 #' @param draw_plot Logical, should the plot be drawn on the current graphics device? 
 #' Only used if \code{return_SCE} is \code{TRUE}, otherwise the plot is always produced.
-#' @param run_args Arguments to pass to \code{\link{runPCA}} when \code{rerun=TRUE} or if there is no existing result in the \code{reducedDims} slot.
+#' @param run_args Arguments to pass to \code{\link{runPCA}}.
 #'
 #' @details 
 #' Each function will search the \code{\link{reducedDims}} slot for an appropriately named set of results and pass those coordinates onto \code{\link{plotReducedDim}}.
-#' If the results are not present, they will be computed using the relevant \code{run*} function.
+#' If the results are not present or \code{rerun=TRUE}, they will be computed using the relevant \code{run*} function.
 #' The result name and \code{run*} function for each \code{plot*} function are:
 #' \itemize{
 #' \item \code{"PCA"} and \code{\link{runPCA}} for \code{plotPCA}
@@ -26,15 +26,19 @@
 #' \item \code{"DiffusionMap"} and \code{\link{runDiffusionMap}} for \code{plotDiffusionMap}
 #' \item \code{"MDS"} and \code{\link{runMDS}} for \code{"plotMDS"}
 #' }
-#' Users can specify arguments to \code{\link{run*}} functions in \code{...}. 
+#' Users can specify arguments to the \code{run*} functions via \code{run_args}. 
 #'
-#' @return A ggplot plot object or an SingleCellExperiment object, depending on \code{return_SCE}.
+#' @return A ggplot object or an SingleCellExperiment object, depending on \code{return_SCE}.
 #'
-#' @name plotPCA 
-#' @rdname plotPCA
+#' @name Reduced dimension plots
+#' @rdname plot_reddim
 #' @aliases plotPCASCE
 #' @importFrom BiocGenerics plotPCA
-#' @seealso \code{\link{runPCA}} \code{\link{runDiffusionMap}} \code{\link{runTSNE}} \code{\link{runMDS}} \code{\link{plotReducedDim}}
+#' @seealso \code{\link{runPCA}},
+#' \code{\link{runDiffusionMap}}, 
+#' \code{\link{runTSNE}}, 
+#' \code{\link{runMDS}},
+#' \code{\link{plotReducedDim}}
 #' @export
 #'
 #' @examples
@@ -42,7 +46,9 @@
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
 #' example_sce <- SingleCellExperiment(
-#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#'     assays = list(counts = sc_example_counts), 
+#'     colData = sc_example_cell_info
+#' )
 #' example_sce <- normalize(example_sce)
 #'
 #' ## Examples plotting PC1 and PC2
@@ -51,34 +57,24 @@
 #' plotPCA(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment")
 #' plotPCA(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment",
 #'     size_by = "Mutation_Status")
-#' plotPCA(example_sce, shape_by = "Treatment", size_by = "Mutation_Status")
-#' plotPCA(example_sce, feature_set = 1:100, colour_by = "Treatment",
-#'     shape_by = "Mutation_Status")
 #'
 #' ## Experiment with legend
 #' example_subset <- example_sce[, example_sce$Treatment == "treat1"]
-#' plotPCA(example_subset, colour_by = "Cell_Cycle", shape_by = "Treatment", legend = "all")
-#'
-#' plotPCA(example_sce, shape_by = "Treatment", return_SCE = TRUE)
+#' plotPCA(example_subset, colour_by = "Cell_Cycle", shape_by = "Treatment", 
+#'     legend = "all")
 #'
 #' ## Examples plotting more than 2 PCs
-#' plotPCA(example_sce, ncomponents = 8)
 #' plotPCA(example_sce, ncomponents = 4, colour_by = "Treatment",
-#' shape_by = "Mutation_Status")
+#'     shape_by = "Mutation_Status")
 #'
 #' ## Same for TSNE:
 #' plotTSNE(example_sce, perplexity = 10)
-#' plotTSNE(example_sce, colour_by = "Cell_Cycle", perplexity = 10)
-#' plotTSNE(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment",
-#'     size_by = "Mutation_Status", perplexity = 10)
 #'
 #' ## Same for DiffusionMaps:
 #' plotDiffusionMap(example_sce)
 #'
 #' ## Same for MDS plots:
 #' plotMDS(example_sce)
-#' plotMDS(example_sce, colour_by = "Cell_Cycle")
-#' plotMDS(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment")
 #'
 plotPCASCE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, rerun = FALSE, ncomponents = 2, run_args=list()) {
    .reddim_dispatcher(object=object, ncomponents=ncomponents, reddim_name="PCA", 
@@ -86,7 +82,7 @@ plotPCASCE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, rerun 
                       return_SCE=return_SCE, draw_plot=draw_plot)
 }
 
-#' @rdname plotPCA
+#' @rdname plot_reddim
 #' @aliases plotTSNE 
 #' @export
 plotTSNE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, rerun = FALSE, ncomponents = 2, run_args=list()) {
@@ -95,7 +91,7 @@ plotTSNE <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, rerun = 
                       return_SCE=return_SCE, draw_plot=draw_plot)
 }
 
-#' @rdname plotPCA
+#' @rdname plot_reddim
 #' @aliases plotDiffusionMap 
 #' @export
 plotDiffusionMap <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, rerun = FALSE, ncomponents = 2, run_args=list()) {
@@ -104,7 +100,7 @@ plotDiffusionMap <- function(object, ..., return_SCE = FALSE, draw_plot = TRUE, 
                       return_SCE=return_SCE, draw_plot=draw_plot)
 }
 
-#' @rdname plotPCA
+#' @rdname plot_reddim
 #' @aliases plotMDS 
 #' @export
 plotMDS <- function(object, ..., ncomponents = 2, return_SCE = FALSE, rerun = FALSE, draw_plot = TRUE, run_args=list()) {
@@ -113,7 +109,7 @@ plotMDS <- function(object, ..., ncomponents = 2, return_SCE = FALSE, rerun = FA
                       return_SCE=return_SCE, draw_plot=draw_plot)
 }
 
-#' @rdname plotPCA
+#' @rdname plot_reddim
 #' @aliases plotPCA plotPCA,SingleCellExperiment-method
 #' @export
 setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
