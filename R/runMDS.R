@@ -31,6 +31,8 @@
 #' \code{\link{cmdscale}},
 #' \code{\link[scater]{plotMDS}}
 #'
+#' @author Aaron Lun, based on code by Davis McCarthy
+#'
 #' @examples
 #' ## Set up an example SingleCellExperiment
 #' data("sc_example_counts")

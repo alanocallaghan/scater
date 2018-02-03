@@ -30,6 +30,8 @@
 #'
 #' @return A ggplot object or an SingleCellExperiment object, depending on \code{return_SCE}.
 #'
+#' @author Davis McCarthy, with modifications by Aaron Lun
+#'
 #' @name Reduced dimension plots
 #' @rdname plot_reddim
 #' @aliases plotPCASCE

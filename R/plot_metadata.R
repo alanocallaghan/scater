@@ -29,6 +29,8 @@
 #' @rdname plotColData
 #' @export
 #'
+#' @author Davis McCarthy, with modifications by Aaron Lun
+#'
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")

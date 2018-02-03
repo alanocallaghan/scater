@@ -37,6 +37,8 @@
 #' @seealso \code{\link{prcomp}}, \code{\link[scater]{plotPCA}}
 #' @export
 #'
+#' @author Aaron Lun, based on code by Davis McCarthy
+#'
 #' @examples
 #' ## Set up an example SingleCellExperiment
 #' data("sc_example_counts")

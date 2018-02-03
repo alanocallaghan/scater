@@ -25,6 +25,8 @@
 #' @return A ggplot object.
 #' @export
 #'
+#' @author Davis McCarthy, with modifications by Aaron Lun
+#'
 #' @importFrom DelayedMatrixStats rowMedians
 #' 
 #' @examples

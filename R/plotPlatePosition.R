@@ -27,6 +27,8 @@
 #'
 #' @export
 #'
+#' @author Davis McCarthy, with modifications by Aaron Lun
+#'
 #' @examples
 #' ## prepare data
 #' data("sc_example_counts")

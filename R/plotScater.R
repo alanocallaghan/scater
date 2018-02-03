@@ -31,6 +31,8 @@
 #' @importFrom reshape2 melt
 #' @export
 #'
+#' @author Davis McCarthy, with modifications by Aaron Lun
+#'
 #' @examples
 #' ## Set up an example SingleCellExperiment
 #' data("sc_example_counts")

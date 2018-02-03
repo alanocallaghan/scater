@@ -22,6 +22,8 @@
 #'
 #' @return A ggplot object
 #'
+#' @author Davis McCarthy, with modifications by Aaron Lun
+#'
 #' @name plotReducedDim
 #' @aliases plotReducedDim 
 #' @import viridis

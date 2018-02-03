@@ -38,6 +38,8 @@
 #'
 #' @return A ggplot object.
 #'
+#' @author Davis McCarthy, with modifications by Aaron Lun
+#'
 #' @name plotExpression
 #' @aliases plotExpression
 #' @import ggplot2

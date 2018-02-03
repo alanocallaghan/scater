@@ -41,6 +41,8 @@
 #' \code{\link[scater]{plotTSNE}}
 #' @export
 #'
+#' @author Aaron Lun, based on code by Davis McCarthy
+#'
 #' @examples
 #' ## Set up an example SingleCellExperiment
 #' data("sc_example_counts")
