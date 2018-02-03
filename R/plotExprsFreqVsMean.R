@@ -61,14 +61,20 @@ plotExprsFreqVsMean <- function(object, freq_exprs = "n_cells_by_counts", mean_e
                             ...) + scale_shape_manual(values = c(1, 17)) 
     
     ## data frame with expression mean and frequency for feature controls
-    conts <- .choose_vis_values(object, controls, mode = "row", search = "metadata")$val
+    if (!is.null(controls)) { 
+        conts <- .choose_vis_values(object, controls, mode = "row", search = "metadata")$val
+    } else {
+        conts <- logical(nrow(object))
+    }
 
-    mn_vs_fq <- data.frame(mn = means, fq = freqs / 100, is_feature_control = conts)
+    mn_vs_fq <- data.frame(mn = means, fq = freqs / 100)
     text_x_loc <- min(mn_vs_fq$mn) + 0.6 * diff(range(mn_vs_fq$mn))
     
     if ( show_smooth ) {
         if ( any(conts) ) {
             tmp_tab <- mn_vs_fq[conts,]
+        } else {
+            tmp_tab <- mn_vs_fq
         }
         plot_out <- plot_out + geom_smooth(aes_string(x = "mn", y = "100 * fq"), data = tmp_tab, 
                                            colour = "firebrick", size = 1, se = show_se)
