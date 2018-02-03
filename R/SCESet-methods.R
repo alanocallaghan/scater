@@ -49,13 +49,13 @@ toSingleCellExperiment <- function(object) {
     
     new.coldata <- DataFrame(row.names = Biobase::sampleNames(object))
     pdat <- Biobase::phenoData(object)
-    for (x in varLabels(pdat)) { 
+    for (x in Biobase::varLabels(pdat)) { 
         new.coldata[[x]] <- pdat[[x]]
     }
     
     new.rowdata <- DataFrame(row.names = Biobase::featureNames(object)) 
     fdat <- Biobase::featureData(object)
-    for (x in varLabels(fdat)) { 
+    for (x in Biobase::varLabels(fdat)) { 
         new.rowdata[[x]] <- fdat[[x]]
     }
 

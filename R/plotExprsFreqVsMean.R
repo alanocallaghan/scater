@@ -3,15 +3,15 @@
 #' Plot the frequency of expression (i.e., percentage of expressing cells) against the mean expression level for each feature in a SingleCellExperiment object.
 #'
 #' @param object A SingleCellExperiment object.
-#' @param freq_exprs Specification of the row-level metadata column containing the number of expressing cells, see \code{?"\link{scater-vis-var}"} for possible values.
+#' @param freq_exprs Specification of the row-level metadata field containing the number of expressing cells per feature, see \code{?"\link{scater-vis-var}"} for possible values.
 #' Note that only metadata fields will be searched, \code{assays} will not be used.
-#' @param x Specification of the row-level metadata column containing the mean expression of each feature, see \code{?"\link{scater-vis-var}"} for possible values.
+#' @param mean_exprs Specification of the row-level metadata field containing the mean expression of each feature, see \code{?"\link{scater-vis-var}"} for possible values.
 #' Again, only metadata fields will be searched, \code{assays} will not be used.
 #' @param controls Specification of the row-level metadata column indicating whether a feature is a control, see \code{?"\link{scater-vis-var}"} for possible values.
 #' Only metadata fields will be searched, \code{assays} will not be used.
 #' @param show_smooth Logical scalar, should a smoothed fit (through feature controls if available; all features otherwise) be shown on the plot? 
 #' See \code{\link[ggplot2]{geom_smooth}} for details.
-#' @param se Logical scalar, should the standard error be shown for a smoothed fit?
+#' @param show_se Logical scalar, should the standard error be shown for a smoothed fit?
 #' @param ... Further arguments passed to \code{\link{plotRowData}}.
 #'
 #' @details 
@@ -20,6 +20,8 @@
 #' We use this curve to define the number of genes above high technical dropout and the numbers of genes that are expressed in at least 50% and at least 25% of cells. 
 #'
 #' @return A ggplot object.
+#' 
+#' @seealso \code{\link{plotRowData}}
 #'
 #' @export
 #' @examples

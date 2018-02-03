@@ -38,6 +38,7 @@
 #' }
 #'
 #' @name scater-plot-args
+#' @importFrom stats runif
 #'
 #' @seealso
 #' \code{\link{plotColData}}, 
@@ -69,12 +70,12 @@ NULL
         }
 
         # Adding violins.
-        plot_out <- ggplot(object, aes(x=X, y=Y)) + xlab(xlab) + ylab(ylab)
+        plot_out <- ggplot(object, aes_string(x="X", y="Y")) + xlab(xlab) + ylab(ylab)
         if (show_violin) {
             if (is.null(fill_by)) { 
                 viol_args <- list(fill="grey90")
             } else {
-                viol_args <- list(mapping=aes(fill=fill_by))
+                viol_args <- list(mapping=aes_string(fill="fill_by"))
             }
             plot_out <- plot_out + do.call(geom_violin, c(viol_args, list(colour = "gray60", alpha = 0.2, scale = "width")))
         }
@@ -103,7 +104,7 @@ NULL
 
     } else if (is.numeric(object$Y) && is.numeric(object$X)) { 
         # Creating a scatter plot.
-        plot_out <- ggplot(object, aes(x=X, y=Y)) + xlab(xlab) + ylab(ylab)
+        plot_out <- ggplot(object, aes_string(x="X", y="Y")) + xlab(xlab) + ylab(ylab)
 
         # Adding points.
         point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = alpha, size = size)
@@ -135,8 +136,8 @@ NULL
         object$Y <- as.integer(object$Y) + point.radius*runif(nrow(object), -1, 1)
 
         # Creating the plot:
-        plot_out <- ggplot(object, aes(x=X, y=Y)) + xlab(xlab) + ylab(ylab)
-        plot_out <- plot_out + geom_tile(aes(x = X, y = Y, height = 2*Radius, width = 2*Radius),
+        plot_out <- ggplot(object, aes_string(x="X", y="Y")) + xlab(xlab) + ylab(ylab)
+        plot_out <- plot_out + geom_tile(aes_string(x = "X", y = "Y", height = "2*Radius", width = "2*Radius"),
                                          data=summary.data, color = 'grey60', size = 0.5, fill='grey90')
 
         # Adding points.

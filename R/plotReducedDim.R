@@ -10,7 +10,6 @@
 #' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param legend String specifying how the legend(s) be shown, see \code{?"\link{scater-plot-args}"} for details.
 #' @param exprs_values A string or integer scalar specifying the assay from which to obtain expression values for colouring, sizing or shaping the points.
-#' @param legend String specifying how the legend(s) be shown, see \code{?"\link{scater-plot-args}"} for details.
 #' @param percentVar A numeric vector giving the proportion of variance in expression explained by each reduced dimension. 
 #' Only expected to be used internally in the \code{\link[scater]{plotPCA}} function.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.

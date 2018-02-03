@@ -105,8 +105,8 @@ normaliseExprs <- function(object, method = "none", design = NULL, feature_set =
 
         ## Check feature_set
         if (is.character(feature_set)) {
-            if ( !(all(feature_set %in% featureNames(object))) )
-                stop("not all 'feature_set' in 'featureNames(object)'")
+            if ( !(all(feature_set %in% rownames(object))) )
+                stop("not all 'feature_set' in 'rownames(object)'")
         }
         if ( !is.null(feature_set) )
             exprs_mat_for_norm <- exprs_mat[feature_set,]
