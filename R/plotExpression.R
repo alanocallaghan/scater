@@ -67,17 +67,17 @@
 #' ## explore options
 #' plotExpression(example_sce, 1:6, x = "Mutation_Status", exprs_values = "logcounts",
 #'     colour_by = "Cell_Cycle", show_violin = TRUE, show_median = TRUE)
-#' plotExpression(example_sce, 1:6, x = "Mutation_Status", exprs_values = "counts",
-#'     colour_by = "Cell_Cycle", show_violin = TRUE, show_median = TRUE)
 #'
 #' plotExpression(example_sce, "Gene_0001", x = "Mutation_Status")
 #' plotExpression(example_sce, c("Gene_0001", "Gene_0004"), x="Mutation_Status")
 #' plotExpression(example_sce, "Gene_0001", x = "Gene_0002")
 #' plotExpression(example_sce, c("Gene_0001", "Gene_0004"), x="Gene_0002")
+#'
 #' ## plot expression against expression values for Gene_0004
 #' plotExpression(example_sce, 1:4, "Gene_0004")
 #' plotExpression(example_sce, 1:4, "Gene_0004", show_smooth = TRUE)
-#' plotExpression(example_sce, 1:4, "Gene_0004", show_smooth = TRUE, se = FALSE)
+#' plotExpression(example_sce, 1:4, "Gene_0004", show_smooth = TRUE, 
+#'    show_se = FALSE)
 #'
 plotExpression <- function(object, features, x = NULL,
                            exprs_values = "logcounts", log2_values = FALSE,
@@ -156,7 +156,8 @@ plotExpression <- function(object, features, x = NULL,
     # Creating the plot with faceting.        
     plot_out <- .central_plotter(evals_long, xlab = xlab, ylab = ylab,
                                  shape_by = shape_by, colour_by = colour_by, size_by = size_by, fill_by = fill_by,
-                                 legend = legend, ...)
+                                 legend = legend, ..., 
+                                 point_FUN = NULL) # disabled arguments
     if (!one_facet) {
         plot_out <- plot_out + facet_wrap(~Feature, ncol = ncol, scales = scales)
     }

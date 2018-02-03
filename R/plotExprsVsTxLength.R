@@ -4,56 +4,21 @@
 #' against transcript length values defined in the SingleCellExperiment object
 #' or supplied as an argument.
 #'
-#' @param object a \code{\link{SingleCellExperiment}} object
-#' @param tx_length transcript lengths to plot on the x-axis. Can be one of: (1)
-#' the name of a column of \code{rowData(object)} containing the transcript length
-#' values, or (2) the name of an element of \code{assays(object)} containing
-#' a matrix of transcript length values, or (3) a numeric vector of length equal
-#' to the number of rows of \code{object} (number of features).
-#' @param exprs_values character string indicating which values should be used
-#' as the expression values for this plot. Valid arguments are \code{"tpm"}
-#' (transcripts per million), \code{"norm_tpm"} (normalised TPM
-#' values), \code{"fpkm"} (FPKM values), \code{"norm_fpkm"} (normalised FPKM
-#' values), \code{"counts"} (counts for each feature), \code{"norm_counts"},
-#' \code{"cpm"} (counts-per-million), \code{"norm_cpm"} (normalised
-#' counts-per-million), \code{"logcounts"} (log-transformed count data; default),
-#' \code{"norm_exprs"} (normalised
-#' expression values) or \code{"stand_exprs"} (standardised expression values)
-#' or any other slots that have been added to the \code{"assays"} slot by
-#' the user.
-#' @param colour_by optional character string supplying name of a column of
-#' \code{rowData(object)} which will be used as a variable by which to colour
-#' expression values on the plot. Alternatively, a data frame with
-#' one column, containing a value for each feature to map to a colour.
-#' @param shape_by optional character string supplying name of a column of
-#' \code{rowData(object)} which will be used as a variable to define the shape of
-#' points for expression values on the plot. Alternatively, a data frame
-#' with one column containing values to map to shapes.
-#' @param size_by optional character string supplying name of a column of
-#' \code{rowData(object)} which will be used as a variable to define the size of
-#' points for expression values on the plot. Alternatively, a data frame
-#' with one column containing values to map to sizes.
-#' @param xlab label for x-axis; if \code{NULL} (default), then \code{x} will be
-#' used as the x-axis label
-#' @param show_exprs_sd logical, show the standard deviation of expression
-#' values for each feature on the plot
-#' @param show_smooth logical, show a smoothed fit through the expression values
-#'  on the plot
-#' @param alpha numeric value between 0 (completely transparent) and 1 (completely
-#' solid) defining how transparent plotted points (cells) should be.
-#' Points are jittered horizontally if the x-axis value is categorical rather
-#' than numeric to avoid overplotting.
-#' @param theme_size numeric scalar giving default font size for plotting theme
-#' (default is 10)
-#' @param log2_values should the expression values be transformed to the
-#' log2-scale for plotting (with an offset of 1 to avoid logging zeroes)?
-#' @param size numeric scalar optionally providing size for points if
-#' \code{size_by} argument is not given. Default is \code{NULL}, in which case
-#' \pkg{ggplot2} default is used.
-#' @param se logical, should standard errors be shown (default \code{TRUE}) for
-#' the smoothed fit through the cells. (Ignored if \code{show_smooth} is \code{FALSE}).
+#' @param object A SingleCellExperiment object.
+#' @param tx_length Transcript lengths for all features, to plot on the x-axis. 
+#' This can take any of the values described in \code{?"\link{scater-vis-var}"} for feature-level metadata.
+#' Data in \code{assays(object)} will \emph{not} be searched.
+#' @param exprs_values A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from.
+#' @param log2_values Logical scalar, specifying whether the expression values be transformed to the log2-scale for plotting (with an offset of 1 to avoid logging zeroes).
+#' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param legend String specifying how the legend(s) be shown, see \code{?"\link{scater-plot-args}"} for details.
+#' @param xlab String specifying the label for x-axis.
+#' @param show_exprs_sd Logical scalar indicating whether the standard deviation of expression values for each feature should be plotted.
+#' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
-#' @return a ggplot object
+#' @return A ggplot object.
 #' @export
 #'
 #' @importFrom DelayedMatrixStats rowMedians
@@ -90,50 +55,33 @@
 #' ## using a vector of tx length values
 #' plotExprsVsTxLength(example_sce, rnorm(2000, mean = 5000, sd = 500))
 #'
-plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len", exprs_values = "logcounts",
+plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len", 
+                                exprs_values = "logcounts", log2_values = FALSE, 
                                 colour_by = NULL, shape_by = NULL, size_by = NULL, 
-                                xlab = NULL, legend = "auto", alpha = 0.6, size = NULL, 
-                                show_exprs_sd = FALSE, log2_values = FALSE, ...) 
+                                legend = "auto", xlab = "Median transcript length", 
+                                show_exprs_sd = FALSE, ...) 
 {
     ## Check object is an SingleCellExperiment object
     if ( !is(object, "SingleCellExperiment") ) {
         stop("object must be an SingleCellExperiment")
     }
 
-    tx_length_values <- rep(NA, nrow(object))
-    ## Check arguments are valid
-    if ( length(tx_length) == 1 ) {
-        if ( tx_length %in% colnames(rowData(object)) )
-            tx_length_values <- rowData(object)[[tx_length]]
-        else {
-            if ( tx_length %in% SummarizedExperiment::assayNames(object) ) {
-                tx_length_mat <- assay(object, tx_length)
-                tx_length_values <- DelayedMatrixStats::rowMedians(DelayedArray(tx_length_mat))
-            } else
-                stop("the argument 'tx_length' should specify a column of rowData(object) or an element of assayNames(object) [see names(assayNames(object))")
-        }
-    } else {
-        if ( length(tx_length) != nrow(object) )
-            stop("If tx_length is a vector it must have length equal to nrow(object).")
-        else {
-            if ( !is.numeric(tx_length) )
-                stop("If a vector, tx_length must contain numeric values.")
-            tx_length_values <- tx_length
-        }
-    }
-
     exprs_mat <- assay(object, exprs_values)
     if ( log2_values ) {
         exprs_mat <- log2(exprs_mat + 1)
         ylab <- paste0("Expression (", exprs_values, "; log2-scale)")
-    } else
+    } else {
         ylab <- paste0("Expression (", exprs_values, ")")
+    }
 
     ## compute mean expression and sd of expression values
     exprs_mean <- rowMeans(exprs_mat)
     exprs_sd <- sqrt(.rowVars(exprs_mat))
 
-    df_to_plot <- data.frame(X=tx_length_values, Y=exprs_mean, 
+    tx_length_out <- .choose_vis_values(object, tx_length, mode = "row", search = "metadata")
+    tx_length <- tx_length_out$name
+
+    df_to_plot <- data.frame(X=tx_length_out$val, Y=exprs_mean, 
                              ymin=exprs_mean - exprs_sd,
                              ymax=exprs_mean + exprs_sd)
 
