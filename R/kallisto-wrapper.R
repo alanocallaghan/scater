@@ -226,7 +226,6 @@ samples, or a vector providing the ave fragment length for each sample.")
 #' 
 #' @importFrom data.table fread
 #' @importFrom rhdf5 h5read
-#' @importFrom rhdf5 H5close
 #' @importFrom rjson fromJSON
 #' @export
 #' @examples
@@ -253,7 +252,6 @@ readKallistoResultsOneSample <- function(directory, read_h5=FALSE,
         file_to_read <- paste0(directory, "/abundance.h5")
         if ( file.exists(file_to_read) ) {
             h5 <- rhdf5::h5read(file_to_read, "/")
-            rhdf5::H5close()
         } else {
             stop(paste("File", file_to_read, "not found or does not exist. Please check directory is correct and that you want to read results in HDF5 format."))
         }
