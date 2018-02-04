@@ -78,6 +78,51 @@
           as.logical(sum), subset_row - 1L)
 }
 
+.qc_hunter <- function(object, qc_field, mode = "column") 
+# This function searches for QC fields in the various plotQC functions,
+# accounting for potential compactness.
+{
+    if (mode=="column") {
+        meta_data <- colData(object)
+    } else {
+        meta_data <- rowData(object)
+    }
+
+    # Simple is best.
+    if (qc_field %in% colnames(meta_data)) { 
+        return(qc_field)
+    }
+
+    # Looking inside.
+    meta_data <- meta_data$scater_qc
+    if (qc_field %in% colnames(meta_data)) {
+        return(c("scater_qc", qc_field))
+    }
+
+    # Looking digging further for the fields.
+    for (subfield in colnames(meta_data)) {
+        sub_meta_data <- meta_data[[subfield]]
+        if (!is(sub_meta_data, "DataFrame")) { 
+            next
+        }
+        
+        suffix <- subfield
+        if (subfield=="all") {
+            suffix <- ""
+        } else if (grepl("^(cell|feature)_control", subfield)) {
+            suffix <- sub("^(cell|feature)_control", "", subfield)
+        }
+        
+        renamed <- sprintf("%s%s", colnames(sub_meta_data), suffix)
+        present <- qc_field==renamed
+        if (any(present)) {
+            return(c("scater_qc", subfield, colnames(sub_meta_data)[which(present)[1]]))
+        }
+    }
+
+    stop(sprintf("failed to find '%s' in %s metadata", qc_field, mode))
+}
+
 ########################################################
 # matrixStats equivalents that are yet to have a home. #
 ########################################################
