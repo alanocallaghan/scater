@@ -178,123 +178,141 @@ test_that("visualization variable picker works properly: misc", {
 })
 
 #################################################
+# Checking the specific plotting functions.
 
-test_that("we can produce default plots for SingleCellExperiment objects", {
-    
-    p <- plotScater(example_sce)
-    print(p)
-    expect_that(p, is_a("ggplot"))
-    expect_that(
-        plotScater(example_sce, exprs_values = "counts", colour_by = "Cell_Cycle"),
-        is_a("ggplot"))
-    expect_that(
-        plotScater(example_sce, block1 = "Treatment", colour_by = "Cell_Cycle"),
-        is_a("ggplot"))
+test_that("plotScater works as expected", {
+    expect_s3_class(plotScater(example_sce), "ggplot")
+    expect_s3_class(plotScater(example_sce, colour_by = "Cell_Cycle"), "ggplot")
+    expect_s3_class(plotScater(example_sce, block1 = "Cell_Cycle"), "ggplot")
+    expect_s3_class(plotScater(example_sce, block2 = "Cell_Cycle"), "ggplot")
 
-    cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
-    expect_that(
-        plotScater(example_sce, exprs_values = "cpm", block1 = "Treatment",
-             block2 = "Mutation_Status", colour_by = "Cell_Cycle"),
-        is_a("ggplot"))
-    # What happens if chosen expression values are not available?
-    expect_error(
-        plotScater(example_sce, exprs_values = "tpm", block1 = "Treatment",
-             colour_by = "Cell_Cycle"),
-        "not in names")
+    expect_s3_class(plotScater(example_sce, block1 = "Treatment", colour_by = "Cell_Cycle"), "ggplot")
+    expect_s3_class(plotScater(example_sce, block1 = "Cell_Cycle", block2 = "Treatment"), "ggplot")
+    expect_s3_class(plotScater(example_sce, block1 = "Mutation_Status", block2 = "Cell_Cycle", colour_by = "Gene_0001"), "ggplot")
+
+    cpm(example_sce) <- calculateCPM(example_sce)
+    expect_s3_class(plotScater(example_sce, exprs_values="cpm"), "ggplot")
+    expect_error(plotScater(example_sce, exprs_values="tpm"), "not in names")
 })
 
-test_that("we can produce PCA plots with different expression values", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    exprs(example_sce) <- log2(calculateCPM(example_sce, 
-                                            use_size_factors = FALSE) + 1)
-    example_sce <- calculateQCMetrics(example_sce)
+#################################################
+# Checking the reduced dimension wrappers.
+
+test_that("we can produce PCA scatterplots", {
+    example_sce <- runPCA(example_sce)
+    expect_identical(reducedDimNames(example_sce), "PCA")
+
+    # Checking that visual parameters work.
+    expect_s3_class(P <- plotPCA(example_sce), "ggplot")
+    expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, size_by = "Gene_0001"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, shape_by = "Treatment"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", size_by = "Gene_0001"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     
-    expect_that(plotPCA(example_sce), is_a("ggplot"))
+    # Checking that re-running works, responsive to feature scaling.
+    expect_s3_class(P2 <- plotPCA(example_sce, rerun=TRUE, run_args=list(scale_features=FALSE)), "ggplot")
+    expect_false(isTRUE(all.equal(P, P2)))
+
+    reducedDim(example_sce, "PCA") <- NULL
+    expect_s3_class(P3 <- plotPCA(example_sce), "ggplot")
+    expect_equal(P, P3)
+
+    expect_s3_class(P4 <- plotPCA(example_sce, run_args=list(scale_features=FALSE)), "ggplot")
+    expect_equal(P2, P4)
+    expect_false(isTRUE(all.equal(P, P4)))
 })
 
-test_that("we can produce t-SNE plots with different expression values", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    exprs(example_sce) <- log2(calculateCPM(example_sce, 
-                                            use_size_factors = FALSE) + 1)
-    example_sce <- calculateQCMetrics(example_sce)
+test_that("we can produce PCA pairplots", {
+    example_sce <- runPCA(example_sce, ncomponents=4)
+    expect_identical(reducedDimNames(example_sce), "PCA")
+
+    # Checking that visual parameters work.
+    expect_s3_class(P <- plotPCA(example_sce, ncomponents=4), "ggplot")
+    expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Cell_Cycle"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, ncomponents=4, size_by = "Gene_0001"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, ncomponents=4, shape_by = "Treatment"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Cell_Cycle", size_by = "Gene_0001"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, ncomponents=4, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     
-    expect_that(plotTSNE(example_sce), is_a("ggplot"))
+    # Checking that re-running works, responsive to feature scaling.
+    expect_s3_class(P2 <- plotPCA(example_sce, ncomponents=4, rerun=TRUE, run_args=list(scale_features=FALSE)), "ggplot")
+    expect_false(isTRUE(all.equal(P, P2)))
+
+    reducedDim(example_sce, "PCA") <- NULL
+    expect_s3_class(P3 <- plotPCA(example_sce, ncomponents=4), "ggplot")
+    expect_equal(P, P3)
+
+    expect_s3_class(P4 <- plotPCA(example_sce, ncomponents=4, run_args=list(scale_features=FALSE)), "ggplot")
+    expect_equal(P2, P4)
+    expect_false(isTRUE(all.equal(P, P4)))
 })
 
-test_that("we can produce Diffusion Map plots with different expression values",
-          {
-              data("sc_example_counts")
-              data("sc_example_cell_info")
-              example_sce <- SingleCellExperiment(
-                  assays = list(counts = sc_example_counts), 
-                  colData = sc_example_cell_info)
-              exprs(example_sce) <- log2(
-                  calculateCPM(example_sce, use_size_factors = FALSE) + 1)
-              example_sce <- calculateQCMetrics(example_sce)
-              
-              #expect_that(plotDiffusionMap(example_sce), is_a("ggplot"))
-          })
+test_that("we can produce TSNE plots", {
+    example_sce <- runTSNE(example_sce, rand_seed=100)
+    expect_identical(reducedDimNames(example_sce), "TSNE")
+    expect_s3_class(P <- plotTSNE(example_sce), "ggplot")
 
-test_that("we can produce MDS plots with different expression values",
-          {
-              data("sc_example_counts")
-              data("sc_example_cell_info")
-              example_sce <- SingleCellExperiment(
-                  assays = list(counts = sc_example_counts), 
-                  colData = sc_example_cell_info)
-              exprs(example_sce) <- log2(
-                  calculateCPM(example_sce, use_size_factors = FALSE) + 1)
-              example_sce <- calculateQCMetrics(example_sce)
+    # plotTSNE re-runs it correctly.
+    reducedDim(example_sce, "TSNE") <- NULL
+    expect_s3_class(P2 <- plotTSNE(example_sce, run_args=list(rand_seed=100)), "ggplot")
+    expect_equal(P, P2)
 
-              expect_that(plotMDS(example_sce), is_a("ggplot"))
-              expect_that(
-                  plotMDS(example_sce, colour_by = "Cell_Cycle",
-                          shape_by = "Treatment", size_by = "Mutation_Status"),
-                  is_a("ggplot"))
-          })
+    # Responsive to changes in parameters.
+    expect_s3_class(P3 <- plotTSNE(example_sce, run_args=list(perplexity=10)), "ggplot")
+    expect_false(isTRUE(all.equal(P, P3)))
 
+    # Handles multiple components properly.
+    expect_s3_class(P4 <- plotTSNE(example_sce, ncomponents=4, run_args=list(rand_seed=20)), "ggplot")
+    example_sce <- runTSNE(example_sce, ncomponents=4, rand_seed=20)
+    expect_equal(plotTSNE(example_sce, ncomponents=4), P4)
+})
 
-test_that("plotReducedDim works as expexted",
-          {
-              data("sc_example_counts")
-              data("sc_example_cell_info")
-              example_sce <- SingleCellExperiment(
-                  assays = list(counts = sc_example_counts), 
-                  colData = sc_example_cell_info)
-              exprs(example_sce) <- log2(calculateCPM(
-                  example_sce, use_size_factors = FALSE) + 1)
-              drop_genes <- apply(exprs(example_sce), 1, 
-                                  function(x) {var(x) == 0})
-              example_sce <- example_sce[!drop_genes, ]
-              
-              reducedDim(example_sce, "PCA") <- 
-                  prcomp(t(exprs(example_sce)), scale. = TRUE)$x
-              expect_that(plotReducedDim(example_sce, "PCA"), is_a("ggplot"))
-              expect_that(plotReducedDim(
-                  example_sce, "PCA", colour_by = "Cell_Cycle"), is_a("ggplot"))
-              expect_that(plotReducedDim(
-                  example_sce, "PCA", colour_by = "Cell_Cycle", 
-                  shape_by = "Treatment"), is_a("ggplot"))
-              expect_that(plotReducedDim(
-                  example_sce, "PCA", colour_by = "Cell_Cycle", 
-                  size_by = "Treatment"), is_a("ggplot"))
-              expect_that(plotReducedDim(example_sce, "PCA", ncomponents = 5), 
-                          is_a("ggplot"))
-              expect_that(plotReducedDim(
-                  example_sce, "PCA", ncomponents = 5, colour_by = "Cell_Cycle",
-                  shape_by = "Treatment"), is_a("ggplot"))
-              expect_that(plotReducedDim(
-                  example_sce, "PCA", colour_by = "Gene_0001"), is_a("ggplot"))
-              
-          })
+test_that("we can produce diffusion maps", {
+    example_sce <- runDiffusionMap(example_sce, rand_seed=100)
+    expect_identical(reducedDimNames(example_sce), "DiffusionMap")
+    expect_s3_class(P <- plotDiffusionMap(example_sce), "ggplot")
+
+    # plotDiffusionMap re-runs it correctly.
+    reducedDim(example_sce, "DiffusionMap") <- NULL
+    expect_s3_class(P2 <- plotDiffusionMap(example_sce, run_args=list(rand_seed=100)), "ggplot")
+#    expect_equal(P, P2) # it seems as if destiny::DiffusionMap does not respond to the seed!
+
+    # Responsive to changes in parameters.
+    expect_s3_class(P3 <- plotDiffusionMap(example_sce, run_args=list(k=13)), "ggplot")
+    expect_false(isTRUE(all.equal(P, P3)))
+
+    # Handles multiple components properly.
+    expect_s3_class(P4 <- plotDiffusionMap(example_sce, ncomponents=4, run_args=list(rand_seed=20)), "ggplot")
+#    example_sce <- runDiffusionMap(example_sce, ncomponents=4, rand_seed=20)
+#    expect_equal(plotDiffusionMap(example_sce, ncomponents=4), P4)
+})
+
+test_that("we can produce MDS plots", {
+    example_sce <- runMDS(example_sce)
+    expect_identical(reducedDimNames(example_sce), "MDS")
+    expect_s3_class(P <- plotMDS(example_sce), "ggplot")
+
+    # plotMDS re-runs it correctly.
+    reducedDim(example_sce, "MDS") <- NULL
+    expect_s3_class(P2 <- plotMDS(example_sce), "ggplot")
+    expect_equal(P, P2)
+
+    # Responsive to changes in parameters.
+    expect_s3_class(P3 <- plotMDS(example_sce, run_args=list(method="manhattan")), "ggplot")
+    expect_false(isTRUE(all.equal(P, P3)))
+
+    # Handles multiple components properly.
+    expect_s3_class(P4 <- plotMDS(example_sce, ncomponents=4), "ggplot")
+    example_sce <- runMDS(example_sce, ncomponents=4)
+    expect_equal(plotMDS(example_sce, ncomponents=4), P4)
+})
+
+#################################################
 
 context("test plotExpression")
 
