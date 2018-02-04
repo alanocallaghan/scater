@@ -414,6 +414,7 @@ test_that("we can produce plots for column metadata", {
               expect_s3_class(plotColData(example_sce, x = x, y = y, shape_by = "Treatment"), "ggplot")
         }
     }
+
     # Testing more visualization schemes.
     expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Cell_Cycle", size_by = "Gene_0001"), "ggplot")
     expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
@@ -424,21 +425,30 @@ test_that("we can produce plots for column metadata", {
     expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment", legend="none"), "ggplot")
     expect_s3_class(plotColData(example_sce, "total_counts", size_by = "Gene_0001", exprs_values = "counts"), "ggplot")
 
+    # Fiddling with all the semi-analysis options.
+    expect_s3_class(plotColData(example_sce, "total_counts", show_violin=FALSE), "ggplot")
+    expect_s3_class(plotColData(example_sce, "total_counts", show_median=TRUE), "ggplot")
+    expect_s3_class(plotColData(example_sce, "total_counts", jitter="jitter"), "ggplot")
+
+    expect_s3_class(plotColData(example_sce, "total_counts", x="total_features_by_counts", show_smooth=TRUE), "ggplot")
+    expect_s3_class(plotColData(example_sce, "total_counts", x="total_features_by_counts", show_smooth=TRUE, show_se=FALSE), "ggplot")
+
     # Checking that it doesn't try to retrieve expression data.
     expect_error(plotColData(example_sce, "Gene_0001", exprs_values = "counts"), "cannot find .* in metadata fields")
     expect_error(plotColData(example_sce, "total_counts", x="Gene_0001", exprs_values = "counts"), "cannot find .* in metadata fields")
 })
 
 test_that("we can produce plots for row metadata", {
-    rowData(example_sce)$WHEE <- rep(LETTERS, length.out=nrow(example_sce))
+    rowData(example_sce)$WHEE <- rep(LETTERS[1:10], length.out=nrow(example_sce))
 
     for (y in c("mean_counts", "is_feature_control")) { # discrete or continuous.
         for (x in list(NULL, "n_cells_by_counts", "WHEE")) { # nothing, discrete or continuous. 
               expect_s3_class(plotRowData(example_sce, x = x, y = y, colour_by = "WHEE"), "ggplot")
-              expect_s3_class(plotRowData(example_sce, x = x, y = y, size_by = "Cell_0001"), "ggplot")
+              expect_s3_class(plotRowData(example_sce, x = x, y = y, size_by = "Cell_001"), "ggplot")
               expect_s3_class(plotRowData(example_sce, x = x, y = y, shape_by = "WHEE"), "ggplot")
         }
     }
+
     # Testing more visualization schemes.
     expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", size_by = "Cell_002"), "ggplot")
     expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", shape_by = "WHEE"), "ggplot")
@@ -449,63 +459,53 @@ test_that("we can produce plots for row metadata", {
     expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", size_by = "Cell_002", shape_by = "WHEE", legend="none"), "ggplot")
     expect_s3_class(plotRowData(example_sce, "total_counts", size_by = "Cell_002", exprs_values = "counts"), "ggplot")
 
+    # Fiddling with all the semi-analysis options.
+    expect_s3_class(plotRowData(example_sce, "total_counts", show_violin=FALSE), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "total_counts", show_median=TRUE), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "total_counts", jitter="jitter"), "ggplot")
+
+    expect_s3_class(plotRowData(example_sce, "total_counts", x="n_cells_by_counts", show_smooth=TRUE), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "total_counts", x="n_cells_by_counts", show_smooth=TRUE, show_se=FALSE), "ggplot")
+
     # Checking that it doesn't try to retrieve expression data.
     expect_error(plotRowData(example_sce, "Cell_002", exprs_values = "counts"), "cannot find .* in metadata fields")
     expect_error(plotRowData(example_sce, "total_counts", x="Cell_002", exprs_values = "counts"), "cannot find .* in metadata fields")
 })
 
+#################################################
+# Testing plotExprsVsTxLength
+
 test_that("plotExprsVsTxLength works as expected", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    fd <- data.frame(
-        gene_id = rownames(sc_example_counts), 
-        feature_id = paste("feature", rep(1:500, each = 4), sep = "_"),
-        median_tx_length = rnorm(2000, mean = 5000, sd = 500))
-    rownames(fd) <- rownames(sc_example_counts)
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info, rowData = fd)
-    exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
+    rowData(example_sce)$median_tx_length <- rnorm(2000, mean = 5000, sd = 500)
     rowData(example_sce)$group <- rep(1:4, each = 500)
+    expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length"), "ggplot")
+    expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", exprs_values="counts"), "ggplot")
+   
+    # Testing more visualization schemes.
+    expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", colour_by = "is_feature_control", size_by = "Cell_002"), "ggplot")
+    expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", colour_by = "is_feature_control", shape_by = "group"), "ggplot")
+    expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", size_by = "Cell_002", shape_by = "group"), "ggplot")
+    expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", colour_by = "is_feature_control", size_by = "Cell_002", shape_by = "group"), "ggplot")
+ 
+    # Testing various semi-analysis options.
+    expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", show_smooth = TRUE), "ggplot")
+    expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", show_exprs_sd = TRUE), "ggplot")
+    expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", show_smooth = TRUE, show_exprs_sd = TRUE), "ggplot")
     
-    p1 <- plotExprsVsTxLength(example_sce, "median_tx_length")
-    expect_that(p1, is_a("ggplot"))
-    p1 <- plotExprsVsTxLength(example_sce, "median_tx_length", 
-                              show_smooth = TRUE)
-    expect_that(p1, is_a("ggplot"))
-    p1 <- plotExprsVsTxLength(example_sce, "median_tx_length", 
-                              show_smooth = TRUE, show_exprs_sd = TRUE)
-    expect_that(p1, is_a("ggplot"))
-    
-    p1 <- plotExprsVsTxLength(example_sce, "median_tx_length",
-                              show_smooth = TRUE,
-                              show_exprs_sd = FALSE, colour_by = "group")
-    expect_that(p1, is_a("ggplot"))
-    p1 <- plotExprsVsTxLength(example_sce, "median_tx_length", 
-                              show_smooth = TRUE,
-                              show_exprs_sd = FALSE, size_by = "group")
-    expect_that(p1, is_a("ggplot"))
-    
-    rowData(example_sce)$group <- rep(letters[1:4], each = 500)
-    p1 <- plotExprsVsTxLength(example_sce, "median_tx_length", 
-                              show_smooth = TRUE,
-                              show_exprs_sd = FALSE, shape_by = "group")
-    expect_that(p1, is_a("ggplot"))
-    
+    # Testing visualization options.
+    expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", colour_by = "group"), "ggplot")
+    expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", show_exprs_sd = TRUE, colour_by = "group"), "ggplot") # checking proper interaction with geom_pointrange.
+    expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", show_exprs_sd = TRUE, shape_by= "group"), "ggplot")
+    expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", show_exprs_sd = TRUE, size_by= "n_cells_by_counts"), "ggplot")
     
     ## using matrix of tx length values in assayData(object)
-    mat <- matrix(rnorm(ncol(example_sce) * nrow(example_sce), mean = 5000,
-                        sd = 500), nrow = nrow(example_sce))
-  
+    mat <- matrix(rnorm(ncol(example_sce) * nrow(example_sce), mean = 5000, sd = 500), nrow = nrow(example_sce))
     dimnames(mat) <- dimnames(example_sce)
     assay(example_sce, "tx_len") <- mat
-    p1 <-  plotExprsVsTxLength(example_sce, "tx_len", length_is_assay = TRUE,
-                               show_smooth = TRUE, show_exprs_sd = TRUE)
-    expect_that(p1, is_a("ggplot"))
+
+    expect_s3_class(plotExprsVsTxLength(example_sce, "tx_len", length_is_assay = TRUE, show_smooth = TRUE, show_exprs_sd = TRUE), "ggplot")
     
     ## using a vector of tx length values
-    p1 <- plotExprsVsTxLength(example_sce, data.frame(Length=rnorm(2000, mean = 5000, sd = 500)))
-    expect_that(p1, is_a("ggplot"))
+    expect_s3_class(plotExprsVsTxLength(example_sce, data.frame(Length=rnorm(2000, mean = 5000, sd = 500))), "ggplot")
 })
 

@@ -126,7 +126,7 @@ plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len", lengt
 
     plot_out <- .central_plotter(df_to_plot, xlab = xlab, ylab = ylab,
                                  shape_by = shape_by, colour_by = colour_by, size_by = size_by, 
-                                 point_FUN=point_FUN, ...)
+                                 legend = legend, point_FUN=point_FUN, ...)
     plot_out
 }
 
