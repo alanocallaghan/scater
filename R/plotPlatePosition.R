@@ -75,8 +75,8 @@ plotPlatePosition <- function(object, plate_position = NULL,
         x_position <- as.integer(gsub("[A-Z]*", "", plate_position))
 
     } else {
-        x_position <- plate_position$row
-        y_position <- plate_position$column
+        x_position <- plate_position$column
+        y_position <- plate_position$row
         plate_position <- NULL
     }
     x_position <- as.factor(x_position)

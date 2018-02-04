@@ -358,35 +358,41 @@ test_that("we can produce expression plots with different expression values", {
     # Checking for behaviour with different values.
     expect_s3_class(plotExpression(example_sce, gene_set, x = "Mutation_Status", exprs_values = "counts"),  "ggplot")
     expect_s3_class(plotExpression(example_sce, gene_set, x = "Mutation_Status", exprs_values = "counts", log2_values = TRUE),  "ggplot")
-    expect_error(plotExpression(example_sce, rownames(example_sce)[1:6], exprs_values = "silly", "not in names")
+    expect_error(plotExpression(example_sce, rownames(example_sce)[1:6], exprs_values = "silly"), "not in names")
 })
 
+#################################################
+# Testing plotPlatePosition
+
 test_that("we can produce plots showing cells in plate position", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
-    example_sce <- calculateQCMetrics(example_sce)
-    ## define plate positions
-    example_sce$plate_position <- paste0(
-        rep(LETTERS[1:5], each = 8), rep(formatC(1:8, width = 2, flag = "0"), 5))
-    
-    expect_that(plotPlatePosition(example_sce, colour_by = "Cell_Cycle"), 
-                is_a("ggplot"))
-    expect_that(plotPlatePosition(example_sce, colour_by = "Gene_0004"), 
-                is_a("ggplot"))
-    ppos <- example_sce$plate_position
-    expect_that(plotPlatePosition(example_sce, plate_position = ppos, 
-                                  colour_by = "Gene_0004"), is_a("ggplot"))
-    example_sce$plate_position <- NULL
-    expect_that(plotPlatePosition(example_sce, 
-                                  list(column=rep(1:8, 5), 
-                                       row=rep(1:5, each = 8)), 
-                                  colour_by = "Gene_0004"), is_a("ggplot"))
-    
+    ## Define plate positions
+    row <- rep(LETTERS[1:5], each = 8)
+    col <- rep(1:8, 5)
+    plate_position <- paste0(row, col)
+
+    # Different types of inputs are accepted.    
+    expect_s3_class(plotPlatePosition(example_sce, list(row=row, column=col)), "ggplot")
+    expect_s3_class(P <- plotPlatePosition(example_sce, plate_position), "ggplot")
+
+    alt <- example_sce
+    alt$plate_position <- plate_position
+    expect_s3_class(plotPlatePosition(alt, colour_by="Cell_Cycle"), "ggplot")
+
+    # Different types of colouring, shaping and sizing are possible.
+    expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle"), "ggplot")
+    expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001"), "ggplot")
+    expect_s3_class(plotPlatePosition(alt, shape_by = "Treatment"), "ggplot")
+    expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", size_by = "Gene_0001"), "ggplot")
+    expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
+    expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+    expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+
+    # Checking that other arguments are passed through.
+    expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment", legend="none"), "ggplot")
+    expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", exprs_values = "counts"), "ggplot")
+
+    # Checking that an error is thrown,
+    expect_error(plotPlatePosition(example_sce, paste0(col, row)), "invalid format") 
 })
 
 test_that("we can produce plots for metadata", {
