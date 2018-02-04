@@ -17,31 +17,34 @@
 #' If no match is found, the function will assume that the string represents a gene name.
 #' It will search \code{rownames(sce)} and extract gene expression values for any matching row across all cells.
 #' Otherwise, an error is raised.
-#' \item A named character string, where the name is either \code{"Feature"} or \code{"Metadata"}.
-#' This forces the function to only search for the name in \code{rownames(sce)} or \code{colnames(colData(sce))}, respectively.
+#' \item A named character string, where the name is either \code{"exprs"} or \code{"metadata"}.
+#' This forces the function to only search for the string in \code{rownames(sce)} or \code{colnames(colData(sce))}, respectively.
 #' Adding an explicit name is useful when the same field exists in both the row names and column metadata names.
 #' \item A character vector of length greater than 1.
 #' This will search for nested fields in \code{colData(sce)}.
-#' For example, supplying a character vector \code{c("A", "B", "C")} will retrieve \code{colData(sce)$A$B$C}, 
-#' where both \code{A} and \code{B} contain nested DataFrames.
-#' See \code{\link{calculateQCMetrics}} with \code{compact=TRUE} for an example of how these can be formed.
+#' For example, supplying a character vector \code{c("A", "B", "C")} will retrieve \code{colData(sce)$A$B$C}, where both \code{A} and \code{B} contain nested DataFrames.
+#' See \code{\link{calculateQCMetrics}} with \code{compact=TRUE} for an example of how these can be constructed. 
+#' The concatenated name \code{"A:B:C"} will be used in the legend.
 #' \item A data frame with one column and number of rows equal to the number of cells.
 #' This should contain values to use for visualization (in this case, for colouring by).
 #' In this manner, the user can use new information without manually adding it to the SingleCellExperiment object.
 #' The column name of the data frame will be used in the legend.
 #' }
-#' Of course, the same logic applies for other visualization parameters such as \code{shape_by} and \code{size_by}.
+#'
+#' The same logic applies for other visualization parameters such as \code{shape_by} and \code{size_by}.
 #' Other arguments may also use the same scheme, but this depends on the context; see the documentation for each function for details.
+#' In particular, if an argument explicitly refers to a metadata field, any names for the character string will be ignored.
+#' Similarly, a character vector of length > 1 is not allowed for an argument that explicitly refers to expression values.
 #' 
 #' @section When plotting by features:
 #' Here, we assume that each visual feature of interest (e.g., point or line) corresponds to a feature in the SingleCellExperiment object \code{sce}.
 #' The scheme is mostly the same as described above, with a few differences:
 #' \itemize{
-#' \item \code{rowData} is used instead of \code{colData}, as we are extracting metadata for each feature.
+#' \item \code{rowData} is searched instead of \code{colData}, as we are extracting metadata for each feature.
 #' \item When extracting expression values, the name of a single cell must be specified.
 #' Visualization will then use the expression profile for all features in that cell.
-#' This tends to be a rather unusual choice for colouring, but we will not judge.
-#' \item Named character strings should use \code{"Cell"} instead of \code{"Feature"}.
+#' (This tends to be a rather unusual choice for colouring.)
+#' \item Character strings named with \code{"exprs"} will search for the string in \code{colnames(sce)}.
 #' \item A data frame input should have number of rows equal to the number of features.
 #' }
 #'
@@ -56,8 +59,8 @@
 #' and most other plotting functions.
 NULL
 
-.choose_vis_values <- function(x, by, mode=c("column", "row"), search=c("any", "metadata", "feature"),
-                               exprs_values = "logcounts", coerce_factor = FALSE, level_limit = NA,
+.choose_vis_values <- function(x, by, mode=c("column", "row"), search=c("any", "metadata", "exprs"),
+                               exprs_values = "logcounts", coerce_factor = FALSE, level_limit = Inf,
                                discard_solo = FALSE) 
 # This function looks through the visualization data and returns the
 # values to be visualized. Either 'by' itself, or a column of colData,
@@ -69,35 +72,28 @@ NULL
         search <- match.arg(search)
 
         # Determining what to check, based on input 'by'.
-        if (search=="any") { 
-            check_metadata <- check_features <- TRUE
-
-            if (length(by)==0) {
-                check_metadata <- FALSE 
-                check_features <- FALSE
-            } else if (length(by)>1) {
-                check_metadata <- TRUE
-                check_features <- FALSE
-            } else if (length(by)==1L) {
+        if (length(by)>1) {
+            if (search=="exprs") {
+                stop("character vector of length > 1 not allowed for search='exprs'")
+            }
+            search <- "metadata"
+        } else if (length(by)==0L) {
+            by <- NULL
+            search <- "none"
+        } else if (length(by)==1L) {
+            if (search=="any") { 
                 cur_name <- names(by)
                 if (!is.null(cur_name) && !is.na(cur_name)) { 
-                    if (cur_name=="Metadata") {
-                        check_features <- FALSE
-                        check_metadata <- TRUE
-                    } else if ((mode=="column" && cur_name=="Feature")
-                               || (mode=="row" && cur_name=="Cell")) {
-                        check_features <- TRUE
-                        check_metadata <- FALSE
+                    if (cur_name=="metadata" || cur_name =="exprs") {
+                        search <- cur_name
                     } 
                 }
+                names(by) <- NULL
             }
-        } else {
-            check_metadata <- (search=="metadata")
-            check_features <- !check_metadata            
         }
            
         # Checking the metadata; note the loop to account for nesting.
-        if (check_metadata) { 
+        if (search=="any" || search=="metadata") { 
             if (mode=="column") {
                 meta_data <- colData(x)
             } else {
@@ -109,35 +105,35 @@ NULL
                     break
                 }
                 vals <- meta_data[[field]]
-                metadata <- vals
+                meta_data <- vals
             }
             by <- paste(by, collapse=":") # collapsing to a single string for output.
         }
 
         # Metadata takes priority, so we don't bother searching if 'vals' is non-NULL.
-        if (check_features) {
+        if (search=="any" || search=="exprs") {
             if (is.null(vals)){
                 exprs <- assay(x, i = exprs_values)
-                if (mode=="column") {
+                if (mode=="column" && by %in% rownames(exprs)) {
                     vals <- exprs[by,] # coloring columns, so we take the row values.
-                } else {
+                } else if (mode=="row" && by %in% colnames(exprs)) {
                     vals <- exprs[,by]
                 }
             }
         }
 
-        if (is.null(vals) && (check_metadata || check_features)) {
-            stop("cannot find the supplied '*_by' in features or metadata")
+        if (is.null(vals) && (search!="none")) { 
+            stop(sprintf("cannot find '%s' in %s fields", by, search))
         }
     } else if (is.data.frame(by)) {
         if (ncol(by) != 1L) {
-            stop("'*_by' should be a data frame with one column")
+            stop("input data frame should only have one column")
         } else {
             if (mode=="column" && nrow(by) != ncol(x)) {
-                stop("'nrow(*_by)' should be equal to number of columns in 'x'")
+                stop("number of rows of input data frame should be equal to 'ncol(object)'")
             }
             if (mode=="row" && nrow(by) != nrow(x)) {
-                stop("'nrow(*_by)' should be equal to number of rows in 'x'")
+                stop("number of rows of input data frame should be equal to 'nrow(object)'")
             }
         }
 
