@@ -1,29 +1,32 @@
-#' Plot the features with the highest expression values
+#' Plot the highest expressing features
 #'
-#' @param object an SCESet object containing expression values and
-#' experimental information. Must have been appropriately prepared.
-#' @param col_by_variable variable name (must be a column name of colData(object))
-#' to be used to assign colours to cell-level values.
-#' @param n numeric scalar giving the number of the most expressed features to
-#' show. Default value is 50.
-#' @param drop_features a character, logical or numeric vector indicating which
-#' features (e.g. genes, transcripts) to drop when producing the plot. For
-#' example, control genes might be dropped to focus attention on contribution
-#' from endogenous rather than synthetic genes.
-#' @param exprs_values which slot of the \code{assayData} in the \code{object}
-#' should be used to define expression? Valid options are "counts" (default),
-#' "tpm", "fpkm" and "logcounts".
-#' @param feature_names_to_plot character scalar indicating which column of the 
-#' rowData slot in the \code{object} is to be used for the feature names 
-#' displayed on the plot. Default is \code{NULL}, in which case 
-#' \code{rownames(object)} is used.
-#' @param as_percentage logical scalar indicating whether percentages should be
-#' plotted. If \code{FALSE}, the raw \code{exprs_values} are shown instead.
+#' Plot the features with the highest average expression across all cells, along with their expression in each individual cell.
 #'
-#' @details Plot the percentage of counts accounted for by the top n most highly
-#' expressed features across the dataset.
+#' @param object A SingleCellExperiment object.
+#' @param n A numeric scalar specifying the number of the most expressed features to show. 
+#' @param controls Specification of the row-level metadata column indicating whether a feature is a control, see \code{?"\link{scater-vis-var}"} for possible values.
+#' Only metadata fields will be searched, \code{assays} will not be used.
+#' If not supplied, this defaults to \code{"is_feature_control"} or equivalent for compacted data.
+#' @param colour_cells_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param drop_features A character, logical or numeric vector indicating which features (e.g. genes, transcripts) to drop when producing the plot. 
+#' For example, spike-in transcripts might be dropped to examine the contribution from endogenous genes.
+#' @param exprs_values A integer scalar or string specifying the assay to obtain expression values from.
+#' @param feature_names_to_plot Specification of which row-level metadata column contains the feature names, see \code{?"\link{scater-vis-var}"} for possible values.
+#' Default is \code{NULL}, in which case  \code{rownames(object)} are used.
+#' @param as_percentage logical scalar indicating whether percentages should be  plotted. 
+#' If \code{FALSE}, the raw \code{exprs_values} are shown instead.
 #'
-#' @return a ggplot plot object
+#' @details 
+#' This function will plot the percentage of counts accounted for by the top \code{n} most highly expressed features across the dataset.
+#' Each feature corresponds to a row on the plot, sorted by average expression (denoted by the point).
+#'
+#' The plot will attempt to colour the points based on whether the corresponding feature is labelled as a control in \code{object}.
+#' This can be turned off by setting \code{controls=NULL}.
+#'
+#' The distribution of expression across all cells is shown as tick marks for each feature.
+#' These ticks can be coloured according to cell-level metadata, as specified by \code{colour_cells_by}.
+#'
+#' @return A ggplot object.
 #'
 #' @export
 #' @examples
@@ -138,16 +141,22 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by = NULL,
     ## Check if is_feature_control is defined, and using it for colouring of the points.
     if (missing(controls)) { 
         controls <- .qc_hunter(object, "is_feature_control", mode="row")
-    }
+    }   
+
     if (!is.null(controls)) { 
-        df_to_plot$is_feature_control <- .choose_vis_values(object, controls, mode = "row", search = "metadata")$val
+        cont_out <- .choose_vis_values(object, controls, mode = "row", search = "metadata")
+        df_to_plot$is_feature_control <- cont_out$val
+    
+        plot_most_expressed <- plot_most_expressed +
+            geom_point(aes_string(x = legend_val, y = "Feature", fill = "is_feature_control"),
+                       data = df_to_plot[chosen,], colour = "gray30", shape = 21) +
+            scale_fill_manual(values = c("aliceblue", "wheat")) +
+            guides(fill = guide_legend(title = "Feature control?"))
     } else {
-        df_to_plot$is_feature_control <- rep(FALSE, nrow(df_to_plot))
+        plot_most_expressed <- plot_most_expressed +
+           geom_point(aes_string(x = legend_val, y = "Feature"),
+                      data = df_to_plot[chosen,], fill = "grey80", colour = "grey30", shape = 21) 
     }
 
-    plot_most_expressed + geom_point(
-        aes_string(x = legend_val, y = "Feature", fill = "is_feature_control"),
-        data = df_to_plot[chosen,], colour = "gray30", shape = 21) +
-        scale_fill_manual(values = c("aliceblue", "wheat")) +
-        guides(fill = guide_legend(title = "Feature control?"))
+    plot_most_expressed 
 }
