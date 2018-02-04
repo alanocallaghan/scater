@@ -40,7 +40,7 @@ This function plots gene expression frequency versus mean expression level, whic
 We fit a non-linear least squares curve for the relationship between expression frequency and mean expression.
 We use this curve to define the number of genes above high technical dropout and the numbers of genes that are expressed in at least 50\% and at least 25\% of cells. 
 
-The plot will atteempt to colour the points based on whether the corresponding features are labelled as feature controls in \code{object}.
+The plot will attempt to colour the points based on whether the corresponding features are labelled as feature controls in \code{object}.
 This can be turned off by setting \code{controls=NULL}.
 }
 \examples{
