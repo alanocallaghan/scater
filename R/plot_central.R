@@ -153,17 +153,17 @@ NULL
         plot_out <- .resolve_plot_colours(plot_out, object$colour_by, colour_by, fill = point_out$fill)
     }
 
-    ## Setting the legend details.
-    plot_out <- .add_extra_guide(plot_out, shape_by, size_by)
-    if ( legend == "none" ) {
-        plot_out <- plot_out + theme(legend.position = "none")
-    }
-
     ## Define plotting theme
     if ( requireNamespace("cowplot", quietly = TRUE) ) {
         plot_out <- plot_out + cowplot::theme_cowplot(theme_size)
     } else {
         plot_out <- plot_out + theme_bw(theme_size)
+    }
+
+    ## Setting the legend details.
+    plot_out <- .add_extra_guide(plot_out, shape_by, size_by)
+    if ( legend == "none" ) {
+        plot_out <- plot_out + theme(legend.position = "none")
     }
 
     plot_out
