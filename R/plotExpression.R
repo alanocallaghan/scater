@@ -160,8 +160,7 @@ plotExpression <- function(object, features, x = NULL,
     # Creating the plot with faceting.        
     plot_out <- .central_plotter(evals_long, xlab = xlab, ylab = ylab,
                                  shape_by = shape_by, colour_by = colour_by, size_by = size_by, fill_by = fill_by,
-                                 legend = legend, ..., 
-                                 point_FUN = NULL) # disabled arguments
+                                 legend = legend, ..., point_FUN = NULL)
     if (!one_facet) {
         plot_out <- plot_out + facet_wrap(~Feature, ncol = ncol, scales = scales)
     }

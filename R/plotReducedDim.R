@@ -94,7 +94,7 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2,
 
         plot_out <- .central_plotter(df_to_plot, xlab = x_lab, ylab = y_lab,
                                      colour_by = colour_by, size_by = size_by, shape_by = shape_by, 
-                                     legend=legend, ...)
+                                     legend=legend, ..., point_FUN=NULL)
         if (add_ticks) {
             plot_out <- plot_out + geom_rug(colour = "gray20", alpha = 0.65)
         }
