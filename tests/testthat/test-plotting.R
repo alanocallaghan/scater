@@ -178,18 +178,26 @@ test_that("visualization variable picker works properly: misc", {
 })
 
 #################################################
-# Checking the specific plotting functions.
+# Checking plotScater.
 
 test_that("plotScater works as expected", {
     expect_s3_class(plotScater(example_sce), "ggplot")
     expect_s3_class(plotScater(example_sce, colour_by = "Cell_Cycle"), "ggplot")
     expect_s3_class(plotScater(example_sce, block1 = "Cell_Cycle"), "ggplot")
     expect_s3_class(plotScater(example_sce, block2 = "Cell_Cycle"), "ggplot")
+    expect_s3_class(plotScater(example_sce, block1 = "Treatment", block2 = "Cell_Cycle"), "ggplot")
+
+    # Different types of colouring are possible
+    expect_s3_class(plotScater(example_sce, colour_by = "Cell_Cycle"), "ggplot")
+    expect_s3_class(plotScater(example_sce, colour_by = "Gene_0001"), "ggplot")
 
     expect_s3_class(plotScater(example_sce, block1 = "Treatment", colour_by = "Cell_Cycle"), "ggplot")
-    expect_s3_class(plotScater(example_sce, block1 = "Cell_Cycle", block2 = "Treatment"), "ggplot")
-    expect_s3_class(plotScater(example_sce, block1 = "Mutation_Status", block2 = "Cell_Cycle", colour_by = "Gene_0001"), "ggplot")
+    expect_s3_class(plotScater(example_sce, block1 = "Mutation_Status", colour_by = "Gene_0001"), "ggplot")
 
+    expect_s3_class(plotScater(example_sce, block1 = "Cell_Cycle", block2 = "Treatment", colour_by = "Cell_Cycle"), "ggplot")
+    expect_s3_class(plotScater(example_sce, block1 = "Cell_Cycle", block2 = "Treatment", colour_by = "Gene_0001"), "ggplot")
+
+    # Responds to different type of expression values.
     cpm(example_sce) <- calculateCPM(example_sce)
     expect_s3_class(plotScater(example_sce, exprs_values="cpm"), "ggplot")
     expect_error(plotScater(example_sce, exprs_values="tpm"), "not in names")
@@ -208,9 +216,9 @@ test_that("we can produce PCA scatterplots", {
     expect_s3_class(plotPCA(example_sce, size_by = "Gene_0001"), "ggplot")
     expect_s3_class(plotPCA(example_sce, shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", size_by = "Gene_0001"), "ggplot")
-    expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPCA(example_sce, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
 
     # Checking other arguments are passed successfully to plotReducedDim.
     expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", legend="none"), "ggplot")
