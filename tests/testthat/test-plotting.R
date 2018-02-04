@@ -211,6 +211,11 @@ test_that("we can produce PCA scatterplots", {
     expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPCA(example_sce, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+
+    # Checking other arguments are passed successfully to plotReducedDim.
+    expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", legend="none"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, exprs_values="counts"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, percentVar=c(19, 5)), "ggplot")
     
     # Checking that re-running works, responsive to feature scaling.
     expect_s3_class(P2 <- plotPCA(example_sce, rerun=TRUE, run_args=list(scale_features=FALSE)), "ggplot")
@@ -238,6 +243,11 @@ test_that("we can produce PCA pairplots", {
     expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPCA(example_sce, ncomponents=4, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+
+    # Checking other arguments are passed successfully to plotReducedDim.
+    expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Cell_Cycle", legend="none"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, ncomponents=4, exprs_values="counts"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, ncomponents=4, percentVar=c(19, 5, 3, 2)), "ggplot")
     
     # Checking that re-running works, responsive to feature scaling.
     expect_s3_class(P2 <- plotPCA(example_sce, ncomponents=4, rerun=TRUE, run_args=list(scale_features=FALSE)), "ggplot")
@@ -313,75 +323,42 @@ test_that("we can produce MDS plots", {
 })
 
 #################################################
-
-context("test plotExpression")
+# Testing plotExpression
 
 test_that("we can produce expression plots with different expression values", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
-    example_sce <- calculateQCMetrics(example_sce)
+    # Testing various 'by x' scenarios.
+    for (gene_set in list("Gene_0001", rownames(example_sce)[1:5], 10, 6:20)) { # different numbers of genes, types of specification.
+        for (x in list(NULL, "Cell_Cycle", "Gene_0100")) { # nothing, categorical, or continuous.
+            expect_s3_class(plotExpression(example_sce, gene_set, x = x), "ggplot")
+            expect_s3_class(plotExpression(example_sce, gene_set, x = x, colour_by = "Cell_Cycle"), "ggplot")
+            expect_s3_class(plotExpression(example_sce, gene_set, x = x, size_by = "Gene_0001"), "ggplot")
+            expect_s3_class(plotExpression(example_sce, gene_set, x = x, shape_by = "Treatment"), "ggplot")
+        }
+    }
 
-    expect_that(plotExpression(example_sce, "Gene_0001", x = "Mutation_Status"),
-                is_a("ggplot"))
-    expect_that(plotExpression(example_sce, c("Gene_0001", "Gene_0004"), 
-                               x = "Mutation_Status"), is_a("ggplot"))
-    expect_that(plotExpression(example_sce, "Gene_0001", x = "Gene_0002"),
-                is_a("ggplot"))
-    expect_that(plotExpression(example_sce, c("Gene_0001", "Gene_0004"), 
-                               x = "Gene_0002"), is_a("ggplot"))
-    expect_that(plotExpression(example_sce, 1:4, "Cell_Cycle"), is_a("ggplot"))
-    expect_that(plotExpression(example_sce, 1:4, "Gene_0004"), is_a("ggplot"))
-    expect_that(plotExpression(example_sce, 1:4), is_a("ggplot"))
-    expect_that(plotExpression(example_sce, 1:4, scales = "fixed"), 
-                is_a("ggplot"))
-    expect_that(plotExpression(example_sce, rownames(example_sce)[1:6],
-                   x = "Mutation_Status", exprs_values = "exprs", 
-                   colour = "Treatment"),  is_a("ggplot"))
-    expect_that(plotExpression(example_sce, rownames(example_sce)[1:6],
-                               x = "Mutation_Status", exprs_values = "logcounts", 
-                               colour = "Treatment"),  is_a("ggplot"))
-    expect_error(plotExpression(example_sce, rownames(example_sce)[1:6],
-                               x = "Mutation_Status", exprs_values = "silly", 
-                               colour = "Treatment"), "not in names")
-    
-})
+    # Testing different visualization schemes.
+    gene_set <- rownames(example_sce)[1:20]
+    expect_s3_class(plotExpression(example_sce, gene_set, colour_by = "Cell_Cycle", size_by = "Gene_0001"), "ggplot")
+    expect_s3_class(plotExpression(example_sce, gene_set, colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
+    expect_s3_class(plotExpression(example_sce, gene_set, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+    expect_s3_class(plotExpression(example_sce, gene_set, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
 
-test_that("we can plot expression for named genes", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
-    example_sce <- calculateQCMetrics(example_sce)
-    geneset <- rownames(example_sce)[1:6]
-    expect_that(plotExpression(example_sce, geneset, "Cell_Cycle"),
-                is_a("ggplot"))
-    expect_that(plotExpression(example_sce, geneset, "Gene_0004"), 
-                is_a("ggplot"))
-})
+    # Testing options when dealing with many genes and no 'x' specified.
+    expect_s3_class(plotExpression(example_sce, gene_set, one_facet=FALSE), "ggplot")
+    expect_s3_class(plotExpression(example_sce, gene_set, feature_colours=FALSE), "ggplot")
 
-test_that("plotting expression for an object with non-NULL is_exprs() ", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
-    example_sce <- calculateQCMetrics(example_sce)
-    geneset <- rownames(example_sce)[1:6]
-    assay(example_sce, "is_exprs") <- counts(example_sce) > 0.5
-    expect_that(plotExpression(example_sce, geneset, "Cell_Cycle"),
-                is_a("ggplot"))
-    expect_that(plotExpression(example_sce, geneset, "Gene_0004"), 
-                is_a("ggplot"))
+    # Fiddling with all the semi-analysis options.
+    expect_s3_class(plotExpression(example_sce, gene_set, show_violin=FALSE), "ggplot")
+    expect_s3_class(plotExpression(example_sce, gene_set, show_median=TRUE), "ggplot")
+    expect_s3_class(plotExpression(example_sce, gene_set, jitter="jitter"), "ggplot")
+
+    expect_s3_class(plotExpression(example_sce, gene_set, x="Gene_0001", show_smooth=TRUE), "ggplot")
+    expect_s3_class(plotExpression(example_sce, gene_set, x="Gene_0001", show_smooth=TRUE, show_se=FALSE), "ggplot")
+
+    # Checking for behaviour with different values.
+    expect_s3_class(plotExpression(example_sce, gene_set, x = "Mutation_Status", exprs_values = "counts"),  "ggplot")
+    expect_s3_class(plotExpression(example_sce, gene_set, x = "Mutation_Status", exprs_values = "counts", log2_values = TRUE),  "ggplot")
+    expect_error(plotExpression(example_sce, rownames(example_sce)[1:6], exprs_values = "silly", "not in names")
 })
 
 test_that("we can produce plots showing cells in plate position", {
