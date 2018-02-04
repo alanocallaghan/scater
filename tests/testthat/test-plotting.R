@@ -8,7 +8,7 @@ example_sce <- SingleCellExperiment(
     assays = list(counts = sc_example_counts), 
     colData = sc_example_cell_info)
 example_sce <- calculateQCMetrics(example_sce)
-example_sce <- normalize(example_sce)
+suppressWarnings(example_sce <- normalize(example_sce))
 
 #################################################
 # Testing the baseline visualization picker.
