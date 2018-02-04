@@ -1,4 +1,5 @@
-# Test functions for QC
+## Test functions for QC
+## library(scater); library(testthat); source("test-qc.R")
 
 context("test controls functionality")
 
@@ -330,15 +331,15 @@ test_that("plotHighestExprs works as expected", {
         plotHighestExprs(example_sce), 
         is_a("ggplot"))
     expect_that(
-        plotHighestExprs(example_sce, col_by_variable = "Mutation_Status"), 
+        plotHighestExprs(example_sce, colour_cells_by= "Mutation_Status"), 
         is_a("ggplot"))
     
     sce.blank <- SingleCellExperiment(
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
-    expect_warning(
+    expect_error(
         plotHighestExprs(sce.blank), 
-        "not found")
+        "failed to find")
     sce.blank <- calculateQCMetrics(sce.blank)
     expect_that(
         plotHighestExprs(sce.blank), 

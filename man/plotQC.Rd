@@ -43,7 +43,7 @@ example_sce <- normalize(example_sce)
 drop_genes <- apply(exprs(example_sce), 1, function(x) {var(x) == 0})
 example_sce <- example_sce[!drop_genes, ]
 example_sce <- calculateQCMetrics(example_sce)
-plotQC(example_sce, type="high", col_by_variable="Mutation_Status")
+plotQC(example_sce, type="high", colour_cells_by="Mutation_Status")
 plotQC(example_sce, type="find", variable="total_features")
 vars <- names(colData(example_sce))[c(2:3, 5:14)]
 plotQC(example_sce, type="expl", variables=vars)
