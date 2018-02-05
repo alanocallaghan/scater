@@ -10,8 +10,8 @@
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in visualization - see \code{?"\link{scater-vis-var}"} for details.
-#' @param by_show_single Logical scalar specifying whether single-level factors should be used for visualization, see \code{?"\link{scater-vis-var}"} for details.
+#' for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.
+#' @param by_show_single Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.
 #' @param legend Logical scalar specifying whether a legend should be shown.
 #' @param theme_size Numeric scalar, see \code{?"\link{scater-plot-args}"} for details.
 #' @param alpha Numeric scalar specifying the transparency of the points, see \code{?"\link{scater-plot-args}"} for details.

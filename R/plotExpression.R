@@ -11,8 +11,8 @@
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in visualization - see \code{?"\link{scater-vis-var}"} for details.
-#' @param by_show_single Logical scalar specifying whether single-level factors should be used for visualization, see \code{?"\link{scater-vis-var}"} for details.
+#' for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.
+#' @param by_show_single Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.
 #' @param xlab String specifying the label for x-axis.
 #' If \code{NULL} (default), \code{x} will be used as the x-axis label.
 #' @param feature_colours Logical scalar indicating whether violins should be coloured by feature when \code{x} and \code{colour_by} are not specified and \code{one_facet=TRUE}.

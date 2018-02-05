@@ -11,8 +11,8 @@
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in visualization - see \code{?"\link{scater-vis-var}"} for details.
-#' @param by_show_single Logical scalar specifying whether single-level factors should be used for visualization, see \code{?"\link{scater-vis-var}"} for details.
+#' for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.
+#' @param by_show_single Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -102,8 +102,8 @@ plotCellData <- function(...) {
 #' @param shape_by Specification of a row metadata field or a cell to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param size_by Specification of a row metadata field or a cell to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in visualization - see \code{?"\link{scater-vis-var}"} for details.
-#' @param by_show_single Logical scalar specifying whether single-level factors should be used for visualization, see \code{?"\link{scater-vis-var}"} for details.
+#' for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.
+#' @param by_show_single Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 

@@ -6,13 +6,13 @@
 #' @param use_dimred A string or integer scalar indicating the reduced dimension result in \code{reducedDims(object)} to plot.
 #' @param ncomponents A numeric scalar indicating the number of dimensions to plot, starting from the first dimension.
 #' @param percentVar A numeric vector giving the proportion of variance in expression explained by each reduced dimension. 
+#' Only expected to be used in PCA settings, e.g., in the \code{\link[scater]{plotPCA}} function.
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in visualization - see \code{?"\link{scater-vis-var}"} for details.
-#' @param by_show_single Logical scalar specifying whether single-level factors should be used for visualization, see \code{?"\link{scater-vis-var}"} for details.
-#' Only expected to be used internally in the \code{\link[scater]{plotPCA}} function.
+#' for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.
+#' @param by_show_single Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #' @param add_ticks Logical scalar indicating whether ticks should be drawn on the axes corresponding to the location of each point.
 #'
