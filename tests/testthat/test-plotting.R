@@ -288,6 +288,9 @@ test_that("we can produce TSNE plots", {
     # Responsive to changes in parameters.
     expect_s3_class(P3 <- plotTSNE(example_sce, run_args=list(perplexity=10)), "ggplot")
     expect_false(isTRUE(all.equal(P, P3)))
+    
+    # Throws a warning if we try to specify this locally.
+    expect_warning(plotTSNE(example_sce, perplexity=10), "non-plotting arguments")
 
     # Handles multiple components properly.
     expect_s3_class(P4 <- plotTSNE(example_sce, ncomponents=4, run_args=list(rand_seed=20)), "ggplot")
@@ -309,6 +312,9 @@ test_that("we can produce diffusion maps", {
     expect_s3_class(P3 <- plotDiffusionMap(example_sce, run_args=list(k=13)), "ggplot")
     expect_false(isTRUE(all.equal(P, P3)))
 
+    # Throws a warning if we try to specify this locally.
+    expect_warning(plotDiffusionMap(example_sce, k=10), "non-plotting arguments")
+
     # Handles multiple components properly.
     expect_s3_class(P4 <- plotDiffusionMap(example_sce, ncomponents=4, run_args=list(rand_seed=20)), "ggplot")
 #    example_sce <- runDiffusionMap(example_sce, ncomponents=4, rand_seed=20)
@@ -328,6 +334,9 @@ test_that("we can produce MDS plots", {
     # Responsive to changes in parameters.
     expect_s3_class(P3 <- plotMDS(example_sce, run_args=list(method="manhattan")), "ggplot")
     expect_false(isTRUE(all.equal(P, P3)))
+
+    # Throws a warning if we try to specify this locally.
+    expect_warning(plotMDS(example_sce, method="manhattan"), "non-plotting arguments")
 
     # Handles multiple components properly.
     expect_s3_class(P4 <- plotMDS(example_sce, ncomponents=4), "ggplot")

@@ -60,10 +60,10 @@
 #' plotPCA(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment",
 #'     size_by = "Mutation_Status")
 #'
-#' ## Experiment with legend
+#' ## Force legend to appear for shape:
 #' example_subset <- example_sce[, example_sce$Treatment == "treat1"]
 #' plotPCA(example_subset, colour_by = "Cell_Cycle", shape_by = "Treatment", 
-#'     by_show_single = TRUE, legend = TRUE)
+#'     by_show_single = TRUE)
 #'
 #' ## Examples plotting more than 2 PCs
 #' plotPCA(example_sce, ncomponents = 4, colour_by = "Treatment",
@@ -148,7 +148,7 @@ setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
 # from having running arguments in "..." to plotting arguments in "...". It can
 # be removed in the next development cycle. 
 {
-    plot_arg_names <- Reduce(union, list(names(formals(plotReducedDim)), formals(.central_plotter), formals(paired_reddim_plot)))
+    plot_arg_names <- Reduce(union, list(names(formals(plotReducedDim)), names(formals(.central_plotter)), names(formals(paired_reddim_plot))))
     extra_args <- list(...)
     for_plotting <- !is.na(pmatch(names(extra_args), plot_arg_names))
     if (!all(for_plotting)) { 
