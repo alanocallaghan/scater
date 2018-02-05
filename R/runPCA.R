@@ -10,7 +10,8 @@
 #' @param exprs_values Integer scalar or string indicating which assay of \code{object} should be used to obtain the expression values for the calculations.
 #' @param scale_features Logical scalar, should the expression values be standardised so that each feature has unit variance?
 #' @param use_coldata Logical scalar specifying whether the column data should be used instead of expression values to perform PCA.
-#' @param selected_variables Character vector indicating which variables in \code{colData(object)} to use for PCA when \code{use_coldata=TRUE}.
+#' @param selected_variables List of strings or a character vector indicating which variables in \code{colData(object)} to use for PCA when \code{use_coldata=TRUE}.
+#' If a list, each entry can take the form described in \code{?"\link{scater-vis-var}"}.
 #' @param detect_outliers Logical scalar, should outliers be detected based on PCA coordinates generated from column-level metadata? 
 #'
 #' @details 
@@ -57,28 +58,32 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
        selected_variables = NULL, detect_outliers = FALSE) {
 
     if ( use_coldata ) {
-        ## select pData features to use
         if ( is.null(selected_variables) ) {
-            selected_variables <- c("pct_counts_top_100_features",
-                                    "total_features",
-                                    "pct_counts_feature_control",
-                                    "total_features_feature_control",
-                                    "log10_total_counts_endogenous",
-                                    "log10_total_counts_feature_control")
-        }
+            selected_variables <- list()
+            it <- 1L
 
-        col_data_names <- colnames(colData(object)) 
-        use_variable <- col_data_names %in% selected_variables
-        vars_not_found <- !(selected_variables %in% col_data_names)
-        if ( any(vars_not_found) ) {
-            for (missing_var in selected_variables[vars_not_found]) {
-                warning(sprintf("selected variable '%s' not found in 'colData(object)'", 
-                                missing_var))
+            # Fishing out the (possibly compacted) metadata fields.
+            for (field in c("pct_counts_in_top_100_features",
+                            "total_features_by_counts",
+                            "pct_counts_feature_control",
+                            "total_features_by_counts_feature_control",
+                            "log10_total_counts_endogenous",
+                            "log10_total_counts_feature_control")) {
+                out <- .qc_hunter(object, field, mode = "column", error = FALSE)
+                if (!is.null(out)) {
+                    selected_variables[[it]] <- out
+                    it <- it + 1L
+                }
             }
         }
-        ## scale double variables
-        exprs_to_plot <- scale(colData(object)[, use_variable],
-                               scale = scale_features)
+
+        # Constructing a matrix - presumably all doubles.
+        exprs_to_plot <- matrix(0, ncol(object), length(selected_variables))
+        for (it in seq_along(selected_variables)) {
+            exprs_to_plot[,it] <- .choose_vis_values(object, selected_variables[[it]], 
+                mode = "column", search = "metadata")$val
+        }
+
     } else {
         exprs_mat <- assay(object, i = exprs_values)
         
@@ -89,17 +94,20 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
             feature_set <- o[seq_len(min(ntop, length(rv)))]
         }
 
-        # Subsetting to the desired features (do NOT move below 'scale()')
+        # Subsetting to the desired features.
         exprs_to_plot <- exprs_mat[feature_set,, drop = FALSE]
 
-        ## Standardise expression if scale_features argument is TRUE
-        exprs_to_plot <- scale(t(exprs_to_plot), scale = scale_features)
+        # Transposing for downstream use (cells are now rows).
+        exprs_to_plot <- t(exprs_to_plot)
     }
 
     ## Drop any features with zero variance
-    keep_feature <- .colVars(exprs_to_plot) > 0.001
+    keep_feature <- .colVars(exprs_to_plot) > 1e-8
     keep_feature[is.na(keep_feature)] <- FALSE
     exprs_to_plot <- exprs_to_plot[, keep_feature]
+
+    ## Scaling to have equal variance (done BEFORE outlier detection).
+    exprs_to_plot <- scale(exprs_to_plot, scale = scale_features)
 
     ## conduct outlier detection
     if ( detect_outliers && use_coldata ) {
