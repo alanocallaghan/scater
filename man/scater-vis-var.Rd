@@ -56,6 +56,19 @@ Visualization will then use the expression profile for all features in that cell
 }
 }
 
+\section{Miscellaneous details}{
+
+Most functions will have a \code{by_exprs_values} parameter. 
+This defines the assay of the SingleCellExperiment object from which expression values are extracted for use in colouring, shaping or sizing the points.
+The setting of \code{by_exprs_values} will usually default to \code{"logcounts"}, or to the value of \code{exprs_values} in functions such as \code{\link{plotExpression}}.
+However, it can be specified separately from \code{exprs_values}, which is useful for visualizing two different types of expression values on the same plot.
+
+Most functions will also have a \code{by_show_single} parameter.
+If \code{FALSE}, variables with only one level are not used for visualization, i.e., the visual aspect (colour or shape or size) is set to the default for all points.
+No guide is created for this aspect, avoiding clutter in the legend when that aspect provides no information.
+If \code{TRUE}, all supplied variables are used for visualization, regardless of how many levels they have.
+}
+
 \seealso{
 \code{\link{plotColData}}, 
 \code{\link{plotRowData}}, 

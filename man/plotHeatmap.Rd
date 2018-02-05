@@ -6,7 +6,8 @@
 \usage{
 plotHeatmap(object, features, columns = NULL, exprs_values = "logcounts",
   center = FALSE, zlim = NULL, symmetric = FALSE, color = NULL,
-  colour_columns_by = NULL, ...)
+  colour_columns_by = NULL, by_exprs_values = exprs_values,
+  by_show_single = FALSE, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -33,6 +34,11 @@ This defaults to the default setting in \code{\link[pheatmap]{pheatmap}}.}
 \item{colour_columns_by}{A list of values specifying how the columns should be annotated with colours.
 Each entry of the list can be of the form described by \code{?"\link{scater-vis-var}"}.
 A character vector can also be supplied and will be treated as a list of strings.}
+
+\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
+for colouring of column-level data - see \code{?"\link{scater-vis-var}"} for details.}
+
+\item{by_show_single}{Logical scalar specifying whether single-level factors should be used for column-level colouring, see \code{?"\link{scater-vis-var}"} for details.}
 
 \item{...}{Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.}
 }

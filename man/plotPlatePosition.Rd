@@ -5,8 +5,9 @@
 \title{Plot cells in plate positions}
 \usage{
 plotPlatePosition(object, plate_position = NULL, colour_by = NULL,
-  size_by = NULL, shape_by = NULL, legend = "auto",
-  exprs_values = "logcounts", theme_size = 24, alpha = 0.6, size = 24)
+  size_by = NULL, shape_by = NULL, by_exprs_values = "logcounts",
+  by_show_single = FALSE, legend = TRUE, theme_size = 24, alpha = 0.6,
+  size = 24)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -21,9 +22,12 @@ Alternatively, a list of two factors (\code{"row"} and \code{"column"}) can be s
 
 \item{shape_by}{Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values.}
 
-\item{legend}{String specifying how the legend(s) be shown, see \code{?"\link{scater-plot-args}"} for details.}
+\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
+for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.}
 
-\item{exprs_values}{A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from, for use in colouring, shaping or sizing.}
+\item{by_show_single}{Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.}
+
+\item{legend}{Logical scalar specifying whether a legend should be shown.}
 
 \item{theme_size}{Numeric scalar, see \code{?"\link{scater-plot-args}"} for details.}
 

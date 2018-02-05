@@ -4,9 +4,10 @@
 \alias{plotReducedDim}
 \title{Plot reduced dimensions}
 \usage{
-plotReducedDim(object, use_dimred, ncomponents = 2, colour_by = NULL,
-  shape_by = NULL, size_by = NULL, exprs_values = "logcounts",
-  legend = "auto", percentVar = NULL, ..., add_ticks = TRUE)
+plotReducedDim(object, use_dimred, ncomponents = 2, percentVar = NULL,
+  colour_by = NULL, shape_by = NULL, size_by = NULL,
+  by_exprs_values = "logcounts", by_show_single = FALSE, ...,
+  add_ticks = TRUE)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -15,18 +16,19 @@ plotReducedDim(object, use_dimred, ncomponents = 2, colour_by = NULL,
 
 \item{ncomponents}{A numeric scalar indicating the number of dimensions to plot, starting from the first dimension.}
 
+\item{percentVar}{A numeric vector giving the proportion of variance in expression explained by each reduced dimension. 
+Only expected to be used in PCA settings, e.g., in the \code{\link[scater]{plotPCA}} function.}
+
 \item{colour_by}{Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values.}
 
 \item{shape_by}{Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values.}
 
 \item{size_by}{Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values.}
 
-\item{exprs_values}{A string or integer scalar specifying the assay from which to obtain expression values for colouring, sizing or shaping the points.}
+\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
+for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.}
 
-\item{legend}{String specifying how the legend(s) be shown, see \code{?"\link{scater-plot-args}"} for details.}
-
-\item{percentVar}{A numeric vector giving the proportion of variance in expression explained by each reduced dimension. 
-Only expected to be used internally in the \code{\link[scater]{plotPCA}} function.}
+\item{by_show_single}{Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 

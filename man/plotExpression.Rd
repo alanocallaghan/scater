@@ -6,8 +6,9 @@
 \usage{
 plotExpression(object, features, x = NULL, exprs_values = "logcounts",
   log2_values = FALSE, colour_by = NULL, shape_by = NULL,
-  size_by = NULL, legend = "auto", xlab = NULL, feature_colours = TRUE,
-  one_facet = TRUE, ncol = 2, scales = "fixed", ...)
+  size_by = NULL, by_exprs_values = exprs_values, by_show_single = FALSE,
+  xlab = NULL, feature_colours = TRUE, one_facet = TRUE, ncol = 2,
+  scales = "fixed", ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values and other metadata.}
@@ -26,7 +27,10 @@ plotExpression(object, features, x = NULL, exprs_values = "logcounts",
 
 \item{size_by}{Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values.}
 
-\item{legend}{String specifying how the legend(s) be shown, see \code{?"\link{scater-plot-args}"} for details.}
+\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
+for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.}
+
+\item{by_show_single}{Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.}
 
 \item{xlab}{String specifying the label for x-axis.
 If \code{NULL} (default), \code{x} will be used as the x-axis label.}

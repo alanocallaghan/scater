@@ -5,7 +5,7 @@
 \title{Plot frequency against mean for each feature}
 \usage{
 plotExprsFreqVsMean(object, freq_exprs, mean_exprs, controls,
-  show_smooth = TRUE, show_se = TRUE, ...)
+  by_show_single = FALSE, show_smooth = TRUE, show_se = TRUE, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -21,6 +21,8 @@ If not supplied or \code{NULL}, this defaults to \code{"mean_counts"} or equival
 \item{controls}{Specification of the row-level metadata column indicating whether a feature is a control, see \code{?"\link{scater-vis-var}"} for possible values.
 Only metadata fields will be searched, \code{assays} will not be used.
 If not supplied, this defaults to \code{"is_feature_control"} or equivalent for compacted data.}
+
+\item{by_show_single}{Logical scalar specifying whether a single-level factor for \code{controls} should be used for colouring, see \code{?"\link{scater-vis-var}"} for details.}
 
 \item{show_smooth}{Logical scalar, should a smoothed fit (through feature controls if available; all features otherwise) be shown on the plot? 
 See \code{\link[ggplot2]{geom_smooth}} for details.}

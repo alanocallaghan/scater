@@ -6,6 +6,7 @@
 \usage{
 plotHighestExprs(object, n = 50, controls, colour_cells_by,
   drop_features = NULL, exprs_values = "counts",
+  by_exprs_values = exprs_values, by_show_single = TRUE,
   feature_names_to_plot = NULL, as_percentage = TRUE)
 }
 \arguments{
@@ -25,8 +26,13 @@ For example, spike-in transcripts might be dropped to examine the contribution f
 
 \item{exprs_values}{A integer scalar or string specifying the assay to obtain expression values from.}
 
-\item{feature_names_to_plot}{Specification of which row-level metadata column contains the feature names, see \code{?"\link{scater-vis-var}"} for possible values.
+\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
+for use in colouring - see \code{?"\link{scater-vis-var}"} for details.}
+
+\item{by_show_single}{Logical scalar specifying whether single-level factors should be used for colouring, see \code{?"\link{scater-vis-var}"} for details.
 Default is \code{NULL}, in which case  \code{rownames(object)} are used.}
+
+\item{feature_names_to_plot}{Specification of which row-level metadata column contains the feature names, see \code{?"\link{scater-vis-var}"} for possible values.}
 
 \item{as_percentage}{logical scalar indicating whether percentages should be  plotted. 
 If \code{FALSE}, the raw \code{exprs_values} are shown instead.}

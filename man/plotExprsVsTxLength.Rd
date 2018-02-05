@@ -7,8 +7,8 @@
 plotExprsVsTxLength(object, tx_length = "median_feat_eff_len",
   length_is_assay = FALSE, exprs_values = "logcounts",
   log2_values = FALSE, colour_by = NULL, shape_by = NULL,
-  size_by = NULL, legend = "auto", xlab = "Median transcript length",
-  show_exprs_sd = FALSE, ...)
+  size_by = NULL, by_exprs_values = exprs_values, by_show_single = FALSE,
+  xlab = "Median transcript length", show_exprs_sd = FALSE, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -30,7 +30,10 @@ Otherwise, if \code{length_is_assay=TRUE}, \code{tx_length} should be the name o
 
 \item{size_by}{Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values.}
 
-\item{legend}{String specifying how the legend(s) be shown, see \code{?"\link{scater-plot-args}"} for details.}
+\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
+for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.}
+
+\item{by_show_single}{Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.}
 
 \item{xlab}{String specifying the label for x-axis.}
 

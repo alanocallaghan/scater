@@ -6,7 +6,8 @@
 \title{Plot row metadata}
 \usage{
 plotRowData(object, y, x = NULL, colour_by = NULL, shape_by = NULL,
-  size_by = NULL, exprs_values = "logcounts", ...)
+  size_by = NULL, by_exprs_values = "logcounts", by_show_single = FALSE,
+  ...)
 
 plotFeatureData(...)
 }
@@ -25,7 +26,10 @@ Again, only metadata fields will be searched, \code{assays} will not be used.}
 
 \item{size_by}{Specification of a row metadata field or a cell to size by, see \code{?"\link{scater-vis-var}"} for possible values.}
 
-\item{exprs_values}{A string or integer scalar specifying the assay to obtain expression values for colouring or shaping or sizing points by.}
+\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
+for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.}
+
+\item{by_show_single}{Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }

@@ -4,25 +4,30 @@
 \alias{plotScater}
 \title{Plot an overview of expression for each cell}
 \usage{
-plotScater(x, block1 = NULL, block2 = NULL, colour_by = NULL,
-  nfeatures = 500, exprs_values = "counts", ncol = 3, line_width = 1.5,
-  theme_size = 10)
+plotScater(x, nfeatures = 500, exprs_values = "counts", colour_by = NULL,
+  by_exprs_values = exprs_values, by_show_single = FALSE, block1 = NULL,
+  block2 = NULL, ncol = 3, line_width = 1.5, theme_size = 10)
 }
 \arguments{
 \item{x}{A SingleCellExperiment object.}
+
+\item{nfeatures}{Numeric scalar indicating the number of top-expressed features to show n the plot.}
+
+\item{exprs_values}{String or integer scalar indicating which assay of \code{object} should be used to obtain the expression values for this plot.}
+
+\item{colour_by}{Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
+The curve for each cell will be coloured according to this specification.}
+
+\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
+for use in line colouring - see \code{?"\link{scater-vis-var}"} for details.}
+
+\item{by_show_single}{Logical scalar specifying whether single-level factors should be used for line colouring, see \code{?"\link{scater-vis-var}"} for details.}
 
 \item{block1}{Specification of a factor by which to separate the cells into blocks (separate panels) in the plot. 
 This can be any type of value described in \code{?"\link{scater-vis-var}"} for column-level metadata.
 Default is \code{NULL}, in which case there is no blocking.}
 
 \item{block2}{Same as \code{block1}, providing another level of blocking.}
-
-\item{colour_by}{Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
-The curve for each cell will be coloured according to this specification.}
-
-\item{nfeatures}{Numeric scalar indicating the number of top-expressed features to show n the plot.}
-
-\item{exprs_values}{String or integer scalar indicating which assay of \code{object} should be used to obtain the expression values for this plot.}
 
 \item{ncol}{Number of columns to use for \code{\link{facet_wrap}} if only one block is defined.}
 
