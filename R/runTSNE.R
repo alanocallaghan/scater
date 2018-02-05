@@ -15,9 +15,9 @@
 #' Defaults to all available dimensions.
 #' @param rand_seed Numeric scalar that can be passed to \code{set.seed} to make the results reproducible.
 #' @param perplexity Numeric scalar defining the perplexity parameter, see \code{?\link[Rtsne]{Rtsne}} for more details.
-#' @param pca Logical scalar passed to \code{\link{Rtsne}}, indicating whether an initial PCA step should be performed.
+#' @param pca Logical scalar passed to \code{\link[Rtsne]{Rtsne}}, indicating whether an initial PCA step should be performed.
 #' This is ignored if \code{use_dimred} is specified.
-#' @param initial_dims Integer scalar passed to \code{\link{Rtsne}}, specifying the number of principal components to be retained if \code{pca=TRUE}. 
+#' @param initial_dims Integer scalar passed to \code{\link[Rtsne]{Rtsne}}, specifying the number of principal components to be retained if \code{pca=TRUE}. 
 #' @param ... Additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.
 #'
 #' @return 

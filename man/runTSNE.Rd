@@ -33,10 +33,10 @@ Defaults to all available dimensions.}
 
 \item{perplexity}{Numeric scalar defining the perplexity parameter, see \code{?\link[Rtsne]{Rtsne}} for more details.}
 
-\item{pca}{Logical scalar passed to \code{\link{Rtsne}}, indicating whether an initial PCA step should be performed.
+\item{pca}{Logical scalar passed to \code{\link[Rtsne]{Rtsne}}, indicating whether an initial PCA step should be performed.
 This is ignored if \code{use_dimred} is specified.}
 
-\item{initial_dims}{Integer scalar passed to \code{\link{Rtsne}}, specifying the number of principal components to be retained if \code{pca=TRUE}.}
+\item{initial_dims}{Integer scalar passed to \code{\link[Rtsne]{Rtsne}}, specifying the number of principal components to be retained if \code{pca=TRUE}.}
 
 \item{...}{Additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.}
 }

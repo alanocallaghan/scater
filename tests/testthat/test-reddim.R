@@ -140,7 +140,7 @@ test_that("runTSNE works as expected", {
 test_that("runMDS works as expected", {
     sceX <- runMDS(sce, ncomponents = 3)
     expect_identical(reducedDimNames(sceX), "MDS")     
-    expect_identical(dim(reducedDim(sceX, "MDS")), c(ncol(sce2), 3L))
+    expect_identical(dim(reducedDim(sceX, "MDS")), c(ncol(sceX), 3L))
 
     # Testing that various settings work.
     sce2 <- runMDS(sce)
