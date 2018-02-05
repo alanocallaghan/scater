@@ -336,7 +336,10 @@ test_that("plotHighestExprs works as expected", {
     expect_s3_class(plotHighestExprs(wt_qc, as_percentage = FALSE), "ggplot")
     
     expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = "Mutation_Status"), "ggplot")
+    expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = NULL), "ggplot")
     expect_s3_class(plotHighestExprs(wt_qc, controls = "is_feature_control_set1"), "ggplot")
+    expect_s3_class(plotHighestExprs(wt_qc, controls = NULL), "ggplot")
+
     rowData(wt_qc)$Whee <- paste("Feature", seq_len(nrow(wt_qc)))
     expect_s3_class(plotHighestExprs(wt_qc, feature_names_to_plot = "Whee"), "ggplot")
 
@@ -377,20 +380,27 @@ test_that("plotExplanatoryVariables works as expected", {
 
 
 test_that("plotExprsFreqVsMean works as expected", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    example_sce <- calculateQCMetrics(example_sce)
-    expect_that(plotExprsFreqVsMean(example_sce), is_a("ggplot"))
-    
-    example_sce <- calculateQCMetrics(
-        example_sce, feature_controls = list(controls1 = 1:20,
-                                           controls2 = 500:1000),
-        cell_controls = list(set_1 = 1:5,
-                             set_2 = 31:40))
-    expect_that(plotExprsFreqVsMean(example_sce), is_a("ggplot"))
+    expect_s3_class(plotExprsFreqVsMean(wt_qc), "ggplot")
+
+    # Checking arguments are passed to plotRowData.
+    expect_s3_class(plotExprsFreqVsMean(wt_qc, legend='none'), "ggplot")
+    expect_s3_class(plotExprsFreqVsMean(wt_qc, size_by = 'n_cells_by_counts'), "ggplot")
+
+    # Checking we can turn off control colouring and other settings.
+    expect_s3_class(plotExprsFreqVsMean(wt_qc, controls=NULL), "ggplot")
+    expect_s3_class(plotExprsFreqVsMean(wt_qc, show_smooth=FALSE), "ggplot")
+    expect_s3_class(plotExprsFreqVsMean(wt_qc, show_se=FALSE), "ggplot")
+
+    # Avoid computing metrics if there are no controls.
+    rowData(wt_qc)$is_feature_control <- FALSE
+    expect_s3_class(plotExprsFreqVsMean(wt_qc), "ggplot")
+
+    # Checking errors.
+    rowData(wo_qc)$whee <- runif(nrow(wo_qc))
+    rowData(wo_qc)$stuff <- runif(nrow(wo_qc))
+    expect_error(plotExprsFreqVsMean(wo_qc), "failed to find")
+    expect_error(plotExprsFreqVsMean(wo_qc, freq_exprs="whee"), "failed to find")
+    expect_s3_class(plotExprsFreqVsMean(wo_qc, freq_exprs="whee", mean_exprs="stuff", controls=NULL), "ggplot")
 })
 
 
