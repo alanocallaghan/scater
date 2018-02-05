@@ -78,14 +78,18 @@
           as.logical(sum), subset_row - 1L)
 }
 
-.qc_hunter <- function(object, qc_field, mode = "column") 
+.qc_hunter <- function(object, qc_field, mode = "column", error = TRUE) 
 # This function searches for QC fields in the various plotQC functions,
 # accounting for potential compactness.
 {
     if (mode=="column") {
         meta_data <- colData(object)
+        protected <- c("feature_control", "endogenous") 
+        setname <- "^feature_control"
     } else {
         meta_data <- rowData(object)
+        protected <- c("cell_control", "non_control")
+        setname <- "^cell_control"
     }
 
     # Simple is best.
@@ -106,11 +110,12 @@
             next
         }
         
-        suffix <- subfield
-        if (subfield=="all") {
+        if (subfield == "all") {
             suffix <- ""
-        } else if (grepl("^(cell|feature)_control", subfield)) {
-            suffix <- sub("^(cell|feature)_control", "", subfield)
+        } else if (subfield %in% protected) {
+            suffix <- paste0("_", subfield)
+        } else {
+            suffix <- sub(setname, "", subfield)
         }
         
         renamed <- sprintf("%s%s", colnames(sub_meta_data), suffix)
@@ -120,7 +125,13 @@
         }
     }
 
-    stop(sprintf("failed to find '%s' in %s metadata", qc_field, mode))
+    if (error) {
+        FUN <- stop
+    } else {
+        FUN <- warning
+    }
+    FUN(sprintf("failed to find '%s' in %s metadata", qc_field, mode))
+    return(NULL)
 }
 
 ########################################################
