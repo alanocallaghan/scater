@@ -10,7 +10,9 @@
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
-#' @param legend String specifying how the legend(s) be shown, see \code{?"\link{scater-plot-args}"} for details.
+#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
+#' for use in visualization - see \code{?"\link{scater-vis-var}"} for details.
+#' @param by_show_single Logical scalar specifying whether single-level factors should be used for visualization, see \code{?"\link{scater-vis-var}"} for details.
 #' @param xlab String specifying the label for x-axis.
 #' If \code{NULL} (default), \code{x} will be used as the x-axis label.
 #' @param feature_colours Logical scalar indicating whether violins should be coloured by feature when \code{x} and \code{colour_by} are not specified and \code{one_facet=TRUE}.
@@ -86,7 +88,8 @@
 plotExpression <- function(object, features, x = NULL,
                            exprs_values = "logcounts", log2_values = FALSE,
                            colour_by = NULL, shape_by = NULL, size_by = NULL,
-                           legend = "auto", xlab = NULL, feature_colours = TRUE, 
+                           by_exprs_values = exprs_values, by_show_single = FALSE,
+                           xlab = NULL, feature_colours = TRUE, 
                            one_facet = TRUE, ncol = 2, scales = "fixed", 
                            ...) 
 {
@@ -130,12 +133,11 @@ plotExpression <- function(object, features, x = NULL,
     vis_out <- .incorporate_common_vis(data.frame(integer(ncol(object)))[,0], # initializing an empty dataframe.
                                        se = object, mode = "column", 
                                        colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-                                       by_exprs_values = exprs_values, legend = legend)
+                                       by_exprs_values = by_exprs_values, by_show_single = by_show_single)
     
     colour_by <- vis_out$colour_by
     shape_by <- vis_out$shape_by
     size_by <- vis_out$size_by
-    legend <- vis_out$legend
 
     evals_long$shape_by <- rep(vis_out$df$shape_by, each=nfeatures)
     evals_long$size_by <- rep(vis_out$df$size_by, each=nfeatures)
@@ -160,7 +162,7 @@ plotExpression <- function(object, features, x = NULL,
     # Creating the plot with faceting.        
     plot_out <- .central_plotter(evals_long, xlab = xlab, ylab = ylab,
                                  shape_by = shape_by, colour_by = colour_by, size_by = size_by, fill_by = fill_by,
-                                 legend = legend, ..., point_FUN = NULL)
+                                 ..., point_FUN = NULL)
     if (!one_facet) {
         plot_out <- plot_out + facet_wrap(~Feature, ncol = ncol, scales = scales)
     }

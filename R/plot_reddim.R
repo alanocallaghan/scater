@@ -63,7 +63,7 @@
 #' ## Experiment with legend
 #' example_subset <- example_sce[, example_sce$Treatment == "treat1"]
 #' plotPCA(example_subset, colour_by = "Cell_Cycle", shape_by = "Treatment", 
-#'     legend = "all")
+#'     by_show_single = TRUE, legend = TRUE)
 #'
 #' ## Examples plotting more than 2 PCs
 #' plotPCA(example_sce, ncomponents = 4, colour_by = "Treatment",

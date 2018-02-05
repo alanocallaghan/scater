@@ -12,8 +12,10 @@
 #' @param log2_values Logical scalar, specifying whether the expression values be transformed to the log2-scale for plotting (with an offset of 1 to avoid logging zeroes).
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
-#' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
-#' @param legend String specifying how the legend(s) be shown, see \code{?"\link{scater-plot-args}"} for details.
+#' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values.
+#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
+#' for use in visualization - see \code{?"\link{scater-vis-var}"} for details.
+#' @param by_show_single Logical scalar specifying whether single-level factors should be used for visualization, see \code{?"\link{scater-vis-var}"} for details.
 #' @param xlab String specifying the label for x-axis.
 #' @param show_exprs_sd Logical scalar indicating whether the standard deviation of expression values for each feature should be plotted.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
@@ -65,7 +67,8 @@
 plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len", length_is_assay = FALSE,
                                 exprs_values = "logcounts", log2_values = FALSE, 
                                 colour_by = NULL, shape_by = NULL, size_by = NULL, 
-                                legend = "auto", xlab = "Median transcript length", 
+                                by_exprs_values = exprs_values, by_show_single = FALSE,
+                                xlab = "Median transcript length", 
                                 show_exprs_sd = FALSE, ...) 
 {
     ## Check object is an SingleCellExperiment object
@@ -101,12 +104,11 @@ plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len", lengt
     ## Setting up visualization parameters
     vis_out <- .incorporate_common_vis(df_to_plot, se = object, mode = "row", 
                                        colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-                                       by_exprs_values = exprs_values, legend = legend)
+                                       by_exprs_values = by_exprs_values, by_show_single = by_show_single)
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by
     shape_by <- vis_out$shape_by
     size_by <- vis_out$size_by
-    legend <- vis_out$legend
 
     ## Creating a plot object
     if ( is.null(xlab) ){ 
@@ -126,7 +128,7 @@ plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len", lengt
 
     plot_out <- .central_plotter(df_to_plot, xlab = xlab, ylab = ylab,
                                  shape_by = shape_by, colour_by = colour_by, size_by = size_by, 
-                                 legend = legend, point_FUN=point_FUN, ...)
+                                 point_FUN=point_FUN, ...)
     plot_out
 }
 

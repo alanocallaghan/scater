@@ -9,8 +9,10 @@
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
-#' @param legend String specifying how the legend(s) be shown, see \code{?"\link{scater-plot-args}"} for details.
-#' @param exprs_values A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from, for use in colouring, shaping or sizing.
+#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
+#' for use in visualization - see \code{?"\link{scater-vis-var}"} for details.
+#' @param by_show_single Logical scalar specifying whether single-level factors should be used for visualization, see \code{?"\link{scater-vis-var}"} for details.
+#' @param legend Logical scalar specifying whether a legend should be shown.
 #' @param theme_size Numeric scalar, see \code{?"\link{scater-plot-args}"} for details.
 #' @param alpha Numeric scalar specifying the transparency of the points, see \code{?"\link{scater-plot-args}"} for details.
 #' @param size Numeric scalar specifying the size of the points, see \code{?"\link{scater-plot-args}"} for details.
@@ -55,8 +57,8 @@
 #'
 plotPlatePosition <- function(object, plate_position = NULL,
                               colour_by = NULL, size_by = NULL, shape_by = NULL,
-                              legend = "auto", exprs_values = "logcounts", 
-                              theme_size = 24, alpha = 0.6, size = 24) 
+                              by_exprs_values = "logcounts", by_show_single = FALSE,
+                              legend = TRUE, theme_size = 24, alpha = 0.6, size = 24) 
 {
     ## check object is SingleCellExperiment object
     if ( !is(object, "SingleCellExperiment") ) {
@@ -87,12 +89,11 @@ plotPlatePosition <- function(object, plate_position = NULL,
     ## checking visualization arguments
     vis_out <- .incorporate_common_vis(df_to_plot, se = object, mode = "column", 
                                        colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-                                       by_exprs_values = exprs_values, legend = legend)
+                                       by_exprs_values = by_exprs_values, by_show_single = by_show_single)
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by
     shape_by <- vis_out$shape_by
     size_by <- vis_out$size_by
-    legend <- vis_out$legend
 
     ## make the plot with appropriate colours.
     plot_out <- ggplot(df_to_plot, aes_string(x="X", y="Y"))
@@ -113,7 +114,7 @@ plotPlatePosition <- function(object, plate_position = NULL,
 
     ## remove legend if so desired
     plot_out <- .add_extra_guide(plot_out, shape_by, size_by)
-    if ( legend == "none" ) {
+    if ( !legend ) {
         plot_out <- plot_out + theme(legend.position = "none")
     }
 

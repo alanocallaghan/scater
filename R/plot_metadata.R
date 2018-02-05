@@ -10,7 +10,9 @@
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
-#' @param exprs_values A string or integer scalar specifying the assay to obtain expression values for colouring or shaping or sizing points by.
+#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
+#' for use in visualization - see \code{?"\link{scater-vis-var}"} for details.
+#' @param by_show_single Logical scalar specifying whether single-level factors should be used for visualization, see \code{?"\link{scater-vis-var}"} for details.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -63,11 +65,13 @@
 #'    size_by = "Gene_0001", shape_by = "Treatment")
 plotColData <- function(object, y, x = NULL, 
                         colour_by = NULL, shape_by = NULL, size_by = NULL, 
-                        exprs_values = "logcounts", ...)
+                        by_exprs_values = "logcounts", by_show_single = FALSE,
+                        ...)
 {
     .metadata_dispatcher(object, mode = "column", y = y, x = x,
                          colour_by = colour_by, shape_by = shape_by, size_by = size_by,
-                         exprs_values = exprs_values, ...)
+                         by_exprs_values = by_exprs_values, by_show_single = by_show_single,
+                         ...)
 }
 
 
@@ -97,7 +101,9 @@ plotCellData <- function(...) {
 #' @param colour_by Specification of a row metadata field or a cell to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param shape_by Specification of a row metadata field or a cell to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param size_by Specification of a row metadata field or a cell to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
-#' @param exprs_values A string or integer scalar specifying the assay to obtain expression values for colouring or shaping or sizing points by.
+#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
+#' for use in visualization - see \code{?"\link{scater-vis-var}"} for details.
+#' @param by_show_single Logical scalar specifying whether single-level factors should be used for visualization, see \code{?"\link{scater-vis-var}"} for details.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -135,11 +141,13 @@ plotCellData <- function(...) {
 #'
 plotRowData <- function(object, y, x = NULL, 
                         colour_by = NULL, shape_by = NULL, size_by = NULL, 
-                        exprs_values = "logcounts", ...)
+                        by_exprs_values = "logcounts", by_show_single = FALSE,
+                        ...)
 {
     .metadata_dispatcher(object, mode = "row", y = y, x = x,
                          colour_by = colour_by, shape_by = shape_by, size_by = size_by,
-                         exprs_values = exprs_values, ...)
+                         by_exprs_values = by_exprs_values, by_show_single = by_show_single,
+                         ...)
 }
 
 #' @rdname plotRowData 
@@ -152,7 +160,8 @@ plotFeatureData <- function(...) {
 
 .metadata_dispatcher <- function(object, mode, y, x = NULL, 
                         colour_by = NULL, shape_by = NULL, size_by = NULL, 
-                        exprs_values = "logcounts", legend = "auto", ...)
+                        by_exprs_values = "logcounts", by_show_single = FALSE,
+                        ...)
 # Internal function to create the data frames, given an indication of 
 # whether we are looking at row or column-level metadata.    
 {
@@ -174,17 +183,14 @@ plotFeatureData <- function(...) {
     ## checking visualization arguments
     vis_out <- .incorporate_common_vis(df_to_plot, se = object, mode = mode,
                                        colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-                                       by_exprs_values = exprs_values, legend = legend)
+                                       by_exprs_values = by_exprs_values, by_show_single = by_show_single)
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by
     shape_by <- vis_out$shape_by
     size_by <- vis_out$size_by
-    legend <- vis_out$legend
 
     # Creating the plot object:
     .central_plotter(df_to_plot, xlab = x_lab, ylab = y_lab,
                      colour_by = colour_by, size_by = size_by, shape_by = shape_by, 
-                     legend=legend, ..., point_FUN=NULL)
+                     ..., point_FUN=NULL)
 }
-
-

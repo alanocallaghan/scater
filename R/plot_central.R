@@ -52,7 +52,7 @@ NULL
 .central_plotter <- function(object, xlab = NULL, ylab = NULL,
                              colour_by = NULL, shape_by = NULL, size_by = NULL, fill_by = NULL,
                              show_median = FALSE, show_violin = TRUE, show_smooth = FALSE, show_se = TRUE,
-                             theme_size = 10, alpha = 0.6, size = NULL, legend = "auto", 
+                             theme_size = 10, alpha = 0.6, size = NULL, legend = TRUE, 
                              point_FUN = NULL, jitter = "swarm")
 # Internal ggplot-creating function to plot anything that involves points.
 # Creates either a scatter plot, (horizontal) violin plots, or a rectangle plot.
