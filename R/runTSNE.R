@@ -15,6 +15,9 @@
 #' Defaults to all available dimensions.
 #' @param rand_seed Numeric scalar that can be passed to \code{set.seed} to make the results reproducible.
 #' @param perplexity Numeric scalar defining the perplexity parameter, see \code{?\link[Rtsne]{Rtsne}} for more details.
+#' @param pca Logical scalar passed to \code{\link{Rtsne}}, indicating whether an initial PCA step should be performed.
+#' This is ignored if \code{use_dimred} is specified.
+#' @param initial_dims Integer scalar passed to \code{\link{Rtsne}}, specifying the number of principal components to be retained if \code{pca=TRUE}. 
 #' @param ... Additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.
 #'
 #' @return 
@@ -60,7 +63,7 @@ runTSNE <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
         exprs_values = "logcounts", scale_features = TRUE,
         use_dimred = NULL, n_dimred = NULL, 
         rand_seed = NULL, perplexity = floor(ncol(object) / 5), 
-        pca = TRUE, ...) {
+        pca = TRUE, initial_dims = 50, ...) {
 
     if (!is.null(use_dimred)) {
         ## Use existing dimensionality reduction results (turning off PCA)
@@ -70,20 +73,19 @@ runTSNE <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
         }
         vals <- dr
         pca <- FALSE
-        pca_dims <- ncol(vals)
 
     } else {
         vals <- .get_highvar_mat(object, exprs_values = exprs_values,
                                  ntop = ntop, feature_set = feature_set)
         vals <- .scale_columns(vals, scale = scale_features)
-        pca_dims <- min(50, ncol(object))
+        initial_dims <- min(initial_dims, ncol(object))
     }
 
     # Actually running the Rtsne step.
     if ( !is.null(rand_seed) ) {
         set.seed(rand_seed)
     }
-    tsne_out <- Rtsne::Rtsne(vals, initial_dims = pca_dims, pca = pca,
+    tsne_out <- Rtsne::Rtsne(vals, initial_dims = initial_dims, pca = pca,
                              perplexity = perplexity, dims = ncomponents,...)
     reducedDim(object, "TSNE") <- tsne_out$Y
     return(object)

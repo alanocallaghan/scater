@@ -83,7 +83,11 @@ test_that("runTSNE works as expected", {
     expect_identical(reducedDimNames(sce2), "TSNE")     
     expect_identical(dim(reducedDim(sce2, "TSNE")), c(ncol(sce2), 3L))
 
-    # Testing that various settings work.
+    # Testing that rand_seed actually works.
+    sce3 <- runTSNE(sce, rand_seed = 100)
+    expect_equal(reducedDim(sce2), reducedDim(sce3))
+
+    # Testing that various settings have some effect. 
     sce3 <- runTSNE(sce, scale_features = FALSE, rand_seed = 100)
     expect_false(isTRUE(all.equal(reducedDim(sce2), reducedDim(sce3))))
 
@@ -102,6 +106,9 @@ test_that("runTSNE works as expected", {
     sce3 <- runTSNE(sce, pca = FALSE, rand_seed = 100)
     expect_false(isTRUE(all.equal(reducedDim(sce2), reducedDim(sce3))))
 
+    sce3 <- runTSNE(sce, initial_dims = 10, rand_seed = 100)
+    expect_false(isTRUE(all.equal(reducedDim(sce2), reducedDim(sce3))))
+
     # Testing out the use of existing reduced dimensions (this should not respond to any feature settings).
     sceP <- runPCA(sce, ncomponents = 4)
     sce2 <- runTSNE(sceP, use_dimred = "PCA", rand_seed = 10)
@@ -113,6 +120,12 @@ test_that("runTSNE works as expected", {
     expect_identical(reducedDim(sce2, "TSNE"), reducedDim(sce3, "TSNE"))
 
     sce3 <- runTSNE(sceP, use_dimred = "PCA", rand_seed = 10, feature_set = 1:20)
+    expect_identical(reducedDim(sce2, "TSNE"), reducedDim(sce3, "TSNE"))
+
+    sce3 <- runTSNE(sceP, use_dimred = "PCA", rand_seed = 10, pca = FALSE)
+    expect_identical(reducedDim(sce2, "TSNE"), reducedDim(sce3, "TSNE"))
+
+    sce3 <- runTSNE(sceP, use_dimred = "PCA", rand_seed = 10, initial_dims = 10)
     expect_identical(reducedDim(sce2, "TSNE"), reducedDim(sce3, "TSNE"))
 
     sce3 <- runTSNE(sceP, use_dimred = "PCA", rand_seed = 10, n_dimred=3)

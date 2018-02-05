@@ -7,7 +7,7 @@
 runTSNE(object, ncomponents = 2, ntop = 500, feature_set = NULL,
   exprs_values = "logcounts", scale_features = TRUE, use_dimred = NULL,
   n_dimred = NULL, rand_seed = NULL, perplexity = floor(ncol(object)/5),
-  ...)
+  pca = TRUE, initial_dims = 50, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -32,6 +32,11 @@ Defaults to all available dimensions.}
 \item{rand_seed}{Numeric scalar that can be passed to \code{set.seed} to make the results reproducible.}
 
 \item{perplexity}{Numeric scalar defining the perplexity parameter, see \code{?\link[Rtsne]{Rtsne}} for more details.}
+
+\item{pca}{Logical scalar passed to \code{\link{Rtsne}}, indicating whether an initial PCA step should be performed.
+This is ignored if \code{use_dimred} is specified.}
+
+\item{initial_dims}{Integer scalar passed to \code{\link{Rtsne}}, specifying the number of principal components to be retained if \code{pca=TRUE}.}
 
 \item{...}{Additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.}
 }
