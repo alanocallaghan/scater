@@ -24,7 +24,8 @@ This will override any \code{ntop} argument if specified.}
 
 \item{use_coldata}{Logical scalar specifying whether the column data should be used instead of expression values to perform PCA.}
 
-\item{selected_variables}{Character vector indicating which variables in \code{colData(object)} to use for PCA when \code{use_coldata=TRUE}.}
+\item{selected_variables}{List of strings or a character vector indicating which variables in \code{colData(object)} to use for PCA when \code{use_coldata=TRUE}.
+If a list, each entry can take the form described in \code{?"\link{scater-vis-var}"}.}
 
 \item{detect_outliers}{Logical scalar, should outliers be detected based on PCA coordinates generated from column-level metadata?}
 }
