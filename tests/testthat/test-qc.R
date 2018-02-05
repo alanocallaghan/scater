@@ -297,10 +297,65 @@ wo_qc <- SingleCellExperiment(
     assays = list(counts = sc_example_counts), 
     colData = sc_example_cell_info)
 wt_qc <- calculateQCMetrics(wo_qc, 
-    feature_controls = list(set1 = 1:500))
+    feature_controls = list(set1 = 1:500),
+    cell_controls = list(whee = 1:10))
 wt_qc_compact <- calculateQCMetrics(wo_qc, 
     feature_controls = list(set1 = 1:500),
+    cell_controls = list(whee = 1:10),
     compact=TRUE)
+
+test_that("the QC hunter works as expected", {
+    
+    # Application on column-level metadata:      
+    for (x in c("total_counts", "total_features_by_counts",
+                "total_counts_endogenous", "total_counts_feature_control",
+                "total_counts_set1", "pct_counts_set1")) {
+
+        expect_error(scater:::.qc_hunter(wo_qc, x, mode = "column"), "failed")
+        expect_warning(out <- scater:::.qc_hunter(wo_qc, x, mode = "column", error = FALSE), "failed")
+        expect_identical(out, NULL)
+        expect_identical(scater:::.qc_hunter(wt_qc, x, mode = "column"), x)
+    }
+
+    expect_identical(scater:::.qc_hunter(wt_qc_compact, "total_counts", mode = "column"), 
+                     c("scater_qc", "all", "total_counts"))
+    expect_identical(scater:::.qc_hunter(wt_qc_compact, "total_features_by_counts", mode = "column"), 
+                     c("scater_qc", "all", "total_features_by_counts"))
+    expect_identical(scater:::.qc_hunter(wt_qc_compact, "total_counts_endogenous", mode = "column"), 
+                     c("scater_qc", "endogenous", "total_counts"))
+    expect_identical(scater:::.qc_hunter(wt_qc_compact, "total_counts_feature_control", mode = "column"), 
+                     c("scater_qc", "feature_control", "total_counts"))
+    expect_identical(scater:::.qc_hunter(wt_qc_compact, "total_counts_set1", mode = "column"), 
+                     c("scater_qc", "feature_control_set1", "total_counts"))
+    expect_identical(scater:::.qc_hunter(wt_qc_compact, "pct_counts_set1", mode = "column"), 
+                     c("scater_qc", "feature_control_set1", "pct_counts"))
+
+    # Application on row-level metadata:      
+    for (x in c("total_counts", "n_cells_by_counts",
+                "total_counts_non_control", "total_counts_cell_control",
+                "total_counts_whee", "pct_counts_whee")) {
+
+        expect_error(scater:::.qc_hunter(wo_qc, x, mode = "row"), "failed")
+        expect_warning(out <- scater:::.qc_hunter(wo_qc, x, mode = "row", error = FALSE), "failed")
+        expect_identical(out, NULL)
+        expect_identical(scater:::.qc_hunter(wt_qc, x, mode = "row"), x)
+    }
+
+    expect_identical(scater:::.qc_hunter(wt_qc_compact, "total_counts", mode = "row"), 
+                     c("scater_qc", "all", "total_counts"))
+    expect_identical(scater:::.qc_hunter(wt_qc_compact, "n_cells_by_counts", mode = "row"), 
+                     c("scater_qc", "all", "n_cells_by_counts"))
+    expect_identical(scater:::.qc_hunter(wt_qc_compact, "total_counts_non_control", mode = "row"), 
+                     c("scater_qc", "non_control", "total_counts"))
+    expect_identical(scater:::.qc_hunter(wt_qc_compact, "total_counts_cell_control", mode = "row"), 
+                     c("scater_qc", "cell_control", "total_counts"))
+    expect_identical(scater:::.qc_hunter(wt_qc_compact, "total_counts_whee", mode = "row"), 
+                     c("scater_qc", "cell_control_whee", "total_counts"))
+    expect_identical(scater:::.qc_hunter(wt_qc_compact, "pct_counts_whee", mode = "row"), 
+                     c("scater_qc", "cell_control_whee", "pct_counts"))
+
+})
+
 
 test_that("failure is as expected for misspecified arg to plotExplanatoryVariables()", {
     expect_error(plotExplanatoryVariables(example_sce, "expl"))
