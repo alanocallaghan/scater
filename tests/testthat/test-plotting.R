@@ -196,6 +196,9 @@ test_that("plotScater works as expected", {
 
     expect_s3_class(plotScater(example_sce, block1 = "Cell_Cycle", block2 = "Treatment", colour_by = "Cell_Cycle"), "ggplot")
     expect_s3_class(plotScater(example_sce, block1 = "Cell_Cycle", block2 = "Treatment", colour_by = "Gene_0001"), "ggplot")
+    
+    expect_s3_class(plotScater(example_sce, colour_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
+    expect_s3_class(plotScater(example_sce, colour_by = "Treatment", by_show_single = TRUE), "ggplot")
 
     # Responds to different type of expression values.
     cpm(example_sce) <- calculateCPM(example_sce)
@@ -221,9 +224,10 @@ test_that("we can produce PCA scatterplots", {
     expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
 
     # Checking other arguments are passed successfully to plotReducedDim.
-    expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", legend="none"), "ggplot")
-    expect_s3_class(plotPCA(example_sce, exprs_values="counts"), "ggplot")
-    expect_s3_class(plotPCA(example_sce, percentVar=c(19, 5)), "ggplot")
+    expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", legend = FALSE), "ggplot")
+    expect_s3_class(plotPCA(example_sce, colour_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, colour_by = "Treatment", by_show_single = TRUE), "ggplot")
+    expect_s3_class(plotPCA(example_sce, percentVar = c(19, 5)), "ggplot")
     
     # Checking that re-running works, responsive to feature scaling.
     expect_s3_class(P2 <- plotPCA(example_sce, rerun=TRUE, run_args=list(scale_features=FALSE)), "ggplot")
@@ -253,8 +257,9 @@ test_that("we can produce PCA pairplots", {
     expect_s3_class(plotPCA(example_sce, ncomponents=4, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
 
     # Checking other arguments are passed successfully to plotReducedDim.
-    expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Cell_Cycle", legend="none"), "ggplot")
-    expect_s3_class(plotPCA(example_sce, ncomponents=4, exprs_values="counts"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Cell_Cycle", legend = FALSE), "ggplot")
+    expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
+    expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Treatment", by_show_single = TRUE), "ggplot")
     expect_s3_class(plotPCA(example_sce, ncomponents=4, percentVar=c(19, 5, 3, 2)), "ggplot")
     
     # Checking that re-running works, responsive to feature scaling.
@@ -350,6 +355,9 @@ test_that("we can produce expression plots with different expression values", {
     expect_s3_class(plotExpression(example_sce, gene_set, colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotExpression(example_sce, gene_set, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotExpression(example_sce, gene_set, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+    
+    expect_s3_class(plotExpression(example_sce, gene_set, size_by = "Gene_0001", shape_by = "Treatment", by_exprs_values = "counts"), "ggplot")
+    expect_s3_class(plotExpression(example_sce, gene_set, size_by = "Gene_0001", shape_by = "Treatment", by_show_single = TRUE), "ggplot")
 
     # Testing options when dealing with many genes and no 'x' specified.
     expect_s3_class(plotExpression(example_sce, gene_set, one_facet=FALSE), "ggplot")
@@ -390,14 +398,18 @@ test_that("we can produce plots showing cells in plate position", {
     expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle"), "ggplot")
     expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001"), "ggplot")
     expect_s3_class(plotPlatePosition(alt, shape_by = "Treatment"), "ggplot")
+
     expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", size_by = "Gene_0001"), "ggplot")
     expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+    
+    expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", shape_by = "Treatment", by_show_single = TRUE), "ggplot")
+    expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", shape_by = "Treatment", by_exprs_values = "counts"), "ggplot")
 
     # Checking that other arguments are passed through.
-    expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment", legend="none"), "ggplot")
-    expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", exprs_values = "counts"), "ggplot")
+    expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment", legend = FALSE), "ggplot")
+    expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
 
     # Checking that an error is thrown,
     expect_error(plotPlatePosition(example_sce, paste0(col, row)), "invalid format") 
@@ -422,8 +434,9 @@ test_that("we can produce plots for column metadata", {
     expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     
     # Testing that other arguments are passed through.
-    expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment", legend="none"), "ggplot")
-    expect_s3_class(plotColData(example_sce, "total_counts", size_by = "Gene_0001", exprs_values = "counts"), "ggplot")
+    expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment", legend = FALSE), "ggplot")
+    expect_s3_class(plotColData(example_sce, "total_counts", size_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
+    expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Treatment", by_show_single = TRUE), "ggplot")
 
     # Fiddling with all the semi-analysis options.
     expect_s3_class(plotColData(example_sce, "total_counts", show_violin=FALSE), "ggplot")
@@ -456,8 +469,9 @@ test_that("we can produce plots for row metadata", {
     expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", size_by = "Cell_002", shape_by = "WHEE"), "ggplot")
     
     # Testing that other arguments are passed through.
-    expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", size_by = "Cell_002", shape_by = "WHEE", legend="none"), "ggplot")
-    expect_s3_class(plotRowData(example_sce, "total_counts", size_by = "Cell_002", exprs_values = "counts"), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", size_by = "Cell_002", shape_by = "WHEE", legend = FALSE), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "total_counts", size_by = "Cell_002", by_exprs_values = "counts"), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", by_show_single = TRUE), "ggplot")
 
     # Fiddling with all the semi-analysis options.
     expect_s3_class(plotRowData(example_sce, "total_counts", show_violin=FALSE), "ggplot")
@@ -486,6 +500,9 @@ test_that("plotExprsVsTxLength works as expected", {
     expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", colour_by = "is_feature_control", shape_by = "group"), "ggplot")
     expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", size_by = "Cell_002", shape_by = "group"), "ggplot")
     expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", colour_by = "is_feature_control", size_by = "Cell_002", shape_by = "group"), "ggplot")
+
+    expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", colour_by = "Cell_002", by_exprs_values = "counts"), "ggplot")
+    expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", colour_by = "is_feature_control", by_show_single = TRUE), "ggplot")
  
     # Testing various semi-analysis options.
     expect_s3_class(plotExprsVsTxLength(example_sce, "median_tx_length", show_smooth = TRUE), "ggplot")

@@ -340,6 +340,9 @@ test_that("plotHighestExprs works as expected", {
     expect_s3_class(plotHighestExprs(wt_qc, controls = "is_feature_control_set1"), "ggplot")
     expect_s3_class(plotHighestExprs(wt_qc, controls = NULL), "ggplot")
 
+    expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = "Mutation_Status", by_show_single = FALSE), "ggplot")
+    expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
+
     rowData(wt_qc)$Whee <- paste("Feature", seq_len(nrow(wt_qc)))
     expect_s3_class(plotHighestExprs(wt_qc, feature_names_to_plot = "Whee"), "ggplot")
 
@@ -383,7 +386,7 @@ test_that("plotExprsFreqVsMean works as expected", {
     expect_s3_class(plotExprsFreqVsMean(wt_qc), "ggplot")
 
     # Checking arguments are passed to plotRowData.
-    expect_s3_class(plotExprsFreqVsMean(wt_qc, legend='none'), "ggplot")
+    expect_s3_class(plotExprsFreqVsMean(wt_qc, legend = FALSE), "ggplot")
     expect_s3_class(plotExprsFreqVsMean(wt_qc, size_by = 'n_cells_by_counts'), "ggplot")
 
     # Checking we can turn off control colouring and other settings.
