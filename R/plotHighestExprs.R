@@ -8,6 +8,7 @@
 #' Only metadata fields will be searched, \code{assays} will not be used.
 #' If not supplied, this defaults to \code{"is_feature_control"} or equivalent for compacted data.
 #' @param colour_cells_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' If not supplied, this defaults to \code{"total_features_by_counts"} or equivalent for compacted data.
 #' @param drop_features A character, logical or numeric vector indicating which features (e.g. genes, transcripts) to drop when producing the plot. 
 #' For example, spike-in transcripts might be dropped to examine the contribution from endogenous genes.
 #' @param exprs_values A integer scalar or string specifying the assay to obtain expression values from.
@@ -25,6 +26,7 @@
 #'
 #' The distribution of expression across all cells is shown as tick marks for each feature.
 #' These ticks can be coloured according to cell-level metadata, as specified by \code{colour_cells_by}.
+#' Setting \code{colour_cells_by=NULL} will disable all tick colouring.
 #'
 #' @return A ggplot object.
 #'
@@ -44,7 +46,7 @@
 #' plotHighestExprs(example_sce, controls = NULL)
 #' plotHighestExprs(example_sce, colour_cells_by="Mutation_Status")
 #'
-plotHighestExprs <- function(object, n = 50, controls, colour_cells_by = NULL, 
+plotHighestExprs <- function(object, n = 50, controls, colour_cells_by, 
                              drop_features = NULL, exprs_values = "counts",
                              feature_names_to_plot = NULL, as_percentage = TRUE) 
 {
@@ -67,7 +69,7 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by = NULL,
     if (is.null(feature_names_to_plot)) {  
         feature_names <- rownames(object)
     } else {
-        feature_names <- .choose_vis_values(object, feature_names_to_plot, search = "metadata", mode = "column")
+        feature_names <- .choose_vis_values(object, feature_names_to_plot, search = "metadata", mode = "row")$val
     }
     rownames(exprs_mat) <- feature_names 
 
@@ -86,7 +88,7 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by = NULL,
     df_exprs_by_cell_long$Tag <- factor(df_exprs_by_cell_long$Tag, rev(feature_names[chosen]))
     
     ## Colouring the individual dashes for the cells.
-    if (is.null(colour_cells_by)) {
+    if (missing(colour_cells_by)) {
         colour_cells_by <- .qc_hunter(object, "total_features_by_counts", mode = "column")
     }
     if (!is.null(colour_cells_by)) {

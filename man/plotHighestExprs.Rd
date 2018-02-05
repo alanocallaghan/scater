@@ -4,7 +4,7 @@
 \alias{plotHighestExprs}
 \title{Plot the highest expressing features}
 \usage{
-plotHighestExprs(object, n = 50, controls, colour_cells_by = NULL,
+plotHighestExprs(object, n = 50, controls, colour_cells_by,
   drop_features = NULL, exprs_values = "counts",
   feature_names_to_plot = NULL, as_percentage = TRUE)
 }
@@ -17,7 +17,8 @@ plotHighestExprs(object, n = 50, controls, colour_cells_by = NULL,
 Only metadata fields will be searched, \code{assays} will not be used.
 If not supplied, this defaults to \code{"is_feature_control"} or equivalent for compacted data.}
 
-\item{colour_cells_by}{Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values.}
+\item{colour_cells_by}{Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
+If not supplied, this defaults to \code{"total_features_by_counts"} or equivalent for compacted data.}
 
 \item{drop_features}{A character, logical or numeric vector indicating which features (e.g. genes, transcripts) to drop when producing the plot. 
 For example, spike-in transcripts might be dropped to examine the contribution from endogenous genes.}
@@ -45,6 +46,7 @@ This can be turned off by setting \code{controls=NULL}.
 
 The distribution of expression across all cells is shown as tick marks for each feature.
 These ticks can be coloured according to cell-level metadata, as specified by \code{colour_cells_by}.
+Setting \code{colour_cells_by=NULL} will disable all tick colouring.
 }
 \examples{
 data("sc_example_counts")

@@ -1,8 +1,6 @@
 ## Test functions for QC
 ## library(scater); library(testthat); source("test-qc.R")
 
-context("test controls functionality")
-
 data("sc_example_counts")
 data("sc_example_cell_info")
 original <- SingleCellExperiment(
@@ -293,12 +291,18 @@ test_that("computing standard QC metrics with TPM data fails as expected", {
 #######################################################################
 # Checking the QC-related plotting functions:
 
+data("sc_example_counts")
+data("sc_example_cell_info")
+wo_qc <- SingleCellExperiment(
+    assays = list(counts = sc_example_counts), 
+    colData = sc_example_cell_info)
+wt_qc <- calculateQCMetrics(wo_qc, 
+    feature_controls = list(set1 = 1:500))
+wt_qc_compact <- calculateQCMetrics(wo_qc, 
+    feature_controls = list(set1 = 1:500),
+    compact=TRUE)
+
 test_that("failure is as expected for misspecified arg to plotExplanatoryVariables()", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
     expect_error(plotExplanatoryVariables(example_sce, "expl"))
 })
 
@@ -318,32 +322,27 @@ test_that("failure is as expected for input with zero-variance features", {
 
 
 test_that("plotHighestExprs works as expected", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    exprs(example_sce) <- log2(
-        calculateCPM(example_sce, use_size_factors = FALSE) + 1)
-    example_sce <- calculateQCMetrics(example_sce, 
-                                      feature_controls = list(set1 = 1:500))
-    expect_that(
-        plotHighestExprs(example_sce), 
-        is_a("ggplot"))
-    expect_that(
-        plotHighestExprs(example_sce, colour_cells_by= "Mutation_Status"), 
-        is_a("ggplot"))
+    expect_s3_class(plotHighestExprs(wt_qc), "ggplot")
+    expect_s3_class(plotHighestExprs(wt_qc_compact), "ggplot")
     
-    sce.blank <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    expect_error(
-        plotHighestExprs(sce.blank), 
-        "failed to find")
-    sce.blank <- calculateQCMetrics(sce.blank)
-    expect_that(
-        plotHighestExprs(sce.blank), 
-        is_a("ggplot"))
+    # Checking out the error messages.
+    expect_error(plotHighestExprs(wo_qc, colour_cells_by = NULL), "failed to find")
+    expect_error(plotHighestExprs(wo_qc, controls = NULL), "failed to find")
+    expect_s3_class(plotHighestExprs(wo_qc, controls = NULL, colour_cells_by = NULL), "ggplot")
+
+    # Checking out the options.
+    expect_s3_class(plotHighestExprs(wt_qc, n=Inf), "ggplot")
+    expect_s3_class(plotHighestExprs(wt_qc, drop_features=1:20), "ggplot")
+    expect_s3_class(plotHighestExprs(wt_qc, as_percentage = FALSE), "ggplot")
+    
+    expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = "Mutation_Status"), "ggplot")
+    expect_s3_class(plotHighestExprs(wt_qc, controls = "is_feature_control_set1"), "ggplot")
+    rowData(wt_qc)$Whee <- paste("Feature", seq_len(nrow(wt_qc)))
+    expect_s3_class(plotHighestExprs(wt_qc, feature_names_to_plot = "Whee"), "ggplot")
+
+    # Checking that the variable pickers work.
+    expect_s3_class(plotHighestExprs(wt_qc_compact, controls = c("scater_qc", "is_feature_control_set1")), "ggplot")
+    expect_s3_class(plotHighestExprs(wt_qc_compact, colour_cells_by = c("scater_qc", "all", "total_counts")), "ggplot")
 })
 
 
