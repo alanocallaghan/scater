@@ -378,6 +378,31 @@ test_that("we can produce expression plots with different expression values", {
 })
 
 #################################################
+# Testing plotHeatmap
+
+test_that("we can produce heatmaps", {
+    # Testing out the options.          
+    plotHeatmap(example_sce, features=rownames(example_sce)[1:10])
+    plotHeatmap(example_sce, features=rownames(example_sce)[1:10], columns = 1:20)
+    plotHeatmap(example_sce, features=rownames(example_sce)[1:10], exprs_values='counts')
+
+    # Colour parameters for the expression values.
+    plotHeatmap(example_sce, features=rownames(example_sce)[1:10], zlim=c(0, 2))
+    plotHeatmap(example_sce, features=rownames(example_sce)[1:10], color=viridis::viridis(20))
+    plotHeatmap(example_sce, features=rownames(example_sce)[1:10], center=TRUE, symmetric=TRUE)
+         
+    # Testing out the column colouring. 
+    plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
+                colour_columns_by=c("Mutation_Status", "Cell_Cycle"))
+    plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
+                colour_columns_by=c("Mutation_Status", "Gene_0001"), 
+                by_exprs_values = "logcounts", by_show_single = TRUE)
+
+    # Testing out passing arguments to pheatmap.
+    plotHeatmap(example_sce, features=rownames(example_sce)[1:10], fontsize = 20, legend = FALSE)
+})
+
+#################################################
 # Testing plotPlatePosition
 
 test_that("we can produce plots showing cells in plate position", {
