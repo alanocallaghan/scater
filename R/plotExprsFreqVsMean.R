@@ -12,6 +12,7 @@
 #' @param controls Specification of the row-level metadata column indicating whether a feature is a control, see \code{?"\link{scater-vis-var}"} for possible values.
 #' Only metadata fields will be searched, \code{assays} will not be used.
 #' If not supplied, this defaults to \code{"is_feature_control"} or equivalent for compacted data.
+#' @param by_show_single Logical scalar specifying whether a single-level factor for \code{controls} should be used for colouring, see \code{?"\link{scater-vis-var}"} for details.
 #' @param show_smooth Logical scalar, should a smoothed fit (through feature controls if available; all features otherwise) be shown on the plot? 
 #' See \code{\link[ggplot2]{geom_smooth}} for details.
 #' @param show_se Logical scalar, should the standard error be shown for a smoothed fit?
@@ -45,7 +46,7 @@
 #'
 #' plotExprsFreqVsMean(example_sce, size_by = "is_feature_control")
 #'
-plotExprsFreqVsMean <- function(object, freq_exprs, mean_exprs, controls, show_smooth = TRUE, show_se = TRUE, ...) 
+plotExprsFreqVsMean <- function(object, freq_exprs, mean_exprs, controls, by_show_single = FALSE, show_smooth = TRUE, show_se = TRUE, ...) 
 {
     if ( !is(object, "SingleCellExperiment") ) {
         stop("Object must be an SingleCellExperiment")
@@ -73,7 +74,8 @@ plotExprsFreqVsMean <- function(object, freq_exprs, mean_exprs, controls, show_s
     
     ## data frame with expression mean and frequency for feature controls
     if (!is.null(controls)) { 
-        conts <- .choose_vis_values(object, controls, mode = "row", search = "metadata")$val
+        conts <- .choose_vis_values(object, controls, mode = "row", search = "metadata", 
+                                    discard_solo = !by_show_single)$val
     } else {
         conts <- logical(nrow(object))
     }

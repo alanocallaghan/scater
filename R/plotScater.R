@@ -11,6 +11,9 @@
 #' The curve for each cell will be coloured according to this specification.
 #' @param nfeatures Numeric scalar indicating the number of top-expressed features to show n the plot.
 #' @param exprs_values String or integer scalar indicating which assay of \code{object} should be used to obtain the expression values for this plot. 
+#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
+#' for use in line colouring - see \code{?"\link{scater-vis-var}"} for details.
+#' @param by_show_single Logical scalar specifying whether single-level factors should be used for line colouring, see \code{?"\link{scater-vis-var}"} for details.
 #' @param ncol Number of columns to use for \code{\link{facet_wrap}} if only one block is defined.
 #' @param line_width Numeric scalar specifying the line width.
 #' @param theme_size Numeric scalar specifying the font size to use for the plotting theme.
@@ -50,9 +53,10 @@
 #' plotScater(example_sce, exprs_values = "cpm", block1 = "Treatment",
 #'     block2 = "Mutation_Status", colour_by = "Cell_Cycle")
 #'
-plotScater <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
-                    nfeatures = 500, exprs_values = "counts", ncol = 3,
-                    line_width = 1.5, theme_size = 10)
+plotScater <- function(x, nfeatures = 500, exprs_values = "counts", 
+                       colour_by = NULL, by_exprs_values = exprs_values, by_show_single = FALSE,
+                       block1 = NULL, block2 = NULL, ncol = 3,
+                       line_width = 1.5, theme_size = 10)
 {
     if (!is(x, "SingleCellExperiment")) {
         stop("x must be of class SingleCellExperiment")
@@ -68,7 +72,7 @@ plotScater <- function(x, block1 = NULL, block2 = NULL, colour_by = NULL,
 
     ## Setting values to colour by.
     colour_by_out <- .choose_vis_values(x, colour_by, mode = "column", search = "any", 
-                                        exprs_values = exprs_values)
+                                        exprs_values = by_exprs_values, discard_solo = !by_show_single)
     colour_by <- colour_by_out$name
     colour_by_vals <- colour_by_out$val
 

@@ -18,6 +18,9 @@
 #' @param colour_columns_by A list of values specifying how the columns should be annotated with colours.
 #' Each entry of the list can be of the form described by \code{?"\link{scater-vis-var}"}.
 #' A character vector can also be supplied and will be treated as a list of strings.
+#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
+#' for colouring of column-level data - see \code{?"\link{scater-vis-var}"} for details.
+#' @param by_show_single Logical scalar specifying whether single-level factors should be used for column-level colouring, see \code{?"\link{scater-vis-var}"} for details.
 #' @param ... Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.
 #'
 #' @details Setting \code{center=TRUE} is useful for examining log-fold changes of each cell's expression profile from the average across all cells.
@@ -46,7 +49,8 @@
 #' @export
 plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts",
                         center=FALSE, zlim=NULL, symmetric=FALSE, color=NULL, 
-                        colour_columns_by=NULL, ...) {
+                        colour_columns_by=NULL, by_exprs_values = exprs_values, by_show_single = FALSE,
+                        ...) {
 
     heat.vals <- assay(object, exprs_values)[features,,drop=FALSE]
     if (!is.null(columns)) { 
@@ -77,9 +81,11 @@ plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts"
         column_variables <- column_colorings <- list()
         for (field in colour_columns_by) { 
             colour_by_out <- .choose_vis_values(object, field, mode = "column", search = "any",
-                                                exprs_values = exprs_values)
+                                                exprs_values = by_exprs_values, discard_solo = !by_show_single)
 
-            if (is.numeric(colour_by_out$val)) { 
+            if (is.null(colour_by_out$val)) { 
+                next
+            } else if (is.numeric(colour_by_out$val)) { 
                 colour_fac <- cut(colour_by_out$val, 25)
             } else {
                 colour_fac <- as.factor(colour_by_out$val)

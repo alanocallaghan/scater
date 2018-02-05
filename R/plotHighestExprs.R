@@ -13,6 +13,9 @@
 #' For example, spike-in transcripts might be dropped to examine the contribution from endogenous genes.
 #' @param exprs_values A integer scalar or string specifying the assay to obtain expression values from.
 #' @param feature_names_to_plot Specification of which row-level metadata column contains the feature names, see \code{?"\link{scater-vis-var}"} for possible values.
+#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
+#' for use in colouring - see \code{?"\link{scater-vis-var}"} for details.
+#' @param by_show_single Logical scalar specifying whether single-level factors should be used for colouring, see \code{?"\link{scater-vis-var}"} for details.
 #' Default is \code{NULL}, in which case  \code{rownames(object)} are used.
 #' @param as_percentage logical scalar indicating whether percentages should be  plotted. 
 #' If \code{FALSE}, the raw \code{exprs_values} are shown instead.
@@ -48,6 +51,7 @@
 #'
 plotHighestExprs <- function(object, n = 50, controls, colour_cells_by, 
                              drop_features = NULL, exprs_values = "counts",
+                             by_exprs_values = exprs_values, by_show_single = TRUE,
                              feature_names_to_plot = NULL, as_percentage = TRUE) 
 {
     if (is.null(rownames(object))) {
@@ -92,7 +96,8 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
         colour_cells_by <- .qc_hunter(object, "total_features_by_counts", mode = "column")
     }
     if (!is.null(colour_cells_by)) {
-        colour_out <- .choose_vis_values(object, colour_cells_by, mode = "column")
+        colour_out <- .choose_vis_values(object, colour_cells_by, mode = "column", exprs_values = by_exprs_values,
+                                         discard_solo = !by_show_single)
         colour_cells_by <- colour_out$name
 
         df_exprs_by_cell_long$colour_by <- colour_out$val[df_exprs_by_cell_long$Cell]
