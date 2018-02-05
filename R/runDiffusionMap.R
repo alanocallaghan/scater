@@ -61,35 +61,15 @@ runDiffusionMap <- function(object, ncomponents = 2, ntop = 500, feature_set = N
             vals <- vals[,seq_len(n_dimred),drop = FALSE]
         }
     } else {
-        ## Define an expression matrix depending on which values we're
-        ## using
-        exprs_mat <- assay(object, i = exprs_values)
-
-        ## Define features to use: either ntop, or if a set of features is
-        ## defined, then those
-        if ( is.null(feature_set) ) {
-            rv <- .rowVars(exprs_mat)
-            feature_set <-
-                order(rv, decreasing = TRUE)[seq_len(min(ntop, length(rv)))]
-        }
-
-        ## Drop any features with zero variance
-        vals <- exprs_mat
-        vals <- vals[feature_set,,drop = FALSE]
-        keep_feature <- .rowVars(vals) > 0.001
-        keep_feature[is.na(keep_feature)] <- FALSE
-        vals <- vals[keep_feature,,drop = FALSE]
-
-        ## Standardise expression if indicated by scale_features argument
-        vals <- t(vals)
-        if (scale_features) {
-            vals <- scale(vals, scale = TRUE)
-        }
+        vals <- .get_highvar_mat(object, exprs_values = exprs_values,
+                                 ntop = ntop, feature_set = feature_set)
+        vals <- .scale_columns(vals, scale = scale_features)
     }
 
     ## Compute DiffusionMap
-    if ( !is.null(rand_seed) )
+    if ( !is.null(rand_seed) ) {
         set.seed(rand_seed)
+    }
     difmap_out <- destiny::DiffusionMap(vals, ...)
 
     reducedDim(object, "DiffusionMap") <- difmap_out@eigenvectors[, seq_len(ncomponents), drop = FALSE]

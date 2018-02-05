@@ -59,7 +59,8 @@
 runTSNE <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL, 
         exprs_values = "logcounts", scale_features = TRUE,
         use_dimred = NULL, n_dimred = NULL, 
-        rand_seed = NULL, perplexity = floor(ncol(object) / 5), ...) {
+        rand_seed = NULL, perplexity = floor(ncol(object) / 5), 
+        pca = TRUE, ...) {
 
     if (!is.null(use_dimred)) {
         ## Use existing dimensionality reduction results (turning off PCA)
@@ -68,40 +69,21 @@ runTSNE <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
             dr <- dr[,seq_len(n_dimred),drop = FALSE]
         }
         vals <- dr
-        do_pca <- FALSE
+        pca <- FALSE
         pca_dims <- ncol(vals)
 
     } else {
-        ## Define an expression matrix depending on which values we're using
-        exprs_mat <- assay(object, i = exprs_values)
-
-        ## Define features to use: either ntop, or if a set of features is
-        ## defined, then those
-        if ( is.null(feature_set) ) {
-            rv <- .rowVars(exprs_mat)
-            ntop <- min(ntop, length(rv))
-            feature_set <- order(rv, decreasing = TRUE)[seq_len(ntop)]
-        }
-
-        ## Drop any features with zero variance
-        vals <- exprs_mat[feature_set,,drop = FALSE]
-        keep_feature <- .rowVars(vals) > 0.001
-        keep_feature[is.na(keep_feature)] <- FALSE
-        vals <- vals[keep_feature,,drop = FALSE]
-
-        ## Standardise expression if stand_exprs(object) is null
-        vals <- t(vals)
-        if (scale_features) {
-            vals <- scale(vals, scale = TRUE)
-        }
-        do_pca <- TRUE
-        pca_dims <- max(50, ncol(object))
+        vals <- .get_highvar_mat(object, exprs_values = exprs_values,
+                                 ntop = ntop, feature_set = feature_set)
+        vals <- .scale_columns(vals, scale = scale_features)
+        pca_dims <- min(50, ncol(object))
     }
 
     # Actually running the Rtsne step.
-    if ( !is.null(rand_seed) )
+    if ( !is.null(rand_seed) ) {
         set.seed(rand_seed)
-    tsne_out <- Rtsne::Rtsne(vals, initial_dims = pca_dims, pca = do_pca,
+    }
+    tsne_out <- Rtsne::Rtsne(vals, initial_dims = pca_dims, pca = pca,
                              perplexity = perplexity, dims = ncomponents,...)
     reducedDim(object, "TSNE") <- tsne_out$Y
     return(object)

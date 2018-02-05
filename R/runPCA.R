@@ -85,29 +85,13 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
         }
 
     } else {
-        exprs_mat <- assay(object, i = exprs_values)
-        
-        # Choosing a set of features, if null.
-        if (is.null(feature_set)) {
-            rv <- .rowVars(exprs_mat)
-            o <- order(rv, decreasing = TRUE)
-            feature_set <- o[seq_len(min(ntop, length(rv)))]
-        }
-
-        # Subsetting to the desired features.
-        exprs_to_plot <- exprs_mat[feature_set,, drop = FALSE]
-
-        # Transposing for downstream use (cells are now rows).
-        exprs_to_plot <- t(exprs_to_plot)
+        exprs_to_plot <- .get_highvar_mat(object, exprs_values = exprs_values,
+                                          ntop = ntop, feature_set = feature_set)
     }
 
-    ## Drop any features with zero variance
-    keep_feature <- .colVars(exprs_to_plot) > 1e-8
-    keep_feature[is.na(keep_feature)] <- FALSE
-    exprs_to_plot <- exprs_to_plot[, keep_feature]
-
-    ## Scaling to have equal variance (done BEFORE outlier detection).
-    exprs_to_plot <- scale(exprs_to_plot, scale = scale_features)
+    ## Drop any features with zero variance, and then scale for equal variance.
+    ## Note that this is done BEFORE outlier detection.
+    exprs_to_plot <- .scale_columns(exprs_to_plot, scale = scale_features)
 
     ## conduct outlier detection
     if ( detect_outliers && use_coldata ) {
@@ -133,4 +117,38 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
         reducedDim(object, "PCA") <- pcs
     }
     return(object)
+}
+
+.get_highvar_mat <- function(object, exprs_values, feature_set, ntop) 
+# Picking the 'ntop' most highly variable features or just using a 
+# pre-specified set of features, if requested. 
+# Also transposing for downstream use (cells are now rows).
+{
+    exprs_mat <- assay(object, i = exprs_values)
+    
+    if (is.null(feature_set)) {
+        rv <- .rowVars(exprs_mat)
+        o <- order(rv, decreasing = TRUE)
+        feature_set <- head(o, ntop)
+    }
+    
+    exprs_to_plot <- exprs_mat[feature_set,, drop = FALSE]
+    exprs_to_plot <- t(exprs_to_plot)
+    return(exprs_to_plot)
+}
+
+.scale_columns <- function(mat, scale = FALSE) 
+# Removing zero-variance columns and scaling the variance of each column, 
+# if requested.
+{
+    keep_feature <- .colVars(mat) > 1e-8
+    keep_feature[is.na(keep_feature)] <- FALSE
+    if (!all(keep_feature)) { 
+        mat <- mat[, keep_feature, drop=FALSE]
+    }
+    if (scale) {
+        # scaling only uses the SD if center = TRUE.
+        mat <- scale(mat, center = TRUE, scale = TRUE)
+    }
+    return(mat)
 }
