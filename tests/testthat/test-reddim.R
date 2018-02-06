@@ -9,6 +9,49 @@ sce <- SingleCellExperiment(
 suppressWarnings(sce <- normalize(sce))
 
 #############################################
+# Check the feature selection and scaling work.
+
+test_that("feature selection and scaling are operational", {
+    out <- scater:::.get_highvar_mat(sce, exprs_values = "logcounts", feature_set = seq_len(nrow(sce)))
+    expect_equal(out, t(logcounts(sce)))
+
+    out <- scater:::.get_highvar_mat(sce, exprs_values = "counts", feature_set = seq_len(nrow(sce)))
+    expect_equal(out, t(counts(sce)))
+
+    # Ntop selection works.
+    out <- scater:::.get_highvar_mat(sce, exprs_values = "logcounts", ntop = 10, feature_set = NULL)
+    rv <- DelayedMatrixStats::rowVars(DelayedArray(logcounts(sce)))
+    keep <- head(order(rv, decreasing=TRUE), 10)
+    expect_equal(out, t(logcounts(sce)[keep,]))
+
+    out <- scater:::.get_highvar_mat(sce, exprs_values = "logcounts", ntop = Inf, feature_set = NULL)
+    keep <- order(rv, decreasing=TRUE)
+    expect_equal(out, t(logcounts(sce)[keep,]))
+
+    # Feature selection works.
+    out <- scater:::.get_highvar_mat(sce, exprs_values = "logcounts", feature_set = 10:1)
+    expect_equal(out, t(logcounts(sce)[10:1,]))
+
+    out <- scater:::.get_highvar_mat(sce, exprs_values = "logcounts", feature_set = rownames(sce)[10:1])
+    expect_equal(out, t(logcounts(sce)[10:1,]))
+
+    # Scaling.
+    MAT <- t(logcounts(sce))
+    cv <- DelayedMatrixStats::colVars(DelayedArray(MAT))
+    novar <- cv < 1e-8
+    expect_true(any(novar))
+
+    NOMAT <- MAT[,!novar]
+    XX <- scater:::.scale_columns(MAT, scale=FALSE)
+    expect_equal(XX, NOMAT)
+
+    XX <- scater:::.scale_columns(NOMAT, scale=TRUE)
+    cm <- colMeans(NOMAT)
+    scaled <- t((t(NOMAT) - cm)/sqrt(cv[!novar]))
+    expect_equivalent(XX, scaled)
+})
+
+#############################################
 # Check PCA.
 
 test_that("runPCA works as expected", {
