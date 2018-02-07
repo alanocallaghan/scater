@@ -1,9 +1,9 @@
-#' Normalise expression expression levels for an SingleCellExperiment object
+#' Normalise expression levels for a SingleCellExperiment object
 #'
-#' Compute normalised expression values from an SingleCellExperiment object and
+#' Compute normalised expression values from a SingleCellExperiment object and
 #' return the object with the normalised expression values added.
 #'
-#' @param object an \code{SingleCellExperiment} object.
+#' @param object A SingleCellExperiment object.
 #' @param method character string specified the method of calculating
 #' normalisation factors. Passed to \code{\link[edgeR]{calcNormFactors}}.
 #' @param design design matrix defining the linear model to be fitted to the
@@ -70,6 +70,10 @@
 #' for those who prefer North American spelling.
 #'
 #' @return an SingleCellExperiment object
+#'
+#' @name normalizeExprs
+#' @rdname normalizeExprs
+#' @aliases normalizeExprs
 #'
 #' @author Davis McCarthy
 #' @importFrom edgeR calcNormFactors.default
@@ -167,7 +171,7 @@ normalizeExprs <- function(object, method = "none", design = NULL, feature_set =
     object
 }
 
-#' @rdname normaliseExprs
+#' @rdname normalizeExprs
 #' @aliases normliseExprs
 #' @export
 normaliseExprs <- function(...) {
