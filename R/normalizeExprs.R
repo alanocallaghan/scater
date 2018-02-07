@@ -97,6 +97,9 @@
 normalizeExprs <- function(object, method = "none", design = NULL, feature_set = NULL,
                            exprs_values = "counts", return_norm_as_exprs = TRUE,
                            return_log = TRUE, ...) {
+    .Deprecated(msg="'normalizeExprs' is deprecated.
+Use edgeR::calcNormFactors(), normalize(), limma::removeBatchEffect() directly instead.")
+
     if (!methods::is(object, "SingleCellExperiment"))
         stop("object argument must be a SingleCellExperiment")
     ## If counts, we can compute size factors.
@@ -135,8 +138,7 @@ normalizeExprs <- function(object, method = "none", design = NULL, feature_set =
     ## Computing normalized expression values, if we're not working with 'exprs'.
     if (exprs_values != "logcounts") {
         object <- normalizeSCE(
-            object, exprs_values = exprs_values, return_log = return_log,
-            return_norm_as_exprs = return_norm_as_exprs)
+            object, exprs_values = exprs_values, return_log = return_log)
     }
 
     ## If a design matrix is provided, then normalised expression values are
