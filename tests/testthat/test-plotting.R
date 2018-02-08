@@ -230,16 +230,33 @@ test_that("we can produce PCA scatterplots", {
     expect_s3_class(plotPCA(example_sce, percentVar = c(19, 5)), "ggplot")
     
     # Checking that re-running works, responsive to feature scaling.
-    expect_s3_class(P2 <- plotPCA(example_sce, rerun=TRUE, run_args=list(scale_features=FALSE)), "ggplot")
-    expect_false(isTRUE(all.equal(P, P2)))
+    example_sceX <- runPCA(example_sce, scale_features=FALSE)
+    expect_s3_class(Px <- plotPCA(example_sceX), "ggplot")
+    expect_s3_class(Px2 <- plotPCA(example_sce, rerun=TRUE, run_args=list(scale_features=FALSE)), "ggplot")
+    expect_equal(Px, Px2)
+    expect_false(isTRUE(all.equal(P, Px2)))
 
-    reducedDim(example_sce, "PCA") <- NULL
-    expect_s3_class(P3 <- plotPCA(example_sce), "ggplot")
-    expect_equal(P, P3)
+    reducedDim(example_sceX, "PCA") <- NULL
+    expect_s3_class(Px3 <- plotPCA(example_sceX), "ggplot")
+    expect_equal(P, Px3)
+    expect_s3_class(Px4 <- plotPCA(example_sceX, run_args=list(scale_features=FALSE)), "ggplot")
+    expect_equal(Px, Px4)
+    
+    # Checking that specification of multiple ncomponents works.
+    expect_s3_class(Pv <- plotPCA(example_sce, ncomponents=1:2), "ggplot")
+    expect_equal(P, Pv)
+    expect_s3_class(Pv2 <- plotPCA(example_sce, ncomponents=2:1), "ggplot")
+    expect_false(isTRUE(all.equal(P, Pv2)))
+    expect_error(plotPCA(example_sce, ncomponents=c(3,1)), "larger than")
 
-    expect_s3_class(P4 <- plotPCA(example_sce, run_args=list(scale_features=FALSE)), "ggplot")
-    expect_equal(P2, P4)
-    expect_false(isTRUE(all.equal(P, P4)))
+    example_sceY <- example_sce
+    reducedDim(example_sceY, "PCA") <- NULL
+    expect_s3_class(Py <- plotPCA(example_sceY, ncomponents=1:2), "ggplot")
+    expect_equal(Pv, Py)
+    expect_s3_class(Py2 <- plotPCA(example_sceY, ncomponents=2:1), "ggplot")
+    expect_equal(Pv2, Py2)
+    expect_s3_class(Py3 <- plotPCA(example_sceY, ncomponents=c(3, 1)), "ggplot")
+    expect_false(isTRUE(all.equal(Py2, Py3)))
 })
 
 test_that("we can produce PCA pairplots", {
@@ -266,13 +283,30 @@ test_that("we can produce PCA pairplots", {
     expect_s3_class(P2 <- plotPCA(example_sce, ncomponents=4, rerun=TRUE, run_args=list(scale_features=FALSE)), "ggplot")
     expect_false(isTRUE(all.equal(P, P2)))
 
-    reducedDim(example_sce, "PCA") <- NULL
-    expect_s3_class(P3 <- plotPCA(example_sce, ncomponents=4), "ggplot")
-    expect_equal(P, P3)
+    example_sceX <- example_sce
+    reducedDim(example_sceX, "PCA") <- NULL
+    expect_s3_class(Px <- plotPCA(example_sceX, ncomponents=4), "ggplot")
+    expect_equal(P, Px)
 
-    expect_s3_class(P4 <- plotPCA(example_sce, ncomponents=4, run_args=list(scale_features=FALSE)), "ggplot")
-    expect_equal(P2, P4)
-    expect_false(isTRUE(all.equal(P, P4)))
+    expect_s3_class(Px2 <- plotPCA(example_sceX, ncomponents=4, run_args=list(scale_features=FALSE)), "ggplot")
+    expect_equal(P2, Px2)
+    expect_false(isTRUE(all.equal(Px, Px2)))
+
+    # Checking that specification of multiple ncomponents works.
+    expect_s3_class(Pv <- plotPCA(example_sce, ncomponents=1:4), "ggplot")
+    expect_equal(P, Pv)
+    expect_s3_class(Pv2 <- plotPCA(example_sce, ncomponents=4:1), "ggplot")
+    expect_false(isTRUE(all.equal(P, Pv2)))
+    expect_error(plotPCA(example_sce, ncomponents=5:1), "larger than")
+
+    example_sceY <- example_sce
+    reducedDim(example_sceY, "PCA") <- NULL
+    expect_s3_class(Py <- plotPCA(example_sceY, ncomponents=1:4), "ggplot")
+    expect_equal(Pv, Py)
+    expect_s3_class(Py2 <- plotPCA(example_sceY, ncomponents=4:1), "ggplot")
+    expect_equal(Pv2, Py2)
+    expect_s3_class(Py3 <- plotPCA(example_sceY, ncomponents=5:1), "ggplot")
+    expect_false(isTRUE(all.equal(Py2, Py3)))
 })
 
 test_that("we can produce TSNE plots", {
