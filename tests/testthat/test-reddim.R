@@ -289,4 +289,18 @@ test_that("runDiffusionMap works as expected", {
 
 })
 
+#############################################
+# Check defences against sparse matrices.
+
+test_that("run* functions work with sparse matrices", {
+    library(Matrix)          
+    counts(sce) <- as(counts(sce), "dgCMatrix")
+    logcounts(sce) <- as(logcounts(sce), "dgCMatrix")
+
+    expect_error(runPCA(sce), NA)
+    expect_error(runPCA(sce, method="irlba"), NA)
+    expect_error(runTSNE(sce), NA)
+    expect_error(runDiffusionMap(sce), NA)
+    expect_error(runMDS(sce), NA)
+})
 

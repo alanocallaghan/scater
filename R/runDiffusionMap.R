@@ -70,6 +70,7 @@ runDiffusionMap <- function(object, ncomponents = 2, ntop = 500, feature_set = N
     if ( !is.null(rand_seed) ) {
         set.seed(rand_seed)
     }
+    vals <- as.matrix(vals) # protect against alternative matrix inputs.
     difmap_out <- destiny::DiffusionMap(vals, ...)
 
     reducedDim(object, "DiffusionMap") <- difmap_out@eigenvectors[, seq_len(ncomponents), drop = FALSE]
