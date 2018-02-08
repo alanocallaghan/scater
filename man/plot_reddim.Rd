@@ -40,9 +40,8 @@ Only used if \code{return_SCE} is \code{TRUE}, otherwise the plot is always prod
 
 \item{rerun}{Logical, should the reduced dimensions be recomputed even if \code{object} contains an appropriately named set of results in the \code{reducedDims} slot?}
 
-\item{ncomponents}{Numeric scalar indicating the number of dimensions components to (calculate and) plot, starting from the first dimension.
-Default is 2, which results in a scatter plot of the first two dimensions.
-If \code{ncomponents} is greater than 2, a pairs plots for the top components is produced.}
+\item{ncomponents}{Numeric scalar indicating the number of dimensions components to (calculate and) plot.
+This can also be a numeric vector, see \code{?\link{plotReducedDim}} for details.}
 
 \item{run_args}{Arguments to pass to \code{\link{runPCA}}.}
 }
@@ -63,7 +62,10 @@ The result name and \code{run*} function for each \code{plot*} function are:
 \item \code{"DiffusionMap"} and \code{\link{runDiffusionMap}} for \code{plotDiffusionMap}
 \item \code{"MDS"} and \code{\link{runMDS}} for \code{"plotMDS"}
 }
-Users can specify arguments to the \code{run*} functions via \code{run_args}.
+Users can specify arguments to the \code{run*} functions via \code{run_args}. 
+
+If \code{ncomponents} is a numeric vector, the maximum value will be used to determine the required number of dimensions to compute in the \code{run*} functions.
+However, only the specified dimensions in \code{ncomponents} will be plotted.
 }
 \examples{
 ## Set up an example SingleCellExperiment
