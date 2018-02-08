@@ -76,12 +76,6 @@ plotColData(example_sce, y = "Treatment",
 plotColData(example_sce, y = "total_features_by_counts", 
    x = "Cell_Cycle", colour_by = "Mutation_Status")
 
-plotColData(example_sce, y = "Mutation_Status", 
-   x = "Cell_Cycle", colour_by = "Mutation_Status")
-
-plotColData(example_sce, y = "Mutation_Status", 
-   x = "Cell_Cycle", colour_by = "Mutation_Status",
-   size_by = "Gene_0001", shape_by = "Treatment")
 }
 \author{
 Davis McCarthy, with modifications by Aaron Lun

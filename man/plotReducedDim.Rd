@@ -52,17 +52,11 @@ example_sce <- SingleCellExperiment(
     colData = sc_example_cell_info
 )
 example_sce <- normalize(example_sce)
-drop_genes <- apply(exprs(example_sce), 1, function(x) {var(x) == 0})
-example_sce <- example_sce[!drop_genes, ]
 
 example_sce <- runPCA(example_sce, ncomponents=5)
 plotReducedDim(example_sce, "PCA")
 plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle")
-plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", shape_by="Treatment")
-
 plotReducedDim(example_sce, "PCA", colour_by="Gene_0001")
-plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", 
-   shape_by="Mutation_Status", size_by="Gene_0001")
 
 plotReducedDim(example_sce, "PCA", ncomponents=5)
 plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle", 
