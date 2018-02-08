@@ -4,9 +4,8 @@
 #' or, if they are not already present, to calculate those results and then plot them.
 #'
 #' @param object A SingleCellExperiment object.
-#' @param ncomponents Numeric scalar indicating the number of dimensions components to (calculate and) plot, starting from the first dimension.
-#' Default is 2, which results in a scatter plot of the first two dimensions.
-#' If \code{ncomponents} is greater than 2, a pairs plots for the top components is produced.
+#' @param ncomponents Numeric scalar indicating the number of dimensions components to (calculate and) plot.
+#' This can also be a numeric vector, see \code{?\link{plotReducedDim}} for details.
 #' @param ... Additional arguments to pass to \code{\link{plotReducedDim}}. 
 #' @param rerun Logical, should the reduced dimensions be recomputed even if \code{object} contains an appropriately named set of results in the \code{reducedDims} slot?
 #' @param return_SCE Logical, should the function return a SingleCellExperiment object with reduced dimension results in the \code{reducedDim} slot?
@@ -27,6 +26,9 @@
 #' \item \code{"MDS"} and \code{\link{runMDS}} for \code{"plotMDS"}
 #' }
 #' Users can specify arguments to the \code{run*} functions via \code{run_args}. 
+#'
+#' If \code{ncomponents} is a numeric vector, the maximum value will be used to determine the required number of dimensions to compute in the \code{run*} functions.
+#' However, only the specified dimensions in \code{ncomponents} will be plotted.
 #'
 #' @return A ggplot object or an SingleCellExperiment object, depending on \code{return_SCE}.
 #'
@@ -127,7 +129,7 @@ setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
 
     # Running the reduced dimension function if necessary.
     if (!(reddim_name %in% names(reducedDims(object))) || rerun) {
-        object <- do.call(reddim_FUN, c(list(object = object, ncomponents = ncomponents), run_args))
+        object <- do.call(reddim_FUN, c(list(object = object, ncomponents = max(ncomponents)), run_args))
     }
 
     ## Create the plot object
