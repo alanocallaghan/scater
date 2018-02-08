@@ -5,6 +5,7 @@
 #' @param object A SingleCellExperiment object.
 #' @param use_dimred A string or integer scalar indicating the reduced dimension result in \code{reducedDims(object)} to plot.
 #' @param ncomponents A numeric scalar indicating the number of dimensions to plot, starting from the first dimension.
+#' Alternatively, a numeric vector specifying the dimensions to be plotted.
 #' @param percentVar A numeric vector giving the proportion of variance in expression explained by each reduced dimension. 
 #' Only expected to be used in PCA settings, e.g., in the \code{\link[scater]{plotPCA}} function.
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
@@ -17,8 +18,11 @@
 #' @param add_ticks Logical scalar indicating whether ticks should be drawn on the axes corresponding to the location of each point.
 #'
 #' @details
-#' If \code{ncomponents} is 2, a scatterplot of the first two dimensions is produced. 
+#' If \code{ncomponents} is a scalar and equal to 2, a scatterplot of the first two dimensions is produced. 
 #' If \code{ncomponents} is greater than 2, a pairs plots for the top dimensions is produced.
+#'
+#' Alternatively, if \code{ncomponents} is a vector of length 2, a scatterplot of the two specified dimensions is produced.
+#' If it is of length greater than 2, a pairs plot is produced containing all pairwise plots between the specified dimensions.
 #'
 #' @return A ggplot object
 #'
@@ -54,16 +58,23 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NUL
 {
     ## Extract reduced dimension representation of cells
     red_dim <- reducedDim(object, use_dimred)
-    if ( ncomponents > ncol(red_dim) ) {
+    if ( any(ncomponents > ncol(red_dim)) ) {
         stop(sprintf("'ncomponents' is larger than 'ncols(reducedDim(object, '%s'))'", use_dimred))
     }
     if (is.null(percentVar)) {
         percentVar <- attr(red_dim, "percentVar")
     }
 
+    # Figuring out what we should plot.
+    if (length(ncomponents)==1L) {
+        to_plot <- seq_len(ncomponents)
+    } else {
+        to_plot <- ncomponents
+    }
+
     ## Define data.frame for plotting (avoid clash between column names)
     colnames(red_dim) <- NULL 
-    df_to_plot <- data.frame(red_dim[, seq_len(ncomponents),drop=FALSE])
+    df_to_plot <- data.frame(red_dim[,to_plot,drop=FALSE])
 
     ## checking visualization arguments
     vis_out <- .incorporate_common_vis(df_to_plot, se = object, mode = "column", 
@@ -73,20 +84,18 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NUL
     colour_by <- vis_out$colour_by
     shape_by <- vis_out$shape_by
     size_by <- vis_out$size_by
-
+        
     ## Dispatching to the central plotter in the simple case of two dimensions.
-    if ( ncomponents==2L ) {
-        colnames(df_to_plot)[seq_len(2)] <- c("X", "Y")
+    if (length(to_plot)==2L) {
+        colnames(df_to_plot)[seq_along(to_plot)] <- c("X", "Y")
 
         if ( is.null(percentVar) ) {
-            x_lab <- "Dimension 1"
-            y_lab <- "Dimension 2"
+            labs <- sprintf("Dimension %i", to_plot)
         } else {
-            x_lab <- paste0("Dimension 1: ", round(percentVar[1] * 100), "% variance")
-            y_lab <- paste0("Dimension 2: ", round(percentVar[2] * 100), "% variance")
+            labs <- sprintf("Dimension %i: %i%% variance", to_plot, round(percentVar[to_plot] * 100))
         }
 
-        plot_out <- .central_plotter(df_to_plot, xlab = x_lab, ylab = y_lab,
+        plot_out <- .central_plotter(df_to_plot, xlab = labs[1], ylab = labs[2],
                                      colour_by = colour_by, size_by = size_by, shape_by = shape_by, 
                                      ..., point_FUN=NULL)
         if (add_ticks) {
@@ -97,17 +106,17 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NUL
     }
 
     ## Otherwise, creating a paired reddim plot.
-    paired_reddim_plot(df_to_plot, ncomponents = ncomponents, percentVar = percentVar,
+    paired_reddim_plot(df_to_plot, to_plot = to_plot, percentVar = percentVar,
         colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
         ...)
 }
 
-paired_reddim_plot <- function(df_to_plot, ncomponents=2, percentVar=NULL,
+paired_reddim_plot <- function(df_to_plot, to_plot, percentVar=NULL,
     colour_by=NULL, shape_by=NULL, size_by=NULL,
     legend = TRUE, theme_size = 10, alpha = 0.6, size = NULL) 
 {
-    to_plot <- seq_len(ncomponents)
-    df_to_expand <- df_to_plot[, to_plot]
+    reddim_cols <- seq_along(to_plot)
+    df_to_expand <- df_to_plot[, reddim_cols]
     if ( is.null(percentVar) ) {
         colnames(df_to_expand) <- sprintf("Dim %i", to_plot)
     } else {
@@ -115,7 +124,7 @@ paired_reddim_plot <- function(df_to_plot, ncomponents=2, percentVar=NULL,
     }
 
     gg1 <- .makePairs(df_to_expand)
-    df_to_plot_big <- data.frame(gg1$all, df_to_plot[, -to_plot])
+    df_to_plot_big <- data.frame(gg1$all, df_to_plot[, -reddim_cols])
     colnames(df_to_plot_big)[-seq_len(4)] <- colnames(df_to_plot)
 
     plot_out <- ggplot(df_to_plot_big, aes_string(x = "x", y = "y")) +
