@@ -4,6 +4,7 @@
 #'
 #' @param object A SingleCellExperiment object.
 #' @param ncomponents Numeric scalar indicating the number of principal components to obtain.
+#' @param method String specifying how the PCA should be performed.
 #' @param ntop Numeric scalar specifying the number of most variable features to use for PCA.
 #' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for PCA.
 #' This will override any \code{ntop} argument if specified.
@@ -13,9 +14,13 @@
 #' @param selected_variables List of strings or a character vector indicating which variables in \code{colData(object)} to use for PCA when \code{use_coldata=TRUE}.
 #' If a list, each entry can take the form described in \code{?"\link{scater-vis-var}"}.
 #' @param detect_outliers Logical scalar, should outliers be detected based on PCA coordinates generated from column-level metadata? 
+#' @param rand_seed Numeric scalar specifying the random seed when using \code{method="irlba"}.
+#' @param ... Additional arguments to pass to \code{\link[irlba]{prcomp_irlba}} when \code{method="irlba"}.
 #'
 #' @details 
-#' The function \code{\link{prcomp}} is used internally to do the PCA.
+#' The function \code{\link{prcomp}} is used internally to do the PCA when \code{method="prcomp"}.
+#' Alternatively, the \pkg{irlba} package can be used, which performs a fast approximation of PCA through the \code{\link[irlba]{prcomp_irlba}} function.
+#' This is especially useful for large, sparse matrices.
 #'
 #' If \code{use_coldata=TRUE}, PCA will be performed on column-level metadata. 
 #' The \code{selected_variables} defaults to a vector containing:
@@ -33,6 +38,10 @@
 #' @return A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell.
 #' If \code{use_coldata=FALSE}, this is stored in the \code{"PCA"} entry of the \code{reducedDims} slot.
 #' Otherwise, it is stored in the \code{"PCA_coldata"} entry.
+#'
+#' The proportion of variance explained by each PC is stored as a numeric vector in the \code{"percentVar"} attribute of the reduced dimension matrix.
+#' Note that this will only be of length equal to \code{ncomponents} when \code{method} is not \code{"prcomp"}.
+#' This is because approximate PCA methods do not compute singular values for all components.
 #'
 #' @rdname runPCA
 #' @seealso \code{\link{prcomp}}, \code{\link[scater]{plotPCA}}
@@ -53,9 +62,10 @@
 #' example_sce <- runPCA(example_sce)
 #' reducedDimNames(example_sce)
 #' head(reducedDim(example_sce))
-runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
-       feature_set = NULL, scale_features = TRUE, use_coldata = FALSE,
-       selected_variables = NULL, detect_outliers = FALSE) {
+runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
+       ntop = 500, exprs_values = "logcounts", feature_set = NULL, scale_features = TRUE, 
+       use_coldata = FALSE, selected_variables = NULL, detect_outliers = FALSE,
+       rand_seed = NULL, ...) {
 
     if ( use_coldata ) {
         if ( is.null(selected_variables) ) {
@@ -104,9 +114,20 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
         object$outlier <- outlier
     }
 
-    ## Compute PCA
-    pca <- prcomp(exprs_to_plot, rank. = ncomponents)
-    percentVar <- pca$sdev ^ 2 / sum(pca$sdev ^ 2)
+    ## Compute PCA via prcomp or irlba.
+    method <- match.arg(method)
+    if (method=="prcomp") {
+        exprs_to_plot <- as.matrix(exprs_to_plot)
+        pca <- prcomp(exprs_to_plot, rank. = ncomponents)
+        total.var <- sum(pca$sdev ^ 2)
+    } else if (method=="irlba") {
+        if (!is.null(rand_seed)) {
+            set.seed(rand_seed)
+        }
+        pca <- irlba::prcomp_irlba(exprs_to_plot, n = ncomponents, ...)
+        total.var <- sum(.colVars(exprs_to_plot))
+    }
+    percentVar <- pca$sdev ^ 2 / total.var
     pcs <- pca$x
     attr(pcs, "percentVar") <- percentVar
 
@@ -139,16 +160,20 @@ runPCA <- function(object, ntop=500, ncomponents=2, exprs_values = "logcounts",
 
 .scale_columns <- function(mat, scale = FALSE) 
 # Removing zero-variance columns and scaling the variance of each column, 
-# if requested.
+# if requested. We scale by the standard deviation, which also changes
+# the centre; however, we don't care much about this, as we center in prcomp() anyway.
 {
-    keep_feature <- .colVars(mat) > 1e-8
+    cv <- .colVars(mat)
+    keep_feature <- cv > 1e-8
     keep_feature[is.na(keep_feature)] <- FALSE
+
     if (!all(keep_feature)) { 
+        cv <- cv[keep_feature]
         mat <- mat[, keep_feature, drop=FALSE]
     }
+
     if (scale) {
-        # scaling only uses the SD if center = TRUE.
-        mat <- scale(mat, center = TRUE, scale = TRUE)
+        mat <- sweep(mat, MARGIN=2, STATS=sqrt(cv), FUN="/", check.margin=FALSE)
     }
     return(mat)
 }
