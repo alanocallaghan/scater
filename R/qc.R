@@ -832,6 +832,7 @@ plotHighestExprs <- function(object, col_by_variable = "total_features", n = 50,
     ## Melt dataframe so it is conducive to ggplot
     if ( is.null(rownames(rdata)) )
         rownames(rdata) <- as.character(rdata$feature)
+    df_pct_exprs_by_cell <- as.matrix(df_pct_exprs_by_cell) # coercing to a normal matrix.
     df_pct_exprs_by_cell_long <- reshape2::melt(df_pct_exprs_by_cell)
     colnames(df_pct_exprs_by_cell_long) <- c("Cell", "Tags", "value")
     df_pct_exprs_by_cell_long$Feature <- 
