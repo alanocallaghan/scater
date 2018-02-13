@@ -146,8 +146,8 @@ test_that("we can compute standard QC metrics with cell controls", {
     }
 })
 
+library(Matrix)
 test_that("we can compute standard QC metrics on sparse counts matrix", {
-    library(Matrix)
     counts(original) <- as(counts(original), "dgCMatrix")
 
     expect_error(
@@ -296,16 +296,20 @@ data("sc_example_cell_info")
 wo_qc <- SingleCellExperiment(
     assays = list(counts = sc_example_counts), 
     colData = sc_example_cell_info)
+
 wt_qc <- calculateQCMetrics(wo_qc, 
     feature_controls = list(set1 = 1:500),
     cell_controls = list(whee = 1:10))
+
 wt_qc_compact <- calculateQCMetrics(wo_qc, 
     feature_controls = list(set1 = 1:500),
     cell_controls = list(whee = 1:10),
     compact=TRUE)
 
+sparsified <- wt_qc
+counts(sparsified) <- as(counts(sparsified), "dgCMatrix")
+
 test_that("the QC hunter works as expected", {
-    
     # Application on column-level metadata:      
     for (x in c("total_counts", "total_features_by_counts",
                 "total_counts_endogenous", "total_counts_feature_control",
@@ -353,7 +357,6 @@ test_that("the QC hunter works as expected", {
                      c("scater_qc", "cell_control_whee", "total_counts"))
     expect_identical(scater:::.qc_hunter(wt_qc_compact, "pct_counts_whee", mode = "row"), 
                      c("scater_qc", "cell_control_whee", "pct_counts"))
-
 })
 
 
@@ -404,6 +407,9 @@ test_that("plotHighestExprs works as expected", {
     # Checking that the variable pickers work.
     expect_s3_class(plotHighestExprs(wt_qc_compact, controls = c("scater_qc", "is_feature_control_set1")), "ggplot")
     expect_s3_class(plotHighestExprs(wt_qc_compact, colour_cells_by = c("scater_qc", "all", "total_counts")), "ggplot")
+
+    # Works for sparse matrices.
+    expect_s3_class(plotHighestExprs(sparsified), "ggplot")
 })
 
 
