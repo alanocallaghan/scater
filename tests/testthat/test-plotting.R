@@ -424,8 +424,8 @@ test_that("we can produce expression plots with different expression values", {
 # Testing plotHeatmap
 
 test_that("we can produce heatmaps", {
-    # Testing out the options.          
-    plotHeatmap(example_sce, features=rownames(example_sce)[1:10])
+    # Testing out the options (need an expect_* clause to avoid skipping).
+    expect_error(plotHeatmap(example_sce, features=rownames(example_sce)[1:10]), NA)
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], columns = 1:20)
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], exprs_values='counts')
 
