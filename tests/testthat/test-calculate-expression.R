@@ -181,5 +181,18 @@ test_that("calcAverage works as expected", {
     ## Repeating with a sparse matrix.    
     ave_counts <- calcAverage(sparsified)
     expect_equal(ave_counts, calcAverage(original, use_size_factors=FALSE))  
+
+    ## Repeating with subsets.
+    ref <- calcAverage(counts(original))
+    sub1 <- calcAverage(counts(original), subset_row=1:10)
+    expect_identical(ref[1:10], sub1)
+
+    logi <- rbinom(nrow(original), 1, 0.5)==1
+    sub2 <- calcAverage(counts(original), subset_row=logi)
+    expect_identical(ref[logi], sub2)
+
+    chosen <- sample(rownames(original), 20)
+    sub3 <- calcAverage(counts(original), subset_row=chosen)
+    expect_identical(ref[chosen], sub3)
 })
 
