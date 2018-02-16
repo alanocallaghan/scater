@@ -14,7 +14,8 @@ plotReducedDim(object, use_dimred, ncomponents = 2, percentVar = NULL,
 
 \item{use_dimred}{A string or integer scalar indicating the reduced dimension result in \code{reducedDims(object)} to plot.}
 
-\item{ncomponents}{A numeric scalar indicating the number of dimensions to plot, starting from the first dimension.}
+\item{ncomponents}{A numeric scalar indicating the number of dimensions to plot, starting from the first dimension.
+Alternatively, a numeric vector specifying the dimensions to be plotted.}
 
 \item{percentVar}{A numeric vector giving the proportion of variance in expression explained by each reduced dimension. 
 Only expected to be used in PCA settings, e.g., in the \code{\link[scater]{plotPCA}} function.}
@@ -41,8 +42,11 @@ A ggplot object
 Plot cell-level reduced dimension results stored in a SingleCellExperiment object.
 }
 \details{
-If \code{ncomponents} is 2, a scatterplot of the first two dimensions is produced. 
+If \code{ncomponents} is a scalar and equal to 2, a scatterplot of the first two dimensions is produced. 
 If \code{ncomponents} is greater than 2, a pairs plots for the top dimensions is produced.
+
+Alternatively, if \code{ncomponents} is a vector of length 2, a scatterplot of the two specified dimensions is produced.
+If it is of length greater than 2, a pairs plot is produced containing all pairwise plots between the specified dimensions.
 }
 \examples{
 data("sc_example_counts")
@@ -52,17 +56,11 @@ example_sce <- SingleCellExperiment(
     colData = sc_example_cell_info
 )
 example_sce <- normalize(example_sce)
-drop_genes <- apply(exprs(example_sce), 1, function(x) {var(x) == 0})
-example_sce <- example_sce[!drop_genes, ]
 
 example_sce <- runPCA(example_sce, ncomponents=5)
 plotReducedDim(example_sce, "PCA")
 plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle")
-plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", shape_by="Treatment")
-
 plotReducedDim(example_sce, "PCA", colour_by="Gene_0001")
-plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle", 
-   shape_by="Mutation_Status", size_by="Gene_0001")
 
 plotReducedDim(example_sce, "PCA", ncomponents=5)
 plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle", 

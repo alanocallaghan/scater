@@ -63,27 +63,18 @@
 #'
 #' ## default plot
 #' plotExpression(example_sce, 1:15)
-#' plotExpression(example_sce, 1:15, jitter = "jitter")
 #'
 #' ## plot expression against an x-axis value
+#' plotExpression(example_sce, c("Gene_0001", "Gene_0004"), x="Mutation_Status")
+#' plotExpression(example_sce, c("Gene_0001", "Gene_0004"), x="Gene_0002")
+#'
+#' ## add visual options
 #' plotExpression(example_sce, 1:6, colour_by = "Mutation_Status")
 #' plotExpression(example_sce, 1:6, colour_by = "Mutation_Status",
 #'      shape_by = "Treatment", size_by = "Gene_0010")
 #'
-#' ## explore options
-#' plotExpression(example_sce, 1:6, x = "Mutation_Status", exprs_values = "logcounts",
-#'     colour_by = "Cell_Cycle", show_violin = TRUE, show_median = TRUE)
-#'
-#' plotExpression(example_sce, "Gene_0001", x = "Mutation_Status")
-#' plotExpression(example_sce, c("Gene_0001", "Gene_0004"), x="Mutation_Status")
-#' plotExpression(example_sce, "Gene_0001", x = "Gene_0002")
-#' plotExpression(example_sce, c("Gene_0001", "Gene_0004"), x="Gene_0002")
-#'
 #' ## plot expression against expression values for Gene_0004
-#' plotExpression(example_sce, 1:4, "Gene_0004")
 #' plotExpression(example_sce, 1:4, "Gene_0004", show_smooth = TRUE)
-#' plotExpression(example_sce, 1:4, "Gene_0004", show_smooth = TRUE, 
-#'    show_se = FALSE)
 #'
 plotExpression <- function(object, features, x = NULL,
                            exprs_values = "logcounts", log2_values = FALSE,

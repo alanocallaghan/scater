@@ -46,8 +46,7 @@ test_that("feature selection and scaling are operational", {
     expect_equal(XX, NOMAT)
 
     XX <- scater:::.scale_columns(NOMAT, scale=TRUE)
-    cm <- colMeans(NOMAT)
-    scaled <- t((t(NOMAT) - cm)/sqrt(cv[!novar]))
+    scaled <- t(t(NOMAT)/sqrt(cv[!novar]))
     expect_equivalent(XX, scaled)
 })
 
@@ -117,6 +116,20 @@ test_that("runPCA works as expected for QC metrics", {
                                "total_features_by_counts",
                                "total_counts_endogenous",
                                "total_counts_feature_control")), NA)
+})
+
+test_that("runPCA works with irlba code", {
+    sceX <- runPCA(sce, ncomponents=4, method="irlba", rand_seed=10)
+    expect_identical(reducedDimNames(sceX), "PCA")     
+    expect_identical(dim(reducedDim(sceX, "PCA")), c(ncol(sceX), 4L))
+    expect_identical(length(attr(reducedDim(sceX), "percentVar")), 4L)
+    expect_false(isTRUE(all.equal(sum(attr(reducedDim(sceX), "percentVar")), 1)))
+
+    # Checking that seed setting works.
+    sceX2 <- runPCA(sce, ncomponents=4, method="irlba", rand_seed=100)
+    sceX3 <- runPCA(sce, ncomponents=4, method="irlba", rand_seed=100)
+    expect_false(isTRUE(all.equal(reducedDim(sceX), reducedDim(sceX2))))
+    expect_equal(reducedDim(sceX2), reducedDim(sceX3))
 })
 
 #############################################
@@ -276,4 +289,18 @@ test_that("runDiffusionMap works as expected", {
 
 })
 
+#############################################
+# Check defences against sparse matrices.
+
+test_that("run* functions work with sparse matrices", {
+    library(Matrix)          
+    counts(sce) <- as(counts(sce), "dgCMatrix")
+    logcounts(sce) <- as(logcounts(sce), "dgCMatrix")
+
+    expect_error(runPCA(sce), NA)
+    expect_error(runPCA(sce, method="irlba"), NA)
+    expect_error(runTSNE(sce), NA)
+    expect_error(runDiffusionMap(sce), NA)
+    expect_error(runMDS(sce), NA)
+})
 

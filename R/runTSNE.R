@@ -30,7 +30,8 @@
 #' Users are advised to test multiple random seed, and then use \code{rand_seed} to set a random seed for replicable results. 
 #'
 #' The value of the \code{perplexity} parameter can have a large effect on the results.
-#' It can often be worthwhile to try multiple values to ensure that the conclusions are robust.
+#' By default, the function will try to provide a reasonable setting, by scaling the perplexity with the number of cells until it reaches a maximum of 50.
+#' However, it is often worthwhile to manually try multiple values to ensure that the conclusions are robust.
 #'
 #' Setting \code{use_dimred} allows users to easily perform t-SNE on low-rank approximations of the original expression matrix (e.g., after PCA).
 #' In such cases, arguments such as \code{ntop}, \code{feature_set}, \code{exprs_values} and \code{scale_features} will be ignored. 
@@ -62,7 +63,7 @@
 runTSNE <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL, 
         exprs_values = "logcounts", scale_features = TRUE,
         use_dimred = NULL, n_dimred = NULL, 
-        rand_seed = NULL, perplexity = floor(ncol(object) / 5), 
+        rand_seed = NULL, perplexity = min(50, floor(ncol(object) / 5)), 
         pca = TRUE, initial_dims = 50, ...) {
 
     if (!is.null(use_dimred)) {
@@ -85,6 +86,7 @@ runTSNE <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
     if ( !is.null(rand_seed) ) {
         set.seed(rand_seed)
     }
+    vals <- as.matrix(vals) # protect against alternative matrix inputs.
     tsne_out <- Rtsne::Rtsne(vals, initial_dims = initial_dims, pca = pca,
                              perplexity = perplexity, dims = ncomponents,...)
     reducedDim(object, "TSNE") <- tsne_out$Y

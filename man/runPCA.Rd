@@ -4,16 +4,19 @@
 \alias{runPCA}
 \title{Perform PCA on cell-level data}
 \usage{
-runPCA(object, ntop = 500, ncomponents = 2, exprs_values = "logcounts",
-  feature_set = NULL, scale_features = TRUE, use_coldata = FALSE,
-  selected_variables = NULL, detect_outliers = FALSE)
+runPCA(object, ncomponents = 2, method = c("prcomp", "irlba"), ntop = 500,
+  exprs_values = "logcounts", feature_set = NULL, scale_features = TRUE,
+  use_coldata = FALSE, selected_variables = NULL, detect_outliers = FALSE,
+  rand_seed = NULL, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
 
-\item{ntop}{Numeric scalar specifying the number of most variable features to use for PCA.}
-
 \item{ncomponents}{Numeric scalar indicating the number of principal components to obtain.}
+
+\item{method}{String specifying how the PCA should be performed.}
+
+\item{ntop}{Numeric scalar specifying the number of most variable features to use for PCA.}
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{object} should be used to obtain the expression values for the calculations.}
 
@@ -28,17 +31,27 @@ This will override any \code{ntop} argument if specified.}
 If a list, each entry can take the form described in \code{?"\link{scater-vis-var}"}.}
 
 \item{detect_outliers}{Logical scalar, should outliers be detected based on PCA coordinates generated from column-level metadata?}
+
+\item{rand_seed}{Numeric scalar specifying the random seed when using \code{method="irlba"}.}
+
+\item{...}{Additional arguments to pass to \code{\link[irlba]{prcomp_irlba}} when \code{method="irlba"}.}
 }
 \value{
 A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell.
 If \code{use_coldata=FALSE}, this is stored in the \code{"PCA"} entry of the \code{reducedDims} slot.
 Otherwise, it is stored in the \code{"PCA_coldata"} entry.
+
+The proportion of variance explained by each PC is stored as a numeric vector in the \code{"percentVar"} attribute of the reduced dimension matrix.
+Note that this will only be of length equal to \code{ncomponents} when \code{method} is not \code{"prcomp"}.
+This is because approximate PCA methods do not compute singular values for all components.
 }
 \description{
 Perform a principal components analysis (PCA) on cells, based on the data in a SingleCellExperiment object.
 }
 \details{
-The function \code{\link{prcomp}} is used internally to do the PCA.
+The function \code{\link{prcomp}} is used internally to do the PCA when \code{method="prcomp"}.
+Alternatively, the \pkg{irlba} package can be used, which performs a fast approximation of PCA through the \code{\link[irlba]{prcomp_irlba}} function.
+This is especially useful for large, sparse matrices.
 
 If \code{use_coldata=TRUE}, PCA will be performed on column-level metadata. 
 The \code{selected_variables} defaults to a vector containing:

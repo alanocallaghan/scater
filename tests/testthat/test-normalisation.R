@@ -2,46 +2,46 @@
 
 context("test expected usage")
 
-test_that("normaliseExprs does not fail on input with zero-variance features", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    expect_that(normaliseExprs(example_sce, method = "none", 
-                                feature_set = 1:100), 
-                is_a("SingleCellExperiment"))
-})
-
-test_that("we can compute normalised expression values with TMM method", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    keep_gene <- rowSums(counts(example_sce)) > 0
-    example_sce <- example_sce[keep_gene,]
-    
-    example_sce <- normaliseExprs(example_sce, method = "TMM", 
-                                     feature_set = 1:100)
-    
-    expect_that(example_sce, is_a("SingleCellExperiment"))
-})
-
-test_that("we can compute normalised expression values with RLE method", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    keep_gene <- rowSums(counts(example_sce)) > 0
-    example_sce <- example_sce[keep_gene,]
-    
-    example_sce <- normaliseExprs(example_sce, method = "RLE", 
-                                     feature_set = 1:100)
-    
-    expect_that(example_sce, is_a("SingleCellExperiment"))
-})
+#test_that("normaliseExprs does not fail on input with zero-variance features", {
+#    data("sc_example_counts")
+#    data("sc_example_cell_info")
+#    example_sce <- SingleCellExperiment(
+#        assays = list(counts = sc_example_counts), 
+#        colData = sc_example_cell_info)
+#    expect_that(normaliseExprs(example_sce, method = "none", 
+#                                feature_set = 1:100), 
+#                is_a("SingleCellExperiment"))
+#})
+#
+#test_that("we can compute normalised expression values with TMM method", {
+#    data("sc_example_counts")
+#    data("sc_example_cell_info")
+#    example_sce <- SingleCellExperiment(
+#        assays = list(counts = sc_example_counts), 
+#        colData = sc_example_cell_info)
+#    keep_gene <- rowSums(counts(example_sce)) > 0
+#    example_sce <- example_sce[keep_gene,]
+#    
+#    example_sce <- normaliseExprs(example_sce, method = "TMM", 
+#                                     feature_set = 1:100)
+#    
+#    expect_that(example_sce, is_a("SingleCellExperiment"))
+#})
+#
+#test_that("we can compute normalised expression values with RLE method", {
+#    data("sc_example_counts")
+#    data("sc_example_cell_info")
+#    example_sce <- SingleCellExperiment(
+#        assays = list(counts = sc_example_counts), 
+#        colData = sc_example_cell_info)
+#    keep_gene <- rowSums(counts(example_sce)) > 0
+#    example_sce <- example_sce[keep_gene,]
+#    
+#    example_sce <- normaliseExprs(example_sce, method = "RLE", 
+#                                     feature_set = 1:100)
+#    
+#    expect_that(example_sce, is_a("SingleCellExperiment"))
+#})
 
 # test_that("we can compute normalised expression values with upperquartile 
 #           method", {
@@ -61,51 +61,51 @@ test_that("we can compute normalised expression values with RLE method", {
 #     expect_that(example_sce, is_a("SCESet"))
 # })
 
-test_that("we can compute normalised expression values with none method", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    keep_gene <- rowSums(counts(example_sce)) > 0
-    example_sce <- example_sce[keep_gene,]
-    
-    example_sce <- normaliseExprs(example_sce, method = "none", 
-                                     feature_set = 1:100)
-    
-    expect_that(example_sce, is_a("SingleCellExperiment"))
-})
-
-test_that("we can compute normalised expression values with a design matrix", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    exprs(example_sce) <- log2(calculateCPM(example_sce, 
-                                            use_size_factors = FALSE) + 1)
-    keep_gene <- rowSums(counts(example_sce)) > 0
-    example_sce <- calculateQCMetrics(example_sce[keep_gene,], 
-                                         feature_controls = list(set1 = 1:40))
-    design <- model.matrix(~example_sce$Cell_Cycle +
-                               example_sce$pct_counts_top_200_features +
-                               example_sce$total_features)
-    example_sce <- normaliseExprs(example_sce, method = "none", design = design)
-    expect_that(example_sce, is_a("SingleCellExperiment"))
-    
-    example_sce <- normaliseExprs(example_sce, method = "TMM", 
-                                     design = design)
-    expect_that(example_sce, is_a("SingleCellExperiment"))
-    
-    example_sce <- normaliseExprs(example_sce, method = "RLE", 
-                                     design = design)
-    expect_that(example_sce, is_a("SingleCellExperiment"))
-    
-    example_sce <- normaliseExprs(example_sce, exprs_values = "exprs",
-                                  design = design)
-    expect_that(example_sce, is_a("SingleCellExperiment"))
-    
-})
+#test_that("we can compute normalised expression values with none method", {
+#    data("sc_example_counts")
+#    data("sc_example_cell_info")
+#    example_sce <- SingleCellExperiment(
+#        assays = list(counts = sc_example_counts), 
+#        colData = sc_example_cell_info)
+#    keep_gene <- rowSums(counts(example_sce)) > 0
+#    example_sce <- example_sce[keep_gene,]
+#    
+#    example_sce <- normaliseExprs(example_sce, method = "none", 
+#                                     feature_set = 1:100)
+#    
+#    expect_that(example_sce, is_a("SingleCellExperiment"))
+#})
+#
+#test_that("we can compute normalised expression values with a design matrix", {
+#    data("sc_example_counts")
+#    data("sc_example_cell_info")
+#    example_sce <- SingleCellExperiment(
+#        assays = list(counts = sc_example_counts), 
+#        colData = sc_example_cell_info)
+#    exprs(example_sce) <- log2(calculateCPM(example_sce, 
+#                                            use_size_factors = FALSE) + 1)
+#    keep_gene <- rowSums(counts(example_sce)) > 0
+#    example_sce <- calculateQCMetrics(example_sce[keep_gene,], 
+#                                         feature_controls = list(set1 = 1:40))
+#    design <- model.matrix(~example_sce$Cell_Cycle +
+#                               example_sce$pct_counts_top_200_features +
+#                               example_sce$total_features)
+#    example_sce <- normaliseExprs(example_sce, method = "none", design = design)
+#    expect_that(example_sce, is_a("SingleCellExperiment"))
+#    
+#    example_sce <- normaliseExprs(example_sce, method = "TMM", 
+#                                     design = design)
+#    expect_that(example_sce, is_a("SingleCellExperiment"))
+#    
+#    example_sce <- normaliseExprs(example_sce, method = "RLE", 
+#                                     design = design)
+#    expect_that(example_sce, is_a("SingleCellExperiment"))
+#    
+#    example_sce <- normaliseExprs(example_sce, exprs_values = "exprs",
+#                                  design = design)
+#    expect_that(example_sce, is_a("SingleCellExperiment"))
+#    
+#})
 
 ####################################################################################################
 # Checking out the behaviour of the normalize() function.

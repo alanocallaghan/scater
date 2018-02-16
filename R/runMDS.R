@@ -62,6 +62,7 @@ runMDS <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
         vals <- .scale_columns(vals, scale = scale_features)
     }
 
+    vals <- as.matrix(vals) # protect against alternative matrix inputs.
     cell_dist <- stats::dist(vals, method = method)
     mds_out <- cmdscale(cell_dist, k = ncomponents)
     reducedDim(object, "MDS") <- mds_out
