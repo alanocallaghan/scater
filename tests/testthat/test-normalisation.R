@@ -178,8 +178,9 @@ test_that("scater::normalize works with different settings", {
     sf <- ref/mean(ref)
     expect_equivalent(exprs(out), log2(t(t(dummy)/sf)+3))
 
-    metadata(X)$log.exprs.offset <- 3
-    out2 <- normalize(X)
+    Y <- X
+    metadata(Y)$log.exprs.offset <- 3
+    out2 <- normalize(Y)
     expect_equal(exprs(out), exprs(out2))
 
     # Checking return_log=FALSE (prior count should turn off automatically).
@@ -193,4 +194,16 @@ test_that("scater::normalize works with different settings", {
     expect_equal(sf, sizeFactors(out))
     out <- normalize(X, centre_size_factors=FALSE)
     expect_equal(ref, sizeFactors(out))
+
+    # Checking that we get sparse matrices out.
+    Y <- X
+    library(Matrix)
+    counts(Y) <- as(counts(X), "dgCMatrix")
+    out <- normalize(Y)
+    expect_s4_class(logcounts(out), "dgCMatrix")
+    expect_equal(as.matrix(logcounts(out)), logcounts(normalize(X)))
+    
+    out2 <- normalize(Y, return_log=FALSE)
+    expect_s4_class(normcounts(out2), "dgCMatrix")
+    expect_equal(as.matrix(normcounts(out2)), normcounts(normalize(X, return_log=FALSE)))
 })
