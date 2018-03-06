@@ -57,7 +57,7 @@ Rcpp::RObject calc_exprs_internal (M mat,
     // Setting up output object (complicated setup to avoid initializing the matrix if summing).
     V input(ngenes);
     Rcpp::NumericVector output(slen);
-    const bool preserve_sparse=(prior==1 && dolog) || (prior==0 && !dolog); // Deciding whether or not to preserve sparsity.
+    const bool preserve_sparse=(prior==1 || !dolog); // Deciding whether or not to preserve sparsity.
 
     std::vector<std::unique_ptr<beachmat::numeric_output> > holder;
     beachmat::numeric_output* optr=NULL;
@@ -85,12 +85,11 @@ Rcpp::RObject calc_exprs_internal (M mat,
                 }
             } else {            
                 tmp/=*size_factors_it[*csdIt];
-                tmp+=prior;
                 
                 if (dosum) { 
                     (*oIt)+=tmp;
                 } else if (dolog) { 
-                    (*oIt)=std::log(tmp)/M_LN2;
+                    (*oIt)=std::log(tmp + prior)/M_LN2;
                 } else {
                     (*oIt)=tmp;
                 }

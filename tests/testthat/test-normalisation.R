@@ -1,4 +1,5 @@
 # Tests for normalisation methods
+# library(scater); library(testthat); source("test-normalisation.R")
 
 context("test expected usage")
 
@@ -125,8 +126,6 @@ test_that("scater::normalize works on endogenous genes", {
     out <- normalize(X)
     sf <- ref/mean(ref)
     expect_equivalent(exprs(out), log2(t(t(dummy)/sf)+1))
-    out <- normalize(X, log_exprs_offset=3)
-    expect_equivalent(exprs(out), log2(t(t(dummy)/sf)+3))
     
     ## repeating with different set of size factors
     ref <- runif(ncells, 10, 20)
@@ -172,4 +171,26 @@ test_that("scater::normalize works on spike-in genes", {
     X4b <- normalize(X, centre_size_factors=FALSE)
     expect_equivalent(sizeFactors(X4b, type="whee"), sizeFactors(X, type="whee"))
     expect_equivalent(exprs(X4), exprs(X4b))
+})
+
+test_that("scater::normalize works with different settings", {
+    out <- normalize(X, log_exprs_offset=3)
+    sf <- ref/mean(ref)
+    expect_equivalent(exprs(out), log2(t(t(dummy)/sf)+3))
+
+    metadata(X)$log.exprs.offset <- 3
+    out2 <- normalize(X)
+    expect_equal(exprs(out), exprs(out2))
+
+    # Checking return_log=FALSE (prior count should turn off automatically).
+    out <- normalize(X, return_log=FALSE)
+    expect_equivalent(normcounts(out), t(t(dummy)/sf))
+
+    out2 <- normalize(X, return_log=FALSE, log_exprs_offset=3)
+    expect_equal(normcounts(out), normcounts(out2))
+
+    # Check with no centering.
+    expect_equal(sf, sizeFactors(out))
+    out <- normalize(X, centre_size_factors=FALSE)
+    expect_equal(ref, sizeFactors(out))
 })
