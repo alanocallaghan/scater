@@ -21,7 +21,7 @@ readKallistoResultsOneSample(directory, read_h5 = FALSE,
 
 readKallistoResults(kallisto_log = NULL, samples = NULL,
   directories = NULL, read_h5 = FALSE, kallisto_version = "current",
-  logExprsOffset = 1, verbose = TRUE)
+  verbose = TRUE)
 }
 \arguments{
 \item{targets_file}{character string giving the path to a tab-delimited text
@@ -100,10 +100,6 @@ the abundance results.}
 
 \item{directories}{character vector providing a set of directories containing
 kallisto abundance results to be read in.}
-
-\item{logExprsOffset}{numeric scalar, providing the offset used when doing
-log2-transformations of expression data to avoid trying to take logs of zero.
-Default offset value is \code{1}.}
 }
 \value{
 A list containing three elements for each sample for which feature

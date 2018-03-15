@@ -280,9 +280,6 @@ readKallistoResultsOneSample <- function(directory, read_h5=FALSE,
 #' the abundance results.
 #' @param directories character vector providing a set of directories containing
 #' kallisto abundance results to be read in.
-#' @param logExprsOffset numeric scalar, providing the offset used when doing
-#' log2-transformations of expression data to avoid trying to take logs of zero.
-#' Default offset value is \code{1}.
 #'
 #' @details This function expects to find only one set of kallisto abundance
 #' results per directory; multiple adundance results in a given directory will
@@ -306,7 +303,6 @@ readKallistoResultsOneSample <- function(directory, read_h5=FALSE,
 readKallistoResults <- function(kallisto_log = NULL, samples = NULL,
                                 directories = NULL, read_h5 = FALSE,
                                 kallisto_version = "current",
-                                logExprsOffset = 1,
                                 verbose = TRUE) {
     kallisto_fail <- rep(FALSE, length(samples))
 
@@ -416,16 +412,14 @@ readKallistoResults <- function(kallisto_log = NULL, samples = NULL,
     
     if ( verbose )
         cat("\n")
+
     ## Produce SingleCellExperiment object
-    sce_out <- SingleCellExperiment(
-        list(exprs = log2(tpm + logExprsOffset), 
-             counts = est_counts, tpm = tpm, 
-             feature_effective_length = feat_eff_len), 
-        colData = pdata, rowData = fdata)
-    if ( verbose )
-        cat("Using log2(TPM + 1) as 'exprs' values in output.")
+    sce_out <- SingleCellExperiment(list(counts = est_counts, tpm = tpm, feature_effective_length = feat_eff_len), 
+                                    colData = pdata, rowData = fdata)
+
     if ( read_h5 )
         bootstraps(sce_out) <- bootstraps
+
     ## Return SCESet object
     sce_out
 }
