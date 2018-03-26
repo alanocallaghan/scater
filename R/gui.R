@@ -27,6 +27,7 @@
 #' scater_gui(example_sce)
 #' }
 scater_gui <- function(object) {
+    .Deprecated(new="iSEE::iSEE")
     
     pd <- colnames(colData(object))
     pd.plot <- pd[!grepl("filter_", pd) & !grepl("is_", pd)]
