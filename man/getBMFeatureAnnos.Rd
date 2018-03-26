@@ -12,50 +12,34 @@ getBMFeatureAnnos(object, filters = "ensembl_transcript_id",
   dataset = "mmusculus_gene_ensembl", host = "www.ensembl.org")
 }
 \arguments{
-\item{object}{an \code{SingleCellExperiment} object}
+\item{object}{A \code{SingleCellExperiment} object.}
 
-\item{filters}{character vector defining the "filters" terms to pass to the
-biomaRt::getBM function.}
+\item{filters}{Character vector defining the filters to pass to the \code{\link[biomaRt]{getBM}} function.}
 
-\item{attributes}{character vector defining the biomaRt attributes to pass to
-the \code{attributes} argument of \code{\link[biomaRt]{getBM}}.}
+\item{attributes}{Character vector defining the attributes to pass to \code{\link[biomaRt]{getBM}}.}
 
-\item{feature_symbol}{character string defining the biomaRt attribute to be 
-used to define the symbol to be used for each feature (which appears as the 
-\code{feature_symbol} in rowData(object), subsequently). Default is 
-\code{"mgi_symbol"}, gene symbols for mouse. This should be changed if the 
-organism is not Mus musculus!}
+\item{feature_symbol}{String specifying the attribute to be used to define the symbol to be used for each feature 
+Default is \code{"mgi_symbol"}, using gene symbols for mouse - this should be changed if the organism is not \emph{Mus musculus}.}
 
-\item{feature_id}{character string defining the biomaRt attribute to be used 
-to define the ID to be used for each feature (which appears as the 
-\code{feature_id} in rowData(object), subsequently). Default is 
-\code{"ensembl_gene_id"}, Ensembl gene IDs for mouse. This should be changed 
-if the organism is not Mus musculus!}
+\item{feature_id}{String specifying the attribute to be used to define the ID to be used for each feature.
+Default is \code{"ensembl_gene_id"}, using the Ensembl gene IDs.}
 
-\item{biomart}{character string defining the biomaRt to be used. Default is 
-\code{"ENSEMBL_MART_ENSEMBL"}.}
+\item{biomart}{String defining the biomaRt to be used, to be passed to \code{\link[biomaRt]{useMart}}.
+Default is \code{"ENSEMBL_MART_ENSEMBL"}.}
 
-\item{dataset}{character string defining the biomaRt dataset to use. Default
-is \code{"mmusculus_gene_ensembl"}, which should be changed if the organism 
-is not the mouse!}
+\item{dataset}{String defining the dataset to use, to be passed to \code{\link[biomaRt]{useMart}}.
+Default is \code{"mmusculus_gene_ensembl"}, which should be changed if the organism is not mouse.}
 
-\item{host}{optional character string argument which can be used to select a
-particular \code{"host"} from biomaRt to use. Useful for accessing archived
-versions of biomaRt data. Default is \code{"www.ensembl.org"}, in which case the current 
-version of the biomaRt (now hosted by Ensembl) is used.}
+\item{host}{Character string argument which can be used to select a particular \code{"host"} to pass to \code{\link[biomaRt]{useMart}}.
+Useful for accessing archived versions of biomaRt data. 
+Default is \code{"www.ensembl.org"}, in which case the current version of the biomaRt (now hosted by Ensembl) is used.}
 }
 \value{
-a SingleCellExperiment object
+A SingleCellExperiment object containing feature annotation.
+The input \code{feature_symbol} appears as the \code{feature_symbol} field in the \code{rowData} of the output object.
 }
 \description{
-Use the biomaRt package to add feature annotation information to an 
-\code{\link{SingleCellExperiment}}.
-}
-\details{
-See the documentation for the biomaRt package, specifically for the
-functions \code{useMart} and \code{\link[biomaRt]{getBM}}, for information on what are 
-permitted values for the filters, attributes, biomart, dataset and host 
-arguments.
+Use the \pkg{biomaRt} package to add feature annotation information to an \code{\link{SingleCellExperiment}}.
 }
 \examples{
 \dontrun{
