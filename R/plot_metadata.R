@@ -171,7 +171,8 @@ plotFeatureData <- function(...) {
     if (!is.null(x)) {
         df_to_plot <- data.frame(X=x_by_out$val, Y=y_by_out$val)
     } else {
-        df_to_plot <- data.frame(Y=y_by_out$val, X=factor(character(nrow(object))))
+        num <- ifelse(mode=="row", nrow(object), ncol(object))
+        df_to_plot <- data.frame(Y=y_by_out$val, X=factor(character(num)))
     }
 
     ## checking visualization arguments
