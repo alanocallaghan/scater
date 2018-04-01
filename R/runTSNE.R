@@ -88,7 +88,8 @@ runTSNE <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
     }
     vals <- as.matrix(vals) # protect against alternative matrix inputs.
     tsne_out <- Rtsne::Rtsne(vals, initial_dims = initial_dims, pca = pca,
-                             perplexity = perplexity, dims = ncomponents,...)
+                             perplexity = perplexity, dims = ncomponents,
+                             check_duplicates = FALSE, ...)
     reducedDim(object, "TSNE") <- tsne_out$Y
     return(object)
 }
