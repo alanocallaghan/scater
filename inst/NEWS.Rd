@@ -1,11 +1,21 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
-\section{Changes in version 1.7.4, Bioconductor 3.7 Release}{
+\section{Changes in version 1.7.16, Bioconductor 3.7 Release}{
   \itemize{
-    \item Refactored calculateQCMetrics() to ignore potential non-linearity,
-     rank genes by highest expression, rename automatically generated 
-     union sets, allow for output of a compact format. 
+    \item Refactored calculateQCMetrics() to ignore potential non-linearity, rank genes by highest expression, 
+        rename automatically generated union sets, allow for output of a compact format. 
+     \item Refactored all plotting functions to allow access to nested fields in the colData() or rowData(), by supplying a character vector.
+     \item Refactored plotTSNE(), plotPCA(), etc. to dispatch to the calculation functions (e.g., runTSNE(), runPCA()), with argument checks.
+     \item Refactored plotColData() and plotRowData() to use the same argument types as other functions rather than aes= input.
+     \item Removed all plotting functions that do not operate on SingleCellExperiment objects.
+     \item Deprecated read10xResults(), downsampleCounts() in favour of methods from the DropletUtils package.
+     \item Deprecated scater_gui() in favour of methods from the iSEE package.
+     \item Deprecated normalizeExprs() as this function made very little sense.
+     \item Added plotHeatmap() function, for easy plotting of heatmaps. 
+     \item Added librarySizeFactors() function, to compute size factors from library sizes.
+     \item Added by_exprs_values= argument to many plotting functions, to distinguish direct plotting of expression values from their use in aesthetics.
+     \item Renamed arguments in plotHighestExprs(), plotExprsVsTxLength(), plotExprsFreqVsMean() for greater clarity. 
   }
 }
 
