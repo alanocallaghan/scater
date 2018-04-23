@@ -192,8 +192,7 @@ calculateTPM <- function(object, effective_length = NULL,
 #' @param use_size_factors A logical scalar indicating whether size factors in \code{object} should be used to compute effective library sizes.
 #' If not, all size factors are deleted and library size-based factors are used instead (see \code{\link{librarySizeFactors}}.
 #' Alternatively, a numeric vector containing a size factor for each cell, which is used in place of \code{sizeFactor(object)}.
-#' @param size_factors A numeric vector containing size factors to 
-#' use for all non-spike-in features.
+#' @param size_factor_grouping A factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.
 #'
 #' @details 
 #' If requested, size factors are used to define the effective library sizes. 

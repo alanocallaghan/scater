@@ -7,7 +7,6 @@
 #' @param object A SingleCellExperiment object or count matrix.
 #' @param exprs_values A string specifying the assay of \code{object} containing the count matrix, if \code{object} is a SingleCellExperiment.
 #' @param use_size_factors a logical scalar specifying whetherthe size factors in \code{object} should be used to construct effective library sizes.
-#' @param size_factors A numeric vector containing size factors to use for all non-spike-in features.
 #' @param size_factor_grouping A factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.
 #' @param subset_row A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calcaulting feature averages.
 #'

@@ -16,8 +16,7 @@ calculateCPM(object, exprs_values = "counts", use_size_factors = TRUE,
 If not, all size factors are deleted and library size-based factors are used instead (see \code{\link{librarySizeFactors}}.
 Alternatively, a numeric vector containing a size factor for each cell, which is used in place of \code{sizeFactor(object)}.}
 
-\item{size_factors}{A numeric vector containing size factors to 
-use for all non-spike-in features.}
+\item{size_factor_grouping}{A factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.}
 }
 \value{
 Matrix of CPM values.
