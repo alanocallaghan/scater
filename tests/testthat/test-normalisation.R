@@ -146,6 +146,8 @@ test_that("scater::normalize works on endogenous genes", {
     Xb <- X
     sizeFactors(Xb) <- NULL
     expect_warning(outb <- normalize(Xb), "using library sizes")
+    expect_warning(outc <- normalize(X, use_size_factors=FALSE), "using library sizes")
+    expect_equal(outb, outc)
 
     lib.sizes <- colSums(counts(Xb))
     lib.sf <- librarySizeFactors(Xb)
@@ -186,6 +188,14 @@ test_that("scater::normalize works on spike-in genes", {
     expect_equivalent(sizeFactors(X4b), sizeFactors(X))
     expect_equivalent(sizeFactors(X4b, type="whee"), sizeFactors(X, type="whee"))
     expect_false(areSizeFactorsCentred(X4b))
+
+    # All size factors are ignored when use_size_factors=FALSE.
+    expect_warning(outc <- normalize(X4, use_size_factors=FALSE), "using library sizes")
+    X5 <- X4
+    sizeFactors(X5) <- NULL
+    sizeFactors(X5, "whee") <- NULL
+    expect_warning(outd <- normalize(X5), "using library sizes")
+    expect_equal(outd, outc)
 })
 
 test_that("scater::normalize works with different settings", {
