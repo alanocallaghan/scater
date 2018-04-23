@@ -236,12 +236,12 @@ calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE,
     out <- normalizeSCE(object, exprs_values = exprs_values, 
                         use_size_factors = use_size_factors, 
                         size_factor_grouping = size_factor_grouping,
-                        log = FALSE, sum = FALSE)
+                        return_log = FALSE)
 
     # Computing a CPM matrix. Size factors are centered at 1, so 
     # all we have to do is to divide further by the library size (in millions).
     cpm_mat <- assay(out, "normcounts")
-    lib_sizes <- .colSums(object)
+    lib_sizes <- .colSums(assay(object, exprs_values))
     cpm_mat <- cpm_mat / (mean(lib_sizes)/1e6)
     return(cpm_mat)
 }
