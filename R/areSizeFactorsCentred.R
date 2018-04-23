@@ -79,7 +79,7 @@ centreSizeFactors <- function(object, centre = 1, grouping = NULL) {
     } else {
         by_group <- split(seq_len(ncol(object)), grouping)
         centrefun <- function(x) { 
-            for (g in grouping) {
+            for (g in by_group) {
                 current <- x[g]
                 x[g] <- current/mean(current) * centre
             }
@@ -89,12 +89,14 @@ centreSizeFactors <- function(object, centre = 1, grouping = NULL) {
 
     # Running through the sets of size factors and centering them as necessary.
     sf <- sizeFactors(object)
-    if (is.null(sf)) {
+    if (!is.null(sf)) {
         sizeFactors(object) <- centrefun(sf)
     }
     for (sf_name in sizeFactorNames(object)) {
         sf <- sizeFactors(object, sf_name)
-        sizeFactors(object, sf_name) <- centrefun(sf)
+        if (!is.null(sf)) {
+            sizeFactors(object, sf_name) <- centrefun(sf)
+        }
     }
 
     return(object)

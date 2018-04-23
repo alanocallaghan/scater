@@ -68,7 +68,7 @@
             }
         }
     } else {
-        sizeFactors(object) <- rep(use_sizeFactors, length.out=ncol(object))
+        sizeFactors(object) <- rep(use_size_factors, length.out=ncol(object))
     }
     return(object)
 }
