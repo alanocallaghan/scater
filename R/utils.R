@@ -53,18 +53,28 @@
     return(list(size.factors=sf.list[seq_len(counter)], index=to.use)) 
 }
 
-.compute_exprs <- function(exprs_mat, 
-                           size_factor_val, size_factor_idx,
+.compute_exprs <- function(exprs_mat, size_factor_val, size_factor_idx,
                            sum = FALSE, log = TRUE, logExprsOffset = 1,
                            subset_row = NULL) {
+    sum <- as.logical(sum)
+    log <- as.logical(log)
+    off <- as.double(logExprsOffset)
 
     ## Specify the rows to be subsetted.
     subset_row <- .subset2index(subset_row, exprs_mat, byrow=TRUE)
     
     ## computes normalized expression values.
-    .Call(cxx_calc_exprs, exprs_mat, size_factor_val, size_factor_idx,
-          as.double(logExprsOffset), as.logical(log),
-          as.logical(sum), subset_row - 1L)
+    out <- .Call(cxx_calc_exprs, exprs_mat, size_factor_val, size_factor_idx,
+                 off, log, sum, subset_row - 1L)
+
+    ## Setting up the names in the output object.
+    if (sum) {
+        names(out) <- rownames(exprs_mat)[subset_row]
+    } else {
+        rownames(out) <- rownames(exprs_mat)[subset_row]
+        colnames(out) <- colnames(exprs_mat)
+    }
+    return(out)
 }
 
 .qc_hunter <- function(object, qc_field, mode = "column", error = TRUE) 

@@ -8,6 +8,7 @@
 #' @param exprs_values A string specifying the assay of \code{object} containing the count matrix, if \code{object} is a SingleCellExperiment.
 #' @param use_size_factors a logical scalar specifying whetherthe size factors in \code{object} should be used to construct effective library sizes.
 #' @param size_factors A numeric vector containing size factors to use for all non-spike-in features.
+#' @param size_factor_grouping A factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.
 #' @param subset_row A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calcaulting feature averages.
 #'
 #' @details 
@@ -28,41 +29,46 @@
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
 #' example_sce <- SingleCellExperiment(
-#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#'    list(counts = sc_example_counts), 
+#'    colData = sc_example_cell_info)
 #'
 #' ## calculate average counts
 #' ave_counts <- calcAverage(example_sce)
 #'
-calcAverage <- function(object, exprs_values="counts", use_size_factors=TRUE, size_factors=NULL, subset_row = NULL) 
+calcAverage <- function(object, exprs_values="counts", use_size_factors=TRUE, size_factors=NULL, size_factor_grouping = NULL, subset_row = NULL) 
 {
-    sf_list <- list(size.factors=list(NULL), index = rep(1L, nrow(object)))
-    if (is(object, 'SingleCellExperiment')) { 
-        if (use_size_factors) {
-            sf_list <- .get_all_sf_sets(object)
-        }
-        object <- assay(object, i=exprs_values)
+    if (!is(object, "SingleCellExperiment")) {
+        assays <- list(object)
+        names(assays) <- exprs_values
+        object <- SingleCellExperiment(assays)
     }
 
-    # Overwriting size factors if provided, otherwise defaulting to lib sizes.
-    if (!is.null(size_factors)) {
-        sf_list$size.factors[[1]] <- rep(size_factors, length.out=ncol(object))
-    } else if (is.null(sf_list$size.factors[[1]])) {
-        sf_list$size.factors[[1]] <- librarySizeFactors(object)
+    # Setting up the size factors.
+    if (use_size_factors) {
+        if (!is.null(size_factors)) {
+            sizeFactors(object) <- size_factors
+        }
+    } else {
+        sizeFactors(object) <- NULL
+        for (x in sizeFactorNames(object)) { 
+            sizeFactors(object, x) <- NULL
+        }
     }
+
+    if (is.null(sizeFactors(object))) {
+        sizeFactors(object) <- librarySizeFactors(object)
+    }
+
+    object <- centreSizeFactors(object, grouping = size_factor_grouping)
+    sf_list <- .get_all_sf_sets(object)
 
     # Computes the average count, adjusting for size factors or library size.
-    all.ave <- .compute_exprs(object, sf_list$size.factors, 
-                              sf_to_use = sf_list$index,
+    all.ave <- .compute_exprs(assay(object, exprs_values),
+                              size_factor_val = sf_list$size.factors, 
+                              size_factor_idx = sf_list$index,
                               log = FALSE, sum = TRUE, logExprsOffset = 0,
                               subset_row = subset_row)
 
-    # Adding names while being row-aware.
-    if (!is.null(subset_row)) {
-        tmp_subset <- .subset2index(subset_row, object)
-        names(all.ave) <- rownames(object)[tmp_subset]
-    } else {
-        names(all.ave) <- rownames(object)
-    }
     return(all.ave / ncol(object))
 }
 
