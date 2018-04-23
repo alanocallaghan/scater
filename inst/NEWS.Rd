@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
-\section{Changes in version 1.7.16, Bioconductor 3.7 Release}{
+\section{Changes in version 1.7.17, Bioconductor 3.7 Release}{
   \itemize{
     \item Refactored calculateQCMetrics() to ignore potential non-linearity, rank genes by highest expression, 
         rename automatically generated union sets, allow for output of a compact format. 
@@ -16,6 +16,9 @@
      \item Added librarySizeFactors() function, to compute size factors from library sizes.
      \item Added by_exprs_values= argument to many plotting functions, to distinguish direct plotting of expression values from their use in aesthetics.
      \item Renamed arguments in plotHighestExprs(), plotExprsVsTxLength(), plotExprsFreqVsMean() for greater clarity. 
+     \item Added centreSizeFactors() function for centralized size factor centering.
+     \item Added size_factor_grouping= argument to normalizeSCE(), calcAverage() and calculateCPM().
+     Also consolidated size_factors= argument into use_size_factors= for these functions.
   }
 }
 
