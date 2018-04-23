@@ -35,7 +35,7 @@
 #' ## calculate average counts
 #' ave_counts <- calcAverage(example_sce)
 #'
-calcAverage <- function(object, exprs_values="counts", use_size_factors=TRUE, size_factors=NULL, size_factor_grouping = NULL, subset_row = NULL) 
+calcAverage <- function(object, exprs_values="counts", use_size_factors = TRUE, size_factor_grouping = NULL, subset_row = NULL) 
 {
     if (!is(object, "SingleCellExperiment")) {
         assays <- list(object)
@@ -44,17 +44,7 @@ calcAverage <- function(object, exprs_values="counts", use_size_factors=TRUE, si
     }
 
     # Setting up the size factors.
-    if (use_size_factors) {
-        if (!is.null(size_factors)) {
-            sizeFactors(object) <- size_factors
-        }
-    } else {
-        sizeFactors(object) <- NULL
-        for (x in sizeFactorNames(object)) { 
-            sizeFactors(object, x) <- NULL
-        }
-    }
-
+    object <- .replace_size_factors(object, use_size_factors) 
     if (is.null(sizeFactors(object))) {
         sizeFactors(object) <- librarySizeFactors(object)
     }

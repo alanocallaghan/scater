@@ -8,6 +8,9 @@
 #  If \code{TRUE}, output is stored as \code{"logcounts"} in the returned object; if \code{FALSE} output is stored as \code{"normcounts"}.
 #' @param log_exprs_offset Numeric scalar specifying the offset to add when log-transforming expression values.
 #' If \code{NULL}, value is taken from \code{metadata(object)$log.exprs.offset} if defined, otherwise 1.
+#' @param use_size_factors A logical scalar indicating whether size factors in \code{object} should be used. 
+#' If not, all size factors are deleted and library size-based factors are used instead (see \code{\link{librarySizeFactors}}.
+#' Alternatively, a numeric vector containing a size factor for each cell.
 #' @param centre_size_factors Logical scalar, should size factors centred at unity be stored in the returned object if \code{exprs_values="counts"}?
 #' @param size_factor_grouping Factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.
 #' @param ... Arguments passed to \code{normalize} when calling \code{normalise}.
@@ -71,11 +74,14 @@
 #' ## normalize the object using the saved size factors
 #' example_sce <- normalize(example_sce)
 #'
-normalizeSCE <- function(object, exprs_values = "counts", return_log = TRUE,
-                         log_exprs_offset = NULL, centre_size_factors = TRUE,
-                         size_factor_grouping = NULL) {
+normalizeSCE <- function(object, exprs_values = "counts", 
+                         return_log = TRUE, log_exprs_offset = NULL, 
+                         use_size_factors = TRUE, size_factor_grouping = NULL
+                         centre_size_factors = TRUE) {
     
     # Setting up the size factors.
+    object <- .replace_size_factors(object, use_size_factors) 
+
     wipe_sf <- FALSE
     if (is.null(sizeFactors(object))) {
         warning("using library sizes as size factors")

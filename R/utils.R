@@ -1,10 +1,10 @@
 ####################################################################
 # Internal utilies that are placed here to make them easier to find.
 
-.subset2index <- function(subset, target, byrow=TRUE) {
-    ## Converts a subsetting vector into a integer equivalent.
-    ## Requires some care to handle logical/character vectors.
-
+.subset2index <- function(subset, target, byrow=TRUE) 
+## Converts a subsetting vector into a integer equivalent.
+## Requires some care to handle logical/character vectors.
+{
     if (is.na(byrow)) {
         dummy <- seq_along(target)
         names(dummy) <- names(target)
@@ -27,7 +27,10 @@
     return(unname(subset))
 }
 
-.get_all_sf_sets <- function(object) {
+.get_all_sf_sets <- function(object) 
+## Returns a list containing a list of sets of size factor values,
+## as well as the indices of the rows to which each size factor set is to be applied.
+{
     fcontrols <- spikeNames(object)
     
     # Storing the default size factors.
@@ -53,9 +56,29 @@
     return(list(size.factors=sf.list[seq_len(counter)], index=to.use)) 
 }
 
+.replace_size_factors <- function(object, use_size_factors) 
+## Either eliminates all size factors in a SingleCellExperiment object,
+## or sets the main size factors to the specified vector.
+{
+    if (is.logical(use_size_factors)) {
+        if (!use_size_factors) {
+            sizeFactors(object) <- NULL
+            for (x in sizeFactorNames(object)) {
+                sizeFactors(object, x) <- NULL
+            }
+        }
+    } else {
+        sizeFactors(object) <- rep(use_sizeFactors, length.out=ncol(object))
+    }
+    return(object)
+}
+
 .compute_exprs <- function(exprs_mat, size_factor_val, size_factor_idx,
                            sum = FALSE, log = TRUE, logExprsOffset = 1,
-                           subset_row = NULL) {
+                           subset_row = NULL) 
+## Calculates normalized expression values, optionally log-transformed
+## and/or summed across cells for a particular gene.
+{
     sum <- as.logical(sum)
     log <- as.logical(log)
     off <- as.double(logExprsOffset)
@@ -79,7 +102,7 @@
 
 .qc_hunter <- function(object, qc_field, mode = "column", error = TRUE) 
 # This function searches for QC fields in the various plotQC functions,
-# accounting for potential compactness.
+# accounting for potential compactness and nesting of DataFrames.
 {
     if (mode=="column") {
         meta_data <- colData(object)
