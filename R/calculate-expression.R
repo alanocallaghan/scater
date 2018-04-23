@@ -221,35 +221,23 @@ calculateTPM <- function(object, effective_length = NULL,
 #' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
 #' cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
 #'
-calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE, size_factors = NULL) 
-{
-    sf_list <- list(size.factors=list(NULL), index = rep(1L, nrow(object)))
-    if (is(object, 'SingleCellExperiment')) { 
-        if (use_size_factors) {
-            sf_list <- .get_all_sf_sets(object)
-        }
-        object <- assay(object, i=exprs_values)
+calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE, size_factor_grouping = NULL) {
+    if (!is(object, "SingleCellExperiment")) {
+        assays <- list(object)
+        names(assays) <- exprs_values
+        object <- SingleCellExperiment(assays)
     }
 
-    # Overwriting size factors if provided, otherwise defaulting to lib sizes.
-    if (!is.null(size_factors)) {
-        sf_list$size.factors[[1]] <- size_factors
-    } else if (is.null(sf_list$size.factors[[1]])) {
-        sf_list$size.factors[[1]] <- librarySizeFactors(object)
-    }
+    out <- normalizeSCE(object, exprs_values = exprs_values, 
+                        use_size_factors = use_size_factors, 
+                        size_factor_grouping = size_factor_grouping,
+                        log = FALSE, sum = FALSE)
 
     # Computing a CPM matrix. Size factors are centered at 1, so 
     # all we have to do is to divide further by the library size (in millions).
-    cpm_mat <- .compute_exprs(object, sf_list$size.factors, 
-                              sf_to_use = sf_list$index,
-                              log = FALSE, sum = FALSE, 
-                              logExprsOffset = 0, subset_row = NULL)
+    cpm_mat <- assay(out, "normcounts")
     lib_sizes <- .colSums(object)
     cpm_mat <- cpm_mat / (mean(lib_sizes)/1e6)
-    
-    # Restoring attributes.
-    rownames(cpm_mat) <- rownames(object)
-    colnames(cpm_mat) <- colnames(object)
     return(cpm_mat)
 }
 
