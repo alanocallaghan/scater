@@ -10,12 +10,16 @@
 #' If \code{NULL}, value is taken from \code{metadata(object)$log.exprs.offset} if defined, otherwise 1.
 #' @param use_size_factors A logical scalar indicating whether size factors in \code{object} should be used. 
 #' If not, all size factors are deleted and library size-based factors are used instead (see \code{\link{librarySizeFactors}}.
-#' Alternatively, a numeric vector containing a size factor for each cell.
+#' Alternatively, a numeric vector containing a size factor for each cell, which is used in place of \code{sizeFactor(object)}.
 #' @param centre_size_factors Logical scalar, should size factors centred at unity be stored in the returned object if \code{exprs_values="counts"}?
 #' @param size_factor_grouping Factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.
 #' @param ... Arguments passed to \code{normalize} when calling \code{normalise}.
 #'
 #' @details 
+#' Normalized expression values are computed by dividing the counts for each cell by the size factor for that cell.
+#' This aims to remove cell-specific scaling biases, e.g., due to differences in sequencing coverage or capture efficiency.
+#' If \code{log=TRUE}, log-normalized values are calculated by adding \code{log_exprs_offset} to the normalized count and performing a log2 transformation.
+#'
 #' Features marked as spike-in controls will be normalized with control-specific size factors, if these are available. 
 #' This reflects the fact that spike-in controls are subject to different biases than those that are removed by gene-specific size factors (namely, total RNA content).
 #' If size factors for a particular spike-in set are not available, a warning will be raised.
@@ -23,9 +27,7 @@
 #' Size factors will automatically be centred prior to calculation of normalized expression values, regardless of the value of \code{centre_size_factors}.
 #' The \code{centre_size_factors} argument is only used to determine whether the centred size factors are stored in the output object.
 #'
-#' \code{normalize} is exactly the same as \code{normalise}, the option
-#' provided for those who have a preference for North American or
-#' British/Australian spelling.
+#' Note that \code{normalize} is exactly the same as \code{normalise}.
 #'
 #' @section Warning about centred size factors:
 #' Centring the size factors ensures that the computed \code{exprs} can be interpreted as being on the same scale as log-counts. 
@@ -44,7 +46,9 @@
 #' In general, it is advisable to only compare size factors and expression values between cells in one SingleCellExperiment object. 
 #' If objects are to be combined, new size factors should be computed using all cells in the combined object, followed by running \code{normalize}.
 #'
-#' @return an SingleCellExperiment object
+#' @return A SingleCellExperiment object containing normalized expression values in \code{"normcounts"} if \code{log=FALSE},
+#' and log-normalized expression values in \code{"logcounts"} if \code{log=TRUE}.
+#' All size factors will also be centred in the output object if \code{centre_size_factors=TRUE}.
 #'
 #' @name normalize
 #' @rdname normalize
@@ -76,7 +80,7 @@
 #'
 normalizeSCE <- function(object, exprs_values = "counts", 
                          return_log = TRUE, log_exprs_offset = NULL, 
-                         use_size_factors = TRUE, size_factor_grouping = NULL
+                         use_size_factors = TRUE, size_factor_grouping = NULL,
                          centre_size_factors = TRUE) {
     
     # Setting up the size factors.

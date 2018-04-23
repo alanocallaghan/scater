@@ -15,13 +15,20 @@
 #' The size-adjusted average count is defined by dividing each count by the size factor and taking the average across cells.
 #' All sizes factors are scaled so that the mean is 1 across all cells, to ensure that the averages are interpretable on the scale of the raw counts. 
 #'
-#' If \code{use_size_factors=TRUE} and \code{object} is a SingleCellExperiment, size factors are automatically extracted from the object.
-#' For spike-in controls, control-specific size factors will be used if available (see \code{\link{normalizeSCE}}). 
-#' If \code{use_size_factors=FALSE} or \code{object} is a matrix, the library size for each cell is used as the size factor via \code{\link{librarySizeFactors}}.
-#' 
-#' If \code{size_factors} is supplied, it will override the any size factors for non-spike-in features in \code{object} (if it is a SingleCellExperiment).
-#' The spike-in size factors will still be used. 
-#' If \code{object} is a matrix, \code{size_factors} will be used instead of the library size.
+#' Assuming that \code{object} is a SingleCellExperiment:
+#' \itemize{
+#' \item If \code{use_size_factors=TRUE}, size factors are automatically extracted from the object.
+#' Note that different size factors may be used for features marked as spike-in controls.
+#' This is due to the presence of control-specific size factors in \code{object}, see \code{\link{normalizeSCE}} for more details.
+#' \item If \code{use_size_factors=FALSE}, all size factors in \code{object} are ignored.
+#' Size factors are instead computed from the library sizes, using \code{\link{librarySizeFactors}}.
+#' \item If \code{use_size_factors} is a numeric vector, it will override the any size factors for non-spike-in features in \code{object}.
+#' The spike-in size factors will still be used for the spike-in transcripts.
+#' }
+#' If no size factors are available, they will be computed from the library sizes using \code{\link{librarySizeFactors}}.
+#'
+#' If \code{object} is a matrix or matrix-like object, size factors can be supplied by setting \code{use_size_factors} to a numeric vector.
+#' Otherwise, the sum of counts for each cell is used as the size factor through \code{\link{librarySizeFactors}}.
 #'
 #' @return Vector of average count values with same length as number of features, or the number of features in \code{subset_row} if supplied.
 #' @export

@@ -13,10 +13,12 @@
 \title{Normalise a SingleCellExperiment object using pre-computed size factors}
 \usage{
 normalizeSCE(object, exprs_values = "counts", return_log = TRUE,
-  log_exprs_offset = NULL, centre_size_factors = TRUE)
+  log_exprs_offset = NULL, use_size_factors = TRUE,
+  size_factor_grouping = NULL, centre_size_factors = TRUE)
 
 \S4method{normalize}{SingleCellExperiment}(object, exprs_values = "counts",
-  return_log = TRUE, log_exprs_offset = NULL, centre_size_factors = TRUE)
+  return_log = TRUE, log_exprs_offset = NULL, use_size_factors = TRUE,
+  size_factor_grouping = NULL, centre_size_factors = TRUE)
 
 normalise(...)
 }
@@ -30,27 +32,37 @@ normalise(...)
 \item{log_exprs_offset}{Numeric scalar specifying the offset to add when log-transforming expression values.
 If \code{NULL}, value is taken from \code{metadata(object)$log.exprs.offset} if defined, otherwise 1.}
 
+\item{use_size_factors}{A logical scalar indicating whether size factors in \code{object} should be used. 
+If not, all size factors are deleted and library size-based factors are used instead (see \code{\link{librarySizeFactors}}.
+Alternatively, a numeric vector containing a size factor for each cell, which is used in place of \code{sizeFactor(object)}.}
+
+\item{size_factor_grouping}{Factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.}
+
 \item{centre_size_factors}{Logical scalar, should size factors centred at unity be stored in the returned object if \code{exprs_values="counts"}?}
 
 \item{...}{Arguments passed to \code{normalize} when calling \code{normalise}.}
 }
 \value{
-an SingleCellExperiment object
+A SingleCellExperiment object containing normalized expression values in \code{"normcounts"} if \code{log=FALSE},
+and log-normalized expression values in \code{"logcounts"} if \code{log=TRUE}.
+All size factors will also be centred in the output object if \code{centre_size_factors=TRUE}.
 }
 \description{
 Compute normalised expression values from count data in a SingleCellExperiment object, using the size factors stored in the object.
 }
 \details{
+Normalized expression values are computed by dividing the counts for each cell by the size factor for that cell.
+This aims to remove cell-specific scaling biases, e.g., due to differences in sequencing coverage or capture efficiency.
+If \code{log=TRUE}, log-normalized values are calculated by adding \code{log_exprs_offset} to the normalized count and performing a log2 transformation.
+
 Features marked as spike-in controls will be normalized with control-specific size factors, if these are available. 
 This reflects the fact that spike-in controls are subject to different biases than those that are removed by gene-specific size factors (namely, total RNA content).
 If size factors for a particular spike-in set are not available, a warning will be raised.
 
 Size factors will automatically be centred prior to calculation of normalized expression values, regardless of the value of \code{centre_size_factors}.
-The \code{centre_size_factors} argument is only used to determine whether the 
+The \code{centre_size_factors} argument is only used to determine whether the centred size factors are stored in the output object.
 
-\code{normalize} is exactly the same as \code{normalise}, the option
-provided for those who have a preference for North American or
-British/Australian spelling.
+Note that \code{normalize} is exactly the same as \code{normalise}.
 }
 \section{Warning about centred size factors}{
 
