@@ -9,6 +9,7 @@
 #' @param log_exprs_offset Numeric scalar specifying the offset to add when log-transforming expression values.
 #' If \code{NULL}, value is taken from \code{metadata(object)$log.exprs.offset} if defined, otherwise 1.
 #' @param centre_size_factors Logical scalar, should size factors centred at unity be stored in the returned object if \code{exprs_values="counts"}?
+#' @param size_factor_grouping Factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.
 #' @param ... Arguments passed to \code{normalize} when calling \code{normalise}.
 #'
 #' @details 
@@ -17,7 +18,7 @@
 #' If size factors for a particular spike-in set are not available, a warning will be raised.
 #'
 #' Size factors will automatically be centred prior to calculation of normalized expression values, regardless of the value of \code{centre_size_factors}.
-#' The \code{centre_size_factors} argument is only used to determine whether the 
+#' The \code{centre_size_factors} argument is only used to determine whether the centred size factors are stored in the output object.
 #'
 #' \code{normalize} is exactly the same as \code{normalise}, the option
 #' provided for those who have a preference for North American or
@@ -71,13 +72,25 @@
 #' example_sce <- normalize(example_sce)
 #'
 normalizeSCE <- function(object, exprs_values = "counts", return_log = TRUE,
-                         log_exprs_offset = NULL, centre_size_factors = TRUE) {
+                         log_exprs_offset = NULL, centre_size_factors = TRUE,
+                         size_factor_grouping = NULL) {
     
-    exprs_mat <- assay(object, i = exprs_values)
-    sf.list <- .get_all_sf_sets(object)
-    if (is.null(sf.list$size.factors[[1]])) {
+    # Setting up the size factors.
+    wipe_sf <- FALSE
+    if (is.null(sizeFactors(object))) {
         warning("using library sizes as size factors")
-        sf.list$size.factors[[1]] <- .colSums(exprs_mat)
+        sizeFactors(object) <- librarySizeFactors(object)
+        wipe_sf <- TRUE
+    }
+    
+    tmp_object <- centreSizeFactors(object, grouping = size_factor_grouping)
+    sf.list <- .get_all_sf_sets(tmp_object)
+
+    if (centre_size_factors) {
+        object <- tmp_object
+    }
+    if (wipe_sf) {
+        sizeFactors(object) <- NULL
     }
 
     ## using logExprsOffset=1 if argument is NULL
@@ -90,8 +103,9 @@ normalizeSCE <- function(object, exprs_values = "counts", return_log = TRUE,
     }
 
     ## Compute normalized expression values.
-    norm_exprs <- .compute_exprs(
-        exprs_mat, sf.list$size.factors, sf_to_use = sf.list$index,
+    norm_exprs <- .compute_exprs(assay(object, i = exprs_values),
+        size_factor_val = sf.list$size.factors, 
+        size_factor_idx = sf.list$index,
         log = return_log, sum = FALSE, logExprsOffset = log_exprs_offset,
         subset_row = NULL)
 
@@ -101,22 +115,6 @@ normalizeSCE <- function(object, exprs_values = "counts", return_log = TRUE,
         metadata(object)$log.exprs.offset <- log_exprs_offset
     } else {
         assay(object, "normcounts") <- norm_exprs
-    }
-
-    ## centering all existing size factors if requested
-    if (centre_size_factors) {
-        sf <- sizeFactors(object)
-        if (!is.null(sf)) {
-            sf <- sf / mean(sf)
-            sizeFactors(object) <- sf
-        }
-
-        # ... and for all named size factor sets.
-        for (type in sizeFactorNames(object)) { 
-            sf <- sizeFactors(object, type = type)
-            sf <- sf / mean(sf)
-            sizeFactors(object, type = type) <- sf
-        }
     }
 
     ## return object

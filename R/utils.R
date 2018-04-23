@@ -53,27 +53,16 @@
     return(list(size.factors=sf.list[seq_len(counter)], index=to.use)) 
 }
 
-.compute_exprs <- function(exprs_mat, size_factors, sf_to_use=NULL, log = TRUE,
-                           sum = FALSE, logExprsOffset = 1,
+.compute_exprs <- function(exprs_mat, 
+                           size_factor_val, size_factor_idx,
+                           sum = FALSE, log = TRUE, logExprsOffset = 1,
                            subset_row = NULL) {
-
-    if (!is.list(size_factors)) { 
-        size_factors <- list(size_factors)
-        sf_to_use <- rep(1L, nrow(exprs_mat))
-    }
-
-    ## Mean centers all the size factors.
-    for (s in seq_along(size_factors)) {
-        sf <- size_factors[[s]]
-        sf <- sf/mean(sf)
-        size_factors[[s]] <- sf
-    }
 
     ## Specify the rows to be subsetted.
     subset_row <- .subset2index(subset_row, exprs_mat, byrow=TRUE)
     
     ## computes normalized expression values.
-    .Call(cxx_calc_exprs, exprs_mat, size_factors, sf_to_use,
+    .Call(cxx_calc_exprs, exprs_mat, size_factor_val, size_factor_idx,
           as.double(logExprsOffset), as.logical(log),
           as.logical(sum), subset_row - 1L)
 }
