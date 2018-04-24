@@ -140,8 +140,7 @@ test_that("calcAverage works as expected", {
     ## Calculate average counts
     ave_counts <- calcAverage(original)
     lib.sizes <- colSums(counts(original))
-    expected_vals <- colMeans(t(counts(original)) / 
-                                  (lib.sizes/mean(lib.sizes)))
+    expected_vals <- colMeans(t(counts(original)) / (lib.sizes/mean(lib.sizes)))
     expect_equal(ave_counts, expected_vals)
     expect_equal(ave_counts, calcAverage(counts(original)))
 
@@ -165,16 +164,20 @@ test_that("calcAverage works as expected", {
     expect_equal(ave_counts[-is_spike], calcAverage(counts(original)[-is_spike,], use_size_factors=sizeFactors(spiked)))
 
     # Ignores or overrides the size factors if requested.
-    expect_equal(calcAverage(counts(original)),
-                 calcAverage(original, use_size_factors=FALSE))
-    expect_equal(calcAverage(counts(spiked)),
-                 calcAverage(spiked, use_size_factors=FALSE))
+    expect_equal(calcAverage(counts(original)), calcAverage(original, use_size_factors=FALSE))
+    expect_equal(calcAverage(counts(spiked)), calcAverage(spiked, use_size_factors=FALSE))
 
     new_sf <- runif(ncol(spiked))
     ave_counts <- calcAverage(spiked, use_size_factors=new_sf)
     spiked2 <- spiked
     sizeFactors(spiked2) <- new_sf
     expect_equal(calcAverage(spiked2), ave_counts)
+
+    # Warnings are correctly thrown (or not) when no spike-ins are available for spike-ins.
+    sizeFactors(spiked2, "WHEE") <- NULL
+    expect_warning(calcAverage(spiked2), "spike-in set")
+    expect_warning(calcAverage(spiked2, use_size_factors=new_sf), "spike-in set")
+    expect_warning(calcAverage(spiked2, use_size_factors=FALSE), NA)
 
     ## Repeating with a sparse matrix.    
     ave_counts <- calcAverage(sparsified)

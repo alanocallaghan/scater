@@ -66,6 +66,10 @@
             for (x in sizeFactorNames(object)) {
                 sizeFactors(object, x) <- NULL
             }
+
+            # Also eliminating spike-in information, to avoid warnings
+            # when spike-in size factors are not available.
+            object <- clearSpikes(object)
         }
     } else {
         sizeFactors(object) <- rep(use_size_factors, length.out=ncol(object))
