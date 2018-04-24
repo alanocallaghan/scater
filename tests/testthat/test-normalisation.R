@@ -146,8 +146,6 @@ test_that("scater::normalize works on endogenous genes", {
     Xb <- X
     sizeFactors(Xb) <- NULL
     expect_warning(outb <- normalize(Xb), "using library sizes")
-    expect_warning(outc <- normalize(X, use_size_factors=FALSE), "using library sizes")
-    expect_equal(outb, outc)
 
     lib.sizes <- colSums(counts(Xb))
     lib.sf <- librarySizeFactors(Xb)
@@ -184,18 +182,18 @@ test_that("scater::normalize works on spike-in genes", {
 
     # Without centering of the size factors.
     X4b <- normalize(X, centre_size_factors=FALSE)
-    expect_equivalent(exprs(X4), exprs(X4b))
+    expect_equivalent(logcounts(X4b)[!chosen,], log2(t(t(counts(X)[!chosen,])/sizeFactors(X))+1))
+    expect_equivalent(logcounts(X4b)[chosen,], log2(t(t(counts(X)[chosen,])/sizeFactors(X, "whee"))+1))
     expect_equivalent(sizeFactors(X4b), sizeFactors(X))
     expect_equivalent(sizeFactors(X4b, type="whee"), sizeFactors(X, type="whee"))
     expect_false(areSizeFactorsCentred(X4b))
 
     # All size factors are ignored when use_size_factors=FALSE.
-    expect_warning(outc <- normalize(X4, use_size_factors=FALSE), "using library sizes")
-    X5 <- X4
+    X5 <- X
     sizeFactors(X5) <- NULL
     sizeFactors(X5, "whee") <- NULL
     expect_warning(outd <- normalize(X5), "using library sizes")
-    expect_equal(outd, outc)
+    expect_equal(logcounts(outd), log2(t(t(counts(X5))/librarySizeFactors(X5)+1)))
 })
 
 test_that("scater::normalize works with different settings", {
@@ -239,13 +237,6 @@ test_that("scater:normalize works with alternative size factor settings", {
     Xb <- centreSizeFactors(X)
     expect_equal(sizeFactors(Xb), sizeFactors(out))
     expect_equal(out, normalize(Xb))
-
-    # Custom size factors
-    sf.new <- runif(ncol(X))
-    out4 <- normalize(X, use_size_factors=sf.new)
-    Xb <- X
-    sizeFactors(Xb) <- sf.new
-    expect_equal(out4, normalize(Xb))
 
     # Size factor grouping.
     grouping <- sample(5, ncol(X), replace=TRUE)
