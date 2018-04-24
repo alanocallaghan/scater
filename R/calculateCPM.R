@@ -30,6 +30,9 @@
 #' If \code{object} is a matrix or matrix-like object, size factors will only be used if \code{use_size_factors} is a numeric vector.
 #' Otherwise, the sum of counts for each cell is directly used as the library size.
 #'
+#' Note that the rescaling is performed to the mean sum of counts for all features, regardless of whether \code{subset.row} is specified.
+#' This ensures that the output of the function with \code{subset.row} is equivalent (but more efficient) than subsetting the output of the function without \code{subset.row}.
+#'
 #' @return Matrix of CPM values.
 #' @export
 #' @examples
@@ -60,13 +63,14 @@ calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE,
     sf_list <- .get_all_sf_sets(object)
 
     # Computes the average count, adjusting for size factors or library size.
-    normed <- .compute_exprs(assay(object, exprs_values),
+    extracted <- assay(object, exprs_values)
+    normed <- .compute_exprs(extracted,
                              size_factor_val = sf_list$size.factors,
                              size_factor_idx = sf_list$index,
                              log = FALSE, sum = FALSE, logExprsOffset = 0,
                              subset_row = subset_row)
 
-    lib_sizes <- colSums2(DelayedArray(normed), rows=subset_row)
+    lib_sizes <- colSums2(DelayedArray(extracted))
     cpm_mat <- normed / (mean(lib_sizes)/1e6)
     return(cpm_mat)
 }
