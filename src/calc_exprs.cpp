@@ -34,7 +34,7 @@ Rcpp::RObject calc_exprs_internal (M mat,
     auto csdIt=chosen_sf_dex.begin();
     for (auto s : subout) { 
         const auto& current=sf_to_use[s];
-        if (current < 1 || current >= nsfsets) { 
+        if (current < 1 || current > nsfsets) { 
             throw std::runtime_error("size factor set index is out of range");
         }
         (*csdIt)=current-1;
