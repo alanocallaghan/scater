@@ -8,11 +8,8 @@
 #  If \code{TRUE}, output is stored as \code{"logcounts"} in the returned object; if \code{FALSE} output is stored as \code{"normcounts"}.
 #' @param log_exprs_offset Numeric scalar specifying the offset to add when log-transforming expression values.
 #' If \code{NULL}, value is taken from \code{metadata(object)$log.exprs.offset} if defined, otherwise 1.
-#' @param use_size_factors A logical scalar indicating whether size factors in \code{object} should be used. 
-#' If not, all size factors are deleted and library size-based factors are used instead (see \code{\link{librarySizeFactors}}.
-#' Alternatively, a numeric vector containing a size factor for each cell, which is used in place of \code{sizeFactor(object)}.
-#' @param centre_size_factors Logical scalar, should size factors centred at unity be stored in the returned object if \code{exprs_values="counts"}?
-#' @param size_factor_grouping Factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.
+#' @param centre_size_factors Logical scalar indicating whether size fators should be centred.
+#' @param size_factor_grouping Factor specifying groups of cells in which size factors should be centred, see \code{\link{centreSizeFactors}} for details.
 #' @param ... Arguments passed to \code{normalize} when calling \code{normalise}.
 #'
 #' @details 
@@ -24,16 +21,18 @@
 #' This reflects the fact that spike-in controls are subject to different biases than those that are removed by gene-specific size factors (namely, total RNA content).
 #' If size factors for a particular spike-in set are not available, a warning will be raised.
 #'
-#' Size factors will automatically be centred prior to calculation of normalized expression values, regardless of the value of \code{centre_size_factors}.
-#' The \code{centre_size_factors} argument is only used to determine whether the centred size factors are stored in the output object.
+#' Size factors will be centred to have a mean of unity if \code{centre_size_factors=TRUE}, prior to calculation of normalized expression values.
+#' This ensures that the computed \code{exprs} can be interpreted as being on the same scale as log-counts. 
+#' It also standardizes the effect of the \code{log_exprs_offset} addition, 
+#' and ensures that abundances are roughly comparable between features normalized with different sets of size factors.
+#'
+#' If \code{size_factor_grouping} is specified and \code{centre_size_factors=TRUE}, this is equivalent to subsetting the SingleCellExperiment;
+#' centering the size factors within each subset; normalizing within each subset; and then merging the subsets back together for output.
+#' This enables convenient normalization of multiple batches separately.
 #'
 #' Note that \code{normalize} is exactly the same as \code{normalise}.
 #'
 #' @section Warning about centred size factors:
-#' Centring the size factors ensures that the computed \code{exprs} can be interpreted as being on the same scale as log-counts. 
-#' This is also standardizes the effect of the \code{log_exprs_offset} addition, 
-#' and ensures that abundances are roughly comparable between features normalized with different sets of size factors.
-#'
 #' Generally speaking, centering does not affect relative comparisons between cells in the same \code{object}, as all size factors are scaled by the same amount. 
 #' However, if two different \code{SingleCellExperiment} objects are run separately through \code{normalize}, the size factors in each object will be rescaled differently. 
 #' This means that the size factors and log-expression values will \emph{not} be comparable between objects.
@@ -43,8 +42,10 @@
 #' the resulting expression values in each subsetted object would \emph{not} be comparable to each other. 
 #' This is despite the fact that all cells were originally derived from a single SingleCellExperiment object.
 #'
-#' In general, it is advisable to only compare size factors and expression values between cells in one SingleCellExperiment object. 
-#' If objects are to be combined, new size factors should be computed using all cells in the combined object, followed by running \code{normalize}.
+#' In general, it is advisable to only compare size factors and expression values between cells in one SingleCellExperiment object,
+#' from a single \code{normalize} call with \code{size_factor_grouping=NULL}.
+#' If objects are to be combined, new size factors should be computed using all cells in the combined object, followed by a single \code{normalize} call.
+#' If \code{size_factor_grouping} is specified, expression values should only be compared \emph{within} each level of the specified factor.
 #'
 #' @return A SingleCellExperiment object containing normalized expression values in \code{"normcounts"} if \code{log=FALSE},
 #' and log-normalized expression values in \code{"logcounts"} if \code{log=TRUE}.
@@ -80,28 +81,17 @@
 #'
 normalizeSCE <- function(object, exprs_values = "counts", 
                          return_log = TRUE, log_exprs_offset = NULL, 
-                         use_size_factors = TRUE, size_factor_grouping = NULL,
-                         centre_size_factors = TRUE) {
+                         centre_size_factors = TRUE, size_factor_grouping = NULL) {
     
-    # Setting up the size factors.
-    object <- .replace_size_factors(object, use_size_factors) 
-
-    wipe_sf <- FALSE
+    ## setting up the size factors.
     if (is.null(sizeFactors(object))) {
         warning("using library sizes as size factors")
         sizeFactors(object) <- librarySizeFactors(object)
-        wipe_sf <- TRUE
     }
-    
-    tmp_object <- centreSizeFactors(object, grouping = size_factor_grouping)
-    sf.list <- .get_all_sf_sets(tmp_object)
-
-    if (centre_size_factors) {
-        object <- tmp_object
+    if (centre_size_factors) { 
+        object <- centreSizeFactors(object, grouping = size_factor_grouping)
     }
-    if (wipe_sf) {
-        sizeFactors(object) <- NULL
-    }
+    sf.list <- .get_all_sf_sets(object)
 
     ## using logExprsOffset=1 if argument is NULL
     if ( is.null(log_exprs_offset)) {
