@@ -229,8 +229,10 @@ test_that("runMDS works as expected", {
     expect_identical(reducedDim(sce2, "MDS"), reducedDim(sce3, "MDS"))
 
     # This does, in fact, happen to be equal, due to the relationship between MDS and PCA.
+    # This is not identifiable by the sign, hence the finagling.
     sce3 <- runMDS(sceP, use_dimred = "PCA", n_dimred=3)
-    expect_equal(reducedDim(sce2, "MDS"), reducedDim(sce3, "MDS"))
+    fold <- reducedDim(sce2, "MDS")/reducedDim(sce3, "MDS")
+    expect_equal(abs(colSums(fold)), rep(nrow(fold), ncol(fold)))
 })
 
 #############################################
