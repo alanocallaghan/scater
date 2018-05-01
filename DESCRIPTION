@@ -19,8 +19,8 @@ Description: A collection of tools for doing various analyses of
 Depends: R (>= 3.5), Biobase, ggplot2, SingleCellExperiment, SummarizedExperiment
 Imports: BiocGenerics, data.table, dplyr, edgeR, ggbeeswarm, grid, limma,
         Matrix, DelayedMatrixStats, methods, parallel, plyr, reshape2, rhdf5, 
-        rjson, S4Vectors, shiny, shinydashboard, stats, tximport, utils, viridis, 
-        Rcpp (>= 0.12.14), DelayedArray
+        rjson, S4Vectors, stats, tximport, utils, viridis, Rcpp (>= 0.12.14), 
+        DelayedArray
 Suggests: BiocStyle, biomaRt, beachmat, cowplot, cluster, destiny, knitr, monocle,
         mvoutlier, rmarkdown, Rtsne, testthat, magrittr, pheatmap, DropletUtils,
         irlba
