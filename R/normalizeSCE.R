@@ -67,16 +67,7 @@
 #'     assays = list(counts = sc_example_counts), 
 #'     colData = sc_example_cell_info
 #' )
-#' keep_gene <- rowSums(counts(example_sce)) > 0
-#' example_sce <- example_sce[keep_gene,]
 #'
-#' ## Apply TMM normalisation taking into account all genes
-#' example_sce <- normaliseExprs(example_sce, method = "TMM")
-#' ## Scale counts relative to a set of control features (here the first 100 features)
-#' example_sce <- normaliseExprs(example_sce, method = "none",
-#' feature_set = 1:100)
-#'
-#' ## normalize the object using the saved size factors
 #' example_sce <- normalize(example_sce)
 #'
 normalizeSCE <- function(object, exprs_values = "counts", 

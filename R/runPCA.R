@@ -140,6 +140,8 @@ runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
     return(object)
 }
 
+#' @importFrom utils head
+#' @importFrom BiocGenerics t
 .get_highvar_mat <- function(object, exprs_values, feature_set, ntop) 
 # Picking the 'ntop' most highly variable features or just using a 
 # pre-specified set of features, if requested. 

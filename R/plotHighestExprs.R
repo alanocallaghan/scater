@@ -34,6 +34,7 @@
 #' @return A ggplot object.
 #'
 #' @export
+#' @importFrom utils head
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
