@@ -126,26 +126,33 @@ test_that("scater::normalize works on endogenous genes", {
     out <- normalize(X)
     sf <- ref/mean(ref)
     expect_equivalent(exprs(out), log2(t(t(dummy)/sf)+1))
+
+    expect_equivalent(sf, sizeFactors(out)) # checking that size factor centering works properly
+    expect_false(areSizeFactorsCentred(X))
+    expect_true(areSizeFactorsCentred(out))
     
     ## repeating with different set of size factors
     ref <- runif(ncells, 10, 20)
     sizeFactors(X) <- ref
     out <- normalize(X)
     sf <- ref/mean(ref)
+
     expect_equivalent(exprs(out), log2(t(t(dummy)/sf)+1)) 
-
-    ## checking that size factor centering works properly
-    expect_equivalent(sf, sizeFactors(out))
-    Xb <- X
-    sizeFactors(Xb) <- ref
-    outb <- normalize(Xb, centre_size_factors=FALSE)
-    expect_equivalent(ref, sizeFactors(outb))
-    expect_equivalent(exprs(out), exprs(outb))
-    
+    expect_equivalent(sf, sizeFactors(out)) # again, centred size factors.
+    expect_false(areSizeFactorsCentred(X))
+    expect_true(areSizeFactorsCentred(out))
+ 
     ## warning if no size factors or other silly inputs.
+    Xb <- X
     sizeFactors(Xb) <- NULL
-    expect_warning(normalize(Xb), "using library sizes")
+    expect_warning(outb <- normalize(Xb), "using library sizes")
 
+    lib.sizes <- colSums(counts(Xb))
+    lib.sf <- librarySizeFactors(Xb)
+    expect_equivalent(lib.sf, lib.sizes/mean(lib.sizes))
+    expect_equivalent(logcounts(outb), log2(t(t(dummy)/lib.sf)+1))
+
+    ## Doesn't break on silly inputs.
     expect_equal(unname(dim(normalize(X[,0,drop=FALSE]))), c(ngenes, 0L))
     expect_equal(unname(dim(normalize(X[0,,drop=FALSE]))), c(0L, ncells)) 
 })
@@ -163,17 +170,34 @@ test_that("scater::normalize works on spike-in genes", {
     sizeFactors(X, type="whee") <- colSums(counts(X)[chosen,])
     expect_warning(X4 <- normalize(X), NA) # i.e., no warning.
     expect_equivalent(exprs(out)[!chosen,], exprs(X4)[!chosen,])
+
     ref <- sizeFactors(X, type="whee")
     sf <- ref/mean(ref)
     expect_equivalent(exprs(X4)[chosen,], log2(t(t(dummy[chosen,])/sf)+1))
 
+    # Checking that the spike-in size factors are correctly centered.
     expect_equivalent(sizeFactors(X4, type="whee"), sf)
+    expect_false(areSizeFactorsCentred(X))
+    expect_true(areSizeFactorsCentred(X4)) 
+
+    # Without centering of the size factors.
     X4b <- normalize(X, centre_size_factors=FALSE)
+    expect_equivalent(logcounts(X4b)[!chosen,], log2(t(t(counts(X)[!chosen,])/sizeFactors(X))+1))
+    expect_equivalent(logcounts(X4b)[chosen,], log2(t(t(counts(X)[chosen,])/sizeFactors(X, "whee"))+1))
+    expect_equivalent(sizeFactors(X4b), sizeFactors(X))
     expect_equivalent(sizeFactors(X4b, type="whee"), sizeFactors(X, type="whee"))
-    expect_equivalent(exprs(X4), exprs(X4b))
+    expect_false(areSizeFactorsCentred(X4b))
+
+    # All size factors are ignored when use_size_factors=FALSE.
+    X5 <- X
+    sizeFactors(X5) <- NULL
+    sizeFactors(X5, "whee") <- NULL
+    expect_warning(outd <- normalize(X5), "using library sizes")
+    expect_equal(logcounts(outd), log2(t(t(counts(X5))/librarySizeFactors(X5)+1)))
 })
 
 test_that("scater::normalize works with different settings", {
+    ## Responds to differences in the prior count.
     out <- normalize(X, log_exprs_offset=3)
     sf <- ref/mean(ref)
     expect_equivalent(exprs(out), log2(t(t(dummy)/sf)+3))
@@ -190,11 +214,6 @@ test_that("scater::normalize works with different settings", {
     out2 <- normalize(X, return_log=FALSE, log_exprs_offset=3)
     expect_equal(normcounts(out), normcounts(out2))
 
-    # Check with no centering.
-    expect_equal(sf, sizeFactors(out))
-    out <- normalize(X, centre_size_factors=FALSE)
-    expect_equal(ref, sizeFactors(out))
-
     # Checking that we get sparse matrices out.
     Y <- X
     library(Matrix)
@@ -207,3 +226,35 @@ test_that("scater::normalize works with different settings", {
     expect_s4_class(normcounts(out2), "dgCMatrix")
     expect_equal(as.matrix(normcounts(out2)), normcounts(normalize(X, return_log=FALSE)))
 })
+
+test_that("scater:normalize works with alternative size factor settings", {
+    # No centering.
+    out <- normalize(X, centre_size_factors=FALSE)
+    expect_equal(ref, sizeFactors(out))
+
+    # Manual centering.
+    out <- normalize(X)
+    Xb <- centreSizeFactors(X)
+    expect_equal(sizeFactors(Xb), sizeFactors(out))
+    expect_equal(out, normalize(Xb))
+
+    # Size factor grouping.
+    grouping <- sample(5, ncol(X), replace=TRUE)
+    out6 <- normalize(X, size_factor_grouping = grouping)
+
+    Xb <- X
+    sf.mod <- sizeFactors(Xb) 
+    for (x in unique(grouping)) {
+        current <- sf.mod[x==grouping]
+        sf.mod[x==grouping] <- current/mean(current)
+    }
+    sizeFactors(Xb) <- sf.mod
+    expect_equal(out6, normalize(Xb))
+
+    # Manual grouping.
+    Xb <- centreSizeFactors(X, grouping = grouping)
+    expect_equal(sizeFactors(Xb), sizeFactors(out6))
+    expect_equal(normalize(Xb), out6)
+})  
+
+

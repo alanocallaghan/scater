@@ -8,26 +8,31 @@
 #  If \code{TRUE}, output is stored as \code{"logcounts"} in the returned object; if \code{FALSE} output is stored as \code{"normcounts"}.
 #' @param log_exprs_offset Numeric scalar specifying the offset to add when log-transforming expression values.
 #' If \code{NULL}, value is taken from \code{metadata(object)$log.exprs.offset} if defined, otherwise 1.
-#' @param centre_size_factors Logical scalar, should size factors centred at unity be stored in the returned object if \code{exprs_values="counts"}?
+#' @param centre_size_factors Logical scalar indicating whether size fators should be centred.
+#' @param size_factor_grouping Factor specifying groups of cells in which size factors should be centred, see \code{\link{centreSizeFactors}} for details.
 #' @param ... Arguments passed to \code{normalize} when calling \code{normalise}.
 #'
 #' @details 
+#' Normalized expression values are computed by dividing the counts for each cell by the size factor for that cell.
+#' This aims to remove cell-specific scaling biases, e.g., due to differences in sequencing coverage or capture efficiency.
+#' If \code{log=TRUE}, log-normalized values are calculated by adding \code{log_exprs_offset} to the normalized count and performing a log2 transformation.
+#'
 #' Features marked as spike-in controls will be normalized with control-specific size factors, if these are available. 
 #' This reflects the fact that spike-in controls are subject to different biases than those that are removed by gene-specific size factors (namely, total RNA content).
 #' If size factors for a particular spike-in set are not available, a warning will be raised.
 #'
-#' Size factors will automatically be centred prior to calculation of normalized expression values, regardless of the value of \code{centre_size_factors}.
-#' The \code{centre_size_factors} argument is only used to determine whether the 
-#'
-#' \code{normalize} is exactly the same as \code{normalise}, the option
-#' provided for those who have a preference for North American or
-#' British/Australian spelling.
-#'
-#' @section Warning about centred size factors:
-#' Centring the size factors ensures that the computed \code{exprs} can be interpreted as being on the same scale as log-counts. 
-#' This is also standardizes the effect of the \code{log_exprs_offset} addition, 
+#' Size factors will be centred to have a mean of unity if \code{centre_size_factors=TRUE}, prior to calculation of normalized expression values.
+#' This ensures that the computed \code{exprs} can be interpreted as being on the same scale as log-counts. 
+#' It also standardizes the effect of the \code{log_exprs_offset} addition, 
 #' and ensures that abundances are roughly comparable between features normalized with different sets of size factors.
 #'
+#' If \code{size_factor_grouping} is specified and \code{centre_size_factors=TRUE}, this is equivalent to subsetting the SingleCellExperiment;
+#' centering the size factors within each subset; normalizing within each subset; and then merging the subsets back together for output.
+#' This enables convenient normalization of multiple batches separately.
+#'
+#' Note that \code{normalize} is exactly the same as \code{normalise}.
+#'
+#' @section Warning about centred size factors:
 #' Generally speaking, centering does not affect relative comparisons between cells in the same \code{object}, as all size factors are scaled by the same amount. 
 #' However, if two different \code{SingleCellExperiment} objects are run separately through \code{normalize}, the size factors in each object will be rescaled differently. 
 #' This means that the size factors and log-expression values will \emph{not} be comparable between objects.
@@ -37,10 +42,14 @@
 #' the resulting expression values in each subsetted object would \emph{not} be comparable to each other. 
 #' This is despite the fact that all cells were originally derived from a single SingleCellExperiment object.
 #'
-#' In general, it is advisable to only compare size factors and expression values between cells in one SingleCellExperiment object. 
-#' If objects are to be combined, new size factors should be computed using all cells in the combined object, followed by running \code{normalize}.
+#' In general, it is advisable to only compare size factors and expression values between cells in one SingleCellExperiment object,
+#' from a single \code{normalize} call with \code{size_factor_grouping=NULL}.
+#' If objects are to be combined, new size factors should be computed using all cells in the combined object, followed by a single \code{normalize} call.
+#' If \code{size_factor_grouping} is specified, expression values should only be compared \emph{within} each level of the specified factor.
 #'
-#' @return an SingleCellExperiment object
+#' @return A SingleCellExperiment object containing normalized expression values in \code{"normcounts"} if \code{log=FALSE},
+#' and log-normalized expression values in \code{"logcounts"} if \code{log=TRUE}.
+#' All size factors will also be centred in the output object if \code{centre_size_factors=TRUE}.
 #'
 #' @name normalize
 #' @rdname normalize
@@ -58,27 +67,22 @@
 #'     assays = list(counts = sc_example_counts), 
 #'     colData = sc_example_cell_info
 #' )
-#' keep_gene <- rowSums(counts(example_sce)) > 0
-#' example_sce <- example_sce[keep_gene,]
 #'
-#' ## Apply TMM normalisation taking into account all genes
-#' example_sce <- normaliseExprs(example_sce, method = "TMM")
-#' ## Scale counts relative to a set of control features (here the first 100 features)
-#' example_sce <- normaliseExprs(example_sce, method = "none",
-#' feature_set = 1:100)
-#'
-#' ## normalize the object using the saved size factors
 #' example_sce <- normalize(example_sce)
 #'
-normalizeSCE <- function(object, exprs_values = "counts", return_log = TRUE,
-                         log_exprs_offset = NULL, centre_size_factors = TRUE) {
+normalizeSCE <- function(object, exprs_values = "counts", 
+                         return_log = TRUE, log_exprs_offset = NULL, 
+                         centre_size_factors = TRUE, size_factor_grouping = NULL) {
     
-    exprs_mat <- assay(object, i = exprs_values)
-    sf.list <- .get_all_sf_sets(object)
-    if (is.null(sf.list$size.factors[[1]])) {
+    ## setting up the size factors.
+    if (is.null(sizeFactors(object))) {
         warning("using library sizes as size factors")
-        sf.list$size.factors[[1]] <- .colSums(exprs_mat)
+        sizeFactors(object) <- librarySizeFactors(object)
     }
+    if (centre_size_factors) { 
+        object <- centreSizeFactors(object, grouping = size_factor_grouping)
+    }
+    sf.list <- .get_all_sf_sets(object)
 
     ## using logExprsOffset=1 if argument is NULL
     if ( is.null(log_exprs_offset)) {
@@ -90,8 +94,9 @@ normalizeSCE <- function(object, exprs_values = "counts", return_log = TRUE,
     }
 
     ## Compute normalized expression values.
-    norm_exprs <- .compute_exprs(
-        exprs_mat, sf.list$size.factors, sf_to_use = sf.list$index,
+    norm_exprs <- .compute_exprs(assay(object, i = exprs_values),
+        size_factor_val = sf.list$size.factors, 
+        size_factor_idx = sf.list$index,
         log = return_log, sum = FALSE, logExprsOffset = log_exprs_offset,
         subset_row = NULL)
 
@@ -101,22 +106,6 @@ normalizeSCE <- function(object, exprs_values = "counts", return_log = TRUE,
         metadata(object)$log.exprs.offset <- log_exprs_offset
     } else {
         assay(object, "normcounts") <- norm_exprs
-    }
-
-    ## centering all existing size factors if requested
-    if (centre_size_factors) {
-        sf <- sizeFactors(object)
-        if (!is.null(sf)) {
-            sf <- sf / mean(sf)
-            sizeFactors(object) <- sf
-        }
-
-        # ... and for all named size factor sets.
-        for (type in sizeFactorNames(object)) { 
-            sf <- sizeFactors(object, type = type)
-            sf <- sf / mean(sf)
-            sizeFactors(object, type = type) <- sf
-        }
     }
 
     ## return object

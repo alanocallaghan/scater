@@ -36,8 +36,7 @@ test_that("we can calculate CPM from counts", {
     ## Responsive to size factors.
     sizeFactors(original) <- runif(ncol(original))
     cpm_out <- calculateCPM(original)
-    expect_equal(cpm_out, calculateCPM(counts(original),
-                                         size_factors=sizeFactors(original)))
+    expect_equal(cpm_out, calculateCPM(counts(original), use_size_factors=sizeFactors(original)))
    
     FUN <- function(counts, sf, libsize = colSums(counts)) {
         eff_lib <- sf/mean(sf) * mean(libsize)
@@ -61,7 +60,7 @@ test_that("we can calculate CPM from counts", {
                  calculateCPM(spiked, use_size_factors=FALSE))
 
     new_sf <- runif(ncol(spiked))
-    cpm_out <- calculateCPM(spiked, size_factors=new_sf)
+    cpm_out <- calculateCPM(spiked, use_size_factors=new_sf)
     spiked2 <- spiked
     sizeFactors(spiked2) <- new_sf
     expect_equal(calculateCPM(spiked2), cpm_out)
@@ -69,6 +68,19 @@ test_that("we can calculate CPM from counts", {
     # Checking that it works on a sparse matrix. 
     cpm_out <- calculateCPM(sparsified)
     expect_equal(as.matrix(cpm_out), calculateCPM(original, use_size_factors=FALSE))
+
+    ## Repeating with subsets.
+    ref <- calculateCPM(counts(original))
+    sub1 <- calculateCPM(counts(original), subset_row=1:10)
+    expect_identical(ref[1:10,], sub1)
+
+    logi <- rbinom(nrow(original), 1, 0.5)==1
+    sub2 <- calculateCPM(counts(original), subset_row=logi)
+    expect_identical(ref[logi,], sub2)
+
+    chosen <- sample(rownames(original), 20)
+    sub3 <- calculateCPM(counts(original), subset_row=chosen)
+    expect_identical(ref[chosen,], sub3)
 })
 
 
@@ -141,16 +153,14 @@ test_that("calcAverage works as expected", {
     ## Calculate average counts
     ave_counts <- calcAverage(original)
     lib.sizes <- colSums(counts(original))
-    expected_vals <- colMeans(t(counts(original)) / 
-                                  (lib.sizes/mean(lib.sizes)))
+    expected_vals <- colMeans(t(counts(original)) / (lib.sizes/mean(lib.sizes)))
     expect_equal(ave_counts, expected_vals)
     expect_equal(ave_counts, calcAverage(counts(original)))
 
     ## Responsive to size factors.
     sizeFactors(original) <- runif(ncol(original))
     ave_counts <- calcAverage(original)
-    expect_equal(ave_counts, calcAverage(counts(original),
-                                         size_factors=sizeFactors(original)))
+    expect_equal(ave_counts, calcAverage(counts(original), use_size_factors=sizeFactors(original)))
     
     sf <- sizeFactors(original) 
     sf <- sf/mean(sf)    
@@ -163,20 +173,24 @@ test_that("calcAverage works as expected", {
     is_spike <- 10:20
     isSpike(spiked, "WHEE") <- is_spike
     ave_counts <- calcAverage(spiked)
-    expect_equal(ave_counts[is_spike], calcAverage(counts(original)[is_spike,], size_factors=sizeFactors(spiked, "WHEE")))
-    expect_equal(ave_counts[-is_spike], calcAverage(counts(original)[-is_spike,], size_factors=sizeFactors(spiked)))
+    expect_equal(ave_counts[is_spike], calcAverage(counts(original)[is_spike,], use_size_factors=sizeFactors(spiked, "WHEE")))
+    expect_equal(ave_counts[-is_spike], calcAverage(counts(original)[-is_spike,], use_size_factors=sizeFactors(spiked)))
 
     # Ignores or overrides the size factors if requested.
-    expect_equal(calcAverage(counts(original)),
-                 calcAverage(original, use_size_factors=FALSE))
-    expect_equal(calcAverage(counts(spiked)),
-                 calcAverage(spiked, use_size_factors=FALSE))
+    expect_equal(calcAverage(counts(original)), calcAverage(original, use_size_factors=FALSE))
+    expect_equal(calcAverage(counts(spiked)), calcAverage(spiked, use_size_factors=FALSE))
 
     new_sf <- runif(ncol(spiked))
-    ave_counts <- calcAverage(spiked, size_factors=new_sf)
+    ave_counts <- calcAverage(spiked, use_size_factors=new_sf)
     spiked2 <- spiked
     sizeFactors(spiked2) <- new_sf
     expect_equal(calcAverage(spiked2), ave_counts)
+
+    # Warnings are correctly thrown (or not) when no spike-ins are available for spike-ins.
+    sizeFactors(spiked2, "WHEE") <- NULL
+    expect_warning(calcAverage(spiked2), "spike-in set")
+    expect_warning(calcAverage(spiked2, use_size_factors=new_sf), "spike-in set")
+    expect_warning(calcAverage(spiked2, use_size_factors=FALSE), NA)
 
     ## Repeating with a sparse matrix.    
     ave_counts <- calcAverage(sparsified)

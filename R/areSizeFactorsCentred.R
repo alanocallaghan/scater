@@ -9,6 +9,8 @@
 #' @return A logical scalar indicating whether all sets of size factors are centered. 
 #' If no size factors are available, \code{TRUE} is returned.
 #'
+#' @author Aaron Lun
+#' @seealso \code{\link{centreSizeFactors}}
 #' @export
 #' @examples
 #' data("sc_example_counts")
@@ -17,8 +19,6 @@
 #'     assays = list(counts = sc_example_counts), 
 #'     colData = sc_example_cell_info
 #' )
-#' keep_gene <- rowSums(counts(example_sce)) > 0
-#' example_sce <- example_sce[keep_gene,]
 #'
 #' sizeFactors(example_sce) <- runif(ncol(example_sce))
 #' areSizeFactorsCentred(example_sce)
@@ -36,4 +36,68 @@ areSizeFactorsCentred <- function(object, centre=1, tol=1e-6) {
     return(TRUE)
 }
 
+#' Centre size factors at unity
+#'
+#' Scales all size factors so that the average size factor across cells is equal to 1.
+#' 
+#' @param object A SingleCellExperiment object containing any number (or zero) sets of size factors.
+#' @param centre A numeric scalar, the value around which all sets of size factors should be centred.
+#' @param grouping A factor specifying the grouping of cells, where size factors are centred to unity within each group.
+#'
+#' @return A SingleCellExperiment with modified size factors that are centred at unity.
+#'
+#' @details
+#' Centering of size factors at unity ensures that division by size factors yields values on the same scale as the raw counts.
+#' This is important for the interpretation of the normalized values, as well as comaprisons between features normalized with different size factors (e.g., spike-ins).
+#'
+#' Specification of \code{grouping} centres the size factors within each level of the provided factor.
+#' This is useful if different batches are sequenced at different depth, by preserving the scale of counts within each batch.
+#' 
+#' @author Aaron Lun
+#' @seealso \code{\link{areSizeFactorsCentred}}
+#' @export
+#' @examples
+#'
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' example_sce <- SingleCellExperiment(
+#'     assays = list(counts = sc_example_counts), 
+#'     colData = sc_example_cell_info
+#' )
+#'
+#' sizeFactors(example_sce) <- runif(ncol(example_sce))
+#' sizeFactors(example_sce, "ERCC") <- runif(ncol(example_sce))
+#' example_sce <- centreSizeFactors(example_sce)
+#'
+#' mean(sizeFactors(example_sce))
+#' mean(sizeFactors(example_sce, "ERCC"))
+#' 
+centreSizeFactors <- function(object, centre = 1, grouping = NULL) {
+    # Setting up a function to centre the size factors by group.
+    if (is.null(grouping)) { 
+        centrefun <- function(x) { x/mean(x) * centre }
+    } else {
+        by_group <- split(seq_len(ncol(object)), grouping)
+        centrefun <- function(x) { 
+            for (g in by_group) {
+                current <- x[g]
+                x[g] <- current/mean(current) * centre
+            }
+            return(x)
+        }
+    }
 
+    # Running through the sets of size factors and centering them as necessary.
+    sf <- sizeFactors(object)
+    if (!is.null(sf)) {
+        sizeFactors(object) <- centrefun(sf)
+    }
+    for (sf_name in sizeFactorNames(object)) {
+        sf <- sizeFactors(object, sf_name)
+        if (!is.null(sf)) {
+            sizeFactors(object, sf_name) <- centrefun(sf)
+        }
+    }
+
+    return(object)
+}

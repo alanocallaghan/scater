@@ -47,6 +47,8 @@
 #'     colour_columns_by=c("Mutation_Status", "Cell_Cycle"))
 #'
 #' @export
+#' @importFrom DelayedArray DelayedArray
+#' @importFrom DelayedMatrixStats rowMeans2
 plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts",
                         center=FALSE, zlim=NULL, symmetric=FALSE, color=NULL, 
                         colour_columns_by=NULL, by_exprs_values = exprs_values, by_show_single = FALSE,
@@ -57,7 +59,7 @@ plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts"
         heat.vals <- heat.vals[,columns,drop=FALSE]        
     }
     if (center) {
-        heat.vals <- heat.vals - rowMeans(heat.vals)
+        heat.vals <- heat.vals - rowMeans2(DelayedArray(heat.vals))
     }
 
     # Winsorizing to preserve the dynamic range.

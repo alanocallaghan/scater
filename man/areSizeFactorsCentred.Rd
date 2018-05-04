@@ -27,12 +27,16 @@ example_sce <- SingleCellExperiment(
     assays = list(counts = sc_example_counts), 
     colData = sc_example_cell_info
 )
-keep_gene <- rowSums(counts(example_sce)) > 0
-example_sce <- example_sce[keep_gene,]
 
 sizeFactors(example_sce) <- runif(ncol(example_sce))
 areSizeFactorsCentred(example_sce)
 example_sce <- normalize(example_sce, centre = TRUE)
 areSizeFactorsCentred(example_sce)
 
+}
+\seealso{
+\code{\link{centreSizeFactors}}
+}
+\author{
+Aaron Lun
 }
