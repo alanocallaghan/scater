@@ -22,8 +22,7 @@ Imports: BiocGenerics, data.table, dplyr, edgeR, ggbeeswarm, grid, limma,
         rjson, S4Vectors, shiny, shinydashboard, stats, tximport, utils, viridis, 
         Rcpp (>= 0.12.14), DelayedArray
 Suggests: BiocStyle, biomaRt, beachmat, cowplot, cluster, destiny, knitr, monocle,
-        mvoutlier, rmarkdown, Rtsne, testthat, magrittr, pheatmap, DropletUtils,
-        irlba
+        mvoutlier, rmarkdown, Rtsne, testthat, magrittr, pheatmap, irlba
 VignetteBuilder: knitr
 LazyData: true
 biocViews: SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,
