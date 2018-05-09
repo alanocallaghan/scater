@@ -1,7 +1,15 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
-\section{Changes in version 1.7.18, Bioconductor 3.7 Release}{
+\section{Changes in version 1.9.2, Bioconductor 3.8 Release}{
+  \itemize{
+    \item Fixes to all violin plots to ensure scatter matches up with violin outlines.
+    \item Rectangle categorical/categorical plots collapse to mirrored bar plots when either factor contains only one level.
+    \item Removed scater_gui(), downsampleCounts(), read10xResults(), normalizeExprs().
+  }
+}
+
+\section{Changes in version 1.7.18, Bioconductor 3.7 Release (April 2018)}{
   \itemize{
     \item Refactored calculateQCMetrics() to ignore potential non-linearity, rank genes by highest expression, 
         rename automatically generated union sets, allow for output of a compact format. 
