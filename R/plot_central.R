@@ -68,7 +68,7 @@ NULL
             } else {
                 viol_args <- list(mapping=aes_string(fill="fill_by"))
             }
-            plot_out <- plot_out + do.call(geom_violin, c(viol_args, list(colour = "gray60", alpha = 0.2, scale = "width")))
+            plot_out <- plot_out + do.call(geom_violin, c(viol_args, list(colour = "gray60", alpha = 0.2, scale = "width", width = 0.8)))
         }
 
         # Adding median, if requested.
@@ -81,7 +81,7 @@ NULL
         point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = alpha, size = size)
         if (is.null(point_FUN)) {
             if (jitter=="swarm") {
-                point_FUN <- function(...) ggbeeswarm::geom_quasirandom(..., groupOnX=TRUE)
+                point_FUN <- function(...) ggbeeswarm::geom_quasirandom(..., width=0.4, groupOnX=TRUE, bandwidth=1)
             } else {
                 point_FUN <- function(...) geom_jitter(..., position = position_jitter(height = 0))
             }
