@@ -110,25 +110,38 @@ NULL
         }
 
     } else {
+        # Creating a rectangle area plot.
         object$X <- as.factor(object$X)
         object$Y <- as.factor(object$Y)
 
-        # Defining the box boundaries:
+        # Quantifying the frequency of each combination.
         summary.data <- as.data.frame(with(object, table(X, Y)))
         summary.data$Proportion <- with(summary.data, Freq / sum(Freq))
-        summary.data$Radius <- 0.49*with(summary.data, sqrt(Proportion/max(Proportion)))
+        summary.data$RelativeProp <- with(summary.data, Proportion / max(Proportion))
 
-        # Adding manual jitter:
+        # Defining the box boundaries (collapses to a mirrored bar plot if there is only one level).
+
+        if (nlevels(object$Y)==1L && nlevels(object$X)!=1L) {
+            summary.data$XWidth <- 0.4
+            summary.data$YWidth <- 0.49 * summary.data$RelativeProp
+        } else if (nlevels(object$Y)!=1L && nlevels(object$X)==1L) {
+            summary.data$XWidth <- 0.49 * summary.data$RelativeProp
+            summary.data$YWidth <- 0.4
+        } else {
+            summary.data$XWidth <- summary.data$YWidth <- 0.49 * sqrt(summary.data$RelativeProp)
+        }
+
+        # Adding manual jitter to each point in each combination of levels.
         object$Marker <- seq_len(nrow(object))
         combined <- merge(object, summary.data, by=c('X', 'Y'), all.x=TRUE)
-        point.radius <- combined$Radius[order(combined$Marker)];
+        combined <- combined[order(combined$Marker),]
         object$Marker <- NULL
-        object$X <- as.integer(object$X) + point.radius*runif(nrow(object), -1, 1);
-        object$Y <- as.integer(object$Y) + point.radius*runif(nrow(object), -1, 1)
+        object$X <- as.integer(object$X) + combined$XWidth*runif(nrow(object), -1, 1)
+        object$Y <- as.integer(object$Y) + combined$YWidth*runif(nrow(object), -1, 1)
 
         # Creating the plot:
         plot_out <- ggplot(object, aes_string(x="X", y="Y")) + xlab(xlab) + ylab(ylab)
-        plot_out <- plot_out + geom_tile(aes_string(x = "X", y = "Y", height = "2*Radius", width = "2*Radius"),
+        plot_out <- plot_out + geom_tile(aes_string(x = "X", y = "Y", height = "2*YWidth", width = "2*XWidth"),
                                          data=summary.data, color = 'grey60', size = 0.5, fill='grey90')
 
         # Adding points.
