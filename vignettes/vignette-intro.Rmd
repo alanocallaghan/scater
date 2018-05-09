@@ -115,6 +115,13 @@ Of course, users can construct any arbitrary matrix of the same dimensions as th
 assay(example_sce, "is_expr") <- counts(example_sce)>0
 ```
 
+The `calcAverage` function will compute the average count for each gene after scaling each cell's counts by its size factor.
+If size factors are not available, it will compute a size factor from the library size.
+
+```{r}
+head(calcAverage(example_sce))
+```
+
 # Other methods of data import 
 
 Count matrices stored as CSV files or equivalent can be easily read into R session using `read.table` from _utils_ or `fread` from the `r CRANpkg("data.table")` package.

@@ -256,7 +256,7 @@ filtered <- example_sce[,keep.total]
 
 The `isOutlier` approach adjusts to experiment-specific aspects of the data, e.g., sequencing depth, amount of spike-in RNA added, cell type.
 In contrast, a fixed threshold would require manual adjustment to account for changes to the experimental protocol or system.
-We refer readers to the [_simpleSingleCell_](https://www.bioconductor.org/help/workflows/simpleSingleCell/intro) workflow for more details.
+We refer readers to the [_simpleSingleCell_](https://bioconductor.org/packages/release/workflows/html/simpleSingleCell.html) workflow for more details.
 
 ### Identifying outliers on all QC metrics
 
