@@ -6,8 +6,8 @@
 \title{Plot a relative log expression (RLE) plot}
 \usage{
 plotRLE(object, exprs_values = "logcounts", exprs_logged = TRUE,
-  colour_by = NULL, style = "minimal", legend = TRUE, ordering = NULL,
-  ...)
+  style = "minimal", legend = TRUE, ordering = NULL, colour_by = NULL,
+  by_exprs_values = exprs_values, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -17,14 +17,17 @@ plotRLE(object, exprs_values = "logcounts", exprs_logged = TRUE,
 \item{exprs_logged}{A logical scalar indicating whether the expression matrix is already log-transformed.
 If not, a log2-transformation (+1) will be performed prior to plotting.}
 
-\item{colour_by}{Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values.}
-
 \item{style}{String defining the boxplot style to use, either \code{"minimal"} (default) or \code{"full"}; see Details.}
 
 \item{legend}{Logical scalar specifying whether a legend should be shown.}
 
 \item{ordering}{A vector specifying the ordering of cells in the RLE plot.
 This can be useful for arranging cells by experimental conditions or batches.}
+
+\item{colour_by}{Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values.}
+
+\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
+for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.}
 
 \item{...}{further arguments passed to \code{\link[ggplot2]{geom_boxplot}} when \code{style="full"}.}
 }

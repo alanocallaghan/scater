@@ -6,11 +6,13 @@
 #' @param exprs_values A string or integer scalar specifying the expression matrix in \code{object} to use.
 #' @param exprs_logged A logical scalar indicating whether the expression matrix is already log-transformed.
 #' If not, a log2-transformation (+1) will be performed prior to plotting.
-#' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param style String defining the boxplot style to use, either \code{"minimal"} (default) or \code{"full"}; see Details.
 #' @param legend Logical scalar specifying whether a legend should be shown.
 #' @param ordering A vector specifying the ordering of cells in the RLE plot.
 #' This can be useful for arranging cells by experimental conditions or batches.
+#' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
+#' for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.
 #' @param ... further arguments passed to \code{\link[ggplot2]{geom_boxplot}} when \code{style="full"}.
 #'
 #' @return A ggplot object
@@ -61,11 +63,11 @@
 #' @importFrom DelayedMatrixStats rowMedians
 #' @importFrom SummarizedExperiment assay
 plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE, 
-                    colour_by = NULL, style = "minimal", legend = TRUE, 
-                    ordering = NULL, ...) {
+                    style = "minimal", legend = TRUE, ordering = NULL, 
+                    colour_by = NULL, by_exprs_values = exprs_values, ...) {
 
-    ## Check arguments are valid
-    colour_by_out <- .choose_vis_values(object, colour_by, mode = "column", search = "any", exprs_values = "logcounts")
+    ## Check aesthetic arguments.
+    colour_by_out <- .choose_vis_values(object, colour_by, mode = "column", search = "any", exprs_values = by_exprs_values)
     colour_by <- colour_by_out$name
     colour_by_vals <- colour_by_out$val
     if (!is.null(colour_by)) {
