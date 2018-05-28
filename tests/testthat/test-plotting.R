@@ -594,3 +594,37 @@ test_that("plotExprsVsTxLength works as expected", {
     expect_s3_class(plotExprsVsTxLength(example_sce, data.frame(Length=rnorm(2000, mean = 5000, sd = 500))), "ggplot")
 })
 
+#################################################
+# Testing plotRLE
+
+test_that("plotRLE works as expected", {
+    data("sc_example_counts")
+    data("sc_example_cell_info")
+    example_sce <- SingleCellExperiment(
+        assays = list(counts = sc_example_counts), 
+        colData = sc_example_cell_info)
+    cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
+    example_sce <- normalize(example_sce)
+
+    # With minimal or full.
+    for (style in c("minimal", "full")) {
+        p <- plotRLE(example_sce, colour_by = "Mutation_Status", style=style)
+        expect_s3_class(p, "ggplot")
+    
+        p <- plotRLE(example_sce, style=style)
+        expect_s3_class(p, "ggplot")
+    
+        p <- plotRLE(example_sce, legend=FALSE, style=style)
+        expect_s3_class(p, "ggplot")
+    
+        p <- plotRLE(example_sce, exprs_values="cpm", exprs_logged=FALSE, style=style)
+        expect_s3_class(p, "ggplot")
+    
+        p <- plotRLE(example_sce, colour_by = "Gene_0004", style=style)
+        expect_s3_class(p, "ggplot")
+    
+        p <- plotRLE(example_sce, colour_by = "Gene_0004", by_exprs_values = "cpm", style=style)
+        expect_s3_class(p, "ggplot")
+    }
+})
+
