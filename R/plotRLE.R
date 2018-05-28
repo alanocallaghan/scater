@@ -3,50 +3,33 @@
 #' Produce a relative log expression (RLE) plot of one or more transformations of cell expression values.
 #'
 #' @param object A SingleCellExperiment object.
-#' @param exprs_mats named list of expression matrices. Entries can either be a 
-#' character string, in which case the corresponding expression matrix will be 
-#' extracted from the SingleCellExperiment \code{object}, or a matrix of expression values.
-#' @param exprs_logged logical vector of same length as \code{exprs_mats} indicating
-#' whether the corresponding entry in \code{exprs_mats} contains logged expression
-#' values (\code{TRUE}) or not (\code{FALSE}).
-#' @param colour_by character string defining the column of \code{colData(object)} to
-#' be used as a factor by which to colour the points in the plot. Alternatively, 
-#' a data frame with one column, containing values to map to colours for all cells.
-#' @param style character(1), either \code{"minimal"} (default) or \code{"full"},
-#' defining the boxplot style to use. \code{"minimal"} uses Tufte-style boxplots and
-#' is fast for large numbers of cells. \code{"full"} uses the usual 
-#' \code{\link{ggplot2}} and is more detailed and flexible, but can take a long 
-#' time to plot for large datasets.
-#' @param legend character, specifying how the legend(s) be shown? Default is
-#' \code{"auto"}, which hides legends that have only one level and shows others.
-#' Alternative is "none" (hide all legends).
-#' @param order_by_colour logical, should cells be ordered (grouped) by the 
-#' \code{colour_by} variable? Default is \code{TRUE}. Useful for visualising 
-#' differences between batches or experimental conditions.
-#' @param ncol integer, number of columns for the facetting of the plot. 
-#' Default is 1.
-#' @param ... further arguments passed to \code{\link[ggplot2]{geom_boxplot}}.
+#' @param exprs_values A string or integer scalar specifying the expression matrix in \code{object} to use.
+#' @param exprs_logged A logical scalar indicating whether the expression matrix is already log-transformed.
+#' If not, a log2-transformation (+1) will be performed prior to plotting.
+#' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param style String defining the boxplot style to use, either \code{"minimal"} (default) or \code{"full"}; see Details.
+#' @param legend Logical scalar specifying whether a legend should be shown.
+#' @param ordering A vector specifying the ordering of cells in the RLE plot.
+#' This can be useful for arranging cells by experimental conditions or batches.
+#' @param ... further arguments passed to \code{\link[ggplot2]{geom_boxplot}} when \code{style="full"}.
 #'
-#' @return a ggplot plot object
+#' @return A ggplot object
 #'
 #' @details 
-#' Unwanted variation can be highly problematic and so its detection is often crucial.
-#' Relative log expression (RLE) plots are a powerful tool for visualising such 
-#' variation in high dimensional data. RLE plots are particularly useful for
-#' assessing whether a procedure aimed at removing unwanted variation, i.e. a 
-#' normalisation procedure, has been successful. These plots, while originally 
-#' devised for gene expression data from microarrays, can also be used to reveal 
-#' unwanted variation in single-cell expression data, where such variation can be 
-#' problematic.
+#' Relative log expression (RLE) plots are a powerful tool for visualising unwanted variation in high dimensional data. 
+#' These plots were originally devised for gene expression data from microarrays but can also be used on single-cell expression data.
+#' RLE plots are particularly useful for assessing whether a procedure aimed at removing unwanted variation (e.g., scaling normalisation) has been successful. 
 #' 
-#' If style is "full", as usual with boxplots, the box shows the inter-quartile 
-#' range and whiskers extend no more than 1.5 * IQR from the hinge (the 25th or 
-#' 75th percentile). Data beyond the whiskers are called outliers and are plotted 
-#' individually. The median (50th percentile) is shown with a white bar.
+#' If style is "full", the usual \pkg{ggplot2} boxplot is created for each cell.
+#' Here, the box shows the inter-quartile range and whiskers extend no more than 1.5 * IQR from the hinge (the 25th or 75th percentile).
+#' Data beyond the whiskers are called outliers and are plotted individually. 
+#' The median (50th percentile) is shown with a white bar.
+#' This approach is detailed and flexible, but can take a long time to plot for large datasets.
 #' 
-#' If style is "minimal", then median is shown with a circle, the IQR in a grey
-#' line, and "whiskers" (as defined above) for the plots are shown with coloured 
-#' lines. No outliers are shown for this plot style.
+#' If style is "minimal", a Tufte-style boxplot is created for each cell.
+#' Here, the median is shown with a circle, the IQR in a grey line, and "whiskers" (as defined above) for the plots are shown with coloured lines. 
+#' No outliers are shown for this plot style.
+#' This approach is more succinct and faster for large numbers of cells.
 #'
 #' @references 
 #' Gandolfo LC, Speed TP. RLE Plots: Visualising Unwanted Variation in High Dimensional Data. 
@@ -78,7 +61,7 @@
 #' @importFrom DelayedMatrixStats rowMedians
 #' @importFrom SummarizedExperiment assay
 plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE, 
-                    colour_by = NULL, style = "minimal", legend = "auto", 
+                    colour_by = NULL, style = "minimal", legend = TRUE, 
                     ordering = NULL, ...) {
 
     ## Check arguments are valid
@@ -130,8 +113,7 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
     plot_out <- .resolve_plot_colours(plot_out, colour_by_vals, colour_by, fill = FALSE)
     plot_out <- .resolve_plot_colours(plot_out, colour_by_vals, colour_by, fill = TRUE)
     
-    legend <- match.arg(legend, c("auto", "none", "all"))
-    if ( legend == "none" ) { 
+    if (!legend) {
         plot_out <- plot_out + theme(legend.position = "none")
     }
     plot_out
