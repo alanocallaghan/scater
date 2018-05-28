@@ -115,12 +115,10 @@ NULL
         object$Y <- as.factor(object$Y)
 
         # Quantifying the frequency of each combination.
-        summary.data <- as.data.frame(with(object, table(X, Y)))
-        summary.data$Proportion <- with(summary.data, Freq / sum(Freq))
-        summary.data$RelativeProp <- with(summary.data, Proportion / max(Proportion))
+        summary.data <- as.data.frame(table(X=object$X, Y=object$Y))
+        summary.data$RelativeProp <- summary.data$Freq / max(summary.data$Freq)
 
         # Defining the box boundaries (collapses to a mirrored bar plot if there is only one level).
-
         if (nlevels(object$Y)==1L && nlevels(object$X)!=1L) {
             summary.data$XWidth <- 0.4
             summary.data$YWidth <- 0.49 * summary.data$RelativeProp
