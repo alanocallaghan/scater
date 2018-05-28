@@ -166,7 +166,7 @@ NULL
 
     ## Setting the legend details.
     plot_out <- .add_extra_guide(plot_out, shape_by, size_by)
-    if ( legend == "none" ) {
+    if (!legend) {
         plot_out <- plot_out + theme(legend.position = "none")
     }
 
