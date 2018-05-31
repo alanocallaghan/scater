@@ -8,7 +8,7 @@
 #' @param exprs_values A string specifying the assay of \code{object} containing the count matrix, if \code{object} is a SingleCellExperiment.
 #' @param use_size_factors a logical scalar specifying whetherthe size factors in \code{object} should be used to construct effective library sizes.
 #' @param size_factor_grouping A factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.
-#' @param subset_row A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calcaulting feature averages.
+#' @param subset_row A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calculating feature averages.
 #'
 #' @details 
 #' The size-adjusted average count is defined by dividing each count by the size factor and taking the average across cells.

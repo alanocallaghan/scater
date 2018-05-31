@@ -16,7 +16,7 @@ calcAverage(object, exprs_values = "counts", use_size_factors = TRUE,
 
 \item{size_factor_grouping}{A factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.}
 
-\item{subset_row}{A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calcaulting feature averages.}
+\item{subset_row}{A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calculating feature averages.}
 }
 \value{
 Vector of average count values with same length as number of features, or the number of features in \code{subset_row} if supplied.
