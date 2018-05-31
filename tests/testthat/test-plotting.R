@@ -310,48 +310,66 @@ test_that("we can produce PCA pairplots", {
 })
 
 test_that("we can produce TSNE plots", {
-    example_sce <- runTSNE(example_sce, rand_seed=100)
+    set.seed(100)
+    example_sce <- runTSNE(example_sce)
     expect_identical(reducedDimNames(example_sce), "TSNE")
     expect_s3_class(P <- plotTSNE(example_sce), "ggplot")
 
     # plotTSNE re-runs it correctly.
     reducedDim(example_sce, "TSNE") <- NULL
-    expect_s3_class(P2 <- plotTSNE(example_sce, run_args=list(rand_seed=100)), "ggplot")
+
+    set.seed(100)
+    P2 <- plotTSNE(example_sce)
+    expect_s3_class(P2, "ggplot")
     expect_equal(P, P2)
 
     # Responsive to changes in parameters.
-    expect_s3_class(P3 <- plotTSNE(example_sce, run_args=list(perplexity=10)), "ggplot")
+    set.seed(100)
+    P3 <- plotTSNE(example_sce, run_args=list(perplexity=10))
+    expect_s3_class(P3, "ggplot")
     expect_false(isTRUE(all.equal(P, P3)))
     
     # Throws a warning if we try to specify this locally.
     expect_warning(plotTSNE(example_sce, perplexity=10), "non-plotting arguments")
 
     # Handles multiple components properly.
-    expect_s3_class(P4 <- plotTSNE(example_sce, ncomponents=4, run_args=list(rand_seed=20)), "ggplot")
-    example_sce <- runTSNE(example_sce, ncomponents=4, rand_seed=20)
+    set.seed(20)
+    P4 <- plotTSNE(example_sce, ncomponents=4)
+    expect_s3_class(P4, "ggplot")
+
+    set.seed(20)
+    example_sce <- runTSNE(example_sce, ncomponents=4)
     expect_equal(plotTSNE(example_sce, ncomponents=4), P4)
 })
 
 test_that("we can produce diffusion maps", {
-    example_sce <- runDiffusionMap(example_sce, rand_seed=100)
+    set.seed(100)        
+    example_sce <- runDiffusionMap(example_sce)
     expect_identical(reducedDimNames(example_sce), "DiffusionMap")
     expect_s3_class(P <- plotDiffusionMap(example_sce), "ggplot")
 
     # plotDiffusionMap re-runs it correctly.
     reducedDim(example_sce, "DiffusionMap") <- NULL
-    expect_s3_class(P2 <- plotDiffusionMap(example_sce, run_args=list(rand_seed=100)), "ggplot")
+
+    set.seed(100)
+    P2 <- plotDiffusionMap(example_sce)
+    expect_s3_class(P2, "ggplot")
 #    expect_equal(P, P2) # it seems as if destiny::DiffusionMap does not respond to the seed!
 
     # Responsive to changes in parameters.
-    expect_s3_class(P3 <- plotDiffusionMap(example_sce, run_args=list(k=13)), "ggplot")
+    set.seed(100)
+    P3 <- plotDiffusionMap(example_sce, run_args=list(k=13))
+    expect_s3_class(P3, "ggplot")
     expect_false(isTRUE(all.equal(P, P3)))
 
     # Throws a warning if we try to specify this locally.
     expect_warning(plotDiffusionMap(example_sce, k=10), "non-plotting arguments")
 
     # Handles multiple components properly.
-    expect_s3_class(P4 <- plotDiffusionMap(example_sce, ncomponents=4, run_args=list(rand_seed=20)), "ggplot")
-#    example_sce <- runDiffusionMap(example_sce, ncomponents=4, rand_seed=20)
+    set.seed(20)        
+    expect_s3_class(P4 <- plotDiffusionMap(example_sce, ncomponents=4), "ggplot")
+#    set.seed(20)
+#    example_sce <- runDiffusionMap(example_sce, ncomponents=4)
 #    expect_equal(plotDiffusionMap(example_sce, ncomponents=4), P4)
 })
 

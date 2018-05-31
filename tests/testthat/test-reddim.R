@@ -119,15 +119,18 @@ test_that("runPCA works as expected for QC metrics", {
 })
 
 test_that("runPCA works with irlba code", {
-    sceX <- runPCA(sce, ncomponents=4, method="irlba", rand_seed=10)
+    set.seed(10)
+    sceX <- runPCA(sce, ncomponents=4, method="irlba")
     expect_identical(reducedDimNames(sceX), "PCA")     
     expect_identical(dim(reducedDim(sceX, "PCA")), c(ncol(sceX), 4L))
     expect_identical(length(attr(reducedDim(sceX), "percentVar")), 4L)
     expect_false(isTRUE(all.equal(sum(attr(reducedDim(sceX), "percentVar")), 1)))
 
     # Checking that seed setting works.
-    sceX2 <- runPCA(sce, ncomponents=4, method="irlba", rand_seed=100)
-    sceX3 <- runPCA(sce, ncomponents=4, method="irlba", rand_seed=100)
+    set.seed(100)
+    sceX2 <- runPCA(sce, ncomponents=4, method="irlba")
+    set.seed(100)
+    sceX3 <- runPCA(sce, ncomponents=4, method="irlba")
     expect_false(isTRUE(all.equal(reducedDim(sceX), reducedDim(sceX2))))
     expect_equal(reducedDim(sceX2), reducedDim(sceX3))
 })
@@ -136,57 +139,74 @@ test_that("runPCA works with irlba code", {
 # Check t-SNE.
 
 test_that("runTSNE works as expected", {
-    sceX <- runTSNE(sce, ncomponents = 3, rand_seed = 100)
+    set.seed(100)
+    sceX <- runTSNE(sce, ncomponents = 3)
     expect_identical(reducedDimNames(sceX), "TSNE")     
     expect_identical(dim(reducedDim(sceX, "TSNE")), c(ncol(sceX), 3L))
 
-    # Testing that rand_seed actually works.
-    sce2 <- runTSNE(sce, rand_seed = 100)
-    sce3 <- runTSNE(sce, rand_seed = 100)
+    # Testing that setting the seed actually works.
+    set.seed(100)
+    sce2 <- runTSNE(sce)
+    set.seed(100)
+    sce3 <- runTSNE(sce)
     expect_equal(reducedDim(sce2), reducedDim(sce3))
 
     # Testing that various settings have some effect. 
-    sce3 <- runTSNE(sce, scale_features = FALSE, rand_seed = 100)
+    set.seed(100)
+    sce3 <- runTSNE(sce, scale_features = FALSE)
     expect_false(isTRUE(all.equal(reducedDim(sce2), reducedDim(sce3))))
 
-    sce3 <- runTSNE(sce, ntop = 100, rand_seed = 100)
+    set.seed(100)
+    sce3 <- runTSNE(sce, ntop = 100)
     expect_false(isTRUE(all.equal(reducedDim(sce2), reducedDim(sce3))))
 
-    sce3 <- runTSNE(sce, exprs_values = "counts", rand_seed = 100)
+    set.seed(100)
+    sce3 <- runTSNE(sce, exprs_values = "counts")
     expect_false(isTRUE(all.equal(reducedDim(sce2), reducedDim(sce3))))
 
-    sce3 <- runTSNE(sce, feature_set = 1:100, rand_seed = 100)
+    set.seed(100)
+    sce3 <- runTSNE(sce, feature_set = 1:100)
     expect_false(isTRUE(all.equal(reducedDim(sce2), reducedDim(sce3))))
     
-    sce3 <- runTSNE(sce, perplexity = 5, rand_seed = 100)
+    set.seed(100)
+    sce3 <- runTSNE(sce, perplexity = 5)
     expect_false(isTRUE(all.equal(reducedDim(sce2), reducedDim(sce3))))
 
-    sce3 <- runTSNE(sce, pca = FALSE, rand_seed = 100)
+    set.seed(100)
+    sce3 <- runTSNE(sce, pca = FALSE)
     expect_false(isTRUE(all.equal(reducedDim(sce2), reducedDim(sce3))))
 
-    sce3 <- runTSNE(sce, initial_dims = 10, rand_seed = 100)
+    set.seed(100)
+    sce3 <- runTSNE(sce, initial_dims = 10)
     expect_false(isTRUE(all.equal(reducedDim(sce2), reducedDim(sce3))))
 
     # Testing out the use of existing reduced dimensions (this should not respond to any feature settings).
+    set.seed(10)
     sceP <- runPCA(sce, ncomponents = 4)
-    sce2 <- runTSNE(sceP, use_dimred = "PCA", rand_seed = 10)
+    sce2 <- runTSNE(sceP, use_dimred = "PCA")
 
-    sce3 <- runTSNE(sceP, use_dimred = "PCA", rand_seed = 10, ntop = 20)
+    set.seed(10)
+    sce3 <- runTSNE(sceP, use_dimred = "PCA", ntop = 20)
     expect_identical(reducedDim(sce2, "TSNE"), reducedDim(sce3, "TSNE"))
 
-    sce3 <- runTSNE(sceP, use_dimred = "PCA", rand_seed = 10, scale_features = FALSE)
+    set.seed(10)
+    sce3 <- runTSNE(sceP, use_dimred = "PCA", scale_features = FALSE)
     expect_identical(reducedDim(sce2, "TSNE"), reducedDim(sce3, "TSNE"))
 
-    sce3 <- runTSNE(sceP, use_dimred = "PCA", rand_seed = 10, feature_set = 1:20)
+    set.seed(10)
+    sce3 <- runTSNE(sceP, use_dimred = "PCA", feature_set = 1:20)
     expect_identical(reducedDim(sce2, "TSNE"), reducedDim(sce3, "TSNE"))
 
-    sce3 <- runTSNE(sceP, use_dimred = "PCA", rand_seed = 10, pca = FALSE)
+    set.seed(10)
+    sce3 <- runTSNE(sceP, use_dimred = "PCA", pca = FALSE)
     expect_identical(reducedDim(sce2, "TSNE"), reducedDim(sce3, "TSNE"))
 
-    sce3 <- runTSNE(sceP, use_dimred = "PCA", rand_seed = 10, initial_dims = 10)
+    set.seed(10)
+    sce3 <- runTSNE(sceP, use_dimred = "PCA", initial_dims = 10)
     expect_identical(reducedDim(sce2, "TSNE"), reducedDim(sce3, "TSNE"))
 
-    sce3 <- runTSNE(sceP, use_dimred = "PCA", rand_seed = 10, n_dimred=3)
+    set.seed(10)
+    sce3 <- runTSNE(sceP, use_dimred = "PCA", n_dimred=3)
     expect_false(isTRUE(all.equal(reducedDim(sce2, "TSNE"), reducedDim(sce3, "TSNE"))))
 })
 
@@ -249,41 +269,41 @@ SIGNAGNOSTIC <- function(x, y, same = TRUE) {
 }
 
 test_that("runDiffusionMap works as expected", {
-    sceX <- runDiffusionMap(sce, ncomponents = 3, rand_seed = 100)
+    sceX <- runDiffusionMap(sce, ncomponents = 3)
     expect_identical(reducedDimNames(sceX), "DiffusionMap")     
     expect_identical(dim(reducedDim(sceX, "DiffusionMap")), c(ncol(sceX), 3L))
 
     # Testing that various settings work.
-    sce2 <- runDiffusionMap(sce, rand_seed = 100)
-    sce3 <- runDiffusionMap(sce, scale_features = FALSE, rand_seed = 100)
+    sce2 <- runDiffusionMap(sce)
+    sce3 <- runDiffusionMap(sce, scale_features = FALSE)
     SIGNAGNOSTIC(same=FALSE, reducedDim(sce2), reducedDim(sce3))
 
-    sce3 <- runDiffusionMap(sce, ntop = 100, rand_seed = 100)
+    sce3 <- runDiffusionMap(sce, ntop = 100)
     SIGNAGNOSTIC(same=FALSE, reducedDim(sce2), reducedDim(sce3))
 
-    sce3 <- runDiffusionMap(sce, exprs_values = "counts", rand_seed = 100)
+    sce3 <- runDiffusionMap(sce, exprs_values = "counts")
     SIGNAGNOSTIC(same=FALSE, reducedDim(sce2), reducedDim(sce3))
 
-    sce3 <- runDiffusionMap(sce, feature_set = 1:100, rand_seed = 100)
+    sce3 <- runDiffusionMap(sce, feature_set = 1:100)
     SIGNAGNOSTIC(same=FALSE, reducedDim(sce2), reducedDim(sce3))
     
-    sce3 <- runDiffusionMap(sce, sigma = 10, rand_seed = 100)
+    sce3 <- runDiffusionMap(sce, sigma = 10)
     SIGNAGNOSTIC(same=FALSE, reducedDim(sce2), reducedDim(sce3))
 
-    sce3 <- runDiffusionMap(sce, k = 13, rand_seed = 100)
+    sce3 <- runDiffusionMap(sce, k = 13)
     SIGNAGNOSTIC(same=FALSE, reducedDim(sce2), reducedDim(sce3))
 
     # Testing out the use of existing reduced dimensions (this should not respond to any feature settings)
     sceP <- runPCA(sce, ncomponents = 4)
-    sce2 <- runDiffusionMap(sceP, use_dimred = "PCA", rand_seed = 10)
+    sce2 <- runDiffusionMap(sceP, use_dimred = "PCA")
 
-    sce3 <- runDiffusionMap(sceP, use_dimred = "PCA", rand_seed = 10, ntop = 20)
+    sce3 <- runDiffusionMap(sceP, use_dimred = "PCA", ntop = 20)
     SIGNAGNOSTIC(reducedDim(sce2, "DiffusionMap"), reducedDim(sce3, "DiffusionMap"))
 
-    sce3 <- runDiffusionMap(sceP, use_dimred = "PCA", rand_seed = 10, scale_features = FALSE)
+    sce3 <- runDiffusionMap(sceP, use_dimred = "PCA", scale_features = FALSE)
     SIGNAGNOSTIC(reducedDim(sce2, "DiffusionMap"), reducedDim(sce3, "DiffusionMap"))
 
-    sce3 <- runDiffusionMap(sceP, use_dimred = "PCA", rand_seed = 10, feature_set = 1:20)
+    sce3 <- runDiffusionMap(sceP, use_dimred = "PCA", feature_set = 1:20)
     SIGNAGNOSTIC(reducedDim(sce2, "DiffusionMap"), reducedDim(sce3, "DiffusionMap"))
 
     sce3 <- runDiffusionMap(sceP, use_dimred = "PCA", n_dimred=3)
