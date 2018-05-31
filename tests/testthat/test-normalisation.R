@@ -142,19 +142,25 @@ test_that("scater::normalize works on endogenous genes", {
     expect_false(areSizeFactorsCentred(X))
     expect_true(areSizeFactorsCentred(out))
  
-    ## warning if no size factors or other silly inputs.
-    Xb <- X
-    sizeFactors(Xb) <- NULL
-    expect_warning(outb <- normalize(Xb), "using library sizes")
-
-    lib.sizes <- colSums(counts(Xb))
-    lib.sf <- librarySizeFactors(Xb)
-    expect_equivalent(lib.sf, lib.sizes/mean(lib.sizes))
-    expect_equivalent(logcounts(outb), log2(t(t(dummy)/lib.sf)+1))
-
     ## Doesn't break on silly inputs.
     expect_equal(unname(dim(normalize(X[,0,drop=FALSE]))), c(ngenes, 0L))
     expect_equal(unname(dim(normalize(X[0,,drop=FALSE]))), c(0L, ncells)) 
+})
+
+
+test_that("scater::normalize works with library sizes", {
+    sizeFactors(X) <- NULL
+    expect_warning(outb <- normalize(X), "using library sizes")
+
+    lib.sizes <- colSums(counts(X))
+    lib.sf <- librarySizeFactors(X)
+    expect_equivalent(lib.sf, lib.sizes/mean(lib.sizes))
+
+    expect_equivalent(logcounts(outb), log2(t(t(dummy)/lib.sf)+1))
+
+    # Subsetting by row works correctly in librarySizeFactors().
+    expect_identical(librarySizeFactors(X, subset_row=20:1), 
+        librarySizeFactors(counts(X)[20:1,]))
 })
 
 test_that("scater::normalize works on spike-in genes", {

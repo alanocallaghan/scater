@@ -4,12 +4,14 @@
 \alias{librarySizeFactors}
 \title{Compute library size factors}
 \usage{
-librarySizeFactors(object, exprs_values = "counts")
+librarySizeFactors(object, exprs_values = "counts", subset_row = NULL)
 }
 \arguments{
 \item{object}{A count matrix or SingleCellExperiment object containing counts.}
 
 \item{exprs_values}{A string indicating the assay of \code{object} containing the counts, if \code{object} is a SingleCellExperiment.}
+
+\item{subset_row}{A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calculating library sizes.}
 }
 \value{
 A numeric vector of size factors.
