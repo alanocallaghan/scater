@@ -70,17 +70,16 @@ test_that("we can calculate CPM from counts", {
     expect_equal(as.matrix(cpm_out), calculateCPM(original, use_size_factors=FALSE))
 
     ## Repeating with subsets.
-    ref <- calculateCPM(counts(original))
     sub1 <- calculateCPM(counts(original), subset_row=1:10)
-    expect_identical(ref[1:10,], sub1)
+    expect_identical(sub1, calculateCPM(counts(original)[1:10,]))
 
     logi <- rbinom(nrow(original), 1, 0.5)==1
     sub2 <- calculateCPM(counts(original), subset_row=logi)
-    expect_identical(ref[logi,], sub2)
+    expect_identical(sub2, calculateCPM(counts(original)[logi,]))
 
     chosen <- sample(rownames(original), 20)
     sub3 <- calculateCPM(counts(original), subset_row=chosen)
-    expect_identical(ref[chosen,], sub3)
+    expect_identical(sub3, calculateCPM(counts(original)[chosen,]))
 })
 
 
@@ -197,16 +196,15 @@ test_that("calcAverage works as expected", {
     expect_equal(ave_counts, calcAverage(original, use_size_factors=FALSE))  
 
     ## Repeating with subsets.
-    ref <- calcAverage(counts(original))
     sub1 <- calcAverage(counts(original), subset_row=1:10)
-    expect_identical(ref[1:10], sub1)
+    expect_identical(sub1, calcAverage(counts(original)[1:10,]))
 
     logi <- rbinom(nrow(original), 1, 0.5)==1
     sub2 <- calcAverage(counts(original), subset_row=logi)
-    expect_identical(ref[logi], sub2)
+    expect_identical(sub2, calcAverage(counts(original)[logi,]))
 
     chosen <- sample(rownames(original), 20)
     sub3 <- calcAverage(counts(original), subset_row=chosen)
-    expect_identical(ref[chosen], sub3)
+    expect_identical(sub3, calcAverage(counts(original)[chosen,]))
 })
 

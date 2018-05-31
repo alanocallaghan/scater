@@ -8,7 +8,7 @@
 #' If not, all size factors are deleted and library size-based factors are used instead (see \code{\link{librarySizeFactors}}.
 #' Alternatively, a numeric vector containing a size factor for each cell, which is used in place of \code{sizeFactor(object)}.
 #' @param size_factor_grouping A factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.
-#' @param subset_row A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calcaulting feature averages.
+#' @param subset_row A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calculating library sizes and CPMs.
 #'
 #' @details 
 #' If requested, size factors are used to define the effective library sizes. 
@@ -44,8 +44,6 @@
 #'
 #' cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
 #'
-#' @importFrom DelayedArray DelayedArray
-#' @importFrom DelayedMatrixStats colSums2
 calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE, size_factor_grouping = NULL, subset_row = NULL) {
     if (!is(object, "SingleCellExperiment")) {
         assays <- list(object)
@@ -56,7 +54,7 @@ calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE,
     # Setting up the size factors.
     object <- .replace_size_factors(object, use_size_factors)
     if (is.null(sizeFactors(object))) {
-        sizeFactors(object) <- librarySizeFactors(object)
+        sizeFactors(object) <- librarySizeFactors(object, subset_row=subset_row)
     }
 
     object <- centreSizeFactors(object, grouping = size_factor_grouping)
@@ -70,7 +68,7 @@ calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE,
                              log = FALSE, sum = FALSE, logExprsOffset = 0,
                              subset_row = subset_row)
 
-    lib_sizes <- colSums2(DelayedArray(extracted))
+    lib_sizes <- .colSums(extracted, rows=subset_row)
     cpm_mat <- normed / (mean(lib_sizes)/1e6)
     return(cpm_mat)
 }

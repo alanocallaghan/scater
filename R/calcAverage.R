@@ -52,7 +52,7 @@ calcAverage <- function(object, exprs_values="counts", use_size_factors = TRUE, 
     # Setting up the size factors.
     object <- .replace_size_factors(object, use_size_factors) 
     if (is.null(sizeFactors(object))) {
-        sizeFactors(object) <- librarySizeFactors(object)
+        sizeFactors(object) <- librarySizeFactors(object, subset_row=subset_row)
     }
 
     object <- centreSizeFactors(object, grouping = size_factor_grouping)
