@@ -13,7 +13,7 @@
 #' Default is to not use existing reduced dimension results.
 #' @param n_dimred Integer scalar, number of dimensions of the reduced dimension slot to use when \code{use_dimred} is supplied.
 #' Defaults to all available dimensions.
-#' @param rand_seed Numeric scalar that can be passed to \code{set.seed} to make the results reproducible.
+#' @param rand_seed Deprecated, numeric scalar that can be passed to \code{set.seed} to make the results reproducible.
 #' @param ... Additional arguments to pass to \code{\link[destiny]{DiffusionMap}}.
 #'
 #' @details 
@@ -21,6 +21,9 @@
 #' 
 #' Setting \code{use_dimred} allows users to easily construct a diffusion map from low-rank approximations of the original expression matrix (e.g., after PCA).
 #' In such cases, arguments such as \code{ntop}, \code{feature_set}, \code{exprs_values} and \code{scale_features} will be ignored. 
+#'
+#' The behaviour of \code{\link[destiny]{DiffusionMap}} seems to be non-deterministic, in a manner that is not responsive to any \code{\link{set.seed}} call.
+#' The reason for this is unknown.
 #'
 #' @return 
 #' A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} diffusion map components for each cell.
@@ -68,6 +71,7 @@ runDiffusionMap <- function(object, ncomponents = 2, ntop = 500, feature_set = N
 
     ## Compute DiffusionMap
     if ( !is.null(rand_seed) ) {
+        .Deprecated(msg="'rand.seed=' is deprecated.\nUse 'set.seed' externally instead.")
         set.seed(rand_seed)
     }
     vals <- as.matrix(vals) # protect against alternative matrix inputs.

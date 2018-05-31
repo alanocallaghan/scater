@@ -14,7 +14,7 @@
 #' @param selected_variables List of strings or a character vector indicating which variables in \code{colData(object)} to use for PCA when \code{use_coldata=TRUE}.
 #' If a list, each entry can take the form described in \code{?"\link{scater-vis-var}"}.
 #' @param detect_outliers Logical scalar, should outliers be detected based on PCA coordinates generated from column-level metadata? 
-#' @param rand_seed Numeric scalar specifying the random seed when using \code{method="irlba"}.
+#' @param rand_seed Deprecated, numeric scalar specifying the random seed when using \code{method="irlba"}.
 #' @param ... Additional arguments to pass to \code{\link[irlba]{prcomp_irlba}} when \code{method="irlba"}.
 #'
 #' @details 
@@ -22,7 +22,11 @@
 #' Alternatively, the \pkg{irlba} package can be used, which performs a fast approximation of PCA through the \code{\link[irlba]{prcomp_irlba}} function.
 #' This is especially useful for large, sparse matrices.
 #'
-#' If \code{use_coldata=TRUE}, PCA will be performed on column-level metadata. 
+#' Note that \code{\link[irlba]{prcomp_irlba}} involves a random initialization, after which it converges towards the exact PCs.
+#' This means that the result will change slightly across different runs.
+#' For full reproducibility, users should call \code{\link{set.seed}} prior to running \code{runPCA} with \code{method="irlba"}.
+#'
+#' If \code{use_coldata=TRUE}, PCA will be performed on column-level metadata instead of the gene expression matrix. 
 #' The \code{selected_variables} defaults to a vector containing:
 #' \itemize{
 #' \item \code{"pct_counts_top_100_features"}
@@ -122,6 +126,7 @@ runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
         total.var <- sum(pca$sdev ^ 2)
     } else if (method=="irlba") {
         if (!is.null(rand_seed)) {
+            .Deprecated(msg="'rand.seed=' is deprecated.\nUse 'set.seed' externally instead.")
             set.seed(rand_seed)
         }
         pca <- irlba::prcomp_irlba(exprs_to_plot, n = ncomponents, ...)
