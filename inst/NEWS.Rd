@@ -1,12 +1,13 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
-\section{Changes in version 1.9.3, Bioconductor 3.8 Release}{
+\section{Changes in version 1.9.4, Bioconductor 3.8 Release}{
   \itemize{
     \item Fixes to all violin plots to ensure scatter matches up with violin outlines.
     \item Rectangle categorical/categorical plots collapse to mirrored bar plots when either factor contains only one level.
     \item Removed scater_gui(), downsampleCounts(), read10xResults(), normalizeExprs().
     \item Simplified plotRLE() to avoid the need for internal faceting.
+    \item Added option for row subsetting in librarySizeFactors().
   }
 }
 
