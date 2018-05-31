@@ -29,7 +29,7 @@ Default is to not use existing reduced dimension results.}
 \item{n_dimred}{Integer scalar, number of dimensions of the reduced dimension slot to use when \code{use_dimred} is supplied.
 Defaults to all available dimensions.}
 
-\item{rand_seed}{Numeric scalar that can be passed to \code{set.seed} to make the results reproducible.}
+\item{rand_seed}{Deprecated, numeric scalar that can be passed to \code{set.seed} to make the results reproducible.}
 
 \item{perplexity}{Numeric scalar defining the perplexity parameter, see \code{?\link[Rtsne]{Rtsne}} for more details.}
 
@@ -50,7 +50,7 @@ Perform t-stochastic neighbour embedding (t-SNE) for the cells, based on the dat
 \details{
 The function \code{\link[Rtsne]{Rtsne}} is used internally to compute the t-SNE. 
 Note that the algorithm is not deterministic, so different runs of the function will produce differing results. 
-Users are advised to test multiple random seed, and then use \code{rand_seed} to set a random seed for replicable results. 
+Users are advised to test multiple random seeds, and then use \code{\link{set.seed}} to set a random seed for replicable results. 
 
 The value of the \code{perplexity} parameter can have a large effect on the results.
 By default, the function will try to provide a reasonable setting, by scaling the perplexity with the number of cells until it reaches a maximum of 50.

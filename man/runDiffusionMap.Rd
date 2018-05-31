@@ -28,7 +28,7 @@ Default is to not use existing reduced dimension results.}
 \item{n_dimred}{Integer scalar, number of dimensions of the reduced dimension slot to use when \code{use_dimred} is supplied.
 Defaults to all available dimensions.}
 
-\item{rand_seed}{Numeric scalar that can be passed to \code{set.seed} to make the results reproducible.}
+\item{rand_seed}{Deprecated, numeric scalar that can be passed to \code{set.seed} to make the results reproducible.}
 
 \item{...}{Additional arguments to pass to \code{\link[destiny]{DiffusionMap}}.}
 }
@@ -43,7 +43,10 @@ Produce a diffusion map for the cells, based on the data in a SingleCellExperime
 The function \code{\link[destiny]{DiffusionMap}} is used internally to compute the diffusion map.
 
 Setting \code{use_dimred} allows users to easily construct a diffusion map from low-rank approximations of the original expression matrix (e.g., after PCA).
-In such cases, arguments such as \code{ntop}, \code{feature_set}, \code{exprs_values} and \code{scale_features} will be ignored.
+In such cases, arguments such as \code{ntop}, \code{feature_set}, \code{exprs_values} and \code{scale_features} will be ignored. 
+
+The behaviour of \code{\link[destiny]{DiffusionMap}} seems to be non-deterministic, in a manner that is not responsive to any \code{\link{set.seed}} call.
+The reason for this is unknown.
 }
 \examples{
 ## Set up an example SingleCellExperiment

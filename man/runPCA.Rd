@@ -32,7 +32,7 @@ If a list, each entry can take the form described in \code{?"\link{scater-vis-va
 
 \item{detect_outliers}{Logical scalar, should outliers be detected based on PCA coordinates generated from column-level metadata?}
 
-\item{rand_seed}{Numeric scalar specifying the random seed when using \code{method="irlba"}.}
+\item{rand_seed}{Deprecated, numeric scalar specifying the random seed when using \code{method="irlba"}.}
 
 \item{...}{Additional arguments to pass to \code{\link[irlba]{prcomp_irlba}} when \code{method="irlba"}.}
 }
@@ -53,7 +53,11 @@ The function \code{\link{prcomp}} is used internally to do the PCA when \code{me
 Alternatively, the \pkg{irlba} package can be used, which performs a fast approximation of PCA through the \code{\link[irlba]{prcomp_irlba}} function.
 This is especially useful for large, sparse matrices.
 
-If \code{use_coldata=TRUE}, PCA will be performed on column-level metadata. 
+Note that \code{\link[irlba]{prcomp_irlba}} involves a random initialization, after which it converges towards the exact PCs.
+This means that the result will change slightly across different runs.
+For full reproducibility, users should call \code{\link{set.seed}} prior to running \code{runPCA} with \code{method="irlba"}.
+
+If \code{use_coldata=TRUE}, PCA will be performed on column-level metadata instead of the gene expression matrix. 
 The \code{selected_variables} defaults to a vector containing:
 \itemize{
 \item \code{"pct_counts_top_100_features"}
