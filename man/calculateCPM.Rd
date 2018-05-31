@@ -18,7 +18,7 @@ Alternatively, a numeric vector containing a size factor for each cell, which is
 
 \item{size_factor_grouping}{A factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.}
 
-\item{subset_row}{A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calcaulting feature averages.}
+\item{subset_row}{A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calculating library sizes and CPMs.}
 }
 \value{
 Matrix of CPM values.

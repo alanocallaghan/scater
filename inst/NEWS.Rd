@@ -8,6 +8,7 @@
     \item Removed scater_gui(), downsampleCounts(), read10xResults(), normalizeExprs().
     \item Simplified plotRLE() to avoid the need for internal faceting.
     \item Added option for row subsetting in librarySizeFactors().
+    \item Ensured calcAverage() and calculateCPM() with subset_row= behave as if the matrix was subsetting prior to the function call.
   }
 }
 
