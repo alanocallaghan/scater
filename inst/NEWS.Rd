@@ -9,6 +9,7 @@
     \item Simplified plotRLE() to avoid the need for internal faceting.
     \item Added option for row subsetting in librarySizeFactors().
     \item Ensured calcAverage() and calculateCPM() with subset_row= behave as if the matrix was subsetting prior to the function call.
+    \item Added readSparseCounts() for creating a sparse matrix from a dense array on file.
   }
 }
 
