@@ -4,7 +4,7 @@
 \alias{readSparseCounts}
 \title{Read sparse count matrix from file}
 \usage{
-readSparseCounts(file, sep = "\\t", quote = "", comment.char = "",
+readSparseCounts(file, sep = "\\t", quote = NULL, comment.char = "",
   row.names = TRUE, col.names = TRUE, ignore.row = 0L, skip.row = 0L,
   ignore.col = 0L, skip.col = 0L, chunk = 1000L)
 }
@@ -49,7 +49,7 @@ outfile <- tempfile()
 write.table(data.frame(A=1:5, B=0, C=0:4, row.names=letters[1:5]), 
     file=outfile, col.names=NA, sep="\\t", quote=FALSE)
 
-readCountMatrix(outfile)
+readSparseCounts(outfile)
 
 }
 \seealso{

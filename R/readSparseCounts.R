@@ -39,7 +39,9 @@
 #'
 #' @export
 #' @importClassesFrom Matrix dgCMatrix
-readSparseCounts <- function(file, sep="\t", quote="", comment.char="", row.names=TRUE, col.names=TRUE, 
+#' @importFrom methods as
+#' @importFrom utils tail
+readSparseCounts <- function(file, sep="\t", quote=NULL, comment.char="", row.names=TRUE, col.names=TRUE, 
     ignore.row=0L, skip.row=0L, ignore.col=0L, skip.col=0L, chunk=1000L)
 {
     file <- file(file, open="r")
