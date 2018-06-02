@@ -44,4 +44,26 @@ test_that("readSparseCounts works as expected", {
 
     out <- readSparseCounts(ofile, skip.col=10L)
     expect_identical(ref[,11:ncol(ref)], out)
+
+    # Behaves correctly with wonky quotes and comments in the row/column names.
+    a2 <- a
+    rownames(a2) <- paste0('"', rownames(a), "#")
+    colnames(a2) <- paste0('#"', colnames(a), "'")
+    ref2 <- as(a2, "dgCMatrix")
+
+    ofile2 <- tempfile()
+    write.table(a2, file=ofile2, sep="\t", quote=FALSE, col.names=NA) 
+    out2 <- readSparseCounts(ofile2)
+    expect_identical(ref2, out2)
+
+    # Behaves properly with file handle input.
+    ofile3 <- tempfile(fileext=".gz")
+    XHANDLE <- gzfile(ofile3, open='wb')
+    write.table(a, file=XHANDLE, sep="\t", quote=FALSE, col.names=NA) 
+    close(XHANDLE)
+    
+    outX <- readSparseCounts(ofile3)
+    outY <- readSparseCounts(file(ofile3, open='rt'))
+    expect_identical(outX, ref)
+    expect_identical(outY, ref)
 })

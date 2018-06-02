@@ -9,7 +9,7 @@ readSparseCounts(file, sep = "\\t", quote = NULL, comment.char = "",
   ignore.col = 0L, skip.col = 0L, chunk = 1000L)
 }
 \arguments{
-\item{file}{A string containing a file path to a count table.}
+\item{file}{A string containing a file path to a count table, or a connection object opened in read-only text mode.}
 
 \item{sep}{A string specifying the delimiter between fields in \code{file}.}
 
@@ -21,7 +21,7 @@ readSparseCounts(file, sep = "\\t", quote = NULL, comment.char = "",
 
 \item{col.names}{A logical scalar specifying whether column names are present.}
 
-\item{ignore.row}{An integeriii scalar specifying the number of rows to ignore at the start of the file, \emph{before} the column names.}
+\item{ignore.row}{An integer scalar specifying the number of rows to ignore at the start of the file, \emph{before} the column names.}
 
 \item{skip.row}{An integer scalar specifying the number of rows to ignore at the start of the file, \emph{after} the column names.}
 

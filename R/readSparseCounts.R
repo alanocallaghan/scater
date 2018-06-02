@@ -2,13 +2,13 @@
 #'
 #' Reads a sparse count matrix from file containing a dense tabular format.
 #'
-#' @param file A string containing a file path to a count table.
+#' @param file A string containing a file path to a count table, or a connection object opened in read-only text mode.
 #' @param sep A string specifying the delimiter between fields in \code{file}.
 #' @param quote A string specifying the quote character, e.g., in column or row names.
 #' @param comment.char A string specifying the comment character after which values are ignored.
 #' @param row.names A logical scalar specifying whether row names are present. 
 #' @param col.names A logical scalar specifying whether column names are present. 
-#' @param ignore.row An integeriii scalar specifying the number of rows to ignore at the start of the file, \emph{before} the column names.
+#' @param ignore.row An integer scalar specifying the number of rows to ignore at the start of the file, \emph{before} the column names.
 #' @param skip.row An integer scalar specifying the number of rows to ignore at the start of the file, \emph{after} the column names.
 #' @param ignore.col An integer scalar specifying the number of columns to ignore at the start of the file, \emph{before} the column names.
 #' @param skip.col An integer scalar specifying the number of columns to ignore at the start of the file, \emph{after} the column names.
@@ -40,29 +40,34 @@
 #' @export
 #' @importClassesFrom Matrix dgCMatrix
 #' @importFrom methods as
-#' @importFrom utils tail
+#' @importFrom utils tail read.table
 readSparseCounts <- function(file, sep="\t", quote=NULL, comment.char="", row.names=TRUE, col.names=TRUE, 
     ignore.row=0L, skip.row=0L, ignore.col=0L, skip.col=0L, chunk=1000L)
 {
-    file <- file(file, open="r")
-    on.exit(close(file))
+    if (!is(file, "connection")) {
+        fhandle <- file(file, open="r")
+        on.exit(close(fhandle))
+    } else {
+        fhandle <- file
+    }
 
     # Scanning through rows.
     if (ignore.row) {
-        readLines(file, n=ignore.row)
+        readLines(fhandle, n=ignore.row)
     }
     if (col.names) {
-        cell.names <- readLines(file, n=1L)
-        cell.names <- strsplit(cell.names, sep)[[1]]
+        cell.names <- read.table(fhandle, sep=sep, quote=quote, comment.char=comment.char, nrows=1L, 
+            stringsAsFactors=FALSE, header=FALSE)
+        cell.names <- as.character(cell.names)
     } else {
         cell.names <- NULL
     }
     if (skip.row) {
-        readLines(file, n=skip.row)
+        readLines(fhandle, n=skip.row)
     }
 
     # Figuring out how to extract the columns.
-    first <- read.table(file, sep=sep, quote=quote, comment.char=comment.char, nrows=1L, 
+    first <- read.table(fhandle, sep=sep, quote=quote, comment.char=comment.char, nrows=1L, 
         stringsAsFactors=FALSE, header=FALSE)
 
     nentries <- ncol(first)
@@ -89,7 +94,7 @@ readSparseCounts <- function(file, sep="\t", quote=NULL, comment.char="", row.na
 
     # Reading it in, chunk by chunk.
     repeat {
-        current <- scan(file, what=what, sep=sep, quote=quote, comment.char=comment.char, nmax=chunk, quiet=TRUE)
+        current <- scan(fhandle, what=what, sep=sep, quote=quote, comment.char=comment.char, nmax=chunk, quiet=TRUE)
         if (row.names) {
             gene.names <- c(gene.names, current[[row.name.col]])
         }
