@@ -35,7 +35,7 @@
 #' write.table(data.frame(A=1:5, B=0, C=0:4, row.names=letters[1:5]), 
 #'     file=outfile, col.names=NA, sep="\t", quote=FALSE)
 #'
-#' readCountMatrix(outfile)
+#' readSparseCounts(outfile)
 #'
 #' @export
 #' @importClassesFrom Matrix dgCMatrix
@@ -81,7 +81,9 @@ readSparseCounts <- function(file, sep="\t", quote="", comment.char="", row.name
     if (row.names) { 
         gene.names <- first[[row.name.col]]
     }
-    output <- as.list(first)
+    output <- list(as.matrix(first[,cell.cols]))
+    colnames(output[[1]]) <- NULL
+    it <- 2L
 
     # Reading it in, chunk by chunk.
     repeat {
@@ -89,14 +91,13 @@ readSparseCounts <- function(file, sep="\t", quote="", comment.char="", row.name
         if (row.names) {
             gene.names <- c(gene.names, current[[row.name.col]])
         }
-        for (cdx in cell.cols) {
-            output[[cdx]] <- rbind(output[[cdx]], as(cbind(current[[cdx]]), Class="dgCMatrix"))
-        }
+        output[[it]] <- as(do.call(cbind, current[cell.cols]), "dgCMatrix")
+        it <- it + 1L
         if (chunk<0 || length(current[[1]]) < chunk) {
             break
         }
     }
-    output <- do.call(cbind, output[cell.cols])
+    output <- do.call(rbind, output)
 
     # Adding row and column names, if available. 
     if (row.names) {
