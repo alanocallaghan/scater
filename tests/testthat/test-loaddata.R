@@ -61,6 +61,9 @@ test_that("readSparseCounts works as expected", {
     XHANDLE <- gzfile(ofile3, open='wb')
     write.table(a, file=XHANDLE, sep="\t", quote=FALSE, col.names=NA) 
     close(XHANDLE)
+
+    expect_error(readSparseCounts(file(ofile3)), "read mode")
+    expect_error(readSparseCounts(DataFrame(ofile3)), "connection")
     
     outX <- readSparseCounts(ofile3)
     outY <- readSparseCounts(file(ofile3, open='rt'))

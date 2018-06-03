@@ -39,16 +39,20 @@
 #'
 #' @export
 #' @importClassesFrom Matrix dgCMatrix
-#' @importFrom methods as
+#' @importFrom methods as is
 #' @importFrom utils tail read.table
 readSparseCounts <- function(file, sep="\t", quote=NULL, comment.char="", row.names=TRUE, col.names=TRUE, 
-    ignore.row=0L, skip.row=0L, ignore.col=0L, skip.col=0L, chunk=1000L)
-{
-    if (!is(file, "connection")) {
-        fhandle <- file(file, open="r")
+    ignore.row=0L, skip.row=0L, ignore.col=0L, skip.col=0L, chunk=1000L) {
+    if (is.character(file)) { 
+        fhandle <- file(file, open='r')
         on.exit(close(fhandle))
-    } else {
+    } else if (is(file, "connection")) {
         fhandle <- file
+        if (!isOpen(fhandle, "read")) {
+            stop("'file' should be a connection in read mode")
+        }
+    } else {
+        stop("'file' should be a connection or a character string")
     }
 
     # Scanning through rows.
