@@ -5,11 +5,10 @@
 #' @param object A SingleCellExperiment object.
 #' @param exprs_values String indicating which assay contains the count data that should be used to compute log-transformed expression values. 
 #' @param return_log Logical scalar, should normalized values be returned on the log2 scale? 
-#  If \code{TRUE}, output is stored as \code{"logcounts"} in the returned object; if \code{FALSE} output is stored as \code{"normcounts"}.
+#'  If \code{TRUE}, output is stored as \code{"logcounts"} in the returned object; if \code{FALSE} output is stored as \code{"normcounts"}.
 #' @param log_exprs_offset Numeric scalar specifying the offset to add when log-transforming expression values.
 #' If \code{NULL}, value is taken from \code{metadata(object)$log.exprs.offset} if defined, otherwise 1.
 #' @param centre_size_factors Logical scalar indicating whether size fators should be centred.
-#' @param size_factor_grouping Factor specifying groups of cells in which size factors should be centred, see \code{\link{centreSizeFactors}} for details.
 #' @param ... Arguments passed to \code{normalize} when calling \code{normalise}.
 #'
 #' @details 
@@ -26,26 +25,7 @@
 #' It also standardizes the effect of the \code{log_exprs_offset} addition, 
 #' and ensures that abundances are roughly comparable between features normalized with different sets of size factors.
 #'
-#' If \code{size_factor_grouping} is specified and \code{centre_size_factors=TRUE}, this is equivalent to subsetting the SingleCellExperiment;
-#' centering the size factors within each subset; normalizing within each subset; and then merging the subsets back together for output.
-#' This enables convenient normalization of multiple batches separately.
-#'
 #' Note that \code{normalize} is exactly the same as \code{normalise}.
-#'
-#' @section Warning about centred size factors:
-#' Generally speaking, centering does not affect relative comparisons between cells in the same \code{object}, as all size factors are scaled by the same amount. 
-#' However, if two different \code{SingleCellExperiment} objects are run separately through \code{normalize}, the size factors in each object will be rescaled differently. 
-#' This means that the size factors and log-expression values will \emph{not} be comparable between objects.
-#'
-#' This lack of comparability is not always obvious. 
-#' For example, if we subsetted an existing SingleCellExperiment object, and ran \code{normalize} separately on each subset, 
-#' the resulting expression values in each subsetted object would \emph{not} be comparable to each other. 
-#' This is despite the fact that all cells were originally derived from a single SingleCellExperiment object.
-#'
-#' In general, it is advisable to only compare size factors and expression values between cells in one SingleCellExperiment object,
-#' from a single \code{normalize} call with \code{size_factor_grouping=NULL}.
-#' If objects are to be combined, new size factors should be computed using all cells in the combined object, followed by a single \code{normalize} call.
-#' If \code{size_factor_grouping} is specified, expression values should only be compared \emph{within} each level of the specified factor.
 #'
 #' @return A SingleCellExperiment object containing normalized expression values in \code{"normcounts"} if \code{log=FALSE},
 #' and log-normalized expression values in \code{"logcounts"} if \code{log=TRUE}.
@@ -55,9 +35,6 @@
 #' @rdname normalize
 #' @aliases normalize normalise normalize,SingleCellExperiment-method normalise,SingleCellExperiment-method
 #' @author Davis McCarthy and Aaron Lun
-#' @importFrom BiocGenerics normalize
-#' @importFrom S4Vectors metadata 'metadata<-'
-#' @importFrom SummarizedExperiment assay
 #'
 #' @export
 #' @examples
@@ -70,9 +47,12 @@
 #'
 #' example_sce <- normalize(example_sce)
 #'
+#' @importFrom BiocGenerics normalize
+#' @importFrom S4Vectors metadata 'metadata<-'
+#' @importFrom SummarizedExperiment assay
 normalizeSCE <- function(object, exprs_values = "counts", 
                          return_log = TRUE, log_exprs_offset = NULL, 
-                         centre_size_factors = TRUE, size_factor_grouping = NULL) {
+                         centre_size_factors = TRUE) {
     
     ## setting up the size factors.
     if (is.null(sizeFactors(object))) {
@@ -80,7 +60,7 @@ normalizeSCE <- function(object, exprs_values = "counts",
         sizeFactors(object) <- librarySizeFactors(object)
     }
     if (centre_size_factors) { 
-        object <- centreSizeFactors(object, grouping = size_factor_grouping)
+        object <- centreSizeFactors(object)
     }
     sf.list <- .get_all_sf_sets(object)
 
@@ -121,5 +101,6 @@ setMethod("normalize", "SingleCellExperiment", normalizeSCE)
 #' @aliases normalise
 #' @export
 normalise <- function(...) {
+    .Deprecated(new="normalize")
     normalize(...)
 }

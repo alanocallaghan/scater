@@ -7,7 +7,6 @@
 #' @param use_size_factors A logical scalar indicating whether size factors in \code{object} should be used to compute effective library sizes.
 #' If not, all size factors are deleted and library size-based factors are used instead (see \code{\link{librarySizeFactors}}.
 #' Alternatively, a numeric vector containing a size factor for each cell, which is used in place of \code{sizeFactor(object)}.
-#' @param size_factor_grouping A factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.
 #' @param subset_row A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calculating library sizes and CPMs.
 #'
 #' @details 
@@ -44,7 +43,7 @@
 #'
 #' cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
 #'
-calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE, size_factor_grouping = NULL, subset_row = NULL) {
+calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE, subset_row = NULL) {
     if (!is(object, "SingleCellExperiment")) {
         assays <- list(object)
         names(assays) <- exprs_values
@@ -57,7 +56,7 @@ calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE,
         sizeFactors(object) <- librarySizeFactors(object, subset_row=subset_row)
     }
 
-    object <- centreSizeFactors(object, grouping = size_factor_grouping)
+    object <- centreSizeFactors(object)
     sf_list <- .get_all_sf_sets(object)
 
     # Computes the average count, adjusting for size factors or library size.

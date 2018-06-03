@@ -7,7 +7,6 @@
 #' @param object A SingleCellExperiment object or count matrix.
 #' @param exprs_values A string specifying the assay of \code{object} containing the count matrix, if \code{object} is a SingleCellExperiment.
 #' @param use_size_factors a logical scalar specifying whetherthe size factors in \code{object} should be used to construct effective library sizes.
-#' @param size_factor_grouping A factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.
 #' @param subset_row A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calculating feature averages.
 #'
 #' @details 
@@ -41,7 +40,7 @@
 #' ## calculate average counts
 #' ave_counts <- calcAverage(example_sce)
 #'
-calcAverage <- function(object, exprs_values="counts", use_size_factors = TRUE, size_factor_grouping = NULL, subset_row = NULL) 
+calcAverage <- function(object, exprs_values="counts", use_size_factors = TRUE, subset_row = NULL) 
 {
     if (!is(object, "SingleCellExperiment")) {
         assays <- list(object)
@@ -55,7 +54,7 @@ calcAverage <- function(object, exprs_values="counts", use_size_factors = TRUE, 
         sizeFactors(object) <- librarySizeFactors(object, subset_row=subset_row)
     }
 
-    object <- centreSizeFactors(object, grouping = size_factor_grouping)
+    object <- centreSizeFactors(object)
     sf_list <- .get_all_sf_sets(object)
 
     # Computes the average count, adjusting for size factors or library size.

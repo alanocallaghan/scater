@@ -42,7 +42,6 @@ areSizeFactorsCentred <- function(object, centre=1, tol=1e-6) {
 #' 
 #' @param object A SingleCellExperiment object containing any number (or zero) sets of size factors.
 #' @param centre A numeric scalar, the value around which all sets of size factors should be centred.
-#' @param grouping A factor specifying the grouping of cells, where size factors are centred to unity within each group.
 #'
 #' @return A SingleCellExperiment with modified size factors that are centred at unity.
 #'
@@ -50,9 +49,6 @@ areSizeFactorsCentred <- function(object, centre=1, tol=1e-6) {
 #' Centering of size factors at unity ensures that division by size factors yields values on the same scale as the raw counts.
 #' This is important for the interpretation of the normalized values, as well as comaprisons between features normalized with different size factors (e.g., spike-ins).
 #'
-#' Specification of \code{grouping} centres the size factors within each level of the provided factor.
-#' This is useful if different batches are sequenced at different depth, by preserving the scale of counts within each batch.
-#' 
 #' @author Aaron Lun
 #' @seealso \code{\link{areSizeFactorsCentred}}
 #' @export
@@ -72,20 +68,8 @@ areSizeFactorsCentred <- function(object, centre=1, tol=1e-6) {
 #' mean(sizeFactors(example_sce))
 #' mean(sizeFactors(example_sce, "ERCC"))
 #' 
-centreSizeFactors <- function(object, centre = 1, grouping = NULL) {
-    # Setting up a function to centre the size factors by group.
-    if (is.null(grouping)) { 
-        centrefun <- function(x) { x/mean(x) * centre }
-    } else {
-        by_group <- split(seq_len(ncol(object)), grouping)
-        centrefun <- function(x) { 
-            for (g in by_group) {
-                current <- x[g]
-                x[g] <- current/mean(current) * centre
-            }
-            return(x)
-        }
-    }
+centreSizeFactors <- function(object, centre = 1) {
+    centrefun <- function(x) { x/mean(x) * centre }
 
     # Running through the sets of size factors and centering them as necessary.
     sf <- sizeFactors(object)
