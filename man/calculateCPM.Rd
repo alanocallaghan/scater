@@ -5,7 +5,7 @@
 \title{Calculate counts per million (CPM)}
 \usage{
 calculateCPM(object, exprs_values = "counts", use_size_factors = TRUE,
-  size_factor_grouping = NULL, subset_row = NULL)
+  subset_row = NULL)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object or count matrix.}
@@ -15,8 +15,6 @@ calculateCPM(object, exprs_values = "counts", use_size_factors = TRUE,
 \item{use_size_factors}{A logical scalar indicating whether size factors in \code{object} should be used to compute effective library sizes.
 If not, all size factors are deleted and library size-based factors are used instead (see \code{\link{librarySizeFactors}}.
 Alternatively, a numeric vector containing a size factor for each cell, which is used in place of \code{sizeFactor(object)}.}
-
-\item{size_factor_grouping}{A factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.}
 
 \item{subset_row}{A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calculating library sizes and CPMs.}
 }

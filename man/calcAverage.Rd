@@ -5,7 +5,7 @@
 \title{Calculate average counts, adjusting for size factors or library size}
 \usage{
 calcAverage(object, exprs_values = "counts", use_size_factors = TRUE,
-  size_factor_grouping = NULL, subset_row = NULL)
+  subset_row = NULL)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object or count matrix.}
@@ -13,8 +13,6 @@ calcAverage(object, exprs_values = "counts", use_size_factors = TRUE,
 \item{exprs_values}{A string specifying the assay of \code{object} containing the count matrix, if \code{object} is a SingleCellExperiment.}
 
 \item{use_size_factors}{a logical scalar specifying whetherthe size factors in \code{object} should be used to construct effective library sizes.}
-
-\item{size_factor_grouping}{A factor to be passed to \code{grouping=} in \code{\link{centreSizeFactors}}.}
 
 \item{subset_row}{A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calculating feature averages.}
 }
