@@ -117,32 +117,3 @@ calculateTPM <- function(object, effective_length = NULL,
 .countToEffCounts <- function(counts, len, eff_len) {
     counts * (len / eff_len)
 }
-
-#' Calculate fragments per kilobase of exon per million reads mapped (FPKM)
-#'
-#' Calculate fragments per kilobase of exon per million reads mapped (FPKM)
-#' values for expression from counts for a set of features.
-#'
-#' @param object an \code{SingleCellExperiment} object
-#' @param effective_length vector of class \code{"numeric"} providing the
-#' effective length for each feature in the \code{SCESet} object
-#' @param ... Further arguments to pass to \code{\link{calculateCPM}}.
-#'
-#' @return Matrix of FPKM values.
-#' @export
-#' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
-#' effective_length <- rep(1000, 2000)
-#' fpkm(example_sce) <- calculateFPKM(example_sce, effective_length,
-#' use_size_factors = FALSE)
-#'
-calculateFPKM <- function(object, effective_length, ...) {
-    if ( !methods::is(object, "SingleCellExperiment") )
-        stop("object must be an SingleCellExperiment")
-    cpms <- calculateCPM(object, ...)
-    effective_length <- effective_length / 1e3
-    cpms / effective_length
-}
