@@ -34,9 +34,9 @@ calcIsExprs <- function(object, detection_limit = 0,
 #' Calculate transcripts-per-million (TPM) values for expression from counts for a set of features.
 #'
 #' @param object A SingleCellExperiment object or a count matrix.
-#' @param exprs_values String specifying the assay containing the counts in \code{object}, if it is a SingleCellExperiment.
 #' @param effective_length Numeric vector containing the effective length for each feature in \code{object}.
 #' If \code{NULL}, it is assumed that \code{exprs_values} has already been adjusted for transcript length.
+#' @param exprs_values String or integer specifying the assay containing the counts in \code{object}, if it is a SingleCellExperiment.
 #'
 #' @details
 #' For read count data, this function assumes uniform coverage along the (effective) length of the transcript.
@@ -61,7 +61,7 @@ calcIsExprs <- function(object, detection_limit = 0,
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom methods is
 #' @importFrom SummarizedExperiment assay
-calculateTPM <- function(object, exprs_values= "counts", effective_length=NULL) {
+calculateTPM <- function(object, effective_length=NULL, exprs_values= "counts") {
     if (is(object, "SingleCellExperiment") ) {
         object <- assay(object, i=exprs_values)
     }
