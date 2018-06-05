@@ -11,42 +11,32 @@
 \alias{plotPCA}
 \title{Plot specific reduced dimensions}
 \usage{
-plotPCASCE(object, ..., return_SCE = FALSE, draw_plot = TRUE,
-  rerun = FALSE, ncomponents = 2, run_args = list())
+plotPCASCE(object, ..., rerun = FALSE, ncomponents = 2, run_args = list())
 
-plotTSNE(object, ..., return_SCE = FALSE, draw_plot = TRUE, rerun = FALSE,
+plotTSNE(object, ..., rerun = FALSE, ncomponents = 2, run_args = list())
+
+plotDiffusionMap(object, ..., rerun = FALSE, ncomponents = 2,
+  run_args = list())
+
+plotMDS(object, ..., rerun = FALSE, ncomponents = 2, run_args = list())
+
+\S4method{plotPCA}{SingleCellExperiment}(object, ..., rerun = FALSE,
   ncomponents = 2, run_args = list())
-
-plotDiffusionMap(object, ..., return_SCE = FALSE, draw_plot = TRUE,
-  rerun = FALSE, ncomponents = 2, run_args = list())
-
-plotMDS(object, ..., ncomponents = 2, return_SCE = FALSE, rerun = FALSE,
-  draw_plot = TRUE, run_args = list())
-
-\S4method{plotPCA}{SingleCellExperiment}(object, ..., return_SCE = FALSE,
-  draw_plot = TRUE, rerun = FALSE, ncomponents = 2, run_args = list())
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
 
 \item{...}{Additional arguments to pass to \code{\link{plotReducedDim}}.}
 
-\item{return_SCE}{Logical, should the function return a SingleCellExperiment object with reduced dimension results in the \code{reducedDim} slot?
-Default is \code{FALSE}, in which case a \code{ggplot} object is returned. 
-This will be deprecated in the next release in favour of directly calling the underlying \code{run*} functions to compute the results.}
-
-\item{draw_plot}{Logical, should the plot be drawn on the current graphics device? 
-Only used if \code{return_SCE} is \code{TRUE}, otherwise the plot is always produced.}
-
 \item{rerun}{Logical, should the reduced dimensions be recomputed even if \code{object} contains an appropriately named set of results in the \code{reducedDims} slot?}
 
 \item{ncomponents}{Numeric scalar indicating the number of dimensions components to (calculate and) plot.
 This can also be a numeric vector, see \code{?\link{plotReducedDim}} for details.}
 
-\item{run_args}{Arguments to pass to \code{\link{runPCA}}.}
+\item{run_args}{Arguments to pass to \code{\link{runPCA}}, \code{\link{runTSNE}}, etc.}
 }
 \value{
-A ggplot object or an SingleCellExperiment object, depending on \code{return_SCE}.
+A ggplot object.
 }
 \description{
 Wrapper functions to create plots for specific types of reduced dimension results in a SingleCellExperiment object,
