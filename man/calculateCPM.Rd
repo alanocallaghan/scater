@@ -43,9 +43,6 @@ If no size factors are available, the library sizes will be used.
 
 If \code{object} is a matrix or matrix-like object, size factors will only be used if \code{use_size_factors} is a numeric vector.
 Otherwise, the sum of counts for each cell is directly used as the library size.
-
-Note that the rescaling is performed to the mean sum of counts for all features, regardless of whether \code{subset.row} is specified.
-This ensures that the output of the function with \code{subset.row} is equivalent (but more efficient) than subsetting the output of the function without \code{subset.row}.
 }
 \examples{
 data("sc_example_counts")
