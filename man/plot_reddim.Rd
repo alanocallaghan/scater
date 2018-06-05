@@ -84,7 +84,7 @@ plotPCA(example_sce, ncomponents = 4, colour_by = "Treatment",
     shape_by = "Mutation_Status")
 
 ## Same for TSNE:
-plotTSNE(example_sce, perplexity = 10)
+plotTSNE(example_sce, run.args=list(perplexity = 10))
 
 ## Same for DiffusionMaps:
 plotDiffusionMap(example_sce)
