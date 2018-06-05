@@ -28,72 +28,8 @@
 #' detection_limit = 1, exprs_values = "counts")
 calcIsExprs <- function(object, detection_limit = 0, 
                         exprs_values = "counts") {
+    .Deprecated(msg="'calcIsExprs' is deprecated.\nUse 'counts(object) > 0' instead")
     assay(object, i = exprs_values) > detection_limit
-}
-
-#' Count the number of expressed genes per cell
-#'
-#'
-#' @param object a \code{\link{SingleCellExperiment}} object or a numeric
-#' matrix of expression values.
-#' @param detection_limit numeric scalar providing the value above which 
-#' observations are deemed to be expressed. Defaults to 
-#' \code{object@detection_limit}.
-#' @param exprs_values character scalar indicating whether the count data
-#' (\code{"counts"}), the log-transformed count data (\code{"logcounts"}),
-#' transcript-per-million (\code{"tpm"}), counts-per-million (\code{"cpm"}) or
-#' FPKM (\code{"fpkm"}) should be used to define if an observation is expressed
-#' or not. Defaults to the first available value of those options in the
-#' order shown. However, if \code{is_exprs(object)} is present, it will be
-#' used directly; \code{exprs_values} and \code{detection_limit} are ignored.
-#' @param byrow logical scalar indicating if \code{TRUE} to count expressing
-#' cells per feature (i.e. gene) and if \code{FALSE} to count expressing
-#' features (i.e. genes) per cell.
-#' @param subset_row logical, integeror character vector indicating which rows
-#' (i.e. features/genes) to use.
-#' @param subset_col logical, integer or character vector indicating which columns
-#' (i.e., cells) to use.
-#'
-#' @details Setting \code{subset_row} or \code{subset_col} is equivalent to 
-#' subsetting \code{object} before calling \code{nexprs}, but more efficient
-#' as a new copy of the matrix is not constructed. 
-#' 
-#' @description An efficient internal function that avoids the need to construct
-#' 'is_exprs_mat' by counting the number of expressed genes per cell on the fly.
-#'
-#' @return If \code{byrow=TRUE}, an integer vector containing the number of cells 
-#' expressing each feature, of the same length as the number of features in 
-#' \code{subset_row} (all features in \code{exprs_mat} if \code{subset_row=NULL}).
-#'
-#' If \code{byrow=FALSE}, an integer vector containing the number of genes 
-#' expressed in each cell, of the same length as the number of cells specified in
-#' \code{subset_col} (all cells in \code{exprs_mat} if \code{subset_col=NULL}).
-#'
-#' @import SingleCellExperiment
-#' @export
-#' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
-#' nexprs(example_sce)[1:10]
-#' nexprs(example_sce, byrow = TRUE)[1:10]
-#'
-nexprs <- function(object, detection_limit = 0, exprs_values = "counts", 
-                   byrow = FALSE, subset_row = NULL, subset_col = NULL) {
-    if (methods::is(object, "SingleCellExperiment")) { 
-        exprs_mat <- assay(object, i = exprs_values)
-    } else {
-        exprs_mat <- object
-    }
-    subset_row <- .subset2index(subset_row, target = exprs_mat, byrow = TRUE)
-    subset_col <- .subset2index(subset_col, target = exprs_mat, byrow = FALSE)
-
-    if (!byrow) {
-        return(.colAbove(exprs_mat, rows=subset_row, cols=subset_col, value=detection_limit))
-    } else {
-        return(.rowAbove(exprs_mat, rows=subset_row, cols=subset_col, value=detection_limit))
-    }
 }
 
 #' Calculate transcripts-per-million (TPM)
