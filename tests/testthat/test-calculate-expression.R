@@ -13,21 +13,6 @@ library(Matrix)
 sparsified <- original
 counts(sparsified) <- as(counts(original), "dgCMatrix")
 
-test_that("we can calculate TPM from counts", {
-    effective_length <- rep(1000, 2000)
-    tpm(original) <- calculateTPM(original, effective_length, 
-                                        calc_from = "counts")
-    
-    expect_that(original, is_a("SingleCellExperiment"))
-    expect_that(sum(tpm(original)), is_more_than(0))
-    
-    tpm(sparsified) <- calculateTPM(sparsified, effective_length, 
-                                     calc_from = "counts")
-    expect_that(sparsified, is_a("SingleCellExperiment"))
-    expect_that(sum(tpm(sparsified)), is_more_than(0))
-    
-})
-
 
 test_that("we can calculate CPM from counts", {
     cpm_out <- calculateCPM(original)
@@ -100,31 +85,22 @@ test_that("we can calculate FPKM from counts", {
                                   use_size_factors = FALSE)
     expect_that(sparsified, is_a("SingleCellExperiment"))
     expect_that(sum(fpkm(sparsified)), is_more_than(0))
-    
 })
 
 
-test_that("we can calculate TPM from FPKM", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    original <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    effective_length <- rep(1000, 2000)
-    fpkm(original) <- calculateFPKM(original, effective_length,
-                                       use_size_factors = FALSE)
-    tpm(original) <- calculateTPM(original, effective_length, 
-                                        calc_from = "fpkm")
-    expect_that(original, is_a("SingleCellExperiment"))
-    expect_that(sum(tpm(original)), is_more_than(0))
-    
-    fpkm(sparsified) <- calculateFPKM(sparsified, effective_length,
-                                       use_size_factors = FALSE)
-    tpm(sparsified) <- calculateTPM(sparsified, effective_length, 
-                                     calc_from = "fpkm")
-    expect_that(sparsified, is_a("SingleCellExperiment"))
-    expect_that(sum(tpm(sparsified)), is_more_than(0))
-    
+test_that("we can calculate TPM from counts", {
+    effective_length <- runif(nrow(original), 1000, 2000)
+    tout <- calculateTPM(original, effective_length)
+
+    ref <- counts(original)/effective_length
+    ref <- t(t(ref)/(colSums(ref)/1e6))
+    expect_equal(tout, ref)
+   
+    expect_equal(calculateTPM(original, NULL), calculateCPM(original))
+
+    tout2 <- calculateTPM(sparsified, effective_length)
+    expect_s4_class(tout2, "dgCMatrix")
+    expect_equal(tout, as.matrix(tout2))
 })
 
 
@@ -133,8 +109,9 @@ test_that("nexprs works as expected", {
     expect_equal(nexprs(original), unname(colSums(counts(original) > 0)))
     expect_equal(nexprs(original), nexprs(counts(original)))
 
-    expect_equal(nexprs(original, byrow = TRUE), 
-                 unname(rowSums(counts(original) > 0)))
+    expect_equal(nexprs(original, byrow = TRUE), unname(rowSums(counts(original) > 0)))
+    expect_equal(nexprs(original, byrow = TRUE), nexprs(counts(original), byrow = TRUE))
+
     expect_equal(nexprs(original, subset_row = 20:40), 
                  unname(colSums(counts(original)[20:40,] > 0)))
     expect_equal(nexprs(original, byrow = TRUE, subset_col = 20:40), 
