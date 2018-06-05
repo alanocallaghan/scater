@@ -14,15 +14,15 @@ by passing appropriate values to the arguments of the desired plotting function.
 
 Here, we assume that each visual feature of interest (e.g., point or line) corresponds to a cell in the SingleCellExperiment object \code{sce}.
 We will also assume that the user wants to change the colour of each feature according to the cell (meta)data.
-To do so, the user can pass to \code{colour_by}:
+To do so, the user can pass as an argument:
 \itemize{
-\item An unnamed character string.
+\item An unnamed character vector of length 1, i.e., a string. 
 This is initially assumed to be the name of a column-level metadata field.
 The function will first search the column names of \code{colData(sce)}, and extract metadata for all cells if a matching field is found.
 If no match is found, the function will assume that the string represents a gene name.
 It will search \code{rownames(sce)} and extract gene expression values for any matching row across all cells.
 Otherwise, an error is raised.
-\item A named character string, where the name is either \code{"exprs"} or \code{"metadata"}.
+\item A named character vector of length 1, where the name is either \code{"exprs"} or \code{"metadata"}.
 This forces the function to only search for the string in \code{rownames(sce)} or \code{colnames(colData(sce))}, respectively.
 Adding an explicit name is useful when the same field exists in both the row names and column metadata names.
 \item A character vector of length greater than 1.
@@ -31,7 +31,7 @@ For example, supplying a character vector \code{c("A", "B", "C")} will retrieve 
 See \code{\link{calculateQCMetrics}} with \code{compact=TRUE} for an example of how these can be constructed. 
 The concatenated name \code{"A:B:C"} will be used in the legend.
 \item A data frame with one column and number of rows equal to the number of cells.
-This should contain values to use for visualization (in this case, for colouring by).
+This should contain values to use for visualization, e.g., for plotting on the x-/y-axis, or for colouring by.
 In this manner, the user can use new information without manually adding it to the SingleCellExperiment object.
 The column name of the data frame will be used in the legend.
 }

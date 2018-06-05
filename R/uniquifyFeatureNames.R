@@ -1,6 +1,6 @@
 #' Make feature names unique
 #' 
-#' Combine a user-interpretable feature name (e.g., gene symbol) with a standard  identifier that is guaranteed to be unique (e.g., Ensembl) for use as row names.
+#' Combine a user-interpretable feature name (e.g., gene symbol) with a standard identifier that is guaranteed to be unique and valid (e.g., Ensembl) for use as row names.
 #' 
 #' @param ID A character vector of unique identifiers.
 #' @param names A character vector of feature names.
