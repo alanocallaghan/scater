@@ -9,8 +9,7 @@ test_that("we can summarise expression at feature level", {
         assays = list(counts = sc_example_counts), 
         colData = sc_example_cell_info)
     effective_length <- rep(c(1000, 2000), times = 1000)
-    tpm(example_sce) <- calculateTPM(example_sce, effective_length, 
-                                        calc_from = "counts")
+    tpm(example_sce) <- calculateTPM(example_sce, effective_length, exprs_values = "counts")
     
     fd <- data.frame(
         gene_id = rownames(example_sce),
