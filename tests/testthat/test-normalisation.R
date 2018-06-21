@@ -123,6 +123,19 @@ test_that("scater::normalize works with different settings", {
     out2 <- normalize(Y, return_log=FALSE)
     expect_s4_class(normcounts(out2), "dgCMatrix")
     expect_equal(as.matrix(normcounts(out2)), normcounts(normalize(X, return_log=FALSE)))
+
+    # Checking that this works with other exprs_values=, and that they get passed to librarySizeFactors. 
+    ref <- X
+    ref <- normalize(ref)
+
+    Y2 <- X
+    assayNames(Y2) <- "whee"
+    Y2 <- normalize(Y2, exprs_values="whee")
+    expect_identical(logcounts(ref), logcounts(Y2))
+
+    sizeFactors(Y2) <- NULL
+    expect_warning(Y2 <- normalize(Y2, exprs_values="whee"), "library sizes")
+    expect_identical(sizeFactors(Y2), librarySizeFactors(ref))
 })
 
 test_that("scater:normalize works with alternative size factor settings", {

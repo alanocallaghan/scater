@@ -57,7 +57,7 @@ normalizeSCE <- function(object, exprs_values = "counts",
     ## setting up the size factors.
     if (is.null(sizeFactors(object))) {
         warning("using library sizes as size factors")
-        sizeFactors(object) <- librarySizeFactors(object)
+        sizeFactors(object) <- librarySizeFactors(object, exprs_values = exprs_values)
     }
     if (centre_size_factors) { 
         object <- centreSizeFactors(object)
