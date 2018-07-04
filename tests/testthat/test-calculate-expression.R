@@ -133,6 +133,12 @@ test_that("calcAverage works as expected", {
     expect_equal(ave_counts, expected_vals)
     expect_equal(ave_counts, calcAverage(counts(original)))
 
+    ## Responsive to other assay names.
+    whee <- original
+    assayNames(whee) <- "whee"
+    whee_counts <- calcAverage(whee, exprs_values="whee")
+    expect_identical(whee_counts, ave_counts)
+
     ## Responsive to size factors.
     sizeFactors(original) <- runif(ncol(original))
     ave_counts <- calcAverage(original)
@@ -162,7 +168,7 @@ test_that("calcAverage works as expected", {
     sizeFactors(spiked2) <- new_sf
     expect_equal(calcAverage(spiked2), ave_counts)
 
-    # Warnings are correctly thrown (or not) when no spike-ins are available for spike-ins.
+    # Warnings are correctly thrown (or not) when no size factors are available for spike-ins.
     sizeFactors(spiked2, "WHEE") <- NULL
     expect_warning(calcAverage(spiked2), "spike-in set")
     expect_warning(calcAverage(spiked2, use_size_factors=new_sf), "spike-in set")
