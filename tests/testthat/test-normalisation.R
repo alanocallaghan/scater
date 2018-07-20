@@ -116,15 +116,22 @@ test_that("scater::normalize works on spike-in genes", {
 })
 
 test_that("scater::normalize works with different settings", {
+    sf <- ref/mean(ref)
+
     ## Responds to differences in the prior count.
     out <- normalize(X, log_exprs_offset=3)
-    sf <- ref/mean(ref)
     expect_equivalent(exprs(out), log2(t(t(dummy)/sf)+3))
 
     Y <- X
     metadata(Y)$log.exprs.offset <- 3
     out2 <- normalize(Y)
     expect_equal(exprs(out), exprs(out2))
+
+    out3 <- normalize(X, log_exprs_offset=3, preserve_zeroes=TRUE)
+    sf3 <- ref/mean(ref) * 3
+    expect_equivalent(exprs(out3), log2(t(t(dummy)/sf3)+1))
+    expect_equivalent(exprs(out3), exprs(out2) - log2(3))
+    expect_equal(sizeFactors(out3), sf3)
 
     # Checking return_log=FALSE (prior count should turn off automatically).
     out <- normalize(X, return_log=FALSE)
