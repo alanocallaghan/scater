@@ -89,6 +89,14 @@ plotTSNE <- function(object, ..., rerun = FALSE, ncomponents = 2, run_args=list(
 }
 
 #' @rdname plot_reddim
+#' @aliases plotUMAP 
+#' @export
+plotUMAP <- function(object, ..., rerun = FALSE, ncomponents = 2, run_args=list()) {
+   .reddim_dispatcher(object=object, ncomponents=ncomponents, reddim_name="UMAP", 
+                      rerun=rerun, reddim_FUN=runUMAP, ..., run_args=run_args)
+}
+
+#' @rdname plot_reddim
 #' @aliases plotDiffusionMap 
 #' @export
 plotDiffusionMap <- function(object, ..., rerun = FALSE, ncomponents = 2, run_args=list()) {
