@@ -11,6 +11,7 @@
     \item Ensured calcAverage() and calculateCPM() with subset_row= behave as if the matrix was subsetting prior to the function call.
     \item Added readSparseCounts() for creating a sparse matrix from a dense array on file.
     \item Added normalizeMatrix() for easy division of matrix columns by the size factors.
+    \item Added preserve_zeroes= option to normalizeSCE() for preserving sparsity with non-unity pseudo-counts.
     \item Added runUMAP() and plotUMAP() to use the UMAP dimensionality reduction method.
   }
 }
