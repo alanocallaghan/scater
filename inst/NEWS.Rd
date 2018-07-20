@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
-\section{Changes in version 1.9.8, Bioconductor 3.8 Release}{
+\section{Changes in version 1.9.9, Bioconductor 3.8 Release}{
   \itemize{
     \item Fixes to all violin plots to ensure scatter matches up with violin outlines.
     \item Rectangle categorical/categorical plots collapse to mirrored bar plots when either factor contains only one level.
@@ -11,6 +11,7 @@
     \item Ensured calcAverage() and calculateCPM() with subset_row= behave as if the matrix was subsetting prior to the function call.
     \item Added readSparseCounts() for creating a sparse matrix from a dense array on file.
     \item Added normalizeMatrix() for easy division of matrix columns by the size factors.
+    \item Added runUMAP() and plotUMAP() to use the UMAP dimensionality reduction method.
   }
 }
 
