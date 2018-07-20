@@ -14,6 +14,28 @@ X <- SingleCellExperiment(list(counts=dummy))
 ref <- colSums(dummy)
 sizeFactors(X) <- ref
 
+test_that("normalizeMatrix works as expected", {
+    out <- normalizeMatrix(dummy, ref)
+    sf <- ref/mean(ref)
+    expect_equivalent(out, log2(t(t(dummy)/sf)+1))
+
+    # Without size factor centering.
+    out <- normalizeMatrix(dummy, ref, centre_size_factors=FALSE)
+    expect_equivalent(out, log2(t(t(dummy)/ref)+1))
+
+    # Without log-transformation.
+    out <- normalizeMatrix(dummy, ref, return_log=FALSE)
+    expect_equivalent(out, t(t(dummy)/sf))
+
+    # Handles silly inputs correctly.
+    out <- normalizeMatrix(dummy[0,,drop=FALSE], ref, return_log=FALSE)
+    expect_identical(dim(out), c(0L, as.integer(ncells)))
+    out <- normalizeMatrix(dummy[,0,drop=FALSE], ref[0], return_log=FALSE)
+    expect_identical(dim(out), c(as.integer(ngenes), as.integer(0L)))
+
+    expect_error(normalizeMatrix(dummy, ref[0], return_log=FALSE), "does not equal")
+})
+
 test_that("scater::normalize works on endogenous genes", {
     out <- normalize(X)
     sf <- ref/mean(ref)
@@ -38,7 +60,6 @@ test_that("scater::normalize works on endogenous genes", {
     expect_equal(unname(dim(normalize(X[,0,drop=FALSE]))), c(ngenes, 0L))
     expect_equal(unname(dim(normalize(X[0,,drop=FALSE]))), c(0L, ncells)) 
 })
-
 
 test_that("scater::normalize works with library sizes", {
     sizeFactors(X) <- NULL
@@ -86,7 +107,7 @@ test_that("scater::normalize works on spike-in genes", {
     expect_equivalent(sizeFactors(X4b, type="whee"), sizeFactors(X, type="whee"))
     expect_false(areSizeFactorsCentred(X4b))
 
-    # All size factors are ignored when use_size_factors=FALSE.
+    # Defaults to library sizes when no size factors are available.
     X5 <- X
     sizeFactors(X5) <- NULL
     sizeFactors(X5, "whee") <- NULL
