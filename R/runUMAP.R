@@ -73,7 +73,7 @@ runUMAP <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
     }
 
     vals <- as.matrix(vals) # protect against alternative matrix inputs.
-    umap_out <- umap::umap(vals, ...)
+    umap_out <- umap::umap(vals, n.components=ncomponents, ...)
     reducedDim(object, "UMAP") <- umap_out$layout
     return(object)
 }
