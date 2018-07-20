@@ -38,13 +38,9 @@ This is stored in the \code{"UMAP"} entry of the \code{reducedDims} slot.
 Perform uniform manifold approximation and projection (UMAP) for the cells, based on the data in a SingleCellExperiment object.
 }
 \details{
-The function \code{\link[Rtsne]{Rtsne}} is used internally to compute the UMAP. 
+The function \code{\link[umap]{umap}} is used internally to compute the UMAP. 
 Note that the algorithm is not deterministic, so different runs of the function will produce differing results. 
 Users are advised to test multiple random seeds, and then use \code{\link{set.seed}} to set a random seed for replicable results. 
-
-The value of the \code{perplexity} parameter can have a large effect on the results.
-By default, the function will try to provide a reasonable setting, by scaling the perplexity with the number of cells until it reaches a maximum of 50.
-However, it is often worthwhile to manually try multiple values to ensure that the conclusions are robust.
 
 Setting \code{use_dimred} allows users to easily perform UMAP on low-rank approximations of the original expression matrix (e.g., after PCA).
 In such cases, arguments such as \code{ntop}, \code{feature_set}, \code{exprs_values} and \code{scale_features} will be ignored.

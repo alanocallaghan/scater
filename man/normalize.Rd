@@ -13,10 +13,12 @@
 \title{Normalise a SingleCellExperiment object using pre-computed size factors}
 \usage{
 normalizeSCE(object, exprs_values = "counts", return_log = TRUE,
-  log_exprs_offset = NULL, centre_size_factors = TRUE)
+  log_exprs_offset = NULL, centre_size_factors = TRUE,
+  preserve_zeroes = FALSE)
 
 \S4method{normalize}{SingleCellExperiment}(object, exprs_values = "counts",
-  return_log = TRUE, log_exprs_offset = NULL, centre_size_factors = TRUE)
+  return_log = TRUE, log_exprs_offset = NULL, centre_size_factors = TRUE,
+  preserve_zeroes = FALSE)
 
 normalise(...)
 }
@@ -25,13 +27,15 @@ normalise(...)
 
 \item{exprs_values}{String indicating which assay contains the count data that should be used to compute log-transformed expression values.}
 
-\item{return_log}{Logical scalar, should normalized values be returned on the log2 scale? 
+\item{return_log}{Logical scalar, should normalized values be returned on the log2 scale?
 If \code{TRUE}, output is stored as \code{"logcounts"} in the returned object; if \code{FALSE} output is stored as \code{"normcounts"}.}
 
-\item{log_exprs_offset}{Numeric scalar specifying the offset to add when log-transforming expression values.
-If \code{NULL}, value is taken from \code{metadata(object)$log.exprs.offset} if defined, otherwise 1.}
+\item{log_exprs_offset}{Numeric scalar specifying the pseudo-count to add when log-transforming expression values.
+If \code{NULL}, the value is taken from \code{metadata(object)$log.exprs.offset} if defined, otherwise it is set to 1.}
 
 \item{centre_size_factors}{Logical scalar indicating whether size fators should be centred.}
+
+\item{preserve_zeroes}{Logical scalar indicating whether zeroes should be preserved when dealing with non-unity offsets.}
 
 \item{...}{Arguments passed to \code{normalize} when calling \code{normalise}.}
 }
@@ -48,14 +52,18 @@ Normalized expression values are computed by dividing the counts for each cell b
 This aims to remove cell-specific scaling biases, e.g., due to differences in sequencing coverage or capture efficiency.
 If \code{log=TRUE}, log-normalized values are calculated by adding \code{log_exprs_offset} to the normalized count and performing a log2 transformation.
 
-Features marked as spike-in controls will be normalized with control-specific size factors, if these are available. 
+Features marked as spike-in controls will be normalized with control-specific size factors, if these are available.
 This reflects the fact that spike-in controls are subject to different biases than those that are removed by gene-specific size factors (namely, total RNA content).
 If size factors for a particular spike-in set are not available, a warning will be raised.
 
 Size factors will be centred to have a mean of unity if \code{centre_size_factors=TRUE}, prior to calculation of normalized expression values.
-This ensures that the computed \code{exprs} can be interpreted as being on the same scale as log-counts. 
-It also standardizes the effect of the \code{log_exprs_offset} addition, 
+This ensures that the computed \code{exprs} can be interpreted as being on the same scale as log-counts.
+It also standardizes the effect of the \code{log_exprs_offset} addition,
 and ensures that abundances are roughly comparable between features normalized with different sets of size factors.
+
+If \code{preserve_zeroes=TRUE} and the pseudo-count is not unity, size factors are instead centered at the specified value of \code{log_exprs_offset}.
+The log-transformation is then performed on the normalized expression values with a pseudo-count of 1, which ensures that zeroes remain so in the output matrix.
+This yields the same results as \code{preserve_zeroes=FALSE} minus a matrix-wide constant of \code{log2(log_exprs_offset)}.
 
 Note that \code{normalize} is exactly the same as \code{normalise}.
 }
@@ -63,7 +71,7 @@ Note that \code{normalize} is exactly the same as \code{normalise}.
 data("sc_example_counts")
 data("sc_example_cell_info")
 example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
+    assays = list(counts = sc_example_counts),
     colData = sc_example_cell_info
 )
 

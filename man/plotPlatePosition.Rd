@@ -14,7 +14,7 @@ plotPlatePosition(object, plate_position = NULL, colour_by = NULL,
 
 \item{plate_position}{A character vector specifying the plate position for each cell (e.g., A01, B12, and so on, where letter indicates row and number indicates column).
 If \code{NULL}, the function will attempt to extract this from \code{object$plate_position}.
-Alternatively, a list of two factors (\code{"row"} and \code{"column"}) can be supplied, specifying the row and column for each cell in \code{object}.}
+Alternatively, a list of two factors (\code{"row"} and \code{"column"}) can be supplied, specifying the row (capital letters) and column (integer) for each cell in \code{object}.}
 
 \item{colour_by}{Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values.}
 
