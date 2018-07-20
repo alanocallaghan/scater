@@ -5,6 +5,7 @@
 \alias{Reduced dimension plots}
 \alias{plotPCASCE}
 \alias{plotTSNE}
+\alias{plotUMAP}
 \alias{plotDiffusionMap}
 \alias{plotMDS}
 \alias{plotPCA,SingleCellExperiment-method}
@@ -14,6 +15,8 @@
 plotPCASCE(object, ..., rerun = FALSE, ncomponents = 2, run_args = list())
 
 plotTSNE(object, ..., rerun = FALSE, ncomponents = 2, run_args = list())
+
+plotUMAP(object, ..., rerun = FALSE, ncomponents = 2, run_args = list())
 
 plotDiffusionMap(object, ..., rerun = FALSE, ncomponents = 2,
   run_args = list())
