@@ -5,7 +5,7 @@
 #' @param object A SingleCellExperiment object. 
 #' @param plate_position A character vector specifying the plate position for each cell (e.g., A01, B12, and so on, where letter indicates row and number indicates column).
 #' If \code{NULL}, the function will attempt to extract this from \code{object$plate_position}.
-#' Alternatively, a list of two factors (\code{"row"} and \code{"column"}) can be supplied, specifying the row and column for each cell in \code{object}.
+#' Alternatively, a list of two factors (\code{"row"} and \code{"column"}) can be supplied, specifying the row (capital letters) and column (integer) for each cell in \code{object}.
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
@@ -77,13 +77,12 @@ plotPlatePosition <- function(object, plate_position = NULL,
         x_position <- as.integer(gsub("[A-Z]*", "", plate_position))
 
     } else {
-        x_position <- plate_position$column
-        y_position <- plate_position$row
+        x_position <- as.integer(plate_position$column)
+        y_position <- as.character(plate_position$row)
         plate_position <- NULL
     }
     x_position <- as.factor(x_position)
-    y_position <- as.factor(y_position) 
-    levels(y_position) <- rev(levels(y_position)) # Up->down order.
+    y_position <- factor(y_position, levels=rev(LETTERS)) # Up->down order.
     df_to_plot <- data.frame(X=x_position, Y=y_position)
 
     ## checking visualization arguments
