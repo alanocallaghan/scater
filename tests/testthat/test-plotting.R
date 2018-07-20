@@ -339,6 +339,36 @@ test_that("we can produce TSNE plots", {
     expect_equal(plotTSNE(example_sce, ncomponents=4), P4)
 })
 
+test_that("we can produce UMAP plots", {
+    set.seed(100)
+    example_sce <- runUMAP(example_sce)
+    expect_identical(reducedDimNames(example_sce), "UMAP")
+    expect_s3_class(P <- plotUMAP(example_sce), "ggplot")
+
+    # plotUMAP re-runs it correctly.
+    reducedDim(example_sce, "UMAP") <- NULL
+
+    set.seed(100)
+    P2 <- plotUMAP(example_sce)
+    expect_s3_class(P2, "ggplot")
+    expect_equal(P, P2)
+
+    # Responsive to changes in parameters.
+    set.seed(100)
+    P3 <- plotUMAP(example_sce, run_args=list(n.neighbors=10))
+    expect_s3_class(P3, "ggplot")
+    expect_false(isTRUE(all.equal(P, P3)))
+    
+    # Handles multiple components properly.
+    set.seed(20)
+    P4 <- plotUMAP(example_sce, ncomponents=4)
+    expect_s3_class(P4, "ggplot")
+
+    set.seed(20)
+    example_sce <- runUMAP(example_sce, ncomponents=4)
+    expect_equal(plotUMAP(example_sce, ncomponents=4), P4)
+})
+
 test_that("we can produce diffusion maps", {
     set.seed(100)        
     example_sce <- runDiffusionMap(example_sce)

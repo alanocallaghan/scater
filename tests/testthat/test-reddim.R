@@ -211,6 +211,61 @@ test_that("runTSNE works as expected", {
 })
 
 #############################################
+# Check UMAP.
+
+test_that("runUMAP works as expected", {
+    set.seed(100)
+    sceX <- runUMAP(sce, ncomponents = 3)
+    expect_identical(reducedDimNames(sceX), "UMAP")     
+    expect_identical(dim(reducedDim(sceX, "UMAP")), c(ncol(sceX), 3L))
+
+    # Testing that setting the seed actually works.
+    set.seed(100)
+    sce2 <- runUMAP(sce)
+    set.seed(100)
+    sce3 <- runUMAP(sce)
+    expect_equal(reducedDim(sce2), reducedDim(sce3))
+
+    # Testing that various settings have some effect. 
+    set.seed(100)
+    sce3 <- runUMAP(sce, scale_features = FALSE)
+    expect_false(isTRUE(all.equal(reducedDim(sce2), reducedDim(sce3))))
+
+    set.seed(100)
+    sce3 <- runUMAP(sce, ntop = 100)
+    expect_false(isTRUE(all.equal(reducedDim(sce2), reducedDim(sce3))))
+
+    set.seed(100)
+    sce3 <- runUMAP(sce, exprs_values = "counts")
+    expect_false(isTRUE(all.equal(reducedDim(sce2), reducedDim(sce3))))
+
+    set.seed(100)
+    sce3 <- runUMAP(sce, feature_set = 1:100)
+    expect_false(isTRUE(all.equal(reducedDim(sce2), reducedDim(sce3))))
+    
+    # Testing out the use of existing reduced dimensions (this should not respond to any feature settings).
+    set.seed(10)
+    sceP <- runPCA(sce, ncomponents = 4)
+    sce2 <- runUMAP(sceP, use_dimred = "PCA")
+
+    set.seed(10)
+    sce3 <- runUMAP(sceP, use_dimred = "PCA", ntop = 20)
+    expect_identical(reducedDim(sce2, "UMAP"), reducedDim(sce3, "UMAP"))
+
+    set.seed(10)
+    sce3 <- runUMAP(sceP, use_dimred = "PCA", scale_features = FALSE)
+    expect_identical(reducedDim(sce2, "UMAP"), reducedDim(sce3, "UMAP"))
+
+    set.seed(10)
+    sce3 <- runUMAP(sceP, use_dimred = "PCA", feature_set = 1:20)
+    expect_identical(reducedDim(sce2, "UMAP"), reducedDim(sce3, "UMAP"))
+
+    set.seed(10)
+    sce3 <- runUMAP(sceP, use_dimred = "PCA", n_dimred=3)
+    expect_false(isTRUE(all.equal(reducedDim(sce2, "UMAP"), reducedDim(sce3, "UMAP"))))
+})
+
+#############################################
 # Check MDS.
 
 test_that("runMDS works as expected", {
