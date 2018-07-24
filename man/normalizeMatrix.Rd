@@ -5,7 +5,7 @@
 \title{Divide columns of a count matrix by the size factors}
 \usage{
 normalizeMatrix(x, size_factors, return_log = TRUE, log_exprs_offset = 1,
-  centre_size_factors = TRUE)
+  centre_size_factors = FALSE)
 }
 \arguments{
 \item{x}{A count matrix, with cells in the columns and genes in the rows.}
@@ -27,6 +27,9 @@ Compute (log-)normalized expression values by dividing counts for each cell by t
 \details{
 This function is more memory-efficient than \code{t(t(x)/size_factors)},
 and more generally applicable to different matrix classes than \code{sweep(x, 2, size_factors, "*")}.
+
+Note that the default \code{centre_size_factors} differs from that in \code{\link{normalizeSCE}}.
+Users of this function are assumed to know what they're doing with respect to normalization.
 }
 \examples{
 data("sc_example_counts")

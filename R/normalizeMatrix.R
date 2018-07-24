@@ -12,6 +12,9 @@
 #' This function is more memory-efficient than \code{t(t(x)/size_factors)},
 #' and more generally applicable to different matrix classes than \code{sweep(x, 2, size_factors, "*")}.
 #'
+#' Note that the default \code{centre_size_factors} differs from that in \code{\link{normalizeSCE}}.
+#' Users of this function are assumed to know what they're doing with respect to normalization.
+#'
 #' @return A matrix of (log-)normalized expression values.
 #'
 #' @author Aaron Lun
@@ -21,7 +24,7 @@
 #' data("sc_example_counts")
 #' normed <- normalizeMatrix(sc_example_counts, 
 #'     librarySizeFactors(sc_example_counts))
-normalizeMatrix <- function(x, size_factors, return_log = TRUE, log_exprs_offset = 1, centre_size_factors = TRUE) {
+normalizeMatrix <- function(x, size_factors, return_log = TRUE, log_exprs_offset = 1, centre_size_factors = FALSE) {
     if (centre_size_factors) {
         size_factors <- size_factors/mean(size_factors)
     }

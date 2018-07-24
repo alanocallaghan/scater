@@ -16,16 +16,16 @@ sizeFactors(X) <- ref
 
 test_that("normalizeMatrix works as expected", {
     out <- normalizeMatrix(dummy, ref)
-    sf <- ref/mean(ref)
-    expect_equivalent(out, log2(t(t(dummy)/sf)+1))
-
-    # Without size factor centering.
-    out <- normalizeMatrix(dummy, ref, centre_size_factors=FALSE)
     expect_equivalent(out, log2(t(t(dummy)/ref)+1))
+
+    # With size factor centering.
+    sf <- ref/mean(ref)
+    out <- normalizeMatrix(dummy, ref, centre_size_factors=TRUE)
+    expect_equivalent(out, log2(t(t(dummy)/sf)+1))
 
     # Without log-transformation.
     out <- normalizeMatrix(dummy, ref, return_log=FALSE)
-    expect_equivalent(out, t(t(dummy)/sf))
+    expect_equivalent(out, t(t(dummy)/ref))
 
     # Handles silly inputs correctly.
     out <- normalizeMatrix(dummy[0,,drop=FALSE], ref, return_log=FALSE)
