@@ -56,10 +56,10 @@ Features marked as spike-in controls will be normalized with control-specific si
 This reflects the fact that spike-in controls are subject to different biases than those that are removed by gene-specific size factors (namely, total RNA content).
 If size factors for a particular spike-in set are not available, a warning will be raised.
 
-Size factors will be centred to have a mean of unity if \code{centre_size_factors=TRUE}, prior to calculation of normalized expression values.
-This ensures that the computed \code{exprs} can be interpreted as being on the same scale as log-counts.
-It also standardizes the effect of the \code{log_exprs_offset} addition,
-and ensures that abundances are roughly comparable between features normalized with different sets of size factors.
+If \code{centre_size_factors=TRUE}, all sets of size factors will be centred to have the same mean prior to calculation of normalized expression values.
+This ensures that abundances are roughly comparable between features normalized with different sets of size factors.
+By default, the centre mean is unity, which means that the computed \code{exprs} can be interpreted as being on the same scale as log-counts.
+It also means that the added \code{log_exprs_offset} can be interpreted as a pseudo-count (i.e., on the same scale as the counts).
 
 If \code{preserve_zeroes=TRUE} and the pseudo-count is not unity, size factors are instead centered at the specified value of \code{log_exprs_offset}.
 The log-transformation is then performed on the normalized expression values with a pseudo-count of 1, which ensures that zeroes remain so in the output matrix.
