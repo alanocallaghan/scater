@@ -355,7 +355,7 @@ test_that("we can produce UMAP plots", {
 
     # Responsive to changes in parameters.
     set.seed(100)
-    P3 <- plotUMAP(example_sce, run_args=list(n.neighbors=10))
+    P3 <- plotUMAP(example_sce, run_args=list(n_neighbors=10))
     expect_s3_class(P3, "ggplot")
     expect_false(isTRUE(all.equal(P, P3)))
     
