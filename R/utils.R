@@ -104,6 +104,8 @@
     return(out)
 }
 
+#' @importFrom SummarizedExperiment colData rowData
+#' @importFrom BiocGenerics colnames
 .qc_hunter <- function(object, qc_field, mode = "column", error = TRUE) 
 # This function searches for QC fields in the various plotQC functions,
 # accounting for potential compactness and nesting of DataFrames.
