@@ -94,7 +94,7 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
     
     ## Colouring the individual dashes for the cells.
     if (missing(colour_cells_by)) {
-        colour_cells_by <- .qc_hunter(object, "total_features_by_counts", mode = "column")
+        colour_cells_by <- .qc_hunter(object, paste0("total_features_by_", exprs_values), mode = "column")
     }
     if (!is.null(colour_cells_by)) {
         colour_out <- .choose_vis_values(object, colour_cells_by, mode = "column", exprs_values = by_exprs_values,

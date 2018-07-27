@@ -382,7 +382,7 @@ test_that("failure is as expected for input with zero-variance features", {
 test_that("plotHighestExprs works as expected", {
     expect_s3_class(plotHighestExprs(wt_qc), "ggplot")
     expect_s3_class(plotHighestExprs(wt_qc_compact), "ggplot")
-    
+
     # Checking out the error messages.
     expect_error(plotHighestExprs(wo_qc, colour_cells_by = NULL), "failed to find")
     expect_error(plotHighestExprs(wo_qc, controls = NULL), "failed to find")
@@ -407,6 +407,13 @@ test_that("plotHighestExprs works as expected", {
     # Checking that the variable pickers work.
     expect_s3_class(plotHighestExprs(wt_qc_compact, controls = c("scater_qc", "is_feature_control_set1")), "ggplot")
     expect_s3_class(plotHighestExprs(wt_qc_compact, colour_cells_by = c("scater_qc", "all", "total_counts")), "ggplot")
+
+    # Recognizes alternative exprs_values.
+    alt_sce <- wt_qc 
+    assayNames(alt_sce) <- "whee"
+    expect_error(plotHighestExprs(alt_sce, exprs_values="whee"), "failed to find")
+    alt_sce$total_features_by_whee <- runif(ncol(alt_sce))
+    expect_s3_class(plotHighestExprs(alt_sce, exprs_values="whee"), "ggplot")
 
     # Works for sparse matrices.
     expect_s3_class(plotHighestExprs(sparsified), "ggplot")
