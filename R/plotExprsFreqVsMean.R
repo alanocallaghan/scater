@@ -12,6 +12,8 @@
 #' @param controls Specification of the row-level metadata column indicating whether a feature is a control, see \code{?"\link{scater-vis-var}"} for possible values.
 #' Only metadata fields will be searched, \code{assays} will not be used.
 #' If not supplied, this defaults to \code{"is_feature_control"} or equivalent for compacted data.
+#' @param exprs_values String specifying the assay used for the default \code{freq_exprs} and \code{mean_exprs}.
+#' This can be set to, e.g., \code{"logcounts"} so that \code{freq_exprs} defaults to \code{"n_cells_by_logcounts"}.
 #' @param by_show_single Logical scalar specifying whether a single-level factor for \code{controls} should be used for colouring, see \code{?"\link{scater-vis-var}"} for details.
 #' @param show_smooth Logical scalar, should a smoothed fit (through feature controls if available; all features otherwise) be shown on the plot? 
 #' See \code{\link[ggplot2]{geom_smooth}} for details.
@@ -31,6 +33,10 @@
 #' @seealso \code{\link{plotRowData}}
 #'
 #' @export
+#' @importFrom methods is
+#' @importClassesFrom SingleCellExperiment SingleCellExperiment
+#' @importFrom ggplot2 ggplot geom_hline geom_vline annotate geom_smooth
+#' @importFrom stats nls
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
@@ -46,17 +52,17 @@
 #'
 #' plotExprsFreqVsMean(example_sce, size_by = "is_feature_control")
 #'
-plotExprsFreqVsMean <- function(object, freq_exprs, mean_exprs, controls, by_show_single = FALSE, show_smooth = TRUE, show_se = TRUE, ...) 
+plotExprsFreqVsMean <- function(object, freq_exprs, mean_exprs, controls, exprs_values = "counts", by_show_single = FALSE, show_smooth = TRUE, show_se = TRUE, ...) 
 {
     if ( !is(object, "SingleCellExperiment") ) {
         stop("Object must be an SingleCellExperiment")
     }
 
     if (missing(freq_exprs) || is.null(freq_exprs)) { 
-        freq_exprs <- .qc_hunter(object, "n_cells_by_counts", mode = 'row')
+        freq_exprs <- .qc_hunter(object, paste0("n_cells_by_", exprs_values), mode = 'row')
     } 
     if (missing(mean_exprs) || is.null(mean_exprs)) {
-        mean_exprs <- .qc_hunter(object, "mean_counts", mode = 'row')
+        mean_exprs <- .qc_hunter(object, paste0("mean_", exprs_values), mode = 'row')
     }
     if (missing(controls)) { 
         controls <- .qc_hunter(object, "is_feature_control", mode="row")

@@ -466,6 +466,14 @@ test_that("plotExprsFreqVsMean works as expected", {
     rowData(wt_qc)$is_feature_control <- FALSE
     expect_s3_class(plotExprsFreqVsMean(wt_qc), "ggplot")
 
+    # Recognizes alternative exprs_values.
+    alt_sce <- wt_qc 
+    assayNames(alt_sce) <- "whee"
+    expect_error(plotExprsFreqVsMean(alt_sce, exprs_values="whee"), "failed to find")
+    rowData(alt_sce)$n_cells_by_whee <- runif(ncol(alt_sce))
+    rowData(alt_sce)$mean_whee <- runif(ncol(alt_sce))
+    expect_s3_class(plotExprsFreqVsMean(alt_sce, exprs_values="whee"), "ggplot")
+
     # Checking errors.
     rowData(wo_qc)$whee <- runif(nrow(wo_qc))
     rowData(wo_qc)$stuff <- runif(nrow(wo_qc))
