@@ -18,7 +18,12 @@
 #' @importFrom SummarizedExperiment assay
 #' @importFrom stats model.matrix
 #' @importFrom Matrix t
-#' 
+#'
+#' @seealso
+#' \code{\link{plotVarianceExplained}}
+#'
+#' @author Aaron Lun
+#'
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
@@ -53,11 +58,16 @@ getVarianceExplained <- function(object, exprs_values = "logcounts", variables =
 
         # Chunk-wise processing to keep memory usage low.            
         ngenes <- nrow(object)
-        by.chunk <- cut(seq_len(ngenes), ceiling(ngenes/chunk))
+        if (ngenes < chunk) {
+            by.chunk <- cut(seq_len(ngenes), ceiling(ngenes/chunk))
+        } else {
+            by.chunk <- factor(integer(ngenes))
+        }
+
         rss <- numeric(ngenes)
         for (element in levels(by.chunk)) {
             current <- by.chunk==element
-            cur.exprs <- exprs_mat[current,]
+            cur.exprs <- exprs_mat[current,,drop=FALSE]
             effects <- qr.qty(QR, as.matrix(t(cur.exprs)))
             rss[current] <- colSums(effects[-seq_len(QR$rank),, drop = FALSE] ^ 2) # no need for .colSums, as this is always dense.
         }
