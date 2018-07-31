@@ -2,14 +2,12 @@
 #'
 #' @param object A SingleCellExperiment object containing expression values and experimental information.
 #' Alternatively, a matrix containing the output of \code{\link{getVarianceExplained}}.
-#' @param method Deprecated: string indicating the type of plot to produce.
-#' Only \code{"density"} is accepted.
 #' @param nvars_to_plot Integer scalar specifying the number of variables with the greatest explanatory power to plot.
 #' This can be set to \code{Inf} to show all variables.
 #' @param min_marginal_r2 Numeric scalar specifying the minimal value required for median marginal R-squared for a variable to be plotted. 
 #' Only variables with a median marginal R-squared strictly larger than this value will be plotted.
 #' @param theme_size Numeric scalar specifying the font size to use for the plotting theme
-#' @param ... parameters to be passed to \code{\link{getVarianceExplained}}.
+#' @param ... Parameters to be passed to \code{\link{getVarianceExplained}}.
 #'
 #' @details 
 #' A density plot is created for each variable, showing the distribution of R-squared across all genes.
@@ -19,9 +17,10 @@
 #' If \code{object} is a SingleCellExperiment object, \code{\link{getVarianceExplained}} will be called to compute the variance in expression explained by each variable in each gene.
 #' Users may prefer to run \code{\link{getVarianceExplained}} manually and pass the resulting matrix as \code{object}, in which case the R-squared values are used directly.
 #'
-#' @return A ggplot object
+#' @return A ggplot object.
 #' @importFrom stats median
 #' @importFrom utils head
+#' @importClassesFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom ggplot2 ggplot geom_line geom_vline scale_x_log10 xlab ylab coord_cartesian theme_bw
 #' @export
 #' @examples
@@ -33,26 +32,20 @@
 #' example_sce <- normalize(example_sce)
 #'
 #' plotExplanatoryVariables(example_sce)
-#'
-plotExplanatoryVariables <- function(object, method = "density", nvars_to_plot = 10,
-        min_marginal_r2 = 0, theme_size = 10, ...) {
-
+plotExplanatoryVariables <- function(object, nvars_to_plot = 10, min_marginal_r2 = 0, theme_size = 10, ...) {
     if (is(object, "SingleCellExperiment")) { 
         rsquared_mat <- getVarianceExplained(object, ...)
     } else {
         rsquared_mat <- as.matrix(object)
     }
 
-    ## Get median R^2 for each variable, add to labels and order by median R^2
+    ## Get median R^2 for each variable, order by median R^2
     median_rsquared <- apply(rsquared_mat, 2, median, na.rm=TRUE)
     oo_median <- order(median_rsquared, decreasing = TRUE)
-    nvars_to_plot <- min(sum(median_rsquared > min_marginal_r2, na.rm = TRUE), nvars_to_plot)
+    keep_var <- median_rsquared >= min_marginal_r2
+    oo_median <- oo_median[keep_var[oo_median]]
 
-    method <- match.arg(method, c("density", "pairs"))
-    if ( method == "pairs" ) {
-        .Deprecated(msg="'method=\"density\"' is deprecated.\nUse 'plotColData' with 'multiplot' instead.")
-    }
-
+    ## Creating the plot.
     chosen_rsquared <- rsquared_mat[, head(oo_median, nvars_to_plot), drop=FALSE]
     df_to_plot <- suppressMessages(reshape2::melt(chosen_rsquared))
     colnames(df_to_plot) <- c("Feature", "Expl_Var", "R_squared")

@@ -4,15 +4,12 @@
 \alias{plotExplanatoryVariables}
 \title{Plot explanatory variables ordered by percentage of variance explained}
 \usage{
-plotExplanatoryVariables(object, method = "density",
-  nvars_to_plot = 10, min_marginal_r2 = 0, theme_size = 10, ...)
+plotExplanatoryVariables(object, nvars_to_plot = 10,
+  min_marginal_r2 = 0, theme_size = 10, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values and experimental information.
 Alternatively, a matrix containing the output of \code{\link{getVarianceExplained}}.}
-
-\item{method}{Deprecated: string indicating the type of plot to produce.
-Only \code{"density"} is accepted.}
 
 \item{nvars_to_plot}{Integer scalar specifying the number of variables with the greatest explanatory power to plot.
 This can be set to \code{Inf} to show all variables.}
@@ -22,10 +19,10 @@ Only variables with a median marginal R-squared strictly larger than this value 
 
 \item{theme_size}{Numeric scalar specifying the font size to use for the plotting theme}
 
-\item{...}{parameters to be passed to \code{\link{getVarianceExplained}}.}
+\item{...}{Parameters to be passed to \code{\link{getVarianceExplained}}.}
 }
 \value{
-A ggplot object
+A ggplot object.
 }
 \description{
 Plot explanatory variables ordered by percentage of variance explained
@@ -47,5 +44,4 @@ example_sce <- SingleCellExperiment(
 example_sce <- normalize(example_sce)
 
 plotExplanatoryVariables(example_sce)
-
 }
