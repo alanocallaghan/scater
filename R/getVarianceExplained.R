@@ -58,7 +58,7 @@ getVarianceExplained <- function(object, exprs_values = "logcounts", variables =
 
         # Chunk-wise processing to keep memory usage low.            
         ngenes <- nrow(object)
-        if (ngenes < chunk) {
+        if (ngenes > chunk) {
             by.chunk <- cut(seq_len(ngenes), ceiling(ngenes/chunk))
         } else {
             by.chunk <- factor(integer(ngenes))

@@ -28,3 +28,19 @@ Estimate the percentage of variance explained for each gene.
 This function computes the percentage of variance in gene expression that is explained by variables in the sample-level metadata.
 It allows problematic factors to be quickly identified, as well as the genes that are most affected.
 }
+\examples{
+data("sc_example_counts")
+data("sc_example_cell_info")
+example_sce <- SingleCellExperiment(
+    assays = list(counts = sc_example_counts), 
+    colData = sc_example_cell_info)
+example_sce <- normalize(example_sce)
+
+r2mat <- getVarianceExplained(example_sce)
+}
+\seealso{
+\code{\link{plotVarianceExplained}}
+}
+\author{
+Aaron Lun
+}
