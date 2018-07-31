@@ -9,7 +9,8 @@
 #'
 #' @details 
 #' This function computes the percentage of variance in PC scores that is explained by variables in the sample-level metadata.
-#' It allows identification of PCs that are driven by technical factors (e.g., batch effects, library size), and subsequently their removal prior to further analysis.
+#' It allows identification of important PCs that are driven by known experimental conditions, e.g., treatment, disease.
+#' PCs correlated with echnical factors (e.g., batch effects, library size) can also be detected and removed prior to further analysis.
 #'
 #' The function will attempt to extract existing PCA results in \code{object} via the \code{use_dimred} argument.
 #' If these are not available, it will rerun the PCA using \code{\link{runPCA}}.
@@ -34,8 +35,8 @@
 #'     colData = sc_example_cell_info)
 #' example_sce <- normalize(example_sce)
 #'                                                    
-#' r2mat <- getImportantPCs(example_sce)
-getImportantPCs <- function(object, variables=NULL, use_dimred="PCA", chunk=1000, ...) {
+#' r2mat <- getExplanatoryPCs(example_sce)
+getExplanatoryPCs <- function(object, variables=NULL, use_dimred="PCA", chunk=1000, ...) {
     reddims <- reducedDim(object, use_dimred)
     if (is.null(reddims)) {
         reddims <- reducedDim(runPCA(object, ...), "PCA")
