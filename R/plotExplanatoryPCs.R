@@ -31,9 +31,9 @@
 #' example_sce <- normalize(example_sce)
 #'
 #' plotExplanatoryPCs(example_sce)
-plotExplanatoryPCs <- function(object, nvars_to_plot = 10, npcs_to_plot=Inf, theme_size=10, ...) {
+plotExplanatoryPCs <- function(object, nvars_to_plot = 10, npcs_to_plot=50, theme_size=10, ...) {
     if (is(object, "SingleCellExperiment")) { 
-        rsquared_mat <- getImportantPCs(object, ...)
+        rsquared_mat <- getExplanatoryPCs(object, ncomponents=npcs_to_plot, ...)
     } else {
         rsquared_mat <- as.matrix(object)
     }
