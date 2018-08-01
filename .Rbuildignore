@@ -6,3 +6,7 @@
 ^appveyor\.yml$
 ^\.git*
 README.md
+
+inst/scater_*
+inst/sticker_*
+inst/web/*
