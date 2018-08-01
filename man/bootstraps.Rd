@@ -4,11 +4,8 @@
 \name{bootstraps}
 \alias{bootstraps}
 \alias{bootstraps<-}
-\alias{bootstraps}
 \alias{bootstraps,SingleCellExperiment-method}
 \alias{bootstraps<-,SingleCellExperiment,array-method}
-\alias{bootstraps<-}
-\alias{bootstraps}
 \title{Accessor and replacement for bootstrap results in a 
 \code{\link{SingleCellExperiment}} object}
 \usage{

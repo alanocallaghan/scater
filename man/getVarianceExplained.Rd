@@ -39,7 +39,7 @@ example_sce <- normalize(example_sce)
 r2mat <- getVarianceExplained(example_sce)
 }
 \seealso{
-\code{\link{plotVarianceExplained}}
+\code{\link{plotExplanatoryVariables}}
 }
 \author{
 Aaron Lun

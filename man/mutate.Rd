@@ -3,7 +3,6 @@
 \docType{methods}
 \name{mutate}
 \alias{mutate}
-\alias{mutate}
 \alias{mutate,SingleCellExperiment-method}
 \title{Add new variables to \code{colData(object)}.}
 \usage{

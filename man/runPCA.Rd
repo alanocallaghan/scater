@@ -4,9 +4,10 @@
 \alias{runPCA}
 \title{Perform PCA on cell-level data}
 \usage{
-runPCA(object, ncomponents = 2, method = c("prcomp", "irlba"), ntop = 500,
-  exprs_values = "logcounts", feature_set = NULL, scale_features = TRUE,
-  use_coldata = FALSE, selected_variables = NULL, detect_outliers = FALSE,
+runPCA(object, ncomponents = 2, method = c("prcomp", "irlba"),
+  ntop = 500, exprs_values = "logcounts", feature_set = NULL,
+  scale_features = TRUE, use_coldata = FALSE,
+  selected_variables = NULL, detect_outliers = FALSE,
   rand_seed = NULL, ...)
 }
 \arguments{

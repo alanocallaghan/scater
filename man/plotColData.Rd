@@ -7,8 +7,8 @@
 \title{Plot column metadata}
 \usage{
 plotColData(object, y, x = NULL, colour_by = NULL, shape_by = NULL,
-  size_by = NULL, by_exprs_values = "logcounts", by_show_single = FALSE,
-  ...)
+  size_by = NULL, by_exprs_values = "logcounts",
+  by_show_single = FALSE, ...)
 
 plotPhenoData(...)
 

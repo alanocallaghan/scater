@@ -13,7 +13,7 @@ readKallistoResults(..., full_length = TRUE)
 readSalmonResults(..., full_length = TRUE)
 }
 \arguments{
-\item{...}{Arguments to be passed to \code{\link{tximport}}.}
+\item{...}{Arguments to be passed to \code{\link[tximport]{tximport}}.}
 
 \item{full_length}{Logical scalar indicating whether the sequencing data is full-length (e.g., Smart-seq2) or end-biased, e.g., UMI-based protocols.}
 }

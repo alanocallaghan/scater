@@ -5,7 +5,8 @@
 \title{Summarise expression values across feature}
 \usage{
 summariseExprsAcrossFeatures(object, exprs_values = "tpm",
-  summarise_by = "feature_id", scaled_tpm_counts = TRUE, lib_size = NULL)
+  summarise_by = "feature_id", scaled_tpm_counts = TRUE,
+  lib_size = NULL)
 }
 \arguments{
 \item{object}{an \code{SingleCellExperiment} object.}

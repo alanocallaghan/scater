@@ -5,8 +5,8 @@
 \title{Perform MDS on cell-level data}
 \usage{
 runMDS(object, ncomponents = 2, ntop = 500, feature_set = NULL,
-  exprs_values = "logcounts", scale_features = TRUE, use_dimred = NULL,
-  n_dimred = NULL, method = "euclidean")
+  exprs_values = "logcounts", scale_features = TRUE,
+  use_dimred = NULL, n_dimred = NULL, method = "euclidean")
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}

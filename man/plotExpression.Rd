@@ -6,9 +6,9 @@
 \usage{
 plotExpression(object, features, x = NULL, exprs_values = "logcounts",
   log2_values = FALSE, colour_by = NULL, shape_by = NULL,
-  size_by = NULL, by_exprs_values = exprs_values, by_show_single = FALSE,
-  xlab = NULL, feature_colours = TRUE, one_facet = TRUE, ncol = 2,
-  scales = "fixed", ...)
+  size_by = NULL, by_exprs_values = exprs_values,
+  by_show_single = FALSE, xlab = NULL, feature_colours = TRUE,
+  one_facet = TRUE, ncol = 2, scales = "fixed", ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values and other metadata.}

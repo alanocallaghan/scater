@@ -4,10 +4,10 @@
 \alias{plotHeatmap}
 \title{Plot heatmap of gene expression values}
 \usage{
-plotHeatmap(object, features, columns = NULL, exprs_values = "logcounts",
-  center = FALSE, zlim = NULL, symmetric = FALSE, color = NULL,
-  colour_columns_by = NULL, by_exprs_values = exprs_values,
-  by_show_single = FALSE, ...)
+plotHeatmap(object, features, columns = NULL,
+  exprs_values = "logcounts", center = FALSE, zlim = NULL,
+  symmetric = FALSE, color = NULL, colour_columns_by = NULL,
+  by_exprs_values = exprs_values, by_show_single = FALSE, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}

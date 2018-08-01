@@ -44,7 +44,7 @@ example_sce <- normalize(example_sce)
 r2mat <- getExplanatoryPCs(example_sce)
 }
 \seealso{
-\code{\link{plotImportantPCs}},
+\code{\link{plotExplanatoryPCs}},
 \code{\link{getVarianceExplained}}
 }
 \author{

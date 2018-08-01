@@ -2,45 +2,36 @@
 % Please edit documentation in R/plotExplanatoryPCs.R
 \name{plotExplanatoryPCs}
 \alias{plotExplanatoryPCs}
-\title{Find most important principal components for a given variable}
+\title{Plot the explanatory PCs for each variable}
 \usage{
-plotExplanatoryPCs(object, nvars_to_plot = 10, npcs_to_plot = Inf,
+plotExplanatoryPCs(object, nvars_to_plot = 10, npcs_to_plot = 50,
   theme_size = 10, ...)
 }
 \arguments{
-\item{object}{A SingleCellExperiment object containing expression values and experimental information.}
+\item{object}{A SingleCellExperiment object containing expression values and experimental information. 
+Alternatively, a matrix containing the output of \code{\link{getExplanatoryPCs}}.}
+
+\item{nvars_to_plot}{Integer scalar specifying the number of variables with the greatest explanatory power to plot.
+This can be set to \code{Inf} to show all variables.}
+
+\item{npcs_to_plot}{Integer scalar specifying the number of PCs to plot.}
 
 \item{theme_size}{numeric scalar providing base font size for ggplot theme.}
 
-\item{exprs_values}{which slot of the \code{assayData} in the \code{object}
-should be used to define expression? Valid options are "counts",
-"tpm", "fpkm" and "logcounts" (default), or anything else in the object added manually by 
-the user.}
-
-\item{ntop}{numeric scalar indicating the number of most variable features to
-use for the PCA. Default is \code{500}, but any \code{ntop} argument is
-overrided if the \code{feature_set} argument is non-NULL.}
-
-\item{feature_set}{character, numeric or logical vector indicating a set of
-features to use for the PCA. If character, entries must all be in
-\code{rownames(object)}. If numeric, values are taken to be indices for
-features. If logical, vector is used to index features and should have length
-equal to \code{nrow(object)}.}
-
-\item{scale_features}{logical, should the expression values be standardised
-so that each feature has unit variance? Default is \code{TRUE}.}
+\item{...}{Parameters to be passed to \code{\link{getExplanatoryPCs}}.}
 }
 \value{
-a \code{\link{ggplot}} plot object
+A ggplot object.
 }
 \description{
-Find most important principal components for a given variable
+Plot the explanatory PCs for each variable
 }
 \details{
-Plot the top 5 or 6 most important PCs (depending on the 
-\code{plot_type} argument for a given variable. Importance here is defined as
-the R-squared value from a linear model regressing each PC onto the variable 
-of interest.
+A density plot is created for each variable, showing the R-squared for each successive PC (up to \code{npcs_to_plot} PCs).
+Only the \code{nvars_to_plot} variables with the largest maximum R-squared across PCs are shown.
+
+If \code{object} is a SingleCellExperiment object, \code{\link{getExplanatoryPCs}} will be called to compute the variance in expression explained by each variable in each gene.
+Users may prefer to run \code{\link{getExplanatoryPCs}} manually and pass the resulting matrix as \code{object}, in which case the R-squared values are used directly.
 }
 \examples{
 data("sc_example_counts")

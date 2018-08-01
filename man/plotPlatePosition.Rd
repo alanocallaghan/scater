@@ -6,8 +6,8 @@
 \usage{
 plotPlatePosition(object, plate_position = NULL, colour_by = NULL,
   size_by = NULL, shape_by = NULL, by_exprs_values = "logcounts",
-  by_show_single = FALSE, legend = TRUE, theme_size = 24, alpha = 0.6,
-  size = 24)
+  by_show_single = FALSE, legend = TRUE, theme_size = 24,
+  alpha = 0.6, size = 24)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}

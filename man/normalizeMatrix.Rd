@@ -4,8 +4,8 @@
 \alias{normalizeMatrix}
 \title{Divide columns of a count matrix by the size factors}
 \usage{
-normalizeMatrix(x, size_factors, return_log = TRUE, log_exprs_offset = 1,
-  centre_size_factors = FALSE)
+normalizeMatrix(x, size_factors, return_log = TRUE,
+  log_exprs_offset = 1, centre_size_factors = FALSE)
 }
 \arguments{
 \item{x}{A count matrix, with cells in the columns and genes in the rows.}
