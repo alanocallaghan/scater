@@ -1,18 +1,10 @@
 ## test calculate expression
-## library(scater); library(testthat); source("test-calculate-expression.R")
-
-context("test calculation of TPM and FPKM")
-
-data("sc_example_counts")
-data("sc_example_cell_info")
-original <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
-    colData = sc_example_cell_info)
+## library(scater); library(testthat); source("setup-sce.R"); source("test-calculate-expression.R")
 
 library(Matrix)
+original <- sce
 sparsified <- original
 counts(sparsified) <- as(counts(original), "dgCMatrix")
-
 
 test_that("we can calculate CPM from counts", {
     cpm_out <- calculateCPM(original)
