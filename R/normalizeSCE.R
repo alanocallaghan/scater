@@ -52,9 +52,9 @@
 #'
 #' example_sce <- normalize(example_sce)
 #'
-#' @importFrom BiocGenerics normalize
-#' @importFrom S4Vectors metadata 'metadata<-'
-#' @importFrom SummarizedExperiment assay
+#' @importFrom BiocGenerics normalize sizeFactors
+#' @importFrom S4Vectors metadata metadata<-
+#' @importFrom SummarizedExperiment assay assay<-
 normalizeSCE <- function(object, exprs_values = "counts",
         return_log = TRUE, log_exprs_offset = NULL,
         centre_size_factors = TRUE, preserve_zeroes = FALSE) {
@@ -87,11 +87,11 @@ normalizeSCE <- function(object, exprs_values = "counts",
     sf.list <- .get_all_sf_sets(object)
 
     ## Compute normalized expression values.
-    norm_exprs <- .compute_exprs(assay(object, i = exprs_values),
-        size_factor_val = sf.list$size.factors,
-        size_factor_idx = sf.list$index,
-        log = return_log, sum = FALSE, logExprsOffset = log_exprs_offset,
-        subset_row = NULL)
+    norm_exprs <- .Call(cxx_norm_exprs, assay(object, i = exprs_values, withDimnames=FALSE),
+        sf.list$size.factors, sf.list$index - 1L, 
+        as.numeric(log_exprs_offset),
+        as.logical(return_log), 
+        subset_row = seq_len(nrow(object)) - 1L)
 
     ## add normalised values to object
     if (return_log) {

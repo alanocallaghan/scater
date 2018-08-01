@@ -29,8 +29,11 @@
 #' If \code{object} is a matrix or matrix-like object, size factors will only be used if \code{use_size_factors} is a numeric vector.
 #' Otherwise, the sum of counts for each cell is directly used as the library size.
 #'
-#' @return Matrix of CPM values.
+#' @return Numeric matrix of CPM values.
 #' @export
+#' @importFrom SingleCellExperiment SingleCellExperiment
+#' @importFrom BiocGenerics sizeFactors sizeFactors<-
+#' @importFrom SummarizedExperiment assay
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
@@ -50,22 +53,22 @@ calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE,
     # Setting up the size factors.
     object <- .replace_size_factors(object, use_size_factors)
     if (is.null(sizeFactors(object))) {
-        sizeFactors(object) <- librarySizeFactors(object, subset_row=subset_row)
+        sizeFactors(object) <- librarySizeFactors(object, subset_row=subset_row, exprs_values=exprs_values)
     }
 
-    object <- centreSizeFactors(object)
-    sf_list <- .get_all_sf_sets(object)
+    lib_sizes <- .colSums(assay(object, exprs_values, withDimnames=FALSE), rows=subset_row)
+    meanlib_millions <- mean(lib_sizes)/1e6
+    object <- centreSizeFactors(object, centre=meanlib_millions)
 
-    # Computes the average count, adjusting for size factors or library size.
-    extracted <- assay(object, exprs_values)
-    normed <- .compute_exprs(extracted,
-                             size_factor_val = sf_list$size.factors,
-                             size_factor_idx = sf_list$index,
-                             log = FALSE, sum = FALSE, logExprsOffset = 0,
-                             subset_row = subset_row)
+    sf.list <- .get_all_sf_sets(object)
 
-    lib_sizes <- .colSums(extracted, rows=subset_row)
-    cpm_mat <- normed / (mean(lib_sizes)/1e6)
-    return(cpm_mat)
+    # Computing the CPM values.
+    subset_row <- .subset2index(subset_row, object, byrow=TRUE)
+    output <- .Call(cxx_norm_exprs, assay(object, i = exprs_values, withDimnames=FALSE),
+        sf.list$size.factors, sf.list$index - 1L,
+        0, FALSE, subset_row = subset_row - 1L)
+
+    colnames(output) <- colnames(object)
+    rownames(output) <- rownames(object)[subset_row]
+    output
 }
-

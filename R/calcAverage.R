@@ -30,6 +30,10 @@
 #'
 #' @return Vector of average count values with same length as number of features, or the number of features in \code{subset_row} if supplied.
 #' @export
+#' @importFrom SingleCellExperiment SingleCellExperiment
+#' @importFrom BiocGenerics sizeFactors sizeFactors<-
+#' @importClassesFrom SingleCellExperiment SingleCellExperiment 
+#'
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
@@ -58,12 +62,10 @@ calcAverage <- function(object, exprs_values="counts", use_size_factors = TRUE, 
     sf_list <- .get_all_sf_sets(object)
 
     # Computes the average count, adjusting for size factors or library size.
-    all.ave <- .compute_exprs(assay(object, exprs_values),
-                              size_factor_val = sf_list$size.factors, 
-                              size_factor_idx = sf_list$index,
-                              log = FALSE, sum = TRUE, logExprsOffset = 0,
-                              subset_row = subset_row)
+    subset_row <- .subset2index(subset_row, object, byrow=TRUE)
+    ave <- .Call(cxx_ave_exprs, assay(object, exprs_values, withDimnames=FALSE), sf_list$size.factors, sf_list$index - 1L, subset_row - 1L)
 
-    return(all.ave / ncol(object))
+    names(ave) <- rownames(object)[subset_row]
+    ave
 }
 
