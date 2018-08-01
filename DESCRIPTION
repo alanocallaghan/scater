@@ -15,14 +15,14 @@ License: GPL-3
 Title: Single-Cell Analysis Toolkit for Gene Expression Data in R
 Description: A collection of tools for doing various analyses of
         single-cell RNA-seq gene expression data, with a focus on
-        quality control.
-Depends: R (>= 3.5), Biobase, ggplot2, SingleCellExperiment
+        quality control and visualization.
+Depends: R (>= 3.5), SingleCellExperiment, ggplot2
 Imports: BiocGenerics, Matrix, data.table, dplyr, ggbeeswarm, grid, limma,
-        DelayedMatrixStats, methods, parallel, plyr, reshape2, rhdf5, 
-        rjson, S4Vectors, stats, tximport, utils, viridis, Rcpp (>= 0.12.14), 
-        DelayedArray, SummarizedExperiment
+        DelayedMatrixStats, methods, parallel, plyr, reshape2, S4Vectors, stats,
+        utils, viridis, Rcpp (>= 0.12.14), DelayedArray, SummarizedExperiment
 Suggests: BiocStyle, biomaRt, beachmat, cowplot, cluster, destiny, knitr, monocle,
-        mvoutlier, rmarkdown, Rtsne, umap, testthat, magrittr, pheatmap, irlba
+        mvoutlier, rmarkdown, Rtsne, umap, testthat, magrittr, pheatmap, irlba,
+        tximport, tximportData
 VignetteBuilder: knitr
 LazyData: true
 biocViews: SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,
@@ -31,7 +31,7 @@ biocViews: SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,
         DataRepresentation, Infrastructure, Coverage
 LinkingTo: Rhdf5lib, Rcpp, beachmat
 SystemRequirements: C++11
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 NeedsCompilation: yes
 URL: http://bioconductor.org/packages/scater/
 BugReports: https://support.bioconductor.org/
