@@ -27,8 +27,8 @@ plotQC <- function(object, type = c("highest-expression", "find-pcs", "explanato
         .Deprecated("plotHighestExprs")
         plot_out <- plotHighestExprs(object, ...)
     } else if (type == "find-pcs") {
-        .Deprecated("findImportantPCs")
-        plot_out <- findImportantPCs(object, ...)
+        .Deprecated("plotExplanatoryPCs")
+        plot_out <- plotExplanatoryPCs(object, ...)
     } else if (type == "explanatory-variables") {
         .Deprecated("plotExplanatoryVariables")
         plot_out <- plotExplanatoryVariables(object, ...)

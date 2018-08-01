@@ -19,7 +19,7 @@
 #' A matrix containing the percentage of variance explained by each factor (column) and for each PC (row).
 #'
 #' @seealso
-#' \code{\link{plotImportantPCs}},
+#' \code{\link{plotExplanatoryPCs}},
 #' \code{\link{getVarianceExplained}}
 #'
 #' @author Aaron Lun
