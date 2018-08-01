@@ -3,8 +3,9 @@
 template <class V, class M>
 class normalizer {
 public:
-    normalizer(M mat, Rcpp::List sf_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject genes_sub) : ptr(mat), 
-            vec(mat->get_ncol()), size_factors(sf_list.size()), current_sfs(sf_list.size()), set_id(sf_to_use), 
+    normalizer(M mat, Rcpp::List sf_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject genes_sub) : 
+            ptr(mat), vec(mat->get_nrow()), 
+            size_factors(sf_list.size()), current_sfs(sf_list.size()), set_id(sf_to_use), 
             subset(process_subset_vector(genes_sub, mat, true)), output(subset.size()) {
 
         const size_t& ncells=ptr->get_ncol();
