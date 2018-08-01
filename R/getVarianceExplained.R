@@ -49,7 +49,7 @@ getVarianceExplained <- function(object, exprs_values = "logcounts", variables =
     for (V in variables) {
         x <- colData(object)[,V]
         if (length(unique(x))<=1L) {
-            warning(sprintf("ignoring '%i' with fewer than 2 unique levels"), V)
+            warning(sprintf("ignoring '%s' with fewer than 2 unique levels", V))
             next
         }
 
