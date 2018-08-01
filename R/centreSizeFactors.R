@@ -32,18 +32,5 @@
 #' 
 centreSizeFactors <- function(object, centre = 1) {
     centrefun <- function(x) { x/mean(x) * centre }
-
-    # Running through the sets of size factors and centering them as necessary.
-    sf <- sizeFactors(object)
-    if (!is.null(sf)) {
-        sizeFactors(object) <- centrefun(sf)
-    }
-    for (sf_name in sizeFactorNames(object)) {
-        sf <- sizeFactors(object, sf_name)
-        if (!is.null(sf)) {
-            sizeFactors(object, sf_name) <- centrefun(sf)
-        }
-    }
-
-    return(object)
+    .apply_to_size_factors(object, centrefun)
 }
