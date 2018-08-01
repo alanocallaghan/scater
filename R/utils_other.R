@@ -26,33 +26,6 @@
     return(unname(subset))
 }
 
-.compute_exprs <- function(exprs_mat, size_factor_val, size_factor_idx,
-                           sum = FALSE, log = TRUE, logExprsOffset = 1,
-                           subset_row = NULL) 
-## Calculates normalized expression values, optionally log-transformed
-## and/or summed across cells for a particular gene.
-{
-    sum <- as.logical(sum)
-    log <- as.logical(log)
-    off <- as.double(logExprsOffset)
-
-    ## Specify the rows to be subsetted.
-    subset_row <- .subset2index(subset_row, exprs_mat, byrow=TRUE)
-    
-    ## computes normalized expression values.
-    out <- .Call(cxx_calc_exprs, exprs_mat, size_factor_val, size_factor_idx,
-                 off, log, sum, subset_row - 1L)
-
-    ## Setting up the names in the output object.
-    if (sum) {
-        names(out) <- rownames(exprs_mat)[subset_row]
-    } else {
-        rownames(out) <- rownames(exprs_mat)[subset_row]
-        colnames(out) <- colnames(exprs_mat)
-    }
-    return(out)
-}
-
 #' @importFrom SummarizedExperiment colData rowData
 #' @importFrom BiocGenerics colnames
 .qc_hunter <- function(object, qc_field, mode = "column", error = TRUE) 
