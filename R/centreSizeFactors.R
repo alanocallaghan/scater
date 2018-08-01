@@ -12,7 +12,7 @@
 #' This is important for the interpretation of the normalized values, as well as comaprisons between features normalized with different size factors (e.g., spike-ins).
 #'
 #' @author Aaron Lun
-#' @seealso \code{\link{areSizeFactorsCentred}}
+#' @seealso \code{\link{normalizeSCE}}
 #' @export
 #' @examples
 #'

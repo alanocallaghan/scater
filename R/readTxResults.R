@@ -2,7 +2,7 @@
 #' 
 #' Create a \linkS4class{SingleCellExperiment} object from pseudo-aligner results via \pkg{tximport}.
 #'
-#' @param ... Arguments to be passed to \code{\link{tximport}}.
+#' @param ... Arguments to be passed to \code{\link[tximport]{tximport}}.
 #' @param full_length Logical scalar indicating whether the sequencing data is full-length (e.g., Smart-seq2) or end-biased, e.g., UMI-based protocols.
 #' 
 #' @details 

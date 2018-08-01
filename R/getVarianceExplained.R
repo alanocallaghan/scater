@@ -20,7 +20,7 @@
 #' @importFrom Matrix t
 #'
 #' @seealso
-#' \code{\link{plotVarianceExplained}}
+#' \code{\link{plotExplanatoryVariables}}
 #'
 #' @author Aaron Lun
 #'
