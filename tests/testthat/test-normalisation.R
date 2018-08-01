@@ -142,12 +142,35 @@ test_that("scater::normalize responds to changes in the prior count", {
     out2 <- normalize(Y)
     expect_equal(exprs(out), exprs(out2))
 
+    # Preserves sparsity if requested.
     out3 <- normalize(X, log_exprs_offset=3, preserve_zeroes=TRUE)
     sf3 <- ref/mean(ref) * 3
     expect_equivalent(exprs(out3), log2(t(t(dummy)/sf3)+1))
     expect_equivalent(exprs(out3), exprs(out2) - log2(3))
     expect_equal(sizeFactors(out3), sf3)
 })
+
+test_that("scater:normalize works with alternative size factor settings", {
+    # No centering.
+    out <- normalize(X, centre_size_factors=FALSE)
+    expect_equal(ref, sizeFactors(out))
+    expect_equal(logcounts(out), log2(t(t(counts(X))/ref+1)))
+
+    # Manual centering.
+    out <- normalize(X)
+    Xb <- centreSizeFactors(X)
+    expect_equal(sizeFactors(Xb), sizeFactors(out))
+    expect_equal(out, normalize(Xb, centre_size_factors=FALSE))
+
+    # No centering _and_ non-unity pseudo count.
+    out <- normalize(X, log_exprs_offset=3, centre_size_factors=FALSE)
+    expect_equivalent(exprs(out), log2(t(t(dummy)/ref)+3))
+
+    out <- normalize(X, log_exprs_offset=3, centre_size_factors=FALSE, preserve_zeroes=TRUE)
+    expect_equivalent(exprs(out), log2(t(t(counts(X))/(ref*3)) + 1))
+})
+
+#######################################################
 
 test_that("scater::normalize can return un-logged values", {
     sf <- ref/mean(ref)
@@ -188,15 +211,3 @@ test_that("scater::normalize works with other exprs_values", {
     expect_identical(sizeFactors(Y2), librarySizeFactors(ref))
 })
 
-test_that("scater:normalize works with alternative size factor settings", {
-    # No centering.
-    out <- normalize(X, centre_size_factors=FALSE)
-    expect_equal(ref, sizeFactors(out))
-    expect_equal(logcounts(out), log2(t(t(counts(X))/ref+1)))
-
-    # Manual centering.
-    out <- normalize(X)
-    Xb <- centreSizeFactors(X)
-    expect_equal(sizeFactors(Xb), sizeFactors(out))
-    expect_equal(out, normalize(Xb))
-})

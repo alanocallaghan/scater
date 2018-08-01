@@ -59,6 +59,12 @@ normalizeSCE <- function(object, exprs_values = "counts",
         return_log = TRUE, log_exprs_offset = NULL,
         centre_size_factors = TRUE, preserve_zeroes = FALSE) {
 
+    ## setting up the size factors.
+    if (is.null(sizeFactors(object))) {
+        warning("using library sizes as size factors")
+        sizeFactors(object) <- librarySizeFactors(object, exprs_values = exprs_values)
+    }
+
     ## using logExprsOffset=1 if argument is NULL
     if ( is.null(log_exprs_offset)) {
         if (!is.null(metadata(object)$log.exprs.offset)) {
@@ -68,21 +74,16 @@ normalizeSCE <- function(object, exprs_values = "counts",
         }
     }
 
-    if (preserve_zeroes) {
-        centering <- log_exprs_offset
-        log_exprs_offset <- 1
-    } else {
-        centering <- 1
+    ## centering size factors, with interaction with pseudo-count
+    if (centre_size_factors) {
+        object <- centreSizeFactors(object)
     }
 
-    ## setting up the size factors.
-    if (is.null(sizeFactors(object))) {
-        warning("using library sizes as size factors")
-        sizeFactors(object) <- librarySizeFactors(object, exprs_values = exprs_values)
+    if (preserve_zeroes) {
+        object <- .apply_to_size_factors(object, FUN=function(sf) sf * log_exprs_offset)
+        log_exprs_offset <- 1
     }
-    if (centre_size_factors) {
-        object <- centreSizeFactors(object, centre=centering)
-    }
+
     sf.list <- .get_all_sf_sets(object)
 
     ## Compute normalized expression values.
