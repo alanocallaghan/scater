@@ -1,8 +1,6 @@
 # Tests for normalisation methods
 # library(scater); library(testthat); source("test-normalisation.R")
 
-context("test expected usage")
-
 set.seed(20003)
 ncells <- 200
 ngenes <- 1000
@@ -13,6 +11,8 @@ colnames(dummy) <- paste0("Y", seq_len(ncells))
 X <- SingleCellExperiment(list(counts=dummy))
 ref <- colSums(dummy)
 sizeFactors(X) <- ref
+
+#######################################################
 
 test_that("normalizeMatrix works as expected", {
     out <- normalizeMatrix(dummy, ref)
@@ -35,6 +35,19 @@ test_that("normalizeMatrix works as expected", {
 
     expect_error(normalizeMatrix(dummy, ref[0], return_log=FALSE), "does not equal")
 })
+
+#######################################################
+
+areSizeFactorsCentred <- function(object, centre=1, tol=1e-6) {
+    all.sf.sets <- c(list(NULL), as.list(sizeFactorNames(object)))
+    for (sfname in all.sf.sets) {
+        sf <- sizeFactors(object, type=sfname)
+        if (!is.null(sf) && abs(mean(sf) - centre) > tol) {
+            return(FALSE)
+        }
+    }
+    return(TRUE)
+}
 
 test_that("scater::normalize works on endogenous genes", {
     out <- normalize(X)
@@ -115,7 +128,9 @@ test_that("scater::normalize works on spike-in genes", {
     expect_equal(logcounts(outd), log2(t(t(counts(X5))/librarySizeFactors(X5)+1)))
 })
 
-test_that("scater::normalize works with different settings", {
+#######################################################
+
+test_that("scater::normalize responds to changes in the prior count", {
     sf <- ref/mean(ref)
 
     ## Responds to differences in the prior count.
@@ -132,6 +147,10 @@ test_that("scater::normalize works with different settings", {
     expect_equivalent(exprs(out3), log2(t(t(dummy)/sf3)+1))
     expect_equivalent(exprs(out3), exprs(out2) - log2(3))
     expect_equal(sizeFactors(out3), sf3)
+})
+
+test_that("scater::normalize can return un-logged values", {
+    sf <- ref/mean(ref)
 
     # Checking return_log=FALSE (prior count should turn off automatically).
     out <- normalize(X, return_log=FALSE)
@@ -139,8 +158,9 @@ test_that("scater::normalize works with different settings", {
 
     out2 <- normalize(X, return_log=FALSE, log_exprs_offset=3)
     expect_equal(normcounts(out), normcounts(out2))
+})
 
-    # Checking that we get sparse matrices out.
+test_that("scater::normalize preserves sparsity", {
     Y <- X
     library(Matrix)
     counts(Y) <- as(counts(X), "dgCMatrix")
@@ -151,8 +171,9 @@ test_that("scater::normalize works with different settings", {
     out2 <- normalize(Y, return_log=FALSE)
     expect_s4_class(normcounts(out2), "dgCMatrix")
     expect_equal(as.matrix(normcounts(out2)), normcounts(normalize(X, return_log=FALSE)))
+})
 
-    # Checking that this works with other exprs_values=, and that they get passed to librarySizeFactors. 
+test_that("scater::normalize works with other exprs_values", {
     ref <- X
     ref <- normalize(ref)
 
@@ -161,6 +182,7 @@ test_that("scater::normalize works with different settings", {
     Y2 <- normalize(Y2, exprs_values="whee")
     expect_identical(logcounts(ref), logcounts(Y2))
 
+    # Checking that exprs_values= gets passed to librarySizeFactors. 
     sizeFactors(Y2) <- NULL
     expect_warning(Y2 <- normalize(Y2, exprs_values="whee"), "library sizes")
     expect_identical(sizeFactors(Y2), librarySizeFactors(ref))
