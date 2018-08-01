@@ -205,68 +205,22 @@ calculateQCMetrics <- function(object, exprs_values="counts", feature_controls =
         feature_controls <- c(feature_controls, existing[!already_there])
     }
 
-    # Assemble all feature controls.
-    if (length(feature_controls)) { 
-        if (is.null(names(feature_controls))) {
-            stop("feature_controls should be named")
-        }
-        
-        # Converting to integer indices for all applications.
-        reindexed <- lapply(feature_controls, FUN = .subset2index, target = exprs_mat)
-        names(reindexed) <- sprintf("feature_control_%s", names(reindexed))
+    # Assemble controls.
+    feat_out <- .organize_controls(feature_controls, "feature_control", "endogenous", exprs_mat, byrow=TRUE)
+    all_feature_sets <- feat_out$sets
+    feature_set_rdata <- feat_out$metadata
 
-        is_fcon <- Reduce(union, reindexed)
-        is_endog <- seq_len(nrow(exprs_mat))[-is_fcon]
-        all_feature_sets <- c(list(endogenous=is_endog, feature_control=is_fcon), reindexed)
-
-        # But storing logical vectors in the metadata.
-        feature_set_rdata <- vector("list", length(reindexed)+1)
-        names(feature_set_rdata) <-  c("feature_control", names(reindexed))
-        for (set in names(feature_set_rdata)) { 
-            new_set <- logical(nrow(exprs_mat))
-            new_set[all_feature_sets[[set]]] <- TRUE
-            feature_set_rdata[[set]] <- new_set
-        }
-    } else {
-        all_feature_sets <- list()
-        feature_set_rdata <- list(feature_control=logical(nrow(object)))
-    }
-
-    # Assemble all cell controls.
-    if (length(cell_controls)) { 
-        if (is.null(names(cell_controls))) {
-            stop("cell_controls should be named")
-        }
-        
-        # Converting to integer indices for all applications.
-        reindexed <- lapply(cell_controls, FUN = .subset2index, target = exprs_mat, byrow=FALSE)
-        names(reindexed) <- sprintf("cell_control_%s", names(reindexed))
-
-        is_ccon <- Reduce(union, reindexed)
-        is_ncon <- seq_len(ncol(exprs_mat))[-is_ccon]
-        all_cell_sets <- c(list(non_control=is_ncon, cell_control=is_ccon), reindexed)
-
-        # But storing logical vectors in the metadata.
-        cell_set_cdata <- vector("list", length(reindexed)+1)
-        names(cell_set_cdata) <-  c("cell_control", names(reindexed))
-        for (set in names(cell_set_cdata)) { 
-            new_set <- logical(ncol(exprs_mat))
-            new_set[all_cell_sets[[set]]] <- TRUE
-            cell_set_cdata[[set]] <- new_set
-        }
-    } else {
-        cell_set_cdata <- list(cell_control=logical(ncol(object)))
-        all_cell_sets <- list()
-    }
+    cell_out <- .organize_controls(cell_controls, "cell_control", "non_control", exprs_mat, byrow=FALSE)
+    all_cell_sets <- cell_out$sets
+    cell_set_cdata <- cell_out$metadata
 
     # Computing all QC metrics.
     out <- .Call(cxx_combined_qc, exprs_mat, all_feature_sets, all_cell_sets, percent_top, detection_limit)
+
     cell_stats_by_feature_set <- out[[1]]
     names(cell_stats_by_feature_set) <- c("all", names(all_feature_sets))
-    feature_stats_by_cell_set <- out[[2]]
-    names(feature_stats_by_cell_set) <- c("all", names(all_cell_sets))
-
     total_libsize <- cell_stats_by_feature_set$all[[1]]
+
     for (fset in names(cell_stats_by_feature_set)) {
         if (fset!="all"){ 
             overall_total <- total_libsize
@@ -279,7 +233,10 @@ calculateQCMetrics <- function(object, exprs_values="counts", feature_controls =
             overall_total=overall_total)
     }
 
+    feature_stats_by_cell_set <- out[[2]]
+    names(feature_stats_by_cell_set) <- c("all", names(all_cell_sets))
     total_per_feature <- feature_stats_by_cell_set$all[[1]]
+
     for (cset in names(feature_stats_by_cell_set)) {
         if (cset!="all"){ 
             overall_total <- total_per_feature 
@@ -312,6 +269,46 @@ calculateQCMetrics <- function(object, exprs_values="counts", feature_controls =
     }
     return(object)
 }
+
+##################################################
+
+.organize_controls <- function(control_list, control_name, other_name, mat, byrow) { 
+    dimlen <- if (byrow) nrow(mat) else ncol(mat)
+
+    if (length(control_list)) { 
+        if (is.null(names(control_list))) {
+            stop(sprintf("%ss should be named", control_name))
+        }
+        
+        # Converting to integer indices for all applications.
+        reindexed <- lapply(control_list, FUN = .subset2index, target = mat, byrow = byrow)
+        names(reindexed) <- sprintf("%s_%s", control_name, names(reindexed))
+
+        is_con <- Reduce(union, reindexed)
+        not_con <- seq_len(dimlen)[-is_con]
+        extras <- list(not_con, is_con)
+        names(extras) <- c(other_name, control_name)
+        all_sets <- c(extras, reindexed)
+
+        # But storing logical vectors in the metadata.
+        as_logical <- vector("list", length(reindexed)+1)
+        names(as_logical) <- c(control_name, names(reindexed))
+        for (set in names(as_logical)) { 
+            new_set <- logical(dimlen)
+            new_set[all_sets[[set]]] <- TRUE
+            as_logical[[set]] <- new_set
+        }
+
+    } else {
+        all_sets <- list()
+        as_logical <- list(logical(dimlen))
+        names(as_logical) <- control_name
+    }
+
+    return(list(sets=all_sets, metadata=as_logical))
+}
+
+##################################################
 
 #' @importFrom S4Vectors DataFrame
 #' @importFrom BiocGenerics cbind
@@ -357,6 +354,8 @@ calculateQCMetrics <- function(object, exprs_values="counts", feature_controls =
 
     feature_data
 }
+
+##################################################
 
 #' @importFrom BiocGenerics cbind
 #' @importClassesFrom S4Vectors DataFrame
