@@ -29,6 +29,7 @@
 #' Otherwise, the sum of counts for each cell is used as the size factor through \code{\link{librarySizeFactors}}.
 #'
 #' @return Vector of average count values with same length as number of features, or the number of features in \code{subset_row} if supplied.
+#' @rdname calculateAverage
 #' @export
 #' @importFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom BiocGenerics sizeFactors sizeFactors<-
@@ -42,9 +43,9 @@
 #'    colData = sc_example_cell_info)
 #'
 #' ## calculate average counts
-#' ave_counts <- calcAverage(example_sce)
+#' ave_counts <- calculateAverage(example_sce)
 #'
-calcAverage <- function(object, exprs_values="counts", use_size_factors = TRUE, subset_row = NULL) 
+calculateAverage <- function(object, exprs_values="counts", use_size_factors = TRUE, subset_row = NULL) 
 {
     if (!is(object, "SingleCellExperiment")) {
         assays <- list(object)
@@ -69,3 +70,7 @@ calcAverage <- function(object, exprs_values="counts", use_size_factors = TRUE, 
     ave
 }
 
+
+#' @rdname calculateAverage
+#' @export
+calcAverage <- calculateAverage
