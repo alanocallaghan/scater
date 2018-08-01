@@ -29,6 +29,9 @@ normalizeMatrix <- function(x, size_factors, return_log = TRUE, log_exprs_offset
         size_factors <- size_factors/mean(size_factors)
     }
 
-    .Call(cxx_norm_exprs, x, list(size_factors), integer(nrow(x)),
+    out <- .Call(cxx_norm_exprs, x, list(size_factors), integer(nrow(x)),
         log_exprs_offset, return_log, seq_len(nrow(x)) - 1L)
+
+    dimnames(out) <- dimnames(x)
+    return(out)
 }
