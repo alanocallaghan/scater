@@ -10,6 +10,7 @@ static const R_CallMethodDef all_call_entries[] = {
     REGISTER(norm_exprs, 6),
     REGISTER(ave_exprs, 4),
 
+    REGISTER(combined_qc, 5),
     REGISTER(calc_top_features, 3),
 
     REGISTER(row_vars, 3),

@@ -161,7 +161,6 @@
 #' @importFrom S4Vectors DataFrame SimpleList
 #' @importFrom SummarizedExperiment assay assay<- assays assays<- assayNames rowData rowData<- colData colData<-
 #' @importFrom BiocGenerics sizeFactors sizeFactors<-
-#' @importFrom Rcpp sourceCpp
 #' @export
 #' @examples
 #' data("sc_example_counts")
@@ -180,23 +179,16 @@
 #' example_sce <- calculateQCMetrics(example_sce, 
 #'      feature_controls = list(ERCC = 1:40))
 #' 
-calculateQCMetrics <- function(object, exprs_values="counts", 
-                               feature_controls = NULL, cell_controls = NULL,
-                               percent_top = c(50, 100, 200, 500),
-                               detection_limit = 0, use_spikes = TRUE,
-                               compact = FALSE) {
+calculateQCMetrics <- function(object, exprs_values="counts", feature_controls = NULL, cell_controls = NULL,
+        percent_top = c(50, 100, 200, 500), detection_limit = 0, use_spikes = TRUE, compact = FALSE) {
 
-    if ( !methods::is(object, "SingleCellExperiment")) {
+    if ( !is(object, "SingleCellExperiment")) {
         stop("object must be a SingleCellExperiment")
     }
     exprs_mat <- assay(object, i = exprs_values)
-    percent_top <- as.integer(percent_top)
-
-    ### Adding general metrics for each cell. ### 
-
-    # We first assemble the list of all metrics (all MUST be first).
-    # We also add any existing spike-ins to this set unless otherwise specified.
-    all_feature_sets <- list(all=NULL)
+    percent_top <- sort(as.integer(percent_top))
+    
+    # Add any existing spike-ins to the feature control set.
     existing_spikes <- spikeNames(object)
     if (use_spikes && length(existing_spikes)) {
         existing <- vector("list", length(existing_spikes))
@@ -213,7 +205,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         feature_controls <- c(feature_controls, existing[!already_there])
     }
 
-    feature_set_rdata <- list()
+    # Assemble all feature controls.
     if (length(feature_controls)) { 
         if (is.null(names(feature_controls))) {
             stop("feature_controls should be named")
@@ -225,7 +217,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
         is_fcon <- Reduce(union, reindexed)
         is_endog <- seq_len(nrow(exprs_mat))[-is_fcon]
-        all_feature_sets <- c(all_feature_sets, list(endogenous=is_endog, feature_control=is_fcon), reindexed)
+        all_feature_sets <- c(list(endogenous=is_endog, feature_control=is_fcon), reindexed)
 
         # But storing logical vectors in the metadata.
         feature_set_rdata <- vector("list", length(reindexed)+1)
@@ -236,30 +228,11 @@ calculateQCMetrics <- function(object, exprs_values="counts",
             feature_set_rdata[[set]] <- new_set
         }
     } else {
+        all_feature_sets <- list()
         feature_set_rdata <- list(feature_control=logical(nrow(object)))
     }
 
-    # Computing the cell-level metrics for each set.
-    cell_stats_by_feature_set <- all_feature_sets
-    total_exprs <- NULL
-
-    for (set in names(all_feature_sets)) {
-        cell_stats_by_feature_set[[set]] <-.get_qc_metrics_per_cell(exprs_mat, 
-            exprs_type = exprs_values, subset_row = all_feature_sets[[set]],
-            percent_top = percent_top, detection_limit = detection_limit,
-            total_exprs = total_exprs, legacy = !compact)
-
-        if (set=="all") { 
-            total_exprs <- cell_stats_by_feature_set[[set]][[paste0("total_", exprs_values)]]
-        }
-    }
-    
-    ### Adding general metrics for each feature. ### 
-
-    # We first assemble thie list of all metrics (all MUST be first).
-    all_cell_sets <- list(all=NULL)
-    cell_set_cdata <- list()
-
+    # Assemble all cell controls.
     if (length(cell_controls)) { 
         if (is.null(names(cell_controls))) {
             stop("cell_controls should be named")
@@ -271,7 +244,7 @@ calculateQCMetrics <- function(object, exprs_values="counts",
 
         is_ccon <- Reduce(union, reindexed)
         is_ncon <- seq_len(ncol(exprs_mat))[-is_ccon]
-        all_cell_sets <- c(all_cell_sets, list(non_control=is_ncon, cell_control=is_ccon), reindexed)
+        all_cell_sets <- c(list(non_control=is_ncon, cell_control=is_ccon), reindexed)
 
         # But storing logical vectors in the metadata.
         cell_set_cdata <- vector("list", length(reindexed)+1)
@@ -283,25 +256,45 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         }
     } else {
         cell_set_cdata <- list(cell_control=logical(ncol(object)))
+        all_cell_sets <- list()
     }
 
-    # Computing the feature-level metrics for each set.
-    feature_stats_by_cell_set <- all_cell_sets
-    total_exprs <- NULL
+    # Computing all QC metrics.
+    out <- .Call(cxx_combined_qc, exprs_mat, all_feature_sets, all_cell_sets, percent_top, detection_limit)
+    cell_stats_by_feature_set <- out[[1]]
+    names(cell_stats_by_feature_set) <- c("all", names(all_feature_sets))
+    feature_stats_by_cell_set <- out[[2]]
+    names(feature_stats_by_cell_set) <- c("all", names(all_cell_sets))
 
-    for (set in names(all_cell_sets)) {
-        feature_stats_by_cell_set[[set]] <-.get_qc_metrics_per_feature(exprs_mat, 
-            exprs_type = exprs_values, subset_col = all_cell_sets[[set]],
-            detection_limit = detection_limit, total_exprs = total_exprs,
-            legacy = !compact)
-
-        if (set=="all") { 
-            total_exprs <- feature_stats_by_cell_set[[set]][[paste0("total_", exprs_values)]]
+    total_libsize <- cell_stats_by_feature_set$all[[1]]
+    for (fset in names(cell_stats_by_feature_set)) {
+        if (fset!="all"){ 
+            overall_total <- total_libsize
+        } else {
+            overall_total <- NULL
         }
+        cell_stats_by_feature_set[[fset]] <- .format_per_cell(
+            cell_stats_by_feature_set[[fset]], 
+            exprs_type=exprs_values, percent_top=percent_top, 
+            overall_total=overall_total)
     }
 
-    ### Formatting output depending on whether we're compacting or not. ###
+    total_per_feature <- feature_stats_by_cell_set$all[[1]]
+    for (cset in names(feature_stats_by_cell_set)) {
+        if (cset!="all"){ 
+            overall_total <- total_per_feature 
+            total_ncells <- length(all_cell_sets[[cset]])
+        } else {
+            overall_total <- NULL
+            total_ncells <- ncol(exprs_mat)
+        }
+        feature_stats_by_cell_set[[cset]] <- .format_per_feature(
+            feature_stats_by_cell_set[[cset]], 
+            exprs_type=exprs_values, total_ncells=total_ncells,
+            overall_total=overall_total)
+    }
 
+    # Formatting output depending on whether we're compacting or not.
     if (compact) {
         scater_cd <- .convert_to_nested_DataFrame(colData(object)$scater_qc, 
             cell_set_cdata, cell_stats_by_feature_set)
@@ -310,8 +303,6 @@ calculateQCMetrics <- function(object, exprs_values="counts",
         colData(object)$scater_qc <- scater_cd
         rowData(object)$scater_qc <- scater_rd
     } else {
-        message("Note that the names of some metrics have changed, see 'Renamed metrics' in ?calculateQCMetrics.
-Old names are currently maintained for back-compatibility, but may be removed in future releases.")
         scater_cd <- .convert_to_full_DataFrame(colData(object), cell_set_cdata, 
             cell_stats_by_feature_set, trim.fun=function(x) sub("^feature_control_", "", x))
         scater_rd <- .convert_to_full_DataFrame(rowData(object), feature_set_rdata, 
@@ -322,105 +313,53 @@ Old names are currently maintained for back-compatibility, but may be removed in
     return(object)
 }
 
-.get_qc_metrics_per_cell <- function(exprs_mat, exprs_type = "counts",
-        subset_row = NULL, detection_limit = 0,
-        percent_top = integer(0), total_exprs = .colSums(exprs_mat),
-        legacy = FALSE) {
-  
-    # Adding the total number of features. 
-    nfeatures <- nexprs(exprs_mat, subset_row = subset_row, byrow = FALSE,
-                        detection_limit = detection_limit)
-    cell_data <- DataFrame(nfeatures, log10(nfeatures + 1), row.names = colnames(exprs_mat))
+#' @importFrom S4Vectors DataFrame
+#' @importFrom BiocGenerics cbind
+#' @importFrom BiocGenerics colnames<-
+.format_per_cell <- function(values, exprs_type, percent_top, overall_total=NULL) {
+    total <- values[[1]]
+    nfeatures <- values[[2]]
+    pct_top <- t(values[[3]])
+
+    cell_data <- DataFrame(nfeatures, log10(nfeatures + 1))
     colnames(cell_data) <- paste0(c("", "log10_"), "total_features_by_", exprs_type)
 
-    ## Adding the total sum.
-    libsize <- .colSums(exprs_mat, rows = subset_row)
-    cell_data[[paste0("total_", exprs_type)]] <- libsize
-    cell_data[[paste0("log10_total_", exprs_type)]] <- log10(libsize + 1)
+    cell_data[[paste0("total_", exprs_type)]] <- total
+    cell_data[[paste0("log10_total_", exprs_type)]] <- log10(total + 1)
     
-    if (!is.null(subset_row)) {
-        ## Computing percentages of actual total.
-        cell_data[[paste0("pct_", exprs_type)]] <- 100 * libsize / total_exprs
-    }
-    
-    ## Computing total percentages.
-    pct_top <- .calc_top_prop(exprs_mat, subset_row = subset_row, percent_top = percent_top,
-                              exprs_type = exprs_type)
-    cell_data <- cbind(cell_data, pct_top)
-
-    ### Legacy metric names. ###
-    if (legacy) { 
-        cell_data$total_features <- cell_data[[paste0("total_features_by_", exprs_type)]]
-        cell_data$log10_total_features <- cell_data[[paste0("log10_total_features_by_", exprs_type)]]
-        
-        pct_top_legacy <- pct_top
-        colnames(pct_top_legacy) <- sub("_in_top_([0-9]+_features)$", "_top_\\1", colnames(pct_top_legacy))
-        cell_data <- cbind(cell_data, pct_top_legacy)
+    if (!is.null(overall_total)) { # Computing percentages of actual total.
+        cell_data[[paste0("pct_", exprs_type)]] <- 100 * total / overall_total
     }
 
-    return(cell_data)
+    colnames(pct_top) <- paste0("pct_", exprs_type, "_in_top_", percent_top, "_features")
+    cbind(cell_data, pct_top)
 }
 
-.calc_top_prop <- function(exprs_mat, percent_top, subset_row = NULL, exprs_type = "counts") 
-## Calculate the proportion of expression belonging to the top set of genes.
-## Produces a matrix of proportions for each top number.
-{
-    
-    if (is.null(subset_row)) { 
-        total_nrows <- nrow(exprs_mat)
-    } else {
-        subset_row <- subset_row - 1L # zero indexing needed for this C++ code.
-        total_nrows <- length(subset_row)
-    }
+#' @importFrom S4Vectors DataFrame
+#' @importFrom BiocGenerics colnames<-
+.format_per_feature <- function(values, exprs_type, total_ncells, overall_total=NULL) {
+    sum_exprs <- values[[1]]
+    ncells <- values[[2]]
 
-    can.calculate <- percent_top <= total_nrows
-    if (any(can.calculate)) { 
-        percent_top <- percent_top[can.calculate]
-        pct_exprs_top_out <- .Call(cxx_calc_top_features, exprs_mat, percent_top, subset_row)
-        names(pct_exprs_top_out) <- paste0("pct_", exprs_type, "_in_top_", percent_top, "_features")
-        return(do.call(DataFrame, pct_exprs_top_out))
-    }
-    return(new("DataFrame", nrows=ncol(exprs_mat)))
-}
-
-.get_qc_metrics_per_feature <- function(exprs_mat, exprs_type="counts", 
-        subset_col=NULL, detection_limit=0, total_exprs = .rowSums(exprs_mat),
-        legacy = FALSE) {
-
-    if (is.null(subset_col)) {
-        total_cells <- ncol(exprs_mat)
-    } else {
-        total_cells <- length(subset_col)
-    }
-
-    # Mean expression.
-    sum_exprs <- .rowSums(exprs_mat, cols = subset_col)
-    ave <- sum_exprs/total_cells
-    feature_data <- DataFrame(ave, log10(ave + 1), row.names = rownames(exprs_mat))
+    ave <- sum_exprs/total_ncells
+    feature_data <- DataFrame(ave, log10(ave + 1))
     colnames(feature_data) <- paste0(c("mean", "log10_mean"), "_", exprs_type)
 
-    # Number of cells expressing.
-    ncells.exprs <- nexprs(exprs_mat, subset_col = subset_col, byrow = TRUE,
-                           detection_limit = detection_limit)
-    feature_data[[paste0("n_cells_by_", exprs_type)]] <- ncells.exprs
-    feature_data[[paste0("pct_dropout_by_", exprs_type)]] <- 100 * (1 - ncells.exprs/total_cells)
+    feature_data[[paste0("n_cells_by_", exprs_type)]] <- ncells
+    feature_data[[paste0("pct_dropout_by_", exprs_type)]] <- 100 * (1 - ncells/total_ncells)
 
-    # Total expression.
     feature_data[[paste0("total_", exprs_type)]] <- sum_exprs
     feature_data[[paste0("log10_total_", exprs_type)]] <- log10(sum_exprs + 1)
-    if (!is.null(subset_col)) { 
-        feature_data[[paste0("pct_", exprs_type)]] <- sum_exprs/total_exprs * 100
+
+    if (!is.null(overall_total)) { 
+        feature_data[[paste0("pct_", exprs_type)]] <- sum_exprs/overall_total * 100
     }
 
-    ### Legacy metric names. ###
-    if (legacy) { 
-        feature_data[[paste0("n_cells_", exprs_type)]] <- feature_data[[paste0("n_cells_by_", exprs_type)]]
-        feature_data[[paste0("pct_dropout_", exprs_type)]] <- feature_data[[paste0("pct_dropout_by_", exprs_type)]] 
-    }
-
-    return(feature_data) 
+    feature_data
 }
 
+#' @importFrom BiocGenerics cbind
+#' @importClassesFrom S4Vectors DataFrame
 .convert_to_nested_DataFrame <- function(existing, set_list, stat_list, exprs_values = "counts") {
     n_values <- length(stat_list[[1]][[1]]) # There should be at least one statistic.
     output <- .create_outer_DataFrame(set_list, n_values)
@@ -436,6 +375,7 @@ Old names are currently maintained for back-compatibility, but may be removed in
     .cbind_overwrite_DataFrames(existing, output)
 }
 
+#' @importFrom BiocGenerics colnames<- cbind
 .convert_to_full_DataFrame <- function(existing, set_list, stat_list, trim.fun=identity) {
     n_values <- length(stat_list[[1]][[1]]) # There should be at least one statistic.
     output <- .create_outer_DataFrame(set_list, n_values)
@@ -456,6 +396,8 @@ Old names are currently maintained for back-compatibility, but may be removed in
     .cbind_overwrite_DataFrames(existing, combined)
 }
 
+#' @importFrom S4Vectors DataFrame
+#' @importClassesFrom S4Vectors DataFrame
 .create_outer_DataFrame <- function(set_list, n_values) {
     if (length(set_list)) { 
         output <- do.call(DataFrame, set_list)
@@ -466,6 +408,7 @@ Old names are currently maintained for back-compatibility, but may be removed in
     return(output)
 }
 
+#' @importFrom BiocGenerics colnames cbind
 .cbind_overwrite_DataFrames <- function(existing, updated) {
     if (is.null(existing)) { 
         return(updated)
