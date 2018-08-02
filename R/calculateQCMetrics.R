@@ -146,22 +146,17 @@
 #'   \item \code{pct_dropout_X} was changed to \code{pct_dropout_by_X}.
 #'   \item \code{pct_X_top_Y_features} was changed to \code{pct_X_in_top_Y_features}.
 #' }
-#' 
-#' All of the old metric names will be kept alongside the new metric names when \code{compact=FALSE}.
-#' Otherwise, only the new metric names will be stored.
-#' The old metric names may be removed in future releases of \pkg{scater}. 
+#' The old metric names have been removed in version 1.9.10.
 #' 
 #' @return A SingleCellExperiment object containing QC metrics in the row and column metadata.
 #'
 #' @author Davis McCarthy, with (many!) modifications by Aaron Lun
 #'
-#' @importFrom stats cmdscale coef mad median model.matrix nls prcomp quantile var dist
-#' @importFrom methods is new
-#' @importFrom utils read.table
-#' @importFrom S4Vectors DataFrame SimpleList
-#' @importFrom SummarizedExperiment assay assay<- assays assays<- assayNames rowData rowData<- colData colData<-
-#' @importFrom BiocGenerics sizeFactors sizeFactors<-
 #' @export
+#' @importFrom methods is 
+#' @importFrom SummarizedExperiment assay rowData rowData<- colData colData<-
+#' @importFrom SingleCellExperiment isSpike spikeNames
+#'
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
@@ -359,6 +354,7 @@ calculateQCMetrics <- function(object, exprs_values="counts", feature_controls =
 
 #' @importFrom BiocGenerics cbind
 #' @importClassesFrom S4Vectors DataFrame
+#' @importFrom methods new
 .convert_to_nested_DataFrame <- function(existing, set_list, stat_list, exprs_values = "counts") {
     n_values <- length(stat_list[[1]][[1]]) # There should be at least one statistic.
     output <- .create_outer_DataFrame(set_list, n_values)
@@ -397,6 +393,7 @@ calculateQCMetrics <- function(object, exprs_values="counts", feature_controls =
 
 #' @importFrom S4Vectors DataFrame
 #' @importClassesFrom S4Vectors DataFrame
+#' @importFrom methods new
 .create_outer_DataFrame <- function(set_list, n_values) {
     if (length(set_list)) { 
         output <- do.call(DataFrame, set_list)

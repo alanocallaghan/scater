@@ -20,6 +20,8 @@
 #' @author Aaron Lun
 #'
 #' @export
+#' @importFrom stats mad median
+#'
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")

@@ -41,6 +41,8 @@ SET_FUN <- function(exprs_values) {
 #' @importFrom SingleCellExperiment logcounts logcounts<-
 #' @importFrom SingleCellExperiment tpm tpm<-
 #' @importFrom SingleCellExperiment cpm cpm<-
+#' @importFrom SummarizedExperiment assays
+#'
 #' @aliases exprs exprs,SingleCellExperiment-method, exprs<-,SingleCellExperiment,ANY-method
 #' @aliases norm_exprs norm_exprs,SingleCellExperiment-method norm_exprs<-,SingleCellExperiment,ANY-method
 #' @aliases stand_exprs stand_exprs,SingleCellExperiment-method, stand_exprs<-,SingleCellExperiment,ANY-method

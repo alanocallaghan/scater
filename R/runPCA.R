@@ -49,7 +49,9 @@
 #'
 #' @rdname runPCA
 #' @seealso \code{\link{prcomp}}, \code{\link[scater]{plotPCA}}
+#'
 #' @export
+#' @importFrom stats prcomp
 #'
 #' @author Aaron Lun, based on code by Davis McCarthy
 #'
