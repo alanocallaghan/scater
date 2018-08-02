@@ -1,51 +1,40 @@
 # tests for feature pre-processing functions.
+# library(scater); library(testthat); source("setup-sce.R"); source("test-feature-preprocessing.R")
 
 context("test feature pre-processing functions")
 
-test_that("we can summarise expression at feature level", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    effective_length <- rep(c(1000, 2000), times = 1000)
-    tpm(example_sce) <- calculateTPM(example_sce, effective_length, exprs_values = "counts")
-    
-    fd <- data.frame(
-        gene_id = rownames(example_sce),
-        feature_id = paste("feature", rep(1:500, each = 4), sep = "_"))
-    rownames(fd) <- rownames(example_sce)
-    rowData(example_sce) <- fd
-    
-    ## tpm with scaled tpm counts
-    example_sce_summarised <-
-        summariseExprsAcrossFeatures(example_sce, exprs_values = "tpm")
-    expect_that(example_sce_summarised, is_a("SingleCellExperiment"))    
-    example_sce_summarised <-
-        summariseExprsAcrossFeatures(example_sce, exprs_values = "tpm",
-                                     scaled_tpm_counts = FALSE)
-    expect_that(example_sce_summarised, is_a("SingleCellExperiment"))    
+set.seed(10001)
+test_that("we can summarise counts at feature set level", {
+    ids <- sample(nrow(sce)/2, nrow(sce), replace=TRUE)
+    out <- sumCountsAcrossFeatures(sce, ids)
+    expect_identical(out, rowsum(counts(sce), ids))
 
-    ## counts 
-    example_sce_summarised <-
-        summariseExprsAcrossFeatures(example_sce, exprs_values = "counts")
-    expect_that(example_sce_summarised, is_a("SingleCellExperiment"))
-    
-    ## exprs
-    exprs(example_sce) <- log2(calculateCPM(example_sce) + 1)
-    expect_error(summariseExprsAcrossFeatures(
-        example_sce, exprs_values = "exprs"), "'arg' should be one of")
-    
-    ## errors
-    example_sce2 <- SingleCellExperiment(
-        assays = list(tpm = tpm(example_sce)), 
-        colData = colData(example_sce), rowData = rowData(example_sce))
-    expect_error(summariseExprsAcrossFeatures(example_sce2, exprs_values = "tpm"),
-                 "lib_size argument")
-    expect_error(summariseExprsAcrossFeatures(example_sce2, exprs_values = "tpm",
-                                              lib_size = 1:10),
-                 "lib_size argument must have length equal")
+    out2 <- sumCountsAcrossFeatures(counts(sce), ids)
+    expect_identical(out, out2)
 
+    # exprs_values= works correctly.
+    alt <- sce
+    assayNames(alt) <- "whee"
+    out2 <- sumCountsAcrossFeatures(alt, ids, exprs_values="whee")
+    expect_identical(out, out2)
+
+    # Handles NA's correctly.
+    ids2 <- sample(LETTERS, nrow(sce), replace=TRUE)
+    out2 <- sumCountsAcrossFeatures(sce, ids2)
+
+    ids3 <- ids2
+    ids3[ids3=="A"] <- NA
+    out3 <- sumCountsAcrossFeatures(sce, ids3)
+
+    expect_identical(out2[setdiff(rownames(out2), "A"),], out3)
+
+    # Handles sparse matrices properly.
+    library(Matrix)
+    sparsified <- sce
+    counts(sparsified) <- as(counts(sparsified), "dgCMatrix")
+    spack <- sumCountsAcrossFeatures(sparsified, ids)
+    expect_s4_class(spack, "dgCMatrix")
+    expect_equal(out, as.matrix(spack))
 })
 
 test_that("we can uniquify the feature names", {
