@@ -5,11 +5,11 @@
 template <typename T, class V>
 struct per_cell_statistics {
     per_cell_statistics() : counter(0), limit(0) {}
-
-    per_cell_statistics(size_t ncells, T detection_limit, size_t max_ngenes, Rcpp::IntegerVector TOP) : 
-            top(TOP), temporary(max_ngenes), limit(detection_limit), counter(0), 
-            totals(ncells), detected(ncells), percentages(top.size(), ncells) {
-
+    
+    per_cell_statistics(size_t ncells, T detection_limit, Rcpp::IntegerVector TOP, size_t ngenes) : 
+            top(TOP), limit(detection_limit), counter(0), 
+            totals(ncells), detected(ncells), percentages(top.size(), ncells),
+            temporary(ngenes) {
         for (size_t t=1; t<top.size(); ++t) {
             if (top[t] < top[t-1]) { 
                 throw std::runtime_error("numbers of top genes must be sorted"); 
@@ -18,7 +18,17 @@ struct per_cell_statistics {
         return;
     }
 
-    void compute_direct (typename V::iterator it, size_t ngenes) {
+    per_cell_statistics(size_t ncells, T detection_limit, Rcpp::IntegerVector sub, Rcpp::IntegerVector TOP) :
+            per_cell_statistics(ncells, detection_limit, TOP, sub.size()) {
+        subset=sub;
+        return;
+    }
+
+    per_cell_statistics(size_t ncells, T detection_limit, size_t ngenes, Rcpp::IntegerVector TOP) : 
+            per_cell_statistics(ncells, detection_limit, TOP, ngenes) {}
+
+    void fill(typename V::iterator it) {
+        const size_t ngenes=temporary.size();
         compute_summaries(it, ngenes);
         std::copy(it, it+ngenes, temporary.begin());
         compute_percentages(temporary.begin(), ngenes);
@@ -26,7 +36,7 @@ struct per_cell_statistics {
         return;
     }
 
-    void compute_subset (typename V::iterator it, Rcpp::IntegerVector subset) {
+    void fill_subset(typename V::iterator it) {
         auto tmp=temporary.begin();
         for (auto sIt=subset.begin(); sIt!=subset.end(); ++sIt, ++tmp) {
             (*tmp)=*(it + *sIt - 1); // convert to zero indexing.
@@ -36,12 +46,13 @@ struct per_cell_statistics {
         ++counter;
         return;
     }
-
 private:
     Rcpp::IntegerVector top;
-    V temporary;
     T limit;
     size_t counter;
+
+    Rcpp::IntegerVector subset;
+    V temporary;
 
     void compute_summaries (typename V::iterator it, size_t ngenes) {
         auto& total=totals[counter];
@@ -81,7 +92,6 @@ private:
         }
         return; 
     }
-
 public:
     V totals;
     Rcpp::IntegerVector detected;
@@ -96,11 +106,9 @@ struct per_gene_statistics {
 
     per_gene_statistics(size_t ngenes, T detection_limit) : totals(ngenes), detected(ngenes), limit(detection_limit) {}
 
-    void compute_summaries (typename V::iterator it, size_t ngenes) {
-        auto tIt=totals.begin();
+    void compute_summaries (typename V::iterator it) {
         auto dIt=detected.begin();
-
-        for (size_t i=0; i<ngenes; ++i, ++it, ++tIt, ++dIt) {
+        for (auto tIt=totals.begin(); tIt!=totals.end(); ++tIt, ++it, ++dIt) {
             const auto& curval=(*it);
             (*tIt)+=curval;
             if (curval > limit) {
@@ -149,12 +157,12 @@ SEXP combined_qc_internal(M mat, Rcpp::List featcon, Rcpp::List cellcon, Rcpp::I
 
     for (size_t fx=0; fx<nfcontrols; ++fx) {
         feat_controls[fx]=featcon[fx];
-        control_PCS[fx]=per_cell_statistics<T, V>(ncells, limit, feat_controls[fx].size(), topset);
+        control_PCS[fx]=per_cell_statistics<T, V>(ncells, limit, feat_controls[fx], topset);
     }
 
     // Processing cell controls.
     const size_t nccontrols=cellcon.size();
-    std::vector<std::vector<size_t> > chosen_ccs(ngenes);
+    std::vector<std::vector<size_t> > chosen_ccs(ncells);
 
     per_gene_statistics<T, V> all_PGS(ngenes, limit);
     std::vector<per_gene_statistics<T, V> > control_PGS(nccontrols);
@@ -172,15 +180,15 @@ SEXP combined_qc_internal(M mat, Rcpp::List featcon, Rcpp::List cellcon, Rcpp::I
     for (size_t c=0; c<ncells; ++c) {
         auto cIt=mat->get_const_col(c, holder.begin());
 
-        all_PCS.compute_direct(cIt, ngenes);
+        all_PCS.fill(cIt);
         for (size_t fx=0; fx<nfcontrols; ++fx) {
-            control_PCS[fx].compute_subset(cIt, feat_controls[fx]);
+            control_PCS[fx].fill_subset(cIt);
         }
 
-        all_PGS.compute_summaries(cIt, ngenes);
+        all_PGS.compute_summaries(cIt);
         auto& chosen_cc=chosen_ccs[c];
         for (auto& cx : chosen_cc) {
-            control_PGS[cx].compute_summaries(cIt, ngenes);
+            control_PGS[cx].compute_summaries(cIt);
         }
     }
 
