@@ -1,13 +1,11 @@
 #' Calculate average counts, adjusting for size factors or library size
 #'
-#' Calculate average counts per feature, adjusting them as appropriate to take
-#' into account for size factors for normalization or library sizes (total
-#' counts).
+#' Calculate average counts per feature, adjusting them to account for normalization due to size factors or library sizes.
 #'
 #' @param object A SingleCellExperiment object or count matrix.
 #' @param exprs_values A string specifying the assay of \code{object} containing the count matrix, if \code{object} is a SingleCellExperiment.
 #' @param use_size_factors a logical scalar specifying whetherthe size factors in \code{object} should be used to construct effective library sizes.
-#' @param subset_row A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calculating feature averages.
+#' @param subset_row A vector specifying the subset of rows of \code{object} for which to return a result.
 #'
 #' @details 
 #' The size-adjusted average count is defined by dividing each count by the size factor and taking the average across cells.

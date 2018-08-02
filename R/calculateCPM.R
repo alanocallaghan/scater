@@ -7,7 +7,7 @@
 #' @param use_size_factors A logical scalar indicating whether size factors in \code{object} should be used to compute effective library sizes.
 #' If not, all size factors are deleted and library size-based factors are used instead (see \code{\link{librarySizeFactors}}.
 #' Alternatively, a numeric vector containing a size factor for each cell, which is used in place of \code{sizeFactor(object)}.
-#' @param subset_row A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calculating library sizes and CPMs.
+#' @param subset_row A vector specifying the subset of rows of \code{object} for which to return a result.
 #'
 #' @details 
 #' If requested, size factors are used to define the effective library sizes. 
