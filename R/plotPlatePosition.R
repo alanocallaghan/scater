@@ -12,10 +12,10 @@
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.
 #' @param by_show_single Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.
-#' @param legend Logical scalar specifying whether a legend should be shown.
+#' @param add_legend Logical scalar specifying whether a legend should be shown.
 #' @param theme_size Numeric scalar, see \code{?"\link{scater-plot-args}"} for details.
-#' @param alpha Numeric scalar specifying the transparency of the points, see \code{?"\link{scater-plot-args}"} for details.
-#' @param size Numeric scalar specifying the size of the points, see \code{?"\link{scater-plot-args}"} for details.
+#' @param point_alpha Numeric scalar specifying the transparency of the points, see \code{?"\link{scater-plot-args}"} for details.
+#' @param point_size Numeric scalar specifying the size of the points, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
 #' This function expects plate positions to be given in a charcter format where a letter indicates the row on the plate and a numeric value  indicates the column. 
@@ -58,7 +58,7 @@
 plotPlatePosition <- function(object, plate_position = NULL,
                               colour_by = NULL, size_by = NULL, shape_by = NULL,
                               by_exprs_values = "logcounts", by_show_single = FALSE,
-                              legend = TRUE, theme_size = 24, alpha = 0.6, size = 24) 
+                              add_legend = TRUE, theme_size = 24, point_alpha = 0.6, point_size = 24) 
 {
     ## check object is SingleCellExperiment object
     if ( !is(object, "SingleCellExperiment") ) {
@@ -97,7 +97,7 @@ plotPlatePosition <- function(object, plate_position = NULL,
     ## make the plot with appropriate colours.
     plot_out <- ggplot(df_to_plot, aes_string(x="X", y="Y"))
 
-    point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = alpha, size = size)
+    point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size)
     plot_out <- plot_out + do.call(geom_point, point_out$args)
 
     if (!is.null(colour_by)) {
@@ -113,7 +113,7 @@ plotPlatePosition <- function(object, plate_position = NULL,
 
     ## remove legend if so desired
     plot_out <- .add_extra_guide(plot_out, shape_by, size_by)
-    if ( !legend ) {
+    if ( !add_legend ) {
         plot_out <- plot_out + theme(legend.position = "none")
     }
 
