@@ -4,15 +4,16 @@
 #' 
 #' @section Aesthetic parameters:
 #' \describe{
-#' \item{\code{legend}:}{Logical scalar, specifying whether a legend should be shown.
+#' \item{\code{add_legend}:}{Logical scalar, specifying whether a legend should be shown.
 #' Defaults to TRUE.}
 #' \item{\code{theme_size}:}{Integer scalar, specifying the font size.
 #' Defaults to 10.}
-#' \item{\code{alpha}:}{Numeric scalar in [0, 1], specifying the transparency.
+#' \item{\code{point_alpha}:}{Numeric scalar in [0, 1], specifying the transparency.
 #' Defaults to 0.6.}
-#' \item{\code{size}:}{Numeric scalar, specifying the size of the points.
+#' \item{\code{point_size}:}{Numeric scalar, specifying the size of the points.
 #' Defaults to \code{NULL}.}
-#' \item{\code{jitter}:}{String to define whether points are to be jittered (\code{"jitter"}) or presented in a \dQuote{beeswarm} style (if \code{"swarm"}, default).
+#' \item{\code{jitter_type}:}{String to define how points are to be jittered in a violin plot.
+#' This is either with random jitter on the x-axis (\code{"jitter"}) or in a \dQuote{beeswarm} style (if \code{"swarm"}, default).
 #' The latter usually looks more attractive, but for datasets with a large number of cells, or for dense plots, the jitter option may work better.}
 #' }
 #'
@@ -43,8 +44,8 @@ NULL
 .central_plotter <- function(object, xlab = NULL, ylab = NULL,
                              colour_by = NULL, shape_by = NULL, size_by = NULL, fill_by = NULL,
                              show_median = FALSE, show_violin = TRUE, show_smooth = FALSE, show_se = TRUE,
-                             theme_size = 10, alpha = 0.6, size = NULL, legend = TRUE, 
-                             point_FUN = NULL, jitter = "swarm")
+                             theme_size = 10, point_alpha = 0.6, point_size = NULL, add_legend = TRUE, 
+                             point_FUN = NULL, jitter_type = "swarm")
 # Internal ggplot-creating function to plot anything that involves points.
 # Creates either a scatter plot, (horizontal) violin plots, or a rectangle plot.
 {
@@ -78,9 +79,9 @@ NULL
         }
 
         # Adding points.
-        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = alpha, size = size)
+        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size)
         if (is.null(point_FUN)) {
-            if (jitter=="swarm") {
+            if (jitter_type=="swarm") {
                 point_FUN <- function(...) ggbeeswarm::geom_quasirandom(..., width=0.4, groupOnX=TRUE, bandwidth=1)
             } else {
                 point_FUN <- function(...) geom_jitter(..., position = position_jitter(height = 0))
@@ -98,7 +99,7 @@ NULL
         plot_out <- ggplot(object, aes_string(x="X", y="Y")) + xlab(xlab) + ylab(ylab)
 
         # Adding points.
-        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = alpha, size = size)
+        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size)
         if (is.null(point_FUN)) {
             point_FUN <- geom_point
         }
@@ -143,7 +144,7 @@ NULL
                                          data=summary.data, color = 'grey60', size = 0.5, fill='grey90')
 
         # Adding points.
-        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = alpha, size = size)
+        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size)
         if (is.null(point_FUN)) {
             point_FUN <- geom_point
         }
@@ -164,7 +165,7 @@ NULL
 
     ## Setting the legend details.
     plot_out <- .add_extra_guide(plot_out, shape_by, size_by)
-    if (!legend) {
+    if (!add_legend) {
         plot_out <- plot_out + theme(legend.position = "none")
     }
 
