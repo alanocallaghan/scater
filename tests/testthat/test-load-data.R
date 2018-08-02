@@ -1,5 +1,5 @@
 # Tests for various data input methods
-# library(scater); library(testthat); source("test-loaddata.R")
+# library(scater); library(testthat); source("test-load-data.R")
 
 context("test expected usage")
 
@@ -62,11 +62,15 @@ test_that("readSparseCounts works as expected", {
     write.table(a, file=XHANDLE, sep="\t", quote=FALSE, col.names=NA) 
     close(XHANDLE)
 
-    expect_error(readSparseCounts(file(ofile3)), "read mode")
+    fhandle <- file(ofile3)
+    expect_error(readSparseCounts(fhandle), "read mode")
+    close(fhandle)
     expect_error(readSparseCounts(DataFrame(ofile3)), "connection")
     
     outX <- readSparseCounts(ofile3)
-    outY <- readSparseCounts(file(ofile3, open='rt'))
+    fhandle <- file(ofile3, open='rt')
+    outY <- readSparseCounts(fhandle)
+    close(fhandle)
     expect_identical(outX, ref)
     expect_identical(outY, ref)
 })
