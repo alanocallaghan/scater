@@ -37,6 +37,7 @@ calcIsExprs <- function(object, detection_limit = 0,
 #' @param effective_length Numeric vector containing the effective length for each feature in \code{object}.
 #' If \code{NULL}, it is assumed that \code{exprs_values} has already been adjusted for transcript length.
 #' @param exprs_values String or integer specifying the assay containing the counts in \code{object}, if it is a SingleCellExperiment.
+#' @param subset_row A vector specifying the subset of rows of \code{object} for which to return a result.
 #'
 #' @details
 #' For read count data, this function assumes uniform coverage along the (effective) length of the transcript.
@@ -61,7 +62,7 @@ calcIsExprs <- function(object, detection_limit = 0,
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom methods is
 #' @importFrom SummarizedExperiment assay
-calculateTPM <- function(object, effective_length=NULL, exprs_values= "counts") {
+calculateTPM <- function(object, effective_length=NULL, exprs_values = "counts", subset_row = NULL) {
     if (is(object, "SingleCellExperiment") ) {
         object <- assay(object, i=exprs_values)
     }
@@ -70,5 +71,5 @@ calculateTPM <- function(object, effective_length=NULL, exprs_values= "counts") 
         object <- object/effective_length
     }
 
-    calculateCPM(object)
+    calculateCPM(object, subset_row = subset_row)
 }
