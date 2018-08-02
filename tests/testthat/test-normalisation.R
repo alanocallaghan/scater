@@ -14,26 +14,36 @@ sizeFactors(X) <- ref
 
 #######################################################
 
-test_that("normalizeMatrix works as expected", {
-    out <- normalizeMatrix(dummy, ref)
+test_that("normalizeCounts works as expected", {
+    out <- normalizeCounts(dummy, ref)
     expect_equivalent(out, log2(t(t(dummy)/ref)+1))
 
     # With size factor centering.
     sf <- ref/mean(ref)
-    out <- normalizeMatrix(dummy, ref, centre_size_factors=TRUE)
+    out <- normalizeCounts(dummy, ref, centre_size_factors=TRUE)
     expect_equivalent(out, log2(t(t(dummy)/sf)+1))
 
     # Without log-transformation.
-    out <- normalizeMatrix(dummy, ref, return_log=FALSE)
+    out <- normalizeCounts(dummy, ref, return_log=FALSE)
     expect_equivalent(out, t(t(dummy)/ref))
 
+    # With subsetting.
+    out <- normalizeCounts(dummy, ref, subset_row=1:10)
+    sub <- normalizeCounts(dummy[1:10,], ref)
+    expect_equivalent(out, sub)
+
+    chosen <- sample(rownames(dummy), 10)
+    out <- normalizeCounts(dummy, ref, subset_row=chosen)
+    sub <- normalizeCounts(dummy[chosen,], ref)
+    expect_equivalent(out, sub)
+
     # Handles silly inputs correctly.
-    out <- normalizeMatrix(dummy[0,,drop=FALSE], ref, return_log=FALSE)
+    out <- normalizeCounts(dummy[0,,drop=FALSE], ref, return_log=FALSE)
     expect_identical(dim(out), c(0L, as.integer(ncells)))
-    out <- normalizeMatrix(dummy[,0,drop=FALSE], ref[0], return_log=FALSE)
+    out <- normalizeCounts(dummy[,0,drop=FALSE], ref[0], return_log=FALSE)
     expect_identical(dim(out), c(as.integer(ngenes), as.integer(0L)))
 
-    expect_error(normalizeMatrix(dummy, ref[0], return_log=FALSE), "does not equal")
+    expect_error(normalizeCounts(dummy, ref[0], return_log=FALSE), "does not equal")
 })
 
 #######################################################
