@@ -65,7 +65,7 @@ example_sce <- calculateQCMetrics(example_sce,
     feature_controls = list(set1 = 1:500)
 )
 
-plotHighestExprs(example_sce, colour_cells_by ="total_features")
+plotHighestExprs(example_sce, colour_cells_by ="total_features_by_counts")
 plotHighestExprs(example_sce, controls = NULL)
 plotHighestExprs(example_sce, colour_cells_by="Mutation_Status")
 

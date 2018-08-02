@@ -19,7 +19,7 @@ Alternatively, a numeric vector containing a size factor for each cell, which is
 \item{subset_row}{A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calculating library sizes and CPMs.}
 }
 \value{
-Matrix of CPM values.
+Numeric matrix of CPM values.
 }
 \description{
 Calculate count-per-million (CPM) values from the count data.
