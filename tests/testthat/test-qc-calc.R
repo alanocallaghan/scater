@@ -135,6 +135,9 @@ test_that("we can compute standard QC metrics with cell controls", {
     }
 })
 
+#######################################################################
+# Responds to sparse matrices.
+
 library(Matrix)
 test_that("we can compute standard QC metrics on sparse counts matrix", {
     counts(original) <- as(counts(original), "dgCMatrix")
@@ -266,9 +269,9 @@ test_that("calculateQCMetrics works with silly inputs", {
 
     # Handles empty 'top' specification.
     ref <- calculateQCMetrics(sce)
-    expect_true(any(grepl("pct_counts_top", colnames(colData(ref)))))
+    expect_true(any(grepl("pct_counts_in_top", colnames(colData(ref)))))
     out <- calculateQCMetrics(sce, percent_top=numeric(0))
-    expect_false(any(grepl("pct_counts_top", colnames(colData(out)))))
+    expect_false(any(grepl("pct_counts_in_top", colnames(colData(out)))))
 })
 
 

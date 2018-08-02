@@ -328,7 +328,7 @@ calculateQCMetrics <- function(object, exprs_values="counts", feature_controls =
         cell_data[[paste0("pct_", exprs_type)]] <- 100 * total / overall_total
     }
 
-    colnames(pct_top) <- paste0("pct_", exprs_type, "_in_top_", percent_top, "_features")
+    colnames(pct_top) <- sprintf("pct_%s_in_top_%i_features", exprs_type, percent_top)
     cbind(cell_data, pct_top)
 }
 
