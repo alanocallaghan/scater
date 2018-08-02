@@ -9,15 +9,16 @@
 \section{Aesthetic parameters}{
 
 \describe{
-\item{\code{legend}:}{Logical scalar, specifying whether a legend should be shown.
+\item{\code{add_legend}:}{Logical scalar, specifying whether a legend should be shown.
 Defaults to TRUE.}
 \item{\code{theme_size}:}{Integer scalar, specifying the font size.
 Defaults to 10.}
-\item{\code{alpha}:}{Numeric scalar in [0, 1], specifying the transparency.
+\item{\code{point_alpha}:}{Numeric scalar in [0, 1], specifying the transparency.
 Defaults to 0.6.}
-\item{\code{size}:}{Numeric scalar, specifying the size of the points.
+\item{\code{point_size}:}{Numeric scalar, specifying the size of the points.
 Defaults to \code{NULL}.}
-\item{\code{jitter}:}{String to define whether points are to be jittered (\code{"jitter"}) or presented in a \dQuote{beeswarm} style (if \code{"swarm"}, default).
+\item{\code{jitter_type}:}{String to define how points are to be jittered in a violin plot.
+This is either with random jitter on the x-axis (\code{"jitter"}) or in a \dQuote{beeswarm} style (if \code{"swarm"}, default).
 The latter usually looks more attractive, but for datasets with a large number of cells, or for dense plots, the jitter option may work better.}
 }
 }
