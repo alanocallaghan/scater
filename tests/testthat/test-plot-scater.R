@@ -1,5 +1,4 @@
-## Tests for plotting functions
-## This stress-tests the plotting functions for all the different parameter settings. 
+## This stress-tests the plotScater-related functions. 
 ## library(scater); library(testthat); source("setup-sce.R"); source("test-plot-scater.R")
 
 example_sce <- sce
@@ -37,18 +36,18 @@ test_that("plotScater's underlying C++ code works as expected", {
         prop[pmin(top, length(x))]
     }
 
-    out <- .Call(scater:::cxx_top_cumsum, assay(example_sce), 1:50)
+    out <- .Call(scater:::cxx_top_cumprop, assay(example_sce), 1:50)
     ref <- apply(assay(example_sce), 2, REFFUN, top=1:50)
     colnames(out) <- colnames(ref)
     expect_equal(out, ref)
 
-    out <- .Call(scater:::cxx_top_cumsum, assay(example_sce), 1:20*5)
+    out <- .Call(scater:::cxx_top_cumprop, assay(example_sce), 1:20*5)
     ref <- apply(assay(example_sce), 2, REFFUN, top=1:20*5)
     colnames(out) <- colnames(ref)
     expect_equal(out, ref)
 
     # Behaves with silly inputs.
-    out <- .Call(scater:::cxx_top_cumsum, assay(example_sce), integer(0))
+    out <- .Call(scater:::cxx_top_cumprop, assay(example_sce), integer(0))
     expect_identical(dim(out), c(0L, ncol(example_sce)))
-    expect_error(.Call(scater:::cxx_top_cumsum, assay(example_sce), 5:1), "sorted")
+    expect_error(.Call(scater:::cxx_top_cumprop, assay(example_sce), 5:1), "sorted")
 })
