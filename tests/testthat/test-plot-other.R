@@ -1,6 +1,5 @@
-## Tests for plotting functions
-## This stress-tests the plotting functions for all the different parameter settings. 
-## library(scater); library(testthat); source("setup-sce.R"); source("test-plotting.R")
+## Tests for other plotting functions
+## library(scater); library(testthat); source("setup-sce.R"); source("test-plot-other.R")
 
 example_sce <- calculateQCMetrics(normed, exprs_values="counts")
 
@@ -35,7 +34,7 @@ test_that("we can produce expression plots with different expression values", {
     # Fiddling with all the semi-analysis options.
     expect_s3_class(plotExpression(example_sce, gene_set, show_violin=FALSE), "ggplot")
     expect_s3_class(plotExpression(example_sce, gene_set, show_median=TRUE), "ggplot")
-    expect_s3_class(plotExpression(example_sce, gene_set, jitter="jitter"), "ggplot")
+    expect_s3_class(plotExpression(example_sce, gene_set, jitter_type="jitter"), "ggplot")
 
     expect_s3_class(plotExpression(example_sce, gene_set, x="Gene_0001", show_smooth=TRUE), "ggplot")
     expect_s3_class(plotExpression(example_sce, gene_set, x="Gene_0001", show_smooth=TRUE, show_se=FALSE), "ggplot")
@@ -102,7 +101,7 @@ test_that("we can produce plots showing cells in plate position", {
     expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", shape_by = "Treatment", by_exprs_values = "counts"), "ggplot")
 
     # Checking that other arguments are passed through.
-    expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment", legend = FALSE), "ggplot")
+    expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment", add_legend = FALSE), "ggplot")
     expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
 
     # Checking that an error is thrown,
@@ -128,14 +127,14 @@ test_that("we can produce plots for column metadata", {
     expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     
     # Testing that other arguments are passed through.
-    expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment", legend = FALSE), "ggplot")
+    expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment", add_legend = FALSE), "ggplot")
     expect_s3_class(plotColData(example_sce, "total_counts", size_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
     expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Treatment", by_show_single = TRUE), "ggplot")
 
     # Fiddling with all the semi-analysis options.
     expect_s3_class(plotColData(example_sce, "total_counts", show_violin=FALSE), "ggplot")
     expect_s3_class(plotColData(example_sce, "total_counts", show_median=TRUE), "ggplot")
-    expect_s3_class(plotColData(example_sce, "total_counts", jitter="jitter"), "ggplot")
+    expect_s3_class(plotColData(example_sce, "total_counts", jitter_type="jitter"), "ggplot")
 
     expect_s3_class(plotColData(example_sce, "total_counts", x="total_features_by_counts", show_smooth=TRUE), "ggplot")
     expect_s3_class(plotColData(example_sce, "total_counts", x="total_features_by_counts", show_smooth=TRUE, show_se=FALSE), "ggplot")
@@ -163,14 +162,14 @@ test_that("we can produce plots for row metadata", {
     expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", size_by = "Cell_002", shape_by = "WHEE"), "ggplot")
     
     # Testing that other arguments are passed through.
-    expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", size_by = "Cell_002", shape_by = "WHEE", legend = FALSE), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", size_by = "Cell_002", shape_by = "WHEE", add_legend = FALSE), "ggplot")
     expect_s3_class(plotRowData(example_sce, "total_counts", size_by = "Cell_002", by_exprs_values = "counts"), "ggplot")
     expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", by_show_single = TRUE), "ggplot")
 
     # Fiddling with all the semi-analysis options.
     expect_s3_class(plotRowData(example_sce, "total_counts", show_violin=FALSE), "ggplot")
     expect_s3_class(plotRowData(example_sce, "total_counts", show_median=TRUE), "ggplot")
-    expect_s3_class(plotRowData(example_sce, "total_counts", jitter="jitter"), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "total_counts", jitter_type="jitter"), "ggplot")
 
     expect_s3_class(plotRowData(example_sce, "total_counts", x="n_cells_by_counts", show_smooth=TRUE), "ggplot")
     expect_s3_class(plotRowData(example_sce, "total_counts", x="n_cells_by_counts", show_smooth=TRUE, show_se=FALSE), "ggplot")
@@ -234,7 +233,7 @@ test_that("plotRLE works as expected", {
         p <- plotRLE(example_sce, style=style)
         expect_s3_class(p, "ggplot")
     
-        p <- plotRLE(example_sce, legend=FALSE, style=style)
+        p <- plotRLE(example_sce, add_legend=FALSE, style=style)
         expect_s3_class(p, "ggplot")
     
         p <- plotRLE(example_sce, exprs_values="cpm", exprs_logged=FALSE, style=style)
