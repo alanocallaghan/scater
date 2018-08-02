@@ -1,17 +1,6 @@
 ## Testing SingleCellExperiment methods
 
-data("sc_example_counts")
-data("sc_example_cell_info")
-original <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
-    colData = sc_example_cell_info)
-
-
-test_that("subsetting SingleCellExperiment works as expected", {
-    expect_that(original[1:500,], is_a("SingleCellExperiment"))
-    expect_that(original[, 10:35], is_a("SingleCellExperiment"))
-    expect_that(original[500:1000, 7:27], is_a("SingleCellExperiment"))
-})
+original <- sce
 
 test_that("accessor functions for SingleCellExperiment work as expected", {
     example_sce <- original 

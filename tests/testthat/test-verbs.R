@@ -1,17 +1,14 @@
 # Tests for dplyr-style verbs
+# library(scater); library(testthat); source("setup-sce.R"); source("test-verbs.R")
 
+example_sce <- sce
+snames <- paste0("sample", 1:ncol(example_sce))
+colnames(example_sce) <- snames
 
 # Test mutate -------------------------------------------------------------
 
 test_that("Mutate correctly adds column name to pData", {
-  data("sc_example_counts")
-  data("sc_example_cell_info")
-  example_sce <- SingleCellExperiment(
-      assays = list(counts = sc_example_counts), 
-      colData = sc_example_cell_info)
-  snames <- paste0("sample", 1:ncol(example_sce))
-  colnames(example_sce) <- snames
-  
+ 
   example_sce <- mutate(example_sce, New_CC = Cell_Cycle)
   
   expect_that(example_sce, is_a("SingleCellExperiment"))
@@ -24,13 +21,6 @@ test_that("Mutate correctly adds column name to pData", {
 # Test rename ------------------------------------------------------------
 
 test_that("Rename correctly renames columns", {
-  data("sc_example_counts")
-  data("sc_example_cell_info")
-  example_sce <- SingleCellExperiment(
-      assays = list(counts = sc_example_counts), 
-      colData = sc_example_cell_info)
-  snames <- paste0("sample", 1:ncol(example_sce))
-  colnames(example_sce) <- snames
   
   old_cc <- example_sce$Cell_Cycle
   example_sce <- rename(example_sce, Cell_Phase = Cell_Cycle)
@@ -46,12 +36,6 @@ test_that("Rename correctly renames columns", {
 # Test filter -------------------------------------------------------------
 
 test_that("Filter correctly chooses cells", {
-  data("sc_example_counts")
-  data("sc_example_cell_info")
-  example_sce <- SingleCellExperiment(
-      assays = list(counts = sc_example_counts), 
-      colData = sc_example_cell_info)
-  
   example_sce <- filter(example_sce, Cell_Cycle == "G0")
   
   expect_that(example_sce, is_a("SingleCellExperiment"))
@@ -62,12 +46,6 @@ test_that("Filter correctly chooses cells", {
 # Test arrange ------------------------------------------------------------
 
 test_that("Arrange correctly orders", {
-  data("sc_example_counts")
-  data("sc_example_cell_info")
-  example_sce <- SingleCellExperiment(
-      assays = list(counts = sc_example_counts), 
-      colData = sc_example_cell_info)
-  
   treatment <- example_sce$Treatment
   n_each <- table(treatment)
   arranged <- c(rep("treat1", n_each[1]), rep("treat2", n_each[2]))

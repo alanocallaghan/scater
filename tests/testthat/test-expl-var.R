@@ -43,6 +43,11 @@ test_that("getVarianceExplained responds to the options", {
 })
 
 test_that("getVarianceExplained handles sparse inputs", {
+    normed_sparse <- normed
+    library(Matrix)
+    counts(normed_sparse) <- as(counts(normed), "dgCMatrix")
+    logcounts(normed_sparse) <- as(logcounts(normed), "dgCMatrix")
+
     varexp_sparse <- getVarianceExplained(normed_sparse)
     expect_equal(varexp, varexp_sparse)
 })

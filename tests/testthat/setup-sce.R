@@ -8,8 +8,3 @@ sce <- SingleCellExperiment(
 # Generating a normalized SCE for specific methods.
 suppressWarnings(normed <- normalize(sce))
 
-# Generating sparse SCEs.
-library(Matrix)
-sce_sparse <- sce
-counts(sce_sparse) <- as(counts(sce_sparse), "dgCMatrix")
-suppressWarnings(normed_sparse <- normalize(sce_sparse))

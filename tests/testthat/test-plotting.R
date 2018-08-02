@@ -1,14 +1,8 @@
 ## Tests for plotting functions
 ## This stress-tests the plotting functions for all the different parameter settings. 
-## library(scater); library(testthat); source("test-plotting.R")
+## library(scater); library(testthat); source("setup-sce.R"); source("test-plotting.R")
 
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
-    colData = sc_example_cell_info)
-example_sce <- calculateQCMetrics(example_sce)
-suppressWarnings(example_sce <- normalize(example_sce))
+example_sce <- calculateQCMetrics(normed, exprs_values="counts")
 
 #################################################
 # Testing the baseline visualization picker.
@@ -637,13 +631,7 @@ test_that("plotExprsVsTxLength works as expected", {
 # Testing plotRLE
 
 test_that("plotRLE works as expected", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    example_sce <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
     cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
-    example_sce <- normalize(example_sce)
 
     # With minimal or full.
     for (style in c("minimal", "full")) {
