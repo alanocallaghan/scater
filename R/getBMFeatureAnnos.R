@@ -1,9 +1,3 @@
-## summarise and annotate features
-
-##----------------------------------------------------------------------------##
-
-## Function to get feature annotation information from biomaRt
-
 #' Get feature annotation information from Biomart
 #' 
 #' Use the \pkg{biomaRt} package to add feature annotation information to an \code{\link{SingleCellExperiment}}. 
@@ -157,6 +151,7 @@ summariseExprsAcrossFeatures <- function(object, exprs_values = "tpm",
                                          summarise_by = "feature_id",
                                          scaled_tpm_counts = TRUE,
                                          lib_size = NULL) {
+    .Deprecated("sumCountsAcrossFeatures")
     if ( !methods::is(object, "SingleCellExperiment") )
         stop("Object must be a SingleCellExperiment")
     ## Define an expression matrix depending on which values we're using
