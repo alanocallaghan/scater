@@ -13,6 +13,8 @@ static const R_CallMethodDef all_call_entries[] = {
     REGISTER(combined_qc, 5),
     REGISTER(calc_top_features, 3),
 
+    REGISTER(sum_counts, 2),
+
     REGISTER(row_vars, 3),
     REGISTER(col_vars, 3),
     REGISTER(row_sums, 3),
