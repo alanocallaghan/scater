@@ -22,7 +22,7 @@ Imports: BiocGenerics, SummarizedExperiment, Matrix, dplyr, ggbeeswarm, grid,
         viridis, Rcpp (>= 0.12.14), DelayedArray
 Suggests: BiocStyle, biomaRt, beachmat, cowplot, cluster, destiny, knitr, monocle,
         mvoutlier, rmarkdown, Rtsne, umap, testthat, magrittr, pheatmap, irlba,
-        tximport, tximportData
+        tximport, tximportData, Biobase, limma
 VignetteBuilder: knitr
 LazyData: true
 biocViews: SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,
