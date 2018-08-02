@@ -16,7 +16,7 @@ calculateCPM(object, exprs_values = "counts", use_size_factors = TRUE,
 If not, all size factors are deleted and library size-based factors are used instead (see \code{\link{librarySizeFactors}}.
 Alternatively, a numeric vector containing a size factor for each cell, which is used in place of \code{sizeFactor(object)}.}
 
-\item{subset_row}{A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calculating library sizes and CPMs.}
+\item{subset_row}{A vector specifying the subset of rows of \code{object} for which to return a result.}
 }
 \value{
 Numeric matrix of CPM values.

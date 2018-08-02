@@ -18,15 +18,13 @@ calcAverage(object, exprs_values = "counts", use_size_factors = TRUE,
 
 \item{use_size_factors}{a logical scalar specifying whetherthe size factors in \code{object} should be used to construct effective library sizes.}
 
-\item{subset_row}{A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calculating feature averages.}
+\item{subset_row}{A vector specifying the subset of rows of \code{object} for which to return a result.}
 }
 \value{
 Vector of average count values with same length as number of features, or the number of features in \code{subset_row} if supplied.
 }
 \description{
-Calculate average counts per feature, adjusting them as appropriate to take
-into account for size factors for normalization or library sizes (total
-counts).
+Calculate average counts per feature, adjusting them to account for normalization due to size factors or library sizes.
 }
 \details{
 The size-adjusted average count is defined by dividing each count by the size factor and taking the average across cells.

@@ -4,7 +4,8 @@
 \alias{calculateTPM}
 \title{Calculate transcripts-per-million (TPM)}
 \usage{
-calculateTPM(object, effective_length = NULL, exprs_values = "counts")
+calculateTPM(object, effective_length = NULL, exprs_values = "counts",
+  subset_row = NULL)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object or a count matrix.}
@@ -13,6 +14,8 @@ calculateTPM(object, effective_length = NULL, exprs_values = "counts")
 If \code{NULL}, it is assumed that \code{exprs_values} has already been adjusted for transcript length.}
 
 \item{exprs_values}{String or integer specifying the assay containing the counts in \code{object}, if it is a SingleCellExperiment.}
+
+\item{subset_row}{A vector specifying the subset of rows of \code{object} for which to return a result.}
 }
 \value{
 A numeric matrix of TPM values.
