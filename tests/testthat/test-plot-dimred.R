@@ -1,5 +1,4 @@
-## Tests for plotting functions
-## This stress-tests the plotting functions for all the different parameter settings. 
+## Tests for dimensionality reduction plotting functions
 ## library(scater); library(testthat); source("setup-sce.R"); source("test-plot-dimred.R")
 
 example_sce <- normed 
@@ -19,7 +18,7 @@ test_that("we can produce PCA scatterplots", {
     expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
 
     # Checking other arguments are passed successfully to plotReducedDim.
-    expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", legend = FALSE), "ggplot")
+    expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", add_legend = FALSE), "ggplot")
     expect_s3_class(plotPCA(example_sce, colour_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
     expect_s3_class(plotPCA(example_sce, colour_by = "Treatment", by_show_single = TRUE), "ggplot")
     expect_s3_class(plotPCA(example_sce, percentVar = c(19, 5)), "ggplot")
@@ -69,7 +68,7 @@ test_that("we can produce PCA pairplots", {
     expect_s3_class(plotPCA(example_sce, ncomponents=4, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
 
     # Checking other arguments are passed successfully to plotReducedDim.
-    expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Cell_Cycle", legend = FALSE), "ggplot")
+    expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Cell_Cycle", add_legend = FALSE), "ggplot")
     expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
     expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Treatment", by_show_single = TRUE), "ggplot")
     expect_s3_class(plotPCA(example_sce, ncomponents=4, percentVar=c(19, 5, 3, 2)), "ggplot")

@@ -116,7 +116,7 @@ test_that("plotExprsFreqVsMean works as expected", {
     expect_s3_class(plotExprsFreqVsMean(wt_qc), "ggplot")
 
     # Checking arguments are passed to plotRowData.
-    expect_s3_class(plotExprsFreqVsMean(wt_qc, legend = FALSE), "ggplot")
+    expect_s3_class(plotExprsFreqVsMean(wt_qc, add_legend = FALSE), "ggplot")
     expect_s3_class(plotExprsFreqVsMean(wt_qc, size_by = 'n_cells_by_counts'), "ggplot")
 
     # Checking we can turn off control colouring and other settings.
