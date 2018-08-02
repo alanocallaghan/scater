@@ -11,7 +11,7 @@ static const R_CallMethodDef all_call_entries[] = {
     REGISTER(ave_exprs, 4),
 
     REGISTER(combined_qc, 5),
-    REGISTER(calc_top_features, 3),
+    REGISTER(top_cumprop, 2),
 
     REGISTER(sum_counts, 2),
 

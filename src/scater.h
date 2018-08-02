@@ -22,7 +22,7 @@ SEXP ave_exprs(SEXP, SEXP, SEXP, SEXP);
 
 SEXP combined_qc(SEXP, SEXP, SEXP, SEXP, SEXP);
 
-SEXP calc_top_features(SEXP, SEXP, SEXP);
+SEXP top_cumprop(SEXP, SEXP);
 
 
 SEXP sum_counts(SEXP, SEXP);

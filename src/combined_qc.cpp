@@ -1,5 +1,39 @@
 #include "scater.h"
 
+/* Functions to compute the cumulative sum. */
+
+void check_topset(const Rcpp::IntegerVector& top) {
+    for (size_t t=1; t<top.size(); ++t) {
+        if (top[t] < top[t-1]) { 
+            throw std::runtime_error("numbers of top genes must be sorted"); 
+        }
+    }
+    return;
+}
+
+template<typename T, class V, class IT>
+void compute_cumsum (typename V::iterator it, size_t ngenes, const Rcpp::IntegerVector& top, IT out) {
+    const size_t ntop=top.size();
+    if (ntop==0) {
+        return;
+    }
+
+    std::partial_sort(it, it + std::min(ngenes, size_t(top[ntop-1])), it + ngenes, std::greater<T>());
+    int x=0;
+    T accumulated=0;
+
+    for (auto target_index : top) {
+        while (x<target_index && x<ngenes) { // '<' as top contains 1-based indices.
+            accumulated+=*(it+x);
+            ++x;
+        }
+        (*out)=accumulated;
+        ++out;
+    }
+
+    return;
+}
+
 /* Class to compute and store the per-cell statistics. */
 
 template <typename T, class V>
@@ -10,40 +44,33 @@ struct per_cell_statistics {
             top(TOP), limit(detection_limit), counter(0), 
             totals(ncells), detected(ncells), percentages(top.size(), ncells),
             temporary(ngenes) {
-        for (size_t t=1; t<top.size(); ++t) {
-            if (top[t] < top[t-1]) { 
-                throw std::runtime_error("numbers of top genes must be sorted"); 
-            }
-        }
+        check_topset(top);
         return;
     }
 
-    per_cell_statistics(size_t ncells, T detection_limit, Rcpp::IntegerVector sub, Rcpp::IntegerVector TOP) :
-            per_cell_statistics(ncells, detection_limit, TOP, sub.size()) {
-        subset=sub;
-        return;
-    }
-
+    // Constructor and fill command for no subsetting, i.e., statistics computed on all genes.
     per_cell_statistics(size_t ncells, T detection_limit, size_t ngenes, Rcpp::IntegerVector TOP) : 
             per_cell_statistics(ncells, detection_limit, TOP, ngenes) {}
 
     void fill(typename V::iterator it) {
         const size_t ngenes=temporary.size();
-        compute_summaries(it, ngenes);
         std::copy(it, it+ngenes, temporary.begin());
-        compute_percentages(temporary.begin(), ngenes);
-        ++counter;
+        compute_summaries(temporary.begin(), ngenes);
+    }
+ 
+    // Constructor and fill command for statistics to be computed on a subset of genes.
+    per_cell_statistics(size_t ncells, T detection_limit, Rcpp::IntegerVector sub, Rcpp::IntegerVector TOP) :
+            per_cell_statistics(ncells, detection_limit, TOP, sub.size()) {
+        subset=sub;
         return;
     }
-
+   
     void fill_subset(typename V::iterator it) {
         auto tmp=temporary.begin();
         for (auto sIt=subset.begin(); sIt!=subset.end(); ++sIt, ++tmp) {
             (*tmp)=*(it + *sIt - 1); // convert to zero indexing.
         }
         compute_summaries(temporary.begin(), subset.size());
-        compute_percentages(temporary.begin(), subset.size());
-        ++counter;
         return;
     }
 private:
@@ -54,43 +81,26 @@ private:
     Rcpp::IntegerVector subset;
     V temporary;
 
+    // This function *will* modify the memory pointed to by 'it', so copying should be done beforehand.
     void compute_summaries (typename V::iterator it, size_t ngenes) {
         auto& total=totals[counter];
         auto& nfeat=detected[counter];
-        for (size_t i=0; i<ngenes; ++i, ++it) {
-            const auto& curval=(*it);
+        for (size_t i=0; i<ngenes; ++i) {
+            const auto& curval=*(it+i);
             total+=curval;
             if (curval > limit) {
                 ++nfeat;
             }
         }
-        return;
-    }
 
-    void compute_percentages (typename V::iterator it, size_t ngenes) {
-        if (top.size()==0) {
-            return;
-        }
-
-        std::partial_sort(it, 
-                it + std::min(ngenes, size_t(top[top.size()-1])), 
-                it + ngenes, 
-                std::greater<T>());
-
-        int x=0;
-        T accumulated=0;
-        double total=totals[counter];
         auto pct_col=percentages.column(counter);
-
-        for (size_t t=0; t<top.size(); ++t) { 
-            int target_index=top[t] - 1; // 0-based index.
-            while (x<=target_index && x<ngenes) {
-                accumulated+=*(it+x);
-                ++x;
-            }
-            pct_col[t]=double(accumulated)/total * 100;
+        compute_cumsum<T, V>(it, ngenes, top, pct_col.begin());
+        for (auto& p : pct_col) { 
+            p/=total;
+            p*=100; 
         }
-        return; 
+        ++counter;
+        return;
     }
 public:
     V totals;
@@ -136,7 +146,7 @@ Rcpp::List create_output_per_gene(const per_gene_statistics<T, V>& PGS) {
     return Rcpp::List::create(PGS.totals, PGS.detected);
 }
 
-/* Main loop. */
+/* Main loop for combined_qc. */
 
 template <typename T, class V, class M>
 SEXP combined_qc_internal(M mat, Rcpp::List featcon, Rcpp::List cellcon, Rcpp::IntegerVector topset, V detection_limit) {
@@ -223,3 +233,40 @@ SEXP combined_qc(SEXP matrix, SEXP featcon, SEXP cellcon, SEXP top, SEXP limit) 
     END_RCPP
 }
 
+/* Main loop for top_cumprop. */
+
+template <typename T, class V, class M>
+SEXP top_cumprop_internal(M mat, Rcpp::IntegerVector topset) {
+    const size_t ncells=mat->get_ncol();
+    const size_t ngenes=mat->get_nrow();
+
+    check_topset(topset);
+    Rcpp::NumericMatrix percentages(topset.size(), ncells);
+    V holder(ngenes);
+
+    for (size_t c=0; c<ncells; ++c) {
+        mat->get_col(c, holder.begin());
+        double totals=std::accumulate(holder.begin(), holder.end(), T(0));
+
+        auto cur_col=percentages.column(c);
+        compute_cumsum<T, V>(holder.begin(), ngenes, topset, cur_col.begin());
+        for (auto& p : cur_col) { p/=totals; }
+    }
+
+    return percentages;
+}
+
+SEXP top_cumprop(SEXP matrix, SEXP top) {
+    BEGIN_RCPP
+    auto mattype=beachmat::find_sexp_type(matrix);
+    if (mattype==INTSXP) {
+        auto mat=beachmat::create_integer_matrix(matrix);
+        return top_cumprop_internal<int, Rcpp::IntegerVector>(mat.get(), top);
+    } else if (mattype==REALSXP) {
+        auto mat=beachmat::create_numeric_matrix(matrix);
+        return top_cumprop_internal<double, Rcpp::NumericVector>(mat.get(), top);
+    } else {
+        throw std::runtime_error("unacceptable matrix type");
+    }
+    END_RCPP
+}
