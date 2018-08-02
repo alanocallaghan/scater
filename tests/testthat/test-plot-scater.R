@@ -29,3 +29,26 @@ test_that("plotScater works as expected", {
     expect_s3_class(plotScater(example_sce, exprs_values="cpm"), "ggplot")
     expect_error(plotScater(example_sce, exprs_values="tpm"), "not in names")
 })
+
+test_that("plotScater's underlying C++ code works as expected", {
+# library(scater); library(testthat); source("setup-sce.R"); example_sce <- sce
+    REFFUN <- function(x, top) {
+        prop <- cumsum(sort(x, decreasing=TRUE))/sum(x)
+        prop[pmin(top, length(x))]
+    }
+
+    out <- .Call(scater:::cxx_top_cumsum, assay(example_sce), 1:50)
+    ref <- apply(assay(example_sce), 2, REFFUN, top=1:50)
+    colnames(out) <- colnames(ref)
+    expect_equal(out, ref)
+
+    out <- .Call(scater:::cxx_top_cumsum, assay(example_sce), 1:20*5)
+    ref <- apply(assay(example_sce), 2, REFFUN, top=1:20*5)
+    colnames(out) <- colnames(ref)
+    expect_equal(out, ref)
+
+    # Behaves with silly inputs.
+    out <- .Call(scater:::cxx_top_cumsum, assay(example_sce), integer(0))
+    expect_identical(dim(out), c(0L, ncol(example_sce)))
+    expect_error(.Call(scater:::cxx_top_cumsum, assay(example_sce), 5:1), "sorted")
+})
