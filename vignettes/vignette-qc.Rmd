@@ -195,7 +195,7 @@ p1 <- plotColData(example_sce, x = "total_counts",
 p2 <- plotColData(example_sce, x = "pct_counts_feature_control",
     y = "total_features_by_counts")
 p3 <- plotColData(example_sce, x = "pct_counts_feature_control",
-    y = "pct_counts_top_50_features")
+    y = "pct_counts_in_top_50_features")
 multiplot(p1, p2, p3, cols = 3)
 ```
 
