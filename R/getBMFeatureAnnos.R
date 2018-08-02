@@ -2,13 +2,10 @@
 #' 
 #' Use the \pkg{biomaRt} package to add feature annotation information to an \code{\link{SingleCellExperiment}}. 
 #' 
-#' @param object A \code{SingleCellExperiment} object.
+#' @param object A \linkS4class{SingleCellExperiment} object.
+#' @param ids A character vector containing the identifiers for all rows of \code{object}, of the same type specified by \code{filters}.
 #' @param filters Character vector defining the filters to pass to the \code{\link[biomaRt]{getBM}} function.
 #' @param attributes Character vector defining the attributes to pass to \code{\link[biomaRt]{getBM}}.
-#' @param feature_symbol String specifying the attribute to be used to define the symbol to be used for each feature 
-#' Default is \code{"mgi_symbol"}, using gene symbols for mouse - this should be changed if the organism is not \emph{Mus musculus}.
-#' @param feature_id String specifying the attribute to be used to define the ID to be used for each feature.
-#' Default is \code{"ensembl_gene_id"}, using the Ensembl gene IDs.
 #' @param biomart String defining the biomaRt to be used, to be passed to \code{\link[biomaRt]{useMart}}.
 #' Default is \code{"ENSEMBL_MART_ENSEMBL"}.
 #' @param dataset String defining the dataset to use, to be passed to \code{\link[biomaRt]{useMart}}.
@@ -21,66 +18,52 @@
 #' The input \code{feature_symbol} appears as the \code{feature_symbol} field in the \code{rowData} of the output object.
 #' 
 #' @export
+#' @importFrom SummarizedExperiment rowData rowData<-
+#' @importFrom BiocGenerics rownames colnames
 #' 
 #' @examples
 #' \dontrun{
-#' object <- getBMFeatureAnnos(object)
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' example_sce <- SingleCellExperiment(
+#'     assays = list(counts = sc_example_counts), 
+#'     colData = sc_example_cell_info
+#' )
+#'
+#' mock_id <- paste0("ENSMUSG", sprintf("%011d", seq_len(nrow(example_sce))))
+#' example_sce <- getBMFeatureAnnos(example_sce, ids=mock_id)
 #' }
 #' 
-getBMFeatureAnnos <- function(object, filters="ensembl_transcript_id", 
-                              attributes=c("ensembl_transcript_id", 
-                                           "ensembl_gene_id", feature_symbol, 
-                                           "chromosome_name", "transcript_biotype",
-                                           "transcript_start", "transcript_end", 
-                                           "transcript_count"), 
-                              feature_symbol="mgi_symbol",
-                              feature_id="ensembl_gene_id",
-                              biomart="ENSEMBL_MART_ENSEMBL", 
-                              dataset="mmusculus_gene_ensembl",
-                              host="www.ensembl.org") {
+getBMFeatureAnnos <- function(object, ids = rownames(object),
+        filters="ensembl_gene_id", 
+        attributes=c(filters, "mgi_symbol", 
+            "chromosome_name", "gene_biotype",
+            "start_position", "end_position"),
+        biomart="ENSEMBL_MART_ENSEMBL", 
+        dataset="mmusculus_gene_ensembl",
+        host="www.ensembl.org") {
+
     ## Define Biomart Mart to use
-    if ( is.null(host) )
+    if ( is.null(host) ) {
         bmart <- biomaRt::useMart(biomart = biomart, dataset = dataset)
-    else 
-        bmart <- biomaRt::useMart(biomart = biomart, dataset = dataset, 
-                                  host = host) 
-    ## Define feature IDs from SingleCellExperiment object
-    feature_ids <- rownames(object)
-    ## Remove transcript ID artifacts from runKallisto (eg. ENSMUST00000201087.11 -> ENSMUST00000201087)
-    feature_ids <- gsub(pattern = "\\.[0-9]+", replacement = "", x = feature_ids)
+    } else {
+        bmart <- biomaRt::useMart(biomart = biomart, dataset = dataset, host = host) 
+    }
+
     ## Get annotations from biomaRt
-    feature_info <- biomaRt::getBM(attributes = attributes, 
-                                   filters = filters, 
-                                   values = feature_ids, mart = bmart)
-    ## Match the feature ids to the filters ids used to get info from biomaRt
-    mm <- match(feature_ids, feature_info[[filters]])
+    feature_info <- biomaRt::getBM(attributes = attributes, filters = filters, values = ids, mart = bmart)
+
+    # Match the feature ids to the filters id.
+    mm <- match(ids, feature_info[[filters]])
     feature_info_full <- feature_info[mm, ]
-    rownames(feature_info_full) <- feature_ids
-    ## Define gene symbol and gene id
-    feature_info_full$feature_symbol <- feature_info_full[[feature_symbol]]
-    feature_info_full$feature_id <- feature_info_full[[feature_id]]
-    ## Use rownames for gene symbol if gene symbol is missing
-    na_symbol <- (is.na(feature_info_full$feature_symbol) | 
-                      feature_info_full$feature_symbol == "")
-    feature_info_full$feature_symbol[na_symbol] <- 
-        rownames(feature_info_full)[na_symbol]
-    ## Use rownames from SingleCellExperiment object (feature IDs) for feature_id if na
-    feature_info_full$feature_id[is.na(feature_info_full$feature_id)] <-
-        rownames(feature_info_full)[is.na(feature_info_full$feature_id)]
-    ## Need to drop any duplicated columns that we want to replace
+
+    ## Drop duplicated columns that we want to replace
     old_rdata <- rowData(object)
-    keep_cols <- !(colnames(old_rdata) %in% 
-                       c("feature_symbol", "feature_id", attributes))
-    if (sum(keep_cols) > 0) {
-        colnames_old_rdata <- colnames(old_rdata)
-        old_rdata <- as.data.frame(old_rdata[, keep_cols])
-        colnames(old_rdata) <- colnames_old_rdata[keep_cols]
-        new_rdata <- cbind(old_rdata, feature_info_full)
-    } else 
-        new_rdata <- feature_info_full
+    keep_cols <- !(colnames(old_rdata) %in% colnames(feature_info_full))
+    new_rdata <- cbind(old_rdata[,keep_cols], feature_info_full)
+
     ## Add new feature annotations to SingleCellExperiment object
     rowData(object) <- new_rdata
-    ## Return SingleCellExperiment object
     object
 }
 
