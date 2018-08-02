@@ -59,26 +59,24 @@ test_that("we can calculate CPM from counts", {
     expect_identical(sub3, calculateCPM(counts(original)[chosen,]))
 })
 
-
 test_that("we can calculate FPKM from counts", {
-    data("sc_example_counts")
-    data("sc_example_cell_info")
-    original <- SingleCellExperiment(
-        assays = list(counts = sc_example_counts), 
-        colData = sc_example_cell_info)
-    effective_length <- rep(1000, 2000)
-    fpkm(original) <- calculateFPKM(
-        original, effective_length, use_size_factors = FALSE)
-    
-    expect_that(original, is_a("SingleCellExperiment"))
-    expect_that(sum(fpkm(original)), is_more_than(0))
-    
-    fpkm(sparsified) <- calculateFPKM(sparsified, effective_length, 
-                                  use_size_factors = FALSE)
-    expect_that(sparsified, is_a("SingleCellExperiment"))
-    expect_that(sum(fpkm(sparsified)), is_more_than(0))
-})
+    effective_length <- runif(nrow(original), 1000, 2000)
+    fpkms <- calculateFPKM(original, effective_length)
 
+    ref <- counts(original)/(effective_length/1e3)
+    ref <- t(t(ref)/(colSums(counts(original))/1e6))
+    expect_equal(fpkms, ref)
+
+    # Repeating with subsets.
+    out <- calculateFPKM(original, effective_length, subset_row=1:10)
+    sub <- calculateFPKM(original[1:10,], effective_length[1:10])
+    expect_equal(out, sub)
+
+    # Handles sparse matrices.
+    tout2 <- calculateFPKM(sparsified, effective_length)
+    expect_s4_class(tout2, "dgCMatrix")
+    expect_equal(ref, as.matrix(tout2))
+})
 
 test_that("we can calculate TPM from counts", {
     effective_length <- runif(nrow(original), 1000, 2000)
@@ -87,14 +85,20 @@ test_that("we can calculate TPM from counts", {
     ref <- counts(original)/effective_length
     ref <- t(t(ref)/(colSums(ref)/1e6))
     expect_equal(tout, ref)
-   
+
+    # Behaves when length is not supplied.
     expect_equal(calculateTPM(original, NULL), calculateCPM(original))
 
+    # Repeating with subsets.
+    out <- calculateTPM(original, effective_length, subset_row=1:10)
+    sub <- calculateTPM(original[1:10,], effective_length[1:10])
+    expect_equal(out, sub)
+
+    # Handles sparse matrices.
     tout2 <- calculateTPM(sparsified, effective_length)
     expect_s4_class(tout2, "dgCMatrix")
     expect_equal(tout, as.matrix(tout2))
 })
-
 
 test_that("nexprs works as expected", {
     ## Testing nexprs on the counts themselves.
