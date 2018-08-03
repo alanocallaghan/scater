@@ -25,6 +25,11 @@
 #' For example, supplying a character vector \code{c("A", "B", "C")} will retrieve \code{colData(sce)$A$B$C}, where both \code{A} and \code{B} contain nested DataFrames.
 #' See \code{\link{calculateQCMetrics}} with \code{compact=TRUE} for an example of how these can be constructed. 
 #' The concatenated name \code{"A:B:C"} will be used in the legend.
+#' \item A character vector of length greater than 1 and the first element set to \code{NA}.
+#' This will search for nested fields in the internal column data of a \linkS4class{SingleCellExperiment}, i.e., in \code{\link{int_colData}}.
+#' For example, \code{c(NA, "size_factor")} would retrieve the values corresponding to \code{sizeFactors(object)}.
+#' The concatenated name without the \code{NA} is used in the legend.
+#' Note that internal fields are \emph{only} searched when \code{NA} is the first element.
 #' \item A data frame with one column and number of rows equal to the number of cells.
 #' This should contain values to use for visualization, e.g., for plotting on the x-/y-axis, or for colouring by.
 #' In this manner, the user can use new information without manually adding it to the SingleCellExperiment object.
@@ -70,17 +75,20 @@
 #' and most other plotting functions.
 NULL
 
+#' @importFrom SummarizedExperiment rowData colData assay
+#' @importFrom SingleCellExperiment int_elementMetadata int_colData
+#' @importFrom BiocGenerics rownames colnames
 .choose_vis_values <- function(x, by, mode=c("column", "row"), search=c("any", "metadata", "exprs"),
-                               exprs_values = "logcounts", coerce_factor = FALSE, level_limit = Inf,
-                               discard_solo = FALSE) 
+    exprs_values = "logcounts", coerce_factor = FALSE, level_limit = Inf, discard_solo = FALSE) 
 # This function looks through the visualization data and returns the
 # values to be visualized. Either 'by' itself, or a column of colData,
 # or a column of rowData, or the expression values of a feature.
 {
     vals <- NULL
-    if (is.character(by)) {
+    if (is.character(by) && length(by) > 0) { 
         mode <- match.arg(mode)
         search <- match.arg(search)
+        internal_only <- FALSE
 
         # Determining what to check, based on input 'by'.
         if (length(by)>1) {
@@ -88,29 +96,28 @@ NULL
                 stop("character vector of length > 1 not allowed for search='exprs'")
             }
             search <- "metadata"
-        } else if (length(by)==0L) {
-            by <- NULL
-            search <- "none"
-        } else if (length(by)==1L) {
-            if (search=="any") { 
-                cur_name <- names(by)
-                if (!is.null(cur_name) && !is.na(cur_name)) { 
-                    if (cur_name=="metadata" || cur_name =="exprs") {
-                        search <- cur_name
-                    } 
-                }
-                names(by) <- NULL
+
+            if (is.na(by[1])) { 
+                internal_only <- TRUE
+                by <- by[-1]
+            }
+        } else if (search=="any") { 
+            cur_name <- names(by)
+            if (!is.null(cur_name) && !is.na(cur_name)) { 
+                if (cur_name=="metadata" || cur_name =="exprs") {
+                    search <- cur_name
+                } 
             }
         }
+        names(by) <- NULL
            
         # Checking the metadata; note the loop to account for nesting.
-        if (search=="any" || search=="metadata") { 
-            if (mode=="column") {
-                meta_data <- colData(x)
+        if (search=="any" || search=="metadata") {
+            if (!internal_only) { 
+                meta_data <- if (mode=="column") colData(x) else rowData(x)
             } else {
-                meta_data <- rowData(x)
+                meta_data <- if (mode=="column") int_colData(x) else int_elementMetadata(x)
             }
-            
             for (field in by) {
                 if (!field %in% colnames(meta_data)) {
                     break
@@ -122,20 +129,25 @@ NULL
         }
 
         # Metadata takes priority, so we don't bother searching if 'vals' is non-NULL.
-        if (search=="any" || search=="exprs") {
-            if (is.null(vals)){
-                exprs <- assay(x, i = exprs_values)
-                if (mode=="column" && by %in% rownames(exprs)) {
-                    vals <- exprs[by,] # coloring columns, so we take the row values.
-                } else if (mode=="row" && by %in% colnames(exprs)) {
-                    vals <- exprs[,by]
+        if ((search=="any" || search=="exprs") && is.null(vals)) { 
+            exprs <- assay(x, i = exprs_values, withDimNames=FALSE)
+            if (mode=="column") {
+                m <- match(by, rownames(x)) # coloring columns, so we take the row values.
+                if (!is.na(m)) {
+                    vals <- exprs[m,] 
+                }
+            } else if (mode=="row") {
+                m <- match(by, colnames(x)) 
+                if (!is.na(m)) {
+                    vals <- exprs[,m] 
                 }
             }
         }
 
-        if (is.null(vals) && (search!="none")) { 
+        if (is.null(vals)) {
             stop(sprintf("cannot find '%s' in %s fields", by, search))
         }
+
     } else if (is.data.frame(by)) {
         if (ncol(by) != 1L) {
             stop("input data frame should only have one column")
@@ -153,6 +165,7 @@ NULL
         by <- colnames(by)
 
     } else if (!is.null(by)) {
+        # We have to allow by=NULL to pass through smoothly.
         stop("invalid value of 'by' supplied")
     }
 
@@ -163,7 +176,7 @@ NULL
             stop(sprintf("number of unique levels exceeds %i", level_limit))
         }
     }
-    
+
     # If only one level for the variable, set to NULL.
     if (length(unique(vals))<=1L && discard_solo) { 
         by <- NULL
