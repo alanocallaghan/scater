@@ -5,9 +5,10 @@
 \title{Perform t-SNE on cell-level data}
 \usage{
 runTSNE(object, ncomponents = 2, ntop = 500, feature_set = NULL,
-  exprs_values = "logcounts", scale_features = TRUE, use_dimred = NULL,
-  n_dimred = NULL, rand_seed = NULL, perplexity = min(50,
-  floor(ncol(object)/5)), pca = TRUE, initial_dims = 50, ...)
+  exprs_values = "logcounts", scale_features = TRUE,
+  use_dimred = NULL, n_dimred = NULL, rand_seed = NULL,
+  perplexity = min(50, floor(ncol(object)/5)), pca = TRUE,
+  initial_dims = 50, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}

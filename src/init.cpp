@@ -7,8 +7,14 @@
 extern "C" {
 
 static const R_CallMethodDef all_call_entries[] = {
-    REGISTER(calc_exprs, 7),
-    REGISTER(calc_top_features, 3),
+    REGISTER(norm_exprs, 6),
+    REGISTER(ave_exprs, 4),
+
+    REGISTER(combined_qc, 5),
+    REGISTER(top_cumprop, 2),
+
+    REGISTER(sum_counts, 2),
+
     REGISTER(row_vars, 3),
     REGISTER(col_vars, 3),
     REGISTER(row_sums, 3),

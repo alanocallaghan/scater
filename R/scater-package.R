@@ -10,5 +10,6 @@
 #' @name scater-package
 #' @docType package
 #' @useDynLib scater, .registration=TRUE, .fixes="cxx_"
+#' @importFrom Rcpp sourceCpp
 NULL
 

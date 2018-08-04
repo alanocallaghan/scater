@@ -113,7 +113,7 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NUL
 
 paired_reddim_plot <- function(df_to_plot, to_plot, percentVar=NULL,
     colour_by=NULL, shape_by=NULL, size_by=NULL,
-    legend = TRUE, theme_size = 10, alpha = 0.6, size = NULL) 
+    add_legend = TRUE, theme_size = 10, point_alpha = 0.6, point_size = NULL) 
 {
     reddim_cols <- seq_along(to_plot)
     df_to_expand <- df_to_plot[, reddim_cols]
@@ -138,7 +138,7 @@ paired_reddim_plot <- function(df_to_plot, to_plot, percentVar=NULL,
         theme_bw(theme_size)
     
     ## Setting up the point addition with various aesthetics.
-    point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = alpha, size = size)
+    point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size)
     plot_out <- plot_out + do.call(geom_point, point_out$args)
     if (!is.null(colour_by)) { 
         plot_out <- .resolve_plot_colours(plot_out, df_to_plot$colour_by, colour_by, fill=point_out$fill)
@@ -146,7 +146,7 @@ paired_reddim_plot <- function(df_to_plot, to_plot, percentVar=NULL,
  
     # Setting the legend details.
     plot_out <- .add_extra_guide(plot_out, shape_by, size_by)
-    if ( !legend ) {
+    if ( !add_legend ) {
         plot_out <- plot_out + theme(legend.position = "none")
     }
 

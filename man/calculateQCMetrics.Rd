@@ -4,9 +4,10 @@
 \alias{calculateQCMetrics}
 \title{Calculate QC metrics}
 \usage{
-calculateQCMetrics(object, exprs_values = "counts", feature_controls = NULL,
-  cell_controls = NULL, percent_top = c(50, 100, 200, 500),
-  detection_limit = 0, use_spikes = TRUE, compact = FALSE)
+calculateQCMetrics(object, exprs_values = "counts",
+  feature_controls = NULL, cell_controls = NULL, percent_top = c(50,
+  100, 200, 500), detection_limit = 0, use_spikes = TRUE,
+  compact = FALSE)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values, usually counts.}
@@ -173,10 +174,7 @@ Several metric names have been changed in \pkg{scater} 1.7.5:
   \item \code{pct_dropout_X} was changed to \code{pct_dropout_by_X}.
   \item \code{pct_X_top_Y_features} was changed to \code{pct_X_in_top_Y_features}.
 }
-
-All of the old metric names will be kept alongside the new metric names when \code{compact=FALSE}.
-Otherwise, only the new metric names will be stored.
-The old metric names may be removed in future releases of \pkg{scater}.
+The old metric names have been removed in version 1.9.10.
 }
 
 \examples{

@@ -30,6 +30,11 @@ This will search for nested fields in \code{colData(sce)}.
 For example, supplying a character vector \code{c("A", "B", "C")} will retrieve \code{colData(sce)$A$B$C}, where both \code{A} and \code{B} contain nested DataFrames.
 See \code{\link{calculateQCMetrics}} with \code{compact=TRUE} for an example of how these can be constructed. 
 The concatenated name \code{"A:B:C"} will be used in the legend.
+\item A character vector of length greater than 1 and the first element set to \code{NA}.
+This will search for nested fields in the internal column data of a \linkS4class{SingleCellExperiment}, i.e., in \code{\link{int_colData}}.
+For example, \code{c(NA, "size_factor")} would retrieve the values corresponding to \code{sizeFactors(object)}.
+The concatenated name without the \code{NA} is used in the legend.
+Note that internal fields are \emph{only} searched when \code{NA} is the first element.
 \item A data frame with one column and number of rows equal to the number of cells.
 This should contain values to use for visualization, e.g., for plotting on the x-/y-axis, or for colouring by.
 In this manner, the user can use new information without manually adding it to the SingleCellExperiment object.

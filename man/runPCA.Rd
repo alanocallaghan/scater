@@ -4,9 +4,10 @@
 \alias{runPCA}
 \title{Perform PCA on cell-level data}
 \usage{
-runPCA(object, ncomponents = 2, method = c("prcomp", "irlba"), ntop = 500,
-  exprs_values = "logcounts", feature_set = NULL, scale_features = TRUE,
-  use_coldata = FALSE, selected_variables = NULL, detect_outliers = FALSE,
+runPCA(object, ncomponents = 2, method = c("prcomp", "irlba"),
+  ntop = 500, exprs_values = "logcounts", feature_set = NULL,
+  scale_features = TRUE, use_coldata = FALSE,
+  selected_variables = NULL, detect_outliers = FALSE,
   rand_seed = NULL, ...)
 }
 \arguments{
@@ -61,7 +62,7 @@ If \code{use_coldata=TRUE}, PCA will be performed on column-level metadata inste
 The \code{selected_variables} defaults to a vector containing:
 \itemize{
 \item \code{"pct_counts_top_100_features"}
-\item \code{"total_features"}
+\item \code{"total_features_by_counts"}
 \item \code{"pct_counts_feature_control"}
 \item \code{"total_features_feature_control"}
 \item \code{"log10_total_counts_endogenous"}

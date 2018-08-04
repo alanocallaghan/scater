@@ -30,7 +30,7 @@
 #' The \code{selected_variables} defaults to a vector containing:
 #' \itemize{
 #' \item \code{"pct_counts_top_100_features"}
-#' \item \code{"total_features"}
+#' \item \code{"total_features_by_counts"}
 #' \item \code{"pct_counts_feature_control"}
 #' \item \code{"total_features_feature_control"}
 #' \item \code{"log10_total_counts_endogenous"}
@@ -49,7 +49,9 @@
 #'
 #' @rdname runPCA
 #' @seealso \code{\link{prcomp}}, \code{\link[scater]{plotPCA}}
+#'
 #' @export
+#' @importFrom stats prcomp
 #'
 #' @author Aaron Lun, based on code by Davis McCarthy
 #'
@@ -122,16 +124,20 @@ runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
     method <- match.arg(method)
     if (method=="prcomp") {
         exprs_to_plot <- as.matrix(exprs_to_plot)
+        ncomponents <- min(c(ncomponents, dim(exprs_to_plot)))
         pca <- prcomp(exprs_to_plot, rank. = ncomponents)
-        total.var <- sum(pca$sdev ^ 2)
+
     } else if (method=="irlba") {
         if (!is.null(rand_seed)) {
             .Deprecated(msg="'rand.seed=' is deprecated.\nUse 'set.seed' externally instead.")
             set.seed(rand_seed)
         }
+
+        ncomponents <- min(c(ncomponents, dim(exprs_to_plot)-1L))
         pca <- irlba::prcomp_irlba(exprs_to_plot, n = ncomponents, ...)
-        total.var <- sum(.colVars(exprs_to_plot))
     }
+
+    total.var <- sum(.colVars(exprs_to_plot))
     percentVar <- pca$sdev ^ 2 / total.var
     pcs <- pca$x
     attr(pcs, "percentVar") <- percentVar

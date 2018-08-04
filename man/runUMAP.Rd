@@ -5,8 +5,8 @@
 \title{Perform UMAP on cell-level data}
 \usage{
 runUMAP(object, ncomponents = 2, ntop = 500, feature_set = NULL,
-  exprs_values = "logcounts", scale_features = TRUE, use_dimred = NULL,
-  n_dimred = NULL, ...)
+  exprs_values = "logcounts", scale_features = TRUE,
+  use_dimred = NULL, n_dimred = NULL, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}

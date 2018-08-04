@@ -4,9 +4,10 @@
 \alias{runDiffusionMap}
 \title{Create a diffusion map from cell-level data}
 \usage{
-runDiffusionMap(object, ncomponents = 2, ntop = 500, feature_set = NULL,
-  exprs_values = "logcounts", scale_features = TRUE, use_dimred = NULL,
-  n_dimred = NULL, rand_seed = NULL, ...)
+runDiffusionMap(object, ncomponents = 2, ntop = 500,
+  feature_set = NULL, exprs_values = "logcounts",
+  scale_features = TRUE, use_dimred = NULL, n_dimred = NULL,
+  rand_seed = NULL, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object}

@@ -52,12 +52,18 @@
 #'
 #' example_sce <- normalize(example_sce)
 #'
-#' @importFrom BiocGenerics normalize
-#' @importFrom S4Vectors metadata 'metadata<-'
-#' @importFrom SummarizedExperiment assay
+#' @importFrom BiocGenerics normalize sizeFactors
+#' @importFrom S4Vectors metadata metadata<-
+#' @importFrom SummarizedExperiment assay assay<-
 normalizeSCE <- function(object, exprs_values = "counts",
         return_log = TRUE, log_exprs_offset = NULL,
         centre_size_factors = TRUE, preserve_zeroes = FALSE) {
+
+    ## setting up the size factors.
+    if (is.null(sizeFactors(object))) {
+        warning("using library sizes as size factors")
+        sizeFactors(object) <- librarySizeFactors(object, exprs_values = exprs_values)
+    }
 
     ## using logExprsOffset=1 if argument is NULL
     if ( is.null(log_exprs_offset)) {
@@ -68,29 +74,24 @@ normalizeSCE <- function(object, exprs_values = "counts",
         }
     }
 
-    if (preserve_zeroes) {
-        centering <- log_exprs_offset
-        log_exprs_offset <- 1
-    } else {
-        centering <- 1
+    ## centering size factors, with interaction with pseudo-count
+    if (centre_size_factors) {
+        object <- centreSizeFactors(object)
     }
 
-    ## setting up the size factors.
-    if (is.null(sizeFactors(object))) {
-        warning("using library sizes as size factors")
-        sizeFactors(object) <- librarySizeFactors(object, exprs_values = exprs_values)
+    if (preserve_zeroes) {
+        object <- .apply_to_size_factors(object, FUN=function(sf) sf * log_exprs_offset)
+        log_exprs_offset <- 1
     }
-    if (centre_size_factors) {
-        object <- centreSizeFactors(object, centre=centering)
-    }
+
     sf.list <- .get_all_sf_sets(object)
 
     ## Compute normalized expression values.
-    norm_exprs <- .compute_exprs(assay(object, i = exprs_values),
-        size_factor_val = sf.list$size.factors,
-        size_factor_idx = sf.list$index,
-        log = return_log, sum = FALSE, logExprsOffset = log_exprs_offset,
-        subset_row = NULL)
+    norm_exprs <- .Call(cxx_norm_exprs, assay(object, i = exprs_values, withDimnames=FALSE),
+        sf.list$size.factors, sf.list$index - 1L, 
+        as.numeric(log_exprs_offset),
+        as.logical(return_log), 
+        subset_row = seq_len(nrow(object)) - 1L)
 
     ## add normalised values to object
     if (return_log) {

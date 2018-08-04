@@ -36,7 +36,8 @@
 #' @importFrom methods is
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom ggplot2 ggplot geom_hline geom_vline annotate geom_smooth
-#' @importFrom stats nls
+#' @importFrom stats nls coef
+#'
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")

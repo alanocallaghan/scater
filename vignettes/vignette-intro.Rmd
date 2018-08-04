@@ -34,7 +34,7 @@ This document gives an introduction to and overview of the quality control funct
 The package features:
 
 * Use of the `SingleCellExperiment` class as a data container for interoperability with a wide range of other Bioconductor packages;
-* Wrappers to [_kallisto_](http://pachterlab.github.io/kallisto/) and [_Salmon_](https://combine-lab.github.io/salmon/) for rapid quantification of transcript abundance; 
+* Functions to import [_kallisto_](http://pachterlab.github.io/kallisto/) and [_Salmon_](https://combine-lab.github.io/salmon/) results;
 * Simple calculation of many quality control metrics from the expression data;
 * Many tools for visualising scRNA-seq data, especially diagnostic plots for quality control;
 * Subsetting and many other methods for filtering out problematic cells and features;
@@ -127,20 +127,14 @@ head(calcAverage(example_sce))
 Count matrices stored as CSV files or equivalent can be easily read into R session using `read.table` from _utils_ or `fread` from the `r CRANpkg("data.table")` package.
 It is advisable to coerce the resulting object into a matrix before storing it in a `SingleCellExperiment` object.
 
+For large data sets, the matrix can be read in chunk-by-chunk with progressive coercion into a sparse matrix from the `r CRANpkg("Matrix")` package.
+This is performed using `readSparseCounts` and reduces memory usage by not explicitly storing zeroes in memory.
+
 Data from 10X Genomics experiments can be read in using the `read10xCounts` function from the `r Biocpkg("DropletUtils")` package.
 This will automatically generate a `SingleCellExperiment` with a sparse matrix, see the documentation for more details.
 
-`r Biocpkg("scater")` also provides wrapper functions to `kallisto` and `Salmon` for easy and extremely fast quantification of transcript abundance from within R.
-An example of how to use these functions is shown below:
-
-```{r, eval=FALSE}
-# Example if in the kallisto/test directory
-setwd("/home/davis/kallisto/test")
-kallisto_log <- runKallisto("targets.txt", "transcripts.idx", single_end=FALSE,
-            output_prefix="output", verbose=TRUE, n_bootstrap_samples=10)
-sce_test <- readKallistoResults(kallisto_log, read_h5=TRUE)
-sce_test
-```
+`r Biocpkg("scater")` also provides wrapper functions `readSalmonResults` or `readKallistoResults` to import transcript abundances from the `kallisto` and `Salmon` pseudo-aligners.
+This is done using methods from the `r Biocpkg("tximport")` package.
 
 # Transitioning from the `SCESet` class
 

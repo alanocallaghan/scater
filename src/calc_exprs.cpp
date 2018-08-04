@@ -1,47 +1,68 @@
 #include "scater.h"
 
-template <typename T, class V, class M>
-Rcpp::RObject calc_exprs_internal (M mat, 
-        Rcpp::List size_fac_list, Rcpp::IntegerVector sf_to_use, 
-        Rcpp::RObject prior_count, Rcpp::RObject log, 
-        Rcpp::RObject sum, Rcpp::RObject subset) {
+template <class V, class M>
+class normalizer {
+public:
+    normalizer(M mat, Rcpp::List sf_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject genes_sub) : 
+            ptr(mat), vec(mat->get_nrow()), 
+            size_factors(sf_list.size()), current_sfs(sf_list.size()), set_id(sf_to_use), 
+            subset(process_subset_vector(genes_sub, mat, true)), output(subset.size()) {
 
-    // Checking dimensions.
+        const size_t& ncells=ptr->get_ncol();
+        for (size_t i=0; i<sf_list.size(); ++i) {
+            Rcpp::NumericVector current(sf_list[i]);
+            if (current.size() != ncells) { 
+                throw std::runtime_error("length of 'size_fac' does not equal number of columns");
+            }
+            size_factors[i]=current;
+        }
+
+        if (set_id.size()!=ptr->get_nrow()) { 
+            throw std::runtime_error("size factor index vector must be equal to number of genes");
+        }
+        return;
+    }
+
+    Rcpp::NumericVector& get_cell(size_t j) {
+        // Moving the size factors to their own vector to avoid cache misses.
+        for (size_t i=0; i<size_factors.size(); ++i) {
+            current_sfs[i]=size_factors[i][j];
+        }
+
+        auto inIt=ptr->get_const_col(j, vec.begin());
+        auto oIt=output.begin();
+        for (auto s : subset) {
+            (*oIt) = *(inIt + s) / current_sfs[set_id[s]];
+            ++oIt;
+        }
+
+        return output;
+    }
+
+    size_t get_output_nrow() const {
+        return subset.size();
+    }
+private:        
+    M ptr;
+    V vec;
+
+    std::vector<Rcpp::NumericVector> size_factors;
+    std::vector<double> current_sfs;
+    Rcpp::IntegerVector set_id;
+
+    Rcpp::IntegerVector subset;
+    Rcpp::NumericVector output;
+};
+
+/* Function to compute normalized expression values. */
+
+template <class V, class M>
+Rcpp::RObject norm_exprs_internal(M mat, Rcpp::List size_fac_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject prior_count, Rcpp::RObject log, Rcpp::RObject subset) {
+    normalizer<V, M> norm(mat, size_fac_list, sf_to_use, subset);
+    const size_t slen=norm.get_output_nrow();
     const size_t ncells=mat->get_ncol();
-    const size_t ngenes=mat->get_nrow();
-    Rcpp::IntegerVector subout=process_subset_vector(subset, mat, true);
-    const size_t slen=subout.size();
 
-    // Checking size factors.
-    const size_t nsfsets=size_fac_list.size();
-    std::vector<Rcpp::NumericVector> size_factors(nsfsets);
-    std::vector<Rcpp::NumericVector::iterator> size_factors_it(nsfsets);
-    auto sfIt=size_factors.begin();
-    auto sfiIt=size_factors_it.begin();
-    for (auto sflIt=size_fac_list.begin(); sflIt!=size_fac_list.end(); ++sflIt, ++sfIt, ++sfiIt) {
-        (*sfIt)=(*sflIt);
-        if (sfIt->size() != ncells) { 
-            throw std::runtime_error("length of 'size_fac' does not equal number of columns");
-        }
-        (*sfiIt)=sfIt->begin();
-    }
-    
-    // Checking size factor choices and subsetting them.
-    if (sf_to_use.size()!=ngenes) { 
-        throw std::runtime_error("size factor index vector must be equal to number of genes");
-    }
-    std::vector<size_t> chosen_sf_dex(slen);
-    auto csdIt=chosen_sf_dex.begin();
-    for (auto s : subout) { 
-        const auto& current=sf_to_use[s];
-        if (current < 1 || current > nsfsets) { 
-            throw std::runtime_error("size factor set index is out of range");
-        }
-        (*csdIt)=current-1;
-        ++csdIt;
-    }
-
-    // Checking scalars.
+    // Pulling out the scalars.
     if (prior_count.sexp_type()!=REALSXP || LENGTH(prior_count)!=1) { 
         throw std::runtime_error("'prior_count' should be a numeric scalar");
     }
@@ -50,89 +71,82 @@ Rcpp::RObject calc_exprs_internal (M mat,
         throw std::runtime_error("log specification should be a logical scalar"); 
     }
     const bool dolog=Rcpp::LogicalVector(log)[0];
-    if (sum.sexp_type()!=LGLSXP || LENGTH(sum)!=1) {
-        throw std::runtime_error("sum specification should be a sumical scalar"); 
-    }
-    const bool dosum=Rcpp::LogicalVector(sum)[0];
 
-    // Setting up output object (complicated setup to avoid initializing the matrix if summing).
-    V input(ngenes);
-    Rcpp::NumericVector output(slen);
-    const bool preserve_sparse=(prior==1 || !dolog); // Deciding whether or not to preserve sparsity.
+    // Deciding whether or not to preserve sparsity in the output.
+    const bool preserve_sparse=(prior==1 || !dolog); 
+    beachmat::output_param OPARAM(mat->get_matrix_type(), true, preserve_sparse);
+    OPARAM.optimize_chunk_dims(slen, ncells);
+    auto optr=beachmat::create_numeric_output(slen, ncells, OPARAM);
 
-    std::vector<std::unique_ptr<beachmat::numeric_output> > holder;
-    beachmat::numeric_output* optr=NULL;
-    if (!dosum) { 
-        beachmat::output_param OPARAM(mat->get_matrix_type(), true, preserve_sparse);
-        OPARAM.optimize_chunk_dims(slen, ncells);
-        holder.push_back(beachmat::create_numeric_output(slen, ncells, OPARAM));
-        optr=holder.front().get();
-    }
-
-    /* Computing normalized expression values for each cell, plus a prior.
-     * We may or may not log-transform, and we may or may not sum across genes.
-     */
+    // Computing normalized expression values for each cell (plus a prior, if log-transforming).
     for (size_t c=0; c<ncells; ++c) {
-        auto inIt=mat->get_const_col(c, input.begin());
-        auto oIt=output.begin();
-        auto csdIt=chosen_sf_dex.begin();
+        auto current_cell=norm.get_cell(c);
 
-        for (const auto& s : subout) {
-            double tmp=*(inIt+s);
-
-            if (!tmp && preserve_sparse) { // Ensure that it doesn't get turned into some slightly non-zero value.
-                if (!dosum) {
-                    (*oIt)=0;
-                }
-            } else {            
-                tmp/=*size_factors_it[*csdIt];
-                
-                if (dosum) { 
-                    (*oIt)+=tmp;
-                } else if (dolog) { 
-                    (*oIt)=std::log(tmp + prior)/M_LN2;
-                } else {
-                    (*oIt)=tmp;
+        if (dolog) {
+            for (auto& val : current_cell) {
+                if (!val && preserve_sparse) { // Ensure that it doesn't get turned into some slightly non-zero value.
+                    ;
+                } else { 
+                    val=std::log(val + prior)/M_LN2;
                 }
             }
-
-            ++oIt;
-            ++csdIt;
         }
           
-        // Incrementing all the size factor iterators.
-        for (auto&& sIt : size_factors_it) {
-            ++sIt;
-        }
-
-        // Adding the result.
-        if (!dosum) {
-            optr->set_col(c, output.begin());
-        }
+        optr->set_col(c, current_cell.begin());
     }
 
-    // Cleaning up expected output.
-    if (dosum) {
-        if (dolog) {
-            for (auto&& o : output) {
-                o=std::log(o)/M_LN2;
-            }
-        }
-        return output;
-    } else {
-        return optr->yield();
-    }
+    return optr->yield();
 }
 
-SEXP calc_exprs(SEXP counts, SEXP size_fac, SEXP sf_use, SEXP prior_count, SEXP log, SEXP sum, SEXP subset) {
+SEXP norm_exprs(SEXP counts, SEXP size_fac, SEXP sf_use, SEXP prior_count, SEXP log, SEXP subset) {
     BEGIN_RCPP
     auto mattype=beachmat::find_sexp_type(counts);
     if (mattype==INTSXP) {
         auto mat=beachmat::create_integer_matrix(counts);
-        return calc_exprs_internal<int, Rcpp::IntegerVector>(mat.get(), size_fac, sf_use, prior_count, log, sum, subset);
+        return norm_exprs_internal<Rcpp::IntegerVector>(mat.get(), size_fac, sf_use, prior_count, log, subset);
     } else if (mattype==REALSXP) {
         auto mat=beachmat::create_numeric_matrix(counts);
-        return calc_exprs_internal<double, Rcpp::NumericVector>(mat.get(), size_fac, sf_use, prior_count, log, sum, subset);
+        return norm_exprs_internal<Rcpp::NumericVector>(mat.get(), size_fac, sf_use, prior_count, log, subset);
+    } else {
+        throw std::runtime_error("unacceptable matrix type");
+    }
+    END_RCPP
+}
+
+/* Function to compute average normalized expression values. */
+
+template <class V, class M>
+Rcpp::RObject ave_exprs_internal(M mat, Rcpp::List size_fac_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject subset) {
+    normalizer<V, M> norm(mat, size_fac_list, sf_to_use, subset);
+    const size_t slen=norm.get_output_nrow();
+    const size_t ncells=mat->get_ncol();
+
+    // Averaging normalized expression values for each gene.
+    Rcpp::NumericVector output(slen);
+    for (size_t c=0; c<ncells; ++c) {
+        auto current_cell=norm.get_cell(c);
+
+        auto oIt=output.begin();
+        for (auto ccIt=current_cell.begin(); ccIt!=current_cell.end(); ++ccIt, ++oIt) {
+            (*oIt)+=(*ccIt);
+        }
+    }
+
+    for (auto& o : output) {
+        o/=ncells;
+    }
+    return output;
+}
+
+SEXP ave_exprs(SEXP counts, SEXP size_fac, SEXP sf_use, SEXP subset) {
+    BEGIN_RCPP
+    auto mattype=beachmat::find_sexp_type(counts);
+    if (mattype==INTSXP) {
+        auto mat=beachmat::create_integer_matrix(counts);
+        return ave_exprs_internal<Rcpp::IntegerVector>(mat.get(), size_fac, sf_use, subset);
+    } else if (mattype==REALSXP) {
+        auto mat=beachmat::create_numeric_matrix(counts);
+        return ave_exprs_internal<Rcpp::NumericVector>(mat.get(), size_fac, sf_use, subset);
     } else {
         throw std::runtime_error("unacceptable matrix type");
     }

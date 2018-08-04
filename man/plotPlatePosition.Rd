@@ -6,8 +6,8 @@
 \usage{
 plotPlatePosition(object, plate_position = NULL, colour_by = NULL,
   size_by = NULL, shape_by = NULL, by_exprs_values = "logcounts",
-  by_show_single = FALSE, legend = TRUE, theme_size = 24, alpha = 0.6,
-  size = 24)
+  by_show_single = FALSE, add_legend = TRUE, theme_size = 24,
+  point_alpha = 0.6, point_size = 24)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -27,13 +27,13 @@ for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.}
 
 \item{by_show_single}{Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.}
 
-\item{legend}{Logical scalar specifying whether a legend should be shown.}
+\item{add_legend}{Logical scalar specifying whether a legend should be shown.}
 
 \item{theme_size}{Numeric scalar, see \code{?"\link{scater-plot-args}"} for details.}
 
-\item{alpha}{Numeric scalar specifying the transparency of the points, see \code{?"\link{scater-plot-args}"} for details.}
+\item{point_alpha}{Numeric scalar specifying the transparency of the points, see \code{?"\link{scater-plot-args}"} for details.}
 
-\item{size}{Numeric scalar specifying the size of the points, see \code{?"\link{scater-plot-args}"} for details.}
+\item{point_size}{Numeric scalar specifying the size of the points, see \code{?"\link{scater-plot-args}"} for details.}
 }
 \value{
 A ggplot object.

@@ -8,7 +8,6 @@
 \alias{stand_exprs<-}
 \alias{fpkm}
 \alias{fpkm<-}
-\alias{norm_exprs}
 \alias{exprs}
 \alias{exprs,SingleCellExperiment-method,}
 \alias{exprs<-,SingleCellExperiment,ANY-method}

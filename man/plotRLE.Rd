@@ -6,8 +6,8 @@
 \title{Plot a relative log expression (RLE) plot}
 \usage{
 plotRLE(object, exprs_values = "logcounts", exprs_logged = TRUE,
-  style = "minimal", legend = TRUE, ordering = NULL, colour_by = NULL,
-  by_exprs_values = exprs_values, ...)
+  style = "minimal", legend = TRUE, ordering = NULL,
+  colour_by = NULL, by_exprs_values = exprs_values, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}

@@ -26,6 +26,9 @@
 #' In such cases, arguments such as \code{ntop}, \code{feature_set}, \code{exprs_values} and \code{scale_features} will be ignored. 
 #'
 #' @export
+#' @importFrom stats cmdscale dist
+#' @importFrom SingleCellExperiment reducedDim reducedDim<-
+#'
 #' @rdname runMDS
 #' @seealso 
 #' \code{\link{cmdscale}},
@@ -63,7 +66,7 @@ runMDS <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
     }
 
     vals <- as.matrix(vals) # protect against alternative matrix inputs.
-    cell_dist <- stats::dist(vals, method = method)
+    cell_dist <- dist(vals, method = method)
     mds_out <- cmdscale(cell_dist, k = ncomponents)
     reducedDim(object, "MDS") <- mds_out
     object

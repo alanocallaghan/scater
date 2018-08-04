@@ -3,7 +3,6 @@
 \docType{methods}
 \name{arrange}
 \alias{arrange}
-\alias{arrange}
 \alias{arrange,SingleCellExperiment-method}
 \title{Arrange columns (cells) of a SingleCellExperiment object}
 \usage{

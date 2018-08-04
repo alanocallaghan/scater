@@ -3,7 +3,6 @@
 \docType{methods}
 \name{rename}
 \alias{rename}
-\alias{rename}
 \alias{rename,SingleCellExperiment-method}
 \title{Rename variables of \code{colData(object)}.}
 \usage{

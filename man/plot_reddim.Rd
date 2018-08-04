@@ -12,16 +12,20 @@
 \alias{plotPCA}
 \title{Plot specific reduced dimensions}
 \usage{
-plotPCASCE(object, ..., rerun = FALSE, ncomponents = 2, run_args = list())
+plotPCASCE(object, ..., rerun = FALSE, ncomponents = 2,
+  run_args = list())
 
-plotTSNE(object, ..., rerun = FALSE, ncomponents = 2, run_args = list())
+plotTSNE(object, ..., rerun = FALSE, ncomponents = 2,
+  run_args = list())
 
-plotUMAP(object, ..., rerun = FALSE, ncomponents = 2, run_args = list())
+plotUMAP(object, ..., rerun = FALSE, ncomponents = 2,
+  run_args = list())
 
 plotDiffusionMap(object, ..., rerun = FALSE, ncomponents = 2,
   run_args = list())
 
-plotMDS(object, ..., rerun = FALSE, ncomponents = 2, run_args = list())
+plotMDS(object, ..., rerun = FALSE, ncomponents = 2,
+  run_args = list())
 
 \S4method{plotPCA}{SingleCellExperiment}(object, ..., rerun = FALSE,
   ncomponents = 2, run_args = list())

@@ -109,7 +109,7 @@ The circle indicates the median expression of each gene, with which genes are so
 By default, "expression" is defined using the feature counts (if available), but other expression values can be used instead by changing `exprs_values`.
 
 ```{r plot-highest, fig.asp=2, fig.wide=TRUE}
-plotQC(example_sce, type = "highest-expression", exprs_values = "counts")
+plotHighestExprs(example_sce, exprs_values = "counts")
 ```
 
 We expect to see the "usual suspects", i.e., mitochondrial genes, actin, ribosomal protein, MALAT1. 
@@ -122,7 +122,7 @@ Another useful plot is that of the frequency of expression (i.e., number of cell
 These two metrics should be positively correlated with each other for most genes.
  
 ```{r plot-qc-exprs-freq-vs-mean-default}
-plotQC(example_sce, type = "exprs-freq-vs-mean")
+plotExprsFreqVsMean(example_sce)
 ```
 
 Outliers from the trend may warrant further investigation.
@@ -195,7 +195,7 @@ p1 <- plotColData(example_sce, x = "total_counts",
 p2 <- plotColData(example_sce, x = "pct_counts_feature_control",
     y = "total_features_by_counts")
 p3 <- plotColData(example_sce, x = "pct_counts_feature_control",
-    y = "pct_counts_top_50_features")
+    y = "pct_counts_in_top_50_features")
 multiplot(p1, p2, p3, cols = 3)
 ```
 
@@ -203,10 +203,8 @@ This is especially useful for side-by-side comparisons between control sets, as 
 A plot for non-control cells is shown on the left while the plot for the controls is shown on the right.
 
 ```{r highest-2, fig.wide=TRUE}
-p1 <- plotQC(example_sce[, !example_sce$is_cell_control],
-    type = "highest-expression")
-p2 <- plotQC(example_sce[, example_sce$is_cell_control],
-    type = "highest-expression")
+p1 <- plotHighestExprs(example_sce[, !example_sce$is_cell_control])
+p2 <- plotHighestExprs(example_sce[, example_sce$is_cell_control])
 multiplot(p1, p2, cols = 2)
 ```
 
@@ -295,29 +293,22 @@ Such genes are often (but not always) uninteresting for characterizing populatio
 
 # Relationships between experimental factors and expression
 
-We can investigate the relative importance of different explanatory factors with some of the `plotQC` function options. 
+We can investigate the relative importance of different explanatory factors with the `plotExplanatoryVariables` function.
 We compute the $R^2$ for each factor in `colData(example_sce)` when fitting a linear model regressing expression values for each gene against that factor.
 This is best done on the log-expression values to reduce the effect of the mean on the variance - hence, we run `normalize` first.
 
 ```{r plot-qc-expl-factors-all}
 example_sce <- normalize(example_sce)
-plotQC(example_sce, type = "expl")
+plotExplanatoryVariables(example_sce)
 ```
 
 Each line corresponds to one factor and represents the distribution of R^2^ values across all genes.
 Alternatively, we can choose a subset of factors to plot in this manner.
 
 ```{r plot-qc-expl-variables-select-variables}
-plotQC(example_sce, type = "expl",
+plotExplanatoryVariables(example_sce,
     variables = c("total_features_by_counts", "total_counts",
         "Mutation_Status", "Treatment", "Cell_Cycle"))
-```
-
-We can also produce pairwise scatter plots of potential explanatory variables.
-Variables are ranked by their median percentage of expression variance explained in a linear model.
-
-```{r plot-qc-pairs-pc}
-plotQC(example_sce, type = "expl", method = "pairs", theme_size = 6)
 ```
 
 In this small dataset, `total_counts` and `total_features_by_counts` explain a very large proportion of the variance in feature expression. 

@@ -46,6 +46,8 @@
 #' @aliases plotExpression
 #' @import ggplot2
 #' @importFrom ggbeeswarm geom_quasirandom
+#' @importFrom SummarizedExperiment assayNames
+#'
 #' @export
 #'
 #' @examples

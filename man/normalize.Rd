@@ -7,17 +7,15 @@
 \alias{normalise}
 \alias{normalize,SingleCellExperiment-method}
 \alias{normalise,SingleCellExperiment-method}
-\alias{normalize,SingleCellExperiment-method}
-\alias{normalize}
-\alias{normalise}
 \title{Normalise a SingleCellExperiment object using pre-computed size factors}
 \usage{
 normalizeSCE(object, exprs_values = "counts", return_log = TRUE,
   log_exprs_offset = NULL, centre_size_factors = TRUE,
   preserve_zeroes = FALSE)
 
-\S4method{normalize}{SingleCellExperiment}(object, exprs_values = "counts",
-  return_log = TRUE, log_exprs_offset = NULL, centre_size_factors = TRUE,
+\S4method{normalize}{SingleCellExperiment}(object,
+  exprs_values = "counts", return_log = TRUE,
+  log_exprs_offset = NULL, centre_size_factors = TRUE,
   preserve_zeroes = FALSE)
 
 normalise(...)

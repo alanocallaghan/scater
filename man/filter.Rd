@@ -3,7 +3,6 @@
 \docType{methods}
 \name{filter}
 \alias{filter}
-\alias{filter}
 \alias{filter,SingleCellExperiment-method}
 \title{Return \code{SingleCellExperiment} with cells matching conditions.}
 \usage{

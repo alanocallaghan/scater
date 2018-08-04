@@ -4,7 +4,7 @@
 \alias{calculateFPKM}
 \title{Calculate fragments per kilobase of exon per million reads mapped (FPKM)}
 \usage{
-calculateFPKM(object, effective_length, ...)
+calculateFPKM(object, effective_length, ..., subset_row = NULL)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object or a numeric matrix of counts.}
@@ -12,6 +12,8 @@ calculateFPKM(object, effective_length, ...)
 \item{effective_length}{Numeric vector providing the effective length for each feature in \code{object}.}
 
 \item{...}{Further arguments to pass to \code{\link{calculateCPM}}.}
+
+\item{subset_row}{A vector specifying the subset of rows of \code{object} for which to return a result.}
 }
 \value{
 A numeric matrix of FPKM values.
