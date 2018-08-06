@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
-\section{Changes in version 1.9.12, Bioconductor 3.8 Release}{
+\section{Changes in version 1.9.13, Bioconductor 3.8 Release}{
   \itemize{
     \item Fixes to all violin plots to ensure scatter matches up with violin outlines.
     \item Rectangle categorical/categorical plots collapse to mirrored bar plots when either factor contains only one level.
@@ -22,6 +22,7 @@
     \item Removed obsolete fields in calculateQCMetrics(), moved processing into C++ for a single-pass algorithm.
     \item Added sumCountsAcrossFeatures() to sum counts across multiple redundant features.
     Deprecated summariseExprsAcrossFeatures().
+    \item All plotting functions can now access internal fields by using a character vector with NA as the first element.
   }
 }
 
