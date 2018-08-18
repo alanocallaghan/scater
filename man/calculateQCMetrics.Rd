@@ -7,7 +7,7 @@
 calculateQCMetrics(object, exprs_values = "counts",
   feature_controls = NULL, cell_controls = NULL, percent_top = c(50,
   100, 200, 500), detection_limit = 0, use_spikes = TRUE,
-  compact = FALSE)
+  compact = FALSE, BPPARAM = SerialParam())
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values, usually counts.}
@@ -29,6 +29,8 @@ See \code{pct_X_top_Y_features} below for more details.}
 \item{use_spikes}{A logical scalar indicating whether existing spike-in sets in \code{object} should be automatically added to \code{feature_controls}, see \code{?\link{isSpike}}.}
 
 \item{compact}{A logical scalar indicating whether the metrics should be returned in a compact format as a nested DataFrame.}
+
+\item{BPPARAM}{A BiocParallelParam object specifying whether the QC calculations should be parallelized.}
 }
 \value{
 A SingleCellExperiment object containing QC metrics in the row and column metadata.
