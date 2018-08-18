@@ -19,7 +19,9 @@
     \item Removed runKallisto() and runSalmon().
     \item Switched readTxResults() to use tximport.
     Switched readSalmonResults() and readKallistoResults() to use readTxResults().
-    \item Removed obsolete fields in calculateQCMetrics(), moved processing into C++ for a single-pass algorithm.
+    \item Removed obsolete fields in calculateQCMetrics().
+    Moved processing into C++ for a single-pass algorithm.
+    Supported parallelization across cells for QC computations.
     \item Added sumCountsAcrossFeatures() to sum counts across multiple redundant features.
     Deprecated summariseExprsAcrossFeatures().
     \item All plotting functions can now access internal fields by using a character vector with NA as the first element.
