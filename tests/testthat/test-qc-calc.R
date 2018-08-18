@@ -136,7 +136,7 @@ test_that("we can compute standard QC metrics with cell controls", {
 })
 
 #######################################################################
-# Responds to sparse matrices.
+# Responds to special settings: 
 
 library(Matrix)
 test_that("we can compute standard QC metrics on sparse counts matrix", {
@@ -154,6 +154,26 @@ test_that("we can compute standard QC metrics on sparse counts matrix", {
     ref <- calculateQCMetrics(ref, feature_controls=list(set1=1:20))
     expect_equal(rowData(ref), rowData(sparsified))
     expect_equal(colData(ref), colData(sparsified))
+})
+
+test_that("we can compute standard QC metrics across multiple cores", {
+    out <- calculateQCMetrics(original, feature_controls = list(set1 = 1:20), cell_controls=list(whee=5:10))
+    out2 <- calculateQCMetrics(original, feature_controls = list(set1 = 1:20), cell_controls=list(whee=5:10), BPPARAM=MulticoreParam(2))
+    expect_identical(out, out2)
+    out3 <- calculateQCMetrics(original, feature_controls = list(set1 = 1:20), cell_controls=list(whee=5:10), BPPARAM=SnowParam(3))
+    expect_identical(out, out3)
+
+    out <- calculateQCMetrics(original, cell_controls=list(whee=5:10, yippe=1:4))
+    out2 <- calculateQCMetrics(original, cell_controls=list(whee=5:10, yippe=1:4), BPPARAM=MulticoreParam(2))
+    expect_identical(out, out2)
+    out3 <- calculateQCMetrics(original, cell_controls=list(whee=5:10, yippe=1:4), BPPARAM=SnowParam(3))
+    expect_identical(out, out3)
+
+    out <- calculateQCMetrics(original, feature_controls = list(set1 = 1:20, whee=5:10))
+    out2 <- calculateQCMetrics(original, feature_controls = list(set1 = 1:20, whee=5:10), BPPARAM=MulticoreParam(2))
+    expect_identical(out, out2)
+    out3 <- calculateQCMetrics(original, feature_controls = list(set1 = 1:20, whee=5:10), BPPARAM=SnowParam(3))
+    expect_identical(out, out3)
 })
 
 #######################################################################
