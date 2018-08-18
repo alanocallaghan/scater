@@ -63,14 +63,8 @@ Rcpp::RObject norm_exprs_internal(M mat, Rcpp::List size_fac_list, Rcpp::Integer
     const size_t ncells=mat->get_ncol();
 
     // Pulling out the scalars.
-    if (prior_count.sexp_type()!=REALSXP || LENGTH(prior_count)!=1) { 
-        throw std::runtime_error("'prior_count' should be a numeric scalar");
-    }
-    const double prior=Rcpp::NumericVector(prior_count)[0];
-    if (log.sexp_type()!=LGLSXP || LENGTH(log)!=1) {
-        throw std::runtime_error("log specification should be a logical scalar"); 
-    }
-    const bool dolog=Rcpp::LogicalVector(log)[0];
+    const double prior=check_numeric_scalar(prior_count, "prior count");
+    const bool dolog=check_logical_scalar(log, "log specification");
 
     // Deciding whether or not to preserve sparsity in the output.
     const bool preserve_sparse=(prior==1 || !dolog); 
