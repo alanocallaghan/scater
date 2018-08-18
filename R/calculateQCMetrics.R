@@ -14,6 +14,7 @@
 #' @param detection_limit A numeric scalar to be passed to \code{\link{nexprs}}, specifying the lower detection limit for expression.
 #' @param use_spikes A logical scalar indicating whether existing spike-in sets in \code{object} should be automatically added to \code{feature_controls}, see \code{?\link{isSpike}}.
 #' @param compact A logical scalar indicating whether the metrics should be returned in a compact format as a nested DataFrame.
+#' @param BPPARAM A BiocParallelParam object specifying whether the QC calculations should be parallelized. 
 #'
 #' @details 
 #' This function calculates useful quality control metrics to help with pre-processing of data and identification of potentially problematic features and cells. 
@@ -156,6 +157,8 @@
 #' @importFrom methods is 
 #' @importFrom SummarizedExperiment assay rowData rowData<- colData colData<-
 #' @importFrom SingleCellExperiment isSpike spikeNames
+#' @importFrom BiocParallel SerialParam bpmapply bpnworkers
+#' @importFrom utils head tail
 #'
 #' @examples
 #' data("sc_example_counts")
@@ -175,7 +178,8 @@
 #'      feature_controls = list(ERCC = 1:40))
 #' 
 calculateQCMetrics <- function(object, exprs_values="counts", feature_controls = NULL, cell_controls = NULL,
-        percent_top = c(50, 100, 200, 500), detection_limit = 0, use_spikes = TRUE, compact = FALSE) {
+        percent_top = c(50, 100, 200, 500), detection_limit = 0, use_spikes = TRUE, compact = FALSE, 
+        BPPARAM=SerialParam()) {
 
     if ( !is(object, "SingleCellExperiment")) {
         stop("object must be a SingleCellExperiment")
@@ -209,10 +213,43 @@ calculateQCMetrics <- function(object, exprs_values="counts", feature_controls =
     all_cell_sets <- cell_out$sets
     cell_set_cdata <- cell_out$metadata
 
-    # Computing all QC metrics.
-    out <- .Call(cxx_combined_qc, exprs_mat, all_feature_sets, all_cell_sets, percent_top, detection_limit)
+    # Computing all QC metrics, with cells split across workers. 
+    n.cores <- bpnworkers(BPPARAM)
+    boundaries <- as.integer(seq(from = 0L, to = ncol(exprs_mat), length.out = n.cores + 1L)) # zero indexed.
+    work.ends <- tail(boundaries, -1L)
+    work.starts <- head(boundaries, -1L)
 
-    cell_stats_by_feature_set <- out[[1]]
+    bp.out <- bpmapply(.compute_qc_metrics, start=work.starts, end=work.ends,
+            MoreArgs=list(exprs_mat=exprs_mat, 
+                all_feature_sets=all_feature_sets, 
+                all_cell_sets=all_cell_sets, 
+                percent_top=percent_top, 
+                detection_limit=detection_limit),
+            BPPARAM=BPPARAM, SIMPLIFY=FALSE, USE.NAMES=FALSE)
+
+    # Aggregating across cores (concatenating pre-cell statistics, summing per-feature statistics).
+    cell_stats_by_feature_set <- bp.out[[1]][[1]]
+    feature_stats_by_cell_set <- bp.out[[1]][[2]]
+    if (n.cores > 1L) {
+        for (i in seq_along(cell_stats_by_feature_set)) {
+            current <- lapply(bp.out, FUN=function(sublist) { sublist[[1]][[i]] })
+            cell_stats_by_feature_set[[i]] <- list(
+                unlist(lapply(current, "[[", i=1L)),  # total count
+                unlist(lapply(current, "[[", i=2L)),  # total features 
+                do.call(cbind, lapply(current, "[[", i=3L)) # percentage in top X.
+            )
+        }
+        
+        for (i in seq_along(feature_stats_by_cell_set)) {
+            current <- lapply(bp.out, FUN=function(sublist) { sublist[[2]][[i]] })
+            feature_stats_by_cell_set[[i]] <- list(
+                Reduce("+", lapply(current, "[[", i=1)), # total count
+                Reduce("+", lapply(current, "[[", i=2))  # total non-zero cells
+            )
+        }
+    }
+
+    # Formatting the output of the loop.
     names(cell_stats_by_feature_set) <- c("all", names(all_feature_sets))
     total_libsize <- cell_stats_by_feature_set$all[[1]]
 
@@ -228,7 +265,6 @@ calculateQCMetrics <- function(object, exprs_values="counts", feature_controls =
             overall_total=overall_total)
     }
 
-    feature_stats_by_cell_set <- out[[2]]
     names(feature_stats_by_cell_set) <- c("all", names(all_cell_sets))
     total_per_feature <- feature_stats_by_cell_set$all[[1]]
 
@@ -301,6 +337,13 @@ calculateQCMetrics <- function(object, exprs_values="counts", feature_controls =
     }
 
     return(list(sets=all_sets, metadata=as_logical))
+}
+
+.compute_qc_metrics <- function(exprs_mat, start, end, all_feature_sets, all_cell_sets, percent_top, detection_limit) 
+# A helper function defined in the scater namespace.
+# This avoids the need to reattach scater in bpmapply for SnowParam().
+{
+    .Call(cxx_combined_qc, exprs_mat, start, end, all_feature_sets, all_cell_sets, percent_top, detection_limit)
 }
 
 ##################################################

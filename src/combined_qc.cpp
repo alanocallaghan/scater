@@ -149,7 +149,7 @@ Rcpp::List create_output_per_gene(const per_gene_statistics<T, V>& PGS) {
 /* Main loop for combined_qc. */
 
 template <typename T, class V, class M>
-SEXP combined_qc_internal(M mat, Rcpp::List featcon, Rcpp::List cellcon, Rcpp::IntegerVector topset, V detection_limit) {
+SEXP combined_qc_internal(M mat, Rcpp::IntegerVector start, Rcpp::IntegerVector end, Rcpp::List featcon, Rcpp::List cellcon, Rcpp::IntegerVector topset, V detection_limit) {
     const size_t ncells=mat->get_ncol();
     const size_t ngenes=mat->get_nrow();
 
@@ -158,36 +158,47 @@ SEXP combined_qc_internal(M mat, Rcpp::List featcon, Rcpp::List cellcon, Rcpp::I
     }
     T limit=detection_limit[0];
 
-    // Processing feature controls.
+    // Defining the subset of cells for which to perform the calculation.
+    const size_t firstcell=check_integer_scalar(start, "first cell index");
+    const size_t lastcell=check_integer_scalar(end, "last cell index");
+    if (firstcell > lastcell || lastcell > ncells) {
+        throw std::runtime_error("cell indices for parallel execution are out of range");
+    }
+    const size_t n_usedcells=lastcell - firstcell;
+
+    // Setting up per-cell statistics (for each feature control set).
     const size_t nfcontrols=featcon.size();
     std::vector<Rcpp::IntegerVector> feat_controls(nfcontrols);
 
-    per_cell_statistics<T, V> all_PCS(ncells, limit, ngenes, topset);
+    per_cell_statistics<T, V> all_PCS(n_usedcells, limit, ngenes, topset);
     std::vector<per_cell_statistics<T, V> > control_PCS(nfcontrols);
 
     for (size_t fx=0; fx<nfcontrols; ++fx) {
         feat_controls[fx]=featcon[fx];
-        control_PCS[fx]=per_cell_statistics<T, V>(ncells, limit, feat_controls[fx], topset);
+        control_PCS[fx]=per_cell_statistics<T, V>(n_usedcells, limit, feat_controls[fx], topset);
     }
 
-    // Processing cell controls.
+    // Setting up per-feature statistics (for each cell control set).
     const size_t nccontrols=cellcon.size();
-    std::vector<std::vector<size_t> > chosen_ccs(ncells);
+    std::vector<std::vector<size_t> > chosen_ccs(n_usedcells); 
 
     per_gene_statistics<T, V> all_PGS(ngenes, limit);
     std::vector<per_gene_statistics<T, V> > control_PGS(nccontrols);
     
     for (size_t cx=0; cx<nccontrols; ++cx) {
         Rcpp::IntegerVector current=cellcon[cx];
-        for (auto g : current) {
-            chosen_ccs[g-1].push_back(cx); // converted to zero-based indexing.
+        for (auto curcell : current) {
+            size_t cell_idx=curcell - 1; // converted to zero-based indexing.
+            if (cell_idx >= firstcell && cell_idx < lastcell) { 
+                chosen_ccs[cell_idx].push_back(cx); 
+            }
         }
         control_PGS[cx]=per_gene_statistics<T, V>(ngenes, limit);
     }
 
-    // Running through all cells.
+    // Running through the requested stretch of cells.
     V holder(ngenes);
-    for (size_t c=0; c<ncells; ++c) {
+    for (size_t c=firstcell; c<lastcell; ++c) {
         auto cIt=mat->get_const_col(c, holder.begin());
 
         all_PCS.fill(cIt);
@@ -202,31 +213,31 @@ SEXP combined_qc_internal(M mat, Rcpp::List featcon, Rcpp::List cellcon, Rcpp::I
         }
     }
 
-    // Creating a list for all per-cell statistics.
+    // Creating a list for all per-cell statistics, and again for all per-feature statistics.
     Rcpp::List output_per_cell(1+nfcontrols);
     output_per_cell[0]=create_output_per_cell(all_PCS);
     for (size_t fx=0; fx<nfcontrols; ++fx) { 
-        output_per_cell[fx+1]=create_output_per_cell<T, V>(control_PCS[fx]);
+        output_per_cell[fx+1]=create_output_per_cell(control_PCS[fx]);
     }
 
     Rcpp::List output_per_gene(1+nccontrols);
     output_per_gene[0]=create_output_per_gene(all_PGS);
     for (size_t cx=0; cx<nccontrols; ++cx) { 
-        output_per_gene[cx+1]=create_output_per_gene<T, V>(control_PGS[cx]);
+        output_per_gene[cx+1]=create_output_per_gene(control_PGS[cx]);
     }
 
     return Rcpp::List::create(output_per_cell, output_per_gene);
 }
 
-SEXP combined_qc(SEXP matrix, SEXP featcon, SEXP cellcon, SEXP top, SEXP limit) {
+SEXP combined_qc(SEXP matrix, SEXP start, SEXP end, SEXP featcon, SEXP cellcon, SEXP top, SEXP limit) {
     BEGIN_RCPP
     auto mattype=beachmat::find_sexp_type(matrix);
     if (mattype==INTSXP) {
         auto mat=beachmat::create_integer_matrix(matrix);
-        return combined_qc_internal<int, Rcpp::IntegerVector>(mat.get(), featcon, cellcon, top, limit);
+        return combined_qc_internal<int, Rcpp::IntegerVector>(mat.get(), start, end, featcon, cellcon, top, limit);
     } else if (mattype==REALSXP) {
         auto mat=beachmat::create_numeric_matrix(matrix);
-        return combined_qc_internal<double, Rcpp::NumericVector>(mat.get(), featcon, cellcon, top, limit);
+        return combined_qc_internal<double, Rcpp::NumericVector>(mat.get(), start, end, featcon, cellcon, top, limit);
     } else {
         throw std::runtime_error("unacceptable matrix type");
     }
