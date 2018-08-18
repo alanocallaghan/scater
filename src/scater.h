@@ -42,7 +42,7 @@ SEXP col_above(SEXP, SEXP, SEXP, SEXP);
 
 }
 
-#include "template_methods.h"
+#include "utils.h"
 
 #endif
 

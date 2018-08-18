@@ -1,5 +1,7 @@
-#ifndef TEMPLATE_METHODS_H
-#define TEMPLATE_METHODS_H
+#ifndef UTILS_H
+#define UTILS_H
+
+#include "Rcpp.h"
 
 template<class MPTR>
 Rcpp::IntegerVector process_subset_vector(Rcpp::RObject subset, MPTR mat, bool byrow) {
@@ -16,4 +18,11 @@ Rcpp::IntegerVector process_subset_vector(Rcpp::RObject subset, MPTR mat, bool b
     return sout;
 }
 
+int check_integer_scalar(Rcpp::RObject, const char*);
+
+double check_numeric_scalar(Rcpp::RObject, const char*);
+
+bool check_logical_scalar(Rcpp::RObject, const char*);
+
 #endif
+
