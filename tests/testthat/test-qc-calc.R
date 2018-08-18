@@ -163,16 +163,16 @@ test_that("we can compute standard QC metrics across multiple cores", {
     out3 <- calculateQCMetrics(original, feature_controls = list(set1 = 1:20), cell_controls=list(whee=5:10), BPPARAM=SnowParam(3))
     expect_identical(out, out3)
 
-    out <- calculateQCMetrics(original, cell_controls=list(whee=5:10, yippe=1:4))
-    out2 <- calculateQCMetrics(original, cell_controls=list(whee=5:10, yippe=1:4), BPPARAM=MulticoreParam(2))
+    out <- calculateQCMetrics(original, cell_controls=list(whee=5:10, yippe=20:30))
+    out2 <- calculateQCMetrics(original, cell_controls=list(whee=5:10, yippe=20:30), BPPARAM=MulticoreParam(2))
     expect_identical(out, out2)
-    out3 <- calculateQCMetrics(original, cell_controls=list(whee=5:10, yippe=1:4), BPPARAM=SnowParam(3))
+    out3 <- calculateQCMetrics(original, cell_controls=list(whee=5:10, yippe=20:30), BPPARAM=SnowParam(3))
     expect_identical(out, out3)
 
-    out <- calculateQCMetrics(original, feature_controls = list(set1 = 1:20, whee=5:10))
-    out2 <- calculateQCMetrics(original, feature_controls = list(set1 = 1:20, whee=5:10), BPPARAM=MulticoreParam(2))
+    out <- calculateQCMetrics(original, feature_controls = list(set1 = 1:20, whee=1000:1010))
+    out2 <- calculateQCMetrics(original, feature_controls = list(set1 = 1:20, whee=1000:1010), BPPARAM=MulticoreParam(2))
     expect_identical(out, out2)
-    out3 <- calculateQCMetrics(original, feature_controls = list(set1 = 1:20, whee=5:10), BPPARAM=SnowParam(3))
+    out3 <- calculateQCMetrics(original, feature_controls = list(set1 = 1:20, whee=1000:1010), BPPARAM=SnowParam(3))
     expect_identical(out, out3)
 })
 
