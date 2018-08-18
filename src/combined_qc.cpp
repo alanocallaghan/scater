@@ -68,7 +68,7 @@ struct per_cell_statistics {
     void fill_subset(typename V::iterator it) {
         auto tmp=temporary.begin();
         for (auto sIt=subset.begin(); sIt!=subset.end(); ++sIt, ++tmp) {
-            (*tmp)=*(it + *sIt - 1); // convert to zero indexing.
+            (*tmp)=*(it + *sIt); 
         }
         compute_summaries(temporary.begin(), subset.size());
         return;
@@ -168,14 +168,12 @@ SEXP combined_qc_internal(M mat, Rcpp::IntegerVector start, Rcpp::IntegerVector 
 
     // Setting up per-cell statistics (for each feature control set).
     const size_t nfcontrols=featcon.size();
-    std::vector<Rcpp::IntegerVector> feat_controls(nfcontrols);
-
     per_cell_statistics<T, V> all_PCS(n_usedcells, limit, ngenes, topset);
     std::vector<per_cell_statistics<T, V> > control_PCS(nfcontrols);
 
     for (size_t fx=0; fx<nfcontrols; ++fx) {
-        feat_controls[fx]=featcon[fx];
-        control_PCS[fx]=per_cell_statistics<T, V>(n_usedcells, limit, feat_controls[fx], topset);
+        Rcpp::IntegerVector current=process_subset_vector(featcon[fx], ngenes, false); // converts to zero-index.
+        control_PCS[fx]=per_cell_statistics<T, V>(n_usedcells, limit, current, topset);
     }
 
     // Setting up per-feature statistics (for each cell control set).
@@ -186,11 +184,11 @@ SEXP combined_qc_internal(M mat, Rcpp::IntegerVector start, Rcpp::IntegerVector 
     std::vector<per_gene_statistics<T, V> > control_PGS(nccontrols);
     
     for (size_t cx=0; cx<nccontrols; ++cx) {
-        Rcpp::IntegerVector current=cellcon[cx];
+        Rcpp::IntegerVector current=process_subset_vector(cellcon[cx], ncells, false); // converts to zero-index.
         for (auto curcell : current) {
-            size_t cell_idx=curcell - 1; // converted to zero-based indexing.
-            if (cell_idx >= firstcell && cell_idx < lastcell) { 
-                chosen_ccs[cell_idx].push_back(cx); 
+            size_t cur_index=curcell;
+            if (firstcell <= cur_index && cur_index < lastcell) {
+                chosen_ccs[cur_index - firstcell].push_back(cx); 
             }
         }
         control_PGS[cx]=per_gene_statistics<T, V>(ngenes, limit);
@@ -198,8 +196,8 @@ SEXP combined_qc_internal(M mat, Rcpp::IntegerVector start, Rcpp::IntegerVector 
 
     // Running through the requested stretch of cells.
     V holder(ngenes);
-    for (size_t c=firstcell; c<lastcell; ++c) {
-        auto cIt=mat->get_const_col(c, holder.begin());
+    for (size_t c=0; c<n_usedcells; ++c) {
+        auto cIt=mat->get_const_col(c + firstcell, holder.begin());
 
         all_PCS.fill(cIt);
         for (size_t fx=0; fx<nfcontrols; ++fx) {
