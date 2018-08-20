@@ -65,13 +65,13 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
         object <- object[-to_discard,]
     }
 
-    ## Define expression values to be used
     ## Find the most highly expressed features in this dataset
     exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
     ave_exprs <- rowSums(exprs_mat)
     oo <- order(ave_exprs, decreasing=TRUE)
     chosen <- head(oo, n)
-    exprs_mat <- exprs_mat[chosen,]
+    sub_mat <- exprs_mat[chosen,,drop=FALSE]
+    sub_ave <- ave_exprs[chosen]
 
     ## define feature names for plot
     if (is.null(feature_names_to_plot)) {  
@@ -79,31 +79,29 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
     } else {
         feature_names <- .choose_vis_values(object, feature_names_to_plot, search = "metadata", mode = "row")$val
     }
-    feature_names <- feature_names[chosen]
-    rownames(exprs_mat) <- feature_names
+    sub_names <- feature_names[chosen]
+    rownames(sub_mat) <- sub_names
 
     ## Compute expression values and reshape them for ggplot.
-    df_exprs_by_cell <- as.matrix(t(exprs_mat))
+    df_exprs_by_cell <- t(sub_mat)
 
     if (as_percentage) { 
         total_exprs <- sum(ave_exprs)
-        top50_pctage <- 100 * sum(ave_exprs[chosen]) / total_exprs
+        top_pctage <- 100 * sum(sub_ave) / total_exprs
         df_exprs_by_cell <- 100 * df_exprs_by_cell / colSums(exprs_mat)
     }
 
     df_exprs_by_cell_long <- reshape2::melt(df_exprs_by_cell)
     colnames(df_exprs_by_cell_long) <- c("Cell", "Tag", "value")
-    df_exprs_by_cell_long$Tag <- factor(df_exprs_by_cell_long$Tag, rev(feature_names))
+    df_exprs_by_cell_long$Tag <- factor(df_exprs_by_cell_long$Tag, rev(sub_names)) # rev() so that most highly expressed is last (i.e., highest y-axis).
     
     ## Colouring the individual dashes for the cells.
     if (missing(colour_cells_by)) {
         colour_cells_by <- .qc_hunter(object, paste0("total_features_by_", exprs_values), mode = "column")
     }
     if (!is.null(colour_cells_by)) {
-        colour_out <- .choose_vis_values(object, colour_cells_by, mode = "column", exprs_values = by_exprs_values,
-                                         discard_solo = !by_show_single)
+        colour_out <- .choose_vis_values(object, colour_cells_by, mode = "column", exprs_values = by_exprs_values, discard_solo = !by_show_single)
         colour_cells_by <- colour_out$name
-
         df_exprs_by_cell_long$colour_by <- colour_out$val[df_exprs_by_cell_long$Cell]
         aes_to_use <- aes_string(y="Tag", x="value", colour="colour_by")
     } else {
@@ -115,7 +113,7 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
    
     if (as_percentage) { 
         plot_most_expressed <- plot_most_expressed + 
-            ggtitle(paste0("Top ", n, " account for ", format(top50_pctage, digits = 3), "% of total")) +
+            ggtitle(paste0("Top ", n, " account for ", format(top_pctage, digits = 3), "% of total")) +
             xlab(paste0("% of total ", exprs_values))
     } else {
         plot_most_expressed <- plot_most_expressed + xlab(exprs_values)
@@ -139,14 +137,13 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
     }
 
     ## Adding median expression values for each gene.
-    df_to_plot <- data.frame(Feature=factor(feature_names, levels=rev(feature_names)))
+    df_to_plot <- data.frame(Feature=factor(sub_names, levels=rev(sub_names)))
     if (as_percentage) { 
-        pct_total <- 100 * ave_exprs / total_exprs
-        df_to_plot$pct_total <- pct_total
-        legend_val <- "as.numeric(pct_total)"
+        df_to_plot$pct_total <- 100 * sub_ave / total_exprs
+        legend_val <- "pct_total"
     } else {
-        df_to_plot[[paste0("ave_", exprs_values)]] <- ave_exprs
-        legend_val <- sprintf("as.numeric(ave_%s)", exprs_values)
+        df_to_plot[[paste0("ave_", exprs_values)]] <- sub_ave
+        legend_val <- sprintf("ave_%s", exprs_values)
     }
 
     ## Check if is_feature_control is defined, and using it for colouring of the points.
@@ -156,17 +153,17 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
 
     if (!is.null(controls)) { 
         cont_out <- .choose_vis_values(object, controls, mode = "row", search = "metadata")
-        df_to_plot$is_feature_control <- cont_out$val
+        df_to_plot$is_feature_control <- cont_out$val[chosen]
     
         plot_most_expressed <- plot_most_expressed +
             geom_point(aes_string(x = legend_val, y = "Feature", fill = "is_feature_control"),
-                       data = df_to_plot[chosen,], colour = "gray30", shape = 21) +
+                       data = df_to_plot, colour = "gray30", shape = 21) +
             scale_fill_manual(values = c("aliceblue", "wheat")) +
             guides(fill = guide_legend(title = "Feature control?"))
     } else {
         plot_most_expressed <- plot_most_expressed +
            geom_point(aes_string(x = legend_val, y = "Feature"),
-                      data = df_to_plot[chosen,], fill = "grey80", colour = "grey30", shape = 21) 
+                      data = df_to_plot, fill = "grey80", colour = "grey30", shape = 21) 
     }
 
     plot_most_expressed 
