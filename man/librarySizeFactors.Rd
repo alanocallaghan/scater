@@ -23,5 +23,4 @@ This ensures that the library size adjustment yields values comparable to those 
 \examples{
 data("sc_example_counts")
 summary(librarySizeFactors(sc_example_counts))
-
 }
