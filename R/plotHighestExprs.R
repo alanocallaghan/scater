@@ -65,7 +65,7 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
 
     ## Define expression values to be used
     ## Find the most highly expressed features in this dataset
-    exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
+    exprs_mat <- .delayed_assay(object, exprs_values)
     ave_exprs <- .rowSums(exprs_mat)
     oo <- order(ave_exprs, decreasing=TRUE)
     chosen <- head(oo, n)

@@ -158,7 +158,7 @@ runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
 # pre-specified set of features, if requested. 
 # Also transposing for downstream use (cells are now rows).
 {
-    exprs_mat <- assay(object, i = exprs_values)
+    exprs_mat <- .delayed_assay(object, exprs_values)
     
     if (is.null(feature_set)) {
         rv <- .rowVars(exprs_mat)

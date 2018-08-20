@@ -15,9 +15,7 @@
 #' summary(librarySizeFactors(sc_example_counts))
 #'
 librarySizeFactors <- function(object, exprs_values="counts", subset_row=NULL) {
-    if (is(object, 'SingleCellExperiment')) { 
-        object <- assay(object, i=exprs_values)
-    }
+    object <- .get_delayed_exprs(object, exprs_values)
     lib_sizes <- .colSums(object, rows=subset_row)
     lib_sizes/mean(lib_sizes)
 }
