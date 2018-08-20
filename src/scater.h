@@ -28,14 +28,6 @@ SEXP top_cumprop(SEXP, SEXP);
 SEXP sum_counts(SEXP, SEXP);
 
 
-SEXP row_vars(SEXP, SEXP, SEXP);
-
-SEXP col_vars(SEXP, SEXP, SEXP);
-
-SEXP row_sums(SEXP, SEXP, SEXP);
-
-SEXP col_sums(SEXP, SEXP, SEXP);
-
 SEXP row_above(SEXP, SEXP, SEXP, SEXP);
 
 SEXP col_above(SEXP, SEXP, SEXP, SEXP);

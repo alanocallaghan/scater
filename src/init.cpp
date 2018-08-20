@@ -15,10 +15,6 @@ static const R_CallMethodDef all_call_entries[] = {
 
     REGISTER(sum_counts, 2),
 
-    REGISTER(row_vars, 3),
-    REGISTER(col_vars, 3),
-    REGISTER(row_sums, 3),
-    REGISTER(col_sums, 3),
     REGISTER(row_above, 4),
     REGISTER(col_above, 4),
     {NULL, NULL, 0}
