@@ -50,24 +50,6 @@ test_that("scaling by feature variances work correctly", {
     expect_equal(out, scaled[,head(order(rv[!novar], decreasing=TRUE), 10)])
 })
 
-test_that("total variance calculations work correctly", {
-    out2 <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", ntop = Inf, get_total=TRUE)
-    rv.all <- DelayedMatrixStats::rowVars(DelayedArray(logcounts(normed)))
-    expect_equal(sum(rv.all), out2$total)
-    rv <- DelayedMatrixStats::colVars(DelayedArray(out2$exprs))
-    expect_equal(sum(rv), out2$total)
-
-    out2 <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", feature_set = 1:10, get_total=TRUE)
-    expect_equal(sum(rv.all[1:10]), out2$total)
-    rv <- DelayedMatrixStats::colVars(DelayedArray(out2$exprs))
-    expect_equal(sum(rv), out2$total)
-
-    out2 <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", feature_set = 1:10, get_total=TRUE, scale=TRUE)
-    expect_equal(ncol(out2$exprs), out2$total)
-    rv <- DelayedMatrixStats::colVars(DelayedArray(out2$exprs))
-    expect_equal(sum(rv), ncol(out2$exprs))
-})
-
 #############################################
 # Check PCA.
 
@@ -82,7 +64,7 @@ test_that("runPCA works as expected", {
     normed3 <- runPCA(normed, scale_features = FALSE)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
     expect_equal(sum(attr(reducedDim(normed2), "percentVar")), 1)
-    expect_equal(sum(attr(reducedDim(normed3), "percentVar")), 1) # Total variance should be 100%.
+    expect_equal(sum(attr(reducedDim(normed3), "percentVar")), 1) # Total variance should still be 100% after scaling.
 
     normed3 <- runPCA(normed, ntop = 100)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
@@ -147,7 +129,7 @@ test_that("runPCA works with irlba code", {
     expect_identical(reducedDimNames(normedX), "PCA")     
     expect_identical(dim(reducedDim(normedX, "PCA")), c(ncol(normedX), 4L))
     expect_identical(length(attr(reducedDim(normedX), "percentVar")), 4L)
-    expect_false(isTRUE(all.equal(sum(attr(reducedDim(normedX), "percentVar")), 1)))
+    expect_true(sum(attr(reducedDim(normedX), "percentVar")) < 1)
 
     # Checking that seed setting works.
     set.seed(100)

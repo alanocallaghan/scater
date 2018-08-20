@@ -53,6 +53,8 @@
 #'
 #' @export
 #' @importFrom stats prcomp
+#' @importFrom DelayedMatrixStats colVars
+#' @importFrom DelayedArray DelayedArray 
 #'
 #' @author Aaron Lun, based on code by Davis McCarthy
 #'
@@ -72,8 +74,8 @@
 runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
        ntop = 500, exprs_values = "logcounts", feature_set = NULL, scale_features = TRUE, 
        use_coldata = FALSE, selected_variables = NULL, detect_outliers = FALSE,
-       rand_seed = NULL, ...) {
-
+       rand_seed = NULL, ...) 
+{
     if ( use_coldata ) {
         if ( is.null(selected_variables) ) {
             selected_variables <- list()
@@ -99,18 +101,12 @@ runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
         for (it in seq_along(selected_variables)) {
             exprs_to_plot[,it] <- .choose_vis_values(object, selected_variables[[it]], mode = "column", search = "metadata")$val
         }
-
         if (scale_features) {
             exprs_to_plot <- .scale_columns(exprs_to_plot)
-            total_var <- ncol(exprs_to_plot)
-        } else {
-            total.var <- sum(.colVars(DelayedArray(exprs_to_plot)))
         }
 
     } else {
-        processed <- .get_mat_for_reddim(object, exprs_values = exprs_values, ntop = ntop, feature_set = feature_set, scale = scale_features, get_total = TRUE)
-        exprs_to_plot <- processed$exprs
-        total_var <- processed$total
+        exprs_to_plot <- .get_mat_for_reddim(object, exprs_values = exprs_values, ntop = ntop, feature_set = feature_set, scale = scale_features)
     }
 
     ## conduct outlier detection
@@ -130,6 +126,8 @@ runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
         exprs_to_plot <- as.matrix(exprs_to_plot)
         ncomponents <- min(c(ncomponents, dim(exprs_to_plot)))
         pca <- prcomp(exprs_to_plot, rank. = ncomponents)
+        percentVar <- pca$sdev ^ 2
+        percentVar <- percentVar / sum(percentVar)
 
     } else if (method=="irlba") {
         if (!is.null(rand_seed)) {
@@ -139,13 +137,12 @@ runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
 
         ncomponents <- min(c(ncomponents, dim(exprs_to_plot)-1L))
         pca <- irlba::prcomp_irlba(exprs_to_plot, n = ncomponents, ...)
+        percentVar <- pca$sdev ^ 2 / sum(colVars(DelayedArray(exprs_to_plot))) # as not all singular values are computed.
     }
 
-    percentVar <- pca$sdev ^ 2 / total_var
+    # Saving the results
     pcs <- pca$x
     attr(pcs, "percentVar") <- percentVar
-
-    # Saving the results
     if (use_coldata) {
         reducedDim(object, "PCA_coldata") <- pcs
     } else {
@@ -158,13 +155,14 @@ runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
 #' @importFrom SummarizedExperiment assay
 #' @importFrom BiocGenerics t
 #' @importFrom DelayedArray DelayedArray
-.get_mat_for_reddim <- function(object, exprs_values, feature_set=NULL, ntop=500, scale=FALSE, get_total=FALSE) 
+#' @importFrom DelayedMatrixStats rowVars
+.get_mat_for_reddim <- function(object, exprs_values, feature_set=NULL, ntop=500, scale=FALSE) 
 # Picking the 'ntop' most highly variable features or just using a pre-specified set of features.
 # Also removing zero-variance columns and scaling the variance of each column.
 # Finally, transposing for downstream use (cells are now rows).
 {
     exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
-    rv <- .rowVars(DelayedArray(exprs_mat))
+    rv <- rowVars(DelayedArray(exprs_mat))
 
     if (is.null(feature_set)) {
         o <- order(rv, decreasing = TRUE)
@@ -182,20 +180,17 @@ runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
         rv <- rep(1, ncol(exprs_to_plot))
     }
 
-    if (!get_total) {
-        exprs_to_plot
-    } else {
-        list(exprs=exprs_to_plot, total=sum(rv))        
-    }
+    exprs_to_plot
 }
 
 #' @importFrom DelayedArray DelayedArray
+#' @importFrom DelayedMatrixStats colVars
 .scale_columns <- function(mat, vars=NULL) 
 # We scale by the standard deviation, which also changes the centre.
 # However, we don't care much about this, as we center in prcomp() anyway.
 {
     if (is.null(vars)) {
-        vars <- .colVars(DelayedArray(mat))
+        vars <- colVars(DelayedArray(mat))
     }
     keep_feature <- vars > 1e-8
     keep_feature[is.na(keep_feature)] <- FALSE
