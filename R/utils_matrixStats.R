@@ -1,5 +1,3 @@
-# Convenience callers to DelayedMatrixStats functions.
-
 #' @importFrom SummarizedExperiment assay
 #' @importFrom BiocGenerics rownames
 #' @importFrom DelayedArray DelayedArray
@@ -13,33 +11,30 @@
     out
 }
 
-#' @importFrom methods is
-#' @importClassesFrom SingleCellExperiment SingleCellExperiment
-#' @importFrom DelayedArray DelayedArray
-.get_delayed_exprs <- function(x, exprs_values) {
-    if (is(x, "SingleCellExperiment")) {
-        .delayed_assay(x, exprs_values)
+.decharacterize <- function(subset, ...) {
+    if (is.character(subset)) {
+        .subset2index(subset, ...)    
     } else {
-        DelayedArray(x)
+        subset
     }
 }
 
 #' @importFrom DelayedMatrixStats rowVars
 .rowVars <- function(x, rows=NULL, cols=NULL) {
-    rowVars(x, rows=rows, cols=cols)
+    rowVars(x, rows=.decharacterize(rows, x, byrow=TRUE), cols=.decharacterize(cols, x, byrow=FALSE))
 }
 
 #' @importFrom DelayedMatrixStats colVars
 .colVars <- function(x, rows=NULL, cols=NULL) {
-    colVars(x, rows=rows, cols=cols)
+    colVars(x, rows=.decharacterize(rows, x, byrow=TRUE), cols=.decharacterize(cols, x, byrow=FALSE))
 }
 
 #' @importFrom DelayedMatrixStats rowSums2
 .rowSums <- function(x, rows=NULL, cols=NULL) {
-    rowSums2(x, rows=rows, cols=cols)
+    rowSums2(x, rows=.decharacterize(rows, x, byrow=TRUE), cols=.decharacterize(cols, x, byrow=FALSE))
 }
 
 #' @importFrom DelayedMatrixStats colSums2
 .colSums <- function(x, rows=NULL, cols=NULL) {
-    colSums2(x, rows=rows, cols=cols)
+    colSums2(x, rows=.decharacterize(rows, x, byrow=TRUE), cols=.decharacterize(cols, x, byrow=FALSE))
 }

@@ -10,12 +10,19 @@
 #' @return A numeric vector of size factors.
 #'
 #' @export
+#' @importFrom methods is
+#' @importClassesFrom SingleCellExperiment SingleCellExperiment
+#' @importFrom DelayedArray DelayedArray
+#'
 #' @examples
 #' data("sc_example_counts")
 #' summary(librarySizeFactors(sc_example_counts))
-#'
 librarySizeFactors <- function(object, exprs_values="counts", subset_row=NULL) {
-    object <- .get_delayed_exprs(object, exprs_values)
+    if (is(object, "SingleCellExperiment")) {
+        object <- .delayed_assay(object, exprs_values)
+    } else {
+        object <- DelayedArray(object)
+    }
     lib_sizes <- .colSums(object, rows=subset_row)
     lib_sizes/mean(lib_sizes)
 }

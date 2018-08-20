@@ -34,7 +34,7 @@
 #'
 #' r2mat <- getVarianceExplained(example_sce)
 getVarianceExplained <- function(object, exprs_values = "logcounts", variables = NULL, chunk=1000) {
-    exprs_mat <- assay(object, exprs_values)
+    exprs_mat <- .delayed_assay(object, exprs_values)
     if (is.null(variables)) {
         variables <- colnames(colData(object))
     }
