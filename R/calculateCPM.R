@@ -33,7 +33,9 @@
 #' @export
 #' @importFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom SummarizedExperiment assay
-#' @importFrom BiocGenerics sizeFactors 
+#' @importFrom BiocGenerics sizeFactors sizeFactors<- 
+#' @importFrom DelayedArray DelayedArray
+#' @importFrom DelayedMatrixStats colSums2
 #'
 #' @examples
 #' data("sc_example_counts")
@@ -45,6 +47,7 @@
 #' cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
 #'
 calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE, subset_row = NULL) {
+    subset_row <- .subset2index(subset_row, object, byrow=TRUE)
     if (!is(object, "SingleCellExperiment")) {
         assays <- list(object)
         names(assays) <- exprs_values
@@ -53,7 +56,7 @@ calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE,
 
     # Setting up the size factors.
     object <- .replace_size_factors(object, use_size_factors)
-    lib_sizes <- .colSums(.delayed_assay(object, exprs_values), rows=subset_row)
+    lib_sizes <- colSums2(assay(object, exprs_values, withDimnames=FALSE), rows=subset_row)
     if (is.null(sizeFactors(object))) {
         sizeFactors(object) <- lib_sizes
     }
@@ -63,7 +66,6 @@ calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE,
     sf.list <- .get_all_sf_sets(object)
 
     # Computing the CPM values.
-    subset_row <- .subset2index(subset_row, object, byrow=TRUE)
     output <- .Call(cxx_norm_exprs, assay(object, i = exprs_values, withDimnames=FALSE),
         sf.list$size.factors, sf.list$index - 1L,
         0, FALSE, subset_row = subset_row - 1L)

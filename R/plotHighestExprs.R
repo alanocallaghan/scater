@@ -35,6 +35,8 @@
 #'
 #' @export
 #' @importFrom utils head
+#' @importFrom DelayedArray DelayedArray
+#' @importFrom BiocGenerics rowSums colSums
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
@@ -65,10 +67,11 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
 
     ## Define expression values to be used
     ## Find the most highly expressed features in this dataset
-    exprs_mat <- .delayed_assay(object, exprs_values)
-    ave_exprs <- .rowSums(exprs_mat)
+    exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
+    ave_exprs <- rowSums(exprs_mat)
     oo <- order(ave_exprs, decreasing=TRUE)
     chosen <- head(oo, n)
+    exprs_mat <- exprs_mat[chosen,]
 
     ## define feature names for plot
     if (is.null(feature_names_to_plot)) {  
@@ -76,21 +79,21 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
     } else {
         feature_names <- .choose_vis_values(object, feature_names_to_plot, search = "metadata", mode = "row")$val
     }
-    rownames(exprs_mat) <- feature_names 
+    feature_names <- feature_names[chosen]
+    rownames(exprs_mat) <- feature_names
 
     ## Compute expression values and reshape them for ggplot.
-    df_exprs_by_cell <- t(exprs_mat[chosen,])
-    df_exprs_by_cell <- as.matrix(df_exprs_by_cell)
+    df_exprs_by_cell <- as.matrix(t(exprs_mat))
 
     if (as_percentage) { 
         total_exprs <- sum(ave_exprs)
         top50_pctage <- 100 * sum(ave_exprs[chosen]) / total_exprs
-        df_exprs_by_cell <- 100 * df_exprs_by_cell / .colSums(exprs_mat)
+        df_exprs_by_cell <- 100 * df_exprs_by_cell / colSums(exprs_mat)
     }
 
     df_exprs_by_cell_long <- reshape2::melt(df_exprs_by_cell)
     colnames(df_exprs_by_cell_long) <- c("Cell", "Tag", "value")
-    df_exprs_by_cell_long$Tag <- factor(df_exprs_by_cell_long$Tag, rev(feature_names[chosen]))
+    df_exprs_by_cell_long$Tag <- factor(df_exprs_by_cell_long$Tag, rev(feature_names))
     
     ## Colouring the individual dashes for the cells.
     if (missing(colour_cells_by)) {

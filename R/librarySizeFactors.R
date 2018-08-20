@@ -13,16 +13,22 @@
 #' @importFrom methods is
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom DelayedArray DelayedArray
+#' @importFrom DelayedMatrixStats colSums2
 #'
 #' @examples
 #' data("sc_example_counts")
 #' summary(librarySizeFactors(sc_example_counts))
 librarySizeFactors <- function(object, exprs_values="counts", subset_row=NULL) {
     if (is(object, "SingleCellExperiment")) {
-        object <- .delayed_assay(object, exprs_values)
+        exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
     } else {
-        object <- DelayedArray(object)
+        exprs_mat <- object
     }
-    lib_sizes <- .colSums(object, rows=subset_row)
-    lib_sizes/mean(lib_sizes)
+
+    subset_row <- .subset2index(subset_row, object, byrow=TRUE)
+    lib_sizes <- colSums2(DelayedArray(exprs_mat), rows=subset_row)
+    sf <- lib_sizes/mean(lib_sizes)
+
+    names(sf) <- colnames(object)
+    return(sf)
 }

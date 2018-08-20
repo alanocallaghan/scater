@@ -18,6 +18,8 @@
 #' @importFrom SummarizedExperiment assay
 #' @importFrom stats model.matrix
 #' @importFrom Matrix t
+#' @importFrom DelayedArray DelayedArray
+#' @importFrom DelayedMatrixStats rowVars
 #'
 #' @seealso
 #' \code{\link{plotExplanatoryVariables}}
@@ -34,16 +36,15 @@
 #'
 #' r2mat <- getVarianceExplained(example_sce)
 getVarianceExplained <- function(object, exprs_values = "logcounts", variables = NULL, chunk=1000) {
-    exprs_mat <- .delayed_assay(object, exprs_values)
+    exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
     if (is.null(variables)) {
         variables <- colnames(colData(object))
     }
 
     ## Initialise matrix to store R^2 values for each feature for each variable
-    rsquared_mat <- matrix(NA_real_, nrow = nrow(object), ncol = length(variables))
-    colnames(rsquared_mat) <- variables
-    rownames(rsquared_mat) <- rownames(object)
-    tss <- .rowVars(exprs_mat) * (ncol(object)-1) 
+    rsquared_mat <- matrix(NA_real_, nrow = nrow(object), ncol = length(variables),
+        dimnames=list(rownames(object), variables))
+    tss <- rowVars(DelayedArray(exprs_mat)) * (ncol(object)-1) 
 
     ## Get R^2 values for each feature and each variable
     for (V in variables) {
