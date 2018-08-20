@@ -10,6 +10,7 @@
 #' This will override any \code{ntop} argument if specified.
 #' @param exprs_values Integer scalar or string indicating which assay of \code{object} should be used to obtain the expression values for the calculations.
 #' @param scale_features Logical scalar, should the expression values be standardised so that each feature has unit variance?
+#' This will also remove features with standard deviations below 1e-8. 
 #' @param use_coldata Logical scalar specifying whether the column data should be used instead of expression values to perform PCA.
 #' @param selected_variables List of strings or a character vector indicating which variables in \code{colData(object)} to use for PCA when \code{use_coldata=TRUE}.
 #' If a list, each entry can take the form described in \code{?"\link{scater-vis-var}"}.
@@ -96,18 +97,21 @@ runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
         # Constructing a matrix - presumably all doubles.
         exprs_to_plot <- matrix(0, ncol(object), length(selected_variables))
         for (it in seq_along(selected_variables)) {
-            exprs_to_plot[,it] <- .choose_vis_values(object, selected_variables[[it]], 
-                mode = "column", search = "metadata")$val
+            exprs_to_plot[,it] <- .choose_vis_values(object, selected_variables[[it]], mode = "column", search = "metadata")$val
+        }
+
+        if (scale_features) {
+            exprs_to_plot <- .scale_columns(exprs_to_plot)
+            total_var <- ncol(exprs_to_plot)
+        } else {
+            total.var <- sum(.colVars(DelayedArray(exprs_to_plot)))
         }
 
     } else {
-        exprs_to_plot <- .get_highvar_mat(object, exprs_values = exprs_values,
-                                          ntop = ntop, feature_set = feature_set)
+        processed <- .get_mat_for_reddim(object, exprs_values = exprs_values, ntop = ntop, feature_set = feature_set, scale = scale_features, get_total = TRUE)
+        exprs_to_plot <- processed$exprs
+        total_var <- processed$total
     }
-
-    ## Drop any features with zero variance, and then scale for equal variance.
-    ## Note that this is done BEFORE outlier detection.
-    exprs_to_plot <- .scale_columns(exprs_to_plot, scale = scale_features)
 
     ## conduct outlier detection
     if ( detect_outliers && use_coldata ) {
@@ -137,8 +141,7 @@ runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
         pca <- irlba::prcomp_irlba(exprs_to_plot, n = ncomponents, ...)
     }
 
-    total.var <- sum(.colVars(exprs_to_plot))
-    percentVar <- pca$sdev ^ 2 / total.var
+    percentVar <- pca$sdev ^ 2 / total_var
     pcs <- pca$x
     attr(pcs, "percentVar") <- percentVar
 
@@ -152,41 +155,56 @@ runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
 }
 
 #' @importFrom utils head
+#' @importFrom SummarizedExperiment assay
 #' @importFrom BiocGenerics t
-.get_highvar_mat <- function(object, exprs_values, feature_set, ntop) 
-# Picking the 'ntop' most highly variable features or just using a 
-# pre-specified set of features, if requested. 
-# Also transposing for downstream use (cells are now rows).
+#' @importFrom DelayedArray DelayedArray
+.get_mat_for_reddim <- function(object, exprs_values, feature_set=NULL, ntop=500, scale=FALSE, get_total=FALSE) 
+# Picking the 'ntop' most highly variable features or just using a pre-specified set of features.
+# Also removing zero-variance columns and scaling the variance of each column.
+# Finally, transposing for downstream use (cells are now rows).
 {
-    exprs_mat <- .delayed_assay(object, exprs_values)
-    
+    exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
+    rv <- .rowVars(DelayedArray(exprs_mat))
+
     if (is.null(feature_set)) {
-        rv <- .rowVars(exprs_mat)
         o <- order(rv, decreasing = TRUE)
         feature_set <- head(o, ntop)
+    } else if (is.character(feature_set)) {
+        feature_set <- .subset2index(feature_set, object, byrow=TRUE)
     }
-    
+
     exprs_to_plot <- exprs_mat[feature_set,, drop = FALSE]
+    rv <- rv[feature_set]
+
     exprs_to_plot <- t(exprs_to_plot)
-    return(exprs_to_plot)
+    if (scale) {
+        exprs_to_plot <- .scale_columns(exprs_to_plot, rv)
+        rv <- rep(1, ncol(exprs_to_plot))
+    }
+
+    if (!get_total) {
+        exprs_to_plot
+    } else {
+        list(exprs=exprs_to_plot, total=sum(rv))        
+    }
 }
 
-.scale_columns <- function(mat, scale = FALSE) 
-# Removing zero-variance columns and scaling the variance of each column, 
-# if requested. We scale by the standard deviation, which also changes
-# the centre; however, we don't care much about this, as we center in prcomp() anyway.
+#' @importFrom DelayedArray DelayedArray
+.scale_columns <- function(mat, vars=NULL) 
+# We scale by the standard deviation, which also changes the centre.
+# However, we don't care much about this, as we center in prcomp() anyway.
 {
-    cv <- .colVars(mat)
-    keep_feature <- cv > 1e-8
+    if (is.null(vars)) {
+        vars <- .colVars(DelayedArray(mat))
+    }
+    keep_feature <- vars > 1e-8
     keep_feature[is.na(keep_feature)] <- FALSE
 
     if (!all(keep_feature)) { 
-        cv <- cv[keep_feature]
+        vars <- vars[keep_feature]
         mat <- mat[, keep_feature, drop=FALSE]
     }
 
-    if (scale) {
-        mat <- sweep(mat, MARGIN=2, STATS=sqrt(cv), FUN="/", check.margin=FALSE)
-    }
+    mat <- sweep(mat, MARGIN=2, STATS=sqrt(vars), FUN="/", check.margin=FALSE)
     return(mat)
 }

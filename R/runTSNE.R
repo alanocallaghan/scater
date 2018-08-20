@@ -64,11 +64,11 @@ runTSNE <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
         exprs_values = "logcounts", scale_features = TRUE,
         use_dimred = NULL, n_dimred = NULL, 
         rand_seed = NULL, perplexity = min(50, floor(ncol(object) / 5)), 
-        pca = TRUE, initial_dims = 50, ...) {
-
+        pca = TRUE, initial_dims = 50, ...) 
+{
     if (!is.null(use_dimred)) {
         ## Use existing dimensionality reduction results (turning off PCA)
-        dr <- reducedDim(object, use_dimred)
+        dr <- reducedDim(object, use_dimred, withDimnames=FALSE)
         if (!is.null(n_dimred)) {
             dr <- dr[,seq_len(n_dimred),drop = FALSE]
         }
@@ -76,10 +76,8 @@ runTSNE <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
         pca <- FALSE
 
     } else {
-        vals <- .get_highvar_mat(object, exprs_values = exprs_values,
-                                 ntop = ntop, feature_set = feature_set)
-        vals <- .scale_columns(vals, scale = scale_features)
-        initial_dims <- min(initial_dims, ncol(object))
+        vals <- .get_mat_for_reddim(object, exprs_values = exprs_values, ntop = ntop, feature_set = feature_set, scale = scale_features)
+        initial_dims <- min(initial_dims, ncol(vals))
     }
 
     # Actually running the Rtsne step.
@@ -88,9 +86,7 @@ runTSNE <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
         set.seed(rand_seed)
     }
     vals <- as.matrix(vals) # protect against alternative matrix inputs.
-    tsne_out <- Rtsne::Rtsne(vals, initial_dims = initial_dims, pca = pca,
-                             perplexity = perplexity, dims = ncomponents,
-                             check_duplicates = FALSE, ...)
+    tsne_out <- Rtsne::Rtsne(vals, initial_dims = initial_dims, pca = pca, perplexity = perplexity, dims = ncomponents, check_duplicates = FALSE, ...)
     reducedDim(object, "TSNE") <- tsne_out$Y
     return(object)
 }

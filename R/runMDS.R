@@ -51,18 +51,16 @@
 #' head(reducedDim(example_sce))
 runMDS <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
         exprs_values = "logcounts", scale_features = TRUE, use_dimred=NULL, n_dimred=NULL,
-        method = "euclidean") {
-
+        method = "euclidean") 
+{
     if (!is.null(use_dimred)) {
         ## Use existing dimensionality reduction results.
-        vals <- reducedDim(object, use_dimred)
+        vals <- reducedDim(object, use_dimred, withDimnames=FALSE)
         if (!is.null(n_dimred)) {
             vals <- vals[,seq_len(n_dimred),drop = FALSE]
         }
     } else {
-        vals <- .get_highvar_mat(object, exprs_values = exprs_values,
-                                 ntop = ntop, feature_set = feature_set)
-        vals <- .scale_columns(vals, scale = scale_features)
+        vals <- .get_mat_for_reddim(object, exprs_values = exprs_values, ntop = ntop, feature_set = feature_set, scale = scale_features)
     }
 
     vals <- as.matrix(vals) # protect against alternative matrix inputs.

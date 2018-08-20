@@ -55,21 +55,19 @@
 #' reducedDimNames(example_sce)
 #' head(reducedDim(example_sce))
 runUMAP <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL, 
-        exprs_values = "logcounts", scale_features = TRUE,
-        use_dimred = NULL, n_dimred = NULL, ...) {
-
+    exprs_values = "logcounts", scale_features = TRUE,
+    use_dimred = NULL, n_dimred = NULL, ...) 
+{
     if (!is.null(use_dimred)) {
         ## Use existing dimensionality reduction results (turning off PCA)
-        dr <- reducedDim(object, use_dimred)
+        dr <- reducedDim(object, use_dimred, withDimnames=FALSE)
         if (!is.null(n_dimred)) {
             dr <- dr[,seq_len(n_dimred),drop = FALSE]
         }
         vals <- dr
 
     } else {
-        vals <- .get_highvar_mat(object, exprs_values = exprs_values,
-                                 ntop = ntop, feature_set = feature_set)
-        vals <- .scale_columns(vals, scale = scale_features)
+        vals <- .get_mat_for_reddim(object, exprs_values = exprs_values, ntop = ntop, feature_set = feature_set, scale = scale_features)
     }
 
     vals <- as.matrix(vals) # protect against alternative matrix inputs.
