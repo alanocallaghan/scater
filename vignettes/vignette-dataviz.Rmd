@@ -168,7 +168,8 @@ We strongly recommend generating plots with different random seeds and perplexit
 
 ```{r plot-tsne-1comp-colby-sizeby-exprs}
 # Perplexity of 10 just chosen here arbitrarily. 
-example_sce <- runTSNE(example_sce, perplexity=10, rand_seed=1000)
+set.seed(1000)
+example_sce <- runTSNE(example_sce, perplexity=10)
 plotTSNE(example_sce, colour_by = "Gene_0001", size_by = "Gene_1000")
 ```
 
@@ -177,8 +178,8 @@ This is useful as it improves speed by using a low-rank approximation of the exp
 The code below uses the first 10 principal components to perform the _t_-SNE.
 
 ```{r plot-tsne-from-pca}
-example_sce <- runTSNE(example_sce, perplexity=10, rand_seed=1000,
-    use_dimred="PCA", n_dimred = 10)
+set.seed(1000)
+example_sce <- runTSNE(example_sce, perplexity=10, use_dimred="PCA", n_dimred=10)
 plotTSNE(example_sce, colour_by="Treatment")
 ```
 
