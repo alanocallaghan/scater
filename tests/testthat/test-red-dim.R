@@ -4,43 +4,68 @@
 #############################################
 # Check the feature selection and scaling work.
 
-test_that("feature selection and scaling are operational", {
-    out <- scater:::.get_highvar_mat(normed, exprs_values = "logcounts", feature_set = seq_len(nrow(normed)))
-    expect_equal(out, t(logcounts(normed)))
+test_that("feature selection is operational", {
+    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", feature_set = seq_len(nrow(normed)))
+    expect_equal(out, t(logcounts(normed, withDimnames=FALSE)))
 
-    out <- scater:::.get_highvar_mat(normed, exprs_values = "counts", feature_set = seq_len(nrow(normed)))
-    expect_equal(out, t(counts(normed)))
+    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "counts", feature_set = seq_len(nrow(normed)))
+    expect_equal(out, t(counts(normed, withDimnames=FALSE)))
 
     # Ntop selection works.
-    out <- scater:::.get_highvar_mat(normed, exprs_values = "logcounts", ntop = 10, feature_set = NULL)
+    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", ntop = 10, feature_set = NULL)
     rv <- DelayedMatrixStats::rowVars(DelayedArray(logcounts(normed)))
     keep <- head(order(rv, decreasing=TRUE), 10)
-    expect_equal(out, t(logcounts(normed)[keep,]))
+    expect_equal(out, t(logcounts(normed, withDimnames=FALSE)[keep,]))
 
-    out <- scater:::.get_highvar_mat(normed, exprs_values = "logcounts", ntop = Inf, feature_set = NULL)
-    keep <- order(rv, decreasing=TRUE)
-    expect_equal(out, t(logcounts(normed)[keep,]))
-
+    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", ntop = Inf, feature_set = NULL)
+    o <- order(rv, decreasing=TRUE)
+    expect_equal(out, t(logcounts(normed, withDimnames=FALSE)[o,]))
+    
     # Feature selection works.
-    out <- scater:::.get_highvar_mat(normed, exprs_values = "logcounts", feature_set = 10:1)
-    expect_equal(out, t(logcounts(normed)[10:1,]))
+    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", feature_set = 10:1)
+    expect_equal(out, t(logcounts(normed, withDimnames=FALSE)[10:1,]))
 
-    out <- scater:::.get_highvar_mat(normed, exprs_values = "logcounts", feature_set = rownames(normed)[10:1])
-    expect_equal(out, t(logcounts(normed)[10:1,]))
+    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", feature_set = rownames(normed)[10:1])
+    expect_equal(out, t(logcounts(normed, withDimnames=FALSE)[10:1,]))
+})
 
-    # Scaling.
-    MAT <- t(logcounts(normed))
+test_that("scaling by feature variances work correctly", {
+    MAT <- t(logcounts(normed, withDimnames=FALSE))
     cv <- DelayedMatrixStats::colVars(DelayedArray(MAT))
     novar <- cv < 1e-8
     expect_true(any(novar))
 
     NOMAT <- MAT[,!novar]
-    XX <- scater:::.scale_columns(MAT, scale=FALSE)
-    expect_equal(XX, NOMAT)
-
-    XX <- scater:::.scale_columns(NOMAT, scale=TRUE)
+    XX <- scater:::.scale_columns(MAT)
     scaled <- t(t(NOMAT)/sqrt(cv[!novar]))
-    expect_equivalent(XX, scaled)
+    expect_equal(XX, scaled)
+
+    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", feature_set = seq_len(nrow(normed)), scale = TRUE)
+    expect_equal(out, scaled)
+    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", feature_set = 10:1, scale = TRUE)
+    expect_equal(out, scaled[,10:1])
+
+    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", ntop = 10, scale = TRUE) # In combination with non-trivial selection.
+    rv <- DelayedMatrixStats::rowVars(DelayedArray(logcounts(normed)))
+    expect_equal(out, scaled[,head(order(rv[!novar], decreasing=TRUE), 10)])
+})
+
+test_that("total variance calculations work correctly", {
+    out2 <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", ntop = Inf, get_total=TRUE)
+    rv.all <- DelayedMatrixStats::rowVars(DelayedArray(logcounts(normed)))
+    expect_equal(sum(rv.all), out2$total)
+    rv <- DelayedMatrixStats::colVars(DelayedArray(out2$exprs))
+    expect_equal(sum(rv), out2$total)
+
+    out2 <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", feature_set = 1:10, get_total=TRUE)
+    expect_equal(sum(rv.all[1:10]), out2$total)
+    rv <- DelayedMatrixStats::colVars(DelayedArray(out2$exprs))
+    expect_equal(sum(rv), out2$total)
+
+    out2 <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", feature_set = 1:10, get_total=TRUE, scale=TRUE)
+    expect_equal(ncol(out2$exprs), out2$total)
+    rv <- DelayedMatrixStats::colVars(DelayedArray(out2$exprs))
+    expect_equal(sum(rv), ncol(out2$exprs))
 })
 
 #############################################
@@ -56,6 +81,8 @@ test_that("runPCA works as expected", {
     normed2 <- runPCA(normed)
     normed3 <- runPCA(normed, scale_features = FALSE)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
+    expect_equal(sum(attr(reducedDim(normed2), "percentVar")), 1)
+    expect_equal(sum(attr(reducedDim(normed3), "percentVar")), 1) # Total variance should be 100%.
 
     normed3 <- runPCA(normed, ntop = 100)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
@@ -75,7 +102,10 @@ test_that("runPCA works as expected", {
 
     # Testing out the scaling (ntop=Inf, otherwise it will pick features based on scaled variance).
     normed_alt <- normed
-    logcounts(normed_alt) <- t(scale(t(logcounts(normed_alt)), scale = TRUE))
+    rescaled <- t(scale(t(logcounts(normed_alt)), scale = TRUE))
+    rescaled[is.na(rescaled)] <- 0
+    logcounts(normed_alt) <- rescaled
+
     normed3 <- runPCA(normed_alt, ncomponents=4, scale_features=FALSE, ntop=Inf)
     normed4 <- runPCA(normed, ncomponents=4, scale_features=TRUE, ntop=Inf)
     expect_equal(reducedDim(normed3), reducedDim(normed4))    
