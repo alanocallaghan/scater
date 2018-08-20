@@ -24,7 +24,8 @@ runPCA(object, ncomponents = 2, method = c("prcomp", "irlba"),
 \item{feature_set}{Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for PCA.
 This will override any \code{ntop} argument if specified.}
 
-\item{scale_features}{Logical scalar, should the expression values be standardised so that each feature has unit variance?}
+\item{scale_features}{Logical scalar, should the expression values be standardised so that each feature has unit variance?
+This will also remove features with standard deviations below 1e-8.}
 
 \item{use_coldata}{Logical scalar specifying whether the column data should be used instead of expression values to perform PCA.}
 
