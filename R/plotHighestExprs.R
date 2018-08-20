@@ -36,7 +36,7 @@
 #' @export
 #' @importFrom utils head
 #' @importFrom DelayedArray DelayedArray
-#' @importFrom BiocGenerics rowSums colSums
+#' @importFrom DelayedMatrixStats rowSums2 colSums2
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
@@ -67,7 +67,7 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
 
     ## Find the most highly expressed features in this dataset
     exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
-    ave_exprs <- rowSums(exprs_mat)
+    ave_exprs <- rowSums2(exprs_mat)
     oo <- order(ave_exprs, decreasing=TRUE)
     chosen <- head(oo, n)
     sub_mat <- exprs_mat[chosen,,drop=FALSE]
@@ -88,10 +88,10 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
     if (as_percentage) { 
         total_exprs <- sum(ave_exprs)
         top_pctage <- 100 * sum(sub_ave) / total_exprs
-        df_exprs_by_cell <- 100 * df_exprs_by_cell / colSums(exprs_mat)
+        df_exprs_by_cell <- 100 * df_exprs_by_cell / colSums2(exprs_mat)
     }
 
-    df_exprs_by_cell_long <- reshape2::melt(df_exprs_by_cell)
+    df_exprs_by_cell_long <- reshape2::melt(as.matrix(df_exprs_by_cell))
     colnames(df_exprs_by_cell_long) <- c("Cell", "Tag", "value")
     df_exprs_by_cell_long$Tag <- factor(df_exprs_by_cell_long$Tag, rev(sub_names)) # rev() so that most highly expressed is last (i.e., highest y-axis).
     
