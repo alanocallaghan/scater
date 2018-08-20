@@ -70,7 +70,7 @@ getVarianceExplained <- function(object, exprs_values = "logcounts", variables =
             current <- by.chunk==element
             cur.exprs <- exprs_mat[current,,drop=FALSE]
             effects <- qr.qty(QR, as.matrix(t(cur.exprs)))
-            rss[current] <- colSums(effects[-seq_len(QR$rank),, drop = FALSE] ^ 2) # no need for .colSums, as this is always dense.
+            rss[current] <- colSums(effects[-seq_len(QR$rank),, drop = FALSE] ^ 2) # no need for special colSums, as this is always dense.
         }
         
         rsquared_mat[, V] <- 1 - rss/tss

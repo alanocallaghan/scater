@@ -27,7 +27,8 @@
 #' @return A ggplot object.
 #' @export
 #' @importFrom DelayedArray DelayedArray
-#' @importFrom DelayedMatrixStats rowMeans2
+#' @importFrom BiocGenerics rowMeans
+#' @importFrom DelayedMatrixStats rowVars
 #'
 #' @author Davis McCarthy, with modifications by Aaron Lun
 #'
@@ -96,8 +97,9 @@ plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len", lengt
     }
 
     ## compute mean expression and sd of expression values
-    exprs_mean <- rowMeans2(DelayedArray(exprs_mat))
-    exprs_sd <- sqrt(.rowVars(exprs_mat))
+    dm <- DelayedArray(exprs_mat)
+    exprs_mean <- rowMeans(dm)
+    exprs_sd <- sqrt(rowVars(dm))
 
     df_to_plot <- data.frame(X=tx_length_values, Y=exprs_mean, 
                              ymin=exprs_mean - exprs_sd,
