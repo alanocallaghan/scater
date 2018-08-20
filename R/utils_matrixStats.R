@@ -1,37 +1,47 @@
-# matrixStats equivalents that are yet to have a home.
+# Convenience callers to DelayedMatrixStats functions.
 
-.realize_subsets <- function(x, rows, cols) {
-    if (is.null(cols)) { 
-        cols <- seq_len(ncol(x)) 
-    } else {
-        cols <- .subset2index(cols, x, byrow=FALSE)
-    }
-    if (is.null(rows)) { 
-        rows <- seq_len(nrow(x))
-    } else {
-        rows <- .subset2index(rows, x, byrow=TRUE)
-    }
-    return(list(rows=rows, cols=cols))
+#' @importFrom SummarizedExperiment assay
+#' @importFrom BiocGenerics rownames
+#' @importFrom DelayedArray DelayedArray
+.delayed_assay <- function(x, exprs_values) 
+# Avoids copying the matrix when pulling out rownames and colnames.
+{
+    out <- assay(x, i=exprs_values, withDimnames=FALSE)
+    out <- DelayedArray(out)
+    rownames(out) <- rownames(x)
+    colnames(out) <- colnames(x)
+    out
 }
 
+#' @importFrom methods is
+#' @importClassesFrom SingleCellExperiment SingleCellExperiment
+#' @importFrom DelayedArray DelayedArray
+.get_delayed_exprs <- function(x, exprs_values) {
+    if (is(x, "SingleCellExperiment")) {
+        .delayed_assay(x, exprs_values)
+    } else {
+        DelayedArray(x)
+    }
+}
+
+#' @importFrom DelayedMatrixStats rowVars
 .rowVars <- function(x, rows=NULL, cols=NULL) {
-    converted <- .realize_subsets(x, rows=rows, cols=cols)
-    .Call(cxx_row_vars, x, converted$rows - 1L, converted$cols - 1L)
+    rowVars(x, rows=rows, cols=cols)
 }
 
+#' @importFrom DelayedMatrixStats colVars
 .colVars <- function(x, rows=NULL, cols=NULL) {
-    converted <- .realize_subsets(x, rows=rows, cols=cols)
-    .Call(cxx_col_vars, x, converted$rows - 1L, converted$cols - 1L)
+    colVars(x, rows=rows, cols=cols)
 }
 
+#' @importFrom DelayedMatrixStats rowSums2
 .rowSums <- function(x, rows=NULL, cols=NULL) {
-    converted <- .realize_subsets(x, rows=rows, cols=cols)
-    .Call(cxx_row_sums, x, converted$rows - 1L, converted$cols - 1L)
+    rowSums2(x, rows=rows, cols=cols)
 }
 
+#' @importFrom DelayedMatrixStats colSums2
 .colSums <- function(x, rows=NULL, cols=NULL) {
-    converted <- .realize_subsets(x, rows=rows, cols=cols)
-    .Call(cxx_col_sums, x, converted$rows - 1L, converted$cols - 1L)
+    colSums2(x, rows=rows, cols=cols)
 }
 
 .rowAbove <- function(x, rows=NULL, cols=NULL, value=0) {
