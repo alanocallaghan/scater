@@ -43,14 +43,3 @@
 .colSums <- function(x, rows=NULL, cols=NULL) {
     colSums2(x, rows=rows, cols=cols)
 }
-
-.rowAbove <- function(x, rows=NULL, cols=NULL, value=0) {
-    converted <- .realize_subsets(x, rows=rows, cols=cols)
-    .Call(cxx_row_above, x, converted$rows - 1L, converted$cols - 1L, value)
-}
-
-.colAbove <- function(x, rows=NULL, cols=NULL, value=0) {
-    converted <- .realize_subsets(x, rows=rows, cols=cols)
-    .Call(cxx_col_above, x, converted$rows - 1L, converted$cols - 1L, value)
-}
-

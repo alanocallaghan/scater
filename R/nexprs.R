@@ -32,18 +32,20 @@
 #' @importFrom SummarizedExperiment assay
 #' @importFrom methods is
 nexprs <- function(object, detection_limit = 0, exprs_values = "counts", 
-                   byrow = FALSE, subset_row = NULL, subset_col = NULL) {
+    byrow = FALSE, subset_row = NULL, subset_col = NULL) 
+{
+    subset_row <- .subset2index(subset_row, target = object, byrow = TRUE)
+    subset_col <- .subset2index(subset_col, target = object, byrow = FALSE)
+
     if (is(object, "SingleCellExperiment")) { 
-        exprs_mat <- assay(object, i = exprs_values)
+        exprs_mat <- assay(object, i = exprs_values, withDimnames=FALSE)
     } else {
         exprs_mat <- object
     }
-    subset_row <- .subset2index(subset_row, target = exprs_mat, byrow = TRUE)
-    subset_col <- .subset2index(subset_col, target = exprs_mat, byrow = FALSE)
 
     if (!byrow) {
-        return(.colAbove(exprs_mat, rows=subset_row, cols=subset_col, value=detection_limit))
+        return(.Call(cxx_col_above, exprs_mat, subset_row - 1L, subset_col - 1L, detection_limit))
     } else {
-        return(.rowAbove(exprs_mat, rows=subset_row, cols=subset_col, value=detection_limit))
+        return(.Call(cxx_row_above, exprs_mat, subset_row - 1L, subset_col - 1L, detection_limit))
     }
 }
