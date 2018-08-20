@@ -110,6 +110,9 @@ test_that("nexprs works as expected", {
 
     expect_equal(nexprs(original, subset_row = 20:40), 
                  unname(colSums(counts(original)[20:40,] > 0)))
+    expect_equal(nexprs(original, detection_limit=5),
+                 unname(colSums(counts(original) > 5)))
+
     expect_equal(nexprs(original, byrow = TRUE, subset_col = 20:40), 
                  unname(rowSums(counts(original)[,20:40] > 0)))
     expect_equal(nexprs(original, byrow = TRUE, detection_limit=5),
