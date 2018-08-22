@@ -6,6 +6,7 @@
 #' @param exprs_values A string specifying the assay of \code{object} containing the count matrix, if \code{object} is a SingleCellExperiment.
 #' @param use_size_factors a logical scalar specifying whetherthe size factors in \code{object} should be used to construct effective library sizes.
 #' @param subset_row A vector specifying the subset of rows of \code{object} for which to return a result.
+#' @param BPPARAM A BiocParallelParam object specifying whether the calculations should be parallelized. 
 #'
 #' @details 
 #' The size-adjusted average count is defined by dividing each count by the size factor and taking the average across cells.
@@ -31,7 +32,7 @@
 #' @export
 #' @importFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom BiocGenerics sizeFactors sizeFactors<-
-#' @importClassesFrom SingleCellExperiment SingleCellExperiment 
+#' @importFrom BiocParallel SerialParam bplapply
 #'
 #' @examples
 #' data("sc_example_counts")
@@ -43,7 +44,7 @@
 #' ## calculate average counts
 #' ave_counts <- calculateAverage(example_sce)
 #'
-calculateAverage <- function(object, exprs_values="counts", use_size_factors = TRUE, subset_row = NULL) 
+calculateAverage <- function(object, exprs_values="counts", use_size_factors = TRUE, subset_row = NULL, BPPARAM = SerialParam())
 {
     if (!is(object, "SingleCellExperiment")) {
         assays <- list(object)
@@ -62,12 +63,25 @@ calculateAverage <- function(object, exprs_values="counts", use_size_factors = T
 
     # Computes the average count, adjusting for size factors or library size.
     subset_row <- .subset2index(subset_row, object, byrow=TRUE)
-    ave <- .Call(cxx_ave_exprs, assay(object, exprs_values, withDimnames=FALSE), sf_list$size.factors, sf_list$index - 1L, subset_row - 1L)
+    subset_by_worker <- .split_vector_by_workers(subset_row - 1L, BPPARAM)
+
+    bp.out <- bplapply(subset_by_worker, FUN=.compute_averages, 
+        mat=assay(object, exprs_values, withDimnames=FALSE), 
+        sf_values=sf_list$size.factors, 
+        sf_index=sf_list$index - 1L, 
+        BPPARAM=BPPARAM)
+    ave <- unlist(bp.out)
 
     names(ave) <- rownames(object)[subset_row]
     ave
 }
 
+.compute_averages <- function(mat, sf_values, sf_index, subset) 
+# A helper function defined in the scater namespace.
+# This avoids the need to reattach scater in bplapply for SnowParam().
+{
+    .Call(cxx_ave_exprs, mat, sf_values, sf_index, subset)
+}
 
 #' @rdname calculateAverage
 #' @export
