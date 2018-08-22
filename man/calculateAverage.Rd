@@ -6,10 +6,11 @@
 \title{Calculate average counts, adjusting for size factors or library size}
 \usage{
 calculateAverage(object, exprs_values = "counts",
-  use_size_factors = TRUE, subset_row = NULL)
+  use_size_factors = TRUE, subset_row = NULL,
+  BPPARAM = SerialParam())
 
 calcAverage(object, exprs_values = "counts", use_size_factors = TRUE,
-  subset_row = NULL)
+  subset_row = NULL, BPPARAM = SerialParam())
 }
 \arguments{
 \item{object}{A SingleCellExperiment object or count matrix.}
@@ -19,6 +20,8 @@ calcAverage(object, exprs_values = "counts", use_size_factors = TRUE,
 \item{use_size_factors}{a logical scalar specifying whetherthe size factors in \code{object} should be used to construct effective library sizes.}
 
 \item{subset_row}{A vector specifying the subset of rows of \code{object} for which to return a result.}
+
+\item{BPPARAM}{A BiocParallelParam object specifying whether the calculations should be parallelized.}
 }
 \value{
 Vector of average count values with same length as number of features, or the number of features in \code{subset_row} if supplied.

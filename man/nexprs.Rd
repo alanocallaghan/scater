@@ -5,7 +5,8 @@
 \title{Count the number of non-zero counts per cell or feature}
 \usage{
 nexprs(object, detection_limit = 0, exprs_values = "counts",
-  byrow = FALSE, subset_row = NULL, subset_col = NULL)
+  byrow = FALSE, subset_row = NULL, subset_col = NULL,
+  BPPARAM = SerialParam())
 }
 \arguments{
 \item{object}{A SingleCellExperiment object or a numeric matrix of expression values.}
@@ -20,6 +21,8 @@ If \code{FALSE}, the function will count the number of detected features per cel
 \item{subset_row}{Logical, integer or character vector indicating which rows (i.e. features) to use.}
 
 \item{subset_col}{Logical, integer or character vector indicating which columns (i.e., cells) to use.}
+
+\item{BPPARAM}{A BiocParallelParam object specifying whether the calculations should be parallelized.}
 }
 \value{
 An integer vector containing counts per gene or cell, depending on the provided arguments.
