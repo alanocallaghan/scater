@@ -157,8 +157,7 @@
 #' @importFrom methods is 
 #' @importFrom SummarizedExperiment assay rowData rowData<- colData colData<-
 #' @importFrom SingleCellExperiment isSpike spikeNames
-#' @importFrom BiocParallel SerialParam bpmapply bpnworkers
-#' @importFrom utils head tail
+#' @importFrom BiocParallel SerialParam bpmapply 
 #'
 #' @examples
 #' data("sc_example_counts")
@@ -214,12 +213,8 @@ calculateQCMetrics <- function(object, exprs_values="counts", feature_controls =
     cell_set_cdata <- cell_out$metadata
 
     # Computing all QC metrics, with cells split across workers. 
-    n.cores <- bpnworkers(BPPARAM)
-    boundaries <- as.integer(seq(from = 0L, to = ncol(exprs_mat), length.out = n.cores + 1L)) # zero indexed.
-    work.ends <- tail(boundaries, -1L)
-    work.starts <- head(boundaries, -1L)
-
-    bp.out <- bpmapply(.compute_qc_metrics, start=work.starts, end=work.ends,
+    worker_assign <- .assign_jobs_to_workers(ncol(exprs_mat), BPPARAM)
+    bp.out <- bpmapply(.compute_qc_metrics, start=worker_assign$start, end=worker_assign$end,
             MoreArgs=list(exprs_mat=exprs_mat, 
                 all_feature_sets=all_feature_sets, 
                 all_cell_sets=all_cell_sets, 
