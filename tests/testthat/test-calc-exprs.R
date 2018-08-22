@@ -100,27 +100,3 @@ test_that("we can calculate TPM from counts", {
     expect_equal(tout, as.matrix(tout2))
 })
 
-test_that("nexprs works as expected", {
-    ## Testing nexprs on the counts themselves.
-    expect_equal(nexprs(original), unname(colSums(counts(original) > 0)))
-    expect_equal(nexprs(original), nexprs(counts(original)))
-
-    expect_equal(nexprs(original, byrow = TRUE), unname(rowSums(counts(original) > 0)))
-    expect_equal(nexprs(original, byrow = TRUE), nexprs(counts(original), byrow = TRUE))
-
-    expect_equal(nexprs(original, subset_row = 20:40), 
-                 unname(colSums(counts(original)[20:40,] > 0)))
-    expect_equal(nexprs(original, detection_limit=5),
-                 unname(colSums(counts(original) > 5)))
-
-    expect_equal(nexprs(original, byrow = TRUE, subset_col = 20:40), 
-                 unname(rowSums(counts(original)[,20:40] > 0)))
-    expect_equal(nexprs(original, byrow = TRUE, detection_limit=5),
-                 unname(rowSums(counts(original) > 5)))
-    
-    ## Testing nexprs on a sparse matrix.
-    expect_equal(nexprs(sparsified), unname(Matrix::colSums(counts(sparsified) > 0)))
-    expect_equal(nexprs(sparsified), nexprs(counts(sparsified)))
-})
-
-
