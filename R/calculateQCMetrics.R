@@ -225,7 +225,7 @@ calculateQCMetrics <- function(object, exprs_values="counts", feature_controls =
     # Aggregating across cores (concatenating pre-cell statistics, summing per-feature statistics).
     cell_stats_by_feature_set <- bp.out[[1]][[1]]
     feature_stats_by_cell_set <- bp.out[[1]][[2]]
-    if (n.cores > 1L) {
+    if (length(bp.out) > 1L) {
         for (i in seq_along(cell_stats_by_feature_set)) {
             current <- lapply(bp.out, FUN=function(sublist) { sublist[[1]][[i]] })
             cell_stats_by_feature_set[[i]] <- list(

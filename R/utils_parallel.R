@@ -3,8 +3,8 @@
 .assign_jobs_to_workers <- function(njobs, BPPARAM) 
 # Returns ZERO-INDEXED job start/ends.
 {
-    n.cores <- bpnworkers(BPPARAM)
-    boundaries <- as.integer(seq(from = 0L, to = njobs, length.out = n.cores + 1L)) 
+    n_cores <- bpnworkers(BPPARAM)
+    boundaries <- as.integer(seq(from = 0L, to = njobs, length.out = n_cores + 1L)) 
     work_ends <- tail(boundaries, -1L)
     work_starts <- head(boundaries, -1L)
     return(list(start=work_starts, end=work_ends))
