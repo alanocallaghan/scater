@@ -1,5 +1,5 @@
-## test calculate expression
-## library(scater); library(testthat); source("setup-sce.R"); source("test-calculate-expression.R")
+## Test CPM calculations and related functions.
+## library(scater); library(testthat); source("setup-sce.R"); source("test-calc-cpm.R")
 
 library(Matrix)
 original <- sce
@@ -9,8 +9,22 @@ counts(sparsified) <- as(counts(original), "dgCMatrix")
 test_that("we can calculate CPM from counts", {
     cpm_out <- calculateCPM(original)
     expect_equal(cpm_out, t(t(counts(original))/(colSums(counts(original)/1e6))))
-    
-    ## Responsive to size factors.
+    expect_identical(cpm_out, calculateCPM(counts(original)))
+
+    ## Repeating with subsets.
+    sub1 <- calculateCPM(counts(original), subset_row=1:10)
+    expect_identical(sub1, calculateCPM(counts(original)[1:10,]))
+
+    logi <- rbinom(nrow(original), 1, 0.5)==1
+    sub2 <- calculateCPM(counts(original), subset_row=logi)
+    expect_identical(sub2, calculateCPM(counts(original)[logi,]))
+
+    chosen <- sample(rownames(original), 20)
+    sub3 <- calculateCPM(counts(original), subset_row=chosen)
+    expect_identical(sub3, calculateCPM(counts(original)[chosen,]))
+})
+
+test_that("calculateCPM is responsive to size factors", {
     sizeFactors(original) <- runif(ncol(original))
     cpm_out <- calculateCPM(original)
     expect_equal(cpm_out, calculateCPM(counts(original), use_size_factors=sizeFactors(original)))
@@ -41,22 +55,18 @@ test_that("we can calculate CPM from counts", {
     spiked2 <- spiked
     sizeFactors(spiked2) <- new_sf
     expect_equal(calculateCPM(spiked2), cpm_out)
+})
 
+test_that("calculateCPM works with alternative inputs", {
     # Checking that it works on a sparse matrix. 
     cpm_out <- calculateCPM(sparsified)
     expect_equal(as.matrix(cpm_out), calculateCPM(original, use_size_factors=FALSE))
 
-    ## Repeating with subsets.
-    sub1 <- calculateCPM(counts(original), subset_row=1:10)
-    expect_identical(sub1, calculateCPM(counts(original)[1:10,]))
-
-    logi <- rbinom(nrow(original), 1, 0.5)==1
-    sub2 <- calculateCPM(counts(original), subset_row=logi)
-    expect_identical(sub2, calculateCPM(counts(original)[logi,]))
-
-    chosen <- sample(rownames(original), 20)
-    sub3 <- calculateCPM(counts(original), subset_row=chosen)
-    expect_identical(sub3, calculateCPM(counts(original)[chosen,]))
+    # Checking that it works when there are no columns or rows.
+    cpm_out <- calculateCPM(original[0,])
+    expect_identical(dim(cpm_out), c(0L, ncol(original)))
+    cpm_out <- calculateCPM(original[,0])
+    expect_identical(dim(cpm_out), c(nrow(original), 0L))
 })
 
 test_that("we can calculate FPKM from counts", {
@@ -99,4 +109,3 @@ test_that("we can calculate TPM from counts", {
     expect_s4_class(tout2, "dgCMatrix")
     expect_equal(tout, as.matrix(tout2))
 })
-
