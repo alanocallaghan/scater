@@ -1,5 +1,5 @@
 # Tests for normalisation methods
-# library(scater); library(testthat); source("test-normalisation.R")
+# library(scater); library(testthat); source("test-norm.R")
 
 set.seed(20003)
 ncells <- 200
