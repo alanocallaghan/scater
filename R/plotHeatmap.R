@@ -21,6 +21,7 @@
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for colouring of column-level data - see \code{?"\link{scater-vis-var}"} for details.
 #' @param by_show_single Logical scalar specifying whether single-level factors should be used for column-level colouring, see \code{?"\link{scater-vis-var}"} for details.
+#' @param show_colnames Logical scalar specifying whether column names should be shown, if available in \code{object}.
 #' @param ... Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.
 #'
 #' @details Setting \code{center=TRUE} is useful for examining log-fold changes of each cell's expression profile from the average across all cells.
@@ -50,11 +51,21 @@
 #' @importFrom DelayedArray DelayedArray
 #' @importFrom DelayedMatrixStats rowMeans2
 plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts",
-                        center=FALSE, zlim=NULL, symmetric=FALSE, color=NULL, 
-                        colour_columns_by=NULL, by_exprs_values = exprs_values, by_show_single = FALSE,
-                        ...) {
+    center=FALSE, zlim=NULL, symmetric=FALSE, color=NULL, 
+    colour_columns_by=NULL, by_exprs_values = exprs_values, by_show_single = FALSE,
+    show_colnames = TRUE, ...) 
+{
+    features_to_use <- .subset2index(features, object, byrow=TRUE)
+    heat.vals <- assay(object, exprs_values, withDimnames=FALSE)[features_to_use,,drop=FALSE]
 
-    heat.vals <- assay(object, exprs_values)[features,,drop=FALSE]
+    rownames(heat.vals) <- rownames(object)[features_to_use]
+    if (is.null(colnames(object))) { 
+        colnames(heat.vals) <- seq_len(ncol(object)) # otherwise downstream colouring fails.
+        show_colnames <- FALSE
+    } else {
+        colnames(heat.vals) <- colnames(object)
+    }
+
     if (!is.null(columns)) { 
         heat.vals <- heat.vals[,columns,drop=FALSE]        
     }
@@ -108,6 +119,7 @@ plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts"
             column_variables[[colour_by_out$name]] <- colour_fac
             column_colorings[[colour_by_out$name]] <- col_scale
         }
+
         column_variables <- do.call(data.frame, c(column_variables, list(row.names=colnames(object))))
     } else {
         column_variables <- column_colorings <- NULL
@@ -115,5 +127,6 @@ plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts"
 
     # Creating the heatmap as specified.
     pheatmap::pheatmap(heat.vals, color=color, breaks=color.breaks, 
-        annotation_col=column_variables, annotation_colors=column_colorings, ...) 
+        annotation_col=column_variables, annotation_colors=column_colorings, 
+        show_colnames=show_colnames, ...) 
 }

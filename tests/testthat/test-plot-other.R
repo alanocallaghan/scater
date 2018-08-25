@@ -66,6 +66,12 @@ test_that("we can produce heatmaps", {
                 colour_columns_by=c("Mutation_Status", "Gene_0001"), 
                 by_exprs_values = "logcounts", by_show_single = TRUE)
 
+    # Testing that column colouring still works when columns have no names.
+    unnamed <- example_sce
+    colnames(unnamed) <- NULL
+    plotHeatmap(unnamed, features=rownames(unnamed)[1:10],
+                colour_columns_by=c("Mutation_Status", "Gene_0001")) 
+
     # Testing out passing arguments to pheatmap.
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], fontsize = 20, legend = FALSE)
 })
