@@ -32,7 +32,7 @@
 #' @export
 #' @importFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom BiocGenerics sizeFactors sizeFactors<-
-#' @importFrom BiocParallel SerialParam bplapply
+#' @importFrom BiocParallel SerialParam bpmapply
 #'
 #' @examples
 #' data("sc_example_counts")

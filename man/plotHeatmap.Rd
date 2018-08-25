@@ -7,7 +7,8 @@
 plotHeatmap(object, features, columns = NULL,
   exprs_values = "logcounts", center = FALSE, zlim = NULL,
   symmetric = FALSE, color = NULL, colour_columns_by = NULL,
-  by_exprs_values = exprs_values, by_show_single = FALSE, ...)
+  by_exprs_values = exprs_values, by_show_single = FALSE,
+  show_colnames = TRUE, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -39,6 +40,8 @@ A character vector can also be supplied and will be treated as a list of strings
 for colouring of column-level data - see \code{?"\link{scater-vis-var}"} for details.}
 
 \item{by_show_single}{Logical scalar specifying whether single-level factors should be used for column-level colouring, see \code{?"\link{scater-vis-var}"} for details.}
+
+\item{show_colnames}{Logical scalar specifying whether column names should be shown, if available in \code{object}.}
 
 \item{...}{Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.}
 }
