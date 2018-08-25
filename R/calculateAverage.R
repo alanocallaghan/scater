@@ -61,26 +61,32 @@ calculateAverage <- function(object, exprs_values="counts", use_size_factors = T
     object <- centreSizeFactors(object)
     sf_list <- .get_all_sf_sets(object)
 
+    # Parallelize across *cells* - for RNA-seq applications, genes are fixed but number of cells can increase.
+    assign_work <- .assign_jobs_to_workers(ncol(object), BPPARAM)
+
     # Computes the average count, adjusting for size factors or library size.
     subset_row <- .subset2index(subset_row, object, byrow=TRUE)
-    subset_by_worker <- .split_vector_by_workers(subset_row - 1L, BPPARAM)
+    bp.out <- bpmapply(FUN=.compute_averages, start=assign_work$start, end=assign_work$end,
+        MoreArgs=list(
+            mat=assay(object, exprs_values, withDimnames=FALSE), 
+            sf_values=sf_list$size.factors, 
+            sf_index=sf_list$index - 1L, 
+            subset=subset_row-1L
+        ),
+        BPPARAM=BPPARAM, SIMPLIFY=FALSE, USE.NAMES=FALSE)
 
-    bp.out <- bplapply(subset_by_worker, FUN=.compute_averages, 
-        mat=assay(object, exprs_values, withDimnames=FALSE), 
-        sf_values=sf_list$size.factors, 
-        sf_index=sf_list$index - 1L, 
-        BPPARAM=BPPARAM)
-    ave <- unlist(bp.out)
+    ave <- Reduce("+", bp.out)
+    ave <- ave/ncol(object)
 
     names(ave) <- rownames(object)[subset_row]
     ave
 }
 
-.compute_averages <- function(mat, sf_values, sf_index, subset) 
+.compute_averages <- function(mat, sf_values, sf_index, subset, start, end) 
 # A helper function defined in the scater namespace.
 # This avoids the need to reattach scater in bplapply for SnowParam().
 {
-    .Call(cxx_ave_exprs, mat, sf_values, sf_index, subset)
+    .Call(cxx_ave_exprs, mat, sf_values, sf_index, subset, start, end)
 }
 
 #' @rdname calculateAverage
