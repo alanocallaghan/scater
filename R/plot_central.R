@@ -37,6 +37,10 @@
 #' Defaults to the identity function.}
 #' \item{\code{trans.y}:}{Function specifying how the y-axis variable should be transformed.
 #' Behaviour and defaults are the same as \code{trans.x}.} 
+#' \item{\code{trans.col}:}{Function specifying how the colouring variable should be transformed.
+#' Behaviour and defaults are the same as \code{trans.x}.} 
+#' \item{\code{trans.size}:}{Function specifying how the size variable should be transformed.
+#' Behaviour and defaults are the same as \code{trans.x}.} 
 #' }
 #'
 #' @name scater-plot-args
@@ -55,7 +59,8 @@ NULL
                              colour_by = NULL, shape_by = NULL, size_by = NULL, fill_by = NULL,
                              show_median = FALSE, show_violin = TRUE, show_smooth = FALSE, show_se = TRUE,
                              theme_size = 10, point_alpha = 0.6, point_size = NULL, add_legend = TRUE,
-                             point_FUN = NULL, jitter_type = "swarm", trans.x = identity, trans.y = identity)
+                             point_FUN = NULL, jitter_type = "swarm", 
+                             trans.x = identity, trans.y = identity, trans.col = identity, trans.size = identity)
 # Internal ggplot-creating function to plot anything that involves points.
 # Creates either a scatter plot, (horizontal) violin plots, or a rectangle plot.
 {
@@ -64,6 +69,12 @@ NULL
     }
     if (is.numeric(object$X)) {
         object$X <- trans.x(object$X)
+    }
+    if (is.numeric(object$colour_by)) {
+        object$colour_by <- trans.col(object$colour_by)
+    }
+    if (is.numeric(object$size_by)) {
+        object$size_by <- trans.size(object$size_by)
     }
 
     if (is.numeric(object$Y)!=is.numeric(object$X)) {
