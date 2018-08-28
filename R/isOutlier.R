@@ -16,6 +16,11 @@
 #' If \code{NA}, it is ignored.
 #' 
 #' @return A logical vector of the same length as the \code{metric} argument, specifying the observations that are considered as outliers.
+#'
+#' @details
+#' Lower and upper thresholds are stored in the \code{"threshold"} attribute of the returned vector.
+#' This is a numeric vector of length 2 when \code{batch=NULL} for the threshold on each side.
+#' Otherwise, it is a matrix with one named column per level of \code{batch} and two rows (one per threshold).
 #' 
 #' @author Aaron Lun
 #'
@@ -62,12 +67,17 @@ isOutlier <- function(metric, nmads = 5, type = c("both", "lower", "higher"),
         # Computing QC metrics for each batch. 
         by.batch <- split(seq_len(N), batch)
         collected <- logical(N)
-        for (b in by.batch) {
-            collected[b] <- Recall(metric[b], nmads = nmads, type = type,
-                                   log = FALSE, subset = subset[b], 
-                                   batch = NULL, min_diff = min_diff)
+        all.threshold <- vector("list", length(by.batch))
+        for (b in seq_along(by.batch)) {
+            bdx <- by.batch[[b]]
+            current <- Recall(metric[bdx], nmads = nmads, type = type, log = FALSE, subset = subset[bdx], batch = NULL, min_diff = min_diff)
+            all.threshold[[b]] <- .get_threshold(current)
+            collected[bdx] <- current
         }
-        return(collected)
+
+        all.threshold <- do.call(cbind, all.threshold)
+        colnames(all.threshold) <- names(by.batch)
+        return(.store_thresholds(collected, all.threshold))
     }
 
     # Computing median/MAD (possibly based on subset of the data).
@@ -93,5 +103,17 @@ isOutlier <- function(metric, nmads = 5, type = c("both", "lower", "higher"),
         lower.limit <- -Inf
     }
 
-    return(metric < lower.limit | upper.limit < metric)
+    .store_thresholds( 
+        (metric < lower.limit | upper.limit < metric),
+        c(lower=lower.limit, higher=upper.limit)
+    )
+}
+
+.store_thresholds <- function(x, val) {
+    attr(x, "thresholds") <- val
+    x
+}
+
+.get_thresholds <- function(x) {
+    attr(x, "thresholds")
 }
