@@ -71,7 +71,7 @@ isOutlier <- function(metric, nmads = 5, type = c("both", "lower", "higher"),
         for (b in seq_along(by.batch)) {
             bdx <- by.batch[[b]]
             current <- Recall(metric[bdx], nmads = nmads, type = type, log = FALSE, subset = subset[bdx], batch = NULL, min_diff = min_diff)
-            all.threshold[[b]] <- .get_threshold(current)
+            all.threshold[[b]] <- .get_thresholds(current)
             collected[bdx] <- current
         }
 
@@ -105,11 +105,13 @@ isOutlier <- function(metric, nmads = 5, type = c("both", "lower", "higher"),
 
     .store_thresholds( 
         (metric < lower.limit | upper.limit < metric),
-        c(lower=lower.limit, higher=upper.limit)
+        c(lower=lower.limit, higher=upper.limit),
+        logged = log
     )
 }
 
-.store_thresholds <- function(x, val) {
+.store_thresholds <- function(x, val, logged=FALSE) {
+    if (logged) val <- 10^val
     attr(x, "thresholds") <- val
     x
 }
