@@ -35,8 +35,9 @@ Bioconductor method:
 
 ```{R}
 ## try http:// if https:// URLs are not supported
-source("https://bioconductor.org/biocLite.R")
-biocLite("scater")
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("scater")
 ```
 
 The `scater` package has been available as a "release" version in
@@ -57,7 +58,7 @@ functionality of `scater`:
 
 ```{r}
 install.packages(c("cowplot", "cluster", "mvoutlier", "parallel", "Rtsne"))
-biocLite(c("destiny", "monocle"))
+BiocManager::install(c("destiny", "monocle"))
 ```
 
 You might also like to install `dplyr` for convenient data manipulation:
