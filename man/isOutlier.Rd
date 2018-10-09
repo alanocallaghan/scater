@@ -33,6 +33,11 @@ A logical vector of the same length as the \code{metric} argument, specifying th
 \description{
 Convenience function to determine which values in a numeric vector are outliers based on the median absolute deviation (MAD).
 }
+\details{
+Lower and upper thresholds are stored in the \code{"threshold"} attribute of the returned vector.
+This is a numeric vector of length 2 when \code{batch=NULL} for the threshold on each side.
+Otherwise, it is a matrix with one named column per level of \code{batch} and two rows (one per threshold).
+}
 \examples{
 data("sc_example_counts")
 data("sc_example_cell_info")
