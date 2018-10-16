@@ -87,4 +87,8 @@ test_that("calcAverage handles silly inputs", {
     expect_equivalent(calcAverage(original[0,]), numeric(0)) 
     expect_equivalent(calcAverage(original[,0]), rep(NaN, nrow(original)))
     expect_equivalent(calcAverage(original, use_size_factors=1), rowMeans(counts(original))) # rep()'s 1 to the number of cells.
+
+    expect_error(calcAverage(original, use_size_factors=rep(-1:1, length.out=ncol(original))), "should be positive")
+    expect_error(calcAverage(original, use_size_factors=rep(0:1, length.out=ncol(original))), "should be positive")
+    expect_error(calcAverage(original, use_size_factors=rep(NA_real_, ncol(original))), "should be positive")
 })

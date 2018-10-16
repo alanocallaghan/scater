@@ -15,6 +15,12 @@ public:
                 throw std::runtime_error("length of 'size_fac' does not equal number of columns");
             }
             size_factors[i]=current;
+
+            for (auto x : current) {
+                if (ISNAN(x) || x<=0) {
+                    throw std::runtime_error("size factors should be positive real numbers");
+                }
+            }
         }
 
         if (set_id.size()!=ptr->get_nrow()) { 
