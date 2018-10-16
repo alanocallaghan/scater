@@ -4,8 +4,6 @@
 
 #' Add new variables to \code{colData(object)}.
 #'
-#' Adds ne
-#'
 #' @param object a \code{SingleCellExperiment} object.
 #' @param ... Additional arguments to be passed to \code{dplyr::mutate} to
 #' act on \code{colData(object)}.
