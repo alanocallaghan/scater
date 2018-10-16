@@ -57,11 +57,6 @@ calculateCPM <- function(object, exprs_values="counts", use_size_factors = TRUE,
     # Setting up the size factors.
     object <- .replace_size_factors(object, use_size_factors)
     lib_sizes <- colSums2(assay(object, exprs_values, withDimnames=FALSE), rows=subset_row)
-
-    if (all(lib_sizes==0) && nrow(object)==0L) {
-        lib_sizes <- rep(1, ncol(object)) # hack to return *something* reasonable when no rows are supplied.
-    }
-
     if (is.null(sizeFactors(object))) {
         sizeFactors(object) <- lib_sizes
     }

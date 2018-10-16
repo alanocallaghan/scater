@@ -55,11 +55,7 @@ calculateAverage <- function(object, exprs_values="counts", use_size_factors = T
     # Setting up the size factors.
     object <- .replace_size_factors(object, use_size_factors) 
     if (is.null(sizeFactors(object))) {
-        if (nrow(object)) {
-            sizeFactors(object) <- librarySizeFactors(object, exprs_values=exprs_values, subset_row=subset_row)
-        } else {
-            sizeFactors(object) <- rep(1, ncol(object)) # hack to return something sensible.
-        }
+        sizeFactors(object) <- librarySizeFactors(object, exprs_values=exprs_values, subset_row=subset_row)
     }
 
     object <- centreSizeFactors(object)
