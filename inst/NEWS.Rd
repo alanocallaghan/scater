@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
-\section{Changes in version 1.9.19, Bioconductor 3.8 Release}{
+\section{Changes in version 1.9.22, Bioconductor 3.8 Release}{
   \itemize{
     \item Fixes to all violin plots to ensure scatter matches up with violin outlines.
     \item Rectangle categorical/categorical plots collapse to mirrored bar plots when either factor contains only one level.
@@ -14,6 +14,7 @@
     \item Added support for parallelization in nexprs().
     \item Added readSparseCounts() for creating a sparse matrix from a dense array on file.
     \item Added normalizeCounts() for easy division of matrix columns by the size factors.
+    Modified to throw error upon encountering negative, NA or zero size factors.
     \item Added preserve_zeroes= option to normalizeSCE() for preserving sparsity with non-unity pseudo-counts.
     \item Added runUMAP() and plotUMAP() to use the UMAP dimensionality reduction method.
     \item Added plotExplanatoryPCs() and getExplanatoryPCs() to correlate PCs with known factors.
