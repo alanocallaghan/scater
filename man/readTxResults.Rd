@@ -28,6 +28,9 @@ If \code{full_length=TRUE}, counts are computed from the length-scaled TPMs.
 Otherwise, counts are not computed from the abundances.
 
 \code{readKallistoResults} and \code{readSalmonResults} are simply wrappers around \code{readTxResults} with \code{type} pre-specified.
+
+This function has now been deprecated in favour of \code{\link[tximeta]{tximeta}}.
+The latter produces a SummarizedExperiment that is easily coerced into a SingleCellExperiment.
 }
 \examples{
 library(tximportData)
