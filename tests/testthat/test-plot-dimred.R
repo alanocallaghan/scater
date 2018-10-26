@@ -125,12 +125,12 @@ test_that("we can produce TSNE plots", {
     
     # Handles multiple components properly.
     set.seed(20)
-    P4 <- plotTSNE(example_sce, ncomponents=4)
+    P4 <- plotTSNE(example_sce, ncomponents=3)
     expect_s3_class(P4, "ggplot")
 
     set.seed(20)
-    example_sce <- runTSNE(example_sce, ncomponents=4)
-    expect_equal(plotTSNE(example_sce, ncomponents=4), P4)
+    example_sce <- runTSNE(example_sce, ncomponents=3)
+    expect_equal(plotTSNE(example_sce, ncomponents=3), P4)
 })
 
 test_that("we can produce UMAP plots", {
