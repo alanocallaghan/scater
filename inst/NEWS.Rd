@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
-\section{Changes in version 1.9.19, Bioconductor 3.8 Release}{
+\section{Changes in version 1.10.0, Bioconductor 3.8 Release (October 2018)}{
   \itemize{
     \item Fixes to all violin plots to ensure scatter matches up with violin outlines.
     \item Rectangle categorical/categorical plots collapse to mirrored bar plots when either factor contains only one level.
@@ -32,7 +32,7 @@
   }
 }
 
-\section{Changes in version 1.7.18, Bioconductor 3.7 Release (April 2018)}{
+\section{Changes in version 1.8.0, Bioconductor 3.7 Release (April 2018)}{
   \itemize{
     \item Refactored calculateQCMetrics() to ignore potential non-linearity, rank genes by highest expression, 
         rename automatically generated union sets, allow for output of a compact format. 
@@ -55,27 +55,23 @@
   }
 }
 
-\section{Changes in version 1.5.11, Bioconductor 3.6 Release (September 2017)}{
+\section{Changes in version 1.6.0, Bioconductor 3.6 Release (September 2017)}{
   \itemize{
-    \item Complete refactoring of the package to use the SingleCellExperiment
-    class
+    \item Complete refactoring of the package to use the SingleCellExperiment class.
   }
 }
 
-
-\section{Changes in version 1.3.49, Bioconductor 3.5 Release (April 2017)}{
+\section{Changes in version 1.4.0, Bioconductor 3.5 Release (April 2017)}{
   \itemize{
-    \item plotRLE() function to make relative log expression plots to assess and
-    compare normalizations
+    \item plotRLE() function to make relative log expression plots to assess and compare normalizations.
     \item Refactored newSCESet() with defined hierarchy of data types
-    \item read10XResults() to read in results from 10x Chromium CellRanger output
-    \item Refined QC metrics
-    \item Bug fixes, efficiency improvements and more tests
+    \item read10XResults() to read in results from 10x Chromium CellRanger output.
+    \item Refined QC metrics.
+    \item Bug fixes, efficiency improvements and more tests.
   }
 }
 
-
-\section{Changes in version 1.1.26, Bioconductor 3.4 Release (October 2016)}{
+\section{Changes in version 1.2.0, Bioconductor 3.4 Release (October 2016)}{
   \itemize{
     \item Key code ported to C++ for greater computational and memory efficiency
     \item Added support/integration for SC3 package for single-cell clustering
@@ -94,16 +90,9 @@
   }
 }
 
-
-\section{Changes in version 0.99.3 (2016-02-29)}{
+\section{Changes in version 1.0.0, Bioconductor 3.3 Release (April 2016)}{
   \itemize{
     \item Package added to Bioconductor
     \item Bioc-submission branch merged with master
-  }
-}
-
-\section{Changes in version 0.99.2 (2016-02-21)}{
-  \itemize{
-    \item Package prepared for Bioconductor submission.
   }
 }
