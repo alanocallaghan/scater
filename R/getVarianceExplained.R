@@ -44,7 +44,7 @@ getVarianceExplained <- function(object, exprs_values = "logcounts", variables =
     ## Initialise matrix to store R^2 values for each feature for each variable
     rsquared_mat <- matrix(NA_real_, nrow = nrow(object), ncol = length(variables),
         dimnames=list(rownames(object), variables))
-    tss <- rowVars(DelayedArray(exprs_mat)) * (ncol(object)-1) 
+    tss.all <- rowVars(DelayedArray(exprs_mat)) * (ncol(object)-1) 
 
     ## Get R^2 values for each feature and each variable
     for (V in variables) {
@@ -52,6 +52,15 @@ getVarianceExplained <- function(object, exprs_values = "logcounts", variables =
         if (length(unique(x))<=1L) {
             warning(sprintf("ignoring '%s' with fewer than 2 unique levels", V))
             next
+        }
+
+        # Protect against NAs in the metadata.
+        keep <- !is.na(x)
+        if (all(keep)) {
+            tss <- tss.all
+        } else {
+            x <- x[keep]
+            tss <- rowVars(DelayedArray(exprs_mat), cols=keep) * (sum(keep) - 1)
         }
 
         design <- model.matrix(~x)
@@ -68,7 +77,7 @@ getVarianceExplained <- function(object, exprs_values = "logcounts", variables =
         rss <- numeric(ngenes)
         for (element in levels(by.chunk)) {
             current <- by.chunk==element
-            cur.exprs <- exprs_mat[current,,drop=FALSE]
+            cur.exprs <- exprs_mat[current,keep,drop=FALSE]
             effects <- qr.qty(QR, as.matrix(t(cur.exprs)))
             rss[current] <- colSums(effects[-seq_len(QR$rank),, drop = FALSE] ^ 2) # no need for special colSums, as this is always dense.
         }

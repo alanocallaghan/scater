@@ -38,19 +38,15 @@ void compute_cumsum (typename V::iterator it, size_t ngenes, const Rcpp::Integer
 
 template <typename T, class V>
 struct per_cell_statistics {
-    per_cell_statistics() : counter(0), limit(0) {}
+    per_cell_statistics() : limit(0), counter(0) {}
     
-    per_cell_statistics(size_t ncells, T detection_limit, Rcpp::IntegerVector TOP, size_t ngenes) : 
-            top(TOP), limit(detection_limit), counter(0), 
-            totals(ncells), detected(ncells), percentages(top.size(), ncells),
-            temporary(ngenes) {
+    // Constructor and fill command for no subsetting, i.e., statistics computed on all genes.
+    per_cell_statistics(size_t ncells, T detection_limit, size_t ngenes, Rcpp::IntegerVector TOP) : 
+            top(TOP), limit(detection_limit), counter(0), temporary(ngenes),
+            totals(ncells), detected(ncells), percentages(top.size(), ncells) {
         check_topset(top);
         return;
     }
-
-    // Constructor and fill command for no subsetting, i.e., statistics computed on all genes.
-    per_cell_statistics(size_t ncells, T detection_limit, size_t ngenes, Rcpp::IntegerVector TOP) : 
-            per_cell_statistics(ncells, detection_limit, TOP, ngenes) {}
 
     void fill(typename V::iterator it) {
         const size_t ngenes=temporary.size();
@@ -60,7 +56,7 @@ struct per_cell_statistics {
  
     // Constructor and fill command for statistics to be computed on a subset of genes.
     per_cell_statistics(size_t ncells, T detection_limit, Rcpp::IntegerVector sub, Rcpp::IntegerVector TOP) :
-            per_cell_statistics(ncells, detection_limit, TOP, sub.size()) {
+            per_cell_statistics(ncells, detection_limit, sub.size(), TOP) {
         subset=sub;
         return;
     }

@@ -43,7 +43,10 @@ test_that("normalizeCounts works as expected", {
     out <- normalizeCounts(dummy[,0,drop=FALSE], ref[0], return_log=FALSE)
     expect_identical(dim(out), c(as.integer(ngenes), as.integer(0L)))
 
-    expect_error(normalizeCounts(dummy, ref[0], return_log=FALSE), "does not equal")
+    expect_error(normalizeCounts(dummy, ref[0]), "does not equal")
+    expect_error(normalizeCounts(dummy, rep(-1, ncol(dummy))), "should be positive")
+    expect_error(normalizeCounts(dummy, rep(0, ncol(dummy))), "should be positive")
+    expect_error(normalizeCounts(dummy, rep(NA_real_, ncol(dummy))), "should be positive")
 })
 
 #######################################################

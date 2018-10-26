@@ -8,13 +8,34 @@ public:
             size_factors(sf_list.size()), current_sfs(sf_list.size()), set_id(sf_to_use), 
             subset(process_subset_vector(genes_sub, mat->get_nrow())), smallest(0), largest(0) {
 
+        const size_t nsets=sf_list.size();
+        std::vector<int> detected(nsets);
+        for (auto i : set_id) {
+            if (i < 0 || i >= nsets) {
+                throw std::runtime_error("size factor set ID out of range");
+            }
+            detected[i]=1;
+        }
+
         const size_t& ncells=ptr->get_ncol();
-        for (size_t i=0; i<sf_list.size(); ++i) {
+        for (size_t i=0; i<nsets; ++i) {
+            // We only error check SFs that get used; this allows invalid but 
+            // unused SFs to exist, e.g., lib sizes of zero for no-row inputs.
+            if (!detected[i]) { 
+                continue;
+            }
+
             Rcpp::NumericVector current(sf_list[i]);
             if (current.size() != ncells) { 
                 throw std::runtime_error("length of 'size_fac' does not equal number of columns");
             }
             size_factors[i]=current;
+
+            for (auto x : current) {
+                if (ISNAN(x) || x<=0) {
+                    throw std::runtime_error("size factors should be positive real numbers");
+                }
+            }
         }
 
         if (set_id.size()!=ptr->get_nrow()) { 

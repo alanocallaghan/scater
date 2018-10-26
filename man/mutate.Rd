@@ -20,7 +20,7 @@ act on \code{colData(object)}.}
 An SingleCellExperiment object.
 }
 \description{
-Adds ne
+Add new variables to \code{colData(object)}.
 }
 \examples{
 data("sc_example_counts")

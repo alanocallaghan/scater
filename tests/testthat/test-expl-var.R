@@ -1,5 +1,5 @@
 ## Test functions related to calculation of the variance explained.
-## library(scater); library(testthat); source("setup-sce.R"); source("test-expvar.R")
+## library(scater); library(testthat); source("setup-sce.R"); source("test-expl-var.R")
 
 #############################################################
 # getVarianceExplained() tests:
@@ -50,6 +50,16 @@ test_that("getVarianceExplained handles sparse inputs", {
 
     varexp_sparse <- getVarianceExplained(normed_sparse)
     expect_equal(varexp, varexp_sparse)
+})
+
+test_that("getVarianceExplained handles NA values in the metadata", {
+    whee <- runif(ncol(normed))
+    whee[sample(ncol(normed), ncol(normed)/3)] <- NA
+    normed$whee <- whee
+
+    out <- getVarianceExplained(normed, variables="whee")
+    ref <- getVarianceExplained(normed[,!is.na(whee)], variables="whee")
+    expect_identical(out, ref)
 })
 
 test_that("getVarianceExplained handles silly inputs correctly", {
