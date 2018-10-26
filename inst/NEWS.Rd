@@ -30,6 +30,7 @@
     Deprecated summariseExprsAcrossFeatures().
     \item All plotting functions can now access internal fields by using a character vector with NA as the first element.
     \item Returned threshold values in the attributes of the output from isOutlier().
+    \item Deprecated the ticks in plotReducedDim().
   }
 }
 

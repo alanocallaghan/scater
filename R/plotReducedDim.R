@@ -15,7 +15,7 @@
 #' for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.
 #' @param by_show_single Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
-#' @param add_ticks Logical scalar indicating whether ticks should be drawn on the axes corresponding to the location of each point.
+#' @param add_ticks Deprecated; logical scalar indicating whether ticks should be drawn on the axes corresponding to the location of each point.
 #'
 #' @details
 #' If \code{ncomponents} is a scalar and equal to 2, a scatterplot of the first two dimensions is produced. 
@@ -54,7 +54,7 @@
 plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NULL, 
                            colour_by = NULL, shape_by = NULL, size_by = NULL,
                            by_exprs_values = "logcounts", by_show_single = FALSE,
-                           ..., add_ticks=TRUE) 
+                           ..., add_ticks=NULL) 
 {
     ## Extract reduced dimension representation of cells
     red_dim <- reducedDim(object, use_dimred)
@@ -98,6 +98,11 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NUL
         plot_out <- .central_plotter(df_to_plot, xlab = labs[1], ylab = labs[2],
                                      colour_by = colour_by, size_by = size_by, shape_by = shape_by, 
                                      ..., point_FUN=NULL)
+
+        if (is.null(add_ticks)) {
+            add_ticks <- TRUE
+            .Deprecated(msg="'add_ticks' is deprecated.\nUse '+ geom_rug(...)' instead.")
+        }
         if (add_ticks) {
             plot_out <- plot_out + geom_rug(colour = "gray20", alpha = 0.65)
         }
