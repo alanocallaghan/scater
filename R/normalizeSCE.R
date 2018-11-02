@@ -1,6 +1,6 @@
-#' Normalise a SingleCellExperiment object using pre-computed size factors
+#' Normalize a SingleCellExperiment object using pre-computed size factors
 #'
-#' Compute normalised expression values from count data in a SingleCellExperiment object, using the size factors stored in the object.
+#' Compute normalized expression values from count data in a SingleCellExperiment object, using the size factors stored in the object.
 #'
 #' @param object A SingleCellExperiment object.
 #' @param exprs_values String indicating which assay contains the count data that should be used to compute log-transformed expression values.
@@ -10,7 +10,6 @@
 #' If \code{NULL}, the value is taken from \code{metadata(object)$log.exprs.offset} if defined, otherwise it is set to 1.
 #' @param centre_size_factors Logical scalar indicating whether size fators should be centred.
 #' @param preserve_zeroes Logical scalar indicating whether zeroes should be preserved when dealing with non-unity offsets.
-#' @param ... Arguments passed to \code{normalize} when calling \code{normalise}.
 #'
 #' @details
 #' Normalized expression values are computed by dividing the counts for each cell by the size factor for that cell.
@@ -30,15 +29,13 @@
 #' The log-transformation is then performed on the normalized expression values with a pseudo-count of 1, which ensures that zeroes remain so in the output matrix.
 #' This yields the same results as \code{preserve_zeroes=FALSE} minus a matrix-wide constant of \code{log2(log_exprs_offset)}.
 #'
-#' Note that \code{normalize} is exactly the same as \code{normalise}.
-#'
 #' @return A SingleCellExperiment object containing normalized expression values in \code{"normcounts"} if \code{log=FALSE},
 #' and log-normalized expression values in \code{"logcounts"} if \code{log=TRUE}.
 #' All size factors will also be centred in the output object if \code{centre_size_factors=TRUE}.
 #'
 #' @name normalize
 #' @rdname normalize
-#' @aliases normalize normalise normalize,SingleCellExperiment-method normalise,SingleCellExperiment-method
+#' @aliases normalize normalize,SingleCellExperiment-method 
 #' @author Davis McCarthy and Aaron Lun
 #'
 #' @export
@@ -93,7 +90,7 @@ normalizeSCE <- function(object, exprs_values = "counts",
         as.logical(return_log), 
         subset_row = seq_len(nrow(object)) - 1L)
 
-    ## add normalised values to object
+    ## add normalized values to object
     if (return_log) {
         assay(object, "logcounts") <- norm_exprs
         metadata(object)$log.exprs.offset <- log_exprs_offset
@@ -109,11 +106,3 @@ normalizeSCE <- function(object, exprs_values = "counts",
 #' @aliases normalize
 #' @export
 setMethod("normalize", "SingleCellExperiment", normalizeSCE)
-
-#' @rdname normalize
-#' @aliases normalise
-#' @export
-normalise <- function(...) {
-    .Deprecated(new="normalize")
-    normalize(...)
-}
