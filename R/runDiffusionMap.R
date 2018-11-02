@@ -13,7 +13,6 @@
 #' Default is to not use existing reduced dimension results.
 #' @param n_dimred Integer scalar, number of dimensions of the reduced dimension slot to use when \code{use_dimred} is supplied.
 #' Defaults to all available dimensions.
-#' @param rand_seed Deprecated, numeric scalar that can be passed to \code{set.seed} to make the results reproducible.
 #' @param ... Additional arguments to pass to \code{\link[destiny]{DiffusionMap}}.
 #'
 #' @details 
@@ -55,7 +54,7 @@
 #' head(reducedDim(example_sce))
 runDiffusionMap <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
         exprs_values = "logcounts", scale_features = TRUE, use_dimred=NULL, n_dimred=NULL,
-        rand_seed = NULL, ...) {
+        ...) {
 
     if (!is.null(use_dimred)) {
         ## Use existing dimensionality reduction results.
@@ -68,10 +67,6 @@ runDiffusionMap <- function(object, ncomponents = 2, ntop = 500, feature_set = N
     }
 
     ## Compute DiffusionMap
-    if ( !is.null(rand_seed) ) {
-        .Deprecated(msg="'rand.seed=' is deprecated.\nUse 'set.seed' externally instead.")
-        set.seed(rand_seed)
-    }
     vals <- as.matrix(vals) # protect against alternative matrix inputs.
     difmap_out <- destiny::DiffusionMap(vals, ...)
 
