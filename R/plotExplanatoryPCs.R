@@ -15,8 +15,6 @@
 #' If \code{object} is a SingleCellExperiment object, \code{\link{getExplanatoryPCs}} will be called to compute the variance in expression explained by each variable in each gene.
 #' Users may prefer to run \code{\link{getExplanatoryPCs}} manually and pass the resulting matrix as \code{object}, in which case the R-squared values are used directly.
 #'
-#' \code{findImportantPCs} is deprecated - it will simply pass all of its arguments to \code{plotExplanatoryPCs}.
-#'
 #' @return A ggplot object.
 #'
 #' @export
@@ -73,11 +71,3 @@ plotExplanatoryPCs <- function(object, nvars_to_plot = 10, npcs_to_plot=50, them
 
     plot_out
 }
-
-#' @rdname plotExplanatoryPCs
-#' @export
-findImportantPCs <- function(...) {
-    .Deprecated("plotExplanatoryPCs")
-    plotExplanatoryPCs(...)
-}
-
