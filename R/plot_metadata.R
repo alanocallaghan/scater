@@ -68,21 +68,6 @@ plotColData <- function(object, y, x = NULL,
                          ...)
 }
 
-
-#' @rdname plotColData
-#' @export
-plotPhenoData <- function(...) {
-    .Deprecated(new="plotColData")
-    plotColData(...)
-}
-
-#' @rdname plotColData 
-#' @export
-plotCellData <- function(...) {
-    .Deprecated(new="plotColData")
-    plotColData(...)
-}
-
 #' Plot row metadata
 #'
 #' Plot row-level (i.e., gene) metadata from a SingleCellExperiment object.
@@ -143,14 +128,6 @@ plotRowData <- function(object, y, x = NULL,
                          by_exprs_values = by_exprs_values, by_show_single = by_show_single,
                          ...)
 }
-
-#' @rdname plotRowData 
-#' @export
-plotFeatureData <- function(...) {
-    .Deprecated(new="plotRowData")
-    plotRowData(...)
-}
-
 
 .metadata_dispatcher <- function(object, mode, y, x = NULL, 
                         colour_by = NULL, shape_by = NULL, size_by = NULL, 
