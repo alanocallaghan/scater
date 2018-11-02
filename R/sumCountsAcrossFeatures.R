@@ -14,7 +14,7 @@
 #' These counts can be aggregated into a single feature by setting the shared identifier (usually the gene symbol) as \code{ids}.
 #'
 #' It is theoretically possible to aggregate transcript-level counts to gene-level counts with this function.
-#' However, it is often better to do so with functions like \code{\link{readTxResults}} that account for differences in transcript lengths between isoforms.
+#' However, it is often better to do so with dedicated functions (e.g., from the \pkg{tximport} or \pkg{tximeta} packages) that account for differences in length across isoforms.
 #'
 #' Any \code{NA} values in \code{ids} are implicitly ignored and will not be considered or reported.
 #' This may be useful, e.g., to remove undesirable feature sets by setting their entries in \code{ids} to \code{NA}.
