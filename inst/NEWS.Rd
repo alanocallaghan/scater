@@ -1,6 +1,12 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
+\section{Changes in version 1.12.0, Bioconductor 3.9 Release}{
+  \itemize{
+    \item Removed all functions deprecated in the last release.
+  }
+}
+
 \section{Changes in version 1.10.0, Bioconductor 3.8 Release (October 2018)}{
   \itemize{
     \item Fixes to all violin plots to ensure scatter matches up with violin outlines.
