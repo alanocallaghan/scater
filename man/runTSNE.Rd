@@ -6,9 +6,8 @@
 \usage{
 runTSNE(object, ncomponents = 2, ntop = 500, feature_set = NULL,
   exprs_values = "logcounts", scale_features = TRUE,
-  use_dimred = NULL, n_dimred = NULL, rand_seed = NULL,
-  perplexity = min(50, floor(ncol(object)/5)), pca = TRUE,
-  initial_dims = 50, ...)
+  use_dimred = NULL, n_dimred = NULL, perplexity = min(50,
+  floor(ncol(object)/5)), pca = TRUE, initial_dims = 50, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -29,8 +28,6 @@ Default is to not use existing reduced dimension results.}
 
 \item{n_dimred}{Integer scalar, number of dimensions of the reduced dimension slot to use when \code{use_dimred} is supplied.
 Defaults to all available dimensions.}
-
-\item{rand_seed}{Deprecated, numeric scalar that can be passed to \code{set.seed} to make the results reproducible.}
 
 \item{perplexity}{Numeric scalar defining the perplexity parameter, see \code{?\link[Rtsne]{Rtsne}} for more details.}
 

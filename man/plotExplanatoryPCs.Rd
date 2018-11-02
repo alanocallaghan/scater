@@ -2,13 +2,10 @@
 % Please edit documentation in R/plotExplanatoryPCs.R
 \name{plotExplanatoryPCs}
 \alias{plotExplanatoryPCs}
-\alias{findImportantPCs}
 \title{Plot the explanatory PCs for each variable}
 \usage{
 plotExplanatoryPCs(object, nvars_to_plot = 10, npcs_to_plot = 50,
   theme_size = 10, ...)
-
-findImportantPCs(...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values and experimental information. 
@@ -35,8 +32,6 @@ Only the \code{nvars_to_plot} variables with the largest maximum R-squared acros
 
 If \code{object} is a SingleCellExperiment object, \code{\link{getExplanatoryPCs}} will be called to compute the variance in expression explained by each variable in each gene.
 Users may prefer to run \code{\link{getExplanatoryPCs}} manually and pass the resulting matrix as \code{object}, in which case the R-squared values are used directly.
-
-\code{findImportantPCs} is deprecated - it will simply pass all of its arguments to \code{plotExplanatoryPCs}.
 }
 \examples{
 data("sc_example_counts")

@@ -4,10 +4,8 @@
 \name{normalize}
 \alias{normalize}
 \alias{normalizeSCE}
-\alias{normalise}
 \alias{normalize,SingleCellExperiment-method}
-\alias{normalise,SingleCellExperiment-method}
-\title{Normalise a SingleCellExperiment object using pre-computed size factors}
+\title{Normalize a SingleCellExperiment object using pre-computed size factors}
 \usage{
 normalizeSCE(object, exprs_values = "counts", return_log = TRUE,
   log_exprs_offset = NULL, centre_size_factors = TRUE,
@@ -17,8 +15,6 @@ normalizeSCE(object, exprs_values = "counts", return_log = TRUE,
   exprs_values = "counts", return_log = TRUE,
   log_exprs_offset = NULL, centre_size_factors = TRUE,
   preserve_zeroes = FALSE)
-
-normalise(...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -34,8 +30,6 @@ If \code{NULL}, the value is taken from \code{metadata(object)$log.exprs.offset}
 \item{centre_size_factors}{Logical scalar indicating whether size fators should be centred.}
 
 \item{preserve_zeroes}{Logical scalar indicating whether zeroes should be preserved when dealing with non-unity offsets.}
-
-\item{...}{Arguments passed to \code{normalize} when calling \code{normalise}.}
 }
 \value{
 A SingleCellExperiment object containing normalized expression values in \code{"normcounts"} if \code{log=FALSE},
@@ -43,7 +37,7 @@ and log-normalized expression values in \code{"logcounts"} if \code{log=TRUE}.
 All size factors will also be centred in the output object if \code{centre_size_factors=TRUE}.
 }
 \description{
-Compute normalised expression values from count data in a SingleCellExperiment object, using the size factors stored in the object.
+Compute normalized expression values from count data in a SingleCellExperiment object, using the size factors stored in the object.
 }
 \details{
 Normalized expression values are computed by dividing the counts for each cell by the size factor for that cell.
@@ -62,8 +56,6 @@ It also means that the added \code{log_exprs_offset} can be interpreted as a pse
 If \code{preserve_zeroes=TRUE} and the pseudo-count is not unity, size factors are instead centered at the specified value of \code{log_exprs_offset}.
 The log-transformation is then performed on the normalized expression values with a pseudo-count of 1, which ensures that zeroes remain so in the output matrix.
 This yields the same results as \code{preserve_zeroes=FALSE} minus a matrix-wide constant of \code{log2(log_exprs_offset)}.
-
-Note that \code{normalize} is exactly the same as \code{normalise}.
 }
 \examples{
 data("sc_example_counts")

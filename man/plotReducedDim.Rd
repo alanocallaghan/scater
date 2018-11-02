@@ -6,8 +6,7 @@
 \usage{
 plotReducedDim(object, use_dimred, ncomponents = 2, percentVar = NULL,
   colour_by = NULL, shape_by = NULL, size_by = NULL,
-  by_exprs_values = "logcounts", by_show_single = FALSE, ...,
-  add_ticks = NULL)
+  by_exprs_values = "logcounts", by_show_single = FALSE, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -32,8 +31,6 @@ for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.}
 \item{by_show_single}{Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
-
-\item{add_ticks}{Deprecated; logical scalar indicating whether ticks should be drawn on the axes corresponding to the location of each point.}
 }
 \value{
 A ggplot object

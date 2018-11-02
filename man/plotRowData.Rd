@@ -2,14 +2,11 @@
 % Please edit documentation in R/plot_metadata.R
 \name{plotRowData}
 \alias{plotRowData}
-\alias{plotFeatureData}
 \title{Plot row metadata}
 \usage{
 plotRowData(object, y, x = NULL, colour_by = NULL, shape_by = NULL,
   size_by = NULL, by_exprs_values = "logcounts",
   by_show_single = FALSE, ...)
-
-plotFeatureData(...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values and experimental information.}

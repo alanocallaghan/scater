@@ -7,8 +7,7 @@
 runPCA(object, ncomponents = 2, method = c("prcomp", "irlba"),
   ntop = 500, exprs_values = "logcounts", feature_set = NULL,
   scale_features = TRUE, use_coldata = FALSE,
-  selected_variables = NULL, detect_outliers = FALSE,
-  rand_seed = NULL, ...)
+  selected_variables = NULL, detect_outliers = FALSE, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -33,8 +32,6 @@ This will also remove features with standard deviations below 1e-8.}
 If a list, each entry can take the form described in \code{?"\link{scater-vis-var}"}.}
 
 \item{detect_outliers}{Logical scalar, should outliers be detected based on PCA coordinates generated from column-level metadata?}
-
-\item{rand_seed}{Deprecated, numeric scalar specifying the random seed when using \code{method="irlba"}.}
 
 \item{...}{Additional arguments to pass to \code{\link[irlba]{prcomp_irlba}} when \code{method="irlba"}.}
 }

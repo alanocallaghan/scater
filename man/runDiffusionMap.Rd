@@ -6,8 +6,7 @@
 \usage{
 runDiffusionMap(object, ncomponents = 2, ntop = 500,
   feature_set = NULL, exprs_values = "logcounts",
-  scale_features = TRUE, use_dimred = NULL, n_dimred = NULL,
-  rand_seed = NULL, ...)
+  scale_features = TRUE, use_dimred = NULL, n_dimred = NULL, ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object}
@@ -28,8 +27,6 @@ Default is to not use existing reduced dimension results.}
 
 \item{n_dimred}{Integer scalar, number of dimensions of the reduced dimension slot to use when \code{use_dimred} is supplied.
 Defaults to all available dimensions.}
-
-\item{rand_seed}{Deprecated, numeric scalar that can be passed to \code{set.seed} to make the results reproducible.}
 
 \item{...}{Additional arguments to pass to \code{\link[destiny]{DiffusionMap}}.}
 }
