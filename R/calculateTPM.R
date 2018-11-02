@@ -1,34 +1,3 @@
-#' Calculate which features are expressed in which cells using a threshold on
-#' observed counts, transcripts-per-million, counts-per-million, FPKM, or
-#' defined expression levels.
-#'
-#' @param object a \code{\link{SingleCellExperiment}} object with expression 
-#' and/or count data.
-#' @param detection_limit numeric scalar giving the minimum expression level
-#' for an expression observation in a cell for it to qualify as expressed.
-#' @param exprs_values character scalar indicating whether the count data
-#' (\code{"counts"}), the log-transformed count data (\code{"logcounts"}),
-#' transcript-per-million (\code{"tpm"}), counts-per-million (\code{"cpm"}) or
-#' FPKM (\code{"fpkm"}) should be used to define if an observation is expressed
-#' or not. Defaults to the first available value of those options in the
-#' order shown.
-#' @return a logical matrix indicating whether or not a feature in a particular
-#' cell is expressed.
-#' 
-#' @export
-#' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
-#' assay(example_sce, "is_exprs") <- calcIsExprs(example_sce, 
-#' detection_limit = 1, exprs_values = "counts")
-calcIsExprs <- function(object, detection_limit = 0, 
-                        exprs_values = "counts") {
-    .Deprecated(msg="'calcIsExprs' is deprecated.\nUse 'counts(object) > 0' instead")
-    assay(object, i = exprs_values) > detection_limit
-}
-
 #' Calculate transcripts-per-million (TPM)
 #'
 #' Calculate transcripts-per-million (TPM) values for expression from counts for a set of features.
