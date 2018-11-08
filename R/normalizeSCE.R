@@ -29,6 +29,10 @@
 #' The log-transformation is then performed on the normalized expression values with a pseudo-count of 1, which ensures that zeroes remain so in the output matrix.
 #' This yields the same results as \code{preserve_zeroes=FALSE} minus a matrix-wide constant of \code{log2(log_exprs_offset)}.
 #'
+#' In some cases, the function will return a \linkS4class{DelayedMatrix} with delayed division and log-transformation operations.
+#' This requires that the assay specified by \code{exprs_values} contains a \linkS4class{DelayedMatrix}, and only one set of size factors is used for all features.
+#' This avoids the need to explicitly calculate normalized expression values across a very large (possibly file-backed) matrix.
+#'
 #' @return A SingleCellExperiment object containing normalized expression values in \code{"normcounts"} if \code{log=FALSE},
 #' and log-normalized expression values in \code{"logcounts"} if \code{log=TRUE}.
 #' All size factors will also be centred in the output object if \code{centre_size_factors=TRUE}.
@@ -52,6 +56,8 @@
 #' @importFrom BiocGenerics normalize sizeFactors
 #' @importFrom S4Vectors metadata metadata<-
 #' @importFrom SummarizedExperiment assay assay<-
+#' @importClassesFrom DelayedArray DelayedMatrix
+#' @importFrom methods is
 normalizeSCE <- function(object, exprs_values = "counts",
         return_log = TRUE, log_exprs_offset = NULL,
         centre_size_factors = TRUE, preserve_zeroes = FALSE) {
@@ -83,12 +89,22 @@ normalizeSCE <- function(object, exprs_values = "counts",
 
     sf.list <- .get_all_sf_sets(object)
 
-    ## Compute normalized expression values.
-    norm_exprs <- .Call(cxx_norm_exprs, assay(object, i = exprs_values, withDimnames=FALSE),
-        sf.list$size.factors, sf.list$index - 1L, 
-        as.numeric(log_exprs_offset),
-        as.logical(return_log), 
-        subset_row = seq_len(nrow(object)) - 1L)
+    ## Compute normalized expression values. If it's a DelayedArray and there's
+    ## only one set of size factors, we just compute it directly.
+    cur_exprs <- assay(object, i = exprs_values, withDimnames=FALSE)
+    if (is(cur_exprs, "DelayedMatrix") && length(used <- unique(sf.list$index))==1L) {
+        norm_exprs <- t(t(cur_exprs) / sf.list$size.factors[[used]])
+        if (return_log) {
+            norm_exprs <- log2(norm_exprs + log_exprs_offset)
+        }
+
+    } else {
+        norm_exprs <- .Call(cxx_norm_exprs, cur_exprs,
+            sf.list$size.factors, sf.list$index - 1L, 
+            as.numeric(log_exprs_offset),
+            as.logical(return_log), 
+            subset_row = seq_len(nrow(object)) - 1L)
+    }
 
     ## add normalized values to object
     if (return_log) {
