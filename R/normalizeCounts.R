@@ -10,17 +10,21 @@
 #' @param subset_row A vector specifying the subset of rows of \code{x} for which to return a result.
 #'
 #' @details 
-#' This function is more memory-efficient than \code{t(t(x)/size_factors)},
-#' and more generally applicable to different matrix classes than \code{sweep(x, 2, size_factors, "*")}.
-#'
+#' This function will compute log-normalized expression values from \code{x}.
+#' It will endeavour to return an object of the same class as \code{x}, with particular focus on \linkS4class{DelayedMatrix} inputs/outputs.
+#' 
 #' Note that the default \code{centre_size_factors} differs from that in \code{\link{normalizeSCE}}.
 #' Users of this function are assumed to know what they're doing with respect to normalization.
 #'
-#' @return A matrix of (log-)normalized expression values.
+#' @return A matrix-like object of (log-)normalized expression values.
 #'
 #' @author Aaron Lun
 #'
 #' @export
+#' @importFrom methods is
+#' @importClassesFrom DelayedArray DelayedMatrix
+#' @importFrom BiocGenerics t colnames rownames
+#'
 #' @examples
 #' data("sc_example_counts")
 #' normed <- normalizeCounts(sc_example_counts, 
@@ -30,11 +34,22 @@ normalizeCounts <- function(x, size_factors, return_log = TRUE, log_exprs_offset
         size_factors <- size_factors/mean(size_factors)
     }
     
-    subset_row <- .subset2index(subset_row, x, byrow=TRUE)
-    out <- .Call(cxx_norm_exprs, x, list(size_factors), integer(nrow(x)),
-        log_exprs_offset, return_log, subset_row - 1L)
+    if (is(x, "DelayedMatrix")) {
+        if (!is.null(subset_row)) {
+            x <- x[subset_row,,drop=FALSE]
+        }
 
-    colnames(out) <- colnames(x)
-    rownames(out) <- rownames(x)[subset_row]
+        out <- t(t(x)/size_factors)
+        if (return_log) {
+            out <- log2(out + log_exprs_offset)
+        }
+
+    } else {
+        subset_row <- .subset2index(subset_row, x, byrow=TRUE)
+        out <- .Call(cxx_norm_exprs, x, list(size_factors), integer(nrow(x)),
+            log_exprs_offset, return_log, subset_row - 1L)
+        colnames(out) <- colnames(x)
+        rownames(out) <- rownames(x)[subset_row]
+    }
     return(out)
 }
