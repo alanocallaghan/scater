@@ -22,14 +22,14 @@ normalizeCounts(x, size_factors, return_log = TRUE,
 \item{subset_row}{A vector specifying the subset of rows of \code{x} for which to return a result.}
 }
 \value{
-A matrix of (log-)normalized expression values.
+A matrix-like object of (log-)normalized expression values.
 }
 \description{
 Compute (log-)normalized expression values by dividing counts for each cell by the corresponding size factor.
 }
 \details{
-This function is more memory-efficient than \code{t(t(x)/size_factors)},
-and more generally applicable to different matrix classes than \code{sweep(x, 2, size_factors, "*")}.
+This function will compute log-normalized expression values from \code{x}.
+It will endeavour to return an object of the same class as \code{x}, with particular focus on \linkS4class{DelayedMatrix} inputs/outputs.
 
 Note that the default \code{centre_size_factors} differs from that in \code{\link{normalizeSCE}}.
 Users of this function are assumed to know what they're doing with respect to normalization.
