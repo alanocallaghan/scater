@@ -55,19 +55,35 @@ test_that("normalizeCounts behaves with sparse inputs", {
 
     library(Matrix)
     sparsed <- as(zeroed, "dgCMatrix")
-    expect_equal(normalizeCounts(zeroed, ref), as.matrix(normalizeCounts(sparsed, ref)))
-    expect_equal(normalizeCounts(zeroed, ref, return_log=FALSE), as.matrix(normalizeCounts(sparsed, ref, return_log=FALSE)))
-    expect_equal(normalizeCounts(zeroed, ref, log_exprs_offset=2), as.matrix(normalizeCounts(sparsed, ref, log_exprs_offset=2)))
-    expect_equal(normalizeCounts(zeroed, ref, subset_row=1:10), as.matrix(normalizeCounts(sparsed, ref, subset_row=1:10)))
+   
+    expect_s4_class(out <- normalizeCounts(sparsed, ref), "dgCMatrix")
+    expect_equal(normalizeCounts(zeroed, ref), as.matrix(out))
+
+    expect_s4_class(out <- normalizeCounts(sparsed, ref, return_log=FALSE), "dgCMatrix")
+    expect_equal(normalizeCounts(zeroed, ref, return_log=FALSE), as.matrix(out))
+
+    expect_true(is.matrix(out <- normalizeCounts(sparsed, ref, log_exprs_offset=2)))
+    expect_equal(normalizeCounts(zeroed, ref, log_exprs_offset=2), as.matrix(out))
+
+    expect_s4_class(out <- normalizeCounts(sparsed, ref, subset_row=1:10), "dgCMatrix")
+    expect_equal(normalizeCounts(zeroed, ref, subset_row=1:10), as.matrix(out))
 })
 
 test_that("normalizeCounts behaves with DelayedArray inputs", {
     library(DelayedArray)
     dadum <- DelayedArray(dummy)      
-    expect_equal(normalizeCounts(dummy, ref), as.matrix(normalizeCounts(dadum, ref)))
-    expect_equal(normalizeCounts(dummy, ref, return_log=FALSE), as.matrix(normalizeCounts(dadum, ref, return_log=FALSE)))
-    expect_equal(normalizeCounts(dummy, ref, log_exprs_offset=2), as.matrix(normalizeCounts(dadum, ref, log_exprs_offset=2)))
-    expect_equal(normalizeCounts(dummy, ref, subset_row=1:10), as.matrix(normalizeCounts(dadum, ref, subset_row=1:10)))
+    
+    expect_s4_class(out <- normalizeCounts(dadum, ref), "DelayedMatrix")
+    expect_equal(normalizeCounts(dummy, ref), as.matrix(out))
+
+    expect_s4_class(out <- normalizeCounts(dadum, ref, return_log=FALSE), "DelayedMatrix")
+    expect_equal(normalizeCounts(dummy, ref, return_log=FALSE), as.matrix(out))
+
+    expect_s4_class(out <- normalizeCounts(dadum, ref, log_exprs_offset=2), "DelayedMatrix")
+    expect_equal(normalizeCounts(dummy, ref, log_exprs_offset=2), as.matrix(out))
+
+    expect_s4_class(out <- normalizeCounts(dadum, ref, subset_row=1:10), "DelayedMatrix")
+    expect_equal(normalizeCounts(dummy, ref, subset_row=1:10), as.matrix(out))
 })
 
 #######################################################
@@ -243,5 +259,29 @@ test_that("scater::normalize works with other exprs_values", {
     sizeFactors(Y2) <- NULL
     expect_warning(Y2 <- normalize(Y2, exprs_values="whee"), "library sizes")
     expect_identical(sizeFactors(Y2), librarySizeFactors(ref))
+})
+
+test_that("scater::normalize works preserves the Delayed'ness", {
+    library(DelayedArray)
+    Y <- X
+    counts(Y) <- DelayedArray(counts(X))
+
+    Y2 <- normalize(Y)
+    expect_s4_class(logcounts(Y2), "DelayedMatrix")
+    expect_equal(as.matrix(logcounts(Y2)), logcounts(normalize(X)))
+
+    Y2 <- normalize(Y, return_log=FALSE)
+    expect_s4_class(normcounts(Y2), "DelayedMatrix")
+    expect_equal(as.matrix(normcounts(Y2)), normcounts(normalize(X, return_log=FALSE)))
+
+    Y2 <- normalize(Y, log_exprs_offset=2)
+    expect_s4_class(logcounts(Y2), "DelayedMatrix")
+    expect_equal(as.matrix(logcounts(Y2)), logcounts(normalize(X, log_exprs_offset=2)))
+
+    # Check that Delayedness is lost for multiple size factors.
+    isSpike(Y, "ERCC") <- 1:10
+    sizeFactors(Y, "ERCC") <- runif(ncol(X))
+    Y2 <- normalize(Y)
+    expect_true(is.matrix(logcounts(Y2)))
 })
 
