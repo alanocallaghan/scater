@@ -56,6 +56,10 @@ It also means that the added \code{log_exprs_offset} can be interpreted as a pse
 If \code{preserve_zeroes=TRUE} and the pseudo-count is not unity, size factors are instead centered at the specified value of \code{log_exprs_offset}.
 The log-transformation is then performed on the normalized expression values with a pseudo-count of 1, which ensures that zeroes remain so in the output matrix.
 This yields the same results as \code{preserve_zeroes=FALSE} minus a matrix-wide constant of \code{log2(log_exprs_offset)}.
+
+In some cases, the function will return a \linkS4class{DelayedMatrix} with delayed division and log-transformation operations.
+This requires that the assay specified by \code{exprs_values} contains a \linkS4class{DelayedMatrix}, and only one set of size factors is used for all features.
+This avoids the need to explicitly calculate normalized expression values across a very large (possibly file-backed) matrix.
 }
 \examples{
 data("sc_example_counts")
