@@ -49,6 +49,27 @@ test_that("normalizeCounts works as expected", {
     expect_error(normalizeCounts(dummy, rep(NA_real_, ncol(dummy))), "should be positive")
 })
 
+test_that("normalizeCounts behaves with sparse inputs", {
+    zeroed <- dummy
+    zeroed[rbinom(length(zeroed), 1, 0.95)==1] <- 0
+
+    library(Matrix)
+    sparsed <- as(zeroed, "dgCMatrix")
+    expect_equal(normalizeCounts(zeroed, ref), as.matrix(normalizeCounts(sparsed, ref)))
+    expect_equal(normalizeCounts(zeroed, ref, return_log=FALSE), as.matrix(normalizeCounts(sparsed, ref, return_log=FALSE)))
+    expect_equal(normalizeCounts(zeroed, ref, log_exprs_offset=2), as.matrix(normalizeCounts(sparsed, ref, log_exprs_offset=2)))
+    expect_equal(normalizeCounts(zeroed, ref, subset_row=1:10), as.matrix(normalizeCounts(sparsed, ref, subset_row=1:10)))
+})
+
+test_that("normalizeCounts behaves with DelayedArray inputs", {
+    library(DelayedArray)
+    dadum <- DelayedArray(dummy)      
+    expect_equal(normalizeCounts(dummy, ref), as.matrix(normalizeCounts(dadum, ref)))
+    expect_equal(normalizeCounts(dummy, ref, return_log=FALSE), as.matrix(normalizeCounts(dadum, ref, return_log=FALSE)))
+    expect_equal(normalizeCounts(dummy, ref, log_exprs_offset=2), as.matrix(normalizeCounts(dadum, ref, log_exprs_offset=2)))
+    expect_equal(normalizeCounts(dummy, ref, subset_row=1:10), as.matrix(normalizeCounts(dadum, ref, subset_row=1:10)))
+})
+
 #######################################################
 
 areSizeFactorsCentred <- function(object, centre=1, tol=1e-6) {
