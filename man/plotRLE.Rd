@@ -42,14 +42,14 @@ Relative log expression (RLE) plots are a powerful tool for visualising unwanted
 These plots were originally devised for gene expression data from microarrays but can also be used on single-cell expression data.
 RLE plots are particularly useful for assessing whether a procedure aimed at removing unwanted variation (e.g., scaling normalisation) has been successful. 
 
-If style is "full", the usual \pkg{ggplot2} boxplot is created for each cell.
-Here, the box shows the inter-quartile range and whiskers extend no more than 1.5 * IQR from the hinge (the 25th or 75th percentile).
+If style is \dQuote{full}, the usual \pkg{ggplot2} boxplot is created for each cell.
+Here, the box shows the inter-quartile range and whiskers extend no more than 1.5 times the IQR from the hinge (the 25th or 75th percentile).
 Data beyond the whiskers are called outliers and are plotted individually. 
 The median (50th percentile) is shown with a white bar.
 This approach is detailed and flexible, but can take a long time to plot for large datasets.
 
-If style is "minimal", a Tufte-style boxplot is created for each cell.
-Here, the median is shown with a circle, the IQR in a grey line, and "whiskers" (as defined above) for the plots are shown with coloured lines. 
+If style is \dQuote{minimal}, a Tufte-style boxplot is created for each cell.
+Here, the median is shown with a circle, the IQR in a grey line, and \dQuote{whiskers} (as defined above) for the plots are shown with coloured lines. 
 No outliers are shown for this plot style.
 This approach is more succinct and faster for large numbers of cells.
 }
