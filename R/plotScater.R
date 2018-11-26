@@ -29,10 +29,9 @@
 #'
 #' @return a ggplot plot object
 #'
-#' @importFrom dplyr mutate
-#' @importFrom plyr aaply
-#' @importFrom reshape2 melt
 #' @export
+#' @importClassesFrom SingleCellExperiment SingleCellExperiment
+#' @importFrom SummarizedExperiment assay
 #'
 #' @author Davis McCarthy, with modifications by Aaron Lun
 #'
@@ -72,20 +71,19 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
 
     ## Setting values to colour by.
     colour_by_out <- .choose_vis_values(x, colour_by, mode = "column", search = "any", 
-                                        exprs_values = by_exprs_values, discard_solo = !by_show_single)
+        exprs_values = by_exprs_values, discard_solo = !by_show_single)
     colour_by <- colour_by_out$name
     colour_by_vals <- colour_by_out$val
 
     ## Define an expression matrix depending on which values we're using
-    exprs_mat <- assay(x, i = exprs_values)
+    exprs_mat <- assay(x, i = exprs_values, withDimnames=FALSE)
     nfeatures <- min(nfeatures, nrow(exprs_mat))
 
     ## Use C++ to get the sequencing real estate accounted for by features
     to_plot <- seq_len(nfeatures)
     ncells <- ncol(exprs_mat)
     seq_real_estate <- .Call(cxx_top_cumprop, exprs_mat, to_plot)
-    seq_real_estate_long <- data.frame(Feature=rep(to_plot, each=ncells),
-                                       Cell=rep(seq_len(ncells), nfeatures))
+    seq_real_estate_long <- data.frame(Feature=rep(to_plot, each=ncells), Cell=rep(seq_len(ncells), nfeatures))
     seq_real_estate_long$Proportion_Library <- as.vector(t(seq_real_estate))
 
     ## Add block and colour_by information if provided
