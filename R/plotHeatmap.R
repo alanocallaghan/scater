@@ -50,6 +50,8 @@
 #' @export
 #' @importFrom DelayedArray DelayedArray
 #' @importFrom DelayedMatrixStats rowMeans2
+#' @importFrom viridis viridis
+#' @importFrom SummarizedExperiment assay
 plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts",
     center=FALSE, zlim=NULL, symmetric=FALSE, color=NULL, 
     colour_columns_by=NULL, by_exprs_values = exprs_values, by_show_single = FALSE,
@@ -110,7 +112,7 @@ plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts"
             } else if (nlevs_colour_by > 10 && nlevs_colour_by <= 20) {
                 col_scale <- .get_palette("tableau20") 
             } else {
-                col_scale <- viridis::viridis(nlevs_colour_by)                    
+                col_scale <- viridis(nlevs_colour_by)                    
             }
 
             col_scale <- col_scale[seq_len(nlevs_colour_by)]

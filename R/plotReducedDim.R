@@ -29,7 +29,6 @@
 #'
 #' @name plotReducedDim
 #' @aliases plotReducedDim 
-#' @import viridis
 #' @importFrom SingleCellExperiment reducedDim
 #' @export
 #'

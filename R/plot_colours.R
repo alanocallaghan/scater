@@ -32,6 +32,7 @@
 }
 
 #' @importFrom ggplot2 scale_fill_manual scale_color_manual
+#' @importFrom viridis scale_fill_viridis scale_color_viridis
 .resolve_plot_colours <- function(plot_out, colour_by, colour_by_name, fill = FALSE) 
 # Get nice plotting colour schemes for very general colour variables
 {
@@ -41,10 +42,10 @@
 
     # Picking whether to fill or not.
     if ( fill ) {
-        VIRIDFUN <- viridis::scale_fill_viridis
+        VIRIDFUN <- scale_fill_viridis
         SCALEFUN <- scale_fill_manual
     } else {
-        VIRIDFUN <- viridis::scale_color_viridis
+        VIRIDFUN <- scale_color_viridis
         SCALEFUN <- scale_color_manual
     }
 
