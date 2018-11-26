@@ -70,36 +70,62 @@ test_that("the QC hunter works as expected on rows", {
 
 #######################################################################
 
-test_that("plotHighestExprs works as expected", {
+test_that("plotHighestExprs works on vanilla cases", {
     expect_s3_class(plotHighestExprs(wt_qc), "ggplot")
     expect_s3_class(plotHighestExprs(wt_qc_compact), "ggplot")
-
-    # Checking out the error messages.
-    expect_error(plotHighestExprs(wo_qc, colour_cells_by = NULL), "failed to find")
-    expect_error(plotHighestExprs(wo_qc, controls = NULL), "failed to find")
-    expect_s3_class(plotHighestExprs(wo_qc, controls = NULL, colour_cells_by = NULL), "ggplot")
-
-    # Checking out the options.
-    expect_s3_class(plotHighestExprs(wt_qc, n=Inf), "ggplot")
-    expect_s3_class(plotHighestExprs(wt_qc, drop_features=1:20), "ggplot")
     expect_s3_class(plotHighestExprs(wt_qc, as_percentage = FALSE), "ggplot")
-    
+})
+
+test_that("plotHighestExprs' aesthetics choices work", {
+    expect_s3_class(plotHighestExprs(wt_qc_compact, controls = c("scater_qc", "is_feature_control_set1")), "ggplot")
+    expect_s3_class(plotHighestExprs(wt_qc_compact, colour_cells_by = c("scater_qc", "all", "total_counts")), "ggplot")
+
     expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = "Mutation_Status"), "ggplot")
     expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = NULL), "ggplot")
     expect_s3_class(plotHighestExprs(wt_qc, controls = "is_feature_control_set1"), "ggplot")
     expect_s3_class(plotHighestExprs(wt_qc, controls = NULL), "ggplot")
-
-    expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = "Mutation_Status", by_show_single = FALSE), "ggplot")
+    
     expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
 
+    # Responds to by_show_single.
+    dummy <- wt_qc
+    dummy$whee <- "A"
+    expect_s3_class(plotHighestExprs(dummy, colour_cells_by = "whee", by_show_single = TRUE), "ggplot")
+    expect_s3_class(plotHighestExprs(dummy, colour_cells_by = "whee", by_show_single = FALSE), "ggplot")
+
+    # Checking out the error messages when values are missing.
+    expect_error(plotHighestExprs(wo_qc, colour_cells_by = NULL), "failed to find")
+    expect_error(plotHighestExprs(wo_qc, controls = NULL), "failed to find")
+    expect_s3_class(plotHighestExprs(wo_qc, controls = NULL, colour_cells_by = NULL), "ggplot")
+})
+
+test_that("plotHighestExprs works with different feature selections", {
+    expect_s3_class(plotHighestExprs(wt_qc, n=Inf), "ggplot")
+
+    # Responds to other sources for row names.
     rowData(wt_qc)$Whee <- paste("Feature", seq_len(nrow(wt_qc)))
     expect_s3_class(plotHighestExprs(wt_qc, feature_names_to_plot = "Whee"), "ggplot")
 
-    # Checking that the variable pickers work.
-    expect_s3_class(plotHighestExprs(wt_qc_compact, controls = c("scater_qc", "is_feature_control_set1")), "ggplot")
-    expect_s3_class(plotHighestExprs(wt_qc_compact, colour_cells_by = c("scater_qc", "all", "total_counts")), "ggplot")
+    dummy <- wt_qc
+    rownames(dummy) <- NULL
+    expect_s3_class(plotHighestExprs(dummy), "ggplot")
+    
+    # Discarding and subset exclusion yield the same results.
+    discard <- rbinom(nrow(wt_qc), 1, 0.5)==1
+    p <- plotHighestExprs(wt_qc, drop_features=discard, as_percentage=FALSE)
+    ref <- plotHighestExprs(wt_qc[!discard,], as_percentage=FALSE)
+    expect_equal(p$data, ref$data)
 
-    # Recognizes alternative exprs_values.
+    # Replacement rownames respect original ordering when discarding.
+    discard <- rbinom(nrow(dummy), 1, 0.5)==1
+    p <- plotHighestExprs(dummy, drop_features=discard, as_percentage=FALSE)
+    dummy2 <- dummy
+    rownames(dummy2) <- sprintf("Feature %i", seq_len(nrow(dummy2)))
+    ref <- plotHighestExprs(dummy2[!discard,], as_percentage=FALSE)
+    expect_equal(p$data, ref$data)
+})
+
+test_that("plotHighestExprs works on alternative exprs", {
     alt_sce <- wt_qc 
     assayNames(alt_sce) <- "whee"
     expect_error(plotHighestExprs(alt_sce, exprs_values="whee"), "failed to find")
