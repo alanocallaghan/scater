@@ -98,9 +98,9 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
     if (style == "full") {
         df_to_plot <- data.frame(
             x=rep(seq_len(ncol(med_devs)), each=nrow(med_devs)),
-            rle=as.numeric(med_devs), # column-major.
-            colour_by=rep(colour_by_vals, each=nrow(med_devs))
+            rle=as.numeric(med_devs) # column-major.
         )
+        df_to_plot[["colour_by"]] <- rep(colour_by_vals, each=nrow(med_devs)) # done outside, just in case it's NULL.
         aesth <- aes_string(x = "x", group = "x", y = "rle", colour = colour_lab, fill = colour_lab)
         plot_out <- .plotRLE_full(df_to_plot, aesth, ncol, ...)
 

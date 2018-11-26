@@ -44,9 +44,9 @@
 #'
 #' @name plotExpression
 #' @aliases plotExpression
-#' @import ggplot2
-#' @importFrom ggbeeswarm geom_quasirandom
-#' @importFrom SummarizedExperiment assayNames
+#' @importFrom ggplot2 facet_wrap theme guides element_text element_blank unit
+#' @importFrom SummarizedExperiment assay assayNames
+#' @importClassesFrom SingleCellExperiment SingleCellExperiment
 #'
 #' @export
 #'
@@ -90,18 +90,16 @@ plotExpression <- function(object, features, x = NULL,
         stop("object must be an SingleCellExperiment object.")
     }
 
-    ## Define number of features to plot
-    if (is.logical(features)) {
-        nfeatures <- sum(features)
-    } else {
-        nfeatures <- length(features)
-    }
+    ## Define features to plot
+    features <- .subset2index(features, object, byrow=TRUE)
+    nfeatures <- length(features)
 
     if ( exprs_values == "exprs" && !(exprs_values %in% assayNames(object)) ) {
         exprs_values <- "logcounts"
     }
-    exprs_mat <- assay(object, i = exprs_values)
+    exprs_mat <- assay(object, i = exprs_values, withDimnames=FALSE)
     exprs_mat <- exprs_mat[features,,drop = FALSE]
+
     if ( log2_values ) {
         exprs_mat <- log2(exprs_mat + 1)
         ylab <- paste0("Expression (", exprs_values, "; log2-scale)")
@@ -109,10 +107,15 @@ plotExpression <- function(object, features, x = NULL,
         ylab <- paste0("Expression (", exprs_values, ")")
     }
 
-    ## Melt the expression data and metadata into a convenient form
-    to_melt <- as.matrix(exprs_mat)
-    evals_long <- reshape2::melt(to_melt)
-    colnames(evals_long) <- c("Feature", "Cell", "Y")
+    ## melt the expression data.
+    chosen_names <- rownames(object)[features]
+    if (is.null(chosen_names)) {
+        chosen_names <- sprintf("Feature %i", features)
+    }
+    evals_long <- data.frame(
+        Feature=rep(chosen_names, ncol(exprs_mat)),
+        Y=as.numeric(exprs_mat) # column major collapse.
+    )
 
     ## check x-coordinates are valid
     x_by_out <- .choose_vis_values(object, x, mode="column", search = "any", exprs_values = exprs_values)
@@ -165,7 +168,8 @@ plotExpression <- function(object, features, x = NULL,
         plot_out <- plot_out + theme(
             axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1),
             axis.ticks.x = element_blank(),
-            plot.margin = unit(c(.03, .02, .05, .02), "npc"))
+            plot.margin = unit(c(.03, .02, .05, .02), "npc")
+        )
     }
 
     # Destroying colour legend if feature_colours was used.

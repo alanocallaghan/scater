@@ -46,12 +46,12 @@ plotExplanatoryPCs <- function(object, nvars_to_plot = 10, npcs_to_plot=50, them
 
     ## Create the plot.
     chosen_rsquared <- rsquared_mat[, head(oo_max, nvars_to_plot), drop=FALSE]
-    rownames(chosen_rsquared) <- NULL
-    df_to_plot <- suppressMessages(reshape2::melt(chosen_rsquared))
-    colnames(df_to_plot) <- c("PC", "Expl_Var", "R_squared")
-
-    df_to_plot$Pct_Var_Explained <- 100 * df_to_plot$R_squared
-    df_to_plot$Expl_Var <- factor(df_to_plot$Expl_Var, levels = colnames(chosen_rsquared))
+    ordered_vars <- factor(colnames(chosen_rsquared), levels=colnames(chosen_rsquared)) # preserve order.
+    df_to_plot <- data.frame(
+        PC=rep(seq_len(nrow(chosen_rsquared)), ncol(chosen_rsquared)),
+        Expl_Var=rep(ordered_vars, each=nrow(chosen_rsquared)),
+        Pct_Var_Explained=as.numeric(chosen_rsquared) * 100 # column major collapse.
+    )
     
     plot_out <- ggplot(df_to_plot, aes_string(x = "PC", y = "Pct_Var_Explained", colour = "Expl_Var")) +
         geom_point(alpha= 1, shape = 16, size = 3) +

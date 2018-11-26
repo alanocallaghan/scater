@@ -47,12 +47,12 @@ plotExplanatoryVariables <- function(object, nvars_to_plot = 10, min_marginal_r2
 
     ## Creating the plot.
     chosen_rsquared <- rsquared_mat[, head(oo_median, nvars_to_plot), drop=FALSE]
-    df_to_plot <- suppressMessages(reshape2::melt(chosen_rsquared))
-    colnames(df_to_plot) <- c("Feature", "Expl_Var", "R_squared")
+    ordered_vars <- factor(colnames(chosen_rsquared), levels=colnames(chosen_rsquared)) # preserve order.
+    df_to_plot <- data.frame(
+        Expl_Var=rep(ordered_vars, each=nrow(chosen_rsquared)),
+        Pct_Var_Explained=as.numeric(chosen_rsquared) * 100 # column major collapse.
+    )
 
-    df_to_plot$Pct_Var_Explained <- 100 * df_to_plot$R_squared
-    df_to_plot$Expl_Var <- factor(df_to_plot$Expl_Var, levels = colnames(chosen_rsquared))
-    
     plot_out <- ggplot(df_to_plot, aes_string(x = "Pct_Var_Explained", colour = "Expl_Var")) +
         geom_line(stat = "density", alpha = 0.7, size = 2) +
         geom_vline(xintercept = 1, linetype = 2) +

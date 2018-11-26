@@ -37,6 +37,9 @@
 #' @importFrom utils head
 #' @importFrom DelayedArray DelayedArray
 #' @importFrom DelayedMatrixStats rowSums2 colSums2
+#' @importFrom SummarizedExperiment assay
+#' @importFrom ggplot2 ggplot geom_point ggtitle xlab ylab theme_bw theme element_text scale_color_gradient scale_fill_manual guides
+#'
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
@@ -57,18 +60,16 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
                              by_exprs_values = exprs_values, by_show_single = TRUE,
                              feature_names_to_plot = NULL, as_percentage = TRUE) 
 {
-    if (is.null(rownames(object))) {
-        rownames(object) <- sprintf("Feature %i", seq_len(nrow(object)))
-    }
-    if (!is.null(drop_features)) { 
-        to_discard <- .subset2index(drop_features, object, byrow=TRUE)
-        object <- object[-to_discard,]
-    }
-
     ## Find the most highly expressed features in this dataset
     exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
     ave_exprs <- rowSums2(exprs_mat)
     oo <- order(ave_exprs, decreasing=TRUE)
+
+    if (!is.null(drop_features)) { 
+        to_discard <- .subset2index(drop_features, object, byrow=TRUE)
+        oo <- setdiff(oo, to_discard)
+    }
+
     chosen <- head(oo, n)
     sub_mat <- exprs_mat[chosen,,drop=FALSE]
     sub_ave <- ave_exprs[chosen]
@@ -76,24 +77,27 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
     ## define feature names for plot
     if (is.null(feature_names_to_plot)) {  
         feature_names <- rownames(object)
+        if (is.null(feature_names)) {
+            feature_names <- sprintf("Feature %i", seq_len(nrow(object)))
+        }
     } else {
         feature_names <- .choose_vis_values(object, feature_names_to_plot, search = "metadata", mode = "row")$val
     }
     sub_names <- feature_names[chosen]
-    rownames(sub_mat) <- sub_names
 
     ## Compute expression values and reshape them for ggplot.
-    df_exprs_by_cell <- t(sub_mat)
-
     if (as_percentage) { 
         total_exprs <- sum(ave_exprs)
         top_pctage <- 100 * sum(sub_ave) / total_exprs
-        df_exprs_by_cell <- 100 * df_exprs_by_cell / colSums2(exprs_mat)
+        sub_mat <- 100 * sweep(sub_mat, 2, colSums2(exprs_mat), "/", check.margin=FALSE)
     }
 
-    df_exprs_by_cell_long <- reshape2::melt(as.matrix(df_exprs_by_cell))
-    colnames(df_exprs_by_cell_long) <- c("Cell", "Tag", "value")
-    df_exprs_by_cell_long$Tag <- factor(df_exprs_by_cell_long$Tag, rev(sub_names)) # rev() so that most highly expressed is last (i.e., highest y-axis).
+    ordered_names <- factor(sub_names, rev(sub_names)) # rev() so that most highly expressed is last (i.e., highest y-axis).
+    df_exprs_by_cell_long <- data.frame(
+        Cell=rep(seq_len(ncol(sub_mat)), each=nrow(sub_mat)), 
+        Tag=rep(ordered_names, ncol(sub_mat)),
+        value=as.numeric(sub_mat) # column major collapse.
+    )
     
     ## Colouring the individual dashes for the cells.
     if (missing(colour_cells_by)) {
@@ -137,7 +141,7 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
     }
 
     ## Adding median expression values for each gene.
-    df_to_plot <- data.frame(Feature=factor(sub_names, levels=rev(sub_names)))
+    df_to_plot <- data.frame(Feature=ordered_names)
     if (as_percentage) { 
         df_to_plot$pct_total <- 100 * sub_ave / total_exprs
         legend_val <- "pct_total"
@@ -156,14 +160,12 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
         df_to_plot$is_feature_control <- cont_out$val[chosen]
     
         plot_most_expressed <- plot_most_expressed +
-            geom_point(aes_string(x = legend_val, y = "Feature", fill = "is_feature_control"),
-                       data = df_to_plot, colour = "gray30", shape = 21) +
+            geom_point(aes_string(x = legend_val, y = "Feature", fill = "is_feature_control"), data = df_to_plot, colour = "gray30", shape = 21) +
             scale_fill_manual(values = c("aliceblue", "wheat")) +
             guides(fill = guide_legend(title = "Feature control?"))
     } else {
         plot_most_expressed <- plot_most_expressed +
-           geom_point(aes_string(x = legend_val, y = "Feature"),
-                      data = df_to_plot, fill = "grey80", colour = "grey30", shape = 21) 
+            geom_point(aes_string(x = legend_val, y = "Feature"), data = df_to_plot, fill = "grey80", colour = "grey30", shape = 21) 
     }
 
     plot_most_expressed 
