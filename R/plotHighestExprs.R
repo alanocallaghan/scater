@@ -136,7 +136,8 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
         if (!is.numeric(df_exprs_by_cell_long$colour_by)) { 
             plot_most_expressed <- .resolve_plot_colours(plot_most_expressed, df_exprs_by_cell_long$colour_by, colour_cells_by)
         } else {
-            plot_most_expressed <- plot_most_expressed + scale_colour_gradient(name = colour_cells_by, low = "lightgoldenrod", high = "firebrick4", space = "Lab")
+            plot_most_expressed <- plot_most_expressed + 
+                scale_color_gradient(name = colour_cells_by, low = "lightgoldenrod", high = "firebrick4", space = "Lab")
         }
     }
 

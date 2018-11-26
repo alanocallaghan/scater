@@ -20,7 +20,7 @@
 #' @export
 #' @importFrom utils head
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
-#' @importFrom ggplot2 ggplot geom_line scale_x_log10 xlab ylab coord_cartesian theme_bw
+#' @importFrom ggplot2 ggplot geom_line xlab ylab coord_cartesian theme_bw scale_y_log10
 #'
 #' @rdname plotExplanatoryPCs
 #' @examples

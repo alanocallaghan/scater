@@ -41,6 +41,8 @@
 #' and most other plotting functions.
 NULL
 
+#' @importFrom ggbeeswarm geom_quasirandom
+#' @importFrom ggplot2 ggplot geom_violin aes_string xlab ylab stat_summary geom_jitter position_jitter coord_flip geom_point stat_smooth geom_tile theme_bw theme
 .central_plotter <- function(object, xlab = NULL, ylab = NULL,
                              colour_by = NULL, shape_by = NULL, size_by = NULL, fill_by = NULL,
                              show_median = FALSE, show_violin = TRUE, show_smooth = FALSE, show_se = TRUE,
@@ -82,7 +84,7 @@ NULL
         point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size)
         if (is.null(point_FUN)) {
             if (jitter_type=="swarm") {
-                point_FUN <- function(...) ggbeeswarm::geom_quasirandom(..., width=0.4, groupOnX=TRUE, bandwidth=1)
+                point_FUN <- function(...) geom_quasirandom(..., width=0.4, groupOnX=TRUE, bandwidth=1)
             } else {
                 point_FUN <- function(...) geom_jitter(..., position = position_jitter(height = 0))
             }
@@ -172,6 +174,7 @@ NULL
     plot_out
 }
 
+#' @importFrom ggplot2 aes_string
 .get_point_args <- function(colour_by, shape_by, size_by, alpha=0.65, size=NULL) 
 ## Note the use of colour instead of fill when shape_by is set, as not all shapes have fill.
 ## (Fill is still the default as it looks nicer.)
@@ -210,6 +213,7 @@ NULL
     return(list(args=geom_args, fill=fill_colour))
 }
 
+#' @importFrom ggplot2 guide_legend guides
 .add_extra_guide <- function(plot_out, shape_by, size_by) 
 # Adding extra legend information on the shape and size.
 {

@@ -29,6 +29,7 @@
 #' @importFrom DelayedArray DelayedArray
 #' @importFrom BiocGenerics rowMeans
 #' @importFrom DelayedMatrixStats rowVars
+#' @importFrom ggplot2 geom_pointrange
 #'
 #' @author Davis McCarthy, with modifications by Aaron Lun
 #'

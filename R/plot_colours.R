@@ -31,6 +31,7 @@
     )
 }
 
+#' @importFrom ggplot2 scale_fill_manual scale_color_manual
 .resolve_plot_colours <- function(plot_out, colour_by, colour_by_name, fill = FALSE) 
 # Get nice plotting colour schemes for very general colour variables
 {

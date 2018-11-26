@@ -32,6 +32,7 @@
 #' @export
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom SummarizedExperiment assay
+#' @importFrom ggplot2 ggplot geom_line facet_grid facet_wrap xlab ylab theme_bw aes_string
 #'
 #' @author Davis McCarthy, with modifications by Aaron Lun
 #'

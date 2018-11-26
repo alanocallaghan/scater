@@ -30,6 +30,7 @@
 #' @name plotReducedDim
 #' @aliases plotReducedDim 
 #' @import viridis
+#' @importFrom SingleCellExperiment reducedDim
 #' @export
 #'
 #' @examples
@@ -107,6 +108,7 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NUL
         ...)
 }
 
+#' @importFrom ggplot2 ggplot facet_grid stat_density geom_point theme
 paired_reddim_plot <- function(df_to_plot, to_plot, percentVar=NULL,
     colour_by=NULL, shape_by=NULL, size_by=NULL,
     add_legend = TRUE, theme_size = 10, point_alpha = 0.6, point_size = NULL) 
