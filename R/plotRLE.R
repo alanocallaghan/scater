@@ -22,14 +22,14 @@
 #' These plots were originally devised for gene expression data from microarrays but can also be used on single-cell expression data.
 #' RLE plots are particularly useful for assessing whether a procedure aimed at removing unwanted variation (e.g., scaling normalisation) has been successful. 
 #' 
-#' If style is "full", the usual \pkg{ggplot2} boxplot is created for each cell.
-#' Here, the box shows the inter-quartile range and whiskers extend no more than 1.5 * IQR from the hinge (the 25th or 75th percentile).
+#' If style is \dQuote{full}, the usual \pkg{ggplot2} boxplot is created for each cell.
+#' Here, the box shows the inter-quartile range and whiskers extend no more than 1.5 times the IQR from the hinge (the 25th or 75th percentile).
 #' Data beyond the whiskers are called outliers and are plotted individually. 
 #' The median (50th percentile) is shown with a white bar.
 #' This approach is detailed and flexible, but can take a long time to plot for large datasets.
 #' 
-#' If style is "minimal", a Tufte-style boxplot is created for each cell.
-#' Here, the median is shown with a circle, the IQR in a grey line, and "whiskers" (as defined above) for the plots are shown with coloured lines. 
+#' If style is \dQuote{minimal}, a Tufte-style boxplot is created for each cell.
+#' Here, the median is shown with a circle, the IQR in a grey line, and \dQuote{whiskers} (as defined above) for the plots are shown with coloured lines. 
 #' No outliers are shown for this plot style.
 #' This approach is more succinct and faster for large numbers of cells.
 #'
@@ -62,6 +62,7 @@
 #' @importFrom DelayedArray DelayedArray
 #' @importFrom DelayedMatrixStats rowMedians
 #' @importFrom SummarizedExperiment assay
+#' @importFrom ggplot2 aes_string theme
 plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE, 
                     style = "minimal", legend = TRUE, ordering = NULL, 
                     colour_by = NULL, by_exprs_values = exprs_values, ...) {
@@ -77,7 +78,7 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
     }
 
     ## Calculate RLE for each gene in each cell.
-    exprs_mat <- assay(object, i=exprs_values)
+    exprs_mat <- assay(object, i=exprs_values, withDimnames=FALSE)
     exprs_mat <- DelayedArray(exprs_mat)
     if (!exprs_logged) {
         exprs_mat <- log2(exprs_mat + 1)
@@ -95,11 +96,11 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
     # Creating the ggplot.
     style <- match.arg(style, c("full", "minimal"))
     if (style == "full") {
-        df_to_plot <- dplyr::as_data_frame(as.matrix(med_devs))
-        df_to_plot[["source"]] <- exprs_values
-        df_to_plot <- reshape2::melt(df_to_plot, id.vars = c("source"), value.name = "rle")
-        df_to_plot[["colour_by"]] <- rep(colour_by_vals, each = nrow(med_devs))
-        df_to_plot[["x"]] <- rep(seq_len(ncol(med_devs)), each = nrow(med_devs))
+        df_to_plot <- data.frame(
+            x=rep(seq_len(ncol(med_devs)), each=nrow(med_devs)),
+            rle=as.numeric(med_devs), # column-major.
+            colour_by=rep(colour_by_vals, each=nrow(med_devs))
+        )
         aesth <- aes_string(x = "x", group = "x", y = "rle", colour = colour_lab, fill = colour_lab)
         plot_out <- .plotRLE_full(df_to_plot, aesth, ncol, ...)
 
@@ -126,43 +127,37 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
 .rle_boxplot_stats <- function(mat) {
     boxstats <- colQuantiles(DelayedArray(mat))
     colnames(boxstats) <- c("q0", "q25", "q50", "q75", "q100")
-    boxdf <- dplyr::as_data_frame(boxstats)
+    boxdf <- data.frame(boxstats)
+
     interqr <- boxstats[, 4] - boxstats[, 2]
-    boxdf[["whiskMin"]] <- pmax(boxdf[["q0"]], 
-                                boxdf[["q25"]] - 1.5 * interqr)
-    boxdf[["whiskMax"]] <- pmin(boxdf[["q100"]], 
-                                boxdf[["q75"]] + 1.5 * interqr)
-    boxdf[["variable"]] <- colnames(mat)
+    boxdf[["whiskMin"]] <- pmax(boxdf[["q0"]], boxdf[["q25"]] - 1.5 * interqr)
+    boxdf[["whiskMax"]] <- pmin(boxdf[["q100"]], boxdf[["q75"]] + 1.5 * interqr)
     boxdf
 }
 
+#' @importFrom ggplot2 ggplot aes_string geom_segment geom_point geom_hline ylab xlab theme_classic theme element_blank
 .plotRLE_minimal <- function(df, colour_by, ncol) {
     plot_out <- ggplot(df, aes_string(x = "x", fill = colour_by)) +
-        geom_segment(aes_string(xend = "x", y = "q25", yend = "q75"), 
-                     colour = "gray60") +
-        geom_segment(aes_string(xend = "x", y = "q75", yend = "whiskMax", 
-                                colour = colour_by)) +
-        geom_segment(aes_string(xend = "x", y = "q25", yend = "whiskMin",
-                                colour = colour_by)) +
+        geom_segment(aes_string(xend = "x", y = "q25", yend = "q75"), colour = "gray60") +
+        geom_segment(aes_string(xend = "x", y = "q75", yend = "whiskMax", colour = colour_by)) +
+        geom_segment(aes_string(xend = "x", y = "q25", yend = "whiskMin", colour = colour_by)) +
         geom_point(aes_string(y = "q50"), shape = 21) +
         geom_hline(yintercept = 0, colour = "gray40", alpha = 0.5) +
         ylab("Relative log expression") + xlab("Sample") +
         theme_classic() +
-        theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), 
-              axis.line.x = element_blank())
+        theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line.x = element_blank())
     plot_out
 }
 
+#' @importFrom stats median
+#' @importFrom ggplot2 geom_boxplot stat_summary ylab xlab theme_classic theme element_blank
 .plotRLE_full <- function(df, aesth, ncol, ...) {
     plot_out <- ggplot(df, aesth) +
         geom_boxplot(...) + # geom_boxplot(notch=T) to compare groups
         stat_summary(geom = "crossbar", width = 0.65, fatten = 0, color = "white", 
-                     fun.data = function(x){ 
-                         return(c(y = median(x), ymin = median(x), ymax = median(x))) }) +
+            fun.data = function(x){ c(y = median(x), ymin = median(x), ymax = median(x)) }) +
         ylab("Relative log expression") + xlab("Sample") +
         theme_classic() +
-        theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), 
-              axis.line.x = element_blank())
+        theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line.x = element_blank())
     plot_out
 }
-
