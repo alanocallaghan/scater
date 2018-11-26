@@ -4,48 +4,6 @@
 example_sce <- calculateQCMetrics(normed, exprs_values="counts")
 
 #################################################
-# Testing plotExpression
-
-test_that("we can produce expression plots with different expression values", {
-    # Testing various 'by x' scenarios.
-    for (gene_set in list("Gene_0001", rownames(example_sce)[1:5], 10, 6:20)) { # different numbers of genes, types of specification.
-        for (x in list(NULL, "Cell_Cycle", "Gene_0100")) { # nothing, categorical, or continuous.
-            expect_s3_class(plotExpression(example_sce, gene_set, x = x), "ggplot")
-            expect_s3_class(plotExpression(example_sce, gene_set, x = x, colour_by = "Cell_Cycle"), "ggplot")
-            expect_s3_class(plotExpression(example_sce, gene_set, x = x, size_by = "Gene_0001"), "ggplot")
-            expect_s3_class(plotExpression(example_sce, gene_set, x = x, shape_by = "Treatment"), "ggplot")
-        }
-    }
-
-    # Testing different visualization schemes.
-    gene_set <- rownames(example_sce)[1:20]
-    expect_s3_class(plotExpression(example_sce, gene_set, colour_by = "Cell_Cycle", size_by = "Gene_0001"), "ggplot")
-    expect_s3_class(plotExpression(example_sce, gene_set, colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
-    expect_s3_class(plotExpression(example_sce, gene_set, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
-    expect_s3_class(plotExpression(example_sce, gene_set, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
-    
-    expect_s3_class(plotExpression(example_sce, gene_set, size_by = "Gene_0001", shape_by = "Treatment", by_exprs_values = "counts"), "ggplot")
-    expect_s3_class(plotExpression(example_sce, gene_set, size_by = "Gene_0001", shape_by = "Treatment", by_show_single = TRUE), "ggplot")
-
-    # Testing options when dealing with many genes and no 'x' specified.
-    expect_s3_class(plotExpression(example_sce, gene_set, one_facet=FALSE), "ggplot")
-    expect_s3_class(plotExpression(example_sce, gene_set, feature_colours=FALSE), "ggplot")
-
-    # Fiddling with all the semi-analysis options.
-    expect_s3_class(plotExpression(example_sce, gene_set, show_violin=FALSE), "ggplot")
-    expect_s3_class(plotExpression(example_sce, gene_set, show_median=TRUE), "ggplot")
-    expect_s3_class(plotExpression(example_sce, gene_set, jitter_type="jitter"), "ggplot")
-
-    expect_s3_class(plotExpression(example_sce, gene_set, x="Gene_0001", show_smooth=TRUE), "ggplot")
-    expect_s3_class(plotExpression(example_sce, gene_set, x="Gene_0001", show_smooth=TRUE, show_se=FALSE), "ggplot")
-
-    # Checking for behaviour with different values.
-    expect_s3_class(plotExpression(example_sce, gene_set, x = "Mutation_Status", exprs_values = "counts"),  "ggplot")
-    expect_s3_class(plotExpression(example_sce, gene_set, x = "Mutation_Status", exprs_values = "counts", log2_values = TRUE),  "ggplot")
-    expect_error(plotExpression(example_sce, rownames(example_sce)[1:6], exprs_values = "silly"), "not in names")
-})
-
-#################################################
 # Testing plotHeatmap
 
 test_that("we can produce heatmaps", {
