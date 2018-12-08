@@ -7,7 +7,9 @@
 runTSNE(object, ncomponents = 2, ntop = 500, feature_set = NULL,
   exprs_values = "logcounts", scale_features = TRUE,
   use_dimred = NULL, n_dimred = NULL, perplexity = min(50,
-  floor(ncol(object)/5)), pca = TRUE, initial_dims = 50, ...)
+  floor(ncol(object)/5)), pca = TRUE, initial_dims = 50,
+  normalize = TRUE, theta = 0.5, external_neighbors = FALSE,
+  BNPARAM = NULL, BPPARAM = SerialParam(), ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -36,6 +38,16 @@ This is ignored if \code{use_dimred} is specified.}
 
 \item{initial_dims}{Integer scalar passed to \code{\link[Rtsne]{Rtsne}}, specifying the number of principal components to be retained if \code{pca=TRUE}.}
 
+\item{normalize}{Logical scalar indicating if input values should be scaled for numerical precision, see \code{\link[Rtsne]{normalize_input}}.}
+
+\item{theta}{Numeric scalar specifying the approximation accuracy of the Barnes-Hut algorithm, see \code{\link[Rtsne]{Rtsne}} for details.}
+
+\item{external_neighbors}{Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.}
+
+\item{BNPARAM}{A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.}
+
+\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.}
+
 \item{...}{Additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.}
 }
 \value{
@@ -55,7 +67,11 @@ By default, the function will try to provide a reasonable setting, by scaling th
 However, it is often worthwhile to manually try multiple values to ensure that the conclusions are robust.
 
 Setting \code{use_dimred} allows users to easily perform t-SNE on low-rank approximations of the original expression matrix (e.g., after PCA).
-In such cases, arguments such as \code{ntop}, \code{feature_set}, \code{exprs_values} and \code{scale_features} will be ignored.
+In such cases, arguments such as \code{ntop}, \code{feature_set}, \code{exprs_values} and \code{scale_features} will be ignored. 
+
+If \code{external_neighbors=TRUE}, the nearest neighbor search step is conducted using a different algorithm to that in the \code{\link[Rtsne]{Rtsne}} function.
+This can be parallelized or approximate to achieve greater speed for large data sets.
+The neighbor search results are then used for t-SNE via the \code{\link[Rtsne]{Rtsne_neighbors}} function.
 }
 \examples{
 ## Set up an example SingleCellExperiment
