@@ -4,6 +4,8 @@
 \section{Changes in version 1.12.0, Bioconductor 3.9 Release}{
   \itemize{
     \item Removed all functions deprecated in the last release.
+    \item Added option in runTSNE() to perform an external nearest neighbors check with BiocNeighbors.
+    Removed the deprecated rand.seed= argument.
   }
 }
 
