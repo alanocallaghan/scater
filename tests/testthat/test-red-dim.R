@@ -185,7 +185,17 @@ test_that("runTSNE works as expected", {
     normed3 <- runTSNE(normed, initial_dims = 10)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
-    # Testing out the use of existing reduced dimensions (this should not respond to any feature settings).
+    set.seed(100)
+    normed3 <- runTSNE(normed, normalize=FALSE)
+    expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
+
+    set.seed(100)
+    normed3 <- runTSNE(normed, theta=0.1)
+    expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
+})
+
+test_that("runTSNE on existing reduced dimension results works as expected", {
+    # Function should not respond to any feature settings.
     set.seed(10)
     normedP <- runPCA(normed, ncomponents = 4)
     normed2 <- runTSNE(normedP, use_dimred = "PCA")
@@ -213,6 +223,39 @@ test_that("runTSNE works as expected", {
     set.seed(10)
     normed3 <- runTSNE(normedP, use_dimred = "PCA", n_dimred=3)
     expect_false(isTRUE(all.equal(reducedDim(normed2, "TSNE"), reducedDim(normed3, "TSNE"))))
+})
+
+test_that("runTSNE works with externally computed nearest neighbor results", {
+    normedP <- runPCA(normed, ncomponents = 20)
+
+    # Need to set the random seed to avoid different RNG states after the NN search. 
+    set.seed(20) 
+    init <- matrix(rnorm(ncol(normedP)*2), ncol=2)
+
+    ref <- runTSNE(normedP, use_dimred="PCA", Y_init=init)
+    alt <- runTSNE(normedP, use_dimred="PCA", Y_init=init, external_neighbors=TRUE)
+    expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
+
+    ref <- runTSNE(normedP, use_dimred="PCA", Y_init=init, perplexity=8.6)
+    alt <- runTSNE(normedP, use_dimred="PCA", Y_init=init, perplexity=8.6, external_neighbors=TRUE)
+    expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
+
+    ref <- runTSNE(normedP, use_dimred="PCA", Y_init=init, theta=0.1)
+    alt <- runTSNE(normedP, use_dimred="PCA", Y_init=init, theta=0.1, external_neighbors=TRUE)
+    expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
+
+    ref <- runTSNE(normedP, use_dimred="PCA", Y_init=init, normalize=FALSE)
+    alt <- runTSNE(normedP, use_dimred="PCA", Y_init=init, normalize=FALSE, external_neighbors=TRUE)
+    expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
+
+    # Works with alternative neighbor searching options.
+    ref <- runTSNE(normedP, use_dimred="PCA", Y_init=init)
+    alt <- runTSNE(normedP, use_dimred="PCA", Y_init=init, external_neighbors=TRUE, BNPARAM=BiocNeighbors::VptreeParam())
+    expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
+
+    ref <- runTSNE(normedP, use_dimred="PCA", Y_init=init)
+    alt <- runTSNE(normedP, use_dimred="PCA", Y_init=init, external_neighbors=TRUE, BPPARAM=MulticoreParam(2))
+    expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
 })
 
 #############################################
