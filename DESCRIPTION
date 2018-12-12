@@ -18,7 +18,7 @@ Imports: BiocGenerics, SummarizedExperiment, Matrix, dplyr, ggbeeswarm, grid,
         DelayedArray, DelayedMatrixStats, methods, S4Vectors, stats, utils, 
         viridis, Rcpp (>= 0.12.14), BiocNeighbors, BiocParallel
 Suggests: BiocStyle, biomaRt, beachmat, cowplot, cluster, destiny, knitr, monocle,
-        mvoutlier, rmarkdown, Rtsne, umap, testthat, magrittr, pheatmap, irlba,
+        mvoutlier, rmarkdown, Rtsne, uwot, testthat, magrittr, pheatmap, irlba,
         Biobase, limma
 VignetteBuilder: knitr
 LazyData: true

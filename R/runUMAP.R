@@ -2,7 +2,7 @@
 #'
 #' Perform uniform manifold approximation and projection (UMAP) for the cells, based on the data in a SingleCellExperiment object.
 #'
-#' @param object A SingleCellExperiment object.
+#' @param object A \linkS4class{SingleCellExperiment} object.
 #' @param ncomponents Numeric scalar indicating the number of UMAP dimensions to obtain.
 #' @param ntop Numeric scalar specifying the number of most variable features to use for UMAP.
 #' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for UMAP.
@@ -13,19 +13,29 @@
 #' Default is to not use existing reduced dimension results.
 #' @param n_dimred Integer scalar, number of dimensions of the reduced dimension slot to use when \code{use_dimred} is supplied.
 #' Defaults to all available dimensions.
-#' @param ... Additional arguments to pass to \code{\link[umap]{umap}}.
+#' @param pca Integer scalar specifying how many PCs should be used as input into UMAP, if the PCA is to be recomputed on the subsetted expression matrix.
+#' Only used when code{use_dimred=NULL}, and if \code{pca=NULL}, no PCA is performed at all.
+#' @param n_neighbors Integer scalar, number of nearest neighbors to identify when constructing the initial graph.
+#' @param external_neighbors Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.
+#' @param BNPARAM A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.
+#' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.
+#' @param ... Additional arguments to pass to \code{\link[uwot]{umap}}.
 #'
 #' @return 
 #' A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} UMAP dimensions for each cell.
 #' This is stored in the \code{"UMAP"} entry of the \code{reducedDims} slot.
 #'
 #' @details 
-#' The function \code{\link[umap]{umap}} is used internally to compute the UMAP. 
+#' The function \code{\link[uwot]{umap}} is used internally to compute the UMAP. 
 #' Note that the algorithm is not deterministic, so different runs of the function will produce differing results. 
 #' Users are advised to test multiple random seeds, and then use \code{\link{set.seed}} to set a random seed for replicable results. 
 #'
 #' Setting \code{use_dimred} allows users to easily perform UMAP on low-rank approximations of the original expression matrix (e.g., after PCA).
 #' In such cases, arguments such as \code{ntop}, \code{feature_set}, \code{exprs_values} and \code{scale_features} will be ignored. 
+#'
+#' If \code{external_neighbors=TRUE}, the nearest neighbor search step is conducted using a different algorithm to that in the \code{\link[uwot]{umap}} function.
+#' This can be parallelized or approximate to achieve greater speed for large data sets.
+#' The neighbor search results are then used directly to create the UMAP embedding.
 #'
 #' @references
 #' McInnes L, Healy J (2018).
@@ -34,10 +44,12 @@
 #'
 #' @rdname runUMAP
 #' @seealso 
-#' \code{\link[umap]{umap}},
+#' \code{\link[uwot]{umap}},
 #' \code{\link[scater]{plotUMAP}}
 #' @export
 #' @importFrom SingleCellExperiment reducedDim<- reducedDim
+#' @importFrom BiocNeighbors findKNN
+#' @importFrom BiocParallel SerialParam
 #'
 #' @author Aaron Lun
 #'
@@ -56,7 +68,9 @@
 #' head(reducedDim(example_sce))
 runUMAP <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL, 
     exprs_values = "logcounts", scale_features = TRUE,
-    use_dimred = NULL, n_dimred = NULL, ...) 
+    use_dimred = NULL, n_dimred = NULL, pca = 50, n_neighbors=15,
+    external_neighbors = FALSE, BNPARAM = NULL, BPPARAM = SerialParam(),
+    ...) 
 {
     if (!is.null(use_dimred)) {
         ## Use existing dimensionality reduction results (turning off PCA)
@@ -65,13 +79,23 @@ runUMAP <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
             dr <- dr[,seq_len(n_dimred),drop = FALSE]
         }
         vals <- dr
+        pca <- NULL 
 
     } else {
         vals <- .get_mat_for_reddim(object, exprs_values = exprs_values, ntop = ntop, feature_set = feature_set, scale = scale_features)
     }
 
     vals <- as.matrix(vals) # protect against alternative matrix inputs.
-    umap_out <- umap::umap(vals, n_components=ncomponents, ...)
-    reducedDim(object, "UMAP") <- umap_out$layout
+    args <- list(X=vals, n_components=ncomponents, n_neighbors=n_neighbors, pca=pca, ...)
+
+    if (external_neighbors) {
+        # A point is considered to be its own nearest neighbor in umap().
+        nn_out <- findKNN(vals, k=n_neighbors-1L, BPPARAM=BPPARAM, BNPARAM=BNPARAM)
+        N <- nrow(vals)
+        args$nn_method <- list(idx=cbind(seq_len(N), nn_out$index), dist=cbind(numeric(N), nn_out$distance))
+    }
+
+    umap_out <- do.call(uwot::umap, args)
+    reducedDim(object, "UMAP") <- umap_out
     return(object)
 }
