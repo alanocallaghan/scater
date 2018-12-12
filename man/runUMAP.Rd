@@ -6,10 +6,12 @@
 \usage{
 runUMAP(object, ncomponents = 2, ntop = 500, feature_set = NULL,
   exprs_values = "logcounts", scale_features = TRUE,
-  use_dimred = NULL, n_dimred = NULL, ...)
+  use_dimred = NULL, n_dimred = NULL, pca = 50, n_neighbors = 15,
+  external_neighbors = FALSE, BNPARAM = NULL,
+  BPPARAM = SerialParam(), ...)
 }
 \arguments{
-\item{object}{A SingleCellExperiment object.}
+\item{object}{A \linkS4class{SingleCellExperiment} object.}
 
 \item{ncomponents}{Numeric scalar indicating the number of UMAP dimensions to obtain.}
 
@@ -28,7 +30,18 @@ Default is to not use existing reduced dimension results.}
 \item{n_dimred}{Integer scalar, number of dimensions of the reduced dimension slot to use when \code{use_dimred} is supplied.
 Defaults to all available dimensions.}
 
-\item{...}{Additional arguments to pass to \code{\link[umap]{umap}}.}
+\item{pca}{Integer scalar specifying how many PCs should be used as input into UMAP, if the PCA is to be recomputed on the subsetted expression matrix.
+Only used when code{use_dimred=NULL}, and if \code{pca=NULL}, no PCA is performed at all.}
+
+\item{n_neighbors}{Integer scalar, number of nearest neighbors to identify when constructing the initial graph.}
+
+\item{external_neighbors}{Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.}
+
+\item{BNPARAM}{A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.}
+
+\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.}
+
+\item{...}{Additional arguments to pass to \code{\link[uwot]{umap}}.}
 }
 \value{
 A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} UMAP dimensions for each cell.
@@ -38,12 +51,16 @@ This is stored in the \code{"UMAP"} entry of the \code{reducedDims} slot.
 Perform uniform manifold approximation and projection (UMAP) for the cells, based on the data in a SingleCellExperiment object.
 }
 \details{
-The function \code{\link[umap]{umap}} is used internally to compute the UMAP. 
+The function \code{\link[uwot]{umap}} is used internally to compute the UMAP. 
 Note that the algorithm is not deterministic, so different runs of the function will produce differing results. 
 Users are advised to test multiple random seeds, and then use \code{\link{set.seed}} to set a random seed for replicable results. 
 
 Setting \code{use_dimred} allows users to easily perform UMAP on low-rank approximations of the original expression matrix (e.g., after PCA).
-In such cases, arguments such as \code{ntop}, \code{feature_set}, \code{exprs_values} and \code{scale_features} will be ignored.
+In such cases, arguments such as \code{ntop}, \code{feature_set}, \code{exprs_values} and \code{scale_features} will be ignored. 
+
+If \code{external_neighbors=TRUE}, the nearest neighbor search step is conducted using a different algorithm to that in the \code{\link[uwot]{umap}} function.
+This can be parallelized or approximate to achieve greater speed for large data sets.
+The neighbor search results are then used directly to create the UMAP embedding.
 }
 \examples{
 ## Set up an example SingleCellExperiment
@@ -65,7 +82,7 @@ UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction.
 arXiv.
 }
 \seealso{
-\code{\link[umap]{umap}},
+\code{\link[uwot]{umap}},
 \code{\link[scater]{plotUMAP}}
 }
 \author{
