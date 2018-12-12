@@ -290,8 +290,10 @@ test_that("runUMAP works as expected", {
     set.seed(100)
     normed3 <- runUMAP(normed, feature_set = 1:100)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
-    
-    # Testing out the use of existing reduced dimensions (this should not respond to any feature settings).
+})
+
+test_that("runUMAP on existing reduced dimension results works as expected", {
+    # Function should not respond to any feature settings.
     set.seed(10)
     normedP <- runPCA(normed, ncomponents = 4)
     normed2 <- runUMAP(normedP, use_dimred = "PCA")
@@ -311,6 +313,50 @@ test_that("runUMAP works as expected", {
     set.seed(10)
     normed3 <- runUMAP(normedP, use_dimred = "PCA", n_dimred=3)
     expect_false(isTRUE(all.equal(reducedDim(normed2, "UMAP"), reducedDim(normed3, "UMAP"))))
+})
+
+test_that("runUMAP works with externally computed nearest neighbor results", {
+    normedP <- runPCA(normed, ncomponents = 20)
+
+    # Need to cajolethe random seed to avoid different RNG states after the NN search. 
+    seedSet <- function(...) invisible(BiocNeighbors::buildIndex(reducedDim(normedP, "PCA"), ...))
+
+    set.seed(20) 
+    seedSet()
+    ref <- runUMAP(normedP, use_dimred="PCA")
+    set.seed(20) 
+    alt <- runUMAP(normedP, use_dimred="PCA", external_neighbors=TRUE)
+    expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
+
+    set.seed(21) 
+    seedSet()
+    ref <- runUMAP(normedP, use_dimred="PCA", n_neighbors=10)
+    set.seed(21) 
+    alt <- runUMAP(normedP, use_dimred="PCA", n_neighbors=10, external_neighbors=TRUE)
+    expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
+
+    set.seed(22) 
+    seedSet()
+    ref <- runUMAP(normedP, use_dimred="PCA", bandwidth=1.5)
+    set.seed(22) 
+    alt <- runUMAP(normedP, use_dimred="PCA", bandwidth=1.5, external_neighbors=TRUE)
+    expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
+
+    # Works with alternative neighbor searching options.
+    set.seed(23) 
+    seedSet(BNPARAM=BiocNeighbors::VptreeParam())
+    ref <- runUMAP(normedP, use_dimred="PCA")
+    set.seed(23) 
+    alt <- runUMAP(normedP, use_dimred="PCA", external_neighbors=TRUE, BNPARAM=BiocNeighbors::VptreeParam())
+    expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
+
+    set.seed(24) 
+    seedSet()
+    invisible(MulticoreParam(2)) # more seed-related cajoling!
+    ref <- runUMAP(normedP, use_dimred="PCA")
+    set.seed(24) 
+    alt <- runUMAP(normedP, use_dimred="PCA", external_neighbors=TRUE, BPPARAM=MulticoreParam(2))
+    expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
 })
 
 #############################################
