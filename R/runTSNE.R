@@ -52,6 +52,7 @@
 #' \code{\link[Rtsne]{Rtsne}},
 #' \code{\link[scater]{plotTSNE}}
 #' @export
+#' @importFrom SingleCellExperiment reducedDim<- reducedDim
 #' @importFrom BiocNeighbors findKNN
 #' @importFrom BiocParallel SerialParam
 #'
