@@ -226,6 +226,8 @@ test_that("runTSNE on existing reduced dimension results works as expected", {
 })
 
 test_that("runTSNE works with externally computed nearest neighbor results", {
+    skip_on_os("windows") # https://github.com/jkrijthe/Rtsne/commit/f3f42504eeac627e4d886b1489ee289f8f9d082b#comments
+
     normedP <- runPCA(normed, ncomponents = 20)
 
     # Need to set the random seed to avoid different RNG states after the NN search. 
