@@ -1,5 +1,13 @@
 #include "scater.h"
 
+#include "beachmat/integer_matrix.h"
+#include "beachmat/numeric_matrix.h"
+#include "utils.h"
+
+#include <vector>
+#include <stdexcept>
+#include <algorithm>
+
 template <class V, class M>
 class normalizer {
 public:

@@ -1,5 +1,11 @@
 #include "scater.h"
 
+#include "beachmat/integer_matrix.h"
+#include "beachmat/numeric_matrix.h"
+
+#include <stdexcept>
+#include <vector>
+
 template <class V, class O, class M>
 Rcpp::RObject sum_counts_internal(M mat, O out, const std::vector<Rcpp::IntegerVector>& feature_set) {
     const size_t ncells=mat->get_ncol();

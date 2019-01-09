@@ -1,5 +1,13 @@
 #include "scater.h"
 
+#include "beachmat/integer_matrix.h"
+#include "beachmat/numeric_matrix.h"
+#include "utils.h"
+
+#include <stdexcept>
+#include <algorithm>
+#include <vector>
+
 /* Functions to compute the cumulative sum. */
 
 void check_topset(const Rcpp::IntegerVector& top) {

@@ -2,14 +2,6 @@
 #define SCATER_H
 
 #include "Rcpp.h"
-#include "beachmat/integer_matrix.h"
-#include "beachmat/numeric_matrix.h"
-
-#include <algorithm>
-#include <deque>
-#include <stdexcept>
-#include <functional>
-#include <cmath>
 
 // Functions to be called from R.
 
@@ -33,8 +25,6 @@ SEXP row_above(SEXP, SEXP, SEXP, SEXP);
 SEXP col_above(SEXP, SEXP, SEXP, SEXP);
 
 }
-
-#include "utils.h"
 
 #endif
 

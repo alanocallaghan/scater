@@ -1,5 +1,8 @@
 #include "utils.h"
 
+#include <sstream>
+#include <stdexcept>
+
 // Checking subsetting vector.
 
 Rcpp::IntegerVector process_subset_vector(Rcpp::RObject subset, int upper, bool zero_indexed) {

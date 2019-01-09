@@ -1,5 +1,13 @@
 #include "scater.h"
 
+#include "beachmat/integer_matrix.h"
+#include "beachmat/numeric_matrix.h"
+
+#include <stdexcept>
+#include <algorithm>
+#include <vector>
+#include <utility>
+
 /* Sorting rows and column subset indices for rapid matrix access. */
 
 Rcpp::List reorganize_subset(Rcpp::IntegerVector sub1, Rcpp::IntegerVector sub2) {
