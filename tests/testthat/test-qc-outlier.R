@@ -105,6 +105,28 @@ test_that("isOutlier responds to batch specification", {
     }
 })
 
+set.seed(10041)
+test_that("isOutlier thresholds are computed correctly with batch specification", {
+    vals <- rnorm(1000)
+    batches <- gl(2, length(vals)/2)
+
+    out <- isOutlier(vals, batch=batches)
+    out1 <- isOutlier(vals[batches==1])
+    out2 <- isOutlier(vals[batches==2])
+    
+    expect_equal(attr(out, "thresholds"), cbind(`1`=attr(out1, "thresholds"), `2`=attr(out2, "thresholds")))
+    expect_identical(as.logical(out), as.logical(c(out1, out2)))
+
+    # With log-transformation.
+    vals <- rgamma(1000, 1, 1)
+    out <- isOutlier(vals, batch=batches, log=TRUE)
+    out1 <- isOutlier(vals[batches==1], log=TRUE)
+    out2 <- isOutlier(vals[batches==2], log=TRUE)
+    
+    expect_equal(attr(out, "thresholds"), cbind(`1`=attr(out1, "thresholds"), `2`=attr(out2, "thresholds")))
+    expect_identical(as.logical(out), as.logical(c(out1, out2)))
+})
+
 set.seed(1005)
 test_that("isOutlier handles silly inputs correctly", {
     expect_warning(out <- isOutlier(numeric(0)))
