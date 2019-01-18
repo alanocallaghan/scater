@@ -4,17 +4,18 @@
 \alias{runPCA}
 \title{Perform PCA on cell-level data}
 \usage{
-runPCA(object, ncomponents = 2, method = c("prcomp", "irlba"),
-  ntop = 500, exprs_values = "logcounts", feature_set = NULL,
+runPCA(object, ncomponents = 2, method = NULL, ntop = 500,
+  exprs_values = "logcounts", feature_set = NULL,
   scale_features = TRUE, use_coldata = FALSE,
-  selected_variables = NULL, detect_outliers = FALSE, ...)
+  selected_variables = NULL, detect_outliers = FALSE,
+  BSPARAM = ExactParam(), BPPARAM = SerialParam(), ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
 
 \item{ncomponents}{Numeric scalar indicating the number of principal components to obtain.}
 
-\item{method}{String specifying how the PCA should be performed.}
+\item{method}{Deprecated, string specifying how the PCA should be performed.}
 
 \item{ntop}{Numeric scalar specifying the number of most variable features to use for PCA.}
 
@@ -33,7 +34,11 @@ If a list, each entry can take the form described in \code{?"\link{scater-vis-va
 
 \item{detect_outliers}{Logical scalar, should outliers be detected based on PCA coordinates generated from column-level metadata?}
 
-\item{...}{Additional arguments to pass to \code{\link[irlba]{prcomp_irlba}} when \code{method="irlba"}.}
+\item{BSPARAM}{A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.}
+
+\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.}
+
+\item{...}{Deprecated.}
 }
 \value{
 A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell.

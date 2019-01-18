@@ -4,7 +4,7 @@
 #'
 #' @param object A SingleCellExperiment object.
 #' @param ncomponents Numeric scalar indicating the number of principal components to obtain.
-#' @param method String specifying how the PCA should be performed.
+#' @param method Deprecated, string specifying how the PCA should be performed.
 #' @param ntop Numeric scalar specifying the number of most variable features to use for PCA.
 #' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for PCA.
 #' This will override any \code{ntop} argument if specified.
@@ -15,7 +15,9 @@
 #' @param selected_variables List of strings or a character vector indicating which variables in \code{colData(object)} to use for PCA when \code{use_coldata=TRUE}.
 #' If a list, each entry can take the form described in \code{?"\link{scater-vis-var}"}.
 #' @param detect_outliers Logical scalar, should outliers be detected based on PCA coordinates generated from column-level metadata? 
-#' @param ... Additional arguments to pass to \code{\link[irlba]{prcomp_irlba}} when \code{method="irlba"}.
+#' @param BSPARAM A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.
+#' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.
+#' @param ... Deprecated.
 #'
 #' @details 
 #' The function \code{\link{prcomp}} is used internally to do the PCA when \code{method="prcomp"}.
@@ -51,9 +53,10 @@
 #' @seealso \code{\link{prcomp}}, \code{\link[scater]{plotPCA}}
 #'
 #' @export
-#' @importFrom stats prcomp
 #' @importFrom DelayedMatrixStats colVars
 #' @importFrom DelayedArray DelayedArray 
+#' @importFrom BiocSingular runPCA ExactParam IrlbaParam
+#' @importFrom BiocParallel SerialParam
 #'
 #' @author Aaron Lun, based on code by Davis McCarthy
 #'
@@ -70,10 +73,10 @@
 #' example_sce <- runPCA(example_sce)
 #' reducedDimNames(example_sce)
 #' head(reducedDim(example_sce))
-runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
+runPCA <- function(object, ncomponents = 2, method = NULL, 
        ntop = 500, exprs_values = "logcounts", feature_set = NULL, scale_features = TRUE, 
        use_coldata = FALSE, selected_variables = NULL, detect_outliers = FALSE,
-       ...) 
+       BSPARAM = ExactParam(), BPPARAM = SerialParam(), ...)
 {
     if ( use_coldata ) {
         if ( is.null(selected_variables) ) {
@@ -119,20 +122,18 @@ runPCA <- function(object, ncomponents = 2, method = c("prcomp", "irlba"),
         object$outlier <- outlier
     }
 
-    ## Compute PCA via prcomp or irlba.
-    method <- match.arg(method)
-    if (method=="prcomp") {
-        exprs_to_plot <- as.matrix(exprs_to_plot)
-        ncomponents <- min(c(ncomponents, dim(exprs_to_plot)))
-        pca <- prcomp(exprs_to_plot, rank. = ncomponents)
-        percentVar <- pca$sdev ^ 2
-        percentVar <- percentVar / sum(percentVar)
-
-    } else if (method=="irlba") {
-        ncomponents <- min(c(ncomponents, dim(exprs_to_plot)-1L))
-        pca <- irlba::prcomp_irlba(exprs_to_plot, n = ncomponents, ...)
-        percentVar <- pca$sdev ^ 2 / sum(colVars(DelayedArray(exprs_to_plot))) # as not all singular values are computed.
+    ## Compute PCA using the specified method.
+    if (!is.null(method)) {
+        .Deprecated(msg="'method=' is deprecated.\nUse 'BSPARAM=' instead.")
+        if (method=="prcomp") {
+            BSPARAM <- ExactParam()
+        } else {
+            BSPARAM <- IrlbaParam()
+        }
     }
+
+    pca <- BiocSingular::runPCA(exprs_to_plot, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM, get.rotation=FALSE)
+    percentVar <- pca$sdev ^ 2 / sum(colVars(DelayedArray(exprs_to_plot))) # as not all singular values are computed.
 
     # Saving the results
     pcs <- pca$x
