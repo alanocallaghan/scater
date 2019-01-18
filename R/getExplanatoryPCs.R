@@ -1,19 +1,18 @@
-#' Estimate the percentage of variance explained for each gene.
+#' Estimate the percentage of variance explained for each PC. 
 #'
 #' @param object A SingleCellExperiment object containing expression values and per-cell experimental information.
-#' @param variables Character vector specifying the explanatory factors in \code{colData(object)} to use.
-#' Default is \code{NULL}, in which case all variables in \code{colData(object)} are considered.
+#' @param ncomponents Integer scalar specifying the number of the top principal components to use.
+#' Ignored if \code{use_dimred} is specified.
 #' @param use_dimred String specifying the field in \code{reducedDims(object)} that contains the PCA results.
-#' @param chunk Argument passed to \code{\link{getVarianceExplained}}.
-#' @param ... Arguments passed to \code{\link{runPCA}}.
+#' @param ... Additional arguments passed to \code{\link{getVarianceExplained}}.
 #'
 #' @details 
 #' This function computes the percentage of variance in PC scores that is explained by variables in the sample-level metadata.
 #' It allows identification of important PCs that are driven by known experimental conditions, e.g., treatment, disease.
-#' PCs correlated with echnical factors (e.g., batch effects, library size) can also be detected and removed prior to further analysis.
+#' PCs correlated with technical factors (e.g., batch effects, library size) can also be detected and removed prior to further analysis.
 #'
-#' The function will attempt to extract existing PCA results in \code{object} via the \code{use_dimred} argument.
-#' If these are not available, it will rerun the PCA using \code{\link{runPCA}}.
+#' If \code{use_dimred} is not \code{NULL}, the function will attempt to extract existing PCA results in \code{object}.
+#' Otherwise, it will rerun the PCA using \code{\link{runPCA}} for the top \code{ncomponents} components.
 #'
 #' @return
 #' A matrix containing the percentage of variance explained by each factor (column) and for each PC (row).
@@ -36,12 +35,13 @@
 #' example_sce <- normalize(example_sce)
 #'                                                    
 #' r2mat <- getExplanatoryPCs(example_sce)
-getExplanatoryPCs <- function(object, variables=NULL, use_dimred="PCA", chunk=1000, ...) {
-    reddims <- reducedDim(object, use_dimred)
+getExplanatoryPCs <- function(object, ncomponents=10, use_dimred = NULL, ...) {
     if (is.null(reddims)) {
-        reddims <- reducedDim(runPCA(object, ...), "PCA")
+        reddims <- reducedDim(runPCA(object, ncomponents=ncomponents), "PCA")
+    } else {
+        reddims <- reducedDim(object, use_dimred)
     }
 
     dummy <- SingleCellExperiment(list(pc_space=t(reddims)), colData=colData(object))
-    getVarianceExplained(dummy, variables=variables, exprs_values="pc_space", chunk=chunk)
+    getVarianceExplained(dummy, exprs_values="pc_space", ...)
 }
