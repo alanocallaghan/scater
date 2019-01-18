@@ -4,15 +4,19 @@
 \alias{getExplanatoryPCs}
 \title{Estimate the percentage of variance explained for each PC.}
 \usage{
-getExplanatoryPCs(object, ncomponents = 10, use_dimred = NULL, ...)
+getExplanatoryPCs(object, use_dimred = "PCA", ncomponents = 10,
+  rerun = FALSE, run_args = list(), ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values and per-cell experimental information.}
 
-\item{ncomponents}{Integer scalar specifying the number of the top principal components to use.
-Ignored if \code{use_dimred} is specified.}
-
 \item{use_dimred}{String specifying the field in \code{reducedDims(object)} that contains the PCA results.}
+
+\item{ncomponents}{Integer scalar specifying the number of the top principal components to use.}
+
+\item{rerun}{Logical scalar indicating whether the PCA should be repeated, even if pre-computed results are already present.}
+
+\item{run_args}{A named list of arguments to pass to \code{\link[scater]{runPCA}}.}
 
 \item{...}{Additional arguments passed to \code{\link{getVarianceExplained}}.}
 }
@@ -27,8 +31,9 @@ This function computes the percentage of variance in PC scores that is explained
 It allows identification of important PCs that are driven by known experimental conditions, e.g., treatment, disease.
 PCs correlated with technical factors (e.g., batch effects, library size) can also be detected and removed prior to further analysis.
 
-If \code{use_dimred} is not \code{NULL}, the function will attempt to extract existing PCA results in \code{object}.
-Otherwise, it will rerun the PCA using \code{\link{runPCA}} for the top \code{ncomponents} components.
+By default, the function will attempt to use pre-computed PCA results in \code{object}.
+This is done by taking the top \code{ncomponents} PCs from the matrix identified by \code{use_dimred}.
+If these are not available or if \code{rerun=TRUE}, the function will rerun the PCA using \code{\link[scater]{runPCA}}.
 }
 \examples{
 data("sc_example_counts")
