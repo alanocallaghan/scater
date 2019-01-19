@@ -132,6 +132,7 @@ test_that("plotExplanatoryVariables works as expected", {
 exppcs <- getExplanatoryPCs(normed, ncomponents=10)
 
 test_that("getExplanatoryPCs matches with a reference function", {
+    expect_identical(nrow(exppcs), 10L)
     expect_identical(colnames(exppcs), colnames(colData(normed)))
     normed <- runPCA(normed, ncomponents=nrow(exppcs))
 
@@ -139,7 +140,7 @@ test_that("getExplanatoryPCs matches with a reference function", {
         X <- colData(normed)[[v]]
         Y <- reducedDim(normed, "PCA")
 
-        # Using lm() per gene, which is a bit slow but ensures we get a reference R2.
+        # Using lm() per PC, which is a bit slow but ensures we get a reference R2.
         output <- numeric(ncol(Y))
         for (g in seq_along(output)) {
             y <- Y[,g]
@@ -156,17 +157,27 @@ test_that("getExplanatoryPCs responds to PC-specific options", {
     blah <- normed
     normed2 <- runPCA(normed, ncomponents=10)
     reducedDim(blah, "WHEE") <- reducedDim(normed2, "PCA")
-    expect_identical(getExplanatoryPCs(normed2), getExplanatoryPCs(blah, use_dimred="WHEE"))
+    expect_identical(res <- getExplanatoryPCs(normed2), getExplanatoryPCs(blah, use_dimred="WHEE"))
+    expect_identical(nrow(res), 10L)
 
     reducedDim(blah, "WHEE") <- reducedDim(normed2, "PCA")[,1:2]
     expect_identical(getExplanatoryPCs(normed2)[1:2,], getExplanatoryPCs(blah, use_dimred="WHEE"))
     
     # Correctly re-runs in the absence of PCs.
-    expect_identical(getExplanatoryPCs(normed, ncomponents=2), getExplanatoryPCs(blah, use_dimred="WHEE"))
-    expect_identical(getExplanatoryPCs(normed, ncomponents=10), getExplanatoryPCs(normed2))
+    expect_identical(res <- getExplanatoryPCs(normed, ncomponents=2), getExplanatoryPCs(blah, use_dimred="WHEE"))
+    expect_identical(nrow(res), 2L)
+
+    expect_identical(res <- getExplanatoryPCs(normed, ncomponents=10), getExplanatoryPCs(normed2))
+    expect_identical(nrow(res), 10L)
+    
+    res <- getExplanatoryPCs(normed, ncomponents=Inf)
+    expect_identical(nrow(res), min(dim(normed))) 
 
     # Correctly truncates existing PCs.
-    expect_identical(getExplanatoryPCs(normed2, ncomponents=2), getExplanatoryPCs(blah, use_dimred="WHEE"))
+    expect_identical(res <- getExplanatoryPCs(normed2, ncomponents=2), getExplanatoryPCs(blah, use_dimred="WHEE"))
+    expect_identical(nrow(res), 2L)
+
+    expect_identical(getExplanatoryPCs(normed2, ncomponents=Inf), getExplanatoryPCs(normed)) # ignores Inf, as it's maxed out.
 
     # Forcibly re-runs when necessary.    
     expect_false(identical(getExplanatoryPCs(normed2), getExplanatoryPCs(blah, use_dimred="WHEE", ncomponents=10)))
@@ -201,8 +212,8 @@ test_that("plotExplanatoryPCs works with PC choice options", {
     expect_s3_class(out, "ggplot")
     expect_identical(out$data, ref$data)
 
-    out <- plotExplanatoryPCs(normed, npcs=min(dim(normed)))
-    allpcs <- runPCA(normed, ncomponents=min(dim(normed)))
+    out <- plotExplanatoryPCs(normed, npcs=Inf)
+    allpcs <- runPCA(normed, ncomponents=Inf)
     ref <- plotExplanatoryPCs(allpcs)
     expect_s3_class(out, "ggplot")
     expect_identical(out$data, ref$data)
