@@ -22,6 +22,7 @@ test_that("we can produce PCA scatterplots", {
     expect_s3_class(plotPCA(example_sce, colour_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
     expect_s3_class(plotPCA(example_sce, colour_by = "Treatment", by_show_single = TRUE), "ggplot")
     expect_s3_class(plotPCA(example_sce, percentVar = c(19, 5)), "ggplot")
+    expect_s3_class(plotPCA(example_sce, text_by="Cell_Cycle"), "ggplot")
     
     # Checking that re-running works, responsive to feature scaling.
     example_sceX <- runPCA(example_sce, scale_features=FALSE)
