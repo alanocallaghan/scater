@@ -9,7 +9,7 @@ runTSNE(object, ncomponents = 2, ntop = 500, feature_set = NULL,
   use_dimred = NULL, n_dimred = NULL, perplexity = min(50,
   floor(ncol(object)/5)), pca = TRUE, initial_dims = 50,
   normalize = TRUE, theta = 0.5, external_neighbors = FALSE,
-  BNPARAM = NULL, BPPARAM = SerialParam(), ...)
+  BNPARAM = KmknnParam(), BPPARAM = SerialParam(), ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
