@@ -40,7 +40,7 @@
 #' r2mat <- getExplanatoryPCs(example_sce)
 getExplanatoryPCs <- function(object, use_dimred = "PCA", ncomponents=10, rerun=FALSE, run_args=list(), ...) {
     if (!use_dimred %in% reducedDimNames(object) || rerun) {
-        object <- do.call(runPCA, c(list(object=object, ncomponents=ncomponents), run_args))
+        object <- do.call(runPCA, c(list(x=object, ncomponents=ncomponents), run_args))
         reddims <- reducedDim(object, "PCA")
     } else {
         reddims <- reducedDim(object, use_dimred)

@@ -2,7 +2,7 @@
 #'
 #' Perform a principal components analysis (PCA) on cells, based on the data in a SingleCellExperiment object. 
 #'
-#' @param object A SingleCellExperiment object.
+#' @param x A \linkS4class{SingleCellExperiment} object.
 #' @param ncomponents Numeric scalar indicating the number of principal components to obtain.
 #' @param method Deprecated, string specifying how the PCA should be performed.
 #' @param ntop Numeric scalar specifying the number of most variable features to use for PCA.
@@ -17,7 +17,6 @@
 #' @param detect_outliers Logical scalar, should outliers be detected based on PCA coordinates generated from column-level metadata? 
 #' @param BSPARAM A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.
-#' @param ... Deprecated.
 #'
 #' @details 
 #' The function \code{\link{prcomp}} is used internally to do the PCA when \code{method="prcomp"}.
@@ -73,11 +72,13 @@
 #' example_sce <- runPCA(example_sce)
 #' reducedDimNames(example_sce)
 #' head(reducedDim(example_sce))
-runPCA <- function(object, ncomponents = 2, method = NULL, 
+setMethod("runPCA", "SingleCellExperiment", function(x, ncomponents = 2, method = NULL, 
        ntop = 500, exprs_values = "logcounts", feature_set = NULL, scale_features = TRUE, 
        use_coldata = FALSE, selected_variables = NULL, detect_outliers = FALSE,
-       BSPARAM = ExactParam(), BPPARAM = SerialParam(), ...)
+       BSPARAM = ExactParam(), BPPARAM = SerialParam())
 {
+    object <- x
+
     if ( use_coldata ) {
         if ( is.null(selected_variables) ) {
             selected_variables <- list()
@@ -132,7 +133,7 @@ runPCA <- function(object, ncomponents = 2, method = NULL,
         }
     }
 
-    pca <- BiocSingular::runPCA(exprs_to_plot, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM, get.rotation=FALSE)
+    pca <- runPCA(exprs_to_plot, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM, get.rotation=FALSE)
     percentVar <- pca$sdev ^ 2 / sum(colVars(DelayedArray(exprs_to_plot))) # as not all singular values are computed.
 
     # Saving the results
@@ -144,7 +145,7 @@ runPCA <- function(object, ncomponents = 2, method = NULL,
         reducedDim(object, "PCA") <- pcs
     }
     return(object)
-}
+})
 
 #' @importFrom utils head
 #' @importFrom SummarizedExperiment assay
