@@ -53,7 +53,7 @@
 #' \code{\link[scater]{plotTSNE}}
 #' @export
 #' @importFrom SingleCellExperiment reducedDim<- reducedDim
-#' @importFrom BiocNeighbors findKNN
+#' @importFrom BiocNeighbors findKNN KmknnParam
 #' @importFrom BiocParallel SerialParam
 #'
 #' @author Aaron Lun, based on code by Davis McCarthy
@@ -77,7 +77,7 @@ runTSNE <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
         perplexity = min(50, floor(ncol(object) / 5)), 
         pca = TRUE, initial_dims = 50, 
         normalize = TRUE, theta = 0.5,
-        external_neighbors = FALSE, BNPARAM = NULL, BPPARAM = SerialParam(),
+        external_neighbors = FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam(),
         ...) 
 {
     if (!is.null(use_dimred)) {

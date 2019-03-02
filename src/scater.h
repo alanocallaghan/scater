@@ -17,7 +17,7 @@ SEXP combined_qc(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 SEXP top_cumprop(SEXP, SEXP);
 
 
-SEXP sum_counts(SEXP, SEXP);
+SEXP sum_counts(SEXP, SEXP, SEXP, SEXP, SEXP);
 
 
 SEXP row_above(SEXP, SEXP, SEXP, SEXP);

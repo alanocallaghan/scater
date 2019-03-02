@@ -13,7 +13,7 @@ static const R_CallMethodDef all_call_entries[] = {
     REGISTER(combined_qc, 7),
     REGISTER(top_cumprop, 2),
 
-    REGISTER(sum_counts, 2),
+    REGISTER(sum_counts, 5),
 
     REGISTER(row_above, 4),
     REGISTER(col_above, 4),

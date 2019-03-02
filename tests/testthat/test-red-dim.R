@@ -57,14 +57,14 @@ test_that("runPCA works as expected", {
     normedX <- runPCA(normed, ncomponents=4)
     expect_identical(reducedDimNames(normedX), "PCA")     
     expect_identical(dim(reducedDim(normedX, "PCA")), c(ncol(normedX), 4L))
-    expect_equal(sum(attr(reducedDim(normedX), "percentVar")), 1)
+    expect_true(sum(attr(reducedDim(normedX), "percentVar")) < 1)
 
     # Testing that various settings give different results.
     normed2 <- runPCA(normed)
     normed3 <- runPCA(normed, scale_features = FALSE)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
-    expect_equal(sum(attr(reducedDim(normed2), "percentVar")), 1)
-    expect_equal(sum(attr(reducedDim(normed3), "percentVar")), 1) # Total variance should still be 100% after scaling.
+    expect_true(sum(attr(reducedDim(normed2), "percentVar")) < 1)
+    expect_true(sum(attr(reducedDim(normed3), "percentVar")) < 1)
 
     normed3 <- runPCA(normed, ntop = 100)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
@@ -125,7 +125,7 @@ test_that("runPCA works as expected for QC metrics", {
 
 test_that("runPCA works with irlba code", {
     set.seed(10)
-    normedX <- runPCA(normed, ncomponents=4, method="irlba")
+    normedX <- runPCA(normed, ncomponents=4, BSPARAM=BiocSingular::IrlbaParam())
     expect_identical(reducedDimNames(normedX), "PCA")     
     expect_identical(dim(reducedDim(normedX, "PCA")), c(ncol(normedX), 4L))
     expect_identical(length(attr(reducedDim(normedX), "percentVar")), 4L)
@@ -133,9 +133,9 @@ test_that("runPCA works with irlba code", {
 
     # Checking that seed setting works.
     set.seed(100)
-    normedX2 <- runPCA(normed, ncomponents=4, method="irlba")
+    normedX2 <- runPCA(normed, ncomponents=4, BSPARAM=BiocSingular::IrlbaParam())
     set.seed(100)
-    normedX3 <- runPCA(normed, ncomponents=4, method="irlba")
+    normedX3 <- runPCA(normed, ncomponents=4, BSPARAM=BiocSingular::IrlbaParam())
     expect_false(isTRUE(all.equal(reducedDim(normedX), reducedDim(normedX2))))
     expect_equal(reducedDim(normedX2), reducedDim(normedX3))
 })
@@ -425,7 +425,7 @@ test_that("run* functions work with sparse matrices", {
     logcounts(normed) <- as(logcounts(normed), "dgCMatrix")
 
     expect_error(runPCA(normed), NA)
-    expect_error(runPCA(normed, method="irlba"), NA)
+    expect_error(runPCA(normed, BSPARAM=BiocSingular::IrlbaParam()), NA)
     expect_error(runTSNE(normed), NA)
     expect_error(runUMAP(normed), NA)
     expect_error(runDiffusionMap(normed), NA)

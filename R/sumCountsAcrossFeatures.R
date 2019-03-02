@@ -5,6 +5,7 @@
 #' @param object A \linkS4class{SingleCellExperiment} object or a count matrix.
 #' @param ids A factor specifying the set to which each feature in \code{object} belongs.
 #' @param exprs_values A string or integer scalar specifying the assay of \code{object} containing counts, if \code{object} is a SingleCellExperiment.
+#' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether summation should be parallelized.
 #'
 #' @return A count matrix where counts for all features in the same set are summed together within each cell.
 #'
@@ -26,6 +27,7 @@
 #' @importFrom BiocGenerics colnames rownames<- colnames<-
 #' @importFrom methods is
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
+#' @importFrom BiocParallel SerialParam bpmapply
 #'
 #' @examples
 #' data("sc_example_counts")
@@ -37,7 +39,7 @@
 #' ids <- sample(LETTERS, nrow(example_sce), replace=TRUE)
 #' out <- sumCountsAcrossFeatures(example_sce, ids)
 #' dimnames(out)
-sumCountsAcrossFeatures <- function(object, ids, exprs_values="counts") {
+sumCountsAcrossFeatures <- function(object, ids, exprs_values="counts", BPPARAM=SerialParam()) {
     if (nrow(object)!=length(ids)) {
         stop("'length(ids)' and 'nrow(object)' are not equal")
     }
@@ -46,9 +48,20 @@ sumCountsAcrossFeatures <- function(object, ids, exprs_values="counts") {
     }
 
     by_set <- split(seq_along(ids) - 1L, ids)
-    out <- .Call(cxx_sum_counts, object, by_set)
+    assignments <- .assign_jobs_to_workers(ncol(object), BPPARAM)
+    out_list <- bpmapply(start=assignments$start, end=assignments$end, FUN=.sum_across_rows_internal, 
+        MoreArgs=list(by_set=by_set, mat=object), BPPARAM=BPPARAM, SIMPLIFY=FALSE, USE.NAMES=FALSE)
 
+    out <- do.call(cbind, out_list)
     colnames(out) <- colnames(object)
     rownames(out) <- names(by_set)
     out
 }
+
+.sum_across_rows_internal <- function(mat, by_set, start, end) 
+# Internal function to drag along the namespace.
+{
+    .Call(cxx_sum_counts, mat, by_set, start, end, TRUE)
+}
+
+

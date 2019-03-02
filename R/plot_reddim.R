@@ -77,7 +77,8 @@
 #'
 plotPCASCE <- function(object, ..., rerun = FALSE, ncomponents = 2, run_args=list()) {
    .reddim_dispatcher(object=object, ncomponents=ncomponents, reddim_name="PCA", 
-                      rerun=rerun, reddim_FUN=runPCA, ..., run_args=run_args)
+        rerun=rerun, reddim_FUN=function(object, ...) { runPCA(x=object, ...) }, # because runPCA's signature is 'x', not 'object'. 
+        ..., run_args=run_args)
 }
 
 #' @rdname plot_reddim
@@ -124,8 +125,5 @@ setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
     if (!(reddim_name %in% reducedDimNames(object)) || rerun) {
         object <- do.call(reddim_FUN, c(list(object = object, ncomponents = max(ncomponents)), run_args))
     }
-
-    ## Create the plot object
-    plot_out <- plotReducedDim(object = object, ncomponents = ncomponents, use_dimred = reddim_name, ...)
-    return(plot_out)
+    plotReducedDim(object = object, ncomponents = ncomponents, use_dimred = reddim_name, ...)
 }

@@ -6,20 +6,19 @@ Authors@R: c(
         person("Aaron", "Lun", role = c("aut", "ctb"), email="infinite.monkeys.with.keyboards@gmail.com"),
         person("Quin", "Wills", role=c("aut"), email="qilin@quinwills.net"),
         person("Vladimir", "Kiselev", role=c("ctb"), email="vk6@sanger.ac.uk"))
-Version: 1.11.10
-Date: 2019-01-17
+Version: 1.11.12
+Date: 2019-02-28
 License: GPL-3
 Title: Single-Cell Analysis Toolkit for Gene Expression Data in R
 Description: A collection of tools for doing various analyses of
         single-cell RNA-seq gene expression data, with a focus on
         quality control and visualization.
-Depends: SingleCellExperiment, ggplot2
+Depends: R (>= 3.6), SingleCellExperiment, ggplot2
 Imports: BiocGenerics, SummarizedExperiment, Matrix, dplyr, ggbeeswarm, grid, 
         DelayedArray, DelayedMatrixStats, methods, S4Vectors, stats, utils, 
-        viridis, Rcpp (>= 0.12.14), BiocNeighbors, BiocParallel
-Suggests: BiocStyle, biomaRt, beachmat, cowplot, cluster, destiny, knitr, monocle,
-        mvoutlier, rmarkdown, Rtsne, umap, testthat, magrittr, pheatmap, irlba,
-        Biobase, limma
+        viridis, Rcpp (>= 0.12.14), BiocNeighbors, BiocSingular, BiocParallel
+Suggests: BiocStyle, biomaRt, beachmat, cowplot, destiny, knitr, mvoutlier, 
+        rmarkdown, Rtsne, umap, testthat, magrittr, pheatmap, Biobase, limma
 VignetteBuilder: knitr
 LazyData: true
 biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,
