@@ -4,7 +4,7 @@
 #'
 #' @param object A SingleCellExperiment object or count matrix.
 #' @param exprs_values A string specifying the assay of \code{object} containing the count matrix, if \code{object} is a SingleCellExperiment.
-#' @param use_size_factors a logical scalar specifying whetherthe size factors in \code{object} should be used to construct effective library sizes.
+#' @param use_size_factors a logical scalar specifying whether the size factors in \code{object} should be used to construct effective library sizes.
 #' @param subset_row A vector specifying the subset of rows of \code{object} for which to return a result.
 #' @param BPPARAM A BiocParallelParam object specifying whether the calculations should be parallelized. 
 #'
