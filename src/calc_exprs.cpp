@@ -12,7 +12,8 @@ template <class V, class M>
 class normalizer {
 public:
     normalizer(M mat, Rcpp::List sf_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject genes_sub) : 
-        ptr(mat), vec(mat->get_nrow()), size_factors(sf_list.size()), current_sfs(sf_list.size()), set_id(sf_to_use), 
+        ptr(mat), vec(mat->get_nrow()), raws(mat->set_up_raw()), is_dense(mat->col_raw_type()=="dense"),
+        size_factors(sf_list.size()), current_sfs(sf_list.size()), set_id(sf_to_use), 
         subset(process_subset_vector(genes_sub, mat->get_nrow())), smallest(0), largest(0) 
     {
 
@@ -63,9 +64,20 @@ public:
             current_sfs[i]=size_factors[i][j];
         }
 
-        ptr->get_col(j, vec.begin()+smallest, smallest, largest);
+        // Specializing to avoid copies for dense arrays.
+        // Very difficult to exploit sparsity due to the need
+        // to consider subsets (that may also be duplicated or unordered).
+        typename V::iterator it;
+        if (is_dense) {
+            ptr->get_col_raw(j, raws);
+            it=raws.get_values_start();
+        } else {
+            it=vec.begin();
+            ptr->get_col(j, it+smallest, smallest, largest);
+        }
+
         for (auto s : subset) {
-            (*output) = vec[s] / current_sfs[set_id[s]];
+            (*output) = *(it+s) / current_sfs[set_id[s]];
             ++output;
         }
 
@@ -78,6 +90,8 @@ public:
 private:        
     M ptr;
     V vec;
+    beachmat::raw_structure<V> raws;
+    const bool is_dense;
 
     std::vector<Rcpp::NumericVector> size_factors;
     std::vector<double> current_sfs;

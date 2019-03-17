@@ -199,19 +199,32 @@ SEXP combined_qc_internal(M mat, Rcpp::IntegerVector start, Rcpp::IntegerVector 
     }
 
     // Running through the requested stretch of cells.
+    // Very difficult in this framework to support sparsity, 
+    // due to the need to consider arbitrary subsets of features,
+    // so we'll limit ourselves to avoiding the copy for dense arrays.
     V holder(ngenes);
-    for (size_t c=0; c<n_usedcells; ++c) {
-        mat->get_col(c + firstcell, holder.begin());
+    auto raws=mat->set_up_raw();
+    const bool is_dense=mat->col_raw_type()=="dense";
 
-        all_PCS.fill(holder.begin());
-        for (size_t fx=0; fx<nfcontrols; ++fx) {
-            control_PCS[fx].fill_subset(holder.begin());
+    for (size_t c=0; c<n_usedcells; ++c) {
+        typename V::iterator it;
+        if (is_dense) {
+            mat->get_col_raw(c + firstcell, raws);
+            it=raws.get_values_start();
+        } else {
+            it=holder.begin();
+            mat->get_col(c + firstcell, it);
         }
 
-        all_PGS.compute_summaries(holder.begin());
+        all_PCS.fill(it);
+        for (size_t fx=0; fx<nfcontrols; ++fx) {
+            control_PCS[fx].fill_subset(it);
+        }
+
+        all_PGS.compute_summaries(it);
         auto& chosen_cc=chosen_ccs[c];
         for (auto& cx : chosen_cc) {
-            control_PGS[cx].compute_summaries(holder.begin());
+            control_PGS[cx].compute_summaries(it);
         }
     }
 
