@@ -61,7 +61,7 @@ sumCountsAcrossFeatures <- function(object, ids, exprs_values="counts", BPPARAM=
 .sum_across_rows_internal <- function(mat, by_set, start, end) 
 # Internal function to drag along the namespace.
 {
-    .Call(cxx_sum_counts, mat, by_set, start, end, TRUE)
+    .Call(cxx_sum_row_counts, mat, by_set, start, end)
 }
 
 
