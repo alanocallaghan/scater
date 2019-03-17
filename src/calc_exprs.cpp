@@ -12,9 +12,9 @@ template <class V, class M>
 class normalizer {
 public:
     normalizer(M mat, Rcpp::List sf_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject genes_sub) : 
-            ptr(mat), vec(mat->get_nrow()), 
-            size_factors(sf_list.size()), current_sfs(sf_list.size()), set_id(sf_to_use), 
-            subset(process_subset_vector(genes_sub, mat->get_nrow())), smallest(0), largest(0) {
+        ptr(mat), vec(mat->get_nrow()), size_factors(sf_list.size()), current_sfs(sf_list.size()), set_id(sf_to_use), 
+        subset(process_subset_vector(genes_sub, mat->get_nrow())), smallest(0), largest(0) 
+    {
 
         const size_t nsets=sf_list.size();
         std::vector<int> detected(nsets);
@@ -63,9 +63,9 @@ public:
             current_sfs[i]=size_factors[i][j];
         }
 
-        auto inIt=ptr->get_const_col(j, vec.begin(), smallest, largest);
+        ptr->get_col(j, vec.begin()+smallest, smallest, largest);
         for (auto s : subset) {
-            (*output) = *(inIt + s - smallest) / current_sfs[set_id[s]];
+            (*output) = vec[s] / current_sfs[set_id[s]];
             ++output;
         }
 
@@ -87,7 +87,9 @@ private:
     size_t smallest, largest;
 };
 
-/* Function to compute normalized expression values. */
+/*****************************************************
+ * Function to compute normalized expression values. *
+ *****************************************************/
 
 template <class V, class M>
 Rcpp::RObject norm_exprs_internal(M mat, Rcpp::List size_fac_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject prior_count, Rcpp::RObject log, Rcpp::RObject subset) {
@@ -100,10 +102,12 @@ Rcpp::RObject norm_exprs_internal(M mat, Rcpp::List size_fac_list, Rcpp::Integer
     const bool dolog=check_logical_scalar(log, "log specification");
 
     // Deciding whether or not to preserve sparsity in the output.
+    beachmat::output_param OPARAM(mat->get_class(), mat->get_package());
     const bool preserve_sparse=(prior==1 || !dolog); 
-    beachmat::output_param OPARAM(mat->get_matrix_type(), true, preserve_sparse);
-    OPARAM.optimize_chunk_dims(slen, ncells);
-    auto optr=beachmat::create_numeric_output(slen, ncells, OPARAM);
+    if (mat->get_class()=="dgCMatrix" && mat->get_package()=="Matrix" && !preserve_sparse) {
+        OPARAM=beachmat::output_param("matrix", "base");
+    }
+   auto optr=beachmat::create_numeric_output(slen, ncells, OPARAM);
 
     // Computing normalized expression values for each cell (plus a prior, if log-transforming).
     Rcpp::NumericVector current_cell(slen);
@@ -112,9 +116,7 @@ Rcpp::RObject norm_exprs_internal(M mat, Rcpp::List size_fac_list, Rcpp::Integer
 
         if (dolog) {
             for (auto& val : current_cell) {
-                if (!val && preserve_sparse) { // Ensure that it doesn't get turned into some slightly non-zero value.
-                    ;
-                } else { 
+                if (val || !preserve_sparse) { // Ensure that it doesn't get turned into some slightly non-zero value.
                     val=std::log(val + prior)/M_LN2;
                 }
             }
@@ -141,38 +143,37 @@ SEXP norm_exprs(SEXP counts, SEXP size_fac, SEXP sf_use, SEXP prior_count, SEXP 
     END_RCPP
 }
 
-/* Function to compute average normalized expression values. */
+/*************************************************************
+ * Function to compute average normalized expression values. *
+ *************************************************************/
 
 template <class V, class M>
-Rcpp::RObject ave_exprs_internal(M mat, Rcpp::List size_fac_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject subset, Rcpp::IntegerVector firstcell, Rcpp::IntegerVector lastcell) {
+Rcpp::RObject ave_exprs_internal(M mat, Rcpp::List size_fac_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject subset) {
     normalizer<V, M> norm(mat, size_fac_list, sf_to_use, subset);
     const size_t slen=norm.get_output_nrow();
-    const size_t first=check_integer_scalar(firstcell, "first cell");
-    const size_t last=check_integer_scalar(lastcell, "last cell");
 
-    // Summing normalized expression values for each gene (averaging in R, due to parallelization with BiocParallelParam).
     Rcpp::NumericVector current_cell(slen), output(slen);
-    for (size_t c=first; c<last; ++c) {
+    for (size_t c=0; c<mat->get_ncol(); ++c) {
         norm.get_cell(c, current_cell.begin());
-
         auto oIt=output.begin();
-        for (auto ccIt=current_cell.begin(); ccIt!=current_cell.end(); ++ccIt, ++oIt) {
-            (*oIt)+=(*ccIt);
+        for (auto cc : current_cell) {
+            (*oIt)+=cc;
+            ++oIt;
         }
     }
 
     return output;
 }
 
-SEXP ave_exprs(SEXP counts, SEXP size_fac, SEXP sf_use, SEXP subset, SEXP first, SEXP last) {
+SEXP ave_exprs(SEXP counts, SEXP size_fac, SEXP sf_use, SEXP subset) {
     BEGIN_RCPP
     auto mattype=beachmat::find_sexp_type(counts);
     if (mattype==INTSXP) {
         auto mat=beachmat::create_integer_matrix(counts);
-        return ave_exprs_internal<Rcpp::IntegerVector>(mat.get(), size_fac, sf_use, subset, first, last);
+        return ave_exprs_internal<Rcpp::IntegerVector>(mat.get(), size_fac, sf_use, subset);
     } else if (mattype==REALSXP) {
         auto mat=beachmat::create_numeric_matrix(counts);
-        return ave_exprs_internal<Rcpp::NumericVector>(mat.get(), size_fac, sf_use, subset, first, last);
+        return ave_exprs_internal<Rcpp::NumericVector>(mat.get(), size_fac, sf_use, subset);
     } else {
         throw std::runtime_error("unacceptable matrix type");
     }

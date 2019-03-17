@@ -201,17 +201,17 @@ SEXP combined_qc_internal(M mat, Rcpp::IntegerVector start, Rcpp::IntegerVector 
     // Running through the requested stretch of cells.
     V holder(ngenes);
     for (size_t c=0; c<n_usedcells; ++c) {
-        auto cIt=mat->get_const_col(c + firstcell, holder.begin());
+        mat->get_col(c + firstcell, holder.begin());
 
-        all_PCS.fill(cIt);
+        all_PCS.fill(holder.begin());
         for (size_t fx=0; fx<nfcontrols; ++fx) {
-            control_PCS[fx].fill_subset(cIt);
+            control_PCS[fx].fill_subset(holder.begin());
         }
 
-        all_PGS.compute_summaries(cIt);
+        all_PGS.compute_summaries(holder.begin());
         auto& chosen_cc=chosen_ccs[c];
         for (auto& cx : chosen_cc) {
-            control_PGS[cx].compute_summaries(cIt);
+            control_PGS[cx].compute_summaries(holder.begin());
         }
     }
 

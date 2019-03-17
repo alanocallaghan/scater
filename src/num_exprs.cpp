@@ -116,11 +116,11 @@ Rcpp::RObject col_above_internal(M mat, Rcpp::IntegerVector rows, Rcpp::IntegerV
     V incoming(mat->get_nrow());
     auto coIt=colorder.begin();
     for (const auto& c : colcopy) { 
-        auto iIt=mat->get_const_col(c, incoming.begin(), first, last);
+        mat->get_col(c, incoming.begin(), first, last);
 
         int& curcount=outcount[*(coIt++)];
         for (const auto& r : rowcopy) {
-            if (*(iIt+r) > objective) { 
+            if (incoming[r] > objective) { 
                 ++curcount;
             }
         }

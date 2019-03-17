@@ -19,14 +19,14 @@ Rcpp::RObject sum_counts_internal(M mat, O out, const std::vector<Rcpp::IntegerV
         }
 
         for (size_t c=start_index; c<end_index; ++c) {
-            auto cIt=mat->get_const_col(c, holder_in.begin());
+            mat->get_col(c, holder_in.begin());
     
             auto ssIt=summable_set.begin();
             for (auto oIt=holder_out.begin(); oIt!=holder_out.end(); ++oIt, ++ssIt) {
                 const auto& curset=(*ssIt);
                 auto& curval=(*oIt=0);
                 for (auto feat : curset) {
-                    curval+=*(cIt + feat);                
+                    curval+=holder_in[feat];
                 }
             }
             out->set_col(c - start_index, holder_out.begin());
@@ -78,20 +78,14 @@ SEXP sum_counts (SEXP counts, SEXP sumset, SEXP job_start, SEXP job_end, SEXP by
     auto mattype=beachmat::find_sexp_type(counts);
     if (mattype==INTSXP) {
         auto mat=beachmat::create_integer_matrix(counts);
-       
-        beachmat::output_param OPARAM(mat->get_matrix_type(), true, true);
-        OPARAM.optimize_chunk_dims(out_nrow, out_ncol);
+        beachmat::output_param OPARAM(mat->get_class(), mat->get_package());
         auto out=beachmat::create_integer_output(out_nrow, out_ncol, OPARAM);
-
         return sum_counts_internal<Rcpp::IntegerVector>(mat.get(), out.get(), summation_set, start_index, end_index, sum_by_row);
 
     } else if (mattype==REALSXP) {
         auto mat=beachmat::create_numeric_matrix(counts);
-
-        beachmat::output_param OPARAM(mat->get_matrix_type(), true, true);
-        OPARAM.optimize_chunk_dims(out_nrow, out_ncol);
+        beachmat::output_param OPARAM(mat->get_class(), mat->get_package());
         auto out=beachmat::create_numeric_output(out_nrow, out_ncol, OPARAM);
-
         return sum_counts_internal<Rcpp::NumericVector>(mat.get(), out.get(), summation_set, start_index, end_index, sum_by_row);
 
     } else {
