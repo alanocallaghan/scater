@@ -9,7 +9,7 @@ extern "C" {
 
 SEXP norm_exprs(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
-SEXP ave_exprs(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+SEXP ave_exprs(SEXP, SEXP, SEXP, SEXP);
 
 
 SEXP combined_qc(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
