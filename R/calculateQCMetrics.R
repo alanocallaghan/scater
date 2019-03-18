@@ -22,6 +22,11 @@
 #' Underscores in \code{assayNames(object)} and in \code{feature_controls} or \code{cell_controls} can cause theoretically cause ambiguities in the names of the output metrics.
 #' While problems are highly unlikely, users are advised to avoid underscores when naming their controls/assays.
 #'
+#' If the expression values are double-precision, the per-row means may not be \emph{exactly} identity for different choices of \code{BPPARAM}.
+#' This is due to differences in rounding error when summation is performed across different numbers of cores.
+#' If it is important to obtain numerically identical results (e.g., when using the per-row means for sensitive procedures like t-SNE) across various parallelization schemes,
+#' we suggest manually calculating those statistics using \code{\link{rowMeans}}.
+#'
 #' @section Cell-level QC metrics:
 #' Denote the value of \code{exprs_values} as \code{X}. 
 #' Cell-level metrics are:
