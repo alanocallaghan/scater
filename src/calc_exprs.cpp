@@ -2,17 +2,18 @@
 
 #include "beachmat/integer_matrix.h"
 #include "beachmat/numeric_matrix.h"
+#include "beachmat/utils/const_column.h"
 #include "utils.h"
 
 #include <vector>
 #include <stdexcept>
 #include <algorithm>
 
-template <class V, class M>
+template <class M>
 class normalizer {
 public:
-    normalizer(M mat, Rcpp::List sf_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject genes_sub) : 
-        ptr(mat), vec(mat->get_nrow()), raws(mat->set_up_raw()), is_dense(mat->col_raw_type()=="dense"),
+    normalizer(M* mat, Rcpp::List sf_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject genes_sub) : 
+        ptr(mat), col_holder(mat, false),
         size_factors(sf_list.size()), current_sfs(sf_list.size()), set_id(sf_to_use), 
         subset(process_subset_vector(genes_sub, mat->get_nrow())), smallest(0), largest(0) 
     {
@@ -64,20 +65,14 @@ public:
             current_sfs[i]=size_factors[i][j];
         }
 
-        // Specializing to avoid copies for dense arrays.
-        // Very difficult to exploit sparsity due to the need
-        // to consider subsets (that may also be duplicated or unordered).
-        typename V::iterator it;
-        if (is_dense) {
-            ptr->get_col_raw(j, raws);
-            it=raws.get_values_start();
-        } else {
-            it=vec.begin();
-            ptr->get_col(j, it+smallest, smallest, largest);
-        }
-
+        /* NOTE: very difficult to exploit sparsity due to the need
+         * to consider subsets (that may also be duplicated or unordered),
+         * hence the false in the const_column constructor.
+         */
+        col_holder.fill(j, smallest, largest);
+        auto it=col_holder.get_values();
         for (auto s : subset) {
-            (*output) = *(it+s) / current_sfs[set_id[s]];
+            (*output) = *(it + s - smallest) / current_sfs[set_id[s]];
             ++output;
         }
 
@@ -87,11 +82,10 @@ public:
     size_t get_output_nrow() const {
         return subset.size();
     }
-private:        
-    M ptr;
-    V vec;
-    beachmat::raw_structure<V> raws;
-    const bool is_dense;
+private: 
+    M* ptr;
+    typename M::vector vec;
+    beachmat::const_column<M> col_holder;
 
     std::vector<Rcpp::NumericVector> size_factors;
     std::vector<double> current_sfs;
@@ -105,9 +99,10 @@ private:
  * Function to compute normalized expression values. *
  *****************************************************/
 
-template <class V, class M>
-Rcpp::RObject norm_exprs_internal(M mat, Rcpp::List size_fac_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject prior_count, Rcpp::RObject log, Rcpp::RObject subset) {
-    normalizer<V, M> norm(mat, size_fac_list, sf_to_use, subset);
+template <class M>
+Rcpp::RObject norm_exprs_internal(Rcpp::RObject input, Rcpp::List size_fac_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject prior_count, Rcpp::RObject log, Rcpp::RObject subset) {
+    auto mat=beachmat::create_matrix<M>(input);
+    normalizer<M> norm(mat.get(), size_fac_list, sf_to_use, subset);
     const size_t slen=norm.get_output_nrow();
     const size_t ncells=mat->get_ncol();
 
@@ -116,7 +111,7 @@ Rcpp::RObject norm_exprs_internal(M mat, Rcpp::List size_fac_list, Rcpp::Integer
     const bool dolog=check_logical_scalar(log, "log specification");
 
     // Deciding whether or not to preserve sparsity in the output.
-    beachmat::output_param OPARAM(mat->get_class(), mat->get_package());
+    beachmat::output_param OPARAM(mat.get());
     const bool preserve_sparse=(prior==1 || !dolog); 
     if (mat->get_class()=="dgCMatrix" && mat->get_package()=="Matrix" && !preserve_sparse) {
         OPARAM=beachmat::output_param("matrix", "base");
@@ -146,11 +141,9 @@ SEXP norm_exprs(SEXP counts, SEXP size_fac, SEXP sf_use, SEXP prior_count, SEXP 
     BEGIN_RCPP
     auto mattype=beachmat::find_sexp_type(counts);
     if (mattype==INTSXP) {
-        auto mat=beachmat::create_integer_matrix(counts);
-        return norm_exprs_internal<Rcpp::IntegerVector>(mat.get(), size_fac, sf_use, prior_count, log, subset);
+        return norm_exprs_internal<beachmat::integer_matrix>(counts, size_fac, sf_use, prior_count, log, subset);
     } else if (mattype==REALSXP) {
-        auto mat=beachmat::create_numeric_matrix(counts);
-        return norm_exprs_internal<Rcpp::NumericVector>(mat.get(), size_fac, sf_use, prior_count, log, subset);
+        return norm_exprs_internal<beachmat::numeric_matrix>(counts, size_fac, sf_use, prior_count, log, subset);
     } else {
         throw std::runtime_error("unacceptable matrix type");
     }
@@ -161,9 +154,10 @@ SEXP norm_exprs(SEXP counts, SEXP size_fac, SEXP sf_use, SEXP prior_count, SEXP 
  * Function to compute average normalized expression values. *
  *************************************************************/
 
-template <class V, class M>
-Rcpp::RObject ave_exprs_internal(M mat, Rcpp::List size_fac_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject subset) {
-    normalizer<V, M> norm(mat, size_fac_list, sf_to_use, subset);
+template <class M>
+Rcpp::RObject ave_exprs_internal(Rcpp::RObject input, Rcpp::List size_fac_list, Rcpp::IntegerVector sf_to_use, Rcpp::RObject subset) {
+    auto mat=beachmat::create_matrix<M>(input);
+    normalizer<M> norm(mat.get(), size_fac_list, sf_to_use, subset);
     const size_t slen=norm.get_output_nrow();
 
     Rcpp::NumericVector current_cell(slen), output(slen);
@@ -183,11 +177,9 @@ SEXP ave_exprs(SEXP counts, SEXP size_fac, SEXP sf_use, SEXP subset) {
     BEGIN_RCPP
     auto mattype=beachmat::find_sexp_type(counts);
     if (mattype==INTSXP) {
-        auto mat=beachmat::create_integer_matrix(counts);
-        return ave_exprs_internal<Rcpp::IntegerVector>(mat.get(), size_fac, sf_use, subset);
+        return ave_exprs_internal<beachmat::integer_matrix>(counts, size_fac, sf_use, subset);
     } else if (mattype==REALSXP) {
-        auto mat=beachmat::create_numeric_matrix(counts);
-        return ave_exprs_internal<Rcpp::NumericVector>(mat.get(), size_fac, sf_use, subset);
+        return ave_exprs_internal<beachmat::numeric_matrix>(counts, size_fac, sf_use, subset);
     } else {
         throw std::runtime_error("unacceptable matrix type");
     }
