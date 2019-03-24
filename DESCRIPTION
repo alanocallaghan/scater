@@ -25,7 +25,7 @@ biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, No
         Visualization, DimensionReduction, Transcriptomics,
         GeneExpression, Sequencing, Software, DataImport,
         DataRepresentation, Infrastructure, Coverage
-LinkingTo: Rhdf5lib, Rcpp, beachmat
+LinkingTo: Rcpp, beachmat
 SystemRequirements: C++11
 RoxygenNote: 6.1.1
 NeedsCompilation: yes

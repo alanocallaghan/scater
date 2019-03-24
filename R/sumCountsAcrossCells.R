@@ -57,7 +57,7 @@ sumCountsAcrossCells <- function(object, ids, exprs_values="counts", BPPARAM=Ser
 .sum_across_cols_internal <- function(mat, by_set, start, end) 
 # Internal function to drag along the namespace.
 {
-    .Call(cxx_sum_counts, mat, by_set, start, end, FALSE)
+    .Call(cxx_sum_col_counts, mat, by_set, start, end)
 }
 
 

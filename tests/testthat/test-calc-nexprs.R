@@ -34,6 +34,7 @@ test_that("nexprs works on a sparse matrix", {
     sparsified <- original
     counts(sparsified) <- as(counts(original), "dgCMatrix")
     expect_equal(nexprs(sparsified), Matrix::colSums(counts(sparsified) > 0))
+    expect_equal(nexprs(sparsified, byrow=TRUE), Matrix::rowSums(counts(sparsified) > 0))
     expect_equal(nexprs(sparsified), nexprs(counts(sparsified)))
 })
 

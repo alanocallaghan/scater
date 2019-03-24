@@ -42,6 +42,12 @@ test_that("by-feature count summarization behaves with odd inputs", {
     expect_s4_class(spack, "dgCMatrix")
     expect_equal(ref, as.matrix(spack))
 
+    unknown <- sce
+    counts(unknown) <- as(counts(unknown), "dgTMatrix")
+    spack <- sumCountsAcrossFeatures(unknown, ids)
+    expect_true(is.matrix(spack))
+    expect_equivalent(ref, as.matrix(spack))
+
     # Handles parallelization properly.
     alt <- sumCountsAcrossFeatures(sce, ids, BPPARAM=BiocParallel::MulticoreParam(2))
     expect_identical(alt, ref)
@@ -88,6 +94,12 @@ test_that("by-cell count summarization behaves with odd inputs", {
     spack <- sumCountsAcrossCells(sparsified, ids)
     expect_s4_class(spack, "dgCMatrix")
     expect_equal(ref, as.matrix(spack))
+
+    unknown <- sce
+    counts(unknown) <- as(counts(unknown), "dgTMatrix")
+    spack <- sumCountsAcrossCells(unknown, ids)
+    expect_true(is.matrix(spack))
+    expect_equivalent(ref, as.matrix(spack))
 
     # Handles parallelization properly.
     alt <- sumCountsAcrossCells(sce, ids, BPPARAM=BiocParallel::MulticoreParam(2))

@@ -30,7 +30,6 @@ test_that("plotScater works as expected", {
 })
 
 test_that("plotScater's underlying C++ code works as expected", {
-# library(scater); library(testthat); source("setup-sce.R"); example_sce <- sce
     REFFUN <- function(x, top) {
         prop <- cumsum(sort(x, decreasing=TRUE))/sum(x)
         prop[pmin(top, length(x))]
@@ -43,6 +42,14 @@ test_that("plotScater's underlying C++ code works as expected", {
 
     out <- .Call(scater:::cxx_top_cumprop, assay(example_sce), 1:20*5)
     ref <- apply(assay(example_sce), 2, REFFUN, top=1:20*5)
+    colnames(out) <- colnames(ref)
+    expect_equal(out, ref)
+
+    # Handles sparse matrices.
+    library(Matrix)
+    spmat <- as(assay(example_sce), "dgCMatrix")
+    out <- .Call(scater:::cxx_top_cumprop, spmat, 1:100)
+    ref <- apply(spmat, 2, REFFUN, top=1:100)
     colnames(out) <- colnames(ref)
     expect_equal(out, ref)
 
