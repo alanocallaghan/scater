@@ -320,7 +320,7 @@ test_that("runUMAP on existing reduced dimension results works as expected", {
 test_that("runUMAP works with externally computed nearest neighbor results", {
     normedP <- runPCA(normed, ncomponents = 20)
 
-    # Need to cajolethe random seed to avoid different RNG states after the NN search. 
+    # Need to cajole the random seed to avoid different RNG states after the NN search. 
     seedSet <- function(...) invisible(BiocNeighbors::buildIndex(reducedDim(normedP, "PCA"), ...))
 
     set.seed(20) 

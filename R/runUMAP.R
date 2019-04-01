@@ -48,7 +48,7 @@
 #' \code{\link[scater]{plotUMAP}}
 #' @export
 #' @importFrom SingleCellExperiment reducedDim<- reducedDim
-#' @importFrom BiocNeighbors findKNN
+#' @importFrom BiocNeighbors findKNN KmknnParam
 #' @importFrom BiocParallel SerialParam
 #'
 #' @author Aaron Lun
@@ -69,7 +69,7 @@
 runUMAP <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL, 
     exprs_values = "logcounts", scale_features = TRUE,
     use_dimred = NULL, n_dimred = NULL, pca = 50, n_neighbors=15,
-    external_neighbors = FALSE, BNPARAM = NULL, BPPARAM = SerialParam(),
+    external_neighbors = FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam(),
     ...) 
 {
     if (!is.null(use_dimred)) {
@@ -83,6 +83,9 @@ runUMAP <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
 
     } else {
         vals <- .get_mat_for_reddim(object, exprs_values = exprs_values, ntop = ntop, feature_set = feature_set, scale = scale_features)
+        if (!is.null(pca) && is.numeric(pca)) {
+            pca <- min(pca, dim(vals))
+        }
     }
 
     vals <- as.matrix(vals) # protect against alternative matrix inputs.

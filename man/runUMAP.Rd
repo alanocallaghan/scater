@@ -7,7 +7,7 @@
 runUMAP(object, ncomponents = 2, ntop = 500, feature_set = NULL,
   exprs_values = "logcounts", scale_features = TRUE,
   use_dimred = NULL, n_dimred = NULL, pca = 50, n_neighbors = 15,
-  external_neighbors = FALSE, BNPARAM = NULL,
+  external_neighbors = FALSE, BNPARAM = KmknnParam(),
   BPPARAM = SerialParam(), ...)
 }
 \arguments{
