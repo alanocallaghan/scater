@@ -72,15 +72,22 @@ test_that("calcAverage responds to other choices", {
     whee_counts <- calcAverage(whee, exprs_values="whee")
     expect_identical(whee_counts, ave_counts)
 
-    ## Responsive to paralellization.
+    ## Responsive to parallelization.
     expect_equal(ave_counts, calcAverage(original, BPPARAM=MulticoreParam(2)))
-    expect_equal(ave_counts, calcAverage(original, BPPARAM=SnowParam(3)))
+    expect_equal(ave_counts, calcAverage(original, BPPARAM=MulticoreParam(3)))
 
-    ## Repeating with a sparse matrix.    
+    ## Repeating with a sparse matrix, to check that the specialized code is correct.
     sparsified <- original
     counts(sparsified) <- as(counts(original), "dgCMatrix")
-    ave_counts <- calcAverage(sparsified)
-    expect_equal(ave_counts, calcAverage(original, use_size_factors=FALSE))  
+    expect_equal(ave_counts, calcAverage(sparsified))
+    expect_equal(calcAverage(original, subset_row=30:20),
+        calcAverage(sparsified, subset_row=30:20))
+
+    unknown <- original
+    counts(unknown) <- as(counts(original), "dgTMatrix")
+    expect_equal(ave_counts, calcAverage(unknown))
+    expect_equal(calcAverage(unknown, subset_row=25:15),
+         calcAverage(original, subset_row=25:15))
 })
 
 test_that("calcAverage handles silly inputs", {

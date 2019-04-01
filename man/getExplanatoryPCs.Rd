@@ -2,36 +2,38 @@
 % Please edit documentation in R/getExplanatoryPCs.R
 \name{getExplanatoryPCs}
 \alias{getExplanatoryPCs}
-\title{Estimate the percentage of variance explained for each gene.}
+\title{Estimate the percentage of variance explained for each PC.}
 \usage{
-getExplanatoryPCs(object, variables = NULL, use_dimred = "PCA",
-  chunk = 1000, ...)
+getExplanatoryPCs(object, use_dimred = "PCA", ncomponents = 10,
+  rerun = FALSE, run_args = list(), ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values and per-cell experimental information.}
 
-\item{variables}{Character vector specifying the explanatory factors in \code{colData(object)} to use.
-Default is \code{NULL}, in which case all variables in \code{colData(object)} are considered.}
-
 \item{use_dimred}{String specifying the field in \code{reducedDims(object)} that contains the PCA results.}
 
-\item{chunk}{Argument passed to \code{\link{getVarianceExplained}}.}
+\item{ncomponents}{Integer scalar specifying the number of the top principal components to use.}
 
-\item{...}{Arguments passed to \code{\link{runPCA}}.}
+\item{rerun}{Logical scalar indicating whether the PCA should be repeated, even if pre-computed results are already present.}
+
+\item{run_args}{A named list of arguments to pass to \code{\link[scater]{runPCA}}.}
+
+\item{...}{Additional arguments passed to \code{\link{getVarianceExplained}}.}
 }
 \value{
 A matrix containing the percentage of variance explained by each factor (column) and for each PC (row).
 }
 \description{
-Estimate the percentage of variance explained for each gene.
+Estimate the percentage of variance explained for each PC.
 }
 \details{
 This function computes the percentage of variance in PC scores that is explained by variables in the sample-level metadata.
 It allows identification of important PCs that are driven by known experimental conditions, e.g., treatment, disease.
-PCs correlated with echnical factors (e.g., batch effects, library size) can also be detected and removed prior to further analysis.
+PCs correlated with technical factors (e.g., batch effects, library size) can also be detected and removed prior to further analysis.
 
-The function will attempt to extract existing PCA results in \code{object} via the \code{use_dimred} argument.
-If these are not available, it will rerun the PCA using \code{\link{runPCA}}.
+By default, the function will attempt to use pre-computed PCA results in \code{object}.
+This is done by taking the top \code{ncomponents} PCs from the matrix identified by \code{use_dimred}.
+If these are not available or if \code{rerun=TRUE}, the function will rerun the PCA using \code{\link[scater]{runPCA}}.
 }
 \examples{
 data("sc_example_counts")

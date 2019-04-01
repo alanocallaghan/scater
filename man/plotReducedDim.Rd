@@ -6,7 +6,8 @@
 \usage{
 plotReducedDim(object, use_dimred, ncomponents = 2, percentVar = NULL,
   colour_by = NULL, shape_by = NULL, size_by = NULL,
-  by_exprs_values = "logcounts", by_show_single = FALSE, ...)
+  by_exprs_values = "logcounts", by_show_single = FALSE,
+  text_by = NULL, text_size = 5, text_colour = "black", ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -30,6 +31,13 @@ for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.}
 
 \item{by_show_single}{Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.}
 
+\item{text_by}{Specification of a column metadata field for which to add text - see \code{?"\link{scater-vis-var}"} for possible values. 
+This must refer to a categorical field, i.e., coercible into a factor.}
+
+\item{text_size}{Numeric scalar specifying the size of added text.}
+
+\item{text_colour}{String specifying the colour of the added text.}
+
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }
 \value{
@@ -39,11 +47,15 @@ A ggplot object
 Plot cell-level reduced dimension results stored in a SingleCellExperiment object.
 }
 \details{
-If \code{ncomponents} is a scalar and equal to 2, a scatterplot of the first two dimensions is produced. 
+If \code{ncomponents} is a scalar equal to 2, a scatterplot of the first two dimensions is produced. 
 If \code{ncomponents} is greater than 2, a pairs plots for the top dimensions is produced.
 
 Alternatively, if \code{ncomponents} is a vector of length 2, a scatterplot of the two specified dimensions is produced.
 If it is of length greater than 2, a pairs plot is produced containing all pairwise plots between the specified dimensions.
+
+The \code{text_by} option will add factor levels as labels onto the plot, placed at the median coordinate across all points in that level.
+This is useful for annotating position-related metadata (e.g., clusters) when there are too many levels to distinguish by colour.
+It is only available for scatterplots.
 }
 \examples{
 data("sc_example_counts")

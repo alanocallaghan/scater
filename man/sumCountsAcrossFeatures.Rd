@@ -4,7 +4,8 @@
 \alias{sumCountsAcrossFeatures}
 \title{Sum counts across a feature set}
 \usage{
-sumCountsAcrossFeatures(object, ids, exprs_values = "counts")
+sumCountsAcrossFeatures(object, ids, exprs_values = "counts",
+  BPPARAM = SerialParam())
 }
 \arguments{
 \item{object}{A \linkS4class{SingleCellExperiment} object or a count matrix.}
@@ -12,6 +13,8 @@ sumCountsAcrossFeatures(object, ids, exprs_values = "counts")
 \item{ids}{A factor specifying the set to which each feature in \code{object} belongs.}
 
 \item{exprs_values}{A string or integer scalar specifying the assay of \code{object} containing counts, if \code{object} is a SingleCellExperiment.}
+
+\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether summation should be parallelized.}
 }
 \value{
 A count matrix where counts for all features in the same set are summed together within each cell.

@@ -11,7 +11,7 @@ package: scater
 output:
     BiocStyle::html_document
 vignette: >
-  %\VignetteIndexEntry{Quality control with scater}
+  %\VignetteIndexEntry{3. Quality control with scater}
   %\VignetteEngine{knitr::rmarkdown}
   %VignetteEncoding{UTF-8}
 ---

@@ -17,7 +17,7 @@ calcAverage(object, exprs_values = "counts", use_size_factors = TRUE,
 
 \item{exprs_values}{A string specifying the assay of \code{object} containing the count matrix, if \code{object} is a SingleCellExperiment.}
 
-\item{use_size_factors}{a logical scalar specifying whetherthe size factors in \code{object} should be used to construct effective library sizes.}
+\item{use_size_factors}{a logical scalar specifying whether the size factors in \code{object} should be used to construct effective library sizes.}
 
 \item{subset_row}{A vector specifying the subset of rows of \code{object} for which to return a result.}
 

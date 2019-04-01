@@ -77,7 +77,7 @@ isOutlier <- function(metric, nmads = 5, type = c("both", "lower", "higher"),
 
         all.threshold <- do.call(cbind, all.threshold)
         colnames(all.threshold) <- names(by.batch)
-        return(.store_thresholds(collected, all.threshold))
+        return(.store_thresholds(collected, all.threshold, logged=log))
     }
 
     # Computing median/MAD (possibly based on subset of the data).

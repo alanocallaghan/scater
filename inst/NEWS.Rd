@@ -6,6 +6,9 @@
     \item Removed all functions deprecated in the last release.
     \item Added option in runTSNE() to perform an external nearest neighbors check with BiocNeighbors.
     Removed the deprecated rand.seed= argument.
+    \item Added text_by= and related options to plotReducedDim(), to overlay annotation labels onto the plot.
+    \item Switched to BSPARAM= from BiocSingular for controlling SVD parameters.
+    Deprecated the approximate= argument for runPCA().
   }
 }
 

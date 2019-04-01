@@ -14,14 +14,22 @@
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.
 #' @param by_show_single Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.
+#' @param text_by Specification of a column metadata field for which to add text - see \code{?"\link{scater-vis-var}"} for possible values. 
+#' This must refer to a categorical field, i.e., coercible into a factor.
+#' @param text_size Numeric scalar specifying the size of added text.
+#' @param text_colour String specifying the colour of the added text.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details
-#' If \code{ncomponents} is a scalar and equal to 2, a scatterplot of the first two dimensions is produced. 
+#' If \code{ncomponents} is a scalar equal to 2, a scatterplot of the first two dimensions is produced. 
 #' If \code{ncomponents} is greater than 2, a pairs plots for the top dimensions is produced.
 #'
 #' Alternatively, if \code{ncomponents} is a vector of length 2, a scatterplot of the two specified dimensions is produced.
 #' If it is of length greater than 2, a pairs plot is produced containing all pairwise plots between the specified dimensions.
+#'
+#' The \code{text_by} option will add factor levels as labels onto the plot, placed at the median coordinate across all points in that level.
+#' This is useful for annotating position-related metadata (e.g., clusters) when there are too many levels to distinguish by colour.
+#' It is only available for scatterplots.
 #'
 #' @return A ggplot object
 #'
@@ -30,6 +38,7 @@
 #' @name plotReducedDim
 #' @aliases plotReducedDim 
 #' @importFrom SingleCellExperiment reducedDim
+#' @importFrom ggplot2 annotate
 #' @export
 #'
 #' @examples
@@ -53,7 +62,7 @@
 plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NULL, 
                            colour_by = NULL, shape_by = NULL, size_by = NULL,
                            by_exprs_values = "logcounts", by_show_single = FALSE,
-                           ...)
+                           text_by=NULL, text_size=5, text_colour="black", ...)
 {
     ## Extract reduced dimension representation of cells
     red_dim <- reducedDim(object, use_dimred)
@@ -97,6 +106,15 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NUL
         plot_out <- .central_plotter(df_to_plot, xlab = labs[1], ylab = labs[2],
                                      colour_by = colour_by, size_by = size_by, shape_by = shape_by, 
                                      ..., point_FUN=NULL)
+
+        # Adding text with the median locations of the 'text_by' vector.
+        if (!is.null(text_by)) {
+            text_out <- .choose_vis_values(object, by=text_by, mode="column", search="metadata", coerce_factor=TRUE)
+            by_text_x <- vapply(split(df_to_plot$X, text_out$val), median, FUN.VALUE=0)
+            by_text_y <- vapply(split(df_to_plot$Y, text_out$val), median, FUN.VALUE=0)
+            plot_out <- plot_out + annotate("text", x=by_text_x, y=by_text_y, 
+                label=names(by_text_x), size=text_size, colour=text_colour)
+        }
 
         return(plot_out)
     }

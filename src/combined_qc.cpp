@@ -1,5 +1,14 @@
 #include "scater.h"
 
+#include "beachmat/integer_matrix.h"
+#include "beachmat/numeric_matrix.h"
+#include "beachmat/utils/const_column.h"
+#include "utils.h"
+
+#include <stdexcept>
+#include <algorithm>
+#include <vector>
+
 /* Functions to compute the cumulative sum. */
 
 void check_topset(const Rcpp::IntegerVector& top) {
@@ -144,15 +153,16 @@ Rcpp::List create_output_per_gene(const per_gene_statistics<T, V>& PGS) {
 
 /* Main loop for combined_qc. */
 
-template <typename T, class V, class M>
-SEXP combined_qc_internal(M mat, Rcpp::IntegerVector start, Rcpp::IntegerVector end, Rcpp::List featcon, Rcpp::List cellcon, Rcpp::IntegerVector topset, V detection_limit) {
+template <class M>
+SEXP combined_qc_internal(Rcpp::RObject input, Rcpp::IntegerVector start, Rcpp::IntegerVector end, Rcpp::List featcon, Rcpp::List cellcon, Rcpp::IntegerVector topset, typename M::vector detection_limit) {
+    auto mat=beachmat::create_matrix<M>(input);
     const size_t ncells=mat->get_ncol();
     const size_t ngenes=mat->get_nrow();
 
     if (detection_limit.size()!=1) {
         throw std::runtime_error("detection limit should be a scalar");
     }
-    T limit=detection_limit[0];
+    typename M::type limit=detection_limit[0];
 
     // Defining the subset of cells for which to perform the calculation.
     const size_t firstcell=check_integer_scalar(start, "first cell index");
@@ -164,20 +174,23 @@ SEXP combined_qc_internal(M mat, Rcpp::IntegerVector start, Rcpp::IntegerVector 
 
     // Setting up per-cell statistics (for each feature control set).
     const size_t nfcontrols=featcon.size();
-    per_cell_statistics<T, V> all_PCS(n_usedcells, limit, ngenes, topset);
-    std::vector<per_cell_statistics<T, V> > control_PCS(nfcontrols);
+
+    typedef per_cell_statistics<typename M::type, typename M::vector> cell_stats;
+    cell_stats all_PCS(n_usedcells, limit, ngenes, topset);
+    std::vector<cell_stats> control_PCS(nfcontrols);
 
     for (size_t fx=0; fx<nfcontrols; ++fx) {
         Rcpp::IntegerVector current=process_subset_vector(featcon[fx], ngenes, false); // converts to zero-index.
-        control_PCS[fx]=per_cell_statistics<T, V>(n_usedcells, limit, current, topset);
+        control_PCS[fx]=cell_stats(n_usedcells, limit, current, topset);
     }
 
     // Setting up per-feature statistics (for each cell control set).
     const size_t nccontrols=cellcon.size();
     std::vector<std::vector<size_t> > chosen_ccs(n_usedcells); 
 
-    per_gene_statistics<T, V> all_PGS(ngenes, limit);
-    std::vector<per_gene_statistics<T, V> > control_PGS(nccontrols);
+    typedef per_gene_statistics<typename M::type, typename M::vector> gene_stats;
+    gene_stats all_PGS(ngenes, limit);
+    std::vector<gene_stats> control_PGS(nccontrols);
     
     for (size_t cx=0; cx<nccontrols; ++cx) {
         Rcpp::IntegerVector current=process_subset_vector(cellcon[cx], ncells, false); // converts to zero-index.
@@ -187,23 +200,28 @@ SEXP combined_qc_internal(M mat, Rcpp::IntegerVector start, Rcpp::IntegerVector 
                 chosen_ccs[cur_index - firstcell].push_back(cx); 
             }
         }
-        control_PGS[cx]=per_gene_statistics<T, V>(ngenes, limit);
+        control_PGS[cx]=gene_stats(ngenes, limit);
     }
 
     // Running through the requested stretch of cells.
-    V holder(ngenes);
-    for (size_t c=0; c<n_usedcells; ++c) {
-        auto cIt=mat->get_const_col(c + firstcell, holder.begin());
+    // Difficult in this framework to support sparsity, 
+    // due to the need to consider arbitrary subsets of features,
+    // so we'll limit ourselves to avoiding the copy for dense arrays.
+    beachmat::const_column<M> col_holder(mat.get(), false);
 
-        all_PCS.fill(cIt);
+    for (size_t c=0; c<n_usedcells; ++c) {
+        col_holder.fill(c+firstcell);
+        auto it=col_holder.get_values();
+
+        all_PCS.fill(it);
         for (size_t fx=0; fx<nfcontrols; ++fx) {
-            control_PCS[fx].fill_subset(cIt);
+            control_PCS[fx].fill_subset(it);
         }
 
-        all_PGS.compute_summaries(cIt);
+        all_PGS.compute_summaries(it);
         auto& chosen_cc=chosen_ccs[c];
         for (auto& cx : chosen_cc) {
-            control_PGS[cx].compute_summaries(cIt);
+            control_PGS[cx].compute_summaries(it);
         }
     }
 
@@ -227,11 +245,9 @@ SEXP combined_qc(SEXP matrix, SEXP start, SEXP end, SEXP featcon, SEXP cellcon, 
     BEGIN_RCPP
     auto mattype=beachmat::find_sexp_type(matrix);
     if (mattype==INTSXP) {
-        auto mat=beachmat::create_integer_matrix(matrix);
-        return combined_qc_internal<int, Rcpp::IntegerVector>(mat.get(), start, end, featcon, cellcon, top, limit);
+        return combined_qc_internal<beachmat::integer_matrix>(matrix, start, end, featcon, cellcon, top, limit);
     } else if (mattype==REALSXP) {
-        auto mat=beachmat::create_numeric_matrix(matrix);
-        return combined_qc_internal<double, Rcpp::NumericVector>(mat.get(), start, end, featcon, cellcon, top, limit);
+        return combined_qc_internal<beachmat::numeric_matrix>(matrix, start, end, featcon, cellcon, top, limit);
     } else {
         throw std::runtime_error("unacceptable matrix type");
     }
@@ -240,21 +256,22 @@ SEXP combined_qc(SEXP matrix, SEXP start, SEXP end, SEXP featcon, SEXP cellcon, 
 
 /* Main loop for top_cumprop. */
 
-template <typename T, class V, class M>
-SEXP top_cumprop_internal(M mat, Rcpp::IntegerVector topset) {
+template <class M>
+SEXP top_cumprop_internal(Rcpp::RObject incoming, Rcpp::IntegerVector topset) {
+    auto mat=beachmat::create_matrix<M>(incoming);
     const size_t ncells=mat->get_ncol();
     const size_t ngenes=mat->get_nrow();
 
     check_topset(topset);
     Rcpp::NumericMatrix percentages(topset.size(), ncells);
-    V holder(ngenes);
+    typename M::vector holder(ngenes); 
 
     for (size_t c=0; c<ncells; ++c) {
-        mat->get_col(c, holder.begin());
-        double totals=std::accumulate(holder.begin(), holder.end(), T(0));
+        mat->get_col(c, holder.begin()); // need to copy as cumsum will change ordering.
+        double totals=std::accumulate(holder.begin(), holder.end(), static_cast<typename M::type>(0));
 
         auto cur_col=percentages.column(c);
-        compute_cumsum<T, V>(holder.begin(), ngenes, topset, cur_col.begin());
+        compute_cumsum<typename M::type, typename M::vector>(holder.begin(), ngenes, topset, cur_col.begin());
         for (auto& p : cur_col) { p/=totals; }
     }
 
@@ -265,11 +282,9 @@ SEXP top_cumprop(SEXP matrix, SEXP top) {
     BEGIN_RCPP
     auto mattype=beachmat::find_sexp_type(matrix);
     if (mattype==INTSXP) {
-        auto mat=beachmat::create_integer_matrix(matrix);
-        return top_cumprop_internal<int, Rcpp::IntegerVector>(mat.get(), top);
+        return top_cumprop_internal<beachmat::integer_matrix>(matrix, top);
     } else if (mattype==REALSXP) {
-        auto mat=beachmat::create_numeric_matrix(matrix);
-        return top_cumprop_internal<double, Rcpp::NumericVector>(mat.get(), top);
+        return top_cumprop_internal<beachmat::numeric_matrix>(matrix, top);
     } else {
         throw std::runtime_error("unacceptable matrix type");
     }

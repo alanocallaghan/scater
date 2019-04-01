@@ -11,7 +11,7 @@ package: scater
 output:
     BiocStyle::html_document
 vignette: >
-  %\VignetteIndexEntry{An introduction to the scater package}
+  %\VignetteIndexEntry{1. An introduction to the scater package}
   %\VignetteEngine{knitr::rmarkdown}
   %VignetteEncoding{UTF-8}
 ---
