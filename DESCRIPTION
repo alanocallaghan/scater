@@ -16,9 +16,9 @@ Description: A collection of tools for doing various analyses of
 Depends: R (>= 3.6), SingleCellExperiment, ggplot2
 Imports: BiocGenerics, SummarizedExperiment, Matrix, dplyr, ggbeeswarm, grid, 
         DelayedArray, DelayedMatrixStats, methods, S4Vectors, stats, utils, 
-        viridis, Rcpp (>= 0.12.14), BiocNeighbors, BiocSingular, BiocParallel
+        viridis, Rcpp, BiocNeighbors, BiocSingular, BiocParallel
 Suggests: BiocStyle, biomaRt, beachmat, cowplot, destiny, knitr, mvoutlier, 
-        rmarkdown, Rtsne, umap, testthat, magrittr, pheatmap, Biobase, limma
+        rmarkdown, Rtsne, uwot, testthat, magrittr, pheatmap, Biobase, limma
 VignetteBuilder: knitr
 LazyData: true
 biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,
