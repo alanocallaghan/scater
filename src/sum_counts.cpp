@@ -25,8 +25,7 @@ template <class M, class O>
 Rcpp::RObject sum_row_counts_internal(Rcpp::RObject input, const std::vector<Rcpp::IntegerVector>& summable_set, size_t start_index, size_t end_index) {
     auto mat=beachmat::create_matrix<M>(input);
     const size_t ncells=mat->get_ncol();
-    const size_t ngenes=mat->get_nrow();
-    
+
     const size_t nsummations=summable_set.size();
     typename M::vector holder_out(nsummations);
     if (end_index > ncells) {
@@ -65,7 +64,6 @@ SEXP sum_row_counts (SEXP counts, SEXP sumset, SEXP job_start, SEXP job_end) {
     BEGIN_RCPP
 
     auto summation_set=create_summation(sumset);
-    const size_t nsummations=summation_set.size();
 
     // Determining the type and amount of work to do.
     size_t start_index=check_integer_scalar(job_start, "start index");
@@ -140,13 +138,11 @@ SEXP sum_col_counts (SEXP counts, SEXP sumset, SEXP job_start, SEXP job_end) {
     BEGIN_RCPP
 
     auto summation_set=create_summation(sumset);
-    const size_t nsummations=summation_set.size();
 
     // Determining the type and amount of work to do.
     size_t start_index=check_integer_scalar(job_start, "start index");
     size_t end_index=check_integer_scalar(job_end, "end index");
     if (end_index < start_index) { throw std::runtime_error("start index is less than end index"); }
-    const size_t ngenes=end_index - start_index;
 
     auto mattype=beachmat::find_sexp_type(counts);
     if (mattype==INTSXP) {
