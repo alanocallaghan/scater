@@ -24,9 +24,9 @@ test_that("nexprs responds to other options", {
     expect_equal(nexprs(original, byrow = TRUE, detection_limit=5), rowSums(counts(original) > 5))
 
     # Handles parallelization.
-    expect_equal(nexprs(original), nexprs(original, BPPARAM=MulticoreParam(2)))
+    expect_equal(nexprs(original), nexprs(original, BPPARAM=safeBPParam(2)))
     expect_equal(nexprs(original), nexprs(original, BPPARAM=SnowParam(3)))
-    expect_equal(nexprs(original, byrow=TRUE), nexprs(original, byrow=TRUE, BPPARAM=MulticoreParam(2)))
+    expect_equal(nexprs(original, byrow=TRUE), nexprs(original, byrow=TRUE, BPPARAM=safeBPParam(2)))
     expect_equal(nexprs(original, byrow=TRUE), nexprs(original, byrow=TRUE, BPPARAM=SnowParam(3)))
 })
 

@@ -73,8 +73,8 @@ test_that("calcAverage responds to other choices", {
     expect_identical(whee_counts, ave_counts)
 
     ## Responsive to parallelization.
-    expect_equal(ave_counts, calcAverage(original, BPPARAM=MulticoreParam(2)))
-    expect_equal(ave_counts, calcAverage(original, BPPARAM=MulticoreParam(3)))
+    expect_equal(ave_counts, calcAverage(original, BPPARAM=safeBPParam(2)))
+    expect_equal(ave_counts, calcAverage(original, BPPARAM=safeBPParam(3)))
 
     ## Repeating with a sparse matrix, to check that the specialized code is correct.
     sparsified <- original

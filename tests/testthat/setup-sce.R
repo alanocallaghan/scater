@@ -8,3 +8,12 @@ sce <- SingleCellExperiment(
 # Generating a normalized SCE for specific methods.
 suppressWarnings(normed <- normalize(sce))
 
+# Because SnowParam() is too slow, yet MulticoreParam() fails on Windows.
+# See discussion at https://github.com/Bioconductor/BiocParallel/issues/98.
+safeBPParam <- function(nworkers) {
+    if (.Platform$OS.type=="windows") {
+        BiocParallel::SerialParam()
+    } else {
+        BiocParallel::MulticoreParam(nworkers)
+    }
+}

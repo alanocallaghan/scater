@@ -49,10 +49,10 @@ test_that("by-feature count summarization behaves with odd inputs", {
     expect_equivalent(ref, as.matrix(spack))
 
     # Handles parallelization properly.
-    alt <- sumCountsAcrossFeatures(sce, ids, BPPARAM=BiocParallel::MulticoreParam(2))
+    alt <- sumCountsAcrossFeatures(sce, ids, BPPARAM=safeBPParam(2))
     expect_identical(alt, ref)
 
-    alt <- sumCountsAcrossFeatures(sce, ids, BPPARAM=BiocParallel::MulticoreParam(3))
+    alt <- sumCountsAcrossFeatures(sce, ids, BPPARAM=safeBPParam(3))
     expect_identical(alt, ref)
 })
 
@@ -102,10 +102,10 @@ test_that("by-cell count summarization behaves with odd inputs", {
     expect_equivalent(ref, as.matrix(spack))
 
     # Handles parallelization properly.
-    alt <- sumCountsAcrossCells(sce, ids, BPPARAM=BiocParallel::MulticoreParam(2))
+    alt <- sumCountsAcrossCells(sce, ids, BPPARAM=safeBPParam(2))
     expect_identical(alt, ref)
 
-    alt <- sumCountsAcrossCells(sce, ids, BPPARAM=BiocParallel::MulticoreParam(3))
+    alt <- sumCountsAcrossCells(sce, ids, BPPARAM=safeBPParam(3))
     expect_identical(alt, ref)
 })
 

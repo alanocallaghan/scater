@@ -256,7 +256,7 @@ test_that("runTSNE works with externally computed nearest neighbor results", {
     expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
 
     ref <- runTSNE(normedP, use_dimred="PCA", Y_init=init)
-    alt <- runTSNE(normedP, use_dimred="PCA", Y_init=init, external_neighbors=TRUE, BPPARAM=MulticoreParam(2))
+    alt <- runTSNE(normedP, use_dimred="PCA", Y_init=init, external_neighbors=TRUE, BPPARAM=safeBPParam(2))
     expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
 })
 
@@ -356,10 +356,10 @@ test_that("runUMAP works with externally computed nearest neighbor results", {
 
     set.seed(24) 
     seedSet()
-    invisible(MulticoreParam(2)) # more seed-related cajoling!
+    invisible(safeBPParam(2)) # more seed-related cajoling!
     ref <- runUMAP(normedP, use_dimred="PCA")
     set.seed(24) 
-    alt <- runUMAP(normedP, use_dimred="PCA", external_neighbors=TRUE, BPPARAM=MulticoreParam(2))
+    alt <- runUMAP(normedP, use_dimred="PCA", external_neighbors=TRUE, BPPARAM=safeBPParam(2))
     expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
 })
 
