@@ -27,7 +27,7 @@
 #' @return A ggplot object.
 #' @export
 #' @importFrom DelayedArray DelayedArray
-#' @importFrom BiocGenerics rowMeans
+#' @importFrom Matrix rowMeans
 #' @importFrom DelayedMatrixStats rowVars
 #' @importFrom ggplot2 geom_pointrange
 #'

@@ -23,7 +23,8 @@
 #' @export
 #' @importFrom methods is
 #' @importClassesFrom DelayedArray DelayedMatrix
-#' @importFrom BiocGenerics t colnames rownames
+#' @importFrom BiocGenerics colnames rownames
+#' @importFrom Matrix t
 #'
 #' @examples
 #' data("sc_example_counts")

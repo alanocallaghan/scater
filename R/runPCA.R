@@ -149,7 +149,7 @@ setMethod("runPCA", "SingleCellExperiment", function(x, ncomponents = 2, method 
 
 #' @importFrom utils head
 #' @importFrom SummarizedExperiment assay
-#' @importFrom BiocGenerics t
+#' @importFrom Matrix t
 #' @importFrom DelayedArray DelayedArray
 #' @importFrom DelayedMatrixStats rowVars
 .get_mat_for_reddim <- function(object, exprs_values, feature_set=NULL, ntop=500, scale=FALSE) 
