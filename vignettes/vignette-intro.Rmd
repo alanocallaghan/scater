@@ -133,8 +133,8 @@ This is performed using `readSparseCounts` and reduces memory usage by not expli
 Data from 10X Genomics experiments can be read in using the `read10xCounts` function from the `r Biocpkg("DropletUtils")` package.
 This will automatically generate a `SingleCellExperiment` with a sparse matrix, see the documentation for more details.
 
-`r Biocpkg("scater")` also provides wrapper functions `readSalmonResults` or `readKallistoResults` to import transcript abundances from the `kallisto` and `Salmon` pseudo-aligners.
-This is done using methods from the `r Biocpkg("tximport")` package.
+Transcript abundances from the `kallisto` and `Salmon` pseudo-aligners can be imported using methods from the `r Biocpkg("tximeta")` package.
+This produces a `SummarizedExperiment` object that can be coerced into a `SingleCellExperiment` simply with `as(se, "SingleCellExperiment")`.
 
 # Transitioning from the `SCESet` class
 
