@@ -1,6 +1,12 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
+\section{Changes in version 1.14.0, Bioconductor 3.10 Release (September 2019)}{
+  \itemize{ 
+    \item Removed deprecated dplyr verbs.
+  }
+}
+
 \section{Changes in version 1.12.0, Bioconductor 3.9 Release (April 2019)}{
   \itemize{
     \item Removed all functions deprecated in the last release.
@@ -11,6 +17,7 @@
     Deprecated the approximate= argument for runPCA().
     \item Switched runUMAP() to use uwot::umap.
     Added support for supplying a pre-defined set of nearest neighbors.
+    \item Deprecated the various dplyr verbs, i.e., filter(), arrange(), mutate(), rename().
   }
 }
 
