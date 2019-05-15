@@ -1,17 +1,18 @@
 ---
-title: "Introduction to `scater`: Single-cell analysis toolkit for expression in R"
+title: Single-cell analysis toolkit for expression in R
 author:
-- name: "Davis McCarthy"
+- name: Davis McCarthy
   affiliation: 
   - EMBL European Bioinformatics Institute
-- name: "Aaron Lun"
+- name: Aaron Lun
   affiliation:
   - Cancer Research UK Cambridge Institute, University of Cambridge
 package: scater
 output:
-    BiocStyle::html_document
+  BiocStyle::html_document:
+    toc_float: yes
 vignette: >
-  %\VignetteIndexEntry{1. An introduction to the scater package}
+  %\VignetteIndexEntry{1. Introduction}
   %\VignetteEngine{knitr::rmarkdown}
   %VignetteEncoding{UTF-8}
 ---
@@ -30,15 +31,10 @@ theme_set(theme_bw(12))
 # Introduction
 
 This document gives an introduction to and overview of the quality control functionality of the `r Biocpkg("scater")` package.
-`r Biocpkg("scater")` contains tools to help with the analysis of single-cell transcriptomic data, focusing on RNA-seq data. 
-The package features:
-
-* Use of the `SingleCellExperiment` class as a data container for interoperability with a wide range of other Bioconductor packages;
-* Functions to import [_kallisto_](http://pachterlab.github.io/kallisto/) and [_Salmon_](https://combine-lab.github.io/salmon/) results;
-* Simple calculation of many quality control metrics from the expression data;
-* Many tools for visualising scRNA-seq data, especially diagnostic plots for quality control;
-* Subsetting and many other methods for filtering out problematic cells and features;
-* Methods for identifying important experimental variables and normalising data ahead of downstream statistical analysis and modeling.
+`r Biocpkg("scater")` contains tools to help with the analysis of single-cell transcriptomic data, 
+focusing on low-level steps such as quality control, normalization and visualization.
+It is based on the `SingleCellExperiment` class (from the `r Biocpkg("SingleCellExperiment")` package),
+and thus is interoperable with many other Bioconductor packages such as `r Biocpkg("scran")`, `r Biocpkg("batchelor")` and `r Biocpkg("iSEE")`.
 
 # Creating a `SingleCellExperiment` object
 

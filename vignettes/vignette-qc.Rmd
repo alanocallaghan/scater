@@ -1,17 +1,18 @@
 ---
-title: "Quality control with `scater`"
+title: Quality control on cells and genes
 author:
-- name: "Davis McCarthy"
+- name: Davis McCarthy
   affiliation: 
   - EMBL European Bioinformatics Institute
-- name: "Aaron Lun"
+- name: Aaron Lun
   affiliation:
   - Cancer Research UK Cambridge Institute, University of Cambridge
 package: scater
 output:
-    BiocStyle::html_document
+  BiocStyle::html_document:
+    toc_float: yes
 vignette: >
-  %\VignetteIndexEntry{3. Quality control with scater}
+  %\VignetteIndexEntry{3. Quality control}
   %\VignetteEngine{knitr::rmarkdown}
   %VignetteEncoding{UTF-8}
 ---
@@ -212,7 +213,7 @@ multiplot(p1, p2, cols = 2)
 
 ## By cells
 
-### Column subsetting 
+### Subsetting to remove low-quality cells 
 
 Column subsetting of the `SingeCellExperiment` object will only retain the selected cells, thus removing low-quality or otherwise unwanted cells.
 We demonstrate below by retaining the first 40 cells.
@@ -221,15 +222,6 @@ We demonstrate below by retaining the first 40 cells.
 ```{r}
 example_sce <- example_sce[,1:40]
 ```
-
-`r Biocpkg("scater")` also provides a `filter` function, inspired by the function of the same name in the `dplyr` package and operating in exactly the same manner.
-This can be used to very conviently subset (i.e. filter) the cells of an `SingleCellExperiment` object based on its `colData` variables.
-
-```{r}
-filter(example_sce, Treatment == "treat1")
-```
-
-### Identifying filtering thresholds
 
 We can identify high-quality cells to retain by setting a fixed threshold on particular metrics.
 For example, we could retain only cells that have at least 100,000 total counts _and_ at least 500 expressed features:
@@ -241,7 +233,7 @@ filtered <- example_sce[,keep.total & keep.n]
 dim(filtered)
 ```
 
-A more flexible way of choosing thresholds is through the `isOutlier` function.
+The `isOutlier` function provides a more data-adaptive way of choosing these thresholds.
 This defines the threshold at a certain number of median absolute deviations (MADs) away from the median.
 Values beyond this threshold are considered outliers and can be filtered out, assuming that they correspond to low-quality cells.
 Here, we define small outliers (using `type="lower"`) for the _log_-total counts at 3 MADs from the median.
@@ -254,7 +246,7 @@ filtered <- example_sce[,keep.total]
 
 The `isOutlier` approach adjusts to experiment-specific aspects of the data, e.g., sequencing depth, amount of spike-in RNA added, cell type.
 In contrast, a fixed threshold would require manual adjustment to account for changes to the experimental protocol or system.
-We refer readers to the [_simpleSingleCell_](https://bioconductor.org/packages/release/workflows/html/simpleSingleCell.html) workflow for more details.
+We refer readers to the `r Biocpkg("simpleSingleCell")` workflow for more details.
 
 ### Identifying outliers on all QC metrics
 

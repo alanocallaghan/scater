@@ -1,17 +1,18 @@
 ---
-title: "Data visualisation methods in scater"
+title: Common visualisations of single-cell data
 author:
-- name: "Davis McCarthy"
+- name: Davis McCarthy
   affiliation:
-    - EMBL European Bioinformatics Institute
-- name: "Aaron Lun"
+  - EMBL European Bioinformatics Institute
+- name: Aaron Lun
   affiliation:
   - Cancer Research UK Cambridge Institute, University of Cambridge
 package: scater
 output:
-    BiocStyle::html_document
+  BiocStyle::html_document:
+    toc_float: yes
 vignette: >
-  %\VignetteIndexEntry{2. Data visualisation methods in scater}
+  %\VignetteIndexEntry{2. Data visualisation}
   %\VignetteEngine{knitr::rmarkdown}
   %VignetteEncoding{UTF-8}
 ---
