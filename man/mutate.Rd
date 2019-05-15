@@ -4,7 +4,7 @@
 \name{mutate}
 \alias{mutate}
 \alias{mutate,SingleCellExperiment-method}
-\title{Add new variables to \code{colData(object)}.}
+\title{Add new variables to \code{colData(object)} (deprecated).}
 \usage{
 mutate(object, ...)
 
@@ -20,13 +20,8 @@ act on \code{colData(object)}.}
 An SingleCellExperiment object.
 }
 \description{
-Add new variables to \code{colData(object)}.
+Add new variables to \code{colData(object)} (deprecated).
 }
-\examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-assays = list(counts = sc_example_counts), 
-colData = sc_example_cell_info)
-example_sce <- mutate(example_sce, is_quiescent = Cell_Cycle == "G0")
+\details{
+Refer to \url{https://github.com/sa-lee/plyexperiment} for replacement functionality.
 }

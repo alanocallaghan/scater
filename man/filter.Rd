@@ -4,7 +4,7 @@
 \name{filter}
 \alias{filter}
 \alias{filter,SingleCellExperiment-method}
-\title{Return \code{SingleCellExperiment} with cells matching conditions.}
+\title{Return \code{SingleCellExperiment} with cells matching conditions (deprecated).}
 \usage{
 filter(object, ...)
 
@@ -23,12 +23,6 @@ An SingleCellExperiment object.
 Subsets the columns (cells) of a \code{SingleCellExperiment} based on
 matching conditions in the rows of \code{colData(object)}.
 }
-\examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-assays = list(counts = sc_example_counts), 
-colData = sc_example_cell_info)
-example_sce_treat1 <- filter(example_sce, Treatment == "treat1")
-
+\details{
+Refer to \url{https://github.com/sa-lee/plyexperiment} for replacement functionality.
 }

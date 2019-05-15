@@ -4,7 +4,7 @@
 \name{rename}
 \alias{rename}
 \alias{rename,SingleCellExperiment-method}
-\title{Rename variables of \code{colData(object)}.}
+\title{Rename variables of \code{colData(object)} (deprecated).}
 \usage{
 rename(object, ...)
 
@@ -20,14 +20,8 @@ act on \code{colData(object)}.}
 An SingleCellExperiment object.
 }
 \description{
-Rename variables of \code{colData(object)}.
+Rename variables of \code{colData(object)} (deprecated).
 }
-\examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-assays = list(counts = sc_example_counts), 
-colData = sc_example_cell_info)
-example_sce <- rename(example_sce, Cell_Phase = Cell_Cycle)
-
+\details{
+Refer to \url{https://github.com/sa-lee/plyexperiment} for replacement functionality.
 }

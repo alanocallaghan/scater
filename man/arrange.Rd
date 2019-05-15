@@ -4,7 +4,7 @@
 \name{arrange}
 \alias{arrange}
 \alias{arrange,SingleCellExperiment-method}
-\title{Arrange columns (cells) of a SingleCellExperiment object}
+\title{Arrange columns (cells) of a SingleCellExperiment object (deprecated).}
 \usage{
 arrange(object, ...)
 
@@ -23,12 +23,6 @@ An SingleCellExperiment object.
 The \code{SingleCellExperiment} returned will have cells ordered by the corresponding
 variable in \code{colData(object)}.
 }
-\examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-assays = list(counts = sc_example_counts), 
-colData = sc_example_cell_info)
-example_sce <- arrange(example_sce, Cell_Cycle)
-
+\details{
+Refer to \url{https://github.com/sa-lee/plyexperiment} for replacement functionality.
 }

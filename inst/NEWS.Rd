@@ -11,6 +11,7 @@
     Deprecated the approximate= argument for runPCA().
     \item Switched runUMAP() to use uwot::umap.
     Added support for supplying a pre-defined set of nearest neighbors.
+    \item Deprecated the various dplyr verbs, i.e., filter(), arrange(), mutate(), rename().
   }
 }
 
