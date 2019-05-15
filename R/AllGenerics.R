@@ -54,31 +54,3 @@ setGeneric("fpkm", function(object) standardGeneric("fpkm"))
 #' @docType methods
 #' @rdname accessors
 setGeneric("fpkm<-", function(object, value) standardGeneric("fpkm<-"))
-
-
-## dplyr-style verb generics
-
-#' @name mutate
-#' @rdname mutate
-#' @docType methods
-#' @export
-setGeneric("mutate", function(object, ...) standardGeneric("mutate"))
-
-#' @name rename
-#' @rdname rename
-#' @docType methods
-#' @export
-setGeneric("rename", function(object, ...) standardGeneric("rename"))
-
-#' @name filter
-#' @rdname filter
-#' @docType methods
-#' @export
-setGeneric("filter", function(object, ...) standardGeneric("filter"))
-
-#' @name arrange
-#' @rdname arrange
-#' @docType methods
-#' @export
-setGeneric("arrange", function(object, ...) standardGeneric("arrange"))
-
