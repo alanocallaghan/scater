@@ -5,9 +5,9 @@
 \alias{runPCA,SingleCellExperiment-method}
 \title{Perform PCA on cell-level data}
 \usage{
-\S4method{runPCA}{SingleCellExperiment}(x, ncomponents = 2,
-  method = NULL, ntop = 500, exprs_values = "logcounts",
-  feature_set = NULL, scale_features = TRUE, use_coldata = FALSE,
+\S4method{runPCA}{SingleCellExperiment}(x, ncomponents = 2, ntop = 500,
+  exprs_values = "logcounts", feature_set = NULL,
+  scale_features = TRUE, use_coldata = FALSE,
   selected_variables = NULL, detect_outliers = FALSE,
   BSPARAM = ExactParam(), BPPARAM = SerialParam())
 }
@@ -15,8 +15,6 @@
 \item{x}{A \linkS4class{SingleCellExperiment} object.}
 
 \item{ncomponents}{Numeric scalar indicating the number of principal components to obtain.}
-
-\item{method}{Deprecated, string specifying how the PCA should be performed.}
 
 \item{ntop}{Numeric scalar specifying the number of most variable features to use for PCA.}
 

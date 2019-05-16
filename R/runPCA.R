@@ -4,7 +4,6 @@
 #'
 #' @param x A \linkS4class{SingleCellExperiment} object.
 #' @param ncomponents Numeric scalar indicating the number of principal components to obtain.
-#' @param method Deprecated, string specifying how the PCA should be performed.
 #' @param ntop Numeric scalar specifying the number of most variable features to use for PCA.
 #' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for PCA.
 #' This will override any \code{ntop} argument if specified.
@@ -72,7 +71,7 @@
 #' example_sce <- runPCA(example_sce)
 #' reducedDimNames(example_sce)
 #' head(reducedDim(example_sce))
-setMethod("runPCA", "SingleCellExperiment", function(x, ncomponents = 2, method = NULL, 
+setMethod("runPCA", "SingleCellExperiment", function(x, ncomponents = 2, 
        ntop = 500, exprs_values = "logcounts", feature_set = NULL, scale_features = TRUE, 
        use_coldata = FALSE, selected_variables = NULL, detect_outliers = FALSE,
        BSPARAM = ExactParam(), BPPARAM = SerialParam())
@@ -121,16 +120,6 @@ setMethod("runPCA", "SingleCellExperiment", function(x, ncomponents = 2, method 
                                      outbound = 0.05)
         outlier <- !as.logical(outliers$wfinal01)
         object$outlier <- outlier
-    }
-
-    ## Compute PCA using the specified method.
-    if (!is.null(method)) {
-        .Deprecated(msg="'method=' is deprecated.\nUse 'BSPARAM=' instead.")
-        if (method=="prcomp") {
-            BSPARAM <- ExactParam()
-        } else {
-            BSPARAM <- IrlbaParam()
-        }
     }
 
     pca <- runPCA(exprs_to_plot, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM, get.rotation=FALSE)
