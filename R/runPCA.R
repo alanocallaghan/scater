@@ -179,7 +179,7 @@ setMethod("runPCA", "SingleCellExperiment", function(x, ncomponents = 2, method 
     exprs_to_plot
 }
 
-#' @importFrom DelayedArray DelayedArray
+#' @importFrom DelayedArray DelayedArray sweep
 #' @importFrom DelayedMatrixStats colVars
 .scale_columns <- function(mat, vars=NULL) 
 # We scale by the standard deviation, which also changes the centre.
