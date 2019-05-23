@@ -4,6 +4,7 @@
 \section{Changes in version 1.14.0, Bioconductor 3.10 Release (September 2019)}{
   \itemize{ 
     \item Removed deprecated dplyr verbs.
+    \item Removed deprecated method= option in runPCA().
   }
 }
 
