@@ -8,7 +8,7 @@ getBMFeatureAnnos(object, ids = rownames(object),
   filters = "ensembl_gene_id", attributes = c(filters, "mgi_symbol",
   "chromosome_name", "gene_biotype", "start_position", "end_position"),
   biomart = "ENSEMBL_MART_ENSEMBL", dataset = "mmusculus_gene_ensembl",
-  host = "www.ensembl.org")
+  ...)
 }
 \arguments{
 \item{object}{A \linkS4class{SingleCellExperiment} object.}
@@ -25,9 +25,7 @@ Default is \code{"ENSEMBL_MART_ENSEMBL"}.}
 \item{dataset}{String defining the dataset to use, to be passed to \code{\link[biomaRt]{useMart}}.
 Default is \code{"mmusculus_gene_ensembl"}, which should be changed if the organism is not mouse.}
 
-\item{host}{Character string argument which can be used to select a particular \code{"host"} to pass to \code{\link[biomaRt]{useMart}}.
-Useful for accessing archived versions of biomaRt data. 
-Default is \code{"www.ensembl.org"}, in which case the current version of the biomaRt (now hosted by Ensembl) is used.}
+\item{...}{Further named arguments to pass to \code{biomaRt::useMart}.}
 }
 \value{
 A SingleCellExperiment object containing feature annotation.
@@ -45,6 +43,7 @@ example_sce <- SingleCellExperiment(
     colData = sc_example_cell_info
 )
 
+# Making up Ensembl IDs for demonstration purposes.
 mock_id <- paste0("ENSMUSG", sprintf("\%011d", seq_len(nrow(example_sce))))
 example_sce <- getBMFeatureAnnos(example_sce, ids=mock_id)
 }
