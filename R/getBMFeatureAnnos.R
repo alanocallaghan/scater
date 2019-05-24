@@ -10,9 +10,7 @@
 #' Default is \code{"ENSEMBL_MART_ENSEMBL"}.
 #' @param dataset String defining the dataset to use, to be passed to \code{\link[biomaRt]{useMart}}.
 #' Default is \code{"mmusculus_gene_ensembl"}, which should be changed if the organism is not mouse.
-#' @param host Character string argument which can be used to select a particular \code{"host"} to pass to \code{\link[biomaRt]{useMart}}.
-#' Useful for accessing archived versions of biomaRt data. 
-#' Default is \code{"www.ensembl.org"}, in which case the current version of the biomaRt (now hosted by Ensembl) is used.
+#' @param ... Further named arguments to pass to \code{biomaRt::useMart}.
 #' 
 #' @return A SingleCellExperiment object containing feature annotation.
 #' The input \code{feature_symbol} appears as the \code{feature_symbol} field in the \code{rowData} of the output object.
@@ -30,6 +28,7 @@
 #'     colData = sc_example_cell_info
 #' )
 #'
+#' # Making up Ensembl IDs for demonstration purposes.
 #' mock_id <- paste0("ENSMUSG", sprintf("%011d", seq_len(nrow(example_sce))))
 #' example_sce <- getBMFeatureAnnos(example_sce, ids=mock_id)
 #' }
@@ -41,16 +40,9 @@ getBMFeatureAnnos <- function(object, ids = rownames(object),
             "start_position", "end_position"),
         biomart="ENSEMBL_MART_ENSEMBL", 
         dataset="mmusculus_gene_ensembl",
-        host="www.ensembl.org") {
-
-    ## Define Biomart Mart to use
-    if ( is.null(host) ) {
-        bmart <- biomaRt::useMart(biomart = biomart, dataset = dataset)
-    } else {
-        bmart <- biomaRt::useMart(biomart = biomart, dataset = dataset, host = host) 
-    }
-
-    ## Get annotations from biomaRt
+        ...) 
+{
+    bmart <- biomaRt::useMart(biomart = biomart, dataset = dataset, ...)
     feature_info <- biomaRt::getBM(attributes = attributes, filters = filters, values = ids, mart = bmart)
 
     # Match the feature ids to the filters id.
