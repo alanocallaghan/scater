@@ -5,6 +5,7 @@
   \itemize{ 
     \item Removed deprecated dplyr verbs.
     \item Removed deprecated method= option in runPCA().
+    Increased ncomponents= default to 50.
     \item Pass all ... options to biomaRt::useMart() in getBMFeatureAnnos().
   }
 }

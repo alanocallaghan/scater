@@ -5,8 +5,8 @@
 \alias{runPCA,SingleCellExperiment-method}
 \title{Perform PCA on cell-level data}
 \usage{
-\S4method{runPCA}{SingleCellExperiment}(x, ncomponents = 2, ntop = 500,
-  exprs_values = "logcounts", feature_set = NULL,
+\S4method{runPCA}{SingleCellExperiment}(x, ncomponents = 50,
+  ntop = 500, exprs_values = "logcounts", feature_set = NULL,
   scale_features = TRUE, use_coldata = FALSE,
   selected_variables = NULL, detect_outliers = FALSE,
   BSPARAM = ExactParam(), BPPARAM = SerialParam())

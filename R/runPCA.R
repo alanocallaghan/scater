@@ -71,7 +71,7 @@
 #' example_sce <- runPCA(example_sce)
 #' reducedDimNames(example_sce)
 #' head(reducedDim(example_sce))
-setMethod("runPCA", "SingleCellExperiment", function(x, ncomponents = 2, 
+setMethod("runPCA", "SingleCellExperiment", function(x, ncomponents = 50,
        ntop = 500, exprs_values = "logcounts", feature_set = NULL, scale_features = TRUE, 
        use_coldata = FALSE, selected_variables = NULL, detect_outliers = FALSE,
        BSPARAM = ExactParam(), BPPARAM = SerialParam())
