@@ -3,7 +3,7 @@
 \docType{methods}
 \name{runPCA,SingleCellExperiment-method}
 \alias{runPCA,SingleCellExperiment-method}
-\title{Perform PCA on cell-level data}
+\title{Perform PCA on expression data}
 \usage{
 \S4method{runPCA}{SingleCellExperiment}(x, ncomponents = 50,
   ntop = 500, exprs_values = "logcounts", feature_set = NULL,
@@ -18,7 +18,7 @@
 
 \item{ntop}{Numeric scalar specifying the number of most variable features to use for PCA.}
 
-\item{exprs_values}{Integer scalar or string indicating which assay of \code{object} should be used to obtain the expression values for the calculations.}
+\item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values of interest.}
 
 \item{feature_set}{Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for PCA.
 This will override any \code{ntop} argument if specified.}
@@ -26,50 +26,35 @@ This will override any \code{ntop} argument if specified.}
 \item{scale_features}{Logical scalar, should the expression values be standardised so that each feature has unit variance?
 This will also remove features with standard deviations below 1e-8.}
 
-\item{use_coldata}{Logical scalar specifying whether the column data should be used instead of expression values to perform PCA.}
+\item{use_coldata}{Deprecated, use \code{\link{runColDataPCA}} instead.}
 
-\item{selected_variables}{List of strings or a character vector indicating which variables in \code{colData(object)} to use for PCA when \code{use_coldata=TRUE}.
-If a list, each entry can take the form described in \code{?"\link{scater-vis-var}"}.}
+\item{selected_variables}{Deprecated, use \code{\link{runColDataPCA}} instead.}
 
-\item{detect_outliers}{Logical scalar, should outliers be detected based on PCA coordinates generated from column-level metadata?}
+\item{detect_outliers}{Deprecated, use \code{\link{runColDataPCA}} instead.}
 
 \item{BSPARAM}{A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.}
 }
 \value{
-A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell.
-If \code{use_coldata=FALSE}, this is stored in the \code{"PCA"} entry of the \code{reducedDims} slot.
-Otherwise, it is stored in the \code{"PCA_coldata"} entry.
-
+A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell,
+stored in the \code{"PCA"} entry of the \code{reducedDims} slot.
 The proportion of variance explained by each PC is stored as a numeric vector in the \code{"percentVar"} attribute of the reduced dimension matrix.
-Note that this will only be of length equal to \code{ncomponents} when \code{method} is not \code{"prcomp"}.
-This is because approximate PCA methods do not compute singular values for all components.
 }
 \description{
-Perform a principal components analysis (PCA) on cells, based on the data in a SingleCellExperiment object.
+Perform a principal components analysis (PCA) on cells, 
+based on the expression data in a SingleCellExperiment object.
 }
 \details{
-The function \code{\link{prcomp}} is used internally to do the PCA when \code{method="prcomp"}.
-Alternatively, the \pkg{irlba} package can be used, which performs a fast approximation of PCA through the \code{\link[irlba]{prcomp_irlba}} function.
-This is especially useful for large, sparse matrices.
-
-Note that \code{\link[irlba]{prcomp_irlba}} involves a random initialization, after which it converges towards the exact PCs.
+Algorithms like \code{BSPARAM=IrlbaParam()} or \code{RandomParam()} involve
+a random initialization, after which it converges towards the exact PCs.
 This means that the result will change slightly across different runs.
-For full reproducibility, users should call \code{\link{set.seed}} prior to running \code{runPCA} with \code{method="irlba"}.
+For full reproducibility, users should call \code{\link{set.seed}} prior to running \code{runPCA} with such algorithms.
 
-If \code{use_coldata=TRUE}, PCA will be performed on column-level metadata instead of the gene expression matrix. 
-The \code{selected_variables} defaults to a vector containing:
-\itemize{
-\item \code{"pct_counts_top_100_features"}
-\item \code{"total_features_by_counts"}
-\item \code{"pct_counts_feature_control"}
-\item \code{"total_features_feature_control"}
-\item \code{"log10_total_counts_endogenous"}
-\item \code{"log10_total_counts_feature_control"}
-}
-This can be useful for identifying outliers cells based on QC metrics, especially when combined with \code{detect_outliers=TRUE}.
-If outlier identification is enabled, the \code{outlier} field of the output \code{colData} will contain the identified outliers.
+In the returned output, 
+the vector of proportion of variance explained may not have length equal to the total number of available PCs.
+This is because not all PCA methods are guaranteed to compute singular values for all components.
+As such, the proportions of variance explained - while accurate - may not sum to unity.
 }
 \examples{
 ## Set up an example SingleCellExperiment
@@ -86,7 +71,7 @@ reducedDimNames(example_sce)
 head(reducedDim(example_sce))
 }
 \seealso{
-\code{\link{prcomp}}, \code{\link[scater]{plotPCA}}
+\code{\link{runPCA}}, \code{\link[scater]{plotPCA}}
 }
 \author{
 Aaron Lun, based on code by Davis McCarthy
