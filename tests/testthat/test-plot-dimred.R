@@ -42,7 +42,7 @@ test_that("we can produce PCA scatterplots", {
     expect_equal(P, Pv)
     expect_s3_class(Pv2 <- plotPCA(example_sce, ncomponents=2:1), "ggplot")
     expect_false(isTRUE(all.equal(P, Pv2)))
-    expect_error(plotPCA(example_sce, ncomponents=c(3,1)), "larger than")
+    expect_error(plotPCA(example_sce, ncomponents=c(51,1)), "larger than")
 
     example_sceY <- example_sce
     reducedDim(example_sceY, "PCA") <- NULL

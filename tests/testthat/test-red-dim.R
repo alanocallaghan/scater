@@ -54,6 +54,13 @@ test_that("scaling by feature variances work correctly", {
 # Check PCA.
 
 test_that("runPCA works as expected", {
+    normedX <- runPCA(normed) 
+    expect_identical(reducedDimNames(normedX), "PCA")     
+    fullN <- min(dim(normed), 50L)
+    expect_identical(dim(reducedDim(normedX, "PCA")), c(ncol(normed), fullN))
+    expect_equal(sum(attr(reducedDim(normedX), "percentVar")), 1)
+
+    # Checking that it works with a restricted number of components.
     normedX <- runPCA(normed, ncomponents=4)
     expect_identical(reducedDimNames(normedX), "PCA")     
     expect_identical(dim(reducedDim(normedX, "PCA")), c(ncol(normedX), 4L))
@@ -62,17 +69,20 @@ test_that("runPCA works as expected", {
     # Testing that various settings give different results.
     normed2 <- runPCA(normed)
     normed3 <- runPCA(normed, scale_features = FALSE)
+    expect_identical(ncol(reducedDim(normed2)), fullN)
+    expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
-    expect_true(sum(attr(reducedDim(normed2), "percentVar")) < 1)
-    expect_true(sum(attr(reducedDim(normed3), "percentVar")) < 1)
 
     normed3 <- runPCA(normed, ntop = 100)
+    expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     normed3 <- runPCA(normed, exprs_values = "counts")
+    expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     normed3 <- runPCA(normed, feature_set = 1:100)
+    expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     # Testing that ntop selection works correctly.
@@ -100,23 +110,23 @@ test_that("runPCA works as expected", {
     expect_equal(reducedDim(normed3), reducedDim(normedX))
 })
 
-test_that("runPCA works as expected for QC metrics", {
+test_that("runColDataPCA works as expected for QC metrics", {
     normedQ <- calculateQCMetrics(normed, feature_controls=list(ERCC=1:50))
-    expect_warning(normedQ <- runPCA(normedQ, use_coldata=TRUE), NA)
+    expect_warning(normedQ <- runColDataPCA(normedQ), NA)
     expect_identical(reducedDimNames(normedQ), "PCA_coldata")
 
     normedQ2 <- calculateQCMetrics(normed, feature_controls=list(ERCC=1:50), compact=TRUE)
-    expect_warning(normedQ2 <- runPCA(normedQ2, use_coldata=TRUE), NA)
+    expect_warning(normedQ2 <- runColDataPCA(normedQ2), NA)
     expect_identical(reducedDim(normedQ, "PCA_coldata"), reducedDim(normedQ2, "PCA_coldata"))
 
     # Checking outlier detection works correctly.
     expect_identical(normedQ2$outlier, NULL)
-    expect_warning(normedQ2 <- runPCA(normedQ2, use_coldata=TRUE, detect_outliers=TRUE), NA)
+    expect_warning(normedQ2 <- runColDataPCA(normedQ2, detect_outliers=TRUE), NA)
     expect_type(normedQ2$outlier, "logical")
     expect_identical(length(normedQ2$outlier), ncol(normedQ2))
 
     # Check manual specification of variables works properly.
-    expect_warning(normedQ3 <- runPCA(normedQ, use_coldata=TRUE, 
+    expect_warning(normedQ3 <- runColDataPCA(normedQ, 
         selected_variables = c("total_counts", 
                                "total_features_by_counts",
                                "total_counts_endogenous",
