@@ -1,59 +1,44 @@
-#' Perform PCA on cell-level data
+#' Perform PCA on expression data
 #'
-#' Perform a principal components analysis (PCA) on cells, based on the data in a SingleCellExperiment object. 
+#' Perform a principal components analysis (PCA) on cells, 
+#' based on the expression data in a SingleCellExperiment object. 
 #'
 #' @param x A \linkS4class{SingleCellExperiment} object.
 #' @param ncomponents Numeric scalar indicating the number of principal components to obtain.
 #' @param ntop Numeric scalar specifying the number of most variable features to use for PCA.
 #' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for PCA.
 #' This will override any \code{ntop} argument if specified.
-#' @param exprs_values Integer scalar or string indicating which assay of \code{object} should be used to obtain the expression values for the calculations.
+#' @param exprs_values Integer scalar or string indicating which assay of \code{x} contains the expression values of interest.
 #' @param scale_features Logical scalar, should the expression values be standardised so that each feature has unit variance?
 #' This will also remove features with standard deviations below 1e-8. 
-#' @param use_coldata Logical scalar specifying whether the column data should be used instead of expression values to perform PCA.
-#' @param selected_variables List of strings or a character vector indicating which variables in \code{colData(object)} to use for PCA when \code{use_coldata=TRUE}.
-#' If a list, each entry can take the form described in \code{?"\link{scater-vis-var}"}.
-#' @param detect_outliers Logical scalar, should outliers be detected based on PCA coordinates generated from column-level metadata? 
+#' @param use_coldata Deprecated, use \code{\link{runColDataPCA}} instead.
+#' @param selected_variables Deprecated, use \code{\link{runColDataPCA}} instead.
+#' @param detect_outliers Deprecated, use \code{\link{runColDataPCA}} instead.
 #' @param BSPARAM A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.
 #'
 #' @details 
-#' The function \code{\link{prcomp}} is used internally to do the PCA when \code{method="prcomp"}.
-#' Alternatively, the \pkg{irlba} package can be used, which performs a fast approximation of PCA through the \code{\link[irlba]{prcomp_irlba}} function.
-#' This is especially useful for large, sparse matrices.
-#'
-#' Note that \code{\link[irlba]{prcomp_irlba}} involves a random initialization, after which it converges towards the exact PCs.
+#' Algorithms like \code{BSPARAM=IrlbaParam()} or \code{RandomParam()} involve
+#' a random initialization, after which it converges towards the exact PCs.
 #' This means that the result will change slightly across different runs.
-#' For full reproducibility, users should call \code{\link{set.seed}} prior to running \code{runPCA} with \code{method="irlba"}.
+#' For full reproducibility, users should call \code{\link{set.seed}} prior to running \code{runPCA} with such algorithms.
 #'
-#' If \code{use_coldata=TRUE}, PCA will be performed on column-level metadata instead of the gene expression matrix. 
-#' The \code{selected_variables} defaults to a vector containing:
-#' \itemize{
-#' \item \code{"pct_counts_top_100_features"}
-#' \item \code{"total_features_by_counts"}
-#' \item \code{"pct_counts_feature_control"}
-#' \item \code{"total_features_feature_control"}
-#' \item \code{"log10_total_counts_endogenous"}
-#' \item \code{"log10_total_counts_feature_control"}
-#' }
-#' This can be useful for identifying outliers cells based on QC metrics, especially when combined with \code{detect_outliers=TRUE}.
-#' If outlier identification is enabled, the \code{outlier} field of the output \code{colData} will contain the identified outliers.
+#' In the returned output, 
+#' the vector of proportion of variance explained may not have length equal to the total number of available PCs.
+#' This is because not all PCA methods are guaranteed to compute singular values for all components.
+#' As such, the proportions of variance explained - while accurate - may not sum to unity.
 #'
-#' @return A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell.
-#' If \code{use_coldata=FALSE}, this is stored in the \code{"PCA"} entry of the \code{reducedDims} slot.
-#' Otherwise, it is stored in the \code{"PCA_coldata"} entry.
-#'
+#' @return A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell,
+#' stored in the \code{"PCA"} entry of the \code{reducedDims} slot.
 #' The proportion of variance explained by each PC is stored as a numeric vector in the \code{"percentVar"} attribute of the reduced dimension matrix.
-#' Note that this will only be of length equal to \code{ncomponents} when \code{method} is not \code{"prcomp"}.
-#' This is because approximate PCA methods do not compute singular values for all components.
 #'
 #' @rdname runPCA
-#' @seealso \code{\link{prcomp}}, \code{\link[scater]{plotPCA}}
+#' @seealso \code{\link{runPCA}}, \code{\link[scater]{plotPCA}}
 #'
 #' @export
 #' @importFrom DelayedMatrixStats colVars
 #' @importFrom DelayedArray DelayedArray 
-#' @importFrom BiocSingular runPCA ExactParam IrlbaParam
+#' @importFrom BiocSingular runPCA ExactParam 
 #' @importFrom BiocParallel SerialParam
 #'
 #' @author Aaron Lun, based on code by Davis McCarthy
@@ -72,54 +57,16 @@
 #' reducedDimNames(example_sce)
 #' head(reducedDim(example_sce))
 setMethod("runPCA", "SingleCellExperiment", function(x, ncomponents = 50,
-       ntop = 500, exprs_values = "logcounts", feature_set = NULL, scale_features = TRUE, 
-       use_coldata = FALSE, selected_variables = NULL, detect_outliers = FALSE,
-       BSPARAM = ExactParam(), BPPARAM = SerialParam())
+    ntop = 500, exprs_values = "logcounts", feature_set = NULL, scale_features = TRUE, 
+    use_coldata = FALSE, selected_variables = NULL, detect_outliers = FALSE,
+    BSPARAM = ExactParam(), BPPARAM = SerialParam())
 {
-    object <- x
-
     if ( use_coldata ) {
-        if ( is.null(selected_variables) ) {
-            selected_variables <- list()
-            it <- 1L
-
-            # Fishing out the (possibly compacted) metadata fields.
-            for (field in c("pct_counts_in_top_100_features",
-                            "total_features_by_counts",
-                            "pct_counts_feature_control",
-                            "total_features_by_counts_feature_control",
-                            "log10_total_counts_endogenous",
-                            "log10_total_counts_feature_control")) {
-                out <- .qc_hunter(object, field, mode = "column", error = FALSE)
-                if (!is.null(out)) {
-                    selected_variables[[it]] <- out
-                    it <- it + 1L
-                }
-            }
-        }
-
-        # Constructing a matrix - presumably all doubles.
-        exprs_to_plot <- matrix(0, ncol(object), length(selected_variables))
-        for (it in seq_along(selected_variables)) {
-            exprs_to_plot[,it] <- .choose_vis_values(object, selected_variables[[it]], mode = "column", search = "metadata")$val
-        }
-        if (scale_features) {
-            exprs_to_plot <- .scale_columns(exprs_to_plot)
-        }
-
+        .Deprecated(msg="'use_coldata=TRUE is deprecated.\nUse 'runColDataPCA()' instead.")
+        return(runColDataPCA(x, ncomponents = ncomponents, selected_variables = selected_variables,
+            detect_outliers = detect_outliers, BSPARAM=BSPARAM, BPPARAM=BPPARAM))
     } else {
-        exprs_to_plot <- .get_mat_for_reddim(object, exprs_values = exprs_values, ntop = ntop, feature_set = feature_set, scale = scale_features)
-    }
-
-    ## conduct outlier detection
-    if ( detect_outliers && use_coldata ) {
-        outliers <- mvoutlier::pcout(exprs_to_plot, makeplot = FALSE,
-                                     explvar = 0.5, crit.M1 = 0.9,
-                                     crit.c1 = 5, crit.M2 = 0.9,
-                                     crit.c2 = 0.99, cs = 0.25,
-                                     outbound = 0.05)
-        outlier <- !as.logical(outliers$wfinal01)
-        object$outlier <- outlier
+        exprs_to_plot <- .get_mat_for_reddim(x, exprs_values = exprs_values, ntop = ntop, feature_set = feature_set, scale = scale_features)
     }
 
     pca <- runPCA(exprs_to_plot, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM, get.rotation=FALSE)
@@ -128,12 +75,8 @@ setMethod("runPCA", "SingleCellExperiment", function(x, ncomponents = 50,
     # Saving the results
     pcs <- pca$x
     attr(pcs, "percentVar") <- percentVar
-    if (use_coldata) {
-        reducedDim(object, "PCA_coldata") <- pcs
-    } else {
-        reducedDim(object, "PCA") <- pcs
-    }
-    return(object)
+    reducedDim(x, "PCA") <- pcs
+    x
 })
 
 #' @importFrom utils head
