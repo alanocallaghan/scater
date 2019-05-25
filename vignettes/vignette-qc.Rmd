@@ -255,8 +255,7 @@ This will identify cells that have substantially different QC metrics from the o
 We can visualize any outliers using a principal components plot as shown below:
 
 ```{r plot-pca-outlier}
-example_sce <- runPCA(example_sce, use_coldata = TRUE,
-    detect_outliers = TRUE)
+example_sce <- runColDataPCA(example_sce, detect_outliers = TRUE)
 plotReducedDim(example_sce, use_dimred="PCA_coldata")
 ```
 
