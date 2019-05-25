@@ -46,7 +46,6 @@ Suggests:
     Rtsne, 
     uwot, 
     testthat, 
-    magrittr, 
     pheatmap, 
     Biobase, 
     limma
