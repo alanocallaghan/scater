@@ -25,14 +25,17 @@
 #' \item \code{"log10_total_counts_endogenous"}
 #' \item \code{"log10_total_counts_feature_control"}
 #' }
-#' This can be useful for identifying outliers cells based on QC metrics, 
-#' especially when combined with \code{detect_outliers=TRUE}.
-#' If outlier identification is enabled, the output \code{colData} will contain a logical \code{outlier} field.
-#' This specifies the cells that correspond to the identified outliers.
+#'
+#' The default variables are useful for identifying outliers cells based on QC metrics when \code{detect_outliers=TRUE}.
+#' This uses an \dQuote{outlyingness} measure computed by \code{adjOutlyingness} in the \pkg{robustbase} package.
+#' Outliers are defined those cells with outlyingness values more than 5 MADs above the median, using \code{\link{isOutlier}}.
 #'
 #' @return A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell,
 #' stored in the \code{"PCA_coldata"} entry of the \code{reducedDims} slot.
 #' The proportion of variance explained by each PC is stored as a numeric vector in the \code{"percentVar"} attribute.
+#'
+#' If \code{detect_outliers=TRUE}, the output \code{colData} will also contain a logical \code{outlier} field.
+#' This specifies the cells that correspond to the identified outliers.
 #' 
 #' @seealso \code{\link[scater]{runPCA}}, for the corresponding method operating on expression data.
 #'
@@ -62,17 +65,18 @@ runColDataPCA <- function(x, ncomponents = 2, scale_features = TRUE,
     selected_variables = NULL, detect_outliers = FALSE,
     BSPARAM = ExactParam(), BPPARAM = SerialParam())
 {
-    if ( is.null(selected_variables) ) {
-        selected_variables <- list()
-        it <- 1L
+    if (is.null(selected_variables)) {
+        candidates <- c("pct_counts_in_top_100_features",
+            "total_features_by_counts",
+            "pct_counts_feature_control",
+            "total_features_by_counts_feature_control",
+            "log10_total_counts_endogenous",
+            "log10_total_counts_feature_control")
 
         # Fishing out the (possibly compacted) metadata fields.
-        for (field in c("pct_counts_in_top_100_features",
-                        "total_features_by_counts",
-                        "pct_counts_feature_control",
-                        "total_features_by_counts_feature_control",
-                        "log10_total_counts_endogenous",
-                        "log10_total_counts_feature_control")) {
+        selected_variables <- list()
+        it <- 1L
+        for (field in candidates) {
             out <- .qc_hunter(x, field, mode = "column", error = FALSE)
             if (!is.null(out)) {
                 selected_variables[[it]] <- out
@@ -90,15 +94,11 @@ runColDataPCA <- function(x, ncomponents = 2, scale_features = TRUE,
         exprs_to_plot <- .scale_columns(exprs_to_plot)
     }
 
-    ## conduct outlier detection
-    if ( detect_outliers) {
-        outliers <- mvoutlier::pcout(exprs_to_plot, makeplot = FALSE,
-                                     explvar = 0.5, crit.M1 = 0.9,
-                                     crit.c1 = 5, crit.M2 = 0.9,
-                                     crit.c2 = 0.99, cs = 0.25,
-                                     outbound = 0.05)
-        outlier <- !as.logical(outliers$wfinal01)
-        x$outlier <- outlier
+    ## Outlier detection. We used to use mvoutlier but their dependency tree 
+    ## changed to require system libraries, which were untenable.
+    if (detect_outliers) {
+        outlying <- robustbase::adjOutlyingness(exprs_to_plot, only.outlyingness=TRUE)
+        x$outlier <- isOutlier(outlying, type="higher")
     }
 
     pca <- runPCA(exprs_to_plot, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM, get.rotation=FALSE)
