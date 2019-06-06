@@ -8,6 +8,7 @@
     Increased ncomponents= default to 50.
     Deprecated use_coldata= and related options in favour of runColDataPCA().
     \item Added runColDataPCA() function for running PCA on colData().
+    Switch outlier detection strategy to avoid mvoutlier's dependency tree.
     \item Pass all ... options to biomaRt::useMart() in getBMFeatureAnnos().
   }
 }

@@ -30,6 +30,9 @@ If a list, each entry can take the form described in \code{?"\link{scater-vis-va
 A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell,
 stored in the \code{"PCA_coldata"} entry of the \code{reducedDims} slot.
 The proportion of variance explained by each PC is stored as a numeric vector in the \code{"percentVar"} attribute.
+
+If \code{detect_outliers=TRUE}, the output \code{colData} will also contain a logical \code{outlier} field.
+This specifies the cells that correspond to the identified outliers.
 }
 \description{
 Perform a principal components analysis (PCA) on cells, 
@@ -46,10 +49,10 @@ The \code{selected_variables} defaults to a vector containing:
 \item \code{"log10_total_counts_endogenous"}
 \item \code{"log10_total_counts_feature_control"}
 }
-This can be useful for identifying outliers cells based on QC metrics, 
-especially when combined with \code{detect_outliers=TRUE}.
-If outlier identification is enabled, the output \code{colData} will contain a logical \code{outlier} field.
-This specifies the cells that correspond to the identified outliers.
+
+The default variables are useful for identifying outliers cells based on QC metrics when \code{detect_outliers=TRUE}.
+This uses an \dQuote{outlyingness} measure computed by \code{adjOutlyingness} in the \pkg{robustbase} package.
+Outliers are defined those cells with outlyingness values more than 5 MADs above the median, using \code{\link{isOutlier}}.
 }
 \examples{
 ## Set up an example SingleCellExperiment
