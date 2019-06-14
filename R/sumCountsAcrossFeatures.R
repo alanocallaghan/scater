@@ -8,6 +8,7 @@
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether summation should be parallelized.
 #'
 #' @return A count matrix where counts for all features in the same set are summed together within each cell.
+#' Rows are ordered according to \code{levels(ids)}.
 #'
 #' @details
 #' This function provides a convenient method for aggregating counts across multiple rows for each cell.
@@ -47,21 +48,24 @@ sumCountsAcrossFeatures <- function(object, ids, exprs_values="counts", BPPARAM=
         object <- assay(object, exprs_values, withDimnames=FALSE)
     }
 
-    by_set <- split(seq_along(ids) - 1L, ids)
+    ids <- as.factor(ids)
+    ans <- integer(length(ids))
+    ans <- as.integer(ids) - 1L
+
     assignments <- .assign_jobs_to_workers(ncol(object), BPPARAM)
-    out_list <- bpmapply(start=assignments$start, end=assignments$end, FUN=.sum_across_rows_internal, 
-        MoreArgs=list(by_set=by_set, mat=object), BPPARAM=BPPARAM, SIMPLIFY=FALSE, USE.NAMES=FALSE)
+    out_list <- bpmapply(start=assignments$start, end=assignments$end, 
+        FUN=.sum_across_rows_internal, 
+        MoreArgs=list(by_set=ans, ntotal=nlevels(ids), mat=object), 
+        BPPARAM=BPPARAM, SIMPLIFY=FALSE, USE.NAMES=FALSE)
 
     out <- do.call(cbind, out_list)
     colnames(out) <- colnames(object)
-    rownames(out) <- names(by_set)
+    rownames(out) <- levels(ids)
     out
 }
 
-.sum_across_rows_internal <- function(mat, by_set, start, end) 
+.sum_across_rows_internal <- function(mat, by_set, ntotal, start, end) 
 # Internal function to drag along the namespace.
 {
-    .Call(cxx_sum_row_counts, mat, by_set, start, end)
+    .Call(cxx_sum_row_counts, mat, by_set, ntotal, start, end)
 }
-
-
