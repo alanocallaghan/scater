@@ -18,6 +18,10 @@
 #' It is theoretically possible to aggregate transcript-level counts to gene-level counts with this function.
 #' However, it is often better to do so with dedicated functions (e.g., from the \pkg{tximport} or \pkg{tximeta} packages) that account for differences in length across isoforms.
 #'
+#' The behaviour of this function is equivalent to that of \code{\link{rowsum}}.
+#' However, this function can operate on any matrix representation in \code{object},
+#' and can do so in a parallelized manner for large matrices without resorting to block processing.
+#'
 #' Any \code{NA} values in \code{ids} are implicitly ignored and will not be considered or reported.
 #' This may be useful, e.g., to remove undesirable feature sets by setting their entries in \code{ids} to \code{NA}.
 #'
