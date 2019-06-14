@@ -18,6 +18,7 @@ sumCountsAcrossCells(object, ids, exprs_values = "counts",
 }
 \value{
 A count matrix where counts for all cells in the same set are summed together for each feature.
+Columns are ordered by \code{levels(ids)}.
 }
 \description{
 Create a count matrix where counts for all cells in a set are summed together.
@@ -25,6 +26,10 @@ Create a count matrix where counts for all cells in a set are summed together.
 \details{
 This function provides a convenient method for aggregating counts across multiple columns for each feature.
 A typical application would be to sum counts across all cells in each cluster to obtain \dQuote{pseudo-bulk} samples for further analysis.
+
+The behaviour of this function is equivalent to that of \code{\link{colsum}}.
+However, this function can operate on any matrix representation in \code{object},
+and can do so in a parallelized manner for large matrices without resorting to block processing.
 
 Any \code{NA} values in \code{ids} are implicitly ignored and will not be considered or reported.
 This may be useful, e.g., to remove undesirable cells by setting their entries in \code{ids} to \code{NA}.
