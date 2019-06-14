@@ -18,6 +18,11 @@ test_that("we can summarise counts at feature set level", {
     out2 <- sumCountsAcrossFeatures(alt, ids, exprs_values="whee")
     expect_identical(out, out2)
 
+    # Respects levels properly.
+    fids <- factor(ids, levels=rev(sort(unique(ids))))
+    fout <- sumCountsAcrossFeatures(sce, fids)
+    expect_identical(out, fout[nrow(fout):1,])
+
     # Handles NA's correctly.
     ids2 <- sample(LETTERS, nrow(sce), replace=TRUE)
     out2 <- sumCountsAcrossFeatures(sce, ids2)
@@ -25,7 +30,6 @@ test_that("we can summarise counts at feature set level", {
     ids3 <- ids2
     ids3[ids3=="A"] <- NA
     out3 <- sumCountsAcrossFeatures(sce, ids3)
-
     expect_identical(out2[setdiff(rownames(out2), "A"),], out3)
 })
 
@@ -70,6 +74,11 @@ test_that("we can summarise counts at cell cluster level", {
     assayNames(alt) <- "whee"
     out2 <- sumCountsAcrossCells(alt, ids, exprs_values="whee")
     expect_identical(out, out2)
+
+    # Respects levels properly.
+    fids <- factor(ids, levels=rev(sort(unique(ids))))
+    fout <- sumCountsAcrossCells(sce, fids)
+    expect_identical(out, fout[,ncol(fout):1])
 
     # Handles NA's correctly.
     ids2 <- sample(LETTERS, ncol(sce), replace=TRUE)
