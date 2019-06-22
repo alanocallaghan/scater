@@ -13,6 +13,7 @@
 #' Default is to not use existing reduced dimension results.
 #' @param n_dimred Integer scalar, number of dimensions of the reduced dimension slot to use when \code{use_dimred} is supplied.
 #' Defaults to all available dimensions.
+#' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #' @param ... Additional arguments to pass to \code{\link[destiny]{DiffusionMap}}.
 #'
 #' @details 
@@ -26,7 +27,7 @@
 #'
 #' @return 
 #' A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} diffusion map components for each cell.
-#' This is stored in the \code{"DiffusionMap"} entry of the \code{reducedDims} slot.
+#' By default, this is stored in the \code{"DiffusionMap"} entry of the \code{reducedDims} slot.
 #'
 #' @author Aaron Lun, based on code by Davis McCarthy
 #'
@@ -54,7 +55,7 @@
 #' head(reducedDim(example_sce))
 runDiffusionMap <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
         exprs_values = "logcounts", scale_features = TRUE, use_dimred=NULL, n_dimred=NULL,
-        ...) {
+        name = "DiffusionMap", ...) {
 
     if (!is.null(use_dimred)) {
         ## Use existing dimensionality reduction results.
@@ -70,6 +71,6 @@ runDiffusionMap <- function(object, ncomponents = 2, ntop = 500, feature_set = N
     vals <- as.matrix(vals) # protect against alternative matrix inputs.
     difmap_out <- destiny::DiffusionMap(vals, ...)
 
-    reducedDim(object, "DiffusionMap") <- difmap_out@eigenvectors[, seq_len(ncomponents), drop = FALSE]
+    reducedDim(object, name) <- difmap_out@eigenvectors[, seq_len(ncomponents), drop = FALSE]
     return(object)
 }

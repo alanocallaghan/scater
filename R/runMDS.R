@@ -8,6 +8,7 @@
 #' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for MDS.
 #' This will override any \code{ntop} argument if specified.
 #' @param exprs_values Integer scalar or string indicating which assay of \code{object} should be used to obtain the expression values for the calculations.
+#' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #' @param scale_features Logical scalar, should the expression values be standardised so that each feature has unit variance?
 #' @param use_dimred String or integer scalar specifying the entry of \code{reducedDims(object)} to use as input to \code{\link{cmdscale}}.
 #' Default is to not use existing reduced dimension results.
@@ -17,7 +18,7 @@
 #'
 #' @return 
 #' A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} MDS dimensions for each cell.
-#' This is stored in the \code{"MDS"} entry of the \code{reducedDims} slot.
+#' By default, this is stored in the \code{"MDS"} entry of the \code{reducedDims} slot.
 #'
 #' @details 
 #' The function \code{\link{cmdscale}} is used internally to compute the multidimensional scaling components to plot.
@@ -51,7 +52,7 @@
 #' head(reducedDim(example_sce))
 runMDS <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
         exprs_values = "logcounts", scale_features = TRUE, use_dimred=NULL, n_dimred=NULL,
-        method = "euclidean") 
+        method = "euclidean", name = "MDS") 
 {
     if (!is.null(use_dimred)) {
         ## Use existing dimensionality reduction results.
@@ -66,6 +67,6 @@ runMDS <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
     vals <- as.matrix(vals) # protect against alternative matrix inputs.
     cell_dist <- dist(vals, method = method)
     mds_out <- cmdscale(cell_dist, k = ncomponents)
-    reducedDim(object, "MDS") <- mds_out
+    reducedDim(object, name) <- mds_out
     object
 }

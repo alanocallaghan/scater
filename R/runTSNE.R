@@ -22,11 +22,12 @@
 #' @param external_neighbors Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.
 #' @param BNPARAM A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.
+#' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #' @param ... Additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.
 #'
 #' @return 
 #' A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} t-SNE dimensions for each cell.
-#' This is stored in the \code{"TSNE"} entry of the \code{reducedDims} slot.
+#' By default, this is stored in the \code{"TSNE"} entry of the \code{reducedDims} slot.
 #'
 #' @details 
 #' The function \code{\link[Rtsne]{Rtsne}} is used internally to compute the t-SNE. 
@@ -78,7 +79,7 @@ runTSNE <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
         pca = TRUE, initial_dims = 50, 
         normalize = TRUE, theta = 0.5,
         external_neighbors = FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam(),
-        ...) 
+        name = "TSNE", ...)
 {
     if (!is.null(use_dimred)) {
         ## Use existing dimensionality reduction results (turning off PCA)
@@ -108,6 +109,6 @@ runTSNE <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
         tsne_out <- Rtsne::Rtsne_neighbors(nn_out$index, nn_out$distance, perplexity=perplexity, dims=ncomponents, theta=theta, ...)
     }
 
-    reducedDim(object, "TSNE") <- tsne_out$Y
+    reducedDim(object, name) <- tsne_out$Y
     return(object)
 }

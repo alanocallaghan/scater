@@ -19,11 +19,12 @@
 #' @param external_neighbors Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.
 #' @param BNPARAM A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.
+#' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #' @param ... Additional arguments to pass to \code{\link[uwot]{umap}}.
 #'
 #' @return 
 #' A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} UMAP dimensions for each cell.
-#' This is stored in the \code{"UMAP"} entry of the \code{reducedDims} slot.
+#' By default, this is stored in the \code{"UMAP"} entry of the \code{reducedDims} slot.
 #'
 #' @details 
 #' The function \code{\link[uwot]{umap}} is used internally to compute the UMAP. 
@@ -70,7 +71,7 @@ runUMAP <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
     exprs_values = "logcounts", scale_features = TRUE,
     use_dimred = NULL, n_dimred = NULL, pca = 50, n_neighbors=15,
     external_neighbors = FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam(),
-    ...) 
+    name = "UMAP", ...) 
 {
     if (!is.null(use_dimred)) {
         ## Use existing dimensionality reduction results (turning off PCA)
@@ -99,6 +100,6 @@ runUMAP <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
     }
 
     umap_out <- do.call(uwot::umap, args)
-    reducedDim(object, "UMAP") <- umap_out
+    reducedDim(object, name) <- umap_out
     return(object)
 }

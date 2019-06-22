@@ -13,6 +13,7 @@
 #' @param detect_outliers Logical indicating whether outliers should be detected based on PCA coordinates.
 #' @param BSPARAM A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.
+#' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #'
 #' @details 
 #' This function performs PCA on column-level metadata instead of the gene expression matrix. 
@@ -30,8 +31,8 @@
 #' This uses an \dQuote{outlyingness} measure computed by \code{adjOutlyingness} in the \pkg{robustbase} package.
 #' Outliers are defined those cells with outlyingness values more than 5 MADs above the median, using \code{\link{isOutlier}}.
 #'
-#' @return A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell,
-#' stored in the \code{"PCA_coldata"} entry of the \code{reducedDims} slot.
+#' @return A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell.
+#' By default, these are stored in the \code{"PCA_coldata"} entry of the \code{reducedDims} slot.
 #' The proportion of variance explained by each PC is stored as a numeric vector in the \code{"percentVar"} attribute.
 #'
 #' If \code{detect_outliers=TRUE}, the output \code{colData} will also contain a logical \code{outlier} field.
@@ -63,7 +64,7 @@
 #' @importFrom BiocParallel SerialParam
 runColDataPCA <- function(x, ncomponents = 2, scale_features = TRUE,
     selected_variables = NULL, detect_outliers = FALSE,
-    BSPARAM = ExactParam(), BPPARAM = SerialParam())
+    BSPARAM = ExactParam(), BPPARAM = SerialParam(), name = "PCA_coldata")
 {
     if (is.null(selected_variables)) {
         candidates <- c("pct_counts_in_top_100_features",
@@ -106,6 +107,6 @@ runColDataPCA <- function(x, ncomponents = 2, scale_features = TRUE,
 
     pcs <- pca$x
     attr(pcs, "percentVar") <- percentVar
-    reducedDim(x, "PCA_coldata") <- pcs
+    reducedDim(x, name) <- pcs
     x
 }

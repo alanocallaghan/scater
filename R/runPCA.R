@@ -16,6 +16,7 @@
 #' @param detect_outliers Deprecated, use \code{\link{runColDataPCA}} instead.
 #' @param BSPARAM A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.
+#' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #'
 #' @details 
 #' Algorithms like \code{BSPARAM=IrlbaParam()} or \code{RandomParam()} involve
@@ -28,8 +29,8 @@
 #' This is because not all PCA methods are guaranteed to compute singular values for all components.
 #' As such, the proportions of variance explained - while accurate - may not sum to unity.
 #'
-#' @return A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell,
-#' stored in the \code{"PCA"} entry of the \code{reducedDims} slot.
+#' @return A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell.
+#' By default, this is stored in the \code{"PCA"} entry of the \code{reducedDims} slot.
 #' The proportion of variance explained by each PC is stored as a numeric vector in the \code{"percentVar"} attribute of the reduced dimension matrix.
 #'
 #' @rdname runPCA
@@ -59,7 +60,7 @@
 setMethod("runPCA", "SingleCellExperiment", function(x, ncomponents = 50,
     ntop = 500, exprs_values = "logcounts", feature_set = NULL, scale_features = TRUE, 
     use_coldata = FALSE, selected_variables = NULL, detect_outliers = FALSE,
-    BSPARAM = ExactParam(), BPPARAM = SerialParam())
+    BSPARAM = ExactParam(), BPPARAM = SerialParam(), name = "PCA")
 {
     if ( use_coldata ) {
         .Deprecated(msg="'use_coldata=TRUE is deprecated.\nUse 'runColDataPCA()' instead.")
@@ -75,7 +76,7 @@ setMethod("runPCA", "SingleCellExperiment", function(x, ncomponents = 50,
     # Saving the results
     pcs <- pca$x
     attr(pcs, "percentVar") <- percentVar
-    reducedDim(x, "PCA") <- pcs
+    reducedDim(x, name) <- pcs
     x
 })
 
