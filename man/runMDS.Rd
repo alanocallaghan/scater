@@ -6,7 +6,8 @@
 \usage{
 runMDS(object, ncomponents = 2, ntop = 500, feature_set = NULL,
   exprs_values = "logcounts", scale_features = TRUE,
-  use_dimred = NULL, n_dimred = NULL, method = "euclidean")
+  use_dimred = NULL, n_dimred = NULL, method = "euclidean",
+  name = "MDS")
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -29,10 +30,12 @@ Default is to not use existing reduced dimension results.}
 Defaults to all available dimensions.}
 
 \item{method}{String specifying the type of distance to be computed between cells.}
+
+\item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
 }
 \value{
 A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} MDS dimensions for each cell.
-This is stored in the \code{"MDS"} entry of the \code{reducedDims} slot.
+By default, this is stored in the \code{"MDS"} entry of the \code{reducedDims} slot.
 }
 \description{
 Perform multi-dimensional scaling (MDS) on cells, based on the data in a SingleCellExperiment object.

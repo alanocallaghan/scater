@@ -6,7 +6,8 @@
 \usage{
 runDiffusionMap(object, ncomponents = 2, ntop = 500,
   feature_set = NULL, exprs_values = "logcounts",
-  scale_features = TRUE, use_dimred = NULL, n_dimred = NULL, ...)
+  scale_features = TRUE, use_dimred = NULL, n_dimred = NULL,
+  name = "DiffusionMap", ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object}
@@ -28,11 +29,13 @@ Default is to not use existing reduced dimension results.}
 \item{n_dimred}{Integer scalar, number of dimensions of the reduced dimension slot to use when \code{use_dimred} is supplied.
 Defaults to all available dimensions.}
 
+\item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
+
 \item{...}{Additional arguments to pass to \code{\link[destiny]{DiffusionMap}}.}
 }
 \value{
 A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} diffusion map components for each cell.
-This is stored in the \code{"DiffusionMap"} entry of the \code{reducedDims} slot.
+By default, this is stored in the \code{"DiffusionMap"} entry of the \code{reducedDims} slot.
 }
 \description{
 Produce a diffusion map for the cells, based on the data in a SingleCellExperiment object.

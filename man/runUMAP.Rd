@@ -8,7 +8,7 @@ runUMAP(object, ncomponents = 2, ntop = 500, feature_set = NULL,
   exprs_values = "logcounts", scale_features = TRUE,
   use_dimred = NULL, n_dimred = NULL, pca = 50, n_neighbors = 15,
   external_neighbors = FALSE, BNPARAM = KmknnParam(),
-  BPPARAM = SerialParam(), ...)
+  BPPARAM = SerialParam(), name = "UMAP", ...)
 }
 \arguments{
 \item{object}{A \linkS4class{SingleCellExperiment} object.}
@@ -41,11 +41,13 @@ Only used when code{use_dimred=NULL}, and if \code{pca=NULL}, no PCA is performe
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.}
 
+\item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
+
 \item{...}{Additional arguments to pass to \code{\link[uwot]{umap}}.}
 }
 \value{
 A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} UMAP dimensions for each cell.
-This is stored in the \code{"UMAP"} entry of the \code{reducedDims} slot.
+By default, this is stored in the \code{"UMAP"} entry of the \code{reducedDims} slot.
 }
 \description{
 Perform uniform manifold approximation and projection (UMAP) for the cells, based on the data in a SingleCellExperiment object.

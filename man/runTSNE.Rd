@@ -9,7 +9,8 @@ runTSNE(object, ncomponents = 2, ntop = 500, feature_set = NULL,
   use_dimred = NULL, n_dimred = NULL, perplexity = min(50,
   floor(ncol(object)/5)), pca = TRUE, initial_dims = 50,
   normalize = TRUE, theta = 0.5, external_neighbors = FALSE,
-  BNPARAM = KmknnParam(), BPPARAM = SerialParam(), ...)
+  BNPARAM = KmknnParam(), BPPARAM = SerialParam(), name = "TSNE",
+  ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -48,11 +49,13 @@ This is ignored if \code{use_dimred} is specified.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.}
 
+\item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
+
 \item{...}{Additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.}
 }
 \value{
 A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} t-SNE dimensions for each cell.
-This is stored in the \code{"TSNE"} entry of the \code{reducedDims} slot.
+By default, this is stored in the \code{"TSNE"} entry of the \code{reducedDims} slot.
 }
 \description{
 Perform t-stochastic neighbour embedding (t-SNE) for the cells, based on the data in a SingleCellExperiment object.

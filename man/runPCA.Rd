@@ -9,7 +9,7 @@
   ntop = 500, exprs_values = "logcounts", feature_set = NULL,
   scale_features = TRUE, use_coldata = FALSE,
   selected_variables = NULL, detect_outliers = FALSE,
-  BSPARAM = ExactParam(), BPPARAM = SerialParam())
+  BSPARAM = ExactParam(), BPPARAM = SerialParam(), name = "PCA")
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object.}
@@ -35,10 +35,12 @@ This will also remove features with standard deviations below 1e-8.}
 \item{BSPARAM}{A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.}
+
+\item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
 }
 \value{
-A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell,
-stored in the \code{"PCA"} entry of the \code{reducedDims} slot.
+A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell.
+By default, this is stored in the \code{"PCA"} entry of the \code{reducedDims} slot.
 The proportion of variance explained by each PC is stored as a numeric vector in the \code{"percentVar"} attribute of the reduced dimension matrix.
 }
 \description{

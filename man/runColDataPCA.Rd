@@ -6,7 +6,8 @@
 \usage{
 runColDataPCA(x, ncomponents = 2, scale_features = TRUE,
   selected_variables = NULL, detect_outliers = FALSE,
-  BSPARAM = ExactParam(), BPPARAM = SerialParam())
+  BSPARAM = ExactParam(), BPPARAM = SerialParam(),
+  name = "PCA_coldata")
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object.}
@@ -25,10 +26,12 @@ If a list, each entry can take the form described in \code{?"\link{scater-vis-va
 \item{BSPARAM}{A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.}
+
+\item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
 }
 \value{
-A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell,
-stored in the \code{"PCA_coldata"} entry of the \code{reducedDims} slot.
+A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell.
+By default, these are stored in the \code{"PCA_coldata"} entry of the \code{reducedDims} slot.
 The proportion of variance explained by each PC is stored as a numeric vector in the \code{"percentVar"} attribute.
 
 If \code{detect_outliers=TRUE}, the output \code{colData} will also contain a logical \code{outlier} field.
