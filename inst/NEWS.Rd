@@ -10,6 +10,7 @@
     \item Added runColDataPCA() function for running PCA on colData().
     Switch outlier detection strategy to avoid mvoutlier's dependency tree.
     \item Pass all ... options to biomaRt::useMart() in getBMFeatureAnnos().
+    \item Added name= arguments to runPCA(), etc. to change the name of the output reducedDim.
   }
 }
 
