@@ -8,13 +8,13 @@
 #' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for MDS.
 #' This will override any \code{ntop} argument if specified.
 #' @param exprs_values Integer scalar or string indicating which assay of \code{object} should be used to obtain the expression values for the calculations.
-#' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #' @param scale_features Logical scalar, should the expression values be standardised so that each feature has unit variance?
 #' @param use_dimred String or integer scalar specifying the entry of \code{reducedDims(object)} to use as input to \code{\link{cmdscale}}.
 #' Default is to not use existing reduced dimension results.
 #' @param n_dimred Integer scalar, number of dimensions of the reduced dimension slot to use when \code{use_dimred} is supplied.
 #' Defaults to all available dimensions.
 #' @param method String specifying the type of distance to be computed between cells.
+#' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #'
 #' @return 
 #' A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} MDS dimensions for each cell.
