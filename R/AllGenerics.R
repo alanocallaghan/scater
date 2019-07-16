@@ -58,3 +58,7 @@ setGeneric("fpkm<-", function(object, value) standardGeneric("fpkm<-"))
 #' @export
 #' @rdname perCellQCMetrics
 setGeneric("perCellQCMetrics", function(x, ...) standardGeneric("perCellQCMetrics"))
+
+#' @export
+#' @rdname runTSNE
+setGeneric("runTSNE", function(x, ...) standardGeneric("runTSNE"))
