@@ -3,28 +3,41 @@
 \docType{methods}
 \name{runPCA,SingleCellExperiment-method}
 \alias{runPCA,SingleCellExperiment-method}
+\alias{runPCA}
 \title{Perform PCA on expression data}
 \usage{
 \S4method{runPCA}{SingleCellExperiment}(x, ncomponents = 50,
-  ntop = 500, exprs_values = "logcounts", feature_set = NULL,
-  scale_features = TRUE, use_coldata = FALSE,
-  selected_variables = NULL, detect_outliers = FALSE,
-  BSPARAM = ExactParam(), BPPARAM = SerialParam(), name = "PCA")
+  ntop = 500, assay.type = "logcounts", exprs_values = NULL,
+  subset.row = NULL, feature_set = NULL, scale = FALSE,
+  scale_features = TRUE, alt.exp = NULL, use.dimred = NULL,
+  n.dimred = NULL, use_coldata = FALSE, selected_variables = NULL,
+  detect_outliers = FALSE, BSPARAM = ExactParam(),
+  BPPARAM = SerialParam(), name = "PCA")
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object.}
 
 \item{ncomponents}{Numeric scalar indicating the number of principal components to obtain.}
 
-\item{ntop}{Numeric scalar specifying the number of most variable features to use for PCA.}
+\item{ntop}{Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values of interest.}
+\item{assay.type}{Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{feature_set}{Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for PCA.
-This will override any \code{ntop} argument if specified.}
+\item{exprs_values}{Deprecated, same as \code{assay.type}.}
 
-\item{scale_features}{Logical scalar, should the expression values be standardised so that each feature has unit variance?
-This will also remove features with standard deviations below 1e-8.}
+\item{subset.row}{Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
+
+\item{feature_set}{Deprecated, same as \code{subset.row}.}
+
+\item{scale}{Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.}
+
+\item{scale_features}{Deprecated, same as \code{scale} but with a different default.}
+
+\item{alt.exp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
+
+\item{use.dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
+
+\item{n.dimred}{Integer scalar or vector specifying the dimensions to use if \code{use.dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
 
 \item{use_coldata}{Deprecated, use \code{\link{runColDataPCA}} instead.}
 
@@ -36,11 +49,11 @@ This will also remove features with standard deviations below 1e-8.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.}
 
-\item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
+\item{name}{String specifying the name to be used to store the result in the \code{\link{reducedDims}} of the output.}
 }
 \value{
-A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell.
-By default, this is stored in the \code{"PCA"} entry of the \code{reducedDims} slot.
+A SingleCellExperiment object containing the first \code{ncomponents} principal coordinates for each cell.
+By default, this is stored in the \code{"PCA"} entry of the \code{\link{reducedDims}}.
 The proportion of variance explained by each PC is stored as a numeric vector in the \code{"percentVar"} attribute of the reduced dimension matrix.
 }
 \description{
@@ -48,15 +61,9 @@ Perform a principal components analysis (PCA) on cells,
 based on the expression data in a SingleCellExperiment object.
 }
 \details{
-Algorithms like \code{BSPARAM=IrlbaParam()} or \code{RandomParam()} involve
-a random initialization, after which it converges towards the exact PCs.
+Algorithms like \code{BSPARAM=IrlbaParam()} or \code{RandomParam()} involve a random initialization, after which it converges towards the exact PCs.
 This means that the result will change slightly across different runs.
 For full reproducibility, users should call \code{\link{set.seed}} prior to running \code{runPCA} with such algorithms.
-
-In the returned output, 
-the vector of proportion of variance explained may not have length equal to the total number of available PCs.
-This is because not all PCA methods are guaranteed to compute singular values for all components.
-As such, the proportions of variance explained - while accurate - may not sum to unity.
 }
 \examples{
 ## Set up an example SingleCellExperiment
@@ -68,12 +75,17 @@ example_sce <- SingleCellExperiment(
 )
 example_sce <- normalize(example_sce)
 
-example_sce <- runPCA(example_sce)
+example_sce <- runPCA(example_sce, scale_features=NULL)
 reducedDimNames(example_sce)
 head(reducedDim(example_sce))
+
 }
 \seealso{
-\code{\link{runPCA}}, \code{\link[scater]{plotPCA}}
+\code{\link[BiocSingular]{runPCA}}, for the underlying calculations. 
+
+\code{\link[scater]{plotPCA}}, to conveniently visualize the results.
+
+\code{?"\link{scater-red-dim-args}"}, for a full description of various options.
 }
 \author{
 Aaron Lun, based on code by Davis McCarthy
