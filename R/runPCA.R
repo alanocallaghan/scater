@@ -6,17 +6,20 @@
 #' @param x A \linkS4class{SingleCellExperiment} object.
 #' @param ncomponents Numeric scalar indicating the number of principal components to obtain.
 #' @param ntop Numeric scalar specifying the number of most variable features to use for PCA.
-#' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for PCA.
+#' @param subset.row Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for PCA.
 #' This will override any \code{ntop} argument if specified.
-#' @param exprs_values Integer scalar or string indicating which assay of \code{x} contains the expression values of interest.
-#' @param scale_features Logical scalar, should the expression values be standardised so that each feature has unit variance?
+#' @param feature_set Deprecated, same as \code{subset.row}.
+#' @param assay.type Integer scalar or string indicating which assay of \code{x} contains the expression values of interest.
+#' @param exprs_values Deprecated, same as \code{assay.type}.
+#' @param scale Logical scalar, should the expression values be standardised so that each feature has unit variance?
 #' This will also remove features with standard deviations below 1e-8. 
+#' @param scale_features Deprecated, same as \code{scale} but with a different default.
 #' @param use_coldata Deprecated, use \code{\link{runColDataPCA}} instead.
 #' @param selected_variables Deprecated, use \code{\link{runColDataPCA}} instead.
 #' @param detect_outliers Deprecated, use \code{\link{runColDataPCA}} instead.
 #' @param BSPARAM A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.
-#' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
+#' @param name String specifying the name to be used to store the result in the \code{\link{reducedDims}} of the output.
 #'
 #' @details 
 #' Algorithms like \code{BSPARAM=IrlbaParam()} or \code{RandomParam()} involve
@@ -29,18 +32,13 @@
 #' This is because not all PCA methods are guaranteed to compute singular values for all components.
 #' As such, the proportions of variance explained - while accurate - may not sum to unity.
 #'
-#' @return A SingleCellExperiment object containing the first \code{ncomponent} principal coordinates for each cell.
-#' By default, this is stored in the \code{"PCA"} entry of the \code{reducedDims} slot.
+#' @return A SingleCellExperiment object containing the first \code{ncomponents} principal coordinates for each cell.
+#' By default, this is stored in the \code{"PCA"} entry of the \code{\link{reducedDims}}.
 #' The proportion of variance explained by each PC is stored as a numeric vector in the \code{"percentVar"} attribute of the reduced dimension matrix.
 #'
 #' @rdname runPCA
+#' @aliases runPCA
 #' @seealso \code{\link{runPCA}}, \code{\link[scater]{plotPCA}}
-#'
-#' @export
-#' @importFrom DelayedMatrixStats colVars
-#' @importFrom DelayedArray DelayedArray 
-#' @importFrom BiocSingular runPCA ExactParam 
-#' @importFrom BiocParallel SerialParam
 #'
 #' @author Aaron Lun, based on code by Davis McCarthy
 #'
@@ -57,21 +55,38 @@
 #' example_sce <- runPCA(example_sce)
 #' reducedDimNames(example_sce)
 #' head(reducedDim(example_sce))
+#'
+#' @export
+#' @importFrom DelayedMatrixStats colVars
+#' @importFrom DelayedArray DelayedArray 
+#' @importFrom BiocSingular runPCA ExactParam 
+#' @importFrom BiocParallel SerialParam
+#' @importFrom SummarizedExperiment assay
+#' @importFrom SingleCellExperiment reducedDim<-
 setMethod("runPCA", "SingleCellExperiment", function(x, ncomponents = 50,
-    ntop = 500, exprs_values = "logcounts", feature_set = NULL, scale_features = TRUE, 
+    ntop=500, 
+    assay.type="logcounts", exprs_values = NULL, 
+    subset.row=NULL, feature_set = NULL, 
+    scale=FALSE, scale_features = TRUE, 
+    use.dimred=NULL, alt.exp=NULL,
     use_coldata = FALSE, selected_variables = NULL, detect_outliers = FALSE,
     BSPARAM = ExactParam(), BPPARAM = SerialParam(), name = "PCA")
 {
+    scale <- .switch_arg_names(scale_features, scale)
+    assay.type <- .switch_arg_names(exprs_values, assay.type)
+    subset.row <- .switch_arg_names(feature_set, subset.row)
+
     if ( use_coldata ) {
         .Deprecated(msg="'use_coldata=TRUE is deprecated.\nUse 'runColDataPCA()' instead.")
         return(runColDataPCA(x, ncomponents = ncomponents, selected_variables = selected_variables,
             detect_outliers = detect_outliers, BSPARAM=BSPARAM, BPPARAM=BPPARAM))
     } else {
-        exprs_to_plot <- .get_mat_for_reddim(x, exprs_values = exprs_values, ntop = ntop, feature_set = feature_set, scale = scale_features)
+        mat <- .get_mat_for_reddim_from_sce(x, assay.type=assay.type, alt.exp=alt.exp, use.dimred=use.dimred, 
+            ntop = ntop, subset.row = subset.row, scale = scale)
     }
 
-    pca <- runPCA(exprs_to_plot, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM, get.rotation=FALSE)
-    percentVar <- pca$sdev ^ 2 / sum(colVars(DelayedArray(exprs_to_plot))) # as not all singular values are computed.
+    pca <- runPCA(mat, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM, get.rotation=FALSE)
+    percentVar <- pca$sdev ^ 2 / sum(colVars(DelayedArray(mat))) # as not all singular values are computed.
 
     # Saving the results
     pcs <- pca$x
@@ -80,36 +95,47 @@ setMethod("runPCA", "SingleCellExperiment", function(x, ncomponents = 50,
     x
 })
 
-#' @importFrom utils head
 #' @importFrom SummarizedExperiment assay
+#' @importFrom SingleCellExperiment altExp reducedDim
+.get_mat_for_reddim_from_sce <- function(x, assay.type="logcounts", alt.exp=NULL, use.dimred=NULL, ...) {
+    if (!is.null(alt.exp)) {
+        x <- altExp(x, alt.exp)
+    }
+    if (!is.null(use.dimred)) {
+        reducedDim(x, use.dimred)
+    } else {
+        .get_mat_for_reddim(assay(x, assay.type), ...)
+    }
+}
+
+#' @importFrom utils head
 #' @importFrom Matrix t
 #' @importFrom DelayedArray DelayedArray
 #' @importFrom DelayedMatrixStats rowVars
-.get_mat_for_reddim <- function(object, exprs_values, feature_set=NULL, ntop=500, scale=FALSE) 
+.get_mat_for_reddim <- function(x, subset.row=NULL, ntop=500, scale=FALSE) 
 # Picking the 'ntop' most highly variable features or just using a pre-specified set of features.
 # Also removing zero-variance columns and scaling the variance of each column.
 # Finally, transposing for downstream use (cells are now rows).
 {
-    exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
-    rv <- rowVars(DelayedArray(exprs_mat))
+    if (is.null(subset.row) || scale) {
+        rv <- rowVars(DelayedArray(x))
+    }
 
-    if (is.null(feature_set)) {
+    if (is.null(subset.row)) {
         o <- order(rv, decreasing = TRUE)
-        feature_set <- head(o, ntop)
-    } else if (is.character(feature_set)) {
-        feature_set <- .subset2index(feature_set, object, byrow=TRUE)
+        subset.row <- head(o, ntop)
+    } else if (is.character(subset.row)) {
+        subset.row <- .subset2index(subset.row, object, byrow=TRUE)
     }
 
-    exprs_to_plot <- exprs_mat[feature_set,, drop = FALSE]
-    rv <- rv[feature_set]
+    x <- x[subset.row,, drop = FALSE]
 
-    exprs_to_plot <- t(exprs_to_plot)
     if (scale) {
-        exprs_to_plot <- .scale_columns(exprs_to_plot, rv)
-        rv <- rep(1, ncol(exprs_to_plot))
+        rv <- rv[subset.row]
+        x <- x/sqrt(rv)
     }
 
-    exprs_to_plot
+    t(x)
 }
 
 #' @importFrom DelayedArray DelayedArray sweep
