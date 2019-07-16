@@ -54,3 +54,7 @@ setGeneric("fpkm", function(object) standardGeneric("fpkm"))
 #' @docType methods
 #' @rdname accessors
 setGeneric("fpkm<-", function(object, value) standardGeneric("fpkm<-"))
+
+#' @export
+#' @rdname perCellQCMetrics
+setGeneric("perCellQCMetrics", function(x, ...) standardGeneric("perCellQCMetrics"))
