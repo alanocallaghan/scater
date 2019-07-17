@@ -41,7 +41,7 @@
 #' @return 
 #' For the ANY method, a matrix is returned containing the UMAP coordinates for each cell (row) and dimension (column).
 #' 
-#' For the \linkS4class{SingleCellExperiment} method, a modified version of \code{x} is return that contains the UMAP coordinates in the \code{"UMAP"} entry of the \code{\link{reducedDims}}.
+#' For the \linkS4class{SingleCellExperiment} method, a modified version of \code{x} is returned that contains the UMAP coordinates in the \code{"UMAP"} entry of the \code{\link{reducedDims}}.
 #'
 #' @details 
 #' The function \code{\link[uwot]{umap}} is used internally to compute the UMAP. 
@@ -53,8 +53,8 @@
 #' The neighbor search results are then used directly to create the UMAP embedding.
 #'
 #' @references
-#' McInnes L, Healy J (2018).
-#' UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction.
+#' McInnes L, Healy J, Melville J (2018).
+#' UMAP: uniform manifold approximation and projection for dimension reduction.
 #' arXiv.
 #'
 #' @name runUMAP
