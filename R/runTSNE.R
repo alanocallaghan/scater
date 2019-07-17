@@ -38,7 +38,7 @@
 #' @return 
 #' For the ANY method, a matrix is returned containing the t-SNE coordinates for each cell (row) and dimension (column).
 #' 
-#' For the \linkS4class{SingleCellExperiment} method, a modified version of \code{x} is return that contains the t-SNE coordinates in the \code{"TSNE"} entry of the \code{\link{reducedDims}}.
+#' For the \linkS4class{SingleCellExperiment} method, a modified version of \code{x} is returned that contains the t-SNE coordinates in the \code{"TSNE"} entry of the \code{\link{reducedDims}}.
 #'
 #' @details 
 #' The function \code{\link[Rtsne]{Rtsne}} is used internally to compute the t-SNE. 
@@ -58,7 +58,7 @@
 #' This presumes that the existing dimensionality reduction is sufficient such that an additional PCA is not required.
 #'
 #' @references
-#' van der Maaten LJP and Hinton GE (2008).
+#' van der Maaten LJP, Hinton GE (2008).
 #' Visualizing High-Dimensional Data Using t-SNE.
 #' \emph{J. Mach. Learn. Res.} 9, 2579-2605.
 #'
@@ -91,8 +91,10 @@ NULL
 #' @rdname runTSNE
 #' @importFrom BiocNeighbors KmknnParam findKNN 
 #' @importFrom BiocParallel SerialParam
-setMethod("runTSNE", "ANY", function(x, ncomponents = 2, ntop = 500, subset.row = NULL, scale=FALSE,
-    transposed=FALSE,                                     
+setMethod("runTSNE", "ANY", function(x, ncomponents = 2, ntop = 500, 
+    subset.row = NULL, feature_set=NULL,
+    scale=FALSE, scale_features=NULL,
+    transposed=FALSE,
     perplexity=NULL, normalize = TRUE, theta = 0.5, ...,
     external.neighbors=FALSE, external_neighbors=NULL,
     BNPARAM = KmknnParam(), BPPARAM = SerialParam())
@@ -132,7 +134,8 @@ setMethod("runTSNE", "SingleCellExperiment", function(x,
     alt.exp=NULL, name="TSNE") 
 {
     use.dimred <- .switch_arg_names(use_dimred, use.dimred)
-    mat <- .get_mat_from_sce(x, assay.type=assay.type, alt.exp=alt.exp, use.dimred=use.dimred)
+    mat <- .get_mat_from_sce(x, assay.type=assay.type, alt.exp=alt.exp, use.dimred=use.dimred,
+        n.dimred=.switch_arg_names(n_dimred, n.dimred))
     tout <- runTSNE(mat, transposed=!is.null(use.dimred), pca=pca, ...)
     reducedDim(x, name) <- tout
     x
