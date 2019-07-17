@@ -10,10 +10,11 @@
 runTSNE(x, ...)
 
 \S4method{runTSNE}{ANY}(x, ncomponents = 2, ntop = 500,
-  subset.row = NULL, scale = FALSE, transposed = FALSE,
-  perplexity = NULL, normalize = TRUE, theta = 0.5, ...,
-  external.neighbors = FALSE, external_neighbors = NULL,
-  BNPARAM = KmknnParam(), BPPARAM = SerialParam())
+  subset.row = NULL, feature_set = NULL, scale = FALSE,
+  scale_features = NULL, transposed = FALSE, perplexity = NULL,
+  normalize = TRUE, theta = 0.5, ..., external.neighbors = FALSE,
+  external_neighbors = NULL, BNPARAM = KmknnParam(),
+  BPPARAM = SerialParam())
 
 \S4method{runTSNE}{SingleCellExperiment}(x, ...,
   pca = is.null(use.dimred), use.dimred = NULL, use_dimred = NULL,
@@ -39,7 +40,11 @@ For the SingleCellExperiment method, additional arguments to pass to the ANY met
 
 \item{subset.row}{Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
+\item{feature_set}{Deprecated, same as \code{subset.row}.}
+
 \item{scale}{Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.}
+
+\item{scale_features}{Deprecated, same as \code{scale} but with a different default.}
 
 \item{transposed}{Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.}
 
@@ -72,15 +77,11 @@ For the SingleCellExperiment method, additional arguments to pass to the ANY met
 \item{alt.exp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
 \item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
-
-\item{feature_set}{Deprecated, same as \code{subset.row}.}
-
-\item{scale_features}{Deprecated, same as \code{scale} but with a different default.}
 }
 \value{
 For the ANY method, a matrix is returned containing the t-SNE coordinates for each cell (row) and dimension (column).
 
-For the \linkS4class{SingleCellExperiment} method, a modified version of \code{x} is return that contains the t-SNE coordinates in the \code{"TSNE"} entry of the \code{\link{reducedDims}}.
+For the \linkS4class{SingleCellExperiment} method, a modified version of \code{x} is returned that contains the t-SNE coordinates in the \code{"TSNE"} entry of the \code{\link{reducedDims}}.
 }
 \description{
 Perform t-stochastic neighbour embedding (t-SNE) for the cells, based on the data in a SingleCellExperiment object.
@@ -92,7 +93,7 @@ Users are advised to test multiple random seeds, and then use \code{\link{set.se
 
 The value of the \code{perplexity} parameter can have a large effect on the results.
 By default, the function will set a \dQuote{reasonable} perplexity that scales with the number of cells in \code{x}.
-(Specifically, it is the number of cells divided by 3, capped at a maximum of 50.)
+(Specifically, it is the number of cells divided by 5, capped at a maximum of 50.)
 However, it is often worthwhile to manually try multiple values to ensure that the conclusions are robust.
 
 If \code{external.neighbors=TRUE}, the nearest neighbor search step will use a different algorithm to that in the \code{\link[Rtsne]{Rtsne}} function.
@@ -117,7 +118,7 @@ reducedDimNames(example_sce)
 head(reducedDim(example_sce))
 }
 \references{
-van der Maaten LJP and Hinton GE (2008).
+van der Maaten LJP, Hinton GE (2008).
 Visualizing High-Dimensional Data Using t-SNE.
 \emph{J. Mach. Learn. Res.} 9, 2579-2605.
 }
