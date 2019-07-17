@@ -2,38 +2,48 @@
 #'
 #' Perform multi-dimensional scaling (MDS) on cells, based on the data in a SingleCellExperiment object. 
 #'
-#' @param object A SingleCellExperiment object.
-#' @param ncomponents Numeric scalar indicating the number of MDS dimensions to obtain.
-#' @param ntop Numeric scalar specifying the number of most variable features to use for MDS. 
-#' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for MDS.
+#' @param x A numeric matrix of log-expression values where rows are features and columns are cells.
+#'
+#' Alternatively, a \linkS4class{SingleCellExperiment} object containing such a matrix.
+#'
+#' Alternatively, if \code{transposed=TRUE}, a numeric matrix where rows are cells and columns are dimensions.
+#' @param ncomponents Numeric scalar indicating the number of MDS?g dimensions to obtain.
+#' @param ntop Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
+#' @param subset.row Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
+#' @param feature_set Deprecated, same as \code{subset.row}.
+#' @param assay.type Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.
+#' @param exprs_values Deprecated, same as \code{assay.type}.
+#' @param scale Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.
+#' @param scale_features Deprecated, same as \code{scale} but with a different default.
+#' @param transposed Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.
+#' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for MDS?g.
 #' This will override any \code{ntop} argument if specified.
-#' @param exprs_values Integer scalar or string indicating which assay of \code{object} should be used to obtain the expression values for the calculations.
-#' @param scale_features Logical scalar, should the expression values be standardised so that each feature has unit variance?
-#' @param use_dimred String or integer scalar specifying the entry of \code{reducedDims(object)} to use as input to \code{\link{cmdscale}}.
-#' Default is to not use existing reduced dimension results.
-#' @param n_dimred Integer scalar, number of dimensions of the reduced dimension slot to use when \code{use_dimred} is supplied.
-#' Defaults to all available dimensions.
+#' @param ... For the generic, additional arguments to pass to specific methods.
+#'
+#' For the SingleCellExperiment method, additional arguments to pass to the ANY method.
 #' @param method String specifying the type of distance to be computed between cells.
+#' @param alt.exp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
+#' @param use.dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
+#' @param use_dimred Deprecated, same as \code{use.dimred}.
+#' @param n.dimred Integer scalar or vector specifying the dimensions to use if \code{use.dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
+#' @param n_dimred Deprecated, same as \code{n.dimred}.
 #' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #'
 #' @return 
-#' A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} MDS dimensions for each cell.
-#' By default, this is stored in the \code{"MDS"} entry of the \code{reducedDims} slot.
+#' For the ANY method, a matrix is returned containing the MDS coordinates for each cell (row) and dimension (column).
+#' 
+#' For the \linkS4class{SingleCellExperiment} method, a modified version of \code{x} is returned that contains the MDS coordinates in the \code{"MDS"} entry of the \code{\link{reducedDims}}.
 #'
 #' @details 
-#' The function \code{\link{cmdscale}} is used internally to compute the multidimensional scaling components to plot.
+#' The function \code{\link{cmdscale}} is used internally to compute the MDS components. 
 #'
-#' Setting \code{use_dimred} allows users to easily perform MDS on low-rank approximations of the original expression matrix (e.g., after PCA).
-#' In such cases, arguments such as \code{ntop}, \code{feature_set}, \code{exprs_values} and \code{scale_features} will be ignored. 
-#'
-#' @export
-#' @importFrom stats cmdscale dist
-#' @importFrom SingleCellExperiment reducedDim reducedDim<-
-#'
-#' @rdname runMDS
+#' @name runMDS
 #' @seealso 
-#' \code{\link{cmdscale}},
-#' \code{\link[scater]{plotMDS}}
+#' \code{\link{cmdscale}}, to perform the underlying calculations.
+#'
+#' \code{\link[scater]{plotMDS}}, to quickly visualize the results.
+#'
+#' \code{?"\link{scater-red-dim-args}"}, for a full description of various options.
 #'
 #' @author Aaron Lun, based on code by Davis McCarthy
 #'
@@ -47,26 +57,41 @@
 #' )
 #' example_sce <- normalize(example_sce)
 #'
-#' example_sce <- runMDS(example_sce)
+#' example_sce <- runMDS(example_sce, scale_features=NULL)
 #' reducedDimNames(example_sce)
 #' head(reducedDim(example_sce))
-runMDS <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
-        exprs_values = "logcounts", scale_features = TRUE, use_dimred=NULL, n_dimred=NULL,
-        method = "euclidean", name = "MDS") 
-{
-    if (!is.null(use_dimred)) {
-        ## Use existing dimensionality reduction results.
-        vals <- reducedDim(object, use_dimred, withDimnames=FALSE)
-        if (!is.null(n_dimred)) {
-            vals <- vals[,seq_len(n_dimred),drop = FALSE]
-        }
-    } else {
-        vals <- .get_mat_for_reddim(object, exprs_values = exprs_values, ntop = ntop, feature_set = feature_set, scale = scale_features)
-    }
+NULL
 
-    vals <- as.matrix(vals) # protect against alternative matrix inputs.
-    cell_dist <- dist(vals, method = method)
-    mds_out <- cmdscale(cell_dist, k = ncomponents)
-    reducedDim(object, name) <- mds_out
-    object
-}
+#' @export
+#' @rdname runMDS
+#' @importFrom stats cmdscale dist
+setMethod("runMDS", "ANY", function(x, ncomponents = 2, ntop = 500, 
+    subset.row = NULL, feature_set=NULL,
+    scale=FALSE, scale_features=NULL,
+    transposed=FALSE, method = "euclidean")
+{
+    if (!transposed) {
+        x <- .get_mat_for_reddim(x, subset.row=subset.row, ntop=ntop, scale=scale) 
+    }
+    x <- as.matrix(x) 
+    cell_dist <- dist(x, method = method)
+    cmdscale(cell_dist, k = ncomponents)
+})
+
+#' @export
+#' @rdname runMDS
+#' @importFrom SingleCellExperiment reducedDim<- 
+setMethod("runMDS", "SingleCellExperiment", function(x, 
+    ..., 
+    use.dimred=NULL, use_dimred=NULL, 
+    n.dimred=NULL, n_dimred=NULL,
+    assay.type="logcounts", exprs_values = NULL,
+    alt.exp=NULL, name="MDS") 
+{
+    use.dimred <- .switch_arg_names(use_dimred, use.dimred)
+    mat <- .get_mat_from_sce(x, assay.type=assay.type, alt.exp=alt.exp, use.dimred=use.dimred,
+        n.dimred=.switch_arg_names(n_dimred, n.dimred))
+    tout <- runMDS(mat, transposed=!is.null(use.dimred), ...)
+    reducedDim(x, name) <- tout
+    x
+})
