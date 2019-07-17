@@ -62,3 +62,7 @@ setGeneric("perCellQCMetrics", function(x, ...) standardGeneric("perCellQCMetric
 #' @export
 #' @rdname runTSNE
 setGeneric("runTSNE", function(x, ...) standardGeneric("runTSNE"))
+
+#' @export
+#' @rdname runUMAP
+setGeneric("runUMAP", function(x, ...) standardGeneric("runUMAP"))
