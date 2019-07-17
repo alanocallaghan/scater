@@ -2,43 +2,58 @@
 #'
 #' Produce a diffusion map for the cells, based on the data in a SingleCellExperiment object.
 #'
-#' @param object A SingleCellExperiment object
-#' @param ncomponents Numeric scalar indicating the number of diffusion components to obtain.
-#' @param ntop Numeric scalar specifying the number of most variable features to use for constructing the diffusion map. 
-#' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use to construct the diffusion map. 
+#' @param x A numeric matrix of log-expression values where rows are features and columns are cells.
+#'
+#' Alternatively, a \linkS4class{SingleCellExperiment} object containing such a matrix.
+#'
+#' Alternatively, if \code{transposed=TRUE}, a numeric matrix where rows are cells and columns are dimensions.
+#' @param ncomponents Numeric scalar indicating the number of UMAP dimensions to obtain.
+#' @param ntop Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
+#' @param subset.row Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
+#' @param feature_set Deprecated, same as \code{subset.row}.
+#' @param assay.type Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.
+#' @param exprs_values Deprecated, same as \code{assay.type}.
+#' @param scale Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.
+#' @param scale_features Deprecated, same as \code{scale} but with a different default.
+#' @param transposed Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.
+#' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for UMAP.
 #' This will override any \code{ntop} argument if specified.
-#' @param exprs_values Integer scalar or string indicating which assay of \code{object} should be used to obtain the expression values for the calculations.
-#' @param scale_features Logical scalar, should the expression values be standardised so that each feature has unit variance?
-#' @param use_dimred String or integer scalar specifying the entry of \code{reducedDims(object)} to use as input to \code{\link[destiny]{DiffusionMap}}.
-#' Default is to not use existing reduced dimension results.
-#' @param n_dimred Integer scalar, number of dimensions of the reduced dimension slot to use when \code{use_dimred} is supplied.
-#' Defaults to all available dimensions.
+#' @param ... For the generic, additional arguments to pass to specific methods.
+#'
+#' For the ANY method, additional arguments to pass to \code{\link[destiny]{DiffusionMap}}.
+#'
+#' For the SingleCellExperiment method, additional arguments to pass to the ANY method.
+#' @param alt.exp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
+#' @param use.dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
+#' @param use_dimred Deprecated, same as \code{use.dimred}.
+#' @param n.dimred Integer scalar or vector specifying the dimensions to use if \code{use.dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
+#' @param n_dimred Deprecated, same as \code{n.dimred}.
 #' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
-#' @param ... Additional arguments to pass to \code{\link[destiny]{DiffusionMap}}.
 #'
 #' @details 
 #' The function \code{\link[destiny]{DiffusionMap}} is used internally to compute the diffusion map.
-#' 
-#' Setting \code{use_dimred} allows users to easily construct a diffusion map from low-rank approximations of the original expression matrix (e.g., after PCA).
-#' In such cases, arguments such as \code{ntop}, \code{feature_set}, \code{exprs_values} and \code{scale_features} will be ignored. 
-#'
 #' The behaviour of \code{\link[destiny]{DiffusionMap}} seems to be non-deterministic, in a manner that is not responsive to any \code{\link{set.seed}} call.
 #' The reason for this is unknown.
 #'
 #' @return 
-#' A SingleCellExperiment object containing the coordinates of the first \code{ncomponent} diffusion map components for each cell.
-#' By default, this is stored in the \code{"DiffusionMap"} entry of the \code{reducedDims} slot.
+#' For the ANY method, a matrix is returned containing the diffusion map coordinates for each cell (row) and dimension (column).
+#' 
+#' For the \linkS4class{SingleCellExperiment} method, a modified version of \code{x} is returned that contains the diffusion map coordinates in the \code{"DiffusionMap"} entry of the \code{\link{reducedDims}}.
 #'
 #' @author Aaron Lun, based on code by Davis McCarthy
 #'
-#' @export
-#' @rdname runDiffusionMap
+#' @name runDiffusionMap
 #' @seealso 
-#' \code{\link[destiny]{destiny}},
-#' \code{\link[scater]{plotDiffusionMap}}
+#' \code{\link[destiny]{DiffusionMap}}, to perform the underlying calculations.
+#'
+#' \code{\link[scater]{plotDiffusionMap}}, to quickly visualize the results.
+#'
+#' \code{?"\link{scater-red-dim-args}"}, for a full description of various options.
 #'
 #' @references
-#' Haghverdi L, Buettner F, Theis FJ. Diffusion maps for high-dimensional single-cell analysis of differentiation data. Bioinformatics. 2015; doi:10.1093/bioinformatics/btv325
+#' Haghverdi L, Buettner F, Theis FJ (2015).
+#' Diffusion maps for high-dimensional single-cell analysis of differentiation data. 
+#' \emph{Bioinformatics} 31(18), 2989-2998.
 #'
 #' @examples
 #' ## Set up an example SingleCellExperiment
@@ -50,27 +65,40 @@
 #' )
 #' example_sce <- normalize(example_sce)
 #'
-#' example_sce <- runDiffusionMap(example_sce)
+#' example_sce <- runDiffusionMap(example_sce, scale_features=NULL)
 #' reducedDimNames(example_sce)
 #' head(reducedDim(example_sce))
-runDiffusionMap <- function(object, ncomponents = 2, ntop = 500, feature_set = NULL,
-        exprs_values = "logcounts", scale_features = TRUE, use_dimred=NULL, n_dimred=NULL,
-        name = "DiffusionMap", ...) {
+NULL
 
-    if (!is.null(use_dimred)) {
-        ## Use existing dimensionality reduction results.
-        vals <- reducedDim(object, use_dimred, withDimnames=FALSE)
-        if (!is.null(n_dimred)) {
-            vals <- vals[,seq_len(n_dimred),drop = FALSE]
-        }
-    } else {
-        vals <- .get_mat_for_reddim(object, exprs_values = exprs_values, ntop = ntop, feature_set = feature_set, scale = scale_features)
+#' @export
+#' @rdname runDiffusionMap
+setMethod("runDiffusionMap", "ANY", function(x, ncomponents = 2, ntop = 500, 
+    subset.row = NULL, feature_set=NULL,
+    scale=FALSE, scale_features=NULL,
+    transposed=FALSE, ...)
+{
+    if (!transposed) {
+        x <- .get_mat_for_reddim(x, subset.row=subset.row, ntop=ntop, scale=scale) 
     }
+    x <- as.matrix(x) 
+    difmap_out <- destiny::DiffusionMap(x, ...)
+    difmap_out@eigenvectors[, seq_len(ncomponents), drop = FALSE]
+})
 
-    ## Compute DiffusionMap
-    vals <- as.matrix(vals) # protect against alternative matrix inputs.
-    difmap_out <- destiny::DiffusionMap(vals, ...)
-
-    reducedDim(object, name) <- difmap_out@eigenvectors[, seq_len(ncomponents), drop = FALSE]
-    return(object)
-}
+#' @export
+#' @rdname runDiffusionMap
+#' @importFrom SingleCellExperiment reducedDim<- 
+setMethod("runDiffusionMap", "SingleCellExperiment", function(x, 
+    ..., 
+    use.dimred=NULL, use_dimred=NULL, 
+    n.dimred=NULL, n_dimred=NULL,
+    assay.type="logcounts", exprs_values = NULL,
+    alt.exp=NULL, name="DiffusionMap") 
+{
+    use.dimred <- .switch_arg_names(use_dimred, use.dimred)
+    mat <- .get_mat_from_sce(x, assay.type=assay.type, alt.exp=alt.exp, use.dimred=use.dimred,
+        n.dimred=.switch_arg_names(n_dimred, n.dimred))
+    tout <- runDiffusionMap(mat, transposed=!is.null(use.dimred), ...)
+    reducedDim(x, name) <- tout
+    x 
+})

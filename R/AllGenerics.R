@@ -66,3 +66,11 @@ setGeneric("runTSNE", function(x, ...) standardGeneric("runTSNE"))
 #' @export
 #' @rdname runUMAP
 setGeneric("runUMAP", function(x, ...) standardGeneric("runUMAP"))
+
+#' @export
+#' @rdname runMDS
+setGeneric("runMDS", function(x, ...) standardGeneric("runMDS"))
+
+#' @export
+#' @rdname runDiffusionMap
+setGeneric("runDiffusionMap", function(x, ...) standardGeneric("runDiffusionMap"))
