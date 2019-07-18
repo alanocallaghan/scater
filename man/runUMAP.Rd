@@ -86,7 +86,7 @@ This will override any \code{ntop} argument if specified.}
 \value{
 For the ANY method, a matrix is returned containing the UMAP coordinates for each cell (row) and dimension (column).
 
-For the \linkS4class{SingleCellExperiment} method, a modified version of \code{x} is return that contains the UMAP coordinates in the \code{"UMAP"} entry of the \code{\link{reducedDims}}.
+For the \linkS4class{SingleCellExperiment} method, a modified version of \code{x} is returned that contains the UMAP coordinates in the \code{"UMAP"} entry of the \code{\link{reducedDims}}.
 }
 \description{
 Perform uniform manifold approximation and projection (UMAP) for the cells, based on the data in a SingleCellExperiment object.
@@ -115,8 +115,8 @@ reducedDimNames(example_sce)
 head(reducedDim(example_sce))
 }
 \references{
-McInnes L, Healy J (2018).
-UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction.
+McInnes L, Healy J, Melville J (2018).
+UMAP: uniform manifold approximation and projection for dimension reduction.
 arXiv.
 }
 \seealso{
