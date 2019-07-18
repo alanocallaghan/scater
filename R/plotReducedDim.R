@@ -12,8 +12,8 @@
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.
-#' @param by_show_single Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.
+#' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
+#' @param by_show_single Deprecated and ignored.
 #' @param text_by Specification of a column metadata field for which to add text - see \code{?"\link{scater-vis-var}"} for possible values. 
 #' This must refer to a categorical field, i.e., coercible into a factor.
 #' @param text_size Numeric scalar specifying the size of added text.
@@ -61,7 +61,7 @@
 #'
 plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NULL, 
                            colour_by = NULL, shape_by = NULL, size_by = NULL,
-                           by_exprs_values = "logcounts", by_show_single = FALSE,
+                           by_exprs_values = "logcounts", 
                            text_by=NULL, text_size=5, text_colour="black", ...)
 {
     ## Extract reduced dimension representation of cells
@@ -85,18 +85,21 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NUL
     df_to_plot <- data.frame(red_dim[,to_plot,drop=FALSE])
 
     ## checking visualization arguments
-    colour_by_out <- retrieveCellInfo(object, colour_by, discard.solo = !by_show_single, assay.type = by_exprs_values)
+    colour_by_out <- retrieveCellInfo(object, colour_by, assay.type = by_exprs_values)
     colour_by <- colour_by_out$name
     df_to_plot$colour_by <- colour_by_out$val
 
-    shape_by_out <- retrieveCellInfo(object, shape_by, discard.solo = !by_show_single, assay.type = by_exprs_values, as.factor = TRUE)
+    shape_by_out <- retrieveCellInfo(object, shape_by, assay.type = by_exprs_values)
     shape_by <- shape_by_out$name
-    df_to_plot$shape_by <- shape_by_out$val
-    if (nlevels(shape_by_out$val) > 10) {
-        stop("more than 10 levels for 'shape_by'")
+    if (!is.null(shape_by_out$value)) {
+        shape_by_out$value <- as.factor(shape_by_out$value)
+        if (nlevels(shape_by_out$value) > 10) {
+            stop("more than 10 levels for 'shape_by'")
+        }
+        df_to_plot$shape_by <- shape_by_out$value
     }
 
-    size_by_out <- retrieveCellInfo(object, size_by, discard.solo = !by_show_single, assay.type = by_exprs_values)
+    size_by_out <- retrieveCellInfo(object, size_by, assay.type = by_exprs_values)
     size_by <- size_by_out$name
     df_to_plot$size_by <- size_by_out$val
 

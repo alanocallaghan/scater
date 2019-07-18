@@ -8,12 +8,10 @@
 #' Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.
 #' @param search Character vector specifying the types of data or metadata to use.
 #' @param assay.type String or integer scalar specifying the assay from which expression values should be extracted.
-#' @param as.factor Logical scalar indicating whether the output should be coerced into a factor.
-#' @param discard.solo Logical scalar indicating whether the output should be discarded if it only has a single level.
 #' 
 #' @return A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
 #' and \code{value}, a vector of length equal to \code{ncol(x)} containing per-cell (meta)data values.
-#' Both can also be \code{NULL} if \code{by} was not found in \code{x} or if there was only one unique value and \code{discard.solo=TRUE}.
+#' If \code{by} was not found in \code{x}, both \code{name} and \code{value} are set to \code{NULL}.
 #'
 #' @details
 #' Given a AsIs-wrapped vector in \code{by}, this function will directly return the vector values as \code{value},
@@ -37,6 +35,7 @@
 #' users should explicitly set \code{by} to a data.frame, DataFrame or AsIs-wrapped vector containing the desired values.
 #' Developers can also consider setting \code{search} to control the fields that are returned.
 #'
+#' @author Aaron Lun
 #' @seealso
 #' \code{\link{plotColData}}, 
 #' \code{\link{plotRowData}}, 
@@ -65,16 +64,9 @@
 #' @export
 #' @importFrom SingleCellExperiment altExp altExpNames
 #' @importFrom SummarizedExperiment colData assay
-retrieveCellInfo <- function(x, by, search=c("any", "colData", "assays", "altExps"), 
-    assay.type="logcounts", as.factor = FALSE, discard.solo = FALSE)
+retrieveCellInfo <- function(x, by, search=c("any", "colData", "assays", "altExps"), assay.type="logcounts")
 {
     .mopUp <- function(name, value) {
-        if (as.factor) {
-            value <- as.factor(value)
-        }
-        if (discard.solo && length(unique(value))==1L) {
-            name <- value <- NULL
-        }
         list(name=name, value=value)
     } 
 
@@ -93,7 +85,13 @@ retrieveCellInfo <- function(x, by, search=c("any", "colData", "assays", "altExp
         return(.mopUp(colnames(by)[1], by[,1]))
     }
 
-    search <- match.arg(search, several.ok=TRUE)
+    if (is.null(by)) {
+        search <- character(0)
+    } else if (!is.character(by) || length(by)>1L) {
+        stop("invalid value for 'by'")
+    } else {
+        search <- match.arg(search, several.ok=TRUE)
+    }
 
     if ("colData" %in% search) {
         cd <- colData(x)
