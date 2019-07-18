@@ -4,7 +4,7 @@
 #'
 #' @param object A SingleCellExperiment object containing expression values and other metadata.
 #' @param features A character vector (of feature names), a logical vector or numeric vector (of indices) specifying the features to plot.
-#' @param x Specification of a column metadata field or a feature to show on the x-axis, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param x Specification of a column metadata field or a feature to show on the x-axis, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param exprs_values A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from.
 #' @param log2_values Logical scalar, specifying whether the expression values be transformed to the log2-scale for plotting (with an offset of 1 to avoid logging zeroes).
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
@@ -118,7 +118,7 @@ plotExpression <- function(object, features, x = NULL,
     )
 
     ## check x-coordinates are valid
-    x_by_out <- .choose_vis_values(object, x, mode="column", search = "any", exprs_values = exprs_values)
+    x_by_out <- retrieveCellInfo(object, x, assay.type = exprs_values)
     xcoord <- x_by_out$val
     if (is.null(xlab)) {
         xlab <- x_by_out$name
