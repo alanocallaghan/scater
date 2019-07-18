@@ -8,9 +8,9 @@
 #' Alternatively, a numeric vector specifying the dimensions to be plotted.
 #' @param percentVar A numeric vector giving the proportion of variance in expression explained by each reduced dimension. 
 #' Only expected to be used in PCA settings, e.g., in the \code{\link[scater]{plotPCA}} function.
-#' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
-#' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
-#' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
+#' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
+#' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.
 #' @param by_show_single Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.
@@ -85,14 +85,21 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NUL
     df_to_plot <- data.frame(red_dim[,to_plot,drop=FALSE])
 
     ## checking visualization arguments
-    vis_out <- .incorporate_common_vis(df_to_plot, se = object, mode = "column", 
-                                       colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-                                       by_exprs_values = by_exprs_values, by_show_single = by_show_single)
-    df_to_plot <- vis_out$df
-    colour_by <- vis_out$colour_by
-    shape_by <- vis_out$shape_by
-    size_by <- vis_out$size_by
-        
+    colour_by_out <- retrieveCellInfo(object, colour_by, discard.solo = !by_show_single, assay.type = by_exprs_values)
+    colour_by <- colour_by_out$name
+    df_to_plot$colour_by <- colour_by_out$val
+
+    shape_by_out <- retrieveCellInfo(object, shape_by, discard.solo = !by_show_single, assay.type = by_exprs_values, as.factor = TRUE)
+    shape_by <- shape_by_out$name
+    df_to_plot$shape_by <- shape_by_out$val
+    if (nlevels(shape_by_out$val) > 10) {
+        stop("more than 10 levels for 'shape_by'")
+    }
+
+    size_by_out <- retrieveCellInfo(object, size_by, discard.solo = !by_show_single, assay.type = by_exprs_values)
+    size_by <- size_by_out$name
+    df_to_plot$size_by <- size_by_out$val
+
     ## Dispatching to the central plotter in the simple case of two dimensions.
     if (length(to_plot)==2L) {
         colnames(df_to_plot)[seq_along(to_plot)] <- c("X", "Y")
