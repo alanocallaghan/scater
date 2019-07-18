@@ -16,11 +16,11 @@
 #' @param color A vector of colours specifying the palette to use for mapping expression values to colours. 
 #' This defaults to the default setting in \code{\link[pheatmap]{pheatmap}}.
 #' @param colour_columns_by A list of values specifying how the columns should be annotated with colours.
-#' Each entry of the list can be of the form described by \code{?"\link{scater-vis-var}"}.
+#' Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
 #' A character vector can also be supplied and will be treated as a list of strings.
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for colouring of column-level data - see \code{?"\link{scater-vis-var}"} for details.
-#' @param by_show_single Logical scalar specifying whether single-level factors should be used for column-level colouring, see \code{?"\link{scater-vis-var}"} for details.
+#' for colouring of column-level data - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
+#' @param by_show_single Deprecated and ignored.
 #' @param show_colnames Logical scalar specifying whether column names should be shown, if available in \code{object}.
 #' @param ... Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.
 #'
@@ -54,7 +54,7 @@
 #' @importFrom SummarizedExperiment assay
 plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts",
     center=FALSE, zlim=NULL, symmetric=FALSE, color=NULL, 
-    colour_columns_by=NULL, by_exprs_values = exprs_values, by_show_single = FALSE,
+    colour_columns_by=NULL, by_exprs_values = exprs_values, by_show_single=FALSE,
     show_colnames = TRUE, ...) 
 {
     features_to_use <- .subset2index(features, object, byrow=TRUE)
@@ -95,8 +95,7 @@ plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts"
     if (length(colour_columns_by)) {
         column_variables <- column_colorings <- list()
         for (field in colour_columns_by) { 
-            colour_by_out <- .choose_vis_values(object, field, mode = "column", search = "any",
-                                                exprs_values = by_exprs_values, discard_solo = !by_show_single)
+            colour_by_out <- retrieveCellInfo(object, field, assay.type = by_exprs_values)
 
             if (is.null(colour_by_out$val)) { 
                 next

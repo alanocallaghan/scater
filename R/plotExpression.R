@@ -7,12 +7,12 @@
 #' @param x Specification of a column metadata field or a feature to show on the x-axis, see \code{?"\link{scater-vis-var}"} for possible values. 
 #' @param exprs_values A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from.
 #' @param log2_values Logical scalar, specifying whether the expression values be transformed to the log2-scale for plotting (with an offset of 1 to avoid logging zeroes).
-#' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
-#' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
-#' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
+#' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
+#' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.
-#' @param by_show_single Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.
+#' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
+#' @param by_show_single Deprecated and ignored.
 #' @param xlab String specifying the label for x-axis.
 #' If \code{NULL} (default), \code{x} will be used as the x-axis label.
 #' @param feature_colours Logical scalar indicating whether violins should be coloured by feature when \code{x} and \code{colour_by} are not specified and \code{one_facet=TRUE}.
@@ -58,7 +58,7 @@
 #'     assays = list(counts = sc_example_counts), 
 #'     colData = sc_example_cell_info
 #' )
-#  example_sce <- normalize(example_sce)
+#' example_sce <- normalize(example_sce)
 #' example_sce <- calculateQCMetrics(example_sce)
 #' sizeFactors(example_sce) <- colSums(counts(example_sce))
 #' example_sce <- normalize(example_sce)
@@ -126,18 +126,23 @@ plotExpression <- function(object, features, x = NULL,
     evals_long$X <- rep(xcoord, each=nfeatures)
 
     ## checking visualization arguments
-    vis_out <- .incorporate_common_vis(data.frame(integer(ncol(object)))[,0], # initializing an empty dataframe.
-                                       se = object, mode = "column", 
-                                       colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-                                       by_exprs_values = by_exprs_values, by_show_single = by_show_single)
-    
-    colour_by <- vis_out$colour_by
-    shape_by <- vis_out$shape_by
-    size_by <- vis_out$size_by
+    colour_by_out <- retrieveCellInfo(object, colour_by, assay.type = by_exprs_values)
+    colour_by <- colour_by_out$name
+    evals_long$colour_by <- rep(colour_by_out$value, each=nfeatures)
 
-    evals_long$shape_by <- rep(vis_out$df$shape_by, each=nfeatures)
-    evals_long$size_by <- rep(vis_out$df$size_by, each=nfeatures)
-    evals_long$colour_by <- rep(vis_out$df$colour_by, each=nfeatures)
+    shape_by_out <- retrieveCellInfo(object, shape_by, assay.type = by_exprs_values)
+    shape_by <- shape_by_out$name
+    if (!is.null(shape_by_out$value)) {
+        shape_by_out$value <- as.factor(shape_by_out$value)
+        if (nlevels(shape_by_out$value) > 10) {
+            stop("more than 10 levels for 'shape_by'")
+        }
+        evals_long$shape_by <- rep(shape_by_out$value, each=nfeatures)
+    }
+
+    size_by_out <- retrieveCellInfo(object, size_by, assay.type = by_exprs_values)
+    size_by <- size_by_out$name
+    evals_long$size_by <- rep(size_by_out$value, each=nfeatures)
 
     ## Set up the faceting.
     if ( is.null(evals_long$X) ) { 
