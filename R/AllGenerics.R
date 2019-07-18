@@ -74,3 +74,7 @@ setGeneric("runMDS", function(x, ...) standardGeneric("runMDS"))
 #' @export
 #' @rdname runDiffusionMap
 setGeneric("runDiffusionMap", function(x, ...) standardGeneric("runDiffusionMap"))
+
+#' @export
+#' @rdname logNormCounts
+setGeneric("logNormCounts", function(x, ...) standardGeneric("logNormCounts"))

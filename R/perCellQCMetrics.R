@@ -171,14 +171,7 @@ setMethod("perCellQCMetrics", "ANY", .per_cell_qc_metrics)
 setMethod("perCellQCMetrics", "SingleCellExperiment", function(x, subsets=NULL, percent.in.top=c(50, 100, 200, 500), ..., 
     assay.type="counts", use.alt.exps=TRUE) {
     main <- .per_cell_qc_metrics(assay(x, assay.type), subsets=subsets, percent.in.top=percent.in.top, ...)
-
-    if (is.logical(use.alt.exps)) {
-        if (use.alt.exps) {
-            use.alt.exps <- seq_along(altExpNames(x))
-        } else {
-            use.alt.exps <- NULL
-        }
-    } 
+    use.alt.exps <- .get_alt_exps_to_use(x, use.alt.exps)
 
     alt <- list()
     total <- main$sum
@@ -203,3 +196,14 @@ setMethod("perCellQCMetrics", "SingleCellExperiment", function(x, subsets=NULL, 
     main$total <- total
     main
 })
+
+.get_alt_exps_to_use <- function(x, use.alt.exps) {
+    if (is.logical(use.alt.exps)) {
+        if (use.alt.exps) {
+            use.alt.exps <- seq_along(altExpNames(x))
+        } else {
+            use.alt.exps <- NULL
+        }
+    } 
+    use.alt.exps
+}
