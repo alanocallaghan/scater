@@ -21,16 +21,16 @@ plotExpression(object, features, x = NULL, exprs_values = "logcounts",
 
 \item{log2_values}{Logical scalar, specifying whether the expression values be transformed to the log2-scale for plotting (with an offset of 1 to avoid logging zeroes).}
 
-\item{colour_by}{Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values.}
+\item{colour_by}{Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{shape_by}{Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values.}
+\item{shape_by}{Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{size_by}{Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values.}
+\item{size_by}{Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.}
+for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.}
 
-\item{by_show_single}{Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.}
+\item{by_show_single}{Deprecated and ignored.}
 
 \item{xlab}{String specifying the label for x-axis.
 If \code{NULL} (default), \code{x} will be used as the x-axis label.}
@@ -76,6 +76,7 @@ example_sce <- SingleCellExperiment(
     assays = list(counts = sc_example_counts), 
     colData = sc_example_cell_info
 )
+example_sce <- normalize(example_sce)
 example_sce <- calculateQCMetrics(example_sce)
 sizeFactors(example_sce) <- colSums(counts(example_sce))
 example_sce <- normalize(example_sce)

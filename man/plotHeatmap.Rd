@@ -33,13 +33,13 @@ If \code{TRUE}, the maximum absolute value of \code{zlim} will be computed and m
 This defaults to the default setting in \code{\link[pheatmap]{pheatmap}}.}
 
 \item{colour_columns_by}{A list of values specifying how the columns should be annotated with colours.
-Each entry of the list can be of the form described by \code{?"\link{scater-vis-var}"}.
+Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
 A character vector can also be supplied and will be treated as a list of strings.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for colouring of column-level data - see \code{?"\link{scater-vis-var}"} for details.}
+for colouring of column-level data - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.}
 
-\item{by_show_single}{Logical scalar specifying whether single-level factors should be used for column-level colouring, see \code{?"\link{scater-vis-var}"} for details.}
+\item{by_show_single}{Deprecated and ignored.}
 
 \item{show_colnames}{Logical scalar specifying whether column names should be shown, if available in \code{object}.}
 
