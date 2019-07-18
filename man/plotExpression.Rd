@@ -15,7 +15,7 @@ plotExpression(object, features, x = NULL, exprs_values = "logcounts",
 
 \item{features}{A character vector (of feature names), a logical vector or numeric vector (of indices) specifying the features to plot.}
 
-\item{x}{Specification of a column metadata field or a feature to show on the x-axis, see \code{?"\link{scater-vis-var}"} for possible values.}
+\item{x}{Specification of a column metadata field or a feature to show on the x-axis, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
 \item{exprs_values}{A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from.}
 
