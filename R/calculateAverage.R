@@ -1,38 +1,48 @@
-#' Calculate average counts, adjusting for size factors or library size
+#' Calculate per-feature average counts
 #'
-#' Calculate average counts per feature, adjusting them to account for normalization due to size factors or library sizes.
+#' Calculate average counts per feature after normalizing observations using size factors. 
 #'
-#' @param x A SingleCellExperiment object or count matrix.
-#' @param exprs_values A string specifying the assay of \code{object} containing the count matrix, if \code{object} is a SingleCellExperiment.
-#' @param use_size_factors a logical scalar specifying whether the size factors in \code{object} should be used to construct effective library sizes.
-#' @param subset_row A vector specifying the subset of rows of \code{object} for which to return a result.
+#' @param x A numeric matrix of counts where features are rows and 
+#'
+#' Alternatively, a \linkS4class{SummarizedExperiment} or a \linkS4class{SingleCellExperiment} containing such counts.
+#' @param size.factors A numeric vector containing size factors.
+#' If \code{NULL}, these are calculated or extracted from \code{x}.
+#' @param assay.type A string specifying the assay of \code{x} containing the count matrix.
+#' @param exprs_values Deprecated, same as \code{assay.type}.
+#' @param subset.row A vector specifying the subset of rows of \code{object} for which to return a result.
+#' @param subset_row Deprecated, same as \code{subset.row}.
 #' @param BPPARAM A BiocParallelParam object specifying whether the calculations should be parallelized. 
+#' @param ... For the generic, arguments to pass to specific methods.
+#'
+#' For the SummarizedExperiment method, further arguments to pass to the ANY method.
+#'
+#' For the SingleCellExperiment method, further arguments to pass to the SummarizedExperiment method.
+#' @param alt.exp String or integer scalar specifying an alternative experiment for which to compute the averages.
 #'
 #' @details 
 #' The size-adjusted average count is defined by dividing each count by the size factor and taking the average across cells.
-#' All sizes factors are scaled so that the mean is 1 across all cells, to ensure that the averages are interpretable on the scale of the raw counts. 
+#' All sizes factors are scaled so that the mean is 1 across all cells, to ensure that the averages are interpretable on the same scale of the raw counts. 
 #'
-#' Assuming that \code{object} is a SingleCellExperiment:
+#' If no size factors are supplied, they are determined automatically:
 #' \itemize{
-#' \item If \code{use_size_factors=TRUE}, size factors are automatically extracted from the object.
-#' Note that different size factors may be used for features marked as spike-in controls.
-#' This is due to the presence of control-specific size factors in \code{object}, see \code{\link{normalizeSCE}} for more details.
-#' \item If \code{use_size_factors=FALSE}, all size factors in \code{object} are ignored.
-#' Size factors are instead computed from the library sizes, using \code{\link{librarySizeFactors}}.
-#' \item If \code{use_size_factors} is a numeric vector, it will override the any size factors for non-spike-in features in \code{object}.
-#' The spike-in size factors will still be used for the spike-in transcripts.
+#' \item For count matrices and \linkS4class{SummarizedExperiment} inputs,
+#' the sum of counts for each cell is used to compute a size factor via the \code{\link{librarySizeFactors}} function.
+#' \item For \linkS4class{SingleCellExperiment} instances, the function searches for \code{\link{sizeFactors}} from \code{x}.
+#' If none are available, it defaults to library size-derived size factors.
 #' }
-#' If no size factors are available, they will be computed from the library sizes using \code{\link{librarySizeFactors}}.
+#' If \code{size.factors} are supplied, they will override any size factors present in \code{x}.
 #'
-#' If \code{object} is a matrix or matrix-like object, size factors can be supplied by setting \code{use_size_factors} to a numeric vector.
-#' Otherwise, the sum of counts for each cell is used as the size factor through \code{\link{librarySizeFactors}}.
-#'
-#' @return Numeric vector of average count values with same length as number of features, 
-#' or the number of features in \code{subset_row} if supplied.
+#' @return A numeric vector of average count values with same length as number of features 
+#' (or the number of features in \code{subset_row} if supplied).
 #' 
 #' @author Aaron Lun
 #'
 #' @name calculateAverage
+#'
+#' @seealso
+#' \code{\link{librarySizeFactors}}, for the default calculation of size factors.
+#'
+#' \code{\link{logNormCounts}}, for the calculation of normalized expression values.
 #'
 #' @examples
 #' data("sc_example_counts")
@@ -46,7 +56,6 @@
 #' summary(ave_counts)
 NULL
 
-#' @export
 #' @importFrom BiocParallel SerialParam bpmapply
 .calculate_average <- function(x, size.factors=NULL, subset.row=NULL, subset_row = NULL, BPPARAM = SerialParam())
 {
@@ -80,34 +89,42 @@ NULL
 }
 
 #' @export
+#' @rdname calculateAverage
 setMethod("calculateAverage", "ANY", .calculate_average)
 
 #' @export
+#' @rdname calculateAverage
 #' @importFrom SummarizedExperiment assay
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
-setMethod("calculateAverage", "SummarizedExperiment", function(x, ..., assay.type="counts")
+setMethod("calculateAverage", "SummarizedExperiment", function(x, ..., assay.type="counts", exprs_values=NULL)
 { 
-    .calculate_average(assay(x, assay.type), subset.row=subset.row)
+    assay.type <- .switch_arg_names(exprs_values, assay.type)
+    .calculate_average(assay(x, assay.type), ...)
 })
 
 #' @export
-#' @importFrom SummarizedExperiment assay
+#' @rdname calculateAverage
 #' @importFrom BiocGenerics sizeFactors
 #' @importFrom SingleCellExperiment altExp
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
-setMethod("calculateAverage", "SingleCellExperiment", function(x, size.factors=NULL, ..., 
-    assay.type="counts", exprs_values=NULL, alt.exp=NULL) 
+setMethod("calculateAverage", "SingleCellExperiment", function(x, size.factors=NULL, ..., alt.exp=NULL) 
 { 
     if (!is.null(alt.exp)) {
+        # Don't use callNextMethod, just in case calculateAverage has a
+        # different specialization for whatever class is stored in 'altExp'.
         x <- altExp(x, alt.exp)
+        calculateAverage(x, size.factors=size.factors, ...)
+    } else {
+        if (is.null(size.factors)) {
+            size.factors <- sizeFactors(x)
+        }
+        callNextMethod(x, size.factors=size.factors, ...)
     }
-    if (is.null(size.factors)) {
-        size.factors <- sizeFactors(x)
-    }
-    assay.type <- .switch_arg_names(exprs_values, assay.type)
-    .calculate_average(assay(x, assay.type), size.factors=size.factors, ...)
 })
 
 #' @rdname calculateAverage
 #' @export
-calcAverage <- calculateAverage
+calcAverage <- function(x, ...) {
+    .Deprecated(new="calculateAverage")
+    calculateAverage(x, ...)
+}
