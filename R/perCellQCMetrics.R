@@ -3,22 +3,24 @@
 #' Compute per-cell quality control metrics for a count matrix or a \linkS4class{SingleCellExperiment}.
 #'
 #' @param x A numeric matrix of counts with cells in columns and features in rows.
-#' Alternatively, a \linkS4class{SingleCellExperiment} object containing such a matrix.
+#' 
+#' Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} object containing such a matrix.
 #' @param subsets A named list containing one or more vectors (a character vector of feature names, a logical vector, or a numeric vector of indices),
 #' used to identify feature controls such as ERCC spike-in sets or mitochondrial genes. 
 #' @param percent.in.top An integer vector. 
 #' Each element is treated as a number of top genes to compute the percentage of library size occupied by the most highly expressed genes in each cell.
 #' @param detection.limit A numeric scalar specifying the lower detection limit for expression.
 #' @param BPPARAM A BiocParallelParam object specifying whether the QC calculations should be parallelized. 
-#' @param ... Arguments to pass to specific methods.
-#' For the SingleCellExperiment method, further arguments to pass to the ANY method.
+#' @param ... For the generic, further arguments to pass to specific methods.
+#' 
+#' For the SummarizedExperiment and SingleCellExperiment methods, further arguments to pass to the ANY method.
 #' @param assay.type A string or integer scalar indicating which \code{assays} in the \code{x} contains the count matrix.
 #' @param use.alt.exps Logical scalar indicating whether QC statistics should be computed for alternative Experiments in \code{x}.
 #' If \code{TRUE}, statistics are computed for all alternative experiments. 
 #'
 #' Alternatively, an integer or character vector specifying the alternative Experiments to use to compute QC statistics.
 #' 
-#' Alternatively, \code{NULL} in which case alternative experiments are not used.
+#' Alternatively \code{NULL}, in which case alternative experiments are not used.
 #'
 #' @return
 #' A \linkS4class{DataFrame} of QC statistics where each row corresponds to a column in \code{x}.
@@ -113,7 +115,9 @@ NULL
 #' @importFrom S4Vectors DataFrame
 #' @importFrom BiocParallel bpmapply SerialParam
 #' @importClassesFrom S4Vectors DataFrame
-.per_cell_qc_metrics <- function(x, subsets = NULL, percent.in.top = c(50, 100, 200, 500), detection.limit = 0, BPPARAM=SerialParam()) {
+.per_cell_qc_metrics <- function(x, subsets = NULL, percent.in.top = c(50, 100, 200, 500), 
+    detection.limit = 0, BPPARAM=SerialParam()) 
+{
     # Computing all QC metrics, with cells split across workers. 
     worker_assign <- .assign_jobs_to_workers(ncol(x), BPPARAM)
     bp.out <- bpmapply(.compute_qc_metrics, start=worker_assign$start, end=worker_assign$end,
@@ -166,24 +170,35 @@ setMethod("perCellQCMetrics", "ANY", .per_cell_qc_metrics)
 #' @export
 #' @rdname perCellQCMetrics
 #' @importFrom SummarizedExperiment assay
+setMethod("perCellQCMetrics", "SummarizedExperiment", function(x, ..., assay.type="counts") {
+    .per_cell_qc_metrics(assay(x, assay.type), ...)
+})
+
+#' @export
+#' @rdname perCellQCMetrics
+#' @importFrom SummarizedExperiment assay
 #' @importFrom SingleCellExperiment altExp altExpNames
 #' @importClassesFrom S4Vectors DataFrame
-setMethod("perCellQCMetrics", "SingleCellExperiment", function(x, subsets=NULL, percent.in.top=c(50, 100, 200, 500), ..., 
-    assay.type="counts", use.alt.exps=TRUE) {
+setMethod("perCellQCMetrics", "SingleCellExperiment", function(x, 
+    subsets=NULL, percent.in.top=c(50, 100, 200, 500), ..., 
+    assay.type="counts", use.alt.exps=TRUE) 
+{
+    # subsets and percent.in.top need to be explicitly listed,
+    # because the alt.exps call sets them to NULL and integer(0).
     main <- .per_cell_qc_metrics(assay(x, assay.type), subsets=subsets, percent.in.top=percent.in.top, ...)
     use.alt.exps <- .get_alt_exps_to_use(x, use.alt.exps)
 
     alt <- list()
     total <- main$sum
     for (i in seq_along(use.alt.exps)) {
-        current <- .per_cell_qc_metrics(assay(altExp(x, use.alt.exps[i]), assay.type), subsets=NULL, percent.in.top=integer(0), ...)
-        current$top.percent <- NULL
-        current$subsets <- NULL
+        y <- assay(altExp(x, use.alt.exps[i]), assay.type)
+        current <- .per_cell_qc_metrics(y, subsets=NULL, percent.in.top=integer(0), ...)
+        current$top.percent <- current$subsets <- NULL
         total <- total + current$sum
         alt[[i]] <- current
     }
     for (i in seq_along(alt)) {
-        alt[[i]]$total <- alt[[i]]$sum/total * 100
+        alt[[i]]$percent.total <- alt[[i]]$sum/total * 100
     }
 
     if (length(alt)) {
