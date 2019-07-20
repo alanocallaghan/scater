@@ -55,10 +55,12 @@
 #' This is named \code{"logcounts"} if \code{log=TRUE} and \code{"normcounts"} otherwise.
 #'
 #' For the SingleCellExperiment method, \code{x} is returned containing an additional assay like the output of the SummarizedExperiment method.
-#' The output will also contain the size factors used in \code{\link{sizeFactors}}, which will be centered if \code{center.sf=TRUE}.
+#' The output object will also contain the size factors used in \code{\link{sizeFactors}}, which will be centered if \code{center.sf=TRUE}.
 #'
 #' @name logNormCounts
 #' @author Aaron Lun, based on code by Davis McCarthy 
+#' @seealso
+#' \code{\link{librarySizeFactors}}, which is used to compute the default size factors if none are supplied or available.
 #'
 #' @export
 #' @examples
