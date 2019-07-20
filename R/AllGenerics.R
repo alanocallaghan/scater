@@ -105,6 +105,5 @@ setGeneric("logNormCounts", function(x, ...) standardGeneric("logNormCounts"))
 setGeneric("librarySizeFactors", function(x, ...) standardGeneric("librarySizeFactors"))
 
 #' @export
-#' @rdname librarySizeFactors 
-setGeneric("computeLibraryFactors", function(x, ...) standardGeneric("computeLibraryFactors"))
-
+#' @rdname normalizeCounts
+setGeneric("normalizeCounts", function(x, ...) standardGeneric("normalizeCounts"))
