@@ -16,7 +16,6 @@
 #' For the SummarizedExperiment method, further arguments to pass to the ANY method.
 #'
 #' For the SingleCellExperiment method, further arguments to pass to the SummarizedExperiment method.
-#' @param alt.exp String or integer scalar specifying an alternative experiment for which to compute the CPMs.
 #'
 #' @details 
 #' If \code{size.factors} are provided or available in \code{x}, they are used to define the effective library sizes. 
@@ -71,13 +70,11 @@ setMethod("calculateCPM", "SummarizedExperiment", function(x, ..., assay.type="c
 
 #' @export
 #' @rdname calculateCPM
-#' @importFrom SingleCellExperiment altExp 
+#' @importFrom BiocGenerics sizeFactors
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
-setMethod("calculateCPM", "SingleCellExperiment", function(x, ..., alt.exp=NULL) {
-    if (!is.null(alt.exp)) {
-        y <- altExp(x, alt.exp)
-        calculateCPM(y, ...) 
-    } else {
-        callNextMethod(x=x, ...)
+setMethod("calculateCPM", "SingleCellExperiment", function(x, size.factors=NULL, ...) {
+    if (is.null(size.factors)) {
+        size.factors <- sizeFactors(x)
     }
+    callNextMethod(x=x, ...)
 })
