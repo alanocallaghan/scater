@@ -62,6 +62,10 @@ setGeneric("fpkm<-", function(object, value) standardGeneric("fpkm<-"))
 #' @rdname perCellQCMetrics
 setGeneric("perCellQCMetrics", function(x, ...) standardGeneric("perCellQCMetrics"))
 
+#' @export
+#' @rdname calculateAverage
+setGeneric("calculateAverage", function(x, ...) standardGeneric("calculateAverage"))
+
 ####################################
 # Dimensionality reduction generics.
 
