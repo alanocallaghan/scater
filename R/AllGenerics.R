@@ -55,9 +55,15 @@ setGeneric("fpkm", function(object) standardGeneric("fpkm"))
 #' @rdname accessors
 setGeneric("fpkm<-", function(object, value) standardGeneric("fpkm<-"))
 
+#############################
+# Metric calculator generics.
+
 #' @export
 #' @rdname perCellQCMetrics
 setGeneric("perCellQCMetrics", function(x, ...) standardGeneric("perCellQCMetrics"))
+
+####################################
+# Dimensionality reduction generics.
 
 #' @export
 #' @rdname runTSNE
@@ -75,6 +81,18 @@ setGeneric("runMDS", function(x, ...) standardGeneric("runMDS"))
 #' @rdname runDiffusionMap
 setGeneric("runDiffusionMap", function(x, ...) standardGeneric("runDiffusionMap"))
 
+#################################
+# Normalization-related generics.
+
 #' @export
 #' @rdname logNormCounts
 setGeneric("logNormCounts", function(x, ...) standardGeneric("logNormCounts"))
+
+#' @export
+#' @rdname librarySizeFactors
+setGeneric("librarySizeFactors", function(x, ...) standardGeneric("librarySizeFactors"))
+
+#' @export
+#' @rdname librarySizeFactors 
+setGeneric("computeLibraryFactors", function(x, ...) standardGeneric("computeLibraryFactors"))
+
