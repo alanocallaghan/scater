@@ -1,56 +1,127 @@
-#' Divide columns of a count matrix by the size factors
+#' Compute normalized expression values
 #'
 #' Compute (log-)normalized expression values by dividing counts for each cell by the corresponding size factor.
 #'
-#' @param x A count matrix, with cells in the columns and genes in the rows.
-#' @param size_factors A numeric vector of size factors for all cells.
-#' @param return_log Logical scalar, should normalized values be returned on the log2 scale? 
-#' @param log_exprs_offset Numeric scalar specifying the offset to add when log-transforming expression values.
-#' @param centre_size_factors Logical scalar indicating whether size fators should be centred.
-#' @param subset_row A vector specifying the subset of rows of \code{x} for which to return a result.
+#' @param x A numeric matrix-like object containing counts for cells in the columns and features in the rows.
+#'
+#' Alternatively, a \linkS4class{SingleCellExperiment} or \linkS4class{SummarizedExperiment} object containing such a count matrix.
+#' @param size.factors A numeric vector of cell-specific size factors.
+#' Alternatively \code{NULL}, in which case the size factors are extracted or computed from \code{x}.
+#' @param log Logical scalar indicating whether normalized values should be log2-transformed.
+#' @param return_log Deprecated, same as \code{log}.
+#' @param pseudo.count Numeric scalar specifying the pseudo-count to add when log-transforming expression values.
+#' @param center.sf Logical scalar indicating whether size factors should be centered at unity before being used.
+#' @param subset.row A vector specifying the subset of rows of \code{x} for which to return a result.
+#' @param subset_row Deprecated, same as \code{subset.row}.
+#' @param ... For the generic, arguments to pass to specific methods.
+#'
+#' For the SummarizedExperiment method, further arguments to pass to the ANY or \linkS4class{DelayedMatrix} methods.
+#' 
+#' For the SingleCellExperiment method, further arguments to pass to the SummarizedExperiment method.
+#' @param alt.exp String or integer scalar specifying an alternative experiment for which to compute normalized expression.
 #'
 #' @details 
-#' This function will compute log-normalized expression values from \code{x}.
-#' It will endeavour to return an object of the same class as \code{x}, with particular focus on \linkS4class{DelayedMatrix} inputs/outputs.
-#' 
-#' Note that the default \code{centre_size_factors} differs from that in \code{\link{normalizeSCE}}.
-#' Users of this function are assumed to know what they're doing with respect to normalization.
+#' Normalized expression values are computed by dividing the counts for each cell by the size factor for that cell.
+#' This aims to remove cell-specific scaling biases, e.g., due to differences in sequencing coverage or capture efficiency.
+#' If \code{log=TRUE}, log-normalized values are calculated by adding \code{pseudo.count} to the normalized count and performing a log2 transformation.
+#'
+#' If no size factors are supplied, they are determined automatically from \code{x}:
+#' \itemize{
+#' \item For count matrices and \linkS4class{SummarizedExperiment} inputs,
+#' the sum of counts for each cell is used to compute a size factor via the \code{\link{librarySizeFactors}} function.
+#' \item For \linkS4class{SingleCellExperiment} instances, the function searches for \code{\link{sizeFactors}} from \code{x}.
+#' If none are available, it defaults to library size-derived size factors.
+#' }
+#' If \code{size.factors} are supplied, they will override any size factors present in \code{x}.
+#'
+#' If \code{center.sf=TRUE}, all sets of size factors will be centered to have the same mean prior to calculation of normalized expression values.
+#' This ensures that abundances are roughly comparable between features normalized with different sets of size factors.
+#' By default, the centre mean is unity, which means that the computed \code{exprs} can be interpreted as being on the same scale as log-counts.
+#' It also means that the added \code{log_exprs_offset} can be interpreted as a pseudo-count (i.e., on the same scale as the counts).
 #'
 #' @return A matrix-like object of (log-)normalized expression values.
 #'
 #' @author Aaron Lun
 #'
-#' @export
-#' @importFrom methods is
-#' @importClassesFrom DelayedArray DelayedMatrix
-#' @importFrom BiocGenerics colnames rownames
-#' @importFrom Matrix t
-#'
+#' @name normalizeCounts
 #' @examples
 #' data("sc_example_counts")
-#' normed <- normalizeCounts(sc_example_counts, 
-#'     librarySizeFactors(sc_example_counts))
-normalizeCounts <- function(x, size_factors, return_log = TRUE, log_exprs_offset = 1, centre_size_factors = FALSE, subset_row = NULL) {
-    if (centre_size_factors) {
-        size_factors <- size_factors/mean(size_factors)
-    }
-    
-    if (is(x, "DelayedMatrix")) {
-        if (!is.null(subset_row)) {
-            x <- x[subset_row,,drop=FALSE]
-        }
+#' normed <- normalizeCounts(sc_example_counts)
+#' str(normed)
+NULL
 
-        out <- t(t(x)/size_factors)
-        if (return_log) {
-            out <- log2(out + log_exprs_offset)
-        }
-
-    } else {
-        subset_row <- .subset2index(subset_row, x, byrow=TRUE)
-        out <- .Call(cxx_norm_exprs, x, list(size_factors), integer(nrow(x)),
-            log_exprs_offset, return_log, subset_row - 1L)
-        colnames(out) <- colnames(x)
-        rownames(out) <- rownames(x)[subset_row]
+#' @export
+#' @rdname normalizeCounts
+#' @importFrom Matrix t
+#' @importClassesFrom DelayedArray DelayedMatrix
+setMethod("normalizeCounts", "DelayedMatrix", function(x, size.factors=NULL, 
+    log=TRUE, return_log=NULL, pseudo.count=1, center.sf=TRUE,
+    subset.row=NULL, subset_row=NULL) 
+{
+    subset.row <- .switch_arg_names(subset_row, subset.row)
+    if (is.null(subset.row)) {
+        x <- x[subset.row,,drop=FALSE]
     }
-    return(out)
+
+    size.factors <- .get_default_sizes(x, size.factors, center.sf)
+    norm_exprs <- t(t(x) / size.factors)
+
+    log <- .switch_arg_names(return_log, log)
+    if (log) {
+        norm_exprs <- log2(norm_exprs + pseudo.count)
+    }
+    norm_exprs
+})
+
+#' @export
+#' @rdname normalizeCounts
+setMethod("normalizeCounts", "ANY", function(x, size.factors=NULL, 
+    log=TRUE, return_log=NULL, pseudo.count=1, center.sf=TRUE,
+    subset.row=NULL, subset_row=NULL) 
+{
+    size.factors <- .get_default_sizes(x, size.factors, center.sf)
+    subset.row <- .switch_arg_names(subset_row, subset.row)
+    subset.row <- .subset2index(subset.row, x, byrow=TRUE)
+    norm_exprs <- .Call(cxx_norm_exprs, x, list(size.factors), integer(nrow(x)),
+        pseudo.count, log, subset.row - 1L)
+    dimnames(norm_exprs) <- dimnames(x)
+    norm_exprs
+})
+
+.get_default_sizes <- function(x, size.factors, center.sf, ...) {
+    if (is.null(size.factors)) {
+        size.factors <- librarySizeFactors(x, ...)
+    }
+    .center_sf(size.factors, center.sf)
 }
+
+.center_sf <- function(size.factors, center.sf) {
+    if (center.sf) {
+        size.factors <- size.factors/mean(size.factors)
+    }
+    size.factors
+}
+
+#' @export
+#' @rdname normalizeCounts
+#' @importFrom SummarizedExperiment assay 
+setMethod("normalizeCounts", "SummarizedExperiment", function(x, ..., assay.type="counts", exprs_values=NULL) {
+    assay.type <- .switch_arg_names(exprs_values, assay.type)
+    normalizeCounts(assay(x, assay.type), ...)
+})
+
+#' @export
+#' @rdname normalizeCounts
+#' @importFrom BiocGenerics sizeFactors 
+#' @importFrom SingleCellExperiment altExp 
+setMethod("normalizeCounts", "SingleCellExperiment", function(x, size.factors=NULL, ..., alt.exp=NULL) {
+    if (!is.null(alt.exp)) {
+        x <- altExp(x, alt.exp)
+        normalizeCounts(x, size.factors=size.factors, ...)
+    } else {
+        if (is.null(size.factors)) {
+            size.factors <- sizeFactors(x)
+        }
+        callNextMethod(x=x, ...)
+    }
+})
