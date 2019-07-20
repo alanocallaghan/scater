@@ -74,6 +74,10 @@ setGeneric("calculateCPM", function(x, ...) standardGeneric("calculateCPM"))
 #' @rdname calculateTPM
 setGeneric("calculateTPM", function(x, ...) standardGeneric("calculateTPM"))
 
+#' @export
+#' @rdname nexprs
+setGeneric("nexprs", function(x, ...) standardGeneric("nexprs"))
+
 ####################################
 # Dimensionality reduction generics.
 

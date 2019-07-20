@@ -1,23 +1,30 @@
 #' Count the number of non-zero counts per cell or feature 
 #'
-#' @description An efficient internal function that counts the number of non-zero counts in each row (per feature) or column (per cell).
-#' This avoids the need to construct an intermediate logical matrix.
+#' Counting the number of non-zero counts in each row (per feature) or column (per cell),
+#' without constructing an intermediate logical matrix.
 #'
-#' @param object A SingleCellExperiment object or a numeric matrix of expression values.
-#' @param detection_limit Numeric scalar providing the value above which  observations are deemed to be expressed. 
-#' @param exprs_values String or integer specifying the assay of \code{object} to obtain the count matrix from, if \code{object} is a SingleCellExperiment.
+#' @param x A numeric matrix of counts where features are rows and 
+#'
+#' Alternatively, a \linkS4class{SummarizedExperiment} containing such counts.
+#' @param detection.limit Numeric scalar providing the value above which  observations are deemed to be expressed. 
+#' @param assay.type String or integer specifying the assay of \code{x} to obtain the count matrix from.
+#' @param exprs_values Deprecated, same as \code{assay.type}.
 #' @param byrow Logical scalar indicating whether to count the number of detected cells per feature.
 #' If \code{FALSE}, the function will count the number of detected features per cell.
-#' @param subset_row Logical, integer or character vector indicating which rows (i.e. features) to use.
-#' @param subset_col Logical, integer or character vector indicating which columns (i.e., cells) to use.
+#' @param subset.row Logical, integer or character vector indicating which rows (i.e. features) to use.
+#' @param subset_row Deprecated, same as \code{subset.row}.
+#' @param subset.col Logical, integer or character vector indicating which columns (i.e., cells) to use.
+#' @param subset_col Deprecated, same as \code{subset.col}.
 #' @param BPPARAM A BiocParallelParam object specifying whether the calculations should be parallelized. 
+#' @param ... For the generic, further arguments to pass to specific methods.
 #'
-#' @details 
-#' Setting \code{subset_row} or \code{subset_col} is equivalent to subsetting \code{object} before calling \code{nexprs}, 
-#' but more efficient as a new copy of the matrix is not constructed. 
+#' For the SummarizedExperiment method, further arguments to pass to the ANY method.
 #'
 #' @return An integer vector containing counts per gene or cell, depending on the provided arguments.
 #'
+#' @author Aaron Lun
+#'
+#' @name nexprs
 #' @export
 #' @examples
 #' data("sc_example_counts")
@@ -29,46 +36,42 @@
 #' nexprs(example_sce)[1:10]
 #' nexprs(example_sce, byrow = TRUE)[1:10]
 #'
-#' @importClassesFrom SingleCellExperiment SingleCellExperiment
-#' @importFrom SummarizedExperiment assay
-#' @importFrom methods is
-#' @importFrom BiocParallel bplapply SerialParam
-nexprs <- function(object, detection_limit = 0, exprs_values = "counts", 
-    byrow = FALSE, subset_row = NULL, subset_col = NULL, BPPARAM=SerialParam()) 
-{
-    subset_row <- .subset2index(subset_row, target = object, byrow = TRUE)
-    subset_col <- .subset2index(subset_col, target = object, byrow = FALSE)
+NULL
 
-    if (is(object, "SingleCellExperiment")) { 
-        exprs_mat <- assay(object, i = exprs_values, withDimnames=FALSE)
-    } else {
-        exprs_mat <- object
-    }
+#' @importFrom BiocParallel bplapply SerialParam
+.nexprs <- function(x, byrow=FALSE, detection.limit=0, detection_limit = NULL,
+    subset.row=NULL, subset_row=NULL, subset.col=NULL, subset_col=NULL, 
+    BPPARAM=SerialParam()) 
+{
+    subset.row <- .switch_arg_names(subset_row, subset.row)
+    subset.col <- .switch_arg_names(subset_col, subset.col)
+    subset.row <- .subset2index(subset.row, target = x, byrow = TRUE)
+    subset.col <- .subset2index(subset.col, target = x, byrow = FALSE)
 
     # Zero-indexing.
-    subset_by_worker <- .split_vector_by_workers(subset_col - 1L, BPPARAM)
-    zero_subset_row <- subset_row - 1L
+    subset.by_worker <- .split_vector_by_workers(subset.col - 1L, BPPARAM)
+    zero_subset.row <- subset.row - 1L
 
     if (!byrow) {
-        bp_out <- bplapply(subset_by_worker, FUN=.get_detected_per_col,
-            mat=exprs_mat,
-            subset_row=zero_subset_row, 
+        bp_out <- bplapply(subset.by_worker, FUN=.get_detected_per_col,
+            mat=x,
+            subset.row=zero_subset.row, 
             detection_limit=detection_limit,
             BPPARAM=BPPARAM)
         
         ndetected <- unlist(bp_out)
-        names(ndetected) <- colnames(object)[subset_col]
+        names(ndetected) <- colnames(x)[subset.col]
         return(ndetected)
 
     } else {
-        bp_out <- bplapply(subset_by_worker, FUN=.get_detected_per_row,
-            mat=exprs_mat,
-            subset_row=zero_subset_row, 
+        bp_out <- bplapply(subset.by_worker, FUN=.get_detected_per_row,
+            mat=x,
+            subset.row=zero_subset.row, 
             detection_limit=detection_limit,
             BPPARAM=BPPARAM)
         
         ndetected <- Reduce("+", bp_out)
-        names(ndetected) <- rownames(object)[subset_row]
+        names(ndetected) <- rownames(x)[subset.row]
         return(ndetected)
     }
 }
@@ -83,3 +86,16 @@ nexprs <- function(object, detection_limit = 0, exprs_values = "counts",
 .get_detected_per_row <- function(mat, subset_row, subset_col, detection_limit) {
     .Call(cxx_row_above, mat, subset_row, subset_col, detection_limit)
 }
+
+#' @export
+#' @rdname nexprs
+setMethod("nexprs", "ANY", .nexprs)
+
+#' @export
+#' @rdname nexprs
+#' @importFrom SummarizedExperiment assay
+#' @importClassesFrom SummarizedExperiment SummarizedExperiment
+setMethod("nexprs", "SummarizedExperiment", function(x, ..., assay.type="counts", exprs_values=NULL) {
+    assay.type <- .switch_arg_names(exprs_values, assay.type)
+    .nexprs(assay(x, assay.type), ...)    
+})
