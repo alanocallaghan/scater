@@ -2,13 +2,21 @@
 #' 
 #' Define per-cell size factors from the library sizes (i.e., total sum of counts per cell).
 #'
-#' @param x A numeric matrix of counts with one row per feature and column per cell.
-#'
+#' @param x For \code{libarySizeFactors}, a numeric matrix of counts with one row per feature and column per cell.
 #' Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such counts.
-#' @param assay.type String or integer scalar indicating the assay of \code{x} containing the counts.
-#' @param exprs_values Deprecated, same as \code{assay.type}.
+#'
+#' For \code{computeLibraryFactors}, only a \linkS4class{SingleCellExperiment} is accepted.
 #' @param subset.row A vector specifying whether the size factors should be computed from a subset of rows of \code{x}.
 #' @param subset_row Deprecated, same as \code{subset_row}.
+#' @param assay.type String or integer scalar indicating the assay of \code{x} containing the counts.
+#' @param exprs_values Deprecated, same as \code{assay.type}.
+#' @param ... For the \code{librarySizeFactors} generic, arguments to pass to specific methods.
+#'
+#' For the SummarizedExperiment \code{librarySizeFactors} method, further arguments to pass to the ANY method.
+#' 
+#' For the SingleCellExperiment \code{librarySizeFactors} method, further arguments to pass to the SummarizedExperiment method.
+#'
+#' For \code{computeLibraryFactors}, further arguments to pass to \code{librarySizeFactors}.
 #' @param alt.exp String or integer scalar indicating which (if any) alternative experiment should be used
 #' to provide the counts to compute the size factors.
 #'
@@ -45,7 +53,8 @@
 NULL
 
 #' @importFrom Matrix colSums
-.library_size_factors <- function(x, subset.row=NULL) {
+.library_size_factors <- function(x, subset.row=NULL, subset_row=NULL) {
+    subset.row <- .switch_arg_names(subset_row, subset.row)
     if (is.null(subset.row)) {
        x <- x[.subset2index(subset.row, x, byrow=TRUE),,drop=FALSE]
     }
@@ -61,39 +70,30 @@ setMethod("librarySizeFactors", "ANY", .library_size_factors)
 #' @rdname librarySizeFactors
 #' @importFrom SummarizedExperiment assay
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
-setMethod("librarySizeFactors", "SummarizedExperiment", function(x, assay.type="counts", subset.row=NULL)
-    .library_size_factors(assay(x, assay.type), subset.row=subset.row))
+setMethod("librarySizeFactors", "SummarizedExperiment", function(x, assay.type="counts", exprs_values=NULL, ...) {
+    assay.type <- .switch_arg_names(exprs_values, assay.type)
+    .library_size_factors(assay(x, assay.type), ...)
+})
 
 #' @export
 #' @rdname librarySizeFactors
 #' @importFrom SummarizedExperiment assay
 #' @importFrom SingleCellExperiment altExp
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
-setMethod("librarySizeFactors", "SingleCellExperiment", 
-    function(x, assay.type="counts", exprs_values=NULL, subset.row=NULL, subset_row=NULL, alt.exp=NULL) 
-{
+setMethod("librarySizeFactors", "SingleCellExperiment", function(x, ..., alt.exp=NULL) {
     if (!is.null(alt.exp)) {
         x <- altExp(x, alt.exp)
+        librarySizeFactors(x, ...)
+    } else {
+        callNextMethod(x=x, ...)
     }
-    assay.type <- .switch_arg_names(exprs_values, assay.type)
-    subset.row <- .switch_arg_names(subset_row, subset.row)
-    .library_size_factors(assay(x, assay.type), subset.row=subset.row)
 })
-
-#' @export
-#' @rdname librarySizeFactors
-setMethod("computeLibraryFactors", "ANY", .library_size_factors)
-
-#' @export
-#' @rdname librarySizeFactors
-setMethod("computeLibraryFactors", "SummarizedExperiment", function(x, assay.type="counts", subset.row=NULL) 
-    librarySizeFactors(x, assay.type=assay.type, subset.row=subset.row))
 
 #' @export
 #' @rdname librarySizeFactors
 #' @importFrom BiocGenerics sizeFactors<-
-setMethod("computeLibraryFactors", "SingleCellExperiment", function(x, assay.type="counts", subset.row=NULL, alt.exp=NULL) {
+computeLibraryFactors <- function(x, ...) {
     sf <- librarySizeFactors(x, assay.type=assay.type, subset.row=subset.row, alt.exp=alt.exp)
     sizeFactors(x) <- sf
     x
-})
+}
