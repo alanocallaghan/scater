@@ -17,7 +17,6 @@
 #' For the SummarizedExperiment method, further arguments to pass to the ANY method.
 #'
 #' For the SingleCellExperiment method, further arguments to pass to the SummarizedExperiment method.
-#' @param alt.exp String or integer scalar specifying an alternative experiment for which to compute the averages.
 #'
 #' @details
 #' For read count data, this function assumes uniform coverage along the (effective) length of the transcript.
@@ -70,11 +69,9 @@ setMethod("calculateTPM", "SummarizedExperiment", function(x, ..., assay.type="c
 #' @rdname calculateTPM
 #' @importFrom SingleCellExperiment altExp
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
-setMethod("calculateTPM", "SingleCellExperiment", function(x, ..., alt.exp=NULL) {
-    if (!is.null(alt.exp)) {
-        y <- altExp(x, alt.exp)
-        calculateTPM(y, ...)
-    } else {
-        callNextMethod(x=x, ...)
+setMethod("calculateTPM", "SingleCellExperiment", function(x, size.factors=NULL, ...) {
+    if (is.null(size.factors)) {
+        size.factors <- sizeFactors(x)
     }
+    callNextMethod(x=x, size.factors=size.factors, ...)
 })

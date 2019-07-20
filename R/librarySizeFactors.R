@@ -77,23 +77,15 @@ setMethod("librarySizeFactors", "SummarizedExperiment", function(x, assay.type="
 
 #' @export
 #' @rdname librarySizeFactors
-#' @importFrom SummarizedExperiment assay
-#' @importFrom SingleCellExperiment altExp
-#' @importClassesFrom SingleCellExperiment SingleCellExperiment
-setMethod("librarySizeFactors", "SingleCellExperiment", function(x, ..., alt.exp=NULL) {
-    if (!is.null(alt.exp)) {
-        x <- altExp(x, alt.exp)
-        librarySizeFactors(x, ...)
-    } else {
-        callNextMethod(x=x, ...)
-    }
-})
-
-#' @export
-#' @rdname librarySizeFactors
 #' @importFrom BiocGenerics sizeFactors<-
-computeLibraryFactors <- function(x, ...) {
-    sf <- librarySizeFactors(x, assay.type=assay.type, subset.row=subset.row, alt.exp=alt.exp)
+#' @importFrom SingleCellExperiment altExp
+computeLibraryFactors <- function(x, ..., alt.exp=NULL) {
+    if (alt.exp) {
+        y <- altExp(x, alt.exp)
+    } else {
+        y <- x
+    }
+    sf <- librarySizeFactors(y, assay.type=assay.type, subset.row=subset.row)
     sizeFactors(x) <- sf
     x
 }

@@ -18,7 +18,6 @@
 #' For the SummarizedExperiment method, further arguments to pass to the ANY or \linkS4class{DelayedMatrix} methods.
 #' 
 #' For the SingleCellExperiment method, further arguments to pass to the SummarizedExperiment method.
-#' @param alt.exp String or integer scalar specifying an alternative experiment for which to compute normalized expression.
 #'
 #' @details 
 #' Normalized expression values are computed by dividing the counts for each cell by the size factor for that cell.
@@ -37,7 +36,7 @@
 #' If \code{center.sf=TRUE}, all sets of size factors will be centered to have the same mean prior to calculation of normalized expression values.
 #' This ensures that abundances are roughly comparable between features normalized with different sets of size factors.
 #' By default, the centre mean is unity, which means that the computed \code{exprs} can be interpreted as being on the same scale as log-counts.
-#' It also means that the added \code{log_exprs_offset} can be interpreted as a pseudo-count (i.e., on the same scale as the counts).
+#' It also means that the value of \code{pseudo.count} can be interpreted as a pseudo-count (i.e., on the same scale as the counts).
 #'
 #' @return A matrix-like object of (log-)normalized expression values.
 #'
@@ -105,6 +104,7 @@ setMethod("normalizeCounts", "ANY", function(x, size.factors=NULL,
 #' @export
 #' @rdname normalizeCounts
 #' @importFrom SummarizedExperiment assay 
+#' @importClassesFrom SummarizedExperiment SummarizedExperiment
 setMethod("normalizeCounts", "SummarizedExperiment", function(x, ..., assay.type="counts", exprs_values=NULL) {
     assay.type <- .switch_arg_names(exprs_values, assay.type)
     normalizeCounts(assay(x, assay.type), ...)
@@ -112,16 +112,11 @@ setMethod("normalizeCounts", "SummarizedExperiment", function(x, ..., assay.type
 
 #' @export
 #' @rdname normalizeCounts
-#' @importFrom BiocGenerics sizeFactors 
-#' @importFrom SingleCellExperiment altExp 
-setMethod("normalizeCounts", "SingleCellExperiment", function(x, size.factors=NULL, ..., alt.exp=NULL) {
-    if (!is.null(alt.exp)) {
-        x <- altExp(x, alt.exp)
-        normalizeCounts(x, size.factors=size.factors, ...)
-    } else {
-        if (is.null(size.factors)) {
-            size.factors <- sizeFactors(x)
-        }
-        callNextMethod(x=x, ...)
+#' @importFrom BiocGenerics sizeFactors
+#' @importClassesFrom SingleCellExperiment SingleCellExperiment
+setMethod("normalizeCounts", "SingleCellExperiment", function(x, size.factors=NULL, ...) {
+    if (is.null(size.factors)) {
+        size.factors <- sizeFactors(x)
     }
+    callNextMethod(x=x, ...)
 })

@@ -17,7 +17,6 @@
 #' For the SummarizedExperiment method, further arguments to pass to the ANY method.
 #'
 #' For the SingleCellExperiment method, further arguments to pass to the SummarizedExperiment method.
-#' @param alt.exp String or integer scalar specifying an alternative experiment for which to compute the averages.
 #'
 #' @details 
 #' The size-adjusted average count is defined by dividing each count by the size factor and taking the average across cells.
@@ -107,19 +106,12 @@ setMethod("calculateAverage", "SummarizedExperiment", function(x, ..., assay.typ
 #' @importFrom BiocGenerics sizeFactors
 #' @importFrom SingleCellExperiment altExp
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
-setMethod("calculateAverage", "SingleCellExperiment", function(x, size.factors=NULL, ..., alt.exp=NULL) 
+setMethod("calculateAverage", "SingleCellExperiment", function(x, size.factors=NULL, ...)
 { 
-    if (!is.null(alt.exp)) {
-        # Don't use callNextMethod, just in case calculateAverage has a
-        # different specialization for whatever class is stored in 'altExp'.
-        x <- altExp(x, alt.exp)
-        calculateAverage(x, size.factors=size.factors, ...)
-    } else {
-        if (is.null(size.factors)) {
-            size.factors <- sizeFactors(x)
-        }
-        callNextMethod(x, size.factors=size.factors, ...)
+    if (is.null(size.factors)) {
+        size.factors <- sizeFactors(x)
     }
+    callNextMethod(x, size.factors=size.factors, ...)
 })
 
 #' @rdname calculateAverage
