@@ -5,6 +5,8 @@
 #' @param x A numeric matrix-like object of counts for each feature (row) and cell (column).
 #'
 #' Alternatively, a \linkS4class{SingleCellExperiment} or \linkS4class{SummarizedExperiment} object containing such a count matrix.
+#' @param size.factors A numeric vector of cell-specific size factors.
+#' Alternatively \code{NULL}, in which case the size factors are extracted or computed from \code{x}.
 #' @param assay.type String or integer scalar indicating which assay contains the count data. 
 #' @param log Logical scalar indicating whether normalized values should be log2-transformed.
 #' @param pseudo.count Numeric scalar specifying the pseudo-count to add when log-transforming expression values.
@@ -30,7 +32,7 @@
 #' \itemize{
 #' \item For count matrices and \linkS4class{SummarizedExperiment} inputs,
 #' the sum of counts for each cell is used to compute a size factor via the \code{\link{librarySizeFactors}} function.
-#' \item For \linkS4class{SingleCellExperiment} instances, the function attempt to extract \code{\link{sizeFactors}} from \code{x}.
+#' \item For \linkS4class{SingleCellExperiment} instances, the function searches for \code{\link{sizeFactors}} from \code{x}.
 #' If none are available, it defaults to library size-derived size factors.
 #' }
 #' If \code{size.factors} are supplied, they will override any size factors present in \code{x}.
@@ -99,9 +101,9 @@ setMethod("logNormCounts", "ANY", function(x, size.factors=NULL, log=TRUE, pseud
     norm_exprs
 })
 
-.get_default_sizes <- function(x, size.factors, center.sf) {
+.get_default_sizes <- function(x, size.factors, center.sf, ...) {
     if (is.null(size.factors)) {
-        size.factors <- librarySizeFactors(x)
+        size.factors <- librarySizeFactors(x, ...)
     }
     .center_sf(size.factors, center.sf)
 }
@@ -139,7 +141,7 @@ setMethod("logNormCounts", "SingleCellExperiment", function(x, size.factors=NULL
     if (is.null(size.factors)) {
         size.factors <- sizeFactors(x)
         if (is.null(size.factors)) {
-            size.factors <- librarySizeFactors(x, exprs_values=assay.type)
+            size.factors <- librarySizeFactors(x, assay.type=assay.type)
         }
     }
     size.factors <- .center_sf(size.factors, center.sf)
