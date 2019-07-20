@@ -9,12 +9,14 @@
 #' If \code{NULL}, the library sizes are used directly. 
 #' @param assay.type A string specifying the assay of \code{x} containing the count matrix.
 #' @param exprs_values Deprecated, same as \code{assay.type}.
+#' @param subset.row A vector specifying the subset of rows of \code{x} for which to return a result.
+#' @param subset_row Deprecated, same as \code{subset.row}.
 #' @param ... For the generic, arguments to pass to specific methods.
 #'
 #' For the SummarizedExperiment method, further arguments to pass to the ANY method.
 #'
 #' For the SingleCellExperiment method, further arguments to pass to the SummarizedExperiment method.
-#' @param alt.exp String or integer scalar specifying an alternative experiment for which to compute the averages.
+#' @param alt.exp String or integer scalar specifying an alternative experiment for which to compute the CPMs.
 #'
 #' @details 
 #' If \code{size.factors} are provided or available in \code{x}, they are used to define the effective library sizes. 
@@ -26,7 +28,7 @@
 #' @name calculateCPM
 #' @author Aaron Lun
 #' @seealso 
-#' \code{\link{logNormCounts}}, on which this function is based.
+#' \code{\link{normalizeCounts}}, on which this function is based.
 #'
 #' @examples
 #' data("sc_example_counts")
@@ -40,9 +42,18 @@
 NULL
 
 #' @importFrom Matrix colSums
-.calculate_cpm <- function(x, size.factors=NULL) {
-    out <- logNormCounts(x, size.factors=size.factors, log=FALSE, center.sf=TRUE)
-    out / (mean(colSums(x))/1e6)
+.calculate_cpm <- function(x, size.factors=NULL, subset.row=NULL, subset_row=NULL) {
+    subset.row <- .switch_arg_names(subset_row, subset.row)
+    if (!is.null(subset.row)) {
+        x <- x[subset.row,,drop=FALSE]
+    }
+
+    lib.sizes <- colSums(x) / 1e6
+    if (!is.null(size.factors)) {
+        lib.sizes <- size.factors / mean(size.factors) * mean(lib.sizes)
+    }
+
+    normalizeCounts(x, size.factors=lib.sizes, log=FALSE, center.sf=FALSE)
 }
 
 #' @export
@@ -51,7 +62,7 @@ setMethod("calculateCPM", "ANY", .calculate_cpm)
 
 #' @export
 #' @rdname calculateCPM
-#' @importFrom SummarizedExperiment assay assay<-
+#' @importFrom SummarizedExperiment assay 
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
 setMethod("calculateCPM", "SummarizedExperiment", function(x, ..., assay.type="counts", exprs_values=NULL) {
     assay.type <- .switch_arg_names(exprs_values, assay.type)
