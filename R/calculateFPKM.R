@@ -1,14 +1,21 @@
-#' Calculate fragments per kilobase of exon per million reads mapped (FPKM)
+#' Calculate FPKMs
 #'
-#' Calculate fragments per kilobase of exon per million reads mapped (FPKM) values for expression from counts for a set of features.
+#' Calculate fragments per kilobase of exon per million reads mapped (FPKM) values from the feature-level counts.
 #'
-#' @param object A SingleCellExperiment object or a numeric matrix of counts.
-#' @param effective_length Numeric vector providing the effective length for each feature in \code{object}.
+#' @param x A numeric matrix of counts where features are rows and cells are columns.
+#'
+#' Alternatively, a \linkS4class{SummarizedExperiment} or a \linkS4class{SingleCellExperiment} containing such counts.
+#' @param effective.length Numeric vector providing the effective length for each feature in \code{x}.
+#' @param effective_length Deprecated, same as \code{effective.length}.
 #' @param ... Further arguments to pass to \code{\link{calculateCPM}}.
-#' @param subset_row A vector specifying the subset of rows of \code{object} for which to return a result.
 #'
 #' @return A numeric matrix of FPKM values.
-#' @export
+#'
+#' @author Aaron Lun, based on code by Davis McCarthy
+#'
+#' @seealso 
+#' \code{\link{calculateCPM}}, for the initial calculation of CPM values.
+#'
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
@@ -17,11 +24,11 @@
 #'     colData = sc_example_cell_info)
 #'
 #' eff_len <- runif(nrow(example_sce), 500, 2000)
-#' fout <- calculateFPKM(example_sce, eff_len, use_size_factors = FALSE)
-#'
-calculateFPKM <- function(object, effective_length, ..., subset_row = NULL) {
-    subset_row <- .subset2index(subset_row, object, byrow=TRUE)
-    cpms <- calculateCPM(object, ..., subset_row = subset_row)
-    effective_length <- effective_length[subset_row] / 1e3
-    cpms / effective_length
+#' fout <- calculateFPKM(example_sce, eff_len)
+#' str(fout)
+#' @export
+calculateFPKM <- function(x, effective.length, effective_length=NULL, ..., subset_row = NULL) {
+    effective.length <- .switch_arg_names(effective_length, effective.length)
+    out <- calculateCPM(x, ...)
+    out / (effective.length / 1e3)
 }
