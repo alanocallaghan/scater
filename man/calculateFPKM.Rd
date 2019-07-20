@@ -2,24 +2,27 @@
 % Please edit documentation in R/calculateFPKM.R
 \name{calculateFPKM}
 \alias{calculateFPKM}
-\title{Calculate fragments per kilobase of exon per million reads mapped (FPKM)}
+\title{Calculate FPKMs}
 \usage{
-calculateFPKM(object, effective_length, ..., subset_row = NULL)
+calculateFPKM(x, effective.length, effective_length = NULL, ...,
+  subset_row = NULL)
 }
 \arguments{
-\item{object}{A SingleCellExperiment object or a numeric matrix of counts.}
+\item{x}{A numeric matrix of counts where features are rows and cells are columns.
 
-\item{effective_length}{Numeric vector providing the effective length for each feature in \code{object}.}
+Alternatively, a \linkS4class{SummarizedExperiment} or a \linkS4class{SingleCellExperiment} containing such counts.}
+
+\item{effective.length}{Numeric vector providing the effective length for each feature in \code{x}.}
+
+\item{effective_length}{Deprecated, same as \code{effective.length}.}
 
 \item{...}{Further arguments to pass to \code{\link{calculateCPM}}.}
-
-\item{subset_row}{A vector specifying the subset of rows of \code{object} for which to return a result.}
 }
 \value{
 A numeric matrix of FPKM values.
 }
 \description{
-Calculate fragments per kilobase of exon per million reads mapped (FPKM) values for expression from counts for a set of features.
+Calculate fragments per kilobase of exon per million reads mapped (FPKM) values from the feature-level counts.
 }
 \examples{
 data("sc_example_counts")
@@ -29,6 +32,12 @@ example_sce <- SingleCellExperiment(
     colData = sc_example_cell_info)
 
 eff_len <- runif(nrow(example_sce), 500, 2000)
-fout <- calculateFPKM(example_sce, eff_len, use_size_factors = FALSE)
-
+fout <- calculateFPKM(example_sce, eff_len)
+str(fout)
+}
+\seealso{
+\code{\link{calculateCPM}}, for the initial calculation of CPM values.
+}
+\author{
+Aaron Lun, based on code by Davis McCarthy
 }
