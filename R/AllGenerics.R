@@ -107,3 +107,18 @@ setGeneric("librarySizeFactors", function(x, ...) standardGeneric("librarySizeFa
 #' @export
 #' @rdname normalizeCounts
 setGeneric("normalizeCounts", function(x, ...) standardGeneric("normalizeCounts"))
+
+#################################
+# Aggregation-related generics.
+
+#' @export
+#' @rdname sumCountsAcrossFeatures
+setGeneric("sumCountsAcrossFeatures", function(x, ...) standardGeneric("sumCountsAcrossFeatures"))
+
+#' @export
+#' @rdname sumCountsAcrossCells
+setGeneric("sumCountsAcrossCells", function(x, ...) standardGeneric("sumCountsAcrossCells"))
+
+#' @export
+#' @rdname sumCountsAcrossCells
+setGeneric("aggregateAcrossCells", function(x, ...) standardGeneric("aggregateAcrossCells"))
