@@ -1,34 +1,99 @@
 #' Compute library size factors
 #' 
-#' Define size factors from the library sizes after centering.
-#' This ensures that the library size adjustment yields values comparable to those generated after normalization with other sets of size factors.
+#' Define per-cell size factors from the library sizes (i.e., total sum of counts per cell).
 #'
-#' @param object A count matrix or SingleCellExperiment object containing counts.
-#' @param exprs_values A string indicating the assay of \code{object} containing the counts, if \code{object} is a SingleCellExperiment.
-#' @param subset_row A vector specifying whether the rows of \code{object} should be (effectively) subsetted before calculating library sizes.
-
-#' @return A numeric vector of size factors.
+#' @param x A numeric matrix of counts with one row per feature and column per cell.
 #'
-#' @export
-#' @importFrom methods is
-#' @importClassesFrom SingleCellExperiment SingleCellExperiment
-#' @importFrom DelayedArray DelayedArray
-#' @importFrom DelayedMatrixStats colSums2
+#' Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such counts.
+#' @param assay.type String or integer scalar indicating the assay of \code{x} containing the counts.
+#' @param exprs_values Deprecated, same as \code{assay.type}.
+#' @param subset.row A vector specifying whether the size factors should be computed from a subset of rows of \code{x}.
+#' @param subset_row Deprecated, same as \code{subset_row}.
+#' @param alt.exp String or integer scalar indicating which (if any) alternative experiment should be used
+#' to provide the counts to compute the size factors.
 #'
+#' @details
+#' Library sizes are converted into size factors by scaling them so that their mean across cells is unity.
+#' This ensures that the normalized values are still on the same scale as the raw counts.
+#' 
+#' Preserving the scale is useful for interpretation of operations on the normalized values,
+#' e.g., the pseudo-count used in \code{\link{logNormCounts}} can actually be considered an additional read/UMI.
+#' This is important for ensuring that the effect of the pseudo-count decreases with increasing sequencing depth.
+#'
+#' Setting \code{alt.exp} is occasionally useful for computing size factors from spike-in transcripts
+#' and using them on the count matrix for endogenous genes (stored in the main experiment).
+#'
+#' @author Aaron Lun
+#'
+#' @seealso 
+#' \code{\link{logNormCounts}}, where these size factors are used by default.
+#' 
+#' @return 
+#' For \code{librarySizeFactors}, a numeric vector of size factors is returned for all methods.
+#'
+#' For \code{computeLibraryFactors}, a numeric vector is also returned for the ANY and SummarizedExperiment methods.
+#' For the SingleCellExperiment method, \code{x} is returned containing the size factors in \code{\link{sizeFactors}(x)}.
+#'
+#' @name librarySizeFactors
 #' @examples
 #' data("sc_example_counts")
 #' summary(librarySizeFactors(sc_example_counts))
-librarySizeFactors <- function(object, exprs_values="counts", subset_row=NULL) {
-    if (is(object, "SingleCellExperiment")) {
-        exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
-    } else {
-        exprs_mat <- object
+#'
+#' sce <- SingleCellExperiment(list(counts=sc_example_counts))
+#' sce <- computeLibraryFactors(sce)
+#' summary(sizeFactors(sce))
+NULL
+
+#' @importFrom Matrix colSums
+.library_size_factors <- function(x, subset.row=NULL) {
+    if (is.null(subset.row)) {
+       x <- x[.subset2index(subset.row, x, byrow=TRUE),,drop=FALSE]
     }
+    lib_sizes <- colSums(x)
+    lib_sizes/mean(lib_sizes)
+}       
 
-    subset_row <- .subset2index(subset_row, object, byrow=TRUE)
-    lib_sizes <- colSums2(DelayedArray(exprs_mat), rows=subset_row)
-    sf <- lib_sizes/mean(lib_sizes)
+#' @export
+#' @rdname librarySizeFactors
+setMethod("librarySizeFactors", "ANY", .library_size_factors)
 
-    names(sf) <- colnames(object)
-    return(sf)
-}
+#' @export
+#' @rdname librarySizeFactors
+#' @importFrom SummarizedExperiment assay
+#' @importClassesFrom SummarizedExperiment SummarizedExperiment
+setMethod("librarySizeFactors", "SummarizedExperiment", function(x, assay.type="counts", subset.row=NULL)
+    .library_size_factors(assay(x, assay.type), subset.row=subset.row))
+
+#' @export
+#' @rdname librarySizeFactors
+#' @importFrom SummarizedExperiment assay
+#' @importFrom SingleCellExperiment altExp
+#' @importClassesFrom SingleCellExperiment SingleCellExperiment
+setMethod("librarySizeFactors", "SingleCellExperiment", 
+    function(x, assay.type="counts", exprs_values=NULL, subset.row=NULL, subset_row=NULL, alt.exp=NULL) 
+{
+    if (!is.null(alt.exp)) {
+        x <- altExp(x, alt.exp)
+    }
+    assay.type <- .switch_arg_names(exprs_values, assay.type)
+    subset.row <- .switch_arg_names(subset_row, subset.row)
+    .library_size_factors(assay(x, assay.type), subset.row=subset.row)
+})
+
+#' @export
+#' @rdname librarySizeFactors
+setMethod("computeLibraryFactors", "ANY", .library_size_factors)
+
+#' @export
+#' @rdname librarySizeFactors
+setMethod("computeLibraryFactors", "SummarizedExperiment", function(x, assay.type="counts", subset.row=NULL) 
+    librarySizeFactors(x, assay.type=assay.type, subset.row=subset.row))
+
+#' @export
+#' @rdname librarySizeFactors
+#' @importFrom BiocGenerics sizeFactors<-
+setMethod("computeLibraryFactors", "SingleCellExperiment", function(x, assay.type="counts", subset.row=NULL, alt.exp=NULL) {
+    sf <- librarySizeFactors(x, assay.type=assay.type, subset.row=subset.row, alt.exp=alt.exp)
+    sizeFactors(x) <- sf
+    x
+})
