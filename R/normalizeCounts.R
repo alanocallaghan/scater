@@ -7,6 +7,7 @@
 #' Alternatively, a \linkS4class{SingleCellExperiment} or \linkS4class{SummarizedExperiment} object containing such a count matrix.
 #' @param size.factors A numeric vector of cell-specific size factors.
 #' Alternatively \code{NULL}, in which case the size factors are extracted or computed from \code{x}.
+#' @param size_factors Deprecated, same as \code{size.factors}.
 #' @param log Logical scalar indicating whether normalized values should be log2-transformed.
 #' @param return_log Deprecated, same as \code{log}.
 #' @param pseudo.count Numeric scalar specifying the pseudo-count to add when log-transforming expression values.
@@ -53,7 +54,7 @@ NULL
 #' @rdname normalizeCounts
 #' @importFrom Matrix t
 #' @importClassesFrom DelayedArray DelayedMatrix
-setMethod("normalizeCounts", "DelayedMatrix", function(x, size.factors=NULL, 
+setMethod("normalizeCounts", "DelayedMatrix", function(x, size.factors=NULL, size_factors=NULL, 
     log=TRUE, return_log=NULL, pseudo.count=1, center.sf=TRUE,
     subset.row=NULL, subset_row=NULL) 
 {
@@ -62,6 +63,7 @@ setMethod("normalizeCounts", "DelayedMatrix", function(x, size.factors=NULL,
         x <- x[subset.row,,drop=FALSE]
     }
 
+    size.factors <- .switch_arg_names(size_factors, size.factors)
     size.factors <- .get_default_sizes(x, size.factors, center.sf)
     norm_exprs <- t(t(x) / size.factors)
 
@@ -74,13 +76,16 @@ setMethod("normalizeCounts", "DelayedMatrix", function(x, size.factors=NULL,
 
 #' @export
 #' @rdname normalizeCounts
-setMethod("normalizeCounts", "ANY", function(x, size.factors=NULL, 
+setMethod("normalizeCounts", "ANY", function(x, size.factors=NULL, size_factors=NULL,
     log=TRUE, return_log=NULL, pseudo.count=1, center.sf=TRUE,
     subset.row=NULL, subset_row=NULL) 
 {
+    size.factors <- .switch_arg_names(size_factors, size.factors)
     size.factors <- .get_default_sizes(x, size.factors, center.sf)
+
     subset.row <- .switch_arg_names(subset_row, subset.row)
     subset.row <- .subset2index(subset.row, x, byrow=TRUE)
+
     norm_exprs <- .Call(cxx_norm_exprs, x, list(size.factors), integer(nrow(x)),
         pseudo.count, log, subset.row - 1L)
     dimnames(norm_exprs) <- dimnames(x)
@@ -114,7 +119,8 @@ setMethod("normalizeCounts", "SummarizedExperiment", function(x, ..., assay.type
 #' @rdname normalizeCounts
 #' @importFrom BiocGenerics sizeFactors
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
-setMethod("normalizeCounts", "SingleCellExperiment", function(x, size.factors=NULL, ...) {
+setMethod("normalizeCounts", "SingleCellExperiment", function(x, size.factors=NULL, size_factors=NULL, ...) {
+    size.factors <- .switch_arg_names(size_factors, size.factors)
     if (is.null(size.factors)) {
         size.factors <- sizeFactors(x)
     }

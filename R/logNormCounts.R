@@ -65,7 +65,7 @@ setMethod("logNormCounts", "SummarizedExperiment", function(x, size.factors=NULL
 #' @importFrom SummarizedExperiment assay<-
 .se_lnc <- function(assay.type, log, pseudo.count, name) {
     force(assay.type)
-    foce(log)
+    force(log)
     force(pseudo.count)
     if (is.null(name)) {
         name <- if (log) "logcounts" else "normcounts"
