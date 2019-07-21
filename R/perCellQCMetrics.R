@@ -5,8 +5,9 @@
 #' @param x A numeric matrix of counts with cells in columns and features in rows.
 #' 
 #' Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} object containing such a matrix.
-#' @param subsets A named list containing one or more vectors (a character vector of feature names, a logical vector, or a numeric vector of indices),
-#' used to identify feature controls such as ERCC spike-in sets or mitochondrial genes. 
+#' @param subsets A named list containing one or more vectors 
+#' (a character vector of feature names, a logical vector, or a numeric vector of indices),
+#' used to identify interesting feature subsets such as ERCC spike-in transcripts or mitochondrial genes. 
 #' @param percent.in.top An integer vector. 
 #' Each element is treated as a number of top genes to compute the percentage of library size occupied by the most highly expressed genes in each cell.
 #' @param detection.limit A numeric scalar specifying the lower detection limit for expression.
@@ -93,7 +94,6 @@
 #'     assays = list(counts = sc_example_counts), 
 #'     colData = sc_example_cell_info
 #' )
-#' example_sce <- calculateQCMetrics(example_sce)
 #'
 #' stats <- perCellQCMetrics(example_sce)
 #' stats
@@ -118,6 +118,8 @@ NULL
 .per_cell_qc_metrics <- function(x, subsets = NULL, percent.in.top = c(50, 100, 200, 500), 
     detection.limit = 0, BPPARAM=SerialParam()) 
 {
+    subsets <- lapply(subsets, FUN = .subset2index, target = x, byrow = TRUE)
+
     # Computing all QC metrics, with cells split across workers. 
     worker_assign <- .assign_jobs_to_workers(ncol(x), BPPARAM)
     bp.out <- bpmapply(.compute_qc_metrics, start=worker_assign$start, end=worker_assign$end,
