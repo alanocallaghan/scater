@@ -106,8 +106,10 @@ aggregateAcrossFeatures <- function(x, ids, ..., use.assay.types="counts") {
         collected[[i]] <- sumCountsAcrossFeatures(x, ids=ids, ..., assay.type=use.assay.types[i])
     }
     names(collected) <- .choose_assay_names(x, use.assay.types)
-    x <- x[match(rownames(collected[[i]]), as.character(ids)),]
+
+    x <- x[match(rownames(collected[[1]]), as.character(ids)),]
     assays(x) <- collected
+    rownames(x) <- rownames(collected[[1]])
     x
 }
 
