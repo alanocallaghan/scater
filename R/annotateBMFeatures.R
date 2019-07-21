@@ -4,9 +4,11 @@
 #' 
 #' @param ids A character vector containing feature identifiers.
 #' @param biomart String defining the biomaRt to be used, to be passed to \code{\link[biomaRt]{useMart}}.
-#' Default is \code{"ENSEMBL_MART_ENSEMBL"}.
 #' @param dataset String defining the dataset to use, to be passed to \code{\link[biomaRt]{useMart}}.
-#' Default is \code{"mmusculus_gene_ensembl"}, which should be changed if the organism is not mouse.
+#' @param id.type String specifying the type of identifier in \code{ids}.
+#' @param symbol.type String specifying the type of symbol to retrieve.
+#' If missing, this is set to \code{"mgi_symbol"} if \code{dataset="mmusculus_gene_ensembl"},
+#' or to \code{"hgnc_symbol"} if \code{dataset="hsapiens_gene_ensembl"},
 #' @param ... Further named arguments to pass to \code{biomaRt::useMart}.
 #' @param attributes Character vector defining the attributes to pass to \code{\link[biomaRt]{getBM}}.
 #' @param filters String defining the type of identifier in \code{ids}, to be used as a filter in \code{\link[biomaRt]{getBM}}.
@@ -22,24 +24,28 @@
 #'
 #' @examples
 #' \dontrun{
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#'     assays = list(counts = sc_example_counts), 
-#'     colData = sc_example_cell_info
-#' )
-#'
 #' # Making up Ensembl IDs for demonstration purposes.
-#' mock_id <- paste0("ENSMUSG", sprintf("%011d", seq_len(nrow(example_sce))))
+#' mock_id <- paste0("ENSMUSG", sprintf("%011d", seq_len(1000)))
 #' anno <- annotateBMFeatures(ids=mock_id)
 #' }
 #' @export
 #' @importFrom methods as
 #' @importClassesFrom S4Vectors DataFrame
 annotateBMFeatures <- function(ids, biomart="ENSEMBL_MART_ENSEMBL", dataset="mmusculus_gene_ensembl",
-    attributes=c(filters, "mgi_symbol", "chromosome_name", "gene_biotype", "start_position", "end_position"),
-    filters="ensembl_gene_id", ...)
+    id.type = "ensembl_gene_id", symbol.type,
+    attributes=c(id.type, symbol.type, "chromosome_name", "gene_biotype", "start_position", "end_position"),
+    filters = id.type, ...)
 {
+    # attributes must be evaluated after the symbol.type
+    # is resolved, otherwise there will be an error. 
+    if (missing(symbol.type)) {
+        symbol.type <- switch(dataset,
+            mmusculus_gene_ensembl="mgi_symbol",
+            hsapiens_gene_ensembl="hgnc_symbol",
+            default=character(0)
+        ) 
+    }
+
     bmart <- biomaRt::useMart(biomart = biomart, dataset = dataset, ...)
     feature_info <- biomaRt::getBM(attributes = attributes, filters = filters, values = ids, mart = bmart)
     mm <- match(ids, feature_info[[filters]])
