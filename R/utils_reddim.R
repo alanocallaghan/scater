@@ -87,12 +87,13 @@ NULL
 #' @importFrom Matrix t
 #' @importFrom DelayedArray DelayedArray
 #' @importFrom DelayedMatrixStats rowVars
-.get_mat_for_reddim <- function(x, subset.row, ntop, scale)
+.get_mat_for_reddim <- function(x, subset.row, ntop, scale, get.var=FALSE)
 # Picking the 'ntop' most highly variable features or just using a pre-specified set of features.
 # Also removing zero-variance columns and scaling the variance of each column.
 # Finally, transposing for downstream use (cells are now rows).
 {
-    if (is.null(subset.row) || scale) {
+    use.var <- is.null(subset.row) || scale || get.var
+    if (use.var) {
         rv <- rowVars(DelayedArray(x))
     }
 
@@ -104,12 +105,20 @@ NULL
     }
 
     x <- x[subset.row,, drop = FALSE]
-
-    if (scale) {
+    if (use.var) {
         rv <- rv[subset.row]
-        rv <- pmax(1e-8, rv)
-        x <- x/sqrt(rv)
     }
 
-    t(x)
+    if (scale) {
+        keep <- rv >= 1e-8
+        x <- x[keep,,drop=FALSE]/sqrt(rv[keep])
+        rv <- rep(1, nrow(x))
+    }
+
+    x <- t(x)
+    if (get.var) {
+        list(x=x, v=rv)
+    } else {
+        x
+    }
 }
