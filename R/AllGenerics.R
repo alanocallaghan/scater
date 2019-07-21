@@ -126,3 +126,12 @@ setGeneric("sumCountsAcrossCells", function(x, ...) standardGeneric("sumCountsAc
 #' @export
 #' @rdname sumCountsAcrossCells
 setGeneric("aggregateAcrossCells", function(x, ...) standardGeneric("aggregateAcrossCells"))
+
+#################################
+# Variance-related generics.
+
+#' @export
+#' @rdname getVarianceExplained
+setGeneric("getVarianceExplained", function(x, ...) standardGeneric("getVarianceExplained"))
+
+
