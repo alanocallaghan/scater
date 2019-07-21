@@ -63,16 +63,12 @@ setGeneric("fpkm<-", function(object, value) standardGeneric("fpkm<-"))
 setGeneric("perCellQCMetrics", function(x, ...) standardGeneric("perCellQCMetrics"))
 
 #' @export
+#' @rdname getVarianceExplained
+setGeneric("getVarianceExplained", function(x, ...) standardGeneric("getVarianceExplained"))
+
+#' @export
 #' @rdname calculateAverage
 setGeneric("calculateAverage", function(x, ...) standardGeneric("calculateAverage"))
-
-#' @export
-#' @rdname calculateCPM
-setGeneric("calculateCPM", function(x, ...) standardGeneric("calculateCPM"))
-
-#' @export
-#' @rdname calculateTPM
-setGeneric("calculateTPM", function(x, ...) standardGeneric("calculateTPM"))
 
 #' @export
 #' @rdname nexprs
@@ -112,6 +108,14 @@ setGeneric("librarySizeFactors", function(x, ...) standardGeneric("librarySizeFa
 #' @rdname normalizeCounts
 setGeneric("normalizeCounts", function(x, ...) standardGeneric("normalizeCounts"))
 
+#' @export
+#' @rdname calculateCPM
+setGeneric("calculateCPM", function(x, ...) standardGeneric("calculateCPM"))
+
+#' @export
+#' @rdname calculateTPM
+setGeneric("calculateTPM", function(x, ...) standardGeneric("calculateTPM"))
+
 #################################
 # Aggregation-related generics.
 
@@ -126,12 +130,3 @@ setGeneric("sumCountsAcrossCells", function(x, ...) standardGeneric("sumCountsAc
 #' @export
 #' @rdname sumCountsAcrossCells
 setGeneric("aggregateAcrossCells", function(x, ...) standardGeneric("aggregateAcrossCells"))
-
-#################################
-# Variance-related generics.
-
-#' @export
-#' @rdname getVarianceExplained
-setGeneric("getVarianceExplained", function(x, ...) standardGeneric("getVarianceExplained"))
-
-
