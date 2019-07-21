@@ -82,20 +82,24 @@ setGeneric("nexprs", function(x, ...) standardGeneric("nexprs"))
 # Dimensionality reduction generics.
 
 #' @export
+#' @rdname runPCA
+setGeneric("calculatePCA", function(x, ...) standardGeneric("calculatePCA"))
+
+#' @export
 #' @rdname runTSNE
-setGeneric("runTSNE", function(x, ...) standardGeneric("runTSNE"))
+setGeneric("calculateTSNE", function(x, ...) standardGeneric("calculateTSNE"))
 
 #' @export
 #' @rdname runUMAP
-setGeneric("runUMAP", function(x, ...) standardGeneric("runUMAP"))
+setGeneric("calculateUMAP", function(x, ...) standardGeneric("calculateUMAP"))
 
 #' @export
 #' @rdname runMDS
-setGeneric("runMDS", function(x, ...) standardGeneric("runMDS"))
+setGeneric("calculateMDS", function(x, ...) standardGeneric("calculateMDS"))
 
 #' @export
 #' @rdname runDiffusionMap
-setGeneric("runDiffusionMap", function(x, ...) standardGeneric("runDiffusionMap"))
+setGeneric("calculateDiffusionMap", function(x, ...) standardGeneric("calculateDiffusionMap"))
 
 #################################
 # Normalization-related generics.

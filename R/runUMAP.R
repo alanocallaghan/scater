@@ -2,11 +2,10 @@
 #'
 #' Perform uniform manifold approximation and projection (UMAP) for the cells, based on the data in a SingleCellExperiment object.
 #'
-#' @param x A numeric matrix of log-expression values where rows are features and columns are cells.
+#' @param x For \code{calculateUMAP}, a numeric matrix of log-expression values where rows are features and columns are cells.
+#' Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
 #'
-#' Alternatively, a \linkS4class{SingleCellExperiment} object containing such a matrix.
-#'
-#' Alternatively, if \code{transposed=TRUE}, a numeric matrix where rows are cells and columns are dimensions.
+#' For \code{runTSNE}, a \linkS4class{SingleCellExperiment} object containing such a matrix.
 #' @param ncomponents Numeric scalar indicating the number of UMAP dimensions to obtain.
 #' @param ntop Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
 #' @param subset.row Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
@@ -18,11 +17,11 @@
 #' @param transposed Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.
 #' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for UMAP.
 #' This will override any \code{ntop} argument if specified.
-#' @param ... For the generic, additional arguments to pass to specific methods.
-#'
+#' @param ... For the \code{calculateUMAP} generic, additional arguments to pass to specific methods.
 #' For the ANY method, additional arguments to pass to \code{\link[uwot]{umap}}.
+#' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
 #'
-#' For the SingleCellExperiment method, additional arguments to pass to the ANY method.
+#' For \code{runUMAP}, additional arguments to pass to \code{calculateUMAP}.
 #' @param pca Integer scalar specifying how many PCs should be used as input into the UMAP algorithm.
 #' By default, no PCA is performed if the input is a dimensionality reduction result.
 #' @param n.neighbors Integer scalar, number of nearest neighbors to identify when constructing the initial graph.
@@ -39,9 +38,9 @@
 #' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #'
 #' @return 
-#' For the ANY method, a matrix is returned containing the UMAP coordinates for each cell (row) and dimension (column).
+#' For \code{calculateUMAP}, a matrix is returned containing the UMAP coordinates for each cell (row) and dimension (column).
 #' 
-#' For the \linkS4class{SingleCellExperiment} method, a modified version of \code{x} is returned that contains the UMAP coordinates in the \code{"UMAP"} entry of the \code{\link{reducedDims}}.
+#' For \code{runUMAP}, a modified \code{x} is returned that contains the UMAP coordinates in \code{\link{reducedDim}(x, name)}.
 #'
 #' @details 
 #' The function \code{\link[uwot]{umap}} is used internally to compute the UMAP. 
@@ -82,11 +81,9 @@
 #' head(reducedDim(example_sce))
 NULL
 
-#' @export
-#' @rdname runUMAP
 #' @importFrom BiocNeighbors findKNN KmknnParam
 #' @importFrom BiocParallel SerialParam
-setMethod("runUMAP", "ANY", function(x, ncomponents = 2, ntop = 500, 
+.calculate_umap <- function(x, ncomponents = 2, ntop = 500, 
     subset.row = NULL, feature_set=NULL,
     scale=FALSE, scale_features=NULL,
     transposed=FALSE, pca=if (transposed) NULL else 50,
@@ -112,22 +109,38 @@ setMethod("runUMAP", "ANY", function(x, ncomponents = 2, ntop = 500,
     }
 
     do.call(uwot::umap, args)
+}
+
+#' @export
+#' @rdname runUMAP
+setMethod("calculateUMAP", "ANY", .calculate_mds)
+
+#' @export
+#' @rdname runUMAP
+#' @importFrom SummarizedExperiment assay
+setMethod("calculateUMAP", "SummarizedExperiment", function(x, ..., assay.type="logcounts") {
+    .calculate_mds(assay(x, assay.type), ...)
 })
 
 #' @export
 #' @rdname runUMAP
-#' @importFrom SingleCellExperiment reducedDim<- 
-setMethod("runUMAP", "SingleCellExperiment", function(x, 
-    ..., pca=if (!is.null(use.dimred)) NULL else 50,
-    use.dimred=NULL, use_dimred=NULL, 
-    n.dimred=NULL, n_dimred=NULL,
-    assay.type="logcounts", exprs_values = NULL,
-    alt.exp=NULL, name="UMAP") 
+#' @importFrom SummarizedExperiment assay
+setMethod("calculateUMAP", "SingleCellExperiment", function(x, ..., 
+    pca=if (!is.null(use.dimred)) NULL else 50,
+    assay.type="logcounts", exprs_values=NULL,
+    use.dimred=NULL, use_dimred=NULL, n.dimred=NULL, n_dimred=NULL, alt.exp=NULL) 
 {
     use.dimred <- .switch_arg_names(use_dimred, use.dimred)
+    assay.type <- .switch_arg_names(exprs_values, assay.type)
     mat <- .get_mat_from_sce(x, assay.type=assay.type, alt.exp=alt.exp, use.dimred=use.dimred,
         n.dimred=.switch_arg_names(n_dimred, n.dimred))
-    tout <- runUMAP(mat, transposed=!is.null(use.dimred), pca=pca, ...)
-    reducedDim(x, name) <- tout
-    x
+    .calculate_umap(mat, transposed=!is.null(use.dimred), pca=pca, ...)
 })
+
+#' @export
+#' @rdname runUMAP
+#' @importFrom SingleCellExperiment reducedDim<-
+runUMAP <- function(x, ..., name="UMAP") {
+    reducedDim(x, name) <- calculateUMAP(x, ...)
+    x
+}
