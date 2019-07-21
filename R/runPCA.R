@@ -74,11 +74,15 @@ NULL
     scale <- .switch_arg_names(scale_features, scale)
     subset.row <- .switch_arg_names(feature_set, subset.row)
     if (!transposed) {
-        x <- .get_mat_for_reddim(x, subset.row=subset.row, ntop=ntop, scale=scale) 
+        out <- .get_mat_for_reddim(x, subset.row=subset.row, ntop=ntop, scale=scale, get.var=TRUE) 
+        x <- out$x
+        cv <- out$v
+    } else {
+        cv <- colVars(DelayedArray(x))
     }
 
     pca <- runPCA(x, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM, get.rotation=FALSE)
-    percentVar <- pca$sdev ^ 2 / sum(colVars(DelayedArray(x))) # as not all singular values are computed.
+    percentVar <- pca$sdev ^ 2 / sum(cv)
 
     # Saving the results
     pcs <- pca$x
