@@ -1,4 +1,4 @@
-#' Plot a relative log expression (RLE) plot
+#' Plot relative log expression 
 #'
 #' Produce a relative log expression (RLE) plot of one or more transformations of cell expression values.
 #'
@@ -10,9 +10,9 @@
 #' @param legend Logical scalar specifying whether a legend should be shown.
 #' @param ordering A vector specifying the ordering of cells in the RLE plot.
 #' This can be useful for arranging cells by experimental conditions or batches.
-#' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
-#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.
+#' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
+#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from,
+#' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
 #' @param ... further arguments passed to \code{\link[ggplot2]{geom_boxplot}} when \code{style="full"}.
 #'
 #' @return A ggplot object
@@ -34,8 +34,9 @@
 #' This approach is more succinct and faster for large numbers of cells.
 #'
 #' @references 
-#' Gandolfo LC, Speed TP. RLE Plots: Visualising Unwanted Variation in High Dimensional Data. 
-#' arXiv [stat.ME]. 2017. Available: http://arxiv.org/abs/1704.03590
+#' Gandolfo LC, Speed TP (2017). 
+#' RLE plots: visualising unwanted variation in high dimensional data. 
+#' \emph{arXiv}.
 #'
 #' @author 
 #' Davis McCarthy,
@@ -68,7 +69,7 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
                     colour_by = NULL, by_exprs_values = exprs_values, ...) {
 
     ## Check aesthetic arguments.
-    colour_by_out <- .choose_vis_values(object, colour_by, mode = "column", search = "any", exprs_values = by_exprs_values)
+    colour_by_out <- retrieveCellInfo(object, colour_by, assay.type = by_exprs_values)
     colour_by <- colour_by_out$name
     colour_by_vals <- colour_by_out$val
     if (!is.null(colour_by)) {

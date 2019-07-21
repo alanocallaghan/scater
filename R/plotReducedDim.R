@@ -14,8 +14,9 @@
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
 #' @param by_show_single Deprecated and ignored.
-#' @param text_by Specification of a column metadata field for which to add text - see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param text_by String specifying the column metadata field with which to add text labels on the plot.
 #' This must refer to a categorical field, i.e., coercible into a factor.
+#' Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
 #' @param text_size Numeric scalar specifying the size of added text.
 #' @param text_colour String specifying the colour of the added text.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
@@ -85,23 +86,14 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NUL
     df_to_plot <- data.frame(red_dim[,to_plot,drop=FALSE])
 
     ## checking visualization arguments
-    colour_by_out <- retrieveCellInfo(object, colour_by, assay.type = by_exprs_values)
-    colour_by <- colour_by_out$name
-    df_to_plot$colour_by <- colour_by_out$val
+    vis_out <- .incorporate_common_vis_col(df_to_plot, se = object, 
+        colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
+        by_exprs_values = by_exprs_values)
 
-    shape_by_out <- retrieveCellInfo(object, shape_by, assay.type = by_exprs_values)
-    shape_by <- shape_by_out$name
-    if (!is.null(shape_by_out$value)) {
-        shape_by_out$value <- as.factor(shape_by_out$value)
-        if (nlevels(shape_by_out$value) > 10) {
-            stop("more than 10 levels for 'shape_by'")
-        }
-        df_to_plot$shape_by <- shape_by_out$value
-    }
-
-    size_by_out <- retrieveCellInfo(object, size_by, assay.type = by_exprs_values)
-    size_by <- size_by_out$name
-    df_to_plot$size_by <- size_by_out$val
+    df_to_plot <- vis_out$df
+    colour_by <- vis_out$colour_by
+    shape_by <- vis_out$shape_by
+    size_by <- vis_out$size_by
 
     ## Dispatching to the central plotter in the simple case of two dimensions.
     if (length(to_plot)==2L) {
@@ -119,7 +111,8 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NUL
 
         # Adding text with the median locations of the 'text_by' vector.
         if (!is.null(text_by)) {
-            text_out <- .choose_vis_values(object, by=text_by, mode="column", search="metadata", coerce_factor=TRUE)
+            text_out <- retrieveCellInfo(object, text_by, column, search="colData")
+            text_out$val <- .coerce_to_factor(text_out$val, level.limit=Inf)
             by_text_x <- vapply(split(df_to_plot$X, text_out$val), median, FUN.VALUE=0)
             by_text_y <- vapply(split(df_to_plot$Y, text_out$val), median, FUN.VALUE=0)
             plot_out <- plot_out + annotate("text", x=by_text_x, y=by_text_y, 
@@ -131,8 +124,7 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NUL
 
     ## Otherwise, creating a paired reddim plot.
     paired_reddim_plot(df_to_plot, to_plot = to_plot, percentVar = percentVar,
-        colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-        ...)
+        colour_by = colour_by, shape_by = shape_by, size_by = size_by, ...)
 }
 
 #' @importFrom ggplot2 ggplot facet_grid stat_density geom_point theme

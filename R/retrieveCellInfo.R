@@ -120,3 +120,13 @@ retrieveCellInfo <- function(x, by, search=c("any", "colData", "assays", "altExp
     .mopUp(NULL, NULL)
 }
 
+.coerce_to_factor <- function(x, level.limit, msg) {
+    if (!is.null(x)) {
+        x <- as.factor(x)
+        if (nlevels(x) > level.limit) {
+            stop(sprintf("more than %i levels for '%s'", level.limit, msg))
+        }
+    }
+    x
+}
+

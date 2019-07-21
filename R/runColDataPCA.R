@@ -9,7 +9,7 @@
 #' @param scale_features Logical scalar, should the expression values be standardised so that each feature has unit variance?
 #' This will also remove features with standard deviations below 1e-8. 
 #' @param selected_variables List of strings or a character vector indicating which variables in \code{colData(x)} to use.
-#' If a list, each entry can take the form described in \code{?"\link{scater-vis-var}"}.
+#' If a list, each entry can also be an \link{AsIs} vector or a data.frame, as described in \code{?\link{retrieveCellInfo}}.
 #' @param detect_outliers Logical indicating whether outliers should be detected based on PCA coordinates.
 #' @param BSPARAM A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.
@@ -89,7 +89,7 @@ runColDataPCA <- function(x, ncomponents = 2, scale_features = TRUE,
     # Constructing a matrix - presumably all doubles.
     exprs_to_plot <- matrix(0, ncol(x), length(selected_variables))
     for (it in seq_along(selected_variables)) {
-        exprs_to_plot[,it] <- .choose_vis_values(x, selected_variables[[it]], mode = "column", search = "metadata")$val
+        exprs_to_plot[,it] <- retrieveCellInfo(x, selected_variables[[it]], search = "colData")$val
     }
     if (scale_features) {
         exprs_to_plot <- .scale_columns(exprs_to_plot)

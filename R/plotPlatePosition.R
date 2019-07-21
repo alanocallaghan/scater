@@ -6,12 +6,12 @@
 #' @param plate_position A character vector specifying the plate position for each cell (e.g., A01, B12, and so on, where letter indicates row and number indicates column).
 #' If \code{NULL}, the function will attempt to extract this from \code{object$plate_position}.
 #' Alternatively, a list of two factors (\code{"row"} and \code{"column"}) can be supplied, specifying the row (capital letters) and column (integer) for each cell in \code{object}.
-#' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
-#' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
-#' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
+#' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
+#' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.
-#' @param by_show_single Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.
+#' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
+#' @param by_show_single Deprecated and ignored.
 #' @param add_legend Logical scalar specifying whether a legend should be shown.
 #' @param theme_size Numeric scalar, see \code{?"\link{scater-plot-args}"} for details.
 #' @param point_alpha Numeric scalar specifying the transparency of the points, see \code{?"\link{scater-plot-args}"} for details.
@@ -86,9 +86,10 @@ plotPlatePosition <- function(object, plate_position = NULL,
     df_to_plot <- data.frame(X=x_position, Y=y_position)
 
     ## checking visualization arguments
-    vis_out <- .incorporate_common_vis(df_to_plot, se = object, mode = "column", 
-                                       colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-                                       by_exprs_values = by_exprs_values, by_show_single = by_show_single)
+    vis_out <- .incorporate_common_vis_col(df_to_plot, se = object, 
+        colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
+        by_exprs_values = by_exprs_values)
+
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by
     shape_by <- vis_out$shape_by

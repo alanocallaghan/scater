@@ -210,6 +210,22 @@ NULL
     return(list(df=df, colour_by = colour_by, shape_by = shape_by, size_by = size_by))
 }
 
+.incorporate_common_vis_col <- function(df, se, mode, colour_by, size_by, shape_by, by_exprs_values, by_show_single) {
+    colour_by_out <- retrieveCellInfo(se, colour_by, assay.type = by_exprs_values)
+    colour_by <- colour_by_out$name
+    df$colour_by <- colour_by_out$val
+
+    shape_by_out <- retrieveCellInfo(se, shape_by, assay.type = by_exprs_values)
+    shape_by <- shape_by_out$name
+    df$shape_by <- .coerce_to_factor(shape_by_out$value, 10, "shape_by")
+
+    size_by_out <- retrieveCellInfo(se, size_by, assay.type = by_exprs_values)
+    size_by <- size_by_out$name
+    df$size_by <- size_by_out$val
+
+    list(df=df, colour_by = colour_by, shape_by = shape_by, size_by = size_by)
+}
+
 ################################################
 ## Creating pair plots.
 
