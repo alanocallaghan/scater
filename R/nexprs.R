@@ -56,7 +56,7 @@ NULL
         bp_out <- bplapply(subset.by_worker, FUN=.get_detected_per_col,
             mat=x,
             subset.row=zero_subset.row, 
-            detection_limit=detection_limit,
+            detection.limit=detection.limit,
             BPPARAM=BPPARAM)
         
         ndetected <- unlist(bp_out)
@@ -67,7 +67,7 @@ NULL
         bp_out <- bplapply(subset.by_worker, FUN=.get_detected_per_row,
             mat=x,
             subset.row=zero_subset.row, 
-            detection_limit=detection_limit,
+            detection.limit=detection.limit,
             BPPARAM=BPPARAM)
         
         ndetected <- Reduce("+", bp_out)
@@ -76,15 +76,15 @@ NULL
     }
 }
 
-.get_detected_per_col <- function(mat, subset_row, subset_col, detection_limit) 
+.get_detected_per_col <- function(mat, subset.row, subset.col, detection.limit) 
 # A helper function defined in the scater namespace.
 # This avoids the need to reattach scater in bplapply for SnowParam().
 {
-    .Call(cxx_col_above, mat, subset_row, subset_col, detection_limit)
+    .Call(cxx_col_above, mat, subset.row, subset.col, detection.limit)
 }
 
-.get_detected_per_row <- function(mat, subset_row, subset_col, detection_limit) {
-    .Call(cxx_row_above, mat, subset_row, subset_col, detection_limit)
+.get_detected_per_row <- function(mat, subset.row, subset.col, detection.limit) {
+    .Call(cxx_row_above, mat, subset.row, subset.col, detection.limit)
 }
 
 #' @export
