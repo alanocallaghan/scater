@@ -2,11 +2,10 @@
 #'
 #' Perform t-stochastic neighbour embedding (t-SNE) for the cells, based on the data in a SingleCellExperiment object.
 #'
-#' @param x A numeric matrix of log-expression values where rows are features and columns are cells.
+#' @param x For \code{calculateTSNE}, a numeric matrix of log-expression values where rows are features and columns are cells.
+#' Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
 #'
-#' Alternatively, a \linkS4class{SingleCellExperiment} object containing such a matrix.
-#'
-#' Alternatively, if \code{transposed=TRUE}, a numeric matrix where rows are cells and columns are dimensions.
+#' For \code{runTSNE}, a \linkS4class{SingleCellExperiment} object containing such a matrix.
 #' @param ncomponents Numeric scalar indicating the number of t-SNE dimensions to obtain.
 #' @param ntop Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
 #' @param subset.row Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
@@ -18,11 +17,11 @@
 #' @param transposed Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.
 #' @param normalize Logical scalar indicating if input values should be scaled for numerical precision, see \code{\link[Rtsne]{normalize_input}}.
 #' @param theta Numeric scalar specifying the approximation accuracy of the Barnes-Hut algorithm, see \code{\link[Rtsne]{Rtsne}} for details.
-#' @param ... For the generic, additional arguments to pass to specific methods.
-#'
+#' @param ... For the \code{calculateTSNE} generic, additional arguments to pass to specific methods.
 #' For the ANY method, additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.
+#' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
 #'
-#' For the SingleCellExperiment method, additional arguments to pass to the ANY method.
+#' For \code{runTSNE}, additional arguments to pass to \code{calculateTSNE}.
 #' @param external.neighbors Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.
 #' @param external_neighbors Deprecated, same as \code{external.neighbors}.
 #' @param BNPARAM A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external.neighbors=TRUE}.
@@ -36,9 +35,9 @@
 #' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #'
 #' @return 
-#' For the ANY method, a matrix is returned containing the t-SNE coordinates for each cell (row) and dimension (column).
+#' For \code{calculateTSNE}, a numeric matrix is returned containing the t-SNE coordinates for each cell (row) and dimension (column).
 #' 
-#' For the \linkS4class{SingleCellExperiment} method, a modified version of \code{x} is returned that contains the t-SNE coordinates in the \code{"TSNE"} entry of the \code{\link{reducedDims}}.
+#' For \code{runTSNE}, a modified \code{x} is returned that contains the t-SNE coordinates in \code{\link{reducedDim}(x, name)}.
 #'
 #' @details 
 #' The function \code{\link[Rtsne]{Rtsne}} is used internally to compute the t-SNE. 
@@ -87,11 +86,9 @@
 #' head(reducedDim(example_sce))
 NULL
 
-#' @export
-#' @rdname runTSNE
 #' @importFrom BiocNeighbors KmknnParam findKNN 
 #' @importFrom BiocParallel SerialParam
-setMethod("runTSNE", "ANY", function(x, ncomponents = 2, ntop = 500, 
+.calculate_tsne <- function(x, ncomponents = 2, ntop = 500, 
     subset.row = NULL, feature_set=NULL,
     scale=FALSE, scale_features=NULL,
     transposed=FALSE,
@@ -121,22 +118,36 @@ setMethod("runTSNE", "ANY", function(x, ncomponents = 2, ntop = 500,
     }
 
     tsne_out$Y
+}
+
+#' @export
+#' @rdname runTSNE
+setMethod("calculateTSNE", "ANY", .calculate_tsne)
+
+#' @export
+#' @rdname runTSNE
+#' @importFrom SummarizedExperiment assay
+setMethod("calculateTSNE", "SummarizedExperiment", function(x, ..., assay.type="logcounts") {
+    .calculate_tsne(assay(x, assay.type), ...)
+})
+
+#' @export
+#' @rdname runTSNE
+setMethod("calculateTSNE", "SingleCellExperiment", function(x, ..., 
+    pca=is.null(use.dimred), assay.type="logcounts", exprs_values = NULL,
+    use.dimred=NULL, use_dimred=NULL, n.dimred=NULL, n_dimred=NULL, alt.exp=NULL)
+{
+    use.dimred <- .switch_arg_names(use_dimred, use.dimred)
+    assay.type <- .switch_arg_names(exprs_values, assay.type)
+    mat <- .get_mat_from_sce(x, assay.type=assay.type, alt.exp=alt.exp, use.dimred=use.dimred,
+        n.dimred=.switch_arg_names(n_dimred, n.dimred))
+    .calculate_tsne(mat, transposed=!is.null(use.dimred), pca=pca, ...)
 })
 
 #' @export
 #' @rdname runTSNE
 #' @importFrom SingleCellExperiment reducedDim<- 
-setMethod("runTSNE", "SingleCellExperiment", function(x, 
-    ..., pca=is.null(use.dimred),
-    use.dimred=NULL, use_dimred=NULL, 
-    n.dimred=NULL, n_dimred=NULL,
-    assay.type="logcounts", exprs_values = NULL,
-    alt.exp=NULL, name="TSNE") 
-{
-    use.dimred <- .switch_arg_names(use_dimred, use.dimred)
-    mat <- .get_mat_from_sce(x, assay.type=assay.type, alt.exp=alt.exp, use.dimred=use.dimred,
-        n.dimred=.switch_arg_names(n_dimred, n.dimred))
-    tout <- runTSNE(mat, transposed=!is.null(use.dimred), pca=pca, ...)
-    reducedDim(x, name) <- tout
+runTSNE <- function(x, ..., name="TSNE") {
+    reducedDim(x, name) <- calculateTSNE(x, ...)
     x
-})
+}
