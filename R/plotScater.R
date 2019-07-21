@@ -2,18 +2,18 @@
 #'
 #' Plot the relative proportion of the library size that is accounted for by the most highly expressed features for each cell in a SingleCellExperiment object. 
 #'
-#' @param x A SingleCellExperiment object.
-#' @param block1 Specification of a factor by which to separate the cells into blocks (separate panels) in the plot. 
-#' This can be any type of value described in \code{?"\link{scater-vis-var}"} for column-level metadata.
+#' @param x A \linkS4class{SingleCellExperiment} object.
+#' @param y String specifying the column-level metadata field by which to separate the cells into separate panels in the plot. 
+#' Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
 #' Default is \code{NULL}, in which case there is no blocking.
 #' @param block2 Same as \code{block1}, providing another level of blocking.
-#' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' The curve for each cell will be coloured according to this specification.
 #' @param nfeatures Numeric scalar indicating the number of top-expressed features to show n the plot.
 #' @param exprs_values String or integer scalar indicating which assay of \code{object} should be used to obtain the expression values for this plot. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in line colouring - see \code{?"\link{scater-vis-var}"} for details.
-#' @param by_show_single Logical scalar specifying whether single-level factors should be used for line colouring, see \code{?"\link{scater-vis-var}"} for details.
+#' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
+#' @param by_show_single Deprecated and ignored.
 #' @param ncol Number of columns to use for \code{\link{facet_wrap}} if only one block is defined.
 #' @param line_width Numeric scalar specifying the line width.
 #' @param theme_size Numeric scalar specifying the font size to use for the plotting theme.
@@ -27,12 +27,7 @@
 #' If only one of \code{block1} and \code{block2} are specified, each panel corresponds to a separate level of the specified blocking factor.
 #' If both are specified, each panel corresponds to a combination of levels.
 #'
-#' @return a ggplot plot object
-#'
-#' @export
-#' @importClassesFrom SingleCellExperiment SingleCellExperiment
-#' @importFrom SummarizedExperiment assay
-#' @importFrom ggplot2 ggplot geom_line facet_grid facet_wrap xlab ylab theme_bw aes_string
+#' @return A \link{ggplot} object.
 #'
 #' @author Davis McCarthy, with modifications by Aaron Lun
 #'
@@ -49,10 +44,10 @@
 #' plotScater(example_sce, exprs_values = "counts", colour_by = "Cell_Cycle")
 #' plotScater(example_sce, block1 = "Treatment", colour_by = "Cell_Cycle")
 #'
-#' cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
-#' plotScater(example_sce, exprs_values = "cpm", block1 = "Treatment",
-#'     block2 = "Mutation_Status", colour_by = "Cell_Cycle")
-#'
+#' @export
+#' @importClassesFrom SingleCellExperiment SingleCellExperiment
+#' @importFrom SummarizedExperiment assay
+#' @importFrom ggplot2 ggplot geom_line facet_grid facet_wrap xlab ylab theme_bw aes_string
 plotScater <- function(x, nfeatures = 500, exprs_values = "counts", 
                        colour_by = NULL, by_exprs_values = exprs_values, by_show_single = FALSE,
                        block1 = NULL, block2 = NULL, ncol = 3,
@@ -62,17 +57,16 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
         stop("x must be of class SingleCellExperiment")
     }
     
-    block1_out <- .choose_vis_values(x, block1, mode = "column", search = "metadata")
+    block1_out <- retrieveCellInfo(x, block1, search = "colData")
     block1 <- block1_out$name
     block1_vals <- block1_out$val
 
-    block2_out <- .choose_vis_values(x, block2, mode = "column", search = "metadata")
+    block2_out <- retrieveCellInfo(x, block2, search = "colData")
     block2 <- block2_out$name
     block2_vals <- block2_out$val
 
     ## Setting values to colour by.
-    colour_by_out <- .choose_vis_values(x, colour_by, mode = "column", search = "any", 
-        exprs_values = by_exprs_values, discard_solo = !by_show_single)
+    colour_by_out <- retrieveCellInfo(x, colour_by, assay.type = by_exprs_values)
     colour_by <- colour_by_out$name
     colour_by_vals <- colour_by_out$val
 

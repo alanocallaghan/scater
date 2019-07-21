@@ -7,7 +7,7 @@
 #' @param controls Specification of the row-level metadata column indicating whether a feature is a control, see \code{?"\link{scater-vis-var}"} for possible values.
 #' Only metadata fields will be searched, \code{assays} will not be used.
 #' If not supplied, this defaults to \code{"is_feature_control"} or equivalent for compacted data.
-#' @param colour_cells_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param colour_cells_by Specification of a column metadata field or a feature to colour by, see \code{\link{retrieveCellInfo}} for possible values. 
 #' If not supplied, this defaults to \code{"total_features_by_counts"} or equivalent for compacted data.
 #' @param drop_features A character, logical or numeric vector indicating which features (e.g. genes, transcripts) to drop when producing the plot. 
 #' For example, spike-in transcripts might be dropped to examine the contribution from endogenous genes.
@@ -104,7 +104,7 @@ plotHighestExprs <- function(object, n = 50, controls, colour_cells_by,
         colour_cells_by <- .qc_hunter(object, paste0("total_features_by_", exprs_values), mode = "column")
     }
     if (!is.null(colour_cells_by)) {
-        colour_out <- .choose_vis_values(object, colour_cells_by, mode = "column", exprs_values = by_exprs_values, discard_solo = !by_show_single)
+        colour_out <- retrieveCellInfo(object, colour_cells_by, assay.type = by_exprs_values)
         colour_cells_by <- colour_out$name
         df_exprs_by_cell_long$colour_by <- colour_out$val[df_exprs_by_cell_long$Cell]
         aes_to_use <- aes_string(y="Tag", x="value", colour="colour_by")

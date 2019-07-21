@@ -2,17 +2,18 @@
 #'
 #' Plot column-level (i.e., cell) metadata in an SingleCellExperiment object.
 #'
-#' @param object A SingleCellExperiment object containing expression values and experimental information.
-#' @param y Specification of the column-level metadata to show on the y-axis, see \code{?"\link{scater-vis-var}"} for possible values.
-#' Note that only metadata fields will be searched, \code{assays} will not be used.
-#' @param x Specification of the column-level metadata to show on the x-axis, see \code{?"\link{scater-vis-var}"} for possible values.
-#' Again, only metadata fields will be searched, \code{assays} will not be used.
-#' @param colour_by Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
-#' @param shape_by Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values. 
-#' @param size_by Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values. 
+#' @param object A \linkS4class{SingleCellExperiment} object containing expression values and experimental information.
+#' @param y String specifying the column-level metadata field to show on the y-axis.
+#' Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
+#' @param x String specifying the column-level metadata to show on the x-axis.
+#' Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
+#' If \code{NULL}, nothing is shown on the x-axis.
+#' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
+#' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
+#' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.
-#' @param by_show_single Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.
+#' for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for details.
+#' @param by_show_single Deprecated and ignored.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -62,10 +63,36 @@ plotColData <- function(object, y, x = NULL,
                         by_exprs_values = "logcounts", by_show_single = FALSE,
                         ...)
 {
-    .metadata_dispatcher(object, mode = "column", y = y, x = x,
-                         colour_by = colour_by, shape_by = shape_by, size_by = size_by,
-                         by_exprs_values = by_exprs_values, by_show_single = by_show_single,
-                         ...)
+    if (!is(object, "SingleCellExperiment")) {
+        stop("object must be an SingleCellExperiment object.")
+    }
+
+    ## Define dataframe to pass to plotMetadata
+    x_by_out <- retrieveCellInfo(object, x, search = "colData")
+    x_lab <- x_by_out$name
+    y_by_out <- retrieveCellInfo(object, y, search = "colData")
+    y_lab <- y_by_out$name
+    if (!is.null(x)) {
+        df_to_plot <- data.frame(X=x_by_out$val, Y=y_by_out$val)
+    } else {
+        num <- ifelse(mode=="row", nrow(object), ncol(object))
+        df_to_plot <- data.frame(Y=y_by_out$val, X=factor(character(num)))
+    }
+
+    ## checking visualization arguments
+    vis_out <- .incorporate_common_vis_col(df_to_plot, se = object, 
+        colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
+        by_exprs_values = by_exprs_values)
+
+    df_to_plot <- vis_out$df
+    colour_by <- vis_out$colour_by
+    shape_by <- vis_out$shape_by
+    size_by <- vis_out$size_by
+
+    # Creating the plot object:
+    .central_plotter(df_to_plot, xlab = x_lab, ylab = y_lab,
+        colour_by = colour_by, size_by = size_by, shape_by = shape_by, 
+        ..., point_FUN=NULL)
 }
 
 #' Plot row metadata
@@ -153,9 +180,10 @@ plotRowData <- function(object, y, x = NULL,
     }
 
     ## checking visualization arguments
-    vis_out <- .incorporate_common_vis(df_to_plot, se = object, mode = mode,
-                                       colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-                                       by_exprs_values = by_exprs_values, by_show_single = by_show_single)
+    vis_out <- .incorporate_common_vis(df_to_plot, se = object, 
+        colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
+        by_exprs_values = by_exprs_values)
+
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by
     shape_by <- vis_out$shape_by
