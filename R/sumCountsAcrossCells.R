@@ -105,8 +105,9 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., 
         }
         names(collected) <- .choose_assay_names(x, use.assay.types)
 
-        y <- y[,match(colnames(collected[[i]]), as.character(ids))]
+        y <- y[,match(colnames(collected[[1]]), as.character(ids))]
         assays(y) <- collected
+        colnames(y) <- colnames(collected[[1]])
         y
     }
 }
