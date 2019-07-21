@@ -1,29 +1,34 @@
-#' Estimate the percentage of variance explained for each gene.
+#' Per-gene variance explained by a variable 
 #'
-#' @param object A SingleCellExperiment object containing expression values and per-cell experimental information.
-#' @param exprs_values String specifying the expression values for which to compute the variance.
-#' @param variables Character vector specifying the explanatory factors in \code{colData(object)} to use.
-#' Default is \code{NULL}, in which case all variables in \code{colData(object)} are considered.
+#' Compute, for each gene, the percentage of variance that is explained by one or more variables of interest.
+#'
+#' @param x A numeric matrix of expression values, usually log-transformed and normalized.
+#' 
+#' Alternatively, a \linkS4class{SummarizedExperiment} containing such a matrix.
+#' @param assay.type String or integer scalar specifying the expression values for which to compute the variance.
+#' @param exprs_values Deprecated, same as \code{assay.type}.
+#' @param variables A \linkS4class{DataFrame} or data.frame containing one or more variables of interest.
+#' This should have number of rows equal to the number of columns in \code{x}.
+#'
+#' For the SummarizedExperiment method, this can also be a character vector specifying column names of \code{colData(x)} to use;
+#' or \code{NULL}, in which case all columns in \code{colData(x)} are used.
 #' @param chunk Integer scalar specifying the chunk size for chunk-wise processing.
 #' Only affects the speed/memory usage trade-off.
+#' @param subset.row A vector specifying the subset of rows of \code{x} for which to return a result.
 #'
 #' @details 
 #' This function computes the percentage of variance in gene expression that is explained by variables in the sample-level metadata.
 #' It allows problematic factors to be quickly identified, as well as the genes that are most affected.
 #'
 #' @return
-#' A matrix containing the percentage of variance explained by each factor (column) and for each gene (row).
-#'
-#' @export
-#' @importFrom SummarizedExperiment assay
-#' @importFrom stats model.matrix
-#' @importFrom Matrix t
-#' @importFrom DelayedArray DelayedArray
-#' @importFrom DelayedMatrixStats rowVars
+#' A numeric matrix containing the percentage of variance explained by each factor (column) and for each gene (row).
 #'
 #' @seealso
-#' \code{\link{plotExplanatoryVariables}}
+#' \code{\link{getExplanatoryPCs}}, which calls this function.
 #'
+#' \code{\link{plotExplanatoryVariables}}, to plot the results.
+#'
+#' @name getVarianceExplained
 #' @author Aaron Lun
 #'
 #' @examples
@@ -35,57 +40,79 @@
 #' example_sce <- normalize(example_sce)
 #'
 #' r2mat <- getVarianceExplained(example_sce)
-getVarianceExplained <- function(object, exprs_values = "logcounts", variables = NULL, chunk=1000) {
-    exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
-    if (is.null(variables)) {
-        variables <- colnames(colData(object))
+NULL
+
+#' @importFrom Matrix t
+#' @importFrom DelayedArray DelayedArray
+#' @importFrom DelayedMatrixStats rowVars
+#' @importFrom stats model.matrix
+.get_variance_explained <- function(x, variables, subset.row=NULL, chunk=1000) {
+    # Initialise matrix to store R^2 values for each feature for each variable
+    rsquared_mat <- matrix(NA_real_, nrow = nrow(x), ncol = ncol(variables),
+        dimnames=list(rownames(x), colnames(variables)))
+    tss.all <- rowVars(DelayedArray(x)) * (ncol(x)-1) 
+
+    # Chunk-wise processing to keep memory usage low.
+    subset.row <- .subset2index(subset.row, x, byrow=TRUE)
+    ngenes <- length(subset.row)
+    if (ngenes > chunk) {
+        by.chunk <- cut(seq_len(ngenes), ceiling(ngenes/chunk))
+    } else {
+        by.chunk <- factor(integer(ngenes))
     }
 
-    ## Initialise matrix to store R^2 values for each feature for each variable
-    rsquared_mat <- matrix(NA_real_, nrow = nrow(object), ncol = length(variables),
-        dimnames=list(rownames(object), variables))
-    tss.all <- rowVars(DelayedArray(exprs_mat)) * (ncol(object)-1) 
-
-    ## Get R^2 values for each feature and each variable
-    for (V in variables) {
-        x <- colData(object)[,V]
-        if (length(unique(x))<=1L) {
+    # Get R^2 values for each feature and each variable
+    for (V in colnames(variables)) {
+        curvar <- variables[[V]]
+        if (length(unique(curvar))<=1L) {
             warning(sprintf("ignoring '%s' with fewer than 2 unique levels", V))
             next
         }
 
         # Protect against NAs in the metadata.
-        keep <- !is.na(x)
+        keep <- !is.na(curvar)
         if (all(keep)) {
             tss <- tss.all
         } else {
-            x <- x[keep]
+            curvar <- curvar[keep]
             tss <- rowVars(DelayedArray(exprs_mat), cols=keep) * (sum(keep) - 1)
         }
 
-        design <- model.matrix(~x)
+        design <- model.matrix(~curvar)
 	    QR <- qr(design)
 
-        # Chunk-wise processing to keep memory usage low.            
-        ngenes <- nrow(object)
-        if (ngenes > chunk) {
-            by.chunk <- cut(seq_len(ngenes), ceiling(ngenes/chunk))
-        } else {
-            by.chunk <- factor(integer(ngenes))
-        }
-
-        rss <- numeric(ngenes)
+        rss <- numeric(length(by.chunk))
         for (element in levels(by.chunk)) {
-            current <- by.chunk==element
-            cur.exprs <- exprs_mat[current,keep,drop=FALSE]
+            chunked <- by.chunk==element
+            cur.exprs <- x[subset.row[chunked],keep,drop=FALSE]
             effects <- qr.qty(QR, as.matrix(t(cur.exprs)))
-            rss[current] <- colSums(effects[-seq_len(QR$rank),, drop = FALSE] ^ 2) # no need for special colSums, as this is always dense.
+
+            # no need for special colSums, as this is always dense.
+            rss[chunked] <- colSums(effects[-seq_len(QR$rank),, drop = FALSE] ^ 2) 
         }
         
         rsquared_mat[, V] <- 1 - rss/tss
     }
 
-    return(rsquared_mat)
+    rsquared_mat
 }
 
+#' @export
+#' @rdname getVarianceExplained
+setMethod("getVarianceExplained", "ANY", .get_variance_explained)
 
+#' @export
+#' @rdname getVarianceExplained
+#' @importFrom SummarizedExperiment colData assay
+#' @importClassesFrom SummarizedExperiment SummarizedExperiment
+setMethod("getVarianceExplained", "SummarizedExperiment", function(x, variables=NULL, ..., 
+    assay.type="counts", exprs_values=NULL) 
+{
+    assay.type <- .switch_arg_names(exprs_values, assay.type)
+    if (is.null(variables)) {
+        variables <- colData(x)
+    } else if (is.character(variables)) {
+        variables <- colData(x)[,variables]        
+    }
+    .get_variance_explained(assay(x, assay.type), variables=variables, ...)
+})
