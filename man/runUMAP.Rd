@@ -21,9 +21,9 @@ calculateUMAP(x, ...)
 \S4method{calculateUMAP}{SingleCellExperiment}(x, ..., pca = if
   (!is.null(use.dimred)) NULL else 50, assay.type = "logcounts",
   exprs_values = NULL, use.dimred = NULL, use_dimred = NULL,
-  n.dimred = NULL, n_dimred = NULL, alt.exp = NULL)
+  n.dimred = NULL, n_dimred = NULL)
 
-runUMAP(x, ..., name = "UMAP")
+runUMAP(x, ..., alt.exp = NULL, name = "UMAP")
 }
 \arguments{
 \item{x}{For \code{calculateUMAP}, a numeric matrix of log-expression values where rows are features and columns are cells.

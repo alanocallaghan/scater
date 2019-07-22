@@ -60,8 +60,17 @@ Setting \code{zlim} preserves the dynamic range of colours in the presence  of o
 Otherwise, the plot may be dominated by a few genes, which will \dQuote{flatten} the observed colours for the rest of the heatmap.
 }
 \examples{
-example(normalizeSCE) # borrowing the example objects in here.
+data("sc_example_counts")
+data("sc_example_cell_info")
+example_sce <- SingleCellExperiment(
+    assays = list(counts = sc_example_counts),
+    colData = sc_example_cell_info
+)
+                                               
+example_sce <- normalize(example_sce)
+
 plotHeatmap(example_sce, features=rownames(example_sce)[1:10])
+
 plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
     center=TRUE, symmetric=TRUE)
 
