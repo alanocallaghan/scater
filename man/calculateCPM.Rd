@@ -16,7 +16,8 @@ calculateCPM(x, ...)
 \S4method{calculateCPM}{SummarizedExperiment}(x, ...,
   assay.type = "counts", exprs_values = NULL)
 
-\S4method{calculateCPM}{SingleCellExperiment}(x, ..., alt.exp = NULL)
+\S4method{calculateCPM}{SingleCellExperiment}(x, size.factors = NULL,
+  ...)
 }
 \arguments{
 \item{x}{A numeric matrix of counts where features are rows and cells are columns.
@@ -39,8 +40,6 @@ If \code{NULL}, the library sizes are used directly.}
 \item{assay.type}{A string specifying the assay of \code{x} containing the count matrix.}
 
 \item{exprs_values}{Deprecated, same as \code{assay.type}.}
-
-\item{alt.exp}{String or integer scalar specifying an alternative experiment for which to compute the CPMs.}
 }
 \value{
 A numeric matrix of CPM values.

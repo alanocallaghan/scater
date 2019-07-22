@@ -18,7 +18,7 @@ calculateAverage(x, ...)
   assay.type = "counts", exprs_values = NULL)
 
 \S4method{calculateAverage}{SingleCellExperiment}(x, size.factors = NULL,
-  ..., alt.exp = NULL)
+  ...)
 
 calcAverage(x, ...)
 }
@@ -45,8 +45,6 @@ If \code{NULL}, these are calculated or extracted from \code{x}.}
 \item{assay.type}{A string specifying the assay of \code{x} containing the count matrix.}
 
 \item{exprs_values}{Deprecated, same as \code{assay.type}.}
-
-\item{alt.exp}{String or integer scalar specifying an alternative experiment for which to compute the averages.}
 }
 \value{
 A numeric vector of average count values with same length as number of features 
