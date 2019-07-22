@@ -24,14 +24,7 @@
 #' If \code{y} is categorical and \code{x} is continuous, horizontal violin plots will be generated.
 #' If \code{x} is missing or categorical, rectangule plots will be generated where the area of a rectangle is proportional to the number of points for a combination of factors.
 #'
-#' Note that \code{plotPhenoData} and \code{plotCellData} are synonyms for \code{plotColData}.
-#' These are artifacts of the transition from the old SCESet class, and will be deprecated in future releases.
-#'
-#' @return A ggplot object.
-#'
-#' @name plotColData
-#' @rdname plotColData
-#' @export
+#' @return A \link{ggplot} object.
 #'
 #' @author Davis McCarthy, with modifications by Aaron Lun
 #'
@@ -58,6 +51,7 @@
 #' plotColData(example_sce, y = "total_features_by_counts", 
 #'    x = "Cell_Cycle", colour_by = "Mutation_Status")
 #'
+#' @export
 plotColData <- function(object, y, x = NULL, 
                         colour_by = NULL, shape_by = NULL, size_by = NULL, 
                         by_exprs_values = "logcounts", by_show_single = FALSE,
@@ -68,15 +62,17 @@ plotColData <- function(object, y, x = NULL,
     }
 
     ## Define dataframe to pass to plotMetadata
-    x_by_out <- retrieveCellInfo(object, x, search = "colData")
-    x_lab <- x_by_out$name
     y_by_out <- retrieveCellInfo(object, y, search = "colData")
     y_lab <- y_by_out$name
+    df_to_plot <- data.frame(Y=y_by_out$val)
+
     if (!is.null(x)) {
-        df_to_plot <- data.frame(X=x_by_out$val, Y=y_by_out$val)
+        x_by_out <- retrieveCellInfo(object, x, search = "colData")
+        x_lab <- x_by_out$name
+        df_to_plot$X <- x_by_out$val
     } else {
-        num <- ifelse(mode=="row", nrow(object), ncol(object))
-        df_to_plot <- data.frame(Y=y_by_out$val, X=factor(character(num)))
+        x_lab <- NULL
+        df_to_plot$X <- factor(character(ncol(object)))
     }
 
     ## checking visualization arguments
