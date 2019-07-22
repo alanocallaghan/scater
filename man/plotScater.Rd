@@ -10,23 +10,19 @@ plotScater(x, nfeatures = 500, exprs_values = "counts",
   line_width = 1.5, theme_size = 10)
 }
 \arguments{
-\item{x}{A SingleCellExperiment object.}
+\item{x}{A \linkS4class{SingleCellExperiment} object.}
 
 \item{nfeatures}{Numeric scalar indicating the number of top-expressed features to show n the plot.}
 
 \item{exprs_values}{String or integer scalar indicating which assay of \code{object} should be used to obtain the expression values for this plot.}
 
-\item{colour_by}{Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
+\item{colour_by}{Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 The curve for each cell will be coloured according to this specification.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in line colouring - see \code{?"\link{scater-vis-var}"} for details.}
+for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.}
 
-\item{by_show_single}{Logical scalar specifying whether single-level factors should be used for line colouring, see \code{?"\link{scater-vis-var}"} for details.}
-
-\item{block1}{Specification of a factor by which to separate the cells into blocks (separate panels) in the plot. 
-This can be any type of value described in \code{?"\link{scater-vis-var}"} for column-level metadata.
-Default is \code{NULL}, in which case there is no blocking.}
+\item{by_show_single}{Deprecated and ignored.}
 
 \item{block2}{Same as \code{block1}, providing another level of blocking.}
 
@@ -35,9 +31,13 @@ Default is \code{NULL}, in which case there is no blocking.}
 \item{line_width}{Numeric scalar specifying the line width.}
 
 \item{theme_size}{Numeric scalar specifying the font size to use for the plotting theme.}
+
+\item{y}{String specifying the column-level metadata field by which to separate the cells into separate panels in the plot. 
+Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
+Default is \code{NULL}, in which case there is no blocking.}
 }
 \value{
-a ggplot plot object
+A \link{ggplot} object.
 }
 \description{
 Plot the relative proportion of the library size that is accounted for by the most highly expressed features for each cell in a SingleCellExperiment object.
@@ -63,10 +63,6 @@ example_sce <- SingleCellExperiment(
 plotScater(example_sce)
 plotScater(example_sce, exprs_values = "counts", colour_by = "Cell_Cycle")
 plotScater(example_sce, block1 = "Treatment", colour_by = "Cell_Cycle")
-
-cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
-plotScater(example_sce, exprs_values = "cpm", block1 = "Treatment",
-    block2 = "Mutation_Status", colour_by = "Cell_Cycle")
 
 }
 \author{

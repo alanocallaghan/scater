@@ -15,9 +15,11 @@ plotExprsVsTxLength(object, tx_length = "median_feat_eff_len",
 \item{object}{A SingleCellExperiment object.}
 
 \item{tx_length}{Transcript lengths for all features, to plot on the x-axis. 
-If \code{length_is_assay=FALSE}, this can take any of the values described in \code{?"\link{scater-vis-var}"} for feature-level metadata;
-data in \code{assays(object)} will \emph{not} be searched.
-Otherwise, if \code{length_is_assay=TRUE}, \code{tx_length} should be the name or index of an assay in \code{object}.}
+
+If \code{length_is_assay=FALSE}, this should be a stirng specifying the column-level metadata field containing the number of expressing cells per feature.
+Otherwise, if \code{length_is_assay=TRUE}, \code{tx_length} should be the name or index of an assay in \code{object}.
+
+Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveFeatureInfo}}.}
 
 \item{length_is_assay}{Logical scalar indicating whether \code{tx_length} refers to an assay of \code{object} containing transcript lengths for all features in all cells.}
 
@@ -25,16 +27,16 @@ Otherwise, if \code{length_is_assay=TRUE}, \code{tx_length} should be the name o
 
 \item{log2_values}{Logical scalar, specifying whether the expression values be transformed to the log2-scale for plotting (with an offset of 1 to avoid logging zeroes).}
 
-\item{colour_by}{Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values.}
+\item{colour_by}{Specification of a row metadata field or a sample to colour by, see \code{?\link{retrieveFeatureInfo}} for possible values.}
 
-\item{shape_by}{Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values.}
+\item{shape_by}{Specification of a row metadata field or a sample to shape by, see \code{?\link{retrieveFeatureInfo}} for possible values.}
 
-\item{size_by}{Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values.}
+\item{size_by}{Specification of a row metadata field or a sample to size by, see \code{?\link{retrieveFeatureInfo}} for possible values.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.}
+for use in point aesthetics - see \code{?\link{retrieveFeatureInfo}} for details.}
 
-\item{by_show_single}{Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.}
+\item{by_show_single}{Deprecated and ignored.}
 
 \item{xlab}{String specifying the label for x-axis.}
 
@@ -43,10 +45,11 @@ for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.}
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }
 \value{
-A ggplot object.
+A \link{ggplot} object.
 }
 \description{
 Plot mean expression values for all features in a SingleCellExperiment object against transcript length values.
+This is deprecated in favour of directly using \code{\link{plotRowData}}.
 }
 \details{
 If \code{length_is_assay=TRUE}, the median transcript length of each feature across all cells is used.

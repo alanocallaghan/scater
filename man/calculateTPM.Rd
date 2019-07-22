@@ -15,7 +15,8 @@ calculateTPM(x, ...)
 \S4method{calculateTPM}{SummarizedExperiment}(x, ...,
   assay.type = "counts", exprs_values = NULL)
 
-\S4method{calculateTPM}{SingleCellExperiment}(x, ..., alt.exp = NULL)
+\S4method{calculateTPM}{SingleCellExperiment}(x, size.factors = NULL,
+  ...)
 }
 \arguments{
 \item{x}{A numeric matrix of counts where features are rows and cells are columns.
@@ -36,8 +37,6 @@ Alternatively \code{NULL}, see Details.}
 \item{assay.type}{A string specifying the assay of \code{x} containing the count matrix.}
 
 \item{exprs_values}{Deprecated, same as \code{assay.type}.}
-
-\item{alt.exp}{String or integer scalar specifying an alternative experiment for which to compute the averages.}
 
 \item{effective_length}{Deprecated, same as \code{effective.length}.}
 }

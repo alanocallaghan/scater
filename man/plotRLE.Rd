@@ -3,7 +3,7 @@
 \name{plotRLE}
 \alias{plotRLE}
 \alias{plotRLE,SingleCellExperiment-method}
-\title{Plot a relative log expression (RLE) plot}
+\title{Plot relative log expression}
 \usage{
 plotRLE(object, exprs_values = "logcounts", exprs_logged = TRUE,
   style = "minimal", legend = TRUE, ordering = NULL,
@@ -24,10 +24,10 @@ If not, a log2-transformation (+1) will be performed prior to plotting.}
 \item{ordering}{A vector specifying the ordering of cells in the RLE plot.
 This can be useful for arranging cells by experimental conditions or batches.}
 
-\item{colour_by}{Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values.}
+\item{colour_by}{Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.}
+\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from,
+for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.}
 
 \item{...}{further arguments passed to \code{\link[ggplot2]{geom_boxplot}} when \code{style="full"}.}
 }
@@ -69,8 +69,9 @@ plotRLE(example_sce, colour_by = "Mutation_Status", style = "full",
 
 }
 \references{
-Gandolfo LC, Speed TP. RLE Plots: Visualising Unwanted Variation in High Dimensional Data. 
-arXiv [stat.ME]. 2017. Available: http://arxiv.org/abs/1704.03590
+Gandolfo LC, Speed TP (2017). 
+RLE plots: visualising unwanted variation in high dimensional data. 
+\emph{arXiv}.
 }
 \author{
 Davis McCarthy,

@@ -2,17 +2,22 @@
 % Please edit documentation in R/getExplanatoryPCs.R
 \name{getExplanatoryPCs}
 \alias{getExplanatoryPCs}
-\title{Estimate the percentage of variance explained for each PC.}
+\title{Per-PC variance explained by a variable}
 \usage{
-getExplanatoryPCs(object, use_dimred = "PCA", ncomponents = 10,
-  rerun = FALSE, run_args = list(), ...)
+getExplanatoryPCs(x, use.dimred = "PCA", use_dimred = NULL,
+  n.dimred = 10, ncomponents = NULL, rerun = FALSE,
+  run_args = list(), ...)
 }
 \arguments{
-\item{object}{A SingleCellExperiment object containing expression values and per-cell experimental information.}
+\item{x}{A \linkS4class{SingleCellExperiment} object containing dimensionality reduction results.}
 
-\item{use_dimred}{String specifying the field in \code{reducedDims(object)} that contains the PCA results.}
+\item{use.dimred}{String or integer scalar specifying the field in \code{reducedDims(x)} that contains the PCA results.}
 
-\item{ncomponents}{Integer scalar specifying the number of the top principal components to use.}
+\item{use_dimred}{Deprecated, same as \code{use.dimred}.}
+
+\item{n.dimred}{Integer scalar specifying the number of the top principal components to use.}
+
+\item{ncomponents}{Deprecated, same as \code{n.dimred}.}
 
 \item{rerun}{Logical scalar indicating whether the PCA should be repeated, even if pre-computed results are already present.}
 
@@ -24,7 +29,7 @@ getExplanatoryPCs(object, use_dimred = "PCA", ncomponents = 10,
 A matrix containing the percentage of variance explained by each factor (column) and for each PC (row).
 }
 \description{
-Estimate the percentage of variance explained for each PC.
+Compute, for each principal component, the percentage of variance that is explained by one or more variables of interest.
 }
 \details{
 This function computes the percentage of variance in PC scores that is explained by variables in the sample-level metadata.
@@ -32,8 +37,9 @@ It allows identification of important PCs that are driven by known experimental 
 PCs correlated with technical factors (e.g., batch effects, library size) can also be detected and removed prior to further analysis.
 
 By default, the function will attempt to use pre-computed PCA results in \code{object}.
-This is done by taking the top \code{ncomponents} PCs from the matrix identified by \code{use_dimred}.
-If these are not available or if \code{rerun=TRUE}, the function will rerun the PCA using \code{\link[scater]{runPCA}}.
+This is done by taking the top \code{n.dimred} PCs from the matrix specified by \code{use.dimred}.
+If these are not available or if \code{rerun=TRUE}, the function will rerun the PCA using \code{\link{runPCA}};
+however, this mode is deprecated and users are advised to explicitly call \code{runPCA} themselves.
 }
 \examples{
 data("sc_example_counts")
@@ -41,13 +47,17 @@ data("sc_example_cell_info")
 example_sce <- SingleCellExperiment(
     assays = list(counts = sc_example_counts), 
     colData = sc_example_cell_info)
+
 example_sce <- normalize(example_sce)
-                                                   
+example_sce <- runPCA(example_sce)
+
 r2mat <- getExplanatoryPCs(example_sce)
+
 }
 \seealso{
-\code{\link{plotExplanatoryPCs}},
-\code{\link{getVarianceExplained}}
+\code{\link{plotExplanatoryPCs}}, to plot the results.
+
+\code{\link{getVarianceExplained}}, to compute the variance explained.
 }
 \author{
 Aaron Lun

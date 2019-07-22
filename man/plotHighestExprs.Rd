@@ -4,8 +4,8 @@
 \alias{plotHighestExprs}
 \title{Plot the highest expressing features}
 \usage{
-plotHighestExprs(object, n = 50, controls, colour_cells_by,
-  drop_features = NULL, exprs_values = "counts",
+plotHighestExprs(object, n = 50, colour_cells_by = NULL,
+  controls = NULL, drop_features = NULL, exprs_values = "counts",
   by_exprs_values = exprs_values, by_show_single = TRUE,
   feature_names_to_plot = NULL, as_percentage = TRUE)
 }
@@ -14,12 +14,9 @@ plotHighestExprs(object, n = 50, controls, colour_cells_by,
 
 \item{n}{A numeric scalar specifying the number of the most expressed features to show.}
 
-\item{controls}{Specification of the row-level metadata column indicating whether a feature is a control, see \code{?"\link{scater-vis-var}"} for possible values.
-Only metadata fields will be searched, \code{assays} will not be used.
-If not supplied, this defaults to \code{"is_feature_control"} or equivalent for compacted data.}
+\item{colour_cells_by}{Specification of a column metadata field or a feature to colour by, see \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{colour_cells_by}{Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values. 
-If not supplied, this defaults to \code{"total_features_by_counts"} or equivalent for compacted data.}
+\item{controls}{Deprecated and ignored.}
 
 \item{drop_features}{A character, logical or numeric vector indicating which features (e.g. genes, transcripts) to drop when producing the plot. 
 For example, spike-in transcripts might be dropped to examine the contribution from endogenous genes.}
@@ -29,30 +26,26 @@ For example, spike-in transcripts might be dropped to examine the contribution f
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
 for use in colouring - see \code{?"\link{scater-vis-var}"} for details.}
 
-\item{by_show_single}{Logical scalar specifying whether single-level factors should be used for colouring, see \code{?"\link{scater-vis-var}"} for details.
+\item{by_show_single}{Deprecated and ignored.
 Default is \code{NULL}, in which case  \code{rownames(object)} are used.}
 
-\item{feature_names_to_plot}{Specification of which row-level metadata column contains the feature names, see \code{?"\link{scater-vis-var}"} for possible values.}
+\item{feature_names_to_plot}{String specifying which row-level metadata column contains the feature names.
+Alternatively, an \link{AsIs}-wrapped vector or a data.frame, see \code{?\link{retrieveFeatureInfo}} for possible values.}
 
 \item{as_percentage}{logical scalar indicating whether percentages should be  plotted. 
 If \code{FALSE}, the raw \code{exprs_values} are shown instead.}
 }
 \value{
-A ggplot object.
+A \link{ggplot} object.
 }
 \description{
 Plot the features with the highest average expression across all cells, along with their expression in each individual cell.
 }
 \details{
 This function will plot the percentage of counts accounted for by the top \code{n} most highly expressed features across the dataset.
-Each feature corresponds to a row on the plot, sorted by average expression (denoted by the point).
-
-The plot will attempt to colour the points based on whether the corresponding feature is labelled as a control in \code{object}.
-This can be turned off by setting \code{controls=NULL}.
-
+Each row on the plot corresponds to a feature and is sorted by average expression (denoted by the point).
 The distribution of expression across all cells is shown as tick marks for each feature.
 These ticks can be coloured according to cell-level metadata, as specified by \code{colour_cells_by}.
-Setting \code{colour_cells_by=NULL} will disable all tick colouring.
 }
 \examples{
 data("sc_example_counts")
@@ -66,7 +59,6 @@ example_sce <- calculateQCMetrics(example_sce,
 )
 
 plotHighestExprs(example_sce, colour_cells_by ="total_features_by_counts")
-plotHighestExprs(example_sce, controls = NULL)
 plotHighestExprs(example_sce, colour_cells_by="Mutation_Status")
 
 }

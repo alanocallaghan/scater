@@ -16,16 +16,16 @@ plotPlatePosition(object, plate_position = NULL, colour_by = NULL,
 If \code{NULL}, the function will attempt to extract this from \code{object$plate_position}.
 Alternatively, a list of two factors (\code{"row"} and \code{"column"}) can be supplied, specifying the row (capital letters) and column (integer) for each cell in \code{object}.}
 
-\item{colour_by}{Specification of a column metadata field or a feature to colour by, see \code{?"\link{scater-vis-var}"} for possible values.}
+\item{colour_by}{Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{size_by}{Specification of a column metadata field or a feature to size by, see \code{?"\link{scater-vis-var}"} for possible values.}
+\item{size_by}{Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{shape_by}{Specification of a column metadata field or a feature to shape by, see \code{?"\link{scater-vis-var}"} for possible values.}
+\item{shape_by}{Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in point aesthetics - see \code{?"\link{scater-vis-var}"} for details.}
+for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.}
 
-\item{by_show_single}{Logical scalar specifying whether single-level factors should be used for point aesthetics, see \code{?"\link{scater-vis-var}"} for details.}
+\item{by_show_single}{Deprecated and ignored.}
 
 \item{add_legend}{Logical scalar specifying whether a legend should be shown.}
 

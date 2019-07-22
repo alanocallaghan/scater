@@ -5,7 +5,6 @@
 \alias{librarySizeFactors}
 \alias{librarySizeFactors,ANY-method}
 \alias{librarySizeFactors,SummarizedExperiment-method}
-\alias{librarySizeFactors,SingleCellExperiment-method}
 \alias{computeLibraryFactors}
 \title{Compute library size factors}
 \usage{
@@ -17,10 +16,7 @@ librarySizeFactors(x, ...)
 \S4method{librarySizeFactors}{SummarizedExperiment}(x,
   assay.type = "counts", exprs_values = NULL, ...)
 
-\S4method{librarySizeFactors}{SingleCellExperiment}(x, ...,
-  alt.exp = NULL)
-
-computeLibraryFactors(x, ...)
+computeLibraryFactors(x, ..., alt.exp = NULL)
 }
 \arguments{
 \item{x}{For \code{libarySizeFactors}, a numeric matrix of counts with one row per feature and column per cell.

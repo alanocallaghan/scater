@@ -29,8 +29,9 @@ Only expected to be used in PCA settings, e.g., in the \code{\link[scater]{plotP
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
 for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.}
 
-\item{text_by}{Specification of a column metadata field for which to add text - see \code{?"\link{scater-vis-var}"} for possible values. 
-This must refer to a categorical field, i.e., coercible into a factor.}
+\item{text_by}{String specifying the column metadata field with which to add text labels on the plot.
+This must refer to a categorical field, i.e., coercible into a factor.
+Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.}
 
 \item{text_size}{Numeric scalar specifying the size of added text.}
 

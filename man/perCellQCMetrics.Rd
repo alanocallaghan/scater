@@ -4,6 +4,7 @@
 \name{perCellQCMetrics}
 \alias{perCellQCMetrics}
 \alias{perCellQCMetrics,ANY-method}
+\alias{perCellQCMetrics,SummarizedExperiment-method}
 \alias{perCellQCMetrics,SingleCellExperiment-method}
 \title{Per-cell quality control metrics}
 \usage{
@@ -13,19 +14,25 @@ perCellQCMetrics(x, ...)
   percent.in.top = c(50, 100, 200, 500), detection.limit = 0,
   BPPARAM = SerialParam())
 
+\S4method{perCellQCMetrics}{SummarizedExperiment}(x, ...,
+  assay.type = "counts")
+
 \S4method{perCellQCMetrics}{SingleCellExperiment}(x, subsets = NULL,
   percent.in.top = c(50, 100, 200, 500), ..., assay.type = "counts",
   use.alt.exps = TRUE)
 }
 \arguments{
 \item{x}{A numeric matrix of counts with cells in columns and features in rows.
-Alternatively, a \linkS4class{SingleCellExperiment} object containing such a matrix.}
 
-\item{...}{Arguments to pass to specific methods.
-For the SingleCellExperiment method, further arguments to pass to the ANY method.}
+Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} object containing such a matrix.}
 
-\item{subsets}{A named list containing one or more vectors (a character vector of feature names, a logical vector, or a numeric vector of indices),
-used to identify feature controls such as ERCC spike-in sets or mitochondrial genes.}
+\item{...}{For the generic, further arguments to pass to specific methods.
+
+For the SummarizedExperiment and SingleCellExperiment methods, further arguments to pass to the ANY method.}
+
+\item{subsets}{A named list containing one or more vectors 
+(a character vector of feature names, a logical vector, or a numeric vector of indices),
+used to identify interesting feature subsets such as ERCC spike-in transcripts or mitochondrial genes.}
 
 \item{percent.in.top}{An integer vector. 
 Each element is treated as a number of top genes to compute the percentage of library size occupied by the most highly expressed genes in each cell.}
@@ -41,7 +48,7 @@ If \code{TRUE}, statistics are computed for all alternative experiments.
 
 Alternatively, an integer or character vector specifying the alternative Experiments to use to compute QC statistics.
 
-Alternatively, \code{NULL} in which case alternative experiments are not used.}
+Alternatively \code{NULL}, in which case alternative experiments are not used.}
 }
 \value{
 A \linkS4class{DataFrame} of QC statistics where each row corresponds to a column in \code{x}.
@@ -115,7 +122,6 @@ example_sce <- SingleCellExperiment(
     assays = list(counts = sc_example_counts), 
     colData = sc_example_cell_info
 )
-example_sce <- calculateQCMetrics(example_sce)
 
 stats <- perCellQCMetrics(example_sce)
 stats
