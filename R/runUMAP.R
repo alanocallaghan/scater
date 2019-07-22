@@ -128,11 +128,11 @@ setMethod("calculateUMAP", "SummarizedExperiment", function(x, ..., assay.type="
 setMethod("calculateUMAP", "SingleCellExperiment", function(x, ..., 
     pca=if (!is.null(use.dimred)) NULL else 50,
     assay.type="logcounts", exprs_values=NULL,
-    use.dimred=NULL, use_dimred=NULL, n.dimred=NULL, n_dimred=NULL, alt.exp=NULL) 
+    use.dimred=NULL, use_dimred=NULL, n.dimred=NULL, n_dimred=NULL)
 {
     use.dimred <- .switch_arg_names(use_dimred, use.dimred)
     assay.type <- .switch_arg_names(exprs_values, assay.type)
-    mat <- .get_mat_from_sce(x, assay.type=assay.type, alt.exp=alt.exp, use.dimred=use.dimred,
+    mat <- .get_mat_from_sce(x, assay.type=assay.type, use.dimred=use.dimred,
         n.dimred=.switch_arg_names(n_dimred, n.dimred))
     .calculate_umap(mat, transposed=!is.null(use.dimred), pca=pca, ...)
 })
@@ -140,7 +140,12 @@ setMethod("calculateUMAP", "SingleCellExperiment", function(x, ...,
 #' @export
 #' @rdname runUMAP
 #' @importFrom SingleCellExperiment reducedDim<-
-runUMAP <- function(x, ..., name="UMAP") {
-    reducedDim(x, name) <- calculateUMAP(x, ...)
+runUMAP <- function(x, ..., alt.exp=NULL, name="UMAP") {
+    if (!is.null(alt.exp)) {
+        y <- altExp(x, alt.exp)
+    } else {
+        y <- x
+    }
+    reducedDim(x, name) <- calculateUMAP(y, ...)
     x
 }

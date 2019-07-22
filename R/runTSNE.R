@@ -5,7 +5,7 @@
 #' @param x For \code{calculateTSNE}, a numeric matrix of log-expression values where rows are features and columns are cells.
 #' Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
 #'
-#' For \code{runTSNE}, a \linkS4class{SingleCellExperiment} object containing such a matrix.
+#' For \code{runTSNE}, a \linkS4class{SingleCellExperiment} object.
 #' @param ncomponents Numeric scalar indicating the number of t-SNE dimensions to obtain.
 #' @param ntop Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
 #' @param subset.row Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
@@ -135,11 +135,11 @@ setMethod("calculateTSNE", "SummarizedExperiment", function(x, ..., assay.type="
 #' @rdname runTSNE
 setMethod("calculateTSNE", "SingleCellExperiment", function(x, ..., 
     pca=is.null(use.dimred), assay.type="logcounts", exprs_values = NULL,
-    use.dimred=NULL, use_dimred=NULL, n.dimred=NULL, n_dimred=NULL, alt.exp=NULL)
+    use.dimred=NULL, use_dimred=NULL, n.dimred=NULL, n_dimred=NULL)
 {
     use.dimred <- .switch_arg_names(use_dimred, use.dimred)
     assay.type <- .switch_arg_names(exprs_values, assay.type)
-    mat <- .get_mat_from_sce(x, assay.type=assay.type, alt.exp=alt.exp, use.dimred=use.dimred,
+    mat <- .get_mat_from_sce(x, assay.type=assay.type, use.dimred=use.dimred,
         n.dimred=.switch_arg_names(n_dimred, n.dimred))
     .calculate_tsne(mat, transposed=!is.null(use.dimred), pca=pca, ...)
 })
@@ -147,7 +147,12 @@ setMethod("calculateTSNE", "SingleCellExperiment", function(x, ...,
 #' @export
 #' @rdname runTSNE
 #' @importFrom SingleCellExperiment reducedDim<- 
-runTSNE <- function(x, ..., name="TSNE") {
-    reducedDim(x, name) <- calculateTSNE(x, ...)
+runTSNE <- function(x, ..., alt.exp=NULL, name="TSNE") {
+    if (!is.null(alt.exp)) {
+        y <- altExp(x, alt.exp)
+    } else {
+        y <- x
+    }
+    reducedDim(x, name) <- calculateTSNE(y, ...)
     x
 }

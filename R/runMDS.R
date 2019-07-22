@@ -5,7 +5,7 @@
 #' @param x For \code{calculateMDS}, a numeric matrix of log-expression values where rows are features and columns are cells.
 #' Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
 #'
-#' For \code{runMDS}, a \linkS4class{SingleCellExperiment} object containing such a matrix.
+#' For \code{runMDS}, a \linkS4class{SingleCellExperiment} object.
 #' @param ncomponents Numeric scalar indicating the number of MDS?g dimensions to obtain.
 #' @param ntop Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
 #' @param subset.row Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
@@ -90,19 +90,24 @@ setMethod("calculateMDS", "SummarizedExperiment", function(x, ..., assay.type="l
 #' @rdname runMDS
 #' @importFrom SummarizedExperiment assay
 setMethod("calculateMDS", "SingleCellExperiment", function(x, ..., assay.type="logcounts", exprs_values=NULL,
-    use.dimred=NULL, use_dimred=NULL, n.dimred=NULL, n_dimred=NULL, alt.exp=NULL) 
+    use.dimred=NULL, use_dimred=NULL, n.dimred=NULL, n_dimred=NULL)
 {
     use.dimred <- .switch_arg_names(use_dimred, use.dimred)
     assay.type <- .switch_arg_names(exprs_values, assay.type)
-    mat <- .get_mat_from_sce(x, assay.type=assay.type, alt.exp=alt.exp, use.dimred=use.dimred,
+    mat <- .get_mat_from_sce(x, assay.type=assay.type, use.dimred=use.dimred,
         n.dimred=.switch_arg_names(n_dimred, n.dimred))
     .calculate_mds(mat, transposed=!is.null(use.dimred), ...)
 })
 
 #' @export
 #' @rdname runMDS
-#' @importFrom SingleCellExperiment reducedDim<- 
-runMDS <- function(x, ..., name="MDS") {
-    reducedDim(x, name) <- calculateMDS(x, ...)
+#' @importFrom SingleCellExperiment reducedDim<- altExp
+runMDS <- function(x, ..., alt.exp=NULL, name="MDS") {
+    if (!is.null(alt.exp)) {
+        y <- altExp(x, alt.exp)
+    } else {
+        y <- x
+    }
+    reducedDim(x, name) <- calculateMDS(y, ...)
     x
 }
