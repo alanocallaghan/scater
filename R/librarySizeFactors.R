@@ -11,10 +11,7 @@
 #' @param assay.type String or integer scalar indicating the assay of \code{x} containing the counts.
 #' @param exprs_values Deprecated, same as \code{assay.type}.
 #' @param ... For the \code{librarySizeFactors} generic, arguments to pass to specific methods.
-#'
-#' For the SummarizedExperiment \code{librarySizeFactors} method, further arguments to pass to the ANY method.
-#' 
-#' For the SingleCellExperiment \code{librarySizeFactors} method, further arguments to pass to the SummarizedExperiment method.
+#' For the SummarizedExperiment method, further arguments to pass to the ANY method.
 #'
 #' For \code{computeLibraryFactors}, further arguments to pass to \code{librarySizeFactors}.
 #' @param alt.exp String or integer scalar indicating which (if any) alternative experiment should be used
@@ -80,12 +77,12 @@ setMethod("librarySizeFactors", "SummarizedExperiment", function(x, assay.type="
 #' @importFrom BiocGenerics sizeFactors<-
 #' @importFrom SingleCellExperiment altExp
 computeLibraryFactors <- function(x, ..., alt.exp=NULL) {
-    if (alt.exp) {
+    if (!is.null(alt.exp)) {
         y <- altExp(x, alt.exp)
     } else {
         y <- x
     }
-    sf <- librarySizeFactors(y, assay.type=assay.type, subset.row=subset.row)
+    sf <- librarySizeFactors(y, ...)
     sizeFactors(x) <- sf
     x
 }
