@@ -6,8 +6,8 @@
 \usage{
 plotReducedDim(object, use_dimred, ncomponents = 2, percentVar = NULL,
   colour_by = NULL, shape_by = NULL, size_by = NULL,
-  by_exprs_values = "logcounts", text_by = NULL, text_size = 5,
-  text_colour = "black", ...)
+  by_exprs_values = "logcounts", by_show_single = NULL,
+  text_by = NULL, text_size = 5, text_colour = "black", ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -29,6 +29,8 @@ Only expected to be used in PCA settings, e.g., in the \code{\link[scater]{plotP
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
 for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.}
 
+\item{by_show_single}{Deprecated and ignored.}
+
 \item{text_by}{String specifying the column metadata field with which to add text labels on the plot.
 This must refer to a categorical field, i.e., coercible into a factor.
 Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.}
@@ -38,8 +40,6 @@ Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCel
 \item{text_colour}{String specifying the colour of the added text.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
-
-\item{by_show_single}{Deprecated and ignored.}
 }
 \value{
 A ggplot object

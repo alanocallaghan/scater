@@ -24,15 +24,15 @@ calculateTSNE(x, ...)
 \S4method{calculateTSNE}{SingleCellExperiment}(x, ...,
   pca = is.null(use.dimred), assay.type = "logcounts",
   exprs_values = NULL, use.dimred = NULL, use_dimred = NULL,
-  n.dimred = NULL, n_dimred = NULL, alt.exp = NULL)
+  n.dimred = NULL, n_dimred = NULL)
 
-runTSNE(x, ..., name = "TSNE")
+runTSNE(x, ..., alt.exp = NULL, name = "TSNE")
 }
 \arguments{
 \item{x}{For \code{calculateTSNE}, a numeric matrix of log-expression values where rows are features and columns are cells.
 Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
 
-For \code{runTSNE}, a \linkS4class{SingleCellExperiment} object containing such a matrix.}
+For \code{runTSNE}, a \linkS4class{SingleCellExperiment} object.}
 
 \item{...}{For the \code{calculateTSNE} generic, additional arguments to pass to specific methods.
 For the ANY method, additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.

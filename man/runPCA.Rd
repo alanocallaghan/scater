@@ -22,11 +22,10 @@ calculatePCA(x, ...)
 
 \S4method{calculatePCA}{SingleCellExperiment}(x, ...,
   assay.type = "logcounts", exprs_values = NULL, use.dimred = NULL,
-  use_dimred = NULL, n.dimred = NULL, n_dimred = NULL,
-  alt.exp = NULL)
+  use_dimred = NULL, n.dimred = NULL, n_dimred = NULL)
 
 \S4method{runPCA}{SingleCellExperiment}(x, ..., use_coldata = FALSE,
-  name = "PCA")
+  alt.exp = NULL, name = "PCA")
 }
 \arguments{
 \item{x}{For \code{calculatePCA}, a numeric matrix of log-expression values where rows are features and columns are cells.
@@ -63,9 +62,9 @@ For \code{runPCA}, additional arguments to pass to \code{calculatePCA}.}
 
 \item{n.dimred}{Integer scalar or vector specifying the dimensions to use if \code{use.dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{alt.exp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
-
 \item{use_coldata}{Deprecated, use \code{\link{runColDataPCA}} instead.}
+
+\item{alt.exp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
 \item{name}{String specifying the name to be used to store the result in the \code{\link{reducedDims}} of the output.}
 }

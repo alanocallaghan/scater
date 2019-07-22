@@ -10,7 +10,7 @@
 \usage{
 calculateTPM(x, ...)
 
-\S4method{calculateTPM}{ANY}(x, effective.length, ...)
+\S4method{calculateTPM}{ANY}(x, lengths, effective_length = NULL, ...)
 
 \S4method{calculateTPM}{SummarizedExperiment}(x, ...,
   assay.type = "counts", exprs_values = NULL)
@@ -31,14 +31,14 @@ For the SummarizedExperiment method, further arguments to pass to the ANY method
 
 For the SingleCellExperiment method, further arguments to pass to the SummarizedExperiment method.}
 
-\item{effective.length}{Numeric vector providing the effective length for each feature in \code{x}.
+\item{lengths}{Numeric vector providing the effective length for each feature in \code{x}.
 Alternatively \code{NULL}, see Details.}
+
+\item{effective_length}{Deprecated, same as \code{length}.}
 
 \item{assay.type}{A string specifying the assay of \code{x} containing the count matrix.}
 
 \item{exprs_values}{Deprecated, same as \code{assay.type}.}
-
-\item{effective_length}{Deprecated, same as \code{effective.length}.}
 }
 \value{
 A numeric matrix of TPM values.
@@ -63,7 +63,7 @@ example_sce <- SingleCellExperiment(
     colData = sc_example_cell_info)
 
 eff_len <- runif(nrow(example_sce), 500, 2000)
-tout <- calculateTPM(example_sce, effective.length = eff_len)
+tout <- calculateTPM(example_sce, lengths = eff_len)
 str(tout)
 }
 \seealso{

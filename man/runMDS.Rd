@@ -20,16 +20,15 @@ calculateMDS(x, ...)
 
 \S4method{calculateMDS}{SingleCellExperiment}(x, ...,
   assay.type = "logcounts", exprs_values = NULL, use.dimred = NULL,
-  use_dimred = NULL, n.dimred = NULL, n_dimred = NULL,
-  alt.exp = NULL)
+  use_dimred = NULL, n.dimred = NULL, n_dimred = NULL)
 
-runMDS(x, ..., name = "MDS")
+runMDS(x, ..., alt.exp = NULL, name = "MDS")
 }
 \arguments{
 \item{x}{For \code{calculateMDS}, a numeric matrix of log-expression values where rows are features and columns are cells.
 Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
 
-For \code{runMDS}, a \linkS4class{SingleCellExperiment} object containing such a matrix.}
+For \code{runMDS}, a \linkS4class{SingleCellExperiment} object.}
 
 \item{...}{For the \code{calculateMDS} generic, additional arguments to pass to specific methods.
 For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.

@@ -25,10 +25,7 @@ Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellEx
 For \code{computeLibraryFactors}, only a \linkS4class{SingleCellExperiment} is accepted.}
 
 \item{...}{For the \code{librarySizeFactors} generic, arguments to pass to specific methods.
-
-For the SummarizedExperiment \code{librarySizeFactors} method, further arguments to pass to the ANY method.
-
-For the SingleCellExperiment \code{librarySizeFactors} method, further arguments to pass to the SummarizedExperiment method.
+For the SummarizedExperiment method, further arguments to pass to the ANY method.
 
 For \code{computeLibraryFactors}, further arguments to pass to \code{librarySizeFactors}.}
 

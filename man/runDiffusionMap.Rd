@@ -20,16 +20,15 @@ calculateDiffusionMap(x, ...)
 
 \S4method{calculateDiffusionMap}{SingleCellExperiment}(x, ...,
   assay.type = "logcounts", exprs_values = NULL, use.dimred = NULL,
-  use_dimred = NULL, n.dimred = NULL, n_dimred = NULL,
-  alt.exp = NULL)
+  use_dimred = NULL, n.dimred = NULL, n_dimred = NULL)
 
-runDiffusionMap(x, ..., name = "DiffusionMap")
+runDiffusionMap(x, ..., alt.exp = NULL, name = "DiffusionMap")
 }
 \arguments{
 \item{x}{For \code{calculateDiffusionMap}, a numeric matrix of log-expression values where rows are features and columns are cells.
 Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
 
-For \code{runDiffusionMap}, a \linkS4class{SingleCellExperiment} object containing such a matrix.}
+For \code{runDiffusionMap}, a \linkS4class{SingleCellExperiment} object.}
 
 \item{...}{For the \code{calculateDiffusionMap} generic, additional arguments to pass to specific methods.
 For the ANY method, additional arguments to pass to \code{\link[destiny]{DiffusionMap}}.
