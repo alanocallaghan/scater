@@ -65,11 +65,8 @@
 NULL
 
 #' @importFrom SummarizedExperiment assay
-#' @importFrom SingleCellExperiment altExp reducedDim
-.get_mat_from_sce <- function(x, assay.type, alt.exp, use.dimred, n.dimred) {
-    if (!is.null(alt.exp)) {
-        x <- altExp(x, alt.exp)
-    }
+#' @importFrom SingleCellExperiment reducedDim
+.get_mat_from_sce <- function(x, assay.type, use.dimred, n.dimred) {
     if (!is.null(use.dimred)) {
         mat <- reducedDim(x, use.dimred)
         if (!is.null(n.dimred)) {
