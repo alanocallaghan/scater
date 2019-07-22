@@ -14,12 +14,6 @@
 #' 
 #' For the SummarizedExperiment and SingleCellExperiment methods, further arguments to pass to the ANY method.
 #' @param assay.type A string or integer scalar indicating which \code{assays} in the \code{x} contains the count matrix.
-#' @param use.alt.exps Logical scalar indicating whether QC statistics should be computed for alternative Experiments in \code{x}.
-#' If \code{TRUE}, statistics are computed for all alternative experiments. 
-#'
-#' Alternatively, an integer or character vector specifying the alternative Experiments to use to compute QC statistics.
-#' 
-#' Alternatively \code{NULL}, in which case alternative experiments are not used.
 #'
 #' @return
 #' A \linkS4class{DataFrame} of QC statistics where each row corresponds to a row in \code{x}.
