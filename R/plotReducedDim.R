@@ -62,7 +62,7 @@
 #'
 plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NULL, 
                            colour_by = NULL, shape_by = NULL, size_by = NULL,
-                           by_exprs_values = "logcounts", 
+                           by_exprs_values = "logcounts", by_show_single=NULL, 
                            text_by=NULL, text_size=5, text_colour="black", ...)
 {
     ## Extract reduced dimension representation of cells

@@ -65,13 +65,13 @@ SET_FUN <- function(exprs_values) {
 #' assays = list(norm_counts = sc_example_counts), colData = sc_example_cell_info)
 #' 
 #' counts(example_sce) <- sc_example_counts
-#' norm_exprs(example_sce) <- log2(calculateCPM(example_sce, use_size_factors = FALSE) + 1)
+#' norm_exprs(example_sce) <- log2(calculateCPM(example_sce) + 1)
 #' 
-#' stand_exprs(example_sce) <- log2(calculateCPM(example_sce, use_size_factors = FALSE) + 1)
+#' stand_exprs(example_sce) <- log2(calculateCPM(example_sce) + 1)
 #'
-#' tpm(example_sce) <- calculateTPM(example_sce, effective_length = 5e4)
+#' tpm(example_sce) <- calculateTPM(example_sce, lengths = 5e4)
 #' 
-#' cpm(example_sce) <- calculateCPM(example_sce, use_size_factors = FALSE)
+#' cpm(example_sce) <- calculateCPM(example_sce)
 #' 
 #' fpkm(example_sce)
 for (x in c("exprs", "norm_exprs", "stand_exprs", "fpkm")) { 

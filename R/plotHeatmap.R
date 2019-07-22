@@ -38,9 +38,16 @@
 #' @author Aaron Lun
 #' 
 #' @examples
-#' example(normalizeSCE) # borrowing the example objects in here.
+#' data("sc_example_counts")
+#' data("sc_example_cell_info")
+#' example_sce <- SingleCellExperiment(
+#'     assays = list(counts = sc_example_counts),
+#'     colData = sc_example_cell_info
+#' )
+#' example_sce <- normalize(example_sce)
+#'
 #' plotHeatmap(example_sce, features=rownames(example_sce)[1:10])
-
+#'
 #' plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
 #'     center=TRUE, symmetric=TRUE)
 #'

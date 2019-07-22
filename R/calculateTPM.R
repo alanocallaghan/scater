@@ -5,9 +5,9 @@
 #' @param x A numeric matrix of counts where features are rows and cells are columns.
 #'
 #' Alternatively, a \linkS4class{SummarizedExperiment} or a \linkS4class{SingleCellExperiment} containing such counts.
-#' @param effective.length Numeric vector providing the effective length for each feature in \code{x}.
+#' @param lengths Numeric vector providing the effective length for each feature in \code{x}.
 #' Alternatively \code{NULL}, see Details.
-#' @param effective_length Deprecated, same as \code{effective.length}.
+#' @param effective_length Deprecated, same as \code{length}.
 #' @param assay.type A string specifying the assay of \code{x} containing the count matrix.
 #' @param exprs_values Deprecated, same as \code{assay.type}.
 #' @param ... For the generic, arguments to pass to specific methods.
@@ -41,13 +41,14 @@
 #'     colData = sc_example_cell_info)
 #'
 #' eff_len <- runif(nrow(example_sce), 500, 2000)
-#' tout <- calculateTPM(example_sce, effective.length = eff_len)
+#' tout <- calculateTPM(example_sce, lengths = eff_len)
 #' str(tout)
 NULL
 
-.calculate_tpm <- function(x, effective.length, ...) {
-    if (!is.null(effective.length)) {
-        x <- x/effective.length
+.calculate_tpm <- function(x, lengths, effective_length=NULL, ...) {
+    lengths <- .switch_arg_names(effective_length, lengths)
+    if (!is.null(lengths)) {
+        x <- x/lengths
     }
     .calculate_cpm(x, ...)
 }
