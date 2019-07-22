@@ -116,10 +116,10 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., 
 #' @rdname sumCountsAcrossCells
 setMethod("aggregateAcrossCells", "SingleCellExperiment", function(x, ids, ..., use.assay.types="counts", use.alt.exps=TRUE) {
     FUN <- .create_cell_aggregator(ids, use.assay.types)
-    x <- FUN(x, ...)
+    y <- FUN(x, ...)
     use.alt.exps <- .get_alt_exps_to_use(x, use.alt.exps)
     for (i in use.alt.exps) {
-        altExp(x, i) <- FUN(altExp(x, i), ...)
+        altExp(y, i) <- FUN(altExp(x, i), ...)
     }
-    x
+    y
 })
