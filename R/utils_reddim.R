@@ -75,6 +75,7 @@ NULL
             }
             mat <- mat[,n.dimred,drop=FALSE]
         }
+        mat
     } else {
         assay(x, assay.type)
     }
