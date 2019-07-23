@@ -7,6 +7,7 @@
 #'
 #' Alternatively, a \linkS4class{SummarizedExperiment} containing such counts.
 #' @param detection.limit Numeric scalar providing the value above which  observations are deemed to be expressed. 
+#' @param detection_limit Deprecated, same as \code{detection.limit}.
 #' @param assay.type String or integer specifying the assay of \code{x} to obtain the count matrix from.
 #' @param exprs_values Deprecated, same as \code{assay.type}.
 #' @param byrow Logical scalar indicating whether to count the number of detected cells per feature.
@@ -45,6 +46,7 @@ NULL
 {
     subset.row <- .switch_arg_names(subset_row, subset.row)
     subset.col <- .switch_arg_names(subset_col, subset.col)
+    detection.limit <- .switch_arg_names(detection_limit, detection.limit)
     subset.row <- .subset2index(subset.row, target = x, byrow = TRUE)
     subset.col <- .subset2index(subset.col, target = x, byrow = FALSE)
 
