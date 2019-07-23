@@ -52,7 +52,7 @@ NULL
 #' @importFrom Matrix colSums
 .library_size_factors <- function(x, subset.row=NULL, subset_row=NULL) {
     subset.row <- .switch_arg_names(subset_row, subset.row)
-    if (is.null(subset.row)) {
+    if (!is.null(subset.row)) {
        x <- x[.subset2index(subset.row, x, byrow=TRUE),,drop=FALSE]
     }
     lib_sizes <- colSums(x)
