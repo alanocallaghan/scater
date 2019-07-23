@@ -27,8 +27,15 @@
 #' fout <- calculateFPKM(example_sce, eff_len)
 #' str(fout)
 #' @export
-calculateFPKM <- function(x, effective.length, effective_length=NULL, ..., subset_row = NULL) {
-    effective.length <- .switch_arg_names(effective_length, effective.length)
-    out <- calculateCPM(x, ...)
-    out / (effective.length / 1e3)
+calculateFPKM <- function(x, lengths, effective_length=NULL, ..., subset.row=NULL, subset_row = NULL) {
+    subset.row <- .switch_arg_names(subset_row, subset.row)
+    lengths <- .switch_arg_names(effective_length, lengths)
+
+    if (!is.null(subset.row)) {
+        subset.row <- .subset2index(subset.row, x, byrow=TRUE)
+        lengths <- lengths[subset.row]
+    }
+
+    out <- calculateCPM(x, subset.row=subset.row, ...)
+    out / (lengths / 1e3)
 }

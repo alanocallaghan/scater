@@ -45,7 +45,7 @@
 #' str(tout)
 NULL
 
-.calculate_tpm <- function(x, lengths, effective_length=NULL, ...) {
+.calculate_tpm <- function(x, lengths=NULL, effective_length=NULL, ...) {
     lengths <- .switch_arg_names(effective_length, lengths)
     if (!is.null(lengths)) {
         x <- x/lengths
@@ -70,9 +70,9 @@ setMethod("calculateTPM", "SummarizedExperiment", function(x, ..., assay.type="c
 #' @rdname calculateTPM
 #' @importFrom SingleCellExperiment altExp
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
-setMethod("calculateTPM", "SingleCellExperiment", function(x, size.factors=NULL, ...) {
+setMethod("calculateTPM", "SingleCellExperiment", function(x, lengths=NULL, size.factors=NULL, ...) {
     if (is.null(size.factors)) {
         size.factors <- sizeFactors(x)
     }
-    callNextMethod(x=x, size.factors=size.factors, ...)
+    callNextMethod(x=x, lengths=lengths, size.factors=size.factors, ...)
 })
