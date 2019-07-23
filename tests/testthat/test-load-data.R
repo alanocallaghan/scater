@@ -3,16 +3,16 @@
 
 context("test expected usage")
 
+a <- matrix(rpois(10000, lambda=1), ncol=50)
+rownames(a) <- paste0("Gene", seq_len(nrow(a)))
+colnames(a) <- paste0("Cell", seq_len(ncol(a)))
+
+ofile <- tempfile()
+write.table(a, file=ofile, sep="\t", quote=FALSE, col.names=NA) 
+ref <- as(a, "dgCMatrix")
+
 library(Matrix)
-test_that("readSparseCounts works as expected", {
-    a <- matrix(rpois(10000, lambda=1), ncol=50)
-    rownames(a) <- paste0("Gene", seq_len(nrow(a)))
-    colnames(a) <- paste0("Cell", seq_len(ncol(a)))
-
-    ofile <- tempfile()
-    write.table(a, file=ofile, sep="\t", quote=FALSE, col.names=NA) 
-
-    ref <- as(a, "dgCMatrix")
+test_that("readSparseCounts works as expected in basic cases", {
     out <- readSparseCounts(ofile)
     expect_identical(ref, out)
 
@@ -21,7 +21,9 @@ test_that("readSparseCounts works as expected", {
     expect_identical(ref, out2)
     out2 <- readSparseCounts(ofile, chunk=51L)
     expect_identical(ref, out2)
+})
 
+test_that("readSparseCounts avoids row/column names if requested", {
     # Avoids row names if requested.
     out <- readSparseCounts(ofile, row.names=FALSE, ignore.col=1L)
     ref2 <- ref
@@ -37,15 +39,17 @@ test_that("readSparseCounts works as expected", {
     expect_identical(ref2, out)
 
     expect_error(readSparseCounts(ofile, col.names=FALSE), "invalid")
+})
 
-    # Skipping works correctly.
+test_that("Skipping works correctly", {
     out <- readSparseCounts(ofile, skip.row=10L)
     expect_identical(ref[11:nrow(ref),], out)
 
     out <- readSparseCounts(ofile, skip.col=10L)
     expect_identical(ref[,11:ncol(ref)], out)
+})
 
-    # Behaves correctly with wonky quotes and comments in the row/column names.
+test_that("Behaves correctly with wonky quotes and comments in the row/column names", {
     a2 <- a
     rownames(a2) <- paste0('"', rownames(a), "#")
     colnames(a2) <- paste0('#"', colnames(a), "'")
@@ -55,8 +59,9 @@ test_that("readSparseCounts works as expected", {
     write.table(a2, file=ofile2, sep="\t", quote=FALSE, col.names=NA) 
     out2 <- readSparseCounts(ofile2)
     expect_identical(ref2, out2)
+})
 
-    # Behaves properly with file handle input.
+test_that("Behaves properly with file handle input", {
     ofile3 <- tempfile(fileext=".gz")
     XHANDLE <- gzfile(ofile3, open='wb')
     write.table(a, file=XHANDLE, sep="\t", quote=FALSE, col.names=NA) 
