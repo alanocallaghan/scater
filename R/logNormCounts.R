@@ -99,7 +99,10 @@ setMethod("logNormCounts", "SingleCellExperiment", function(x, size.factors=NULL
     FUN <- .se_lnc(assay.type=assay.type, log=log, pseudo.count=pseudo.count, name=name) 
     x <- FUN(x, size.factors=size.factors, center.sf=FALSE)
     if (log) {
-        int_metadata(x)$scater <- c(int_metadata(x)$scater, list(pseudo.count=pseudo.count))
+        if (is.null(int_metadata(x)$scater)) {
+            int_metadata(x)$scater <- list()
+        }
+        int_metadata(x)$scater$pseudo.count <- pseudo.count
     }
 
     use.alt.exps <- .get_alt_exps_to_use(x, use.alt.exps)
