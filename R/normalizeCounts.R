@@ -11,6 +11,7 @@
 #' @param log Logical scalar indicating whether normalized values should be log2-transformed.
 #' @param return_log Deprecated, same as \code{log}.
 #' @param pseudo.count Numeric scalar specifying the pseudo-count to add when log-transforming expression values.
+#' @param log_exprs_offset Deprecated, same as \code{pseudo.count}.
 #' @param center.sf Logical scalar indicating whether size factors should be centered at unity before being used.
 #' @param subset.row A vector specifying the subset of rows of \code{x} for which to return a result.
 #' @param subset_row Deprecated, same as \code{subset.row}.
@@ -55,11 +56,11 @@ NULL
 #' @importFrom Matrix t
 #' @importClassesFrom DelayedArray DelayedMatrix
 setMethod("normalizeCounts", "DelayedMatrix", function(x, size.factors=NULL, size_factors=NULL, 
-    log=TRUE, return_log=NULL, pseudo.count=1, center.sf=TRUE,
+    log=TRUE, return_log=NULL, pseudo.count=1, log_exprs_offset=NULL, center.sf=TRUE,
     subset.row=NULL, subset_row=NULL) 
 {
     subset.row <- .switch_arg_names(subset_row, subset.row)
-    if (is.null(subset.row)) {
+    if (!is.null(subset.row)) {
         x <- x[subset.row,,drop=FALSE]
     }
 
@@ -67,6 +68,7 @@ setMethod("normalizeCounts", "DelayedMatrix", function(x, size.factors=NULL, siz
     size.factors <- .get_default_sizes(x, size.factors, center.sf)
     norm_exprs <- t(t(x) / size.factors)
 
+    pseudo.count <- .switch_arg_names(log_exprs_offset, pseudo.count)
     log <- .switch_arg_names(return_log, log)
     if (log) {
         norm_exprs <- log2(norm_exprs + pseudo.count)
@@ -77,7 +79,7 @@ setMethod("normalizeCounts", "DelayedMatrix", function(x, size.factors=NULL, siz
 #' @export
 #' @rdname normalizeCounts
 setMethod("normalizeCounts", "ANY", function(x, size.factors=NULL, size_factors=NULL,
-    log=TRUE, return_log=NULL, pseudo.count=1, center.sf=TRUE,
+    log=TRUE, return_log=NULL, pseudo.count=1, log_exprs_offset=NULL, center.sf=TRUE,
     subset.row=NULL, subset_row=NULL) 
 {
     size.factors <- .switch_arg_names(size_factors, size.factors)
@@ -86,9 +88,11 @@ setMethod("normalizeCounts", "ANY", function(x, size.factors=NULL, size_factors=
     subset.row <- .switch_arg_names(subset_row, subset.row)
     subset.row <- .subset2index(subset.row, x, byrow=TRUE)
 
+    pseudo.count <- .switch_arg_names(log_exprs_offset, pseudo.count)
+    log <- .switch_arg_names(return_log, log)
     norm_exprs <- .Call(cxx_norm_exprs, x, list(size.factors), integer(nrow(x)),
         pseudo.count, log, subset.row - 1L)
-    dimnames(norm_exprs) <- dimnames(x)
+    dimnames(norm_exprs) <- list(rownames(x)[subset.row], colnames(x))
     norm_exprs
 })
 
@@ -124,5 +128,5 @@ setMethod("normalizeCounts", "SingleCellExperiment", function(x, size.factors=NU
     if (is.null(size.factors)) {
         size.factors <- sizeFactors(x)
     }
-    callNextMethod(x=x, ...)
+    callNextMethod(x=x, size.factors=size.factors, ...)
 })
