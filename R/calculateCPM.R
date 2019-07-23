@@ -76,5 +76,5 @@ setMethod("calculateCPM", "SingleCellExperiment", function(x, size.factors=NULL,
     if (is.null(size.factors)) {
         size.factors <- sizeFactors(x)
     }
-    callNextMethod(x=x, ...)
+    callNextMethod(x=x, size.factors=size.factors, ...)
 })
