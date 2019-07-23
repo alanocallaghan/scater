@@ -3,19 +3,22 @@
 
 context("test feature pre-processing functions")
 
+##########################################################
+
 set.seed(10001)
 test_that("we can summarise counts at feature set level", {
     ids <- sample(nrow(sce)/2, nrow(sce), replace=TRUE)
     out <- sumCountsAcrossFeatures(sce, ids)
     expect_identical(out, rowsum(counts(sce), ids))
+    expect_identical(rownames(out), as.character(sort(unique(ids))))
 
     out2 <- sumCountsAcrossFeatures(counts(sce), ids)
     expect_identical(out, out2)
 
-    # exprs_values= works correctly.
+    # assay.type= works correctly.
     alt <- sce
     assayNames(alt) <- "whee"
-    out2 <- sumCountsAcrossFeatures(alt, ids, exprs_values="whee")
+    out2 <- sumCountsAcrossFeatures(alt, ids, assay.type="whee")
     expect_identical(out, out2)
 
     # Respects levels properly.
@@ -60,6 +63,26 @@ test_that("by-feature count summarization behaves with odd inputs", {
     expect_identical(alt, ref)
 })
 
+set.seed(100021)
+test_that("Aggregation across features works correctly", {
+    ids <- paste0("GENE_", sample(nrow(sce)/2, nrow(sce), replace=TRUE))
+    alt <- aggregateAcrossFeatures(sce, ids)
+
+    expect_identical(rownames(alt), sort(unique(ids)))
+    expect_identical(counts(alt), sumCountsAcrossFeatures(counts(sce), ids))
+
+    # Behaves in the presence of multiple assays.
+    normcounts(sce) <- normalizeCounts(sce, log=FALSE)
+    alt2 <- aggregateAcrossFeatures(sce, ids)
+    expect_identical(alt, alt2)
+
+    alt3 <- aggregateAcrossFeatures(sce, ids, use.assay.types=c("counts", "normcounts"))
+    expect_identical(counts(alt), counts(alt3))
+    expect_identical(normcounts(alt3), sumCountsAcrossFeatures(sce, ids, assay.type="normcounts"))
+})
+
+##########################################################
+
 set.seed(10003)
 test_that("we can summarise counts at cell cluster level", {
     ids <- sample(ncol(sce)/2, ncol(sce), replace=TRUE)
@@ -69,10 +92,10 @@ test_that("we can summarise counts at cell cluster level", {
     out2 <- sumCountsAcrossCells(counts(sce), ids)
     expect_identical(out, out2)
 
-    # exprs_values= works correctly.
+    # assay.type= works correctly.
     alt <- sce
     assayNames(alt) <- "whee"
-    out2 <- sumCountsAcrossCells(alt, ids, exprs_values="whee")
+    out2 <- sumCountsAcrossCells(alt, ids, assay.type="whee")
     expect_identical(out, out2)
 
     # Respects levels properly.
@@ -117,6 +140,40 @@ test_that("by-cell count summarization behaves with odd inputs", {
     alt <- sumCountsAcrossCells(sce, ids, BPPARAM=safeBPParam(3))
     expect_identical(alt, ref)
 })
+
+set.seed(100041)
+test_that("Aggregation across cells works correctly for SCEs", {
+    ids <- paste0("CLUSTER_", sample(ncol(sce)/2, ncol(sce), replace=TRUE))
+    alt <- aggregateAcrossCells(sce, ids)
+
+    expect_identical(colnames(alt), sort(unique(ids)))
+    expect_identical(counts(alt), sumCountsAcrossCells(counts(sce), ids))
+
+    # Behaves in the presence of multiple assays.
+    normcounts(sce) <- normalizeCounts(sce, log=FALSE)
+    alt2 <- aggregateAcrossCells(sce, ids)
+    expect_identical(alt, alt2)
+
+    alt3 <- aggregateAcrossCells(sce, ids, use.assay.types=c("counts", "normcounts"))
+    expect_identical(counts(alt), counts(alt3))
+    expect_identical(normcounts(alt3), sumCountsAcrossCells(sce, ids, assay.type="normcounts"))
+
+    # Behaves for alternative experiments.
+    copy <- sce
+    altExp(copy, 1) <- sce
+    copy <- aggregateAcrossCells(copy, ids)
+    expect_identical(altExp(copy, 1), alt)
+})
+
+set.seed(100042)
+test_that("Aggregation across cells works correctly for SEs", {
+    ids <- paste0("CLUSTER_", sample(ncol(sce)/2, ncol(sce), replace=TRUE))
+    alt <- aggregateAcrossCells(sce, ids)
+    expect_identical(colnames(alt), sort(unique(ids)))
+    expect_identical(counts(alt), sumCountsAcrossCells(counts(sce), ids))
+})
+
+##########################################################
 
 test_that("we can uniquify the feature names", {
     all.genes <- sample(c(LETTERS, LETTERS[1:5], NA, NA))

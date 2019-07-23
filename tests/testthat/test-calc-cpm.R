@@ -12,22 +12,22 @@ test_that("we can calculate CPM from counts", {
     expect_identical(cpm_out, calculateCPM(counts(original)))
 
     ## Repeating with subsets.
-    sub1 <- calculateCPM(counts(original), subset_row=1:10)
+    sub1 <- calculateCPM(counts(original), subset.row=1:10)
     expect_identical(sub1, calculateCPM(counts(original)[1:10,]))
 
     logi <- rbinom(nrow(original), 1, 0.5)==1
-    sub2 <- calculateCPM(counts(original), subset_row=logi)
+    sub2 <- calculateCPM(counts(original), subset.row=logi)
     expect_identical(sub2, calculateCPM(counts(original)[logi,]))
 
     chosen <- sample(rownames(original), 20)
-    sub3 <- calculateCPM(counts(original), subset_row=chosen)
+    sub3 <- calculateCPM(counts(original), subset.row=chosen)
     expect_identical(sub3, calculateCPM(counts(original)[chosen,]))
 })
 
 test_that("calculateCPM is responsive to size factors", {
     sizeFactors(original) <- runif(ncol(original))
     cpm_out <- calculateCPM(original)
-    expect_equal(cpm_out, calculateCPM(counts(original), use_size_factors=sizeFactors(original)))
+    expect_equal(cpm_out, calculateCPM(counts(original), size.factors=sizeFactors(original)))
    
     FUN <- function(counts, sf, libsize = colSums(counts)) {
         eff_lib <- sf/mean(sf) * mean(libsize)
@@ -35,32 +35,16 @@ test_that("calculateCPM is responsive to size factors", {
     } 
     expect_equal(cpm_out, FUN(counts(original), sizeFactors(original)))
 
-    ## Responsive to multiple size factors.
-    spiked <- original
-    sizeFactors(spiked, "WHEE") <- runif(ncol(original))
-    is_spike <- 10:20
-    isSpike(spiked, "WHEE") <- is_spike
-    cpm_out <- calculateCPM(spiked)
-    expect_equal(cpm_out[is_spike,], FUN(counts(original)[is_spike,], sizeFactors(spiked, "WHEE"), colSums(counts(original))))
-    expect_equal(cpm_out[-is_spike,], FUN(counts(original)[-is_spike,], sizeFactors(spiked), colSums(counts(original))))
-
     # Ignores or overrides the size factors if requested.
-    expect_equal(calculateCPM(counts(original)),
-                 calculateCPM(original, use_size_factors=FALSE))
-    expect_equal(calculateCPM(counts(spiked)),
-                 calculateCPM(spiked, use_size_factors=FALSE))
-
-    new_sf <- runif(ncol(spiked))
-    cpm_out <- calculateCPM(spiked, use_size_factors=new_sf)
-    spiked2 <- spiked
-    sizeFactors(spiked2) <- new_sf
-    expect_equal(calculateCPM(spiked2), cpm_out)
+    new_sf <- runif(ncol(original))
+    cpm_out <- calculateCPM(original, size.factors=new_sf)
+    expect_equal(calculateCPM(counts(original), new_sf), cpm_out)
 })
 
 test_that("calculateCPM works with alternative inputs", {
     # Checking that it works on a sparse matrix. 
     cpm_out <- calculateCPM(sparsified)
-    expect_equal(as.matrix(cpm_out), calculateCPM(original, use_size_factors=FALSE))
+    expect_equal(as.matrix(cpm_out), calculateCPM(original))
 
     # Checking that it works when there are no columns or rows.
     cpm_out <- calculateCPM(original[0,])
@@ -78,7 +62,7 @@ test_that("we can calculate FPKM from counts", {
     expect_equal(fpkms, ref)
 
     # Repeating with subsets.
-    out <- calculateFPKM(original, effective_length, subset_row=1:10)
+    out <- calculateFPKM(original, effective_length, subset.row=1:10)
     sub <- calculateFPKM(original[1:10,], effective_length[1:10])
     expect_equal(out, sub)
 
@@ -100,7 +84,7 @@ test_that("we can calculate TPM from counts", {
     expect_equal(calculateTPM(original, NULL), calculateCPM(original))
 
     # Repeating with subsets.
-    out <- calculateTPM(original, effective_length, subset_row=1:10)
+    out <- calculateTPM(original, effective_length, subset.row=1:10)
     sub <- calculateTPM(original[1:10,], effective_length[1:10])
     expect_equal(out, sub)
 

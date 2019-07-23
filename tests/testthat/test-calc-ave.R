@@ -4,98 +4,73 @@
 original <- sce
 
 set.seed(10000)
-test_that("calcAverage works as expected", {
-    ave_counts <- calcAverage(original)
+test_that("calculateAverage works as expected", {
+    ave_counts <- calculateAverage(original)
     lib.sizes <- colSums(counts(original))
     expected_vals <- colMeans(t(counts(original)) / (lib.sizes/mean(lib.sizes)))
     expect_equal(ave_counts, expected_vals)
-    expect_equal(ave_counts, calcAverage(counts(original)))
+    expect_equal(ave_counts, calculateAverage(counts(original)))
 
     ## Repeating with subsets.
-    sub1 <- calcAverage(counts(original), subset_row=1:10)
-    expect_identical(sub1, calcAverage(counts(original)[1:10,]))
+    sub1 <- calculateAverage(counts(original), subset.row=1:10)
+    expect_identical(sub1, calculateAverage(counts(original)[1:10,]))
 
     logi <- rbinom(nrow(original), 1, 0.5)==1
-    sub2 <- calcAverage(counts(original), subset_row=logi)
-    expect_identical(sub2, calcAverage(counts(original)[logi,]))
+    sub2 <- calculateAverage(counts(original), subset.row=logi)
+    expect_identical(sub2, calculateAverage(counts(original)[logi,]))
 
     chosen <- sample(rownames(original), 20)
-    sub3 <- calcAverage(counts(original), subset_row=chosen)
-    expect_identical(sub3, calcAverage(counts(original)[chosen,]))
+    sub3 <- calculateAverage(counts(original), subset.row=chosen)
+    expect_identical(sub3, calculateAverage(counts(original)[chosen,]))
 })
 
-test_that("calcAverage responds to size factor options", {
-    ave_counts <- calcAverage(original)
+test_that("calculateAverage responds to size factor options", {
+    ave_counts <- calculateAverage(original)
 
     ## Responsive to size factors.
     sizeFactors(original) <- runif(ncol(original))
-    ave_counts <- calcAverage(original)
-    expect_equal(ave_counts, calcAverage(counts(original), use_size_factors=sizeFactors(original)))
+    ave_counts <- calculateAverage(original)
+    expect_equal(ave_counts, calculateAverage(counts(original), size.factors=sizeFactors(original)))
     
     sf <- sizeFactors(original) 
     sf <- sf/mean(sf)    
     expected_vals <- colMeans(t(counts(original)) / sf)
     expect_equal(ave_counts, expected_vals)
 
-    ## Responsive to multiple size factors.
-    spiked <- original
-    sizeFactors(spiked, "WHEE") <- runif(ncol(original))
-    is_spike <- 10:20
-    isSpike(spiked, "WHEE") <- is_spike
-    ave_counts <- calcAverage(spiked)
-    expect_equal(ave_counts[is_spike], calcAverage(counts(original)[is_spike,], use_size_factors=sizeFactors(spiked, "WHEE")))
-    expect_equal(ave_counts[-is_spike], calcAverage(counts(original)[-is_spike,], use_size_factors=sizeFactors(spiked)))
-
     # Ignores or overrides the size factors if requested.
-    expect_equal(calcAverage(counts(original)), calcAverage(original, use_size_factors=FALSE))
-    expect_equal(calcAverage(counts(spiked)), calcAverage(spiked, use_size_factors=FALSE))
-
-    new_sf <- runif(ncol(spiked))
-    ave_counts <- calcAverage(spiked, use_size_factors=new_sf)
-    spiked2 <- spiked
-    sizeFactors(spiked2) <- new_sf
-    expect_equal(calcAverage(spiked2), ave_counts)
-
-    # Warnings are correctly thrown (or not) when no size factors are available for spike-ins.
-    sizeFactors(spiked2, "WHEE") <- NULL
-    expect_warning(calcAverage(spiked2), "spike-in set")
-    expect_warning(calcAverage(spiked2, use_size_factors=new_sf), "spike-in set")
-    expect_warning(calcAverage(spiked2, use_size_factors=FALSE), NA)
+    new_sf <- runif(ncol(original))
+    ave_counts <- calculateAverage(original, size.factors=new_sf)
+    expect_equal(calculateAverage(counts(original), size.factors=new_sf), ave_counts)
 })
 
-test_that("calcAverage responds to other choices", {
-    ave_counts <- calcAverage(original)
+test_that("calculateAverage responds to other choices", {
+    ave_counts <- calculateAverage(original)
 
     ## Responsive to other assay names.
     whee <- original
-    assayNames(whee) <- "whee"
-    whee_counts <- calcAverage(whee, exprs_values="whee")
-    expect_identical(whee_counts, ave_counts)
+    assay(whee, "whee") <- counts(original)*2
+    whee_counts <- calculateAverage(whee, assay.type="whee")
+    expect_identical(whee_counts, ave_counts*2)
 
     ## Responsive to parallelization.
-    expect_equal(ave_counts, calcAverage(original, BPPARAM=safeBPParam(2)))
-    expect_equal(ave_counts, calcAverage(original, BPPARAM=safeBPParam(3)))
+    expect_equal(ave_counts, calculateAverage(original, BPPARAM=safeBPParam(2)))
+    expect_equal(ave_counts, calculateAverage(original, BPPARAM=safeBPParam(3)))
 
     ## Repeating with a sparse matrix, to check that the specialized code is correct.
     sparsified <- original
     counts(sparsified) <- as(counts(original), "dgCMatrix")
-    expect_equal(ave_counts, calcAverage(sparsified))
-    expect_equal(calcAverage(original, subset_row=30:20),
-        calcAverage(sparsified, subset_row=30:20))
+    expect_equal(ave_counts, calculateAverage(sparsified))
+    expect_equal(calculateAverage(original, subset.row=30:20),
+        calculateAverage(sparsified, subset.row=30:20))
 
     unknown <- original
     counts(unknown) <- as(counts(original), "dgTMatrix")
-    expect_equal(ave_counts, calcAverage(unknown))
-    expect_equal(calcAverage(unknown, subset_row=25:15),
-         calcAverage(original, subset_row=25:15))
+    expect_equal(ave_counts, calculateAverage(unknown))
+    expect_equal(calculateAverage(unknown, subset.row=25:15),
+         calculateAverage(original, subset.row=25:15))
 })
 
-test_that("calcAverage handles silly inputs", {
-    expect_equivalent(calcAverage(original[0,]), numeric(0)) 
-    expect_equivalent(calcAverage(original[,0]), rep(NaN, nrow(original)))
-    expect_equivalent(calcAverage(original, use_size_factors=1), rowMeans(counts(original))) # rep()'s 1 to the number of cells.
-
-    expect_error(calcAverage(original, use_size_factors=rep(-1:1, length.out=ncol(original))), "should be positive")
-    expect_error(calcAverage(original, use_size_factors=rep(0:1, length.out=ncol(original))), "should be positive")
-    expect_error(calcAverage(original, use_size_factors=rep(NA_real_, ncol(original))), "should be positive")
+test_that("calculateAverage handles silly inputs", {
+    expect_equivalent(calculateAverage(original[0,]), numeric(0)) 
+    expect_equivalent(calculateAverage(original[,0]), rep(NaN, nrow(original)))
 })

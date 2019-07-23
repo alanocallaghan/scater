@@ -12,11 +12,11 @@ test_that("nexprs works as expected", {
 })
 
 test_that("nexprs responds to subsetting", {
-    expect_equal(nexprs(original, subset_row = 20:40), colSums(counts(original)[20:40,] > 0))
-    expect_equal(nexprs(original, byrow = TRUE, subset_col = 20:40), rowSums(counts(original)[,20:40] > 0))
+    expect_equal(nexprs(original, subset.row = 20:40), colSums(counts(original)[20:40,] > 0))
+    expect_equal(nexprs(original, byrow = TRUE, subset.col = 20:40), rowSums(counts(original)[,20:40] > 0))
 
-    expect_equal(nexprs(original, subset_row = 20:40, subset_col=1:10), colSums(counts(original)[20:40,1:10] > 0))
-    expect_equal(nexprs(original, byrow = TRUE, subset_row=1:10, subset_col = 20:40), rowSums(counts(original)[1:10,20:40] > 0))
+    expect_equal(nexprs(original, subset.row = 20:40, subset.col=1:10), colSums(counts(original)[20:40,1:10] > 0))
+    expect_equal(nexprs(original, byrow = TRUE, subset.row=1:10, subset.col = 20:40), rowSums(counts(original)[1:10,20:40] > 0))
 })
 
 test_that("nexprs responds to other options", {    
@@ -39,9 +39,9 @@ test_that("nexprs works on a sparse matrix", {
 })
 
 test_that("nexprs handles silly inputs properly", {
-    expect_equivalent(nexprs(original, subset_row=integer(0)), integer(ncol(original)))
-    expect_equivalent(nexprs(original, subset_col=integer(0)), integer(0))
-    expect_equivalent(nexprs(original, subset_row=integer(0), byrow=TRUE), integer(0))
-    expect_equivalent(nexprs(original, subset_col=integer(0), byrow=TRUE), integer(nrow(original)))
+    expect_equivalent(nexprs(original, subset.row=integer(0)), integer(ncol(original)))
+    expect_equivalent(nexprs(original, subset.col=integer(0)), integer(0))
+    expect_equivalent(nexprs(original, subset.row=integer(0), byrow=TRUE), integer(0))
+    expect_equivalent(nexprs(original, subset.col=integer(0), byrow=TRUE), integer(nrow(original)))
 })
 
