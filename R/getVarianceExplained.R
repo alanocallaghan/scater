@@ -47,11 +47,6 @@ NULL
 #' @importFrom DelayedMatrixStats rowVars
 #' @importFrom stats model.matrix
 .get_variance_explained <- function(x, variables, subset.row=NULL, chunk=1000) {
-    # Initialise matrix to store R^2 values for each feature for each variable
-    rsquared_mat <- matrix(NA_real_, nrow = nrow(x), ncol = ncol(variables),
-        dimnames=list(rownames(x), colnames(variables)))
-    tss.all <- rowVars(DelayedArray(x)) * (ncol(x)-1) 
-
     # Chunk-wise processing to keep memory usage low.
     subset.row <- .subset2index(subset.row, x, byrow=TRUE)
     ngenes <- length(subset.row)
@@ -60,6 +55,11 @@ NULL
     } else {
         by.chunk <- factor(integer(ngenes))
     }
+
+    # Initialise matrix to store R^2 values for each feature for each variable
+    rsquared_mat <- matrix(NA_real_, ngenes, ncol(variables), 
+        dimnames=list(rownames(x)[subset.row], colnames(variables)))
+    tss.all <- rowVars(DelayedArray(x), rows=subset.row) * (ncol(x)-1) 
 
     # Get R^2 values for each feature and each variable
     for (V in colnames(variables)) {
@@ -75,13 +75,13 @@ NULL
             tss <- tss.all
         } else {
             curvar <- curvar[keep]
-            tss <- rowVars(DelayedArray(exprs_mat), cols=keep) * (sum(keep) - 1)
+            tss <- rowVars(DelayedArray(x), rows=subset.row, cols=keep) * (sum(keep) - 1)
         }
 
         design <- model.matrix(~curvar)
 	    QR <- qr(design)
 
-        rss <- numeric(length(by.chunk))
+        rss <- numeric(ngenes)
         for (element in levels(by.chunk)) {
             chunked <- by.chunk==element
             cur.exprs <- x[subset.row[chunked],keep,drop=FALSE]
@@ -106,13 +106,13 @@ setMethod("getVarianceExplained", "ANY", .get_variance_explained)
 #' @importFrom SummarizedExperiment colData assay
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
 setMethod("getVarianceExplained", "SummarizedExperiment", function(x, variables=NULL, ..., 
-    assay.type="counts", exprs_values=NULL) 
+    assay.type="logcounts", exprs_values=NULL) 
 {
     assay.type <- .switch_arg_names(exprs_values, assay.type)
     if (is.null(variables)) {
         variables <- colData(x)
     } else if (is.character(variables)) {
-        variables <- colData(x)[,variables]        
+        variables <- colData(x)[,variables,drop=FALSE]
     }
     .get_variance_explained(assay(x, assay.type), variables=variables, ...)
 })
