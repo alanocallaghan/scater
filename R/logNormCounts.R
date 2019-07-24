@@ -54,6 +54,7 @@
 NULL
 
 #' @export
+#' @rdname logNormCounts
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
 setMethod("logNormCounts", "SummarizedExperiment", function(x, size.factors=NULL, log=TRUE, pseudo.count=1, center.sf=TRUE, 
     assay.type="counts", name=NULL) 
@@ -78,6 +79,7 @@ setMethod("logNormCounts", "SummarizedExperiment", function(x, size.factors=NULL
 }
 
 #' @export
+#' @rdname logNormCounts
 #' @importFrom BiocGenerics sizeFactors sizeFactors<-
 #' @importFrom SingleCellExperiment altExp altExp<- int_metadata int_metadata<-
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
