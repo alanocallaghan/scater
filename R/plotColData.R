@@ -64,11 +64,17 @@ plotColData <- function(object, y, x = NULL,
     ## Define dataframe to pass to plotMetadata
     y_by_out <- retrieveCellInfo(object, y, search = "colData")
     y_lab <- y_by_out$name
+    if (is.null(y_lab)) {
+        stop(sprintf("could not find '%s' in 'colData(object)'", y))
+    }
     df_to_plot <- data.frame(Y=y_by_out$val)
 
     if (!is.null(x)) {
         x_by_out <- retrieveCellInfo(object, x, search = "colData")
         x_lab <- x_by_out$name
+        if (is.null(x_lab)) {
+            stop(sprintf("could not find '%s' in 'rowData(object)'", x))
+        }
         df_to_plot$X <- x_by_out$val
     } else {
         x_lab <- NULL
