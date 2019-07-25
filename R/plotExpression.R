@@ -3,7 +3,8 @@
 #' Plot expression values for a set of features (e.g. genes or transcripts) in a SingleExperiment object, against a continuous or categorical covariate for all cells.
 #'
 #' @param object A SingleCellExperiment object containing expression values and other metadata.
-#' @param features A character vector (of feature names), a logical vector or numeric vector (of indices) specifying the features to plot.
+#' @param features A character vector or a list specifying the features to plot.
+#' If a list is supplied, each entry of the list can be a string, an AsIs-wrapped vector or a data.frame - see \code{?\link{retrieveCellInfo}}.
 #' @param x Specification of a column metadata field or a feature to show on the x-axis, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param exprs_values A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from.
 #' @param log2_values Logical scalar, specifying whether the expression values be transformed to the log2-scale for plotting (with an offset of 1 to avoid logging zeroes).
@@ -64,19 +65,24 @@
 #' example_sce <- normalize(example_sce)
 #'
 #' ## default plot
-#' plotExpression(example_sce, 1:15)
+#' plotExpression(example_sce, rownames(example_sce)[1:15])
 #'
 #' ## plot expression against an x-axis value
-#' plotExpression(example_sce, c("Gene_0001", "Gene_0004"), x="Mutation_Status")
-#' plotExpression(example_sce, c("Gene_0001", "Gene_0004"), x="Gene_0002")
+#' plotExpression(example_sce, c("Gene_0001", "Gene_0004"), 
+#'     x="Mutation_Status")
+#' plotExpression(example_sce, c("Gene_0001", "Gene_0004"), 
+#'     x="Gene_0002")
 #'
 #' ## add visual options
-#' plotExpression(example_sce, 1:6, colour_by = "Mutation_Status")
-#' plotExpression(example_sce, 1:6, colour_by = "Mutation_Status",
-#'      shape_by = "Treatment", size_by = "Gene_0010")
+#' plotExpression(example_sce, rownames(example_sce)[1:6], 
+#'     colour_by = "Mutation_Status")
+#' plotExpression(example_sce, rownames(example_sce)[1:6], 
+#'     colour_by = "Mutation_Status", shape_by = "Treatment", 
+#'     size_by = "Gene_0010")
 #'
 #' ## plot expression against expression values for Gene_0004
-#' plotExpression(example_sce, 1:4, "Gene_0004", show_smooth = TRUE)
+#' plotExpression(example_sce, rownames(example_sce)[1:4],
+#'     "Gene_0004", show_smooth = TRUE)
 #'
 plotExpression <- function(object, features, x = NULL,
                            exprs_values = "logcounts", log2_values = FALSE,
@@ -91,30 +97,32 @@ plotExpression <- function(object, features, x = NULL,
     }
 
     ## Define features to plot
-    features <- .subset2index(features, object, byrow=TRUE)
-    nfeatures <- length(features)
-
     if ( exprs_values == "exprs" && !(exprs_values %in% assayNames(object)) ) {
         exprs_values <- "logcounts"
     }
-    exprs_mat <- assay(object, i = exprs_values, withDimnames=FALSE)
-    exprs_mat <- exprs_mat[features,,drop = FALSE]
+
+    exprs_vals <- vector("list", length(features))
+    for (i in seq_along(features)) {
+        current <- retrieveCellInfo(object, features[i], 
+            search=c("assays", "altExps"), assay.type=exprs_values)$value
+        if (is.null(current)) {
+            stop("cannot find '%s' in 'object'", features[i])
+        }
+        exprs_vals[[i]] <- current
+    }
+    nfeatures <- length(features)
 
     if ( log2_values ) {
-        exprs_mat <- log2(exprs_mat + 1)
+        exprs_val <- lapply(exprs_vals, function(x) log2(x + 1))
         ylab <- paste0("Expression (", exprs_values, "; log2-scale)")
     } else {
         ylab <- paste0("Expression (", exprs_values, ")")
     }
 
     ## melt the expression data.
-    chosen_names <- rownames(object)[features]
-    if (is.null(chosen_names)) {
-        chosen_names <- sprintf("Feature %i", features)
-    }
     evals_long <- data.frame(
-        Feature=rep(chosen_names, ncol(exprs_mat)),
-        Y=as.numeric(exprs_mat) # column major collapse.
+        Feature=rep(features, lengths(exprs_vals)),
+        Y=unlist(exprs_vals) 
     )
 
     ## check x-coordinates are valid
