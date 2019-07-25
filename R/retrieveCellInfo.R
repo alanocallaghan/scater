@@ -31,6 +31,8 @@
 #' and return the expression vector for this feature at \code{assay.type} as the output \code{value}.
 #' }
 #' Any match will cause the function to return without considering later possibilities.
+#' The search can be modified by changing the presence and ordering of elements in \code{search}. 
+#' 
 #' If there is a name clash that results in retrieval of an unintended field,
 #' users should explicitly set \code{by} to a data.frame, DataFrame or AsIs-wrapped vector containing the desired values.
 #' Developers can also consider setting \code{search} to control the fields that are returned.
@@ -92,31 +94,29 @@ retrieveCellInfo <- function(x, by, search=c("colData", "assays", "altExps"), as
         search <- match.arg(search, several.ok=TRUE)
     }
 
-    if ("colData" %in% search) {
-        cd <- colData(x)
-        if (by %in% colnames(cd)) {
-            return(.mopUp(by, cd[,by]))
-        }
-    }
-
-    if ("assays" %in% search) {
-        m <- match(by, rownames(x))
-        if (!is.na(m)) {
-            return(.mopUp(by, assay(x, assay.type, withDimnames=FALSE)[m,]))
-        }
-    }
-
-    if ("altExps" %in% search) {
-        for (i in seq_along(altExpNames(x))) {
-            current <- altExp(x, i)
-            m <- match(by, rownames(current))
+    for (s in search) {
+        if (s=="colData") {
+            cd <- colData(x)
+            if (by %in% colnames(cd)) {
+                return(.mopUp(by, cd[,by]))
+            }
+        } else if (s=="assays") {
+            m <- match(by, rownames(x))
             if (!is.na(m)) {
-                return(.mopUp(by, assay(current, assay.type, withDimnames=FALSE)[m,]))
+                return(.mopUp(by, assay(x, assay.type, withDimnames=FALSE)[m,]))
+            }
+        } else if (s=="altExps") {
+            for (i in seq_along(altExpNames(x))) {
+                current <- altExp(x, i)
+                m <- match(by, rownames(current))
+                if (!is.na(m)) {
+                    return(.mopUp(by, assay(current, assay.type, withDimnames=FALSE)[m,]))
+                }
             }
         }
     }
 
-    .mopUp(NULL, NULL)
+    stop(sprintf("cannot find '%s'", by))
 }
 
 .coerce_to_factor <- function(x, level.limit, msg) {
