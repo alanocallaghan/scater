@@ -104,8 +104,8 @@ test_that("we can produce plots for column metadata", {
     expect_s3_class(plotColData(example_sce, "total_counts", x="total_features_by_counts", show_smooth=TRUE, show_se=FALSE), "ggplot")
 
     # Checking that it doesn't try to retrieve expression data.
-    expect_error(plotColData(example_sce, "Gene_0001", exprs_values = "counts"), "could not find")
-    expect_error(plotColData(example_sce, "total_counts", x="Gene_0001", exprs_values = "counts"), "could not find")
+    expect_error(plotColData(example_sce, "Gene_0001", exprs_values = "counts"), "cannot find")
+    expect_error(plotColData(example_sce, "total_counts", x="Gene_0001", exprs_values = "counts"), "cannot find")
 })
 
 test_that("we can produce plots for row metadata", {
@@ -139,8 +139,8 @@ test_that("we can produce plots for row metadata", {
     expect_s3_class(plotRowData(example_sce, "total_counts", x="n_cells_by_counts", show_smooth=TRUE, show_se=FALSE), "ggplot")
 
     # Checking that it doesn't try to retrieve expression data.
-    expect_error(plotRowData(example_sce, "Cell_002", exprs_values = "counts"), "could not find")
-    expect_error(plotRowData(example_sce, "total_counts", x="Cell_002", exprs_values = "counts"), "could not find")
+    expect_error(plotRowData(example_sce, "Cell_002", exprs_values = "counts"), "cannot find")
+    expect_error(plotRowData(example_sce, "total_counts", x="Cell_002", exprs_values = "counts"), "cannot find")
 })
 
 #################################################
