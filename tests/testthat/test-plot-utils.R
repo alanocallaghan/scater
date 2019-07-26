@@ -40,6 +40,8 @@ test_that("retrieveCellInfo works in the basic case", {
     expect_error(retrieveCellInfo(example_sce, "WHEE"), "cannot find")
     expect_error(retrieveCellInfo(example_sce, "Mutation_Status", search = "assays"), "cannot find")
     expect_error(retrieveCellInfo(example_sce, "Gene_0002", search = "colData"), "cannot find")
+
+    expect_identical(retrieveCellInfo(example_sce, NULL), list(name=NULL, value=NULL))
 })
 
 test_that("retrieveCellInfo handles clashes correctly", {
@@ -107,6 +109,8 @@ test_that("retrieveFeatureInfo works for rows with strings", {
     expect_error(retrieveFeatureInfo(example_sce, "whee"), "cannot find")
     expect_error(retrieveFeatureInfo(example_sce, "HAPPY", search = "assays"), "cannot find")
     expect_error(retrieveFeatureInfo(example_sce, "Cell_010", search = "rowData"), "cannot find")
+
+    expect_identical(retrieveFeatureInfo(example_sce, NULL), list(name=NULL, value=NULL))
 })
 
 test_that("retrieveFeatureInfo is responsive to search mode", {

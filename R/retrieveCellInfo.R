@@ -70,6 +70,9 @@ retrieveCellInfo <- function(x, by, search=c("colData", "assays", "altExps"), as
     .mopUp <- function(name, value) {
         list(name=name, value=value)
     } 
+    if (is.null(by)) {
+        return(.mopUp(NULL, NULL))
+    }
 
     if (is(by, "AsIs")) {
         if (length(by) != ncol(x)) {

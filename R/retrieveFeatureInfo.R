@@ -64,6 +64,9 @@ retrieveFeatureInfo <- function(x, by, search=c("rowData", "assays"), assay.type
     .mopUp <- function(name, value) {
         list(name=name, value=value)
     } 
+    if (is.null(by)) {
+        return(.mopUp(NULL, NULL))
+    }
 
     if (is(by, "AsIs")) {
         if (length(by) != nrow(x)) {
