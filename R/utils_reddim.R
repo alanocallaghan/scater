@@ -99,7 +99,7 @@ NULL
         o <- order(rv, decreasing = TRUE)
         subset.row <- head(o, ntop)
     } else if (is.character(subset.row)) {
-        subset.row <- .subset2index(subset.row, object, byrow=TRUE)
+        subset.row <- .subset2index(subset.row, x, byrow=TRUE)
     }
 
     x <- x[subset.row,, drop = FALSE]
