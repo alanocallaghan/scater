@@ -4,7 +4,7 @@
 example_sce <- normed
 
 test_that("plotExpression works for various 'x'", {
-    for (gene_set in list("Gene_0001", rownames(example_sce)[1:5], 10, 6:20)) { # different numbers of genes, types of specification.
+    for (gene_set in list("Gene_0001", rownames(example_sce)[1:5])) { # different numbers of genes, types of specification.
         for (x in list(NULL, "Cell_Cycle", "Gene_0100")) { # nothing, categorical, or continuous.
             expect_s3_class(plotExpression(example_sce, gene_set, x = x), "ggplot")
             expect_s3_class(plotExpression(example_sce, gene_set, x = x, colour_by = "Cell_Cycle"), "ggplot")
@@ -49,11 +49,4 @@ test_that("plotExpression works for different exprs_values", {
     sparsified <- example_sce
     logcounts(sparsified) <- as(logcounts(sparsified), "dgCMatrix")
     expect_equal(plotExpression(sparsified, "Gene_0001"), plotExpression(example_sce, "Gene_0001"))
-})
-
-test_that("plotExpression works without feature names", {
-    dummy <- example_sce
-    rownames(dummy) <- NULL
-    expect_s3_class(p <- plotExpression(dummy, 1:20),  "ggplot")
-    expect_identical(levels(p$data[,1]), sort(sprintf("Feature %i", 1:20)))
 })
