@@ -20,7 +20,7 @@
 #' This contains the following fields:
 #' \itemize{
 #' \item \code{mean}: numeric, the mean counts for each feature.
-#' \item \code{above.limit}: numeric, the proportion of observations above \code{detection.limit}.
+#' \item \code{detected}: numeric, the percentage of observations above \code{detection.limit}.
 #' \item \code{subsets}: A nested DataFrame containing statistics for each subset, see Details.
 #' }
 #' 
@@ -36,18 +36,18 @@
 #' For example, if \code{subsets} contained \code{"empty"} and \code{"cellpool"}, the output would look like:
 #' \preformatted{  output 
 #'   |-- mean 
-#'   |-- above.limit
+#'   |-- detected
 #'   +-- subsets
 #'       |-- empty
 #'       |   |-- mean 
-#'       |   |-- above.limit
-#'       |   +-- ratio.in
+#'       |   |-- detected
+#'       |   +-- ratio
 #'       +-- cellpool 
 #'           |-- mean
-#'           |-- above.limit
-#'           +-- ratio.in
+#'           |-- detected
+#'           +-- ratio
 #' }
-#' The \code{ratio.in} field contains the ratio of the mean within each subset to the mean across all cells.
+#' The \code{ratio} field contains the ratio of the mean within each subset to the mean across all cells.
 #' 
 #' @examples
 #' data("sc_example_counts")
@@ -73,6 +73,9 @@ NULL
 #' @importClassesFrom S4Vectors DataFrame
 .per_feature_qc_metrics <- function(x, subsets = NULL, detection.limit = 0, BPPARAM=SerialParam()) 
 {
+    if (length(subsets) && is.null(names(subsets))){ 
+        stop("'subsets' must be named")
+    }
     subsets <- lapply(subsets, FUN = .subset2index, target = x, byrow = FALSE)
 
     # Computing all QC metrics, with cells split across workers. 
@@ -98,15 +101,13 @@ NULL
     }
 
     output <- feature_stats_by_cell_set[[1]]
-    names(output) <- c("mean", "above.limit")
     output <- .sum2mean(output, ncol(x))
 
     out.subsets <- list()
     for (i in seq_along(subsets)) {
-        current <- feature_stats_by_cell_set[[i + 1]][1:2]
-        names(current) <- c("mean", "above.limit")
+        current <- feature_stats_by_cell_set[[i + 1]]
         current <- .sum2mean(current, length(subsets[[i]]))
-        current$ratio.in <- current$mean/output$mean
+        current$ratio <- current$mean/output$mean
         out.subsets[[i]] <- DataFrame(current)
     }
         
@@ -117,11 +118,13 @@ NULL
         output$subsets <- new("DataFrame", nrows=nrow(x)) 
     }
 
-    do.call(DataFrame, lapply(output, I))
+    output <- do.call(DataFrame, lapply(output, I))
+    rownames(output) <- rownames(x)
+    output
 }
 
 .sum2mean <- function(l, n) {
-    lapply(l, function(x) x/n)
+    list(mean=l[[1]]/n, detected=l[[2]]/n*100)
 }
 
 #' @export
