@@ -108,7 +108,7 @@ plotExpression <- function(object, features, x = NULL,
         if (is.null(current)) {
             stop("cannot find '%s' in 'object'", features[i])
         }
-        exprs_vals[[i]] <- current
+        exprs_vals[[i]] <- unname(current)
     }
     nfeatures <- length(features)
 
