@@ -82,7 +82,7 @@ NULL
     }
 
     pca <- runPCA(x, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM, get.rotation=FALSE)
-    percentVar <- pca$sdev ^ 2 / sum(cv)
+    percentVar <- pca$sdev ^ 2 / sum(cv) * 100
 
     # Saving the results
     pcs <- pca$x
