@@ -17,10 +17,10 @@ test_that("getVarianceExplained matches with a reference function", {
         for (g in seq_len(nrow(normed))) { 
             y <- Y[g,]
             fit <- lm(y ~ X)
-            output[g] <- suppressWarnings(summary(fit)$r.squared)
+            output[g] <- suppressWarnings(summary(fit)$r.squared) 
         }
 
-        expect_equal(output, unname(varexp[,v]))
+        expect_equal(output * 100, unname(varexp[,v]))
     }
 })
 
@@ -152,7 +152,7 @@ test_that("getExplanatoryPCs matches with a reference function", {
             output[g] <- suppressWarnings(summary(fit)$r.squared)
         }
 
-        expect_equal(output, unname(exppcs[,v]))
+        expect_equal(output * 100, unname(exppcs[,v]))
     }
 })
 
