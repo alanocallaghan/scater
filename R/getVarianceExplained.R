@@ -94,7 +94,7 @@ NULL
         rsquared_mat[, V] <- 1 - rss/tss
     }
 
-    rsquared_mat
+    rsquared_mat * 100
 }
 
 #' @export
