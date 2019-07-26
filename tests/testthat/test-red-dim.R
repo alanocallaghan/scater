@@ -5,47 +5,42 @@
 # Check the feature selection and scaling work.
 
 test_that("feature selection is operational", {
-    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", feature_set = seq_len(nrow(normed)))
-    expect_equal(out, t(logcounts(normed, withDimnames=FALSE)))
-
-    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "counts", feature_set = seq_len(nrow(normed)))
-    expect_equal(out, t(counts(normed, withDimnames=FALSE)))
+    out <- scater:::.get_mat_for_reddim(logcounts(normed), subset.row = seq_len(nrow(normed)), scale=FALSE)
+    expect_equal(out, t(logcounts(normed)))
 
     # Ntop selection works.
-    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", ntop = 10, feature_set = NULL)
+    out <- scater:::.get_mat_for_reddim(logcounts(normed), ntop = 10, subset.row = NULL, scale=FALSE)
     rv <- DelayedMatrixStats::rowVars(DelayedArray(logcounts(normed)))
     keep <- head(order(rv, decreasing=TRUE), 10)
-    expect_equal(out, t(logcounts(normed, withDimnames=FALSE)[keep,]))
+    expect_equal(out, t(logcounts(normed)[keep,]))
 
-    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", ntop = Inf, feature_set = NULL)
+    out <- scater:::.get_mat_for_reddim(logcounts(normed), ntop = Inf, subset.row = NULL, scale=FALSE)
     o <- order(rv, decreasing=TRUE)
-    expect_equal(out, t(logcounts(normed, withDimnames=FALSE)[o,]))
-    
-    # Feature selection works.
-    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", feature_set = 10:1)
-    expect_equal(out, t(logcounts(normed, withDimnames=FALSE)[10:1,]))
+    expect_equal(out, t(logcounts(normed)[o,]))
 
-    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", feature_set = rownames(normed)[10:1])
-    expect_equal(out, t(logcounts(normed, withDimnames=FALSE)[10:1,]))
+    # Feature selection works.
+    out <- scater:::.get_mat_for_reddim(logcounts(normed), subset.row = 10:1, scale=FALSE)
+    expect_equal(out, t(logcounts(normed)[10:1,]))
+
+    out <- scater:::.get_mat_for_reddim(logcounts(normed), subset.row = rownames(normed)[10:1], scale=FALSE)
+    expect_equal(out, t(logcounts(normed)[10:1,]))
 })
 
 test_that("scaling by feature variances work correctly", {
-    MAT <- t(logcounts(normed, withDimnames=FALSE))
+    MAT <- t(logcounts(normed))
     cv <- DelayedMatrixStats::colVars(DelayedArray(MAT))
     novar <- cv < 1e-8
     expect_true(any(novar))
 
     NOMAT <- MAT[,!novar]
-    XX <- scater:::.scale_columns(MAT)
     scaled <- t(t(NOMAT)/sqrt(cv[!novar]))
-    expect_equal(XX, scaled)
 
-    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", feature_set = seq_len(nrow(normed)), scale = TRUE)
+    out <- scater:::.get_mat_for_reddim(logcounts(normed), subset.row = seq_len(nrow(normed)), scale = TRUE)
     expect_equal(out, scaled)
-    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", feature_set = 10:1, scale = TRUE)
+    out <- scater:::.get_mat_for_reddim(logcounts(normed), subset.row = 10:1, scale = TRUE)
     expect_equal(out, scaled[,10:1])
 
-    out <- scater:::.get_mat_for_reddim(normed, exprs_values = "logcounts", ntop = 10, scale = TRUE) # In combination with non-trivial selection.
+    out <- scater:::.get_mat_for_reddim(logcounts(normed), subset.row=NULL, ntop = 10, scale = TRUE) # In combination with non-trivial selection.
     rv <- DelayedMatrixStats::rowVars(DelayedArray(logcounts(normed)))
     expect_equal(out, scaled[,head(order(rv[!novar], decreasing=TRUE), 10)])
 })
@@ -58,37 +53,38 @@ test_that("runPCA works as expected", {
     expect_identical(reducedDimNames(normedX), "PCA")     
     fullN <- min(dim(normed), 50L)
     expect_identical(dim(reducedDim(normedX, "PCA")), c(ncol(normed), fullN))
-    expect_equal(sum(attr(reducedDim(normedX), "percentVar")), 1)
+    expect_equal(sum(attr(reducedDim(normedX), "percentVar")), 100)
 
     # Checking that it works with a restricted number of components.
     normedX <- runPCA(normed, ncomponents=4)
     expect_identical(reducedDimNames(normedX), "PCA")     
     expect_identical(dim(reducedDim(normedX, "PCA")), c(ncol(normedX), 4L))
-    expect_true(sum(attr(reducedDim(normedX), "percentVar")) < 1)
+    expect_true(sum(attr(reducedDim(normedX), "percentVar")) < 100)
 
     # Testing that various settings give different results.
     normed2 <- runPCA(normed)
-    normed3 <- runPCA(normed, scale_features = FALSE)
+    normed3 <- runPCA(normed, scale = TRUE)
     expect_identical(ncol(reducedDim(normed2)), fullN)
     expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
+    expect_equal(sum(attr(reducedDim(normed3), "percentVar")), 100)
 
     normed3 <- runPCA(normed, ntop = 100)
     expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
-    normed3 <- runPCA(normed, exprs_values = "counts")
+    normed3 <- runPCA(normed, assay.type = "counts")
     expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
-    normed3 <- runPCA(normed, feature_set = 1:100)
+    normed3 <- runPCA(normed, subset.row = 1:100)
     expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     # Testing that ntop selection works correctly.
     most_var <- DelayedMatrixStats::rowVars(DelayedArray(logcounts(normed)))
     keep <- head(order(most_var, decreasing=TRUE), 100)
-    normed3 <- runPCA(normed, ncomponents=4, feature_set=keep)
+    normed3 <- runPCA(normed, ncomponents=4, subset.row=keep)
     normed4 <- runPCA(normed, ncomponents=4, ntop=100)
     expect_equal(reducedDim(normed3), reducedDim(normed4))    
 
@@ -106,31 +102,27 @@ test_that("runPCA works as expected", {
     normed_alt <- normed
     assay(normed_alt, "whee") <- logcounts(normed)
     logcounts(normed_alt) <- NULL
-    normed3 <- runPCA(normed_alt, ncomponents=4, exprs_values="whee")
+    normed3 <- runPCA(normed_alt, ncomponents=4, assay.type="whee")
     expect_equal(reducedDim(normed3), reducedDim(normedX))
 })
 
 test_that("runColDataPCA works as expected for QC metrics", {
-    normedQ <- calculateQCMetrics(normed, feature_controls=list(ERCC=1:50))
-    expect_warning(normedQ <- runColDataPCA(normedQ), NA)
-    expect_identical(reducedDimNames(normedQ), "PCA_coldata")
+    normed$field1 <- runif(ncol(normed))
+    normed$field2 <- runif(ncol(normed))
+    normed$field3 <- runif(ncol(normed))
+    normed$field4 <- runif(ncol(normed))
 
-    normedQ2 <- calculateQCMetrics(normed, feature_controls=list(ERCC=1:50), compact=TRUE)
-    expect_warning(normedQ2 <- runColDataPCA(normedQ2), NA)
-    expect_identical(reducedDim(normedQ, "PCA_coldata"), reducedDim(normedQ2, "PCA_coldata"))
-
+    vars <- c("field1", "field2", "field3", "field4")
+    normed <- runColDataPCA(normed, variables=vars)
+    out <- reducedDim(normed, "PCA_coldata")
+    ref <- calculatePCA(t(as.matrix(colData(normed)[,vars])), ncomponents=2, scale=TRUE)
+    expect_true(all(abs(abs(colMeans(out/ref)) - 1) < 1e-6))
+    
     # Checking outlier detection works correctly.
-    expect_identical(normedQ2$outlier, NULL)
-    expect_warning(normedQ2 <- runColDataPCA(normedQ2, detect_outliers=TRUE), NA)
-    expect_type(normedQ2$outlier, "logical")
-    expect_identical(length(normedQ2$outlier), ncol(normedQ2))
-
-    # Check manual specification of variables works properly.
-    expect_warning(normedQ3 <- runColDataPCA(normedQ, 
-        selected_variables = c("total_counts", 
-                               "total_features_by_counts",
-                               "total_counts_endogenous",
-                               "total_counts_feature_control")), NA)
+    expect_identical(normed$outlier, NULL)
+    expect_warning(normed <- runColDataPCA(normed, variables=vars, outliers=TRUE), NA)
+    expect_type(normed$outlier, "logical")
+    expect_identical(length(normed$outlier), ncol(normed))
 })
 
 test_that("runPCA works with irlba code", {
@@ -139,7 +131,7 @@ test_that("runPCA works with irlba code", {
     expect_identical(reducedDimNames(normedX), "PCA")     
     expect_identical(dim(reducedDim(normedX, "PCA")), c(ncol(normedX), 4L))
     expect_identical(length(attr(reducedDim(normedX), "percentVar")), 4L)
-    expect_true(sum(attr(reducedDim(normedX), "percentVar")) < 1)
+    expect_true(sum(attr(reducedDim(normedX), "percentVar")) < 100)
 
     # Checking that seed setting works.
     set.seed(100)
@@ -168,7 +160,7 @@ test_that("runTSNE works as expected", {
 
     # Testing that various settings have some effect. 
     set.seed(100)
-    normed3 <- runTSNE(normed, scale_features = FALSE)
+    normed3 <- runTSNE(normed, scale=TRUE)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     set.seed(100)
@@ -176,11 +168,11 @@ test_that("runTSNE works as expected", {
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     set.seed(100)
-    normed3 <- runTSNE(normed, exprs_values = "counts")
+    normed3 <- runTSNE(normed, assay.type = "counts")
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     set.seed(100)
-    normed3 <- runTSNE(normed, feature_set = 1:100)
+    normed3 <- runTSNE(normed, subset.row = 1:100)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
     
     set.seed(100)
@@ -208,30 +200,30 @@ test_that("runTSNE on existing reduced dimension results works as expected", {
     # Function should not respond to any feature settings.
     set.seed(10)
     normedP <- runPCA(normed, ncomponents = 4)
-    normed2 <- runTSNE(normedP, use_dimred = "PCA")
+    normed2 <- runTSNE(normedP, use.dimred="PCA")
 
     set.seed(10)
-    normed3 <- runTSNE(normedP, use_dimred = "PCA", ntop = 20)
+    normed3 <- runTSNE(normedP, use.dimred="PCA", ntop = 20)
     expect_identical(reducedDim(normed2, "TSNE"), reducedDim(normed3, "TSNE"))
 
     set.seed(10)
-    normed3 <- runTSNE(normedP, use_dimred = "PCA", scale_features = FALSE)
+    normed3 <- runTSNE(normedP, use.dimred="PCA", scale=TRUE)
     expect_identical(reducedDim(normed2, "TSNE"), reducedDim(normed3, "TSNE"))
 
     set.seed(10)
-    normed3 <- runTSNE(normedP, use_dimred = "PCA", feature_set = 1:20)
+    normed3 <- runTSNE(normedP, use.dimred="PCA", subset.row = 1:20)
     expect_identical(reducedDim(normed2, "TSNE"), reducedDim(normed3, "TSNE"))
 
     set.seed(10)
-    normed3 <- runTSNE(normedP, use_dimred = "PCA", pca = FALSE)
+    normed3 <- runTSNE(normedP, use.dimred="PCA", pca = FALSE)
     expect_identical(reducedDim(normed2, "TSNE"), reducedDim(normed3, "TSNE"))
 
     set.seed(10)
-    normed3 <- runTSNE(normedP, use_dimred = "PCA", initial_dims = 10)
+    normed3 <- runTSNE(normedP, use.dimred="PCA", initial_dims = 10)
     expect_identical(reducedDim(normed2, "TSNE"), reducedDim(normed3, "TSNE"))
 
     set.seed(10)
-    normed3 <- runTSNE(normedP, use_dimred = "PCA", n_dimred=3)
+    normed3 <- runTSNE(normedP, use.dimred="PCA", n_dimred=3)
     expect_false(isTRUE(all.equal(reducedDim(normed2, "TSNE"), reducedDim(normed3, "TSNE"))))
 })
 
@@ -244,29 +236,29 @@ test_that("runTSNE works with externally computed nearest neighbor results", {
     set.seed(20) 
     init <- matrix(rnorm(ncol(normedP)*2), ncol=2)
 
-    ref <- runTSNE(normedP, use_dimred="PCA", Y_init=init)
-    alt <- runTSNE(normedP, use_dimred="PCA", Y_init=init, external_neighbors=TRUE)
+    ref <- runTSNE(normedP, use.dimred="PCA", Y_init=init)
+    alt <- runTSNE(normedP, use.dimred="PCA", Y_init=init, external_neighbors=TRUE)
     expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
 
-    ref <- runTSNE(normedP, use_dimred="PCA", Y_init=init, perplexity=8.6)
-    alt <- runTSNE(normedP, use_dimred="PCA", Y_init=init, perplexity=8.6, external_neighbors=TRUE)
+    ref <- runTSNE(normedP, use.dimred="PCA", Y_init=init, perplexity=8.6)
+    alt <- runTSNE(normedP, use.dimred="PCA", Y_init=init, perplexity=8.6, external_neighbors=TRUE)
     expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
 
-    ref <- runTSNE(normedP, use_dimred="PCA", Y_init=init, theta=0.1)
-    alt <- runTSNE(normedP, use_dimred="PCA", Y_init=init, theta=0.1, external_neighbors=TRUE)
+    ref <- runTSNE(normedP, use.dimred="PCA", Y_init=init, theta=0.1)
+    alt <- runTSNE(normedP, use.dimred="PCA", Y_init=init, theta=0.1, external_neighbors=TRUE)
     expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
 
-    ref <- runTSNE(normedP, use_dimred="PCA", Y_init=init, normalize=FALSE)
-    alt <- runTSNE(normedP, use_dimred="PCA", Y_init=init, normalize=FALSE, external_neighbors=TRUE)
+    ref <- runTSNE(normedP, use.dimred="PCA", Y_init=init, normalize=FALSE)
+    alt <- runTSNE(normedP, use.dimred="PCA", Y_init=init, normalize=FALSE, external_neighbors=TRUE)
     expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
 
     # Works with alternative neighbor searching options.
-    ref <- runTSNE(normedP, use_dimred="PCA", Y_init=init)
-    alt <- runTSNE(normedP, use_dimred="PCA", Y_init=init, external_neighbors=TRUE, BNPARAM=BiocNeighbors::VptreeParam())
+    ref <- runTSNE(normedP, use.dimred="PCA", Y_init=init)
+    alt <- runTSNE(normedP, use.dimred="PCA", Y_init=init, external_neighbors=TRUE, BNPARAM=BiocNeighbors::VptreeParam())
     expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
 
-    ref <- runTSNE(normedP, use_dimred="PCA", Y_init=init)
-    alt <- runTSNE(normedP, use_dimred="PCA", Y_init=init, external_neighbors=TRUE, BPPARAM=safeBPParam(2))
+    ref <- runTSNE(normedP, use.dimred="PCA", Y_init=init)
+    alt <- runTSNE(normedP, use.dimred="PCA", Y_init=init, external_neighbors=TRUE, BPPARAM=safeBPParam(2))
     expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
 })
 
@@ -288,7 +280,7 @@ test_that("runUMAP works as expected", {
 
     # Testing that various settings have some effect. 
     set.seed(100)
-    normed3 <- runUMAP(normed, scale_features = FALSE)
+    normed3 <- runUMAP(normed, scale=TRUE)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     set.seed(100)
@@ -296,11 +288,11 @@ test_that("runUMAP works as expected", {
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     set.seed(100)
-    normed3 <- runUMAP(normed, exprs_values = "counts")
+    normed3 <- runUMAP(normed, assay.type = "counts")
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     set.seed(100)
-    normed3 <- runUMAP(normed, feature_set = 1:100)
+    normed3 <- runUMAP(normed, subset.row = 1:100)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 })
 
@@ -308,22 +300,22 @@ test_that("runUMAP on existing reduced dimension results works as expected", {
     # Function should not respond to any feature settings.
     set.seed(10)
     normedP <- runPCA(normed, ncomponents = 4)
-    normed2 <- runUMAP(normedP, use_dimred = "PCA")
+    normed2 <- runUMAP(normedP, use.dimred="PCA")
 
     set.seed(10)
-    normed3 <- runUMAP(normedP, use_dimred = "PCA", ntop = 20)
+    normed3 <- runUMAP(normedP, use.dimred="PCA", ntop = 20)
     expect_identical(reducedDim(normed2, "UMAP"), reducedDim(normed3, "UMAP"))
 
     set.seed(10)
-    normed3 <- runUMAP(normedP, use_dimred = "PCA", scale_features = FALSE)
+    normed3 <- runUMAP(normedP, use.dimred="PCA", scale=TRUE)
     expect_identical(reducedDim(normed2, "UMAP"), reducedDim(normed3, "UMAP"))
 
     set.seed(10)
-    normed3 <- runUMAP(normedP, use_dimred = "PCA", feature_set = 1:20)
+    normed3 <- runUMAP(normedP, use.dimred="PCA", subset.row = 1:20)
     expect_identical(reducedDim(normed2, "UMAP"), reducedDim(normed3, "UMAP"))
 
     set.seed(10)
-    normed3 <- runUMAP(normedP, use_dimred = "PCA", n_dimred=3)
+    normed3 <- runUMAP(normedP, use.dimred="PCA", n_dimred=3)
     expect_false(isTRUE(all.equal(reducedDim(normed2, "UMAP"), reducedDim(normed3, "UMAP"))))
 })
 
@@ -337,39 +329,39 @@ test_that("runUMAP works with externally computed nearest neighbor results", {
 
     set.seed(20) 
     seedSet()
-    ref <- runUMAP(normedP, use_dimred="PCA")
+    ref <- runUMAP(normedP, use.dimred="PCA")
     set.seed(20) 
-    alt <- runUMAP(normedP, use_dimred="PCA", external_neighbors=TRUE)
+    alt <- runUMAP(normedP, use.dimred="PCA", external_neighbors=TRUE)
     expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
 
     set.seed(21) 
     seedSet()
-    ref <- runUMAP(normedP, use_dimred="PCA", n_neighbors=10)
+    ref <- runUMAP(normedP, use.dimred="PCA", n_neighbors=10)
     set.seed(21) 
-    alt <- runUMAP(normedP, use_dimred="PCA", n_neighbors=10, external_neighbors=TRUE)
+    alt <- runUMAP(normedP, use.dimred="PCA", n_neighbors=10, external_neighbors=TRUE)
     expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
 
     set.seed(22) 
     seedSet()
-    ref <- runUMAP(normedP, use_dimred="PCA", bandwidth=1.5)
+    ref <- runUMAP(normedP, use.dimred="PCA", bandwidth=1.5)
     set.seed(22) 
-    alt <- runUMAP(normedP, use_dimred="PCA", bandwidth=1.5, external_neighbors=TRUE)
+    alt <- runUMAP(normedP, use.dimred="PCA", bandwidth=1.5, external_neighbors=TRUE)
     expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
 
     # Works with alternative neighbor searching options.
     set.seed(23) 
     seedSet(BNPARAM=BiocNeighbors::VptreeParam())
-    ref <- runUMAP(normedP, use_dimred="PCA")
+    ref <- runUMAP(normedP, use.dimred="PCA")
     set.seed(23) 
-    alt <- runUMAP(normedP, use_dimred="PCA", external_neighbors=TRUE, BNPARAM=BiocNeighbors::VptreeParam())
+    alt <- runUMAP(normedP, use.dimred="PCA", external_neighbors=TRUE, BNPARAM=BiocNeighbors::VptreeParam())
     expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
 
     set.seed(24) 
     seedSet()
     invisible(safeBPParam(2)) # more seed-related cajoling!
-    ref <- runUMAP(normedP, use_dimred="PCA")
+    ref <- runUMAP(normedP, use.dimred="PCA")
     set.seed(24) 
-    alt <- runUMAP(normedP, use_dimred="PCA", external_neighbors=TRUE, BPPARAM=safeBPParam(2))
+    alt <- runUMAP(normedP, use.dimred="PCA", external_neighbors=TRUE, BPPARAM=safeBPParam(2))
     expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
 })
 
@@ -383,16 +375,16 @@ test_that("runMDS works as expected", {
 
     # Testing that various settings work.
     normed2 <- runMDS(normed)
-    normed3 <- runMDS(normed, scale_features = FALSE)
+    normed3 <- runMDS(normed, scale=TRUE)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     normed3 <- runMDS(normed, ntop = 100)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
-    normed3 <- runMDS(normed, exprs_values = "counts")
+    normed3 <- runMDS(normed, assay.type = "counts")
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
-    normed3 <- runMDS(normed, feature_set = 1:100)
+    normed3 <- runMDS(normed, subset.row = 1:100)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     normed3 <- runMDS(normed, method = "manhattan")
@@ -400,20 +392,20 @@ test_that("runMDS works as expected", {
 
     # Testing out the use of existing reduced dimensions (this should not respond to any feature settings).
     normedP <- runPCA(normed, ncomponents = 4)
-    normed2 <- runMDS(normedP, use_dimred = "PCA")
+    normed2 <- runMDS(normedP, use.dimred="PCA")
 
-    normed3 <- runMDS(normedP, use_dimred = "PCA", ntop = 20)
+    normed3 <- runMDS(normedP, use.dimred="PCA", ntop = 20)
     expect_identical(reducedDim(normed2, "MDS"), reducedDim(normed3, "MDS"))
 
-    normed3 <- runMDS(normedP, use_dimred = "PCA", scale_features = FALSE)
+    normed3 <- runMDS(normedP, use.dimred="PCA", scale=TRUE)
     expect_identical(reducedDim(normed2, "MDS"), reducedDim(normed3, "MDS"))
 
-    normed3 <- runMDS(normedP, use_dimred = "PCA", feature_set = 1:20)
+    normed3 <- runMDS(normedP, use.dimred="PCA", subset.row = 1:20)
     expect_identical(reducedDim(normed2, "MDS"), reducedDim(normed3, "MDS"))
 
     # This does, in fact, happen to be equal, due to the relationship between MDS and PCA.
     # This is not identifiable by the sign, hence the finagling.
-    normed3 <- runMDS(normedP, use_dimred = "PCA", n_dimred=3)
+    normed3 <- runMDS(normedP, use.dimred="PCA", n_dimred=3)
     fold <- reducedDim(normed2, "MDS")/reducedDim(normed3, "MDS")
     expect_equal(abs(colSums(fold)), rep(nrow(fold), ncol(fold)))
 })
@@ -438,40 +430,36 @@ test_that("runDiffusionMap works as expected", {
 
     # Testing that various settings work.
     normed2 <- runDiffusionMap(normed)
-    normed3 <- runDiffusionMap(normed, scale_features = FALSE)
+    normed3 <- runDiffusionMap(normed, scale=TRUE)
     SIGNAGNOSTIC(same=FALSE, reducedDim(normed2), reducedDim(normed3))
 
     normed3 <- runDiffusionMap(normed, ntop = 100)
     SIGNAGNOSTIC(same=FALSE, reducedDim(normed2), reducedDim(normed3))
 
-    normed3 <- runDiffusionMap(normed, exprs_values = "counts")
+    normed3 <- runDiffusionMap(normed, assay.type = "counts")
     SIGNAGNOSTIC(same=FALSE, reducedDim(normed2), reducedDim(normed3))
 
-    normed3 <- runDiffusionMap(normed, feature_set = 1:100)
+    normed3 <- runDiffusionMap(normed, subset.row = 1:100)
     SIGNAGNOSTIC(same=FALSE, reducedDim(normed2), reducedDim(normed3))
     
-    normed3 <- runDiffusionMap(normed, sigma = 10)
-    SIGNAGNOSTIC(same=FALSE, reducedDim(normed2), reducedDim(normed3))
-
     normed3 <- runDiffusionMap(normed, k = 13)
     SIGNAGNOSTIC(same=FALSE, reducedDim(normed2), reducedDim(normed3))
 
     # Testing out the use of existing reduced dimensions (this should not respond to any feature settings)
     normedP <- runPCA(normed, ncomponents = 4)
-    normed2 <- runDiffusionMap(normedP, use_dimred = "PCA")
+    normed2 <- runDiffusionMap(normedP, use.dimred="PCA")
 
-    normed3 <- runDiffusionMap(normedP, use_dimred = "PCA", ntop = 20)
+    normed3 <- runDiffusionMap(normedP, use.dimred="PCA", ntop = 20)
     SIGNAGNOSTIC(reducedDim(normed2, "DiffusionMap"), reducedDim(normed3, "DiffusionMap"))
 
-    normed3 <- runDiffusionMap(normedP, use_dimred = "PCA", scale_features = FALSE)
+    normed3 <- runDiffusionMap(normedP, use.dimred="PCA", scale=TRUE)
     SIGNAGNOSTIC(reducedDim(normed2, "DiffusionMap"), reducedDim(normed3, "DiffusionMap"))
 
-    normed3 <- runDiffusionMap(normedP, use_dimred = "PCA", feature_set = 1:20)
+    normed3 <- runDiffusionMap(normedP, use.dimred="PCA", subset.row = 1:20)
     SIGNAGNOSTIC(reducedDim(normed2, "DiffusionMap"), reducedDim(normed3, "DiffusionMap"))
 
-    normed3 <- runDiffusionMap(normedP, use_dimred = "PCA", n_dimred=3)
+    normed3 <- runDiffusionMap(normedP, use.dimred="PCA", n_dimred=3)
     SIGNAGNOSTIC(reducedDim(normed2, "DiffusionMap"), reducedDim(normed3, "DiffusionMap"), same = FALSE)
-
 })
 
 #############################################
