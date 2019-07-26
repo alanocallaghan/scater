@@ -28,7 +28,7 @@
 #' This contains the following fields:
 #' \itemize{
 #' \item \code{sum}: numeric, the sum of counts for each cell.
-#' \item \code{above.limit}: numeric, the number of observations above \code{detection.limit}.
+#' \item \code{detected}: numeric, the number of observations above \code{detection.limit}.
 #' \item \code{top.percent}: numeric matrix, the percentage of counts assigned to the top percentage of most highly expressed genes.
 #' Each column of the matrix corresponds to an entry of the sorted \code{percent.in.top}, in increasing order.
 #' \item \code{subsets}: A nested DataFrame containing statistics for each subset, see Details.
@@ -42,50 +42,50 @@
 #' 
 #' @details
 #' This function calculates useful QC metrics for identification and removal of potentially problematic cells.
-#' Obvious per-cell metrics are the sum of counts (i.e., the library size) and the number of expressed features (i.e., above the detection limit).
+#' Obvious per-cell metrics are the sum of counts (i.e., the library size) and the number of detected features.
 #' The percentage of counts in the top features also provides a measure of library complexity.
 #' 
-#' If \code{subsets} is specified, the same statistics are computed for each subset of features.
-#' This is useful for obtaining statistics for gene sets of interest, e.g., mitochondrial genes, Y chromosome genes.
-#' These statistics are stored as nested \linkS4class{DataFrame}s in the output.
-#' For example, if \code{subsets} contained \code{"Mito"} and \code{"Sex"}, the output would look like:
+#' If \code{subsets} is specified, these statistics are also computed for each subset of features.
+#' This is useful for investigating gene sets of interest, e.g., mitochondrial genes, Y chromosome genes.
+#' These statistics are stored as nested \linkS4class{DataFrame}s in the \code{subsets} field of the output.
+#' For example, if the input \code{subsets} contained \code{"Mito"} and \code{"Sex"}, the output would look like:
 #' \preformatted{  output 
 #'   |-- sum
-#'   |-- above.limit
+#'   |-- detected
 #'   |-- top.percent
 #'   +-- subsets
 #'       |-- Mito
 #'       |   |-- sum
-#'       |   |-- above.limit
-#'       |   +-- percent.in
+#'       |   |-- detected
+#'       |   +-- percent
 #'       +-- Sex 
 #'           |-- sum
-#'           |-- above.limit
-#'           +-- percent.in
+#'           |-- detected
+#'           +-- percent
 #' }
-#' The \code{percent.in} field contains the percentage of counts assigned to each subset for each cell.
+#' Here, the \code{percent} field contains the percentage of each cell's count sum assigned to each subset. 
 #'
 #' If \code{use.alt.exps} is \code{TRUE}, the same statistics are computed for each alternative experiment in \code{x}.
 #' This can also be an integer or character vector specifying the alternative Experiments to use.
-#' These statistics are also stored as nested \linkS4class{DataFrame}s.
+#' These statistics are also stored as nested \linkS4class{DataFrame}s, this time in the \code{alt.exps} field of the output.
 #' For example, if \code{x} contained the alternative Experiments \code{"Spike"} and \code{"Ab"}, the output would look like:
 #' \preformatted{  output 
 #'   |-- sum
-#'   |-- above.limit
+#'   |-- detected
 #'   |-- top.percent
 #'   +-- alt.exps 
 #'   |   |-- Spike
 #'   |   |   |-- sum
-#'   |   |   |-- above.limit
+#'   |   |   |-- detected
 #'   |   |   +-- percent.total
 #'   |   +-- Ab
 #'   |       |-- sum
-#'   |       |-- above.limit
+#'   |       |-- detected
 #'   |       +-- percent.total
 #'   +-- total 
 #' }
-#' The \code{total} field contains the total sum of counts for each cell, including both the main and alternative Experiments.
-#' The \code{percent.total} field contains the percentage of the total in each alternative Experiment for each cell.
+#' The \code{total} field contains the total sum of counts for each cell across the main and alternative Experiments.
+#' The \code{percent} field contains the percentage of the total count in each alternative Experiment for each cell.
 #' 
 #' @examples
 #' data("sc_example_counts")
@@ -118,7 +118,11 @@ NULL
 .per_cell_qc_metrics <- function(x, subsets = NULL, percent.in.top = c(50, 100, 200, 500), 
     detection.limit = 0, BPPARAM=SerialParam()) 
 {
+    if (length(subsets) && is.null(names(subsets))){ 
+        stop("'subsets' must be named")
+    }
     subsets <- lapply(subsets, FUN = .subset2index, target = x, byrow = TRUE)
+    percent.in.top <- sort(as.integer(percent.in.top))
 
     # Computing all QC metrics, with cells split across workers. 
     worker_assign <- .assign_jobs_to_workers(ncol(x), BPPARAM)
@@ -126,7 +130,7 @@ NULL
             MoreArgs=list(exprs_mat=x, 
                 all_feature_sets=subsets, 
                 all_cell_sets=list(),
-                percent_top=sort(as.integer(percent.in.top)),
+                percent_top=percent.in.top,
                 detection_limit=detection.limit),
             BPPARAM=BPPARAM, SIMPLIFY=FALSE, USE.NAMES=FALSE)
 
@@ -144,14 +148,15 @@ NULL
     }
 
     output <- cell_stats_by_feature_set[[1]]
-    output[[3]] <- I(t(output[[3]]))
-    names(output) <- c("sum", "above.limit", "top.percent")
+    names(output) <- c("sum", "detected", "top.percent")
+    output$top.percent <- I(t(output$top.percent))
+    colnames(output$top.percent) <- percent.in.top
 
     out.subsets <- list()
     for (i in seq_along(subsets)) {
         current <- cell_stats_by_feature_set[[i + 1]][1:2]
-        names(current) <- c("sum", "above.limit")
-        current$percent.in <- current$sum/output$sum * 100
+        names(current) <- c("sum", "detected")
+        current$percent <- current$sum/output$sum * 100
         out.subsets[[i]] <- DataFrame(current)
     }
         
@@ -162,7 +167,9 @@ NULL
         output$subsets <- new("DataFrame", nrows=ncol(x)) 
     }
 
-    do.call(DataFrame, lapply(output, I))
+    output <- do.call(DataFrame, lapply(output, I))
+    rownames(output) <- colnames(x)
+    output
 }
 
 #' @export
@@ -200,7 +207,7 @@ setMethod("perCellQCMetrics", "SingleCellExperiment", function(x,
         alt[[i]] <- current
     }
     for (i in seq_along(alt)) {
-        alt[[i]]$percent.total <- alt[[i]]$sum/total * 100
+        alt[[i]]$percent <- alt[[i]]$sum/total * 100
     }
 
     if (length(alt)) {
