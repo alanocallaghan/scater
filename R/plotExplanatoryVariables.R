@@ -50,7 +50,7 @@ plotExplanatoryVariables <- function(object, nvars_to_plot = 10, min_marginal_r2
     ordered_vars <- factor(colnames(chosen_rsquared), levels=colnames(chosen_rsquared)) # preserve order.
     df_to_plot <- data.frame(
         Expl_Var=rep(ordered_vars, each=nrow(chosen_rsquared)),
-        Pct_Var_Explained=as.numeric(chosen_rsquared) * 100 # column major collapse.
+        Pct_Var_Explained=as.numeric(chosen_rsquared) # column major collapse.
     )
 
     plot_out <- ggplot(df_to_plot, aes_string(x = "Pct_Var_Explained", colour = "Expl_Var")) +
