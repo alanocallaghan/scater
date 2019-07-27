@@ -12,7 +12,7 @@
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
+#' for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
 #' @param by_show_single Deprecated and ignored.
 #' @param xlab String specifying the label for x-axis.
 #' If \code{NULL} (default), \code{x} will be used as the x-axis label.
@@ -104,7 +104,7 @@ plotExpression <- function(object, features, x = NULL,
     exprs_vals <- vector("list", length(features))
     for (i in seq_along(features)) {
         current <- retrieveCellInfo(object, features[i], 
-            search=c("assays", "altExps"), assay.type=exprs_values)$value
+            search=c("assays", "altExps"), exprs_values=exprs_values)$value
         if (is.null(current)) {
             stop("cannot find '%s' in 'object'", features[i])
         }
@@ -126,7 +126,7 @@ plotExpression <- function(object, features, x = NULL,
     )
 
     ## check x-coordinates are valid
-    x_by_out <- retrieveCellInfo(object, x, assay.type = exprs_values)
+    x_by_out <- retrieveCellInfo(object, x, exprs_values = exprs_values)
     xcoord <- x_by_out$val
     if (is.null(xlab)) {
         xlab <- x_by_out$name
@@ -134,11 +134,11 @@ plotExpression <- function(object, features, x = NULL,
     evals_long$X <- rep(xcoord, each=nfeatures)
 
     ## checking visualization arguments
-    colour_by_out <- retrieveCellInfo(object, colour_by, assay.type = by_exprs_values)
+    colour_by_out <- retrieveCellInfo(object, colour_by, exprs_values = by_exprs_values)
     colour_by <- colour_by_out$name
     evals_long$colour_by <- rep(colour_by_out$value, each=nfeatures)
 
-    shape_by_out <- retrieveCellInfo(object, shape_by, assay.type = by_exprs_values)
+    shape_by_out <- retrieveCellInfo(object, shape_by, exprs_values = by_exprs_values)
     shape_by <- shape_by_out$name
     if (!is.null(shape_by_out$value)) {
         shape_by_out$value <- as.factor(shape_by_out$value)
@@ -148,7 +148,7 @@ plotExpression <- function(object, features, x = NULL,
         evals_long$shape_by <- rep(shape_by_out$value, each=nfeatures)
     }
 
-    size_by_out <- retrieveCellInfo(object, size_by, assay.type = by_exprs_values)
+    size_by_out <- retrieveCellInfo(object, size_by, exprs_values = by_exprs_values)
     size_by <- size_by_out$name
     evals_long$size_by <- rep(size_by_out$value, each=nfeatures)
 

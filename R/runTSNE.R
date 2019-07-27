@@ -8,10 +8,9 @@
 #' For \code{runTSNE}, a \linkS4class{SingleCellExperiment} object.
 #' @param ncomponents Numeric scalar indicating the number of t-SNE dimensions to obtain.
 #' @param ntop Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param subset.row Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param feature_set Deprecated, same as \code{subset.row}.
-#' @param assay.type Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.
-#' @param exprs_values Deprecated, same as \code{assay.type}.
+#' @param subset_row Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
+#' @param feature_set Deprecated, same as \code{subset_row}.
+#' @param exprs_values Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.
 #' @param scale Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.
 #' @param scale_features Deprecated, same as \code{scale} but with a different default.
 #' @param transposed Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.
@@ -22,16 +21,13 @@
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
 #'
 #' For \code{runTSNE}, additional arguments to pass to \code{calculateTSNE}.
-#' @param external.neighbors Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.
-#' @param external_neighbors Deprecated, same as \code{external.neighbors}.
-#' @param BNPARAM A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external.neighbors=TRUE}.
-#' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external.neighbors=TRUE}.
+#' @param external_neighbors Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.
+#' @param BNPARAM A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.
+#' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.
 #' @param pca Logical scalar indicating whether a PCA step should be performed inside \code{\link[Rtsne]{Rtsne}}.
-#' @param alt.exp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param use.dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
-#' @param use_dimred Deprecated, same as \code{use.dimred}.
-#' @param n.dimred Integer scalar or vector specifying the dimensions to use if \code{use.dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
-#' @param n_dimred Deprecated, same as \code{n.dimred}.
+#' @param use_altexp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
+#' @param use_dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
+#' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{use_dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
 #' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #'
 #' @return 
@@ -49,11 +45,11 @@
 #' (Specifically, it is the number of cells divided by 5, capped at a maximum of 50.)
 #' However, it is often worthwhile to manually try multiple values to ensure that the conclusions are robust.
 #'
-#' If \code{external.neighbors=TRUE}, the nearest neighbor search step will use a different algorithm to that in the \code{\link[Rtsne]{Rtsne}} function.
+#' If \code{external_neighbors=TRUE}, the nearest neighbor search step will use a different algorithm to that in the \code{\link[Rtsne]{Rtsne}} function.
 #' This can be parallelized or approximate to achieve greater speed for large data sets.
 #' The neighbor search results are then used for t-SNE via the \code{\link[Rtsne]{Rtsne_neighbors}} function.
 #' 
-#' If \code{use.dimred} is specified, the PCA step of the \code{Rtsne} function is automatically turned off by default.
+#' If \code{use_dimred} is specified, the PCA step of the \code{Rtsne} function is automatically turned off by default.
 #' This presumes that the existing dimensionality reduction is sufficient such that an additional PCA is not required.
 #'
 #' @references
@@ -89,25 +85,23 @@ NULL
 #' @importFrom BiocNeighbors KmknnParam findKNN 
 #' @importFrom BiocParallel SerialParam
 .calculate_tsne <- function(x, ncomponents = 2, ntop = 500, 
-    subset.row = NULL, feature_set=NULL,
+    subset_row = NULL, feature_set=NULL,
     scale=FALSE, scale_features=NULL,
     transposed=FALSE,
     perplexity=NULL, normalize = TRUE, theta = 0.5, ...,
-    external.neighbors=FALSE, external_neighbors=NULL,
-    BNPARAM = KmknnParam(), BPPARAM = SerialParam())
+    external_neighbors=FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam())
 { 
     if (!transposed) {
-        x <- .get_mat_for_reddim(x, subset.row=subset.row, ntop=ntop, scale=scale) 
+        x <- .get_mat_for_reddim(x, subset_row=subset_row, ntop=ntop, scale=scale) 
     }
     x <- as.matrix(x) 
 
-    external.neighbors <- .switch_arg_names(external_neighbors, external.neighbors)
     if (is.null(perplexity)) {
         perplexity <- min(50, floor(nrow(x) / 5))
     }
 
     args <- list(perplexity=perplexity, dims=ncomponents, theta=theta, ...)
-    if (!external.neighbors || theta==0) {
+    if (!external_neighbors || theta==0) {
         tsne_out <- do.call(Rtsne::Rtsne, c(list(x, check_duplicates = FALSE, normalize=normalize), args))
     } else {
         if (normalize) {
@@ -127,29 +121,25 @@ setMethod("calculateTSNE", "ANY", .calculate_tsne)
 #' @export
 #' @rdname runTSNE
 #' @importFrom SummarizedExperiment assay
-setMethod("calculateTSNE", "SummarizedExperiment", function(x, ..., assay.type="logcounts") {
-    .calculate_tsne(assay(x, assay.type), ...)
+setMethod("calculateTSNE", "SummarizedExperiment", function(x, ..., exprs_values="logcounts") {
+    .calculate_tsne(assay(x, exprs_values), ...)
 })
 
 #' @export
 #' @rdname runTSNE
-setMethod("calculateTSNE", "SingleCellExperiment", function(x, ..., 
-    pca=is.null(use.dimred), assay.type="logcounts", exprs_values = NULL,
-    use.dimred=NULL, use_dimred=NULL, n.dimred=NULL, n_dimred=NULL)
+setMethod("calculateTSNE", "SingleCellExperiment", function(x, ..., pca=is.null(use_dimred), 
+    exprs_values="logcounts", use_dimred=NULL, n_dimred=NULL)
 {
-    use.dimred <- .switch_arg_names(use_dimred, use.dimred)
-    assay.type <- .switch_arg_names(exprs_values, assay.type)
-    mat <- .get_mat_from_sce(x, assay.type=assay.type, use.dimred=use.dimred,
-        n.dimred=.switch_arg_names(n_dimred, n.dimred))
-    .calculate_tsne(mat, transposed=!is.null(use.dimred), pca=pca, ...)
+    mat <- .get_mat_from_sce(x, exprs_values=exprs_values, use_dimred=use_dimred, n_dimred=n_dimred)
+    .calculate_tsne(mat, transposed=!is.null(use_dimred), pca=pca, ...)
 })
 
 #' @export
 #' @rdname runTSNE
 #' @importFrom SingleCellExperiment reducedDim<- 
-runTSNE <- function(x, ..., alt.exp=NULL, name="TSNE") {
-    if (!is.null(alt.exp)) {
-        y <- altExp(x, alt.exp)
+runTSNE <- function(x, ..., use_altexp=NULL, name="TSNE") {
+    if (!is.null(use_altexp)) {
+        y <- altExp(x, use_altexp)
     } else {
         y <- x
     }

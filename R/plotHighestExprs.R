@@ -93,7 +93,7 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by=NULL, controls=NULL
     
     ## Colouring the individual dashes for the cells.
     if (!is.null(colour_cells_by)) {
-        colour_out <- retrieveCellInfo(object, colour_cells_by, assay.type = by_exprs_values)
+        colour_out <- retrieveCellInfo(object, colour_cells_by, exprs_values = by_exprs_values)
         colour_cells_by <- colour_out$name
         df_exprs_by_cell_long$colour_by <- colour_out$val[df_exprs_by_cell_long$Cell]
         aes_to_use <- aes_string(y="Tag", x="value", colour="colour_by")

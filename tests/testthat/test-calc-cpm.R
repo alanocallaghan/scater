@@ -12,22 +12,22 @@ test_that("we can calculate CPM from counts", {
     expect_identical(cpm_out, calculateCPM(counts(original)))
 
     ## Repeating with subsets.
-    sub1 <- calculateCPM(counts(original), subset.row=1:10)
+    sub1 <- calculateCPM(counts(original), subset_row=1:10)
     expect_identical(sub1, calculateCPM(counts(original)[1:10,]))
 
     logi <- rbinom(nrow(original), 1, 0.5)==1
-    sub2 <- calculateCPM(counts(original), subset.row=logi)
+    sub2 <- calculateCPM(counts(original), subset_row=logi)
     expect_identical(sub2, calculateCPM(counts(original)[logi,]))
 
     chosen <- sample(rownames(original), 20)
-    sub3 <- calculateCPM(counts(original), subset.row=chosen)
+    sub3 <- calculateCPM(counts(original), subset_row=chosen)
     expect_identical(sub3, calculateCPM(counts(original)[chosen,]))
 })
 
 test_that("calculateCPM is responsive to size factors", {
     sizeFactors(original) <- runif(ncol(original))
     cpm_out <- calculateCPM(original)
-    expect_equal(cpm_out, calculateCPM(counts(original), size.factors=sizeFactors(original)))
+    expect_equal(cpm_out, calculateCPM(counts(original), size_factors=sizeFactors(original)))
    
     FUN <- function(counts, sf, libsize = colSums(counts)) {
         eff_lib <- sf/mean(sf) * mean(libsize)
@@ -37,7 +37,7 @@ test_that("calculateCPM is responsive to size factors", {
 
     # Ignores or overrides the size factors if requested.
     new_sf <- runif(ncol(original))
-    cpm_out <- calculateCPM(original, size.factors=new_sf)
+    cpm_out <- calculateCPM(original, size_factors=new_sf)
     expect_equal(calculateCPM(counts(original), new_sf), cpm_out)
 })
 
@@ -62,7 +62,7 @@ test_that("we can calculate FPKM from counts", {
     expect_equal(fpkms, ref)
 
     # Repeating with subsets.
-    out <- calculateFPKM(original, effective_length, subset.row=1:10)
+    out <- calculateFPKM(original, effective_length, subset_row=1:10)
     sub <- calculateFPKM(original[1:10,], effective_length[1:10])
     expect_equal(out, sub)
 
@@ -84,7 +84,7 @@ test_that("we can calculate TPM from counts", {
     expect_equal(calculateTPM(original, NULL), calculateCPM(original))
 
     # Repeating with subsets.
-    out <- calculateTPM(original, effective_length, subset.row=1:10)
+    out <- calculateTPM(original, effective_length, subset_row=1:10)
     sub <- calculateTPM(original[1:10,], effective_length[1:10])
     expect_equal(out, sub)
 

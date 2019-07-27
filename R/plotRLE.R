@@ -12,7 +12,7 @@
 #' This can be useful for arranging cells by experimental conditions or batches.
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from,
-#' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
+#' for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
 #' @param ... further arguments passed to \code{\link[ggplot2]{geom_boxplot}} when \code{style="full"}.
 #'
 #' @return A ggplot object
@@ -69,7 +69,7 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
                     colour_by = NULL, by_exprs_values = exprs_values, ...) {
 
     ## Check aesthetic arguments.
-    colour_by_out <- retrieveCellInfo(object, colour_by, assay.type = by_exprs_values)
+    colour_by_out <- retrieveCellInfo(object, colour_by, exprs_values = by_exprs_values)
     colour_by <- colour_by_out$name
     colour_by_vals <- colour_by_out$val
     if (!is.null(colour_by)) {

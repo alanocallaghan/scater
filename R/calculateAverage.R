@@ -5,12 +5,10 @@
 #' @param x A numeric matrix of counts where features are rows and 
 #'
 #' Alternatively, a \linkS4class{SummarizedExperiment} or a \linkS4class{SingleCellExperiment} containing such counts.
-#' @param size.factors A numeric vector containing size factors.
+#' @param size_factors A numeric vector containing size factors.
 #' If \code{NULL}, these are calculated or extracted from \code{x}.
-#' @param assay.type A string specifying the assay of \code{x} containing the count matrix.
-#' @param exprs_values Deprecated, same as \code{assay.type}.
-#' @param subset.row A vector specifying the subset of rows of \code{object} for which to return a result.
-#' @param subset_row Deprecated, same as \code{subset.row}.
+#' @param exprs_values A string specifying the assay of \code{x} containing the count matrix.
+#' @param subset_row A vector specifying the subset of rows of \code{object} for which to return a result.
 #' @param BPPARAM A BiocParallelParam object specifying whether the calculations should be parallelized. 
 #' @param ... For the generic, arguments to pass to specific methods.
 #'
@@ -29,7 +27,7 @@
 #' \item For \linkS4class{SingleCellExperiment} instances, the function searches for \code{\link{sizeFactors}} from \code{x}.
 #' If none are available, it defaults to library size-derived size factors.
 #' }
-#' If \code{size.factors} are supplied, they will override any size factors present in \code{x}.
+#' If \code{size_factors} are supplied, they will override any size factors present in \code{x}.
 #'
 #' @return A numeric vector of average count values with same length as number of features 
 #' (or the number of features in \code{subset_row} if supplied).
@@ -56,35 +54,33 @@
 NULL
 
 #' @importFrom BiocParallel SerialParam bpmapply
-.calculate_average <- function(x, size.factors=NULL, subset.row=NULL, subset_row = NULL, BPPARAM = SerialParam())
+.calculate_average <- function(x, size_factors=NULL, subset_row=NULL, BPPARAM = SerialParam())
 {
-    subset.row <- .switch_arg_names(subset_row, subset.row)
-    subset.row <- .subset2index(subset.row, x, byrow=TRUE)
-
-    size.factors <- .get_default_sizes(x, size.factors, center.sf=TRUE, subset.row=subset.row)
+    subset_row <- .subset2index(subset_row, x, byrow=TRUE)
+    size_factors <- .get_default_sizes(x, size_factors, center_sf=TRUE, subset_row=subset_row)
 
     # Parallelize across *genes* to ensure numerically IDENTICAL results.
-    by_core <- .split_vector_by_workers(subset.row, BPPARAM)
+    by_core <- .split_vector_by_workers(subset_row, BPPARAM)
     for (i in seq_along(by_core)) {
         by_core[[i]] <- x[by_core[[i]],,drop=FALSE]
     }
 
     # Computes the average count, adjusting for size factors or library size.
     bp.out <- bpmapply(FUN=.compute_averages, by_core,
-        MoreArgs=list(size.factors=size.factors),
+        MoreArgs=list(size_factors=size_factors),
         BPPARAM=BPPARAM, SIMPLIFY=FALSE, USE.NAMES=FALSE)
 
     ave <- unlist(bp.out)/ncol(x)
-    names(ave) <- rownames(x)[subset.row]
+    names(ave) <- rownames(x)[subset_row]
     ave
 }
 
-.compute_averages <- function(mat, size.factors)
+.compute_averages <- function(mat, size_factors)
 # A helper function defined in the scater namespace.
 # This avoids the need to reattach scater in bplapply for SnowParam().
 # TODO: replace this with actual C++ code that avoids the problems.
 {
-    .Call(cxx_ave_exprs, mat, list(size.factors), integer(nrow(mat)), seq_len(nrow(mat))-1L)
+    .Call(cxx_ave_exprs, mat, list(size_factors), integer(nrow(mat)), seq_len(nrow(mat))-1L)
 }
 
 #' @export
@@ -95,10 +91,9 @@ setMethod("calculateAverage", "ANY", .calculate_average)
 #' @rdname calculateAverage
 #' @importFrom SummarizedExperiment assay
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
-setMethod("calculateAverage", "SummarizedExperiment", function(x, ..., assay.type="counts", exprs_values=NULL)
+setMethod("calculateAverage", "SummarizedExperiment", function(x, ..., exprs_values="counts")
 { 
-    assay.type <- .switch_arg_names(exprs_values, assay.type)
-    .calculate_average(assay(x, assay.type), ...)
+    .calculate_average(assay(x, exprs_values), ...)
 })
 
 #' @export
@@ -106,12 +101,12 @@ setMethod("calculateAverage", "SummarizedExperiment", function(x, ..., assay.typ
 #' @importFrom BiocGenerics sizeFactors
 #' @importFrom SingleCellExperiment altExp
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
-setMethod("calculateAverage", "SingleCellExperiment", function(x, size.factors=NULL, ...)
+setMethod("calculateAverage", "SingleCellExperiment", function(x, size_factors=NULL, ...)
 { 
-    if (is.null(size.factors)) {
-        size.factors <- sizeFactors(x)
+    if (is.null(size_factors)) {
+        size_factors <- sizeFactors(x)
     }
-    callNextMethod(x, size.factors=size.factors, ...)
+    callNextMethod(x, size_factors=size_factors, ...)
 })
 
 #' @rdname calculateAverage

@@ -1,13 +1,13 @@
 .incorporate_common_vis_row <- function(df, se, mode, colour_by, size_by, shape_by, by_exprs_values, by_show_single) {
-    colour_by_out <- retrieveFeatureInfo(se, colour_by, assay.type = by_exprs_values)
+    colour_by_out <- retrieveFeatureInfo(se, colour_by, exprs_values = by_exprs_values)
     colour_by <- colour_by_out$name
     df$colour_by <- colour_by_out$val
 
-    shape_by_out <- retrieveFeatureInfo(se, shape_by, assay.type = by_exprs_values)
+    shape_by_out <- retrieveFeatureInfo(se, shape_by, exprs_values = by_exprs_values)
     shape_by <- shape_by_out$name
     df$shape_by <- .coerce_to_factor(shape_by_out$value, 10, "shape_by")
 
-    size_by_out <- retrieveFeatureInfo(se, size_by, assay.type = by_exprs_values)
+    size_by_out <- retrieveFeatureInfo(se, size_by, exprs_values = by_exprs_values)
     size_by <- size_by_out$name
     df$size_by <- size_by_out$val
 
@@ -15,15 +15,15 @@
 }
 
 .incorporate_common_vis_col <- function(df, se, mode, colour_by, size_by, shape_by, by_exprs_values, by_show_single) {
-    colour_by_out <- retrieveCellInfo(se, colour_by, assay.type = by_exprs_values)
+    colour_by_out <- retrieveCellInfo(se, colour_by, exprs_values = by_exprs_values)
     colour_by <- colour_by_out$name
     df$colour_by <- colour_by_out$val
 
-    shape_by_out <- retrieveCellInfo(se, shape_by, assay.type = by_exprs_values)
+    shape_by_out <- retrieveCellInfo(se, shape_by, exprs_values = by_exprs_values)
     shape_by <- shape_by_out$name
     df$shape_by <- .coerce_to_factor(shape_by_out$value, 10, "shape_by")
 
-    size_by_out <- retrieveCellInfo(se, size_by, assay.type = by_exprs_values)
+    size_by_out <- retrieveCellInfo(se, size_by, exprs_values = by_exprs_values)
     size_by <- size_by_out$name
     df$size_by <- size_by_out$val
 

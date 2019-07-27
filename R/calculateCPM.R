@@ -5,12 +5,10 @@
 #' @param x A numeric matrix of counts where features are rows and cells are columns.
 #'
 #' Alternatively, a \linkS4class{SummarizedExperiment} or a \linkS4class{SingleCellExperiment} containing such counts.
-#' @param size.factors A numeric vector containing size factors to adjust the library sizes.
+#' @param size_factors A numeric vector containing size factors to adjust the library sizes.
 #' If \code{NULL}, the library sizes are used directly. 
-#' @param assay.type A string specifying the assay of \code{x} containing the count matrix.
-#' @param exprs_values Deprecated, same as \code{assay.type}.
-#' @param subset.row A vector specifying the subset of rows of \code{x} for which to return a result.
-#' @param subset_row Deprecated, same as \code{subset.row}.
+#' @param exprs_values A string specifying the assay of \code{x} containing the count matrix.
+#' @param subset_row A vector specifying the subset of rows of \code{x} for which to return a result.
 #' @param ... For the generic, arguments to pass to specific methods.
 #'
 #' For the SummarizedExperiment method, further arguments to pass to the ANY method.
@@ -18,7 +16,7 @@
 #' For the SingleCellExperiment method, further arguments to pass to the SummarizedExperiment method.
 #'
 #' @details 
-#' If \code{size.factors} are provided or available in \code{x}, they are used to define the effective library sizes. 
+#' If \code{size_factors} are provided or available in \code{x}, they are used to define the effective library sizes. 
 #' This is done by scaling all size factors such that the mean factor is equal to the mean sum of counts across all features. 
 #' The effective library sizes are then used as the denominator of the CPM calculation.
 #'
@@ -41,18 +39,17 @@
 NULL
 
 #' @importFrom Matrix colSums
-.calculate_cpm <- function(x, size.factors=NULL, subset.row=NULL, subset_row=NULL) {
-    subset.row <- .switch_arg_names(subset_row, subset.row)
-    if (!is.null(subset.row)) {
-        x <- x[subset.row,,drop=FALSE]
+.calculate_cpm <- function(x, size_factors=NULL, subset_row=NULL) {
+    if (!is.null(subset_row)) {
+        x <- x[subset_row,,drop=FALSE]
     }
 
     lib.sizes <- colSums(x) / 1e6
-    if (!is.null(size.factors)) {
-        lib.sizes <- size.factors / mean(size.factors) * mean(lib.sizes)
+    if (!is.null(size_factors)) {
+        lib.sizes <- size_factors / mean(size_factors) * mean(lib.sizes)
     }
 
-    normalizeCounts(x, size.factors=lib.sizes, log=FALSE, center.sf=FALSE)
+    normalizeCounts(x, size_factors=lib.sizes, log=FALSE, center_sf=FALSE)
 }
 
 #' @export
@@ -63,18 +60,17 @@ setMethod("calculateCPM", "ANY", .calculate_cpm)
 #' @rdname calculateCPM
 #' @importFrom SummarizedExperiment assay 
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
-setMethod("calculateCPM", "SummarizedExperiment", function(x, ..., assay.type="counts", exprs_values=NULL) {
-    assay.type <- .switch_arg_names(exprs_values, assay.type)
-    .calculate_cpm(assay(x, assay.type), ...)
+setMethod("calculateCPM", "SummarizedExperiment", function(x, ..., exprs_values="counts") {
+    .calculate_cpm(assay(x, exprs_values), ...)
 })
 
 #' @export
 #' @rdname calculateCPM
 #' @importFrom BiocGenerics sizeFactors
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
-setMethod("calculateCPM", "SingleCellExperiment", function(x, size.factors=NULL, ...) {
-    if (is.null(size.factors)) {
-        size.factors <- sizeFactors(x)
+setMethod("calculateCPM", "SingleCellExperiment", function(x, size_factors=NULL, ...) {
+    if (is.null(size_factors)) {
+        size_factors <- sizeFactors(x)
     }
-    callNextMethod(x=x, size.factors=size.factors, ...)
+    callNextMethod(x=x, size_factors=size_factors, ...)
 })

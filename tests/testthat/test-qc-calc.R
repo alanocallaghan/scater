@@ -19,7 +19,7 @@ test_that("we can compute standard per-cell QC metrics", {
 
         for (x in c(50, 100, 200, 500)) { 
             chosen <- o[seq_len(x)]
-            expect_equivalent(df$top.percent[i,as.character(x)], sum(cur_counts[chosen])/lib_size * 100) 
+            expect_equivalent(df$percent_top[i,as.character(x)], sum(cur_counts[chosen])/lib_size * 100) 
         }
     }
 })
@@ -54,12 +54,12 @@ test_that("perCellQCMetrics works with alternative experiments", {
 
     for (x in altExpNames(sce)) {
         current <- perCellQCMetrics(altExp(sce, x))
-        expect_identical(df$alt.exps[[x]]$sum, current$sum)
-        expect_identical(df$alt.exps[[x]]$detected, current$detected)
-        expect_equal(df$alt.exps[[x]]$percent, current$sum/df$total*100)
+        expect_identical(df$altexps[[x]]$sum, current$sum)
+        expect_identical(df$altexps[[x]]$detected, current$detected)
+        expect_equal(df$altexps[[x]]$percent, current$sum/df$total*100)
     }
     
-    expect_identical(df$total, df$sum + df$alt.exps$alpha$sum + df$alt.exps$bravo$sum)
+    expect_identical(df$total, df$sum + df$altexps$alpha$sum + df$altexps$bravo$sum)
 })
 
 test_that("perCellQCMetrics handles silly inputs", {
@@ -76,16 +76,16 @@ test_that("perCellQCMetrics handles silly inputs", {
 
     # Percentage holds at the limit.
     df <- perCellQCMetrics(original[1:10,])
-    expect_true(all(df$top.percent==100))
+    expect_true(all(df$percent_top==100))
 
-    df <- perCellQCMetrics(original, percent.in.top=integer(0))
-    expect_identical(ncol(df$top.percent), 0L)
+    df <- perCellQCMetrics(original, percent_top=integer(0))
+    expect_identical(ncol(df$percent_top), 0L)
 
     # Responds to alternative inputs.
     blah <- sce
     assayNames(blah) <- "whee"
     expect_error(perCellQCMetrics(blah), "counts")
-    expect_error(perCellQCMetrics(blah, assay.type="whee"), NA)
+    expect_error(perCellQCMetrics(blah, exprs_values="whee"), NA)
 })
 
 #######################################################################
@@ -132,7 +132,7 @@ test_that("perCellQCMetrics handles silly inputs", {
     blah <- sce
     assayNames(blah) <- "whee"
     expect_error(perFeatureQCMetrics(blah), "counts")
-    expect_error(perFeatureQCMetrics(blah, assay.type="whee"), NA)
+    expect_error(perFeatureQCMetrics(blah, exprs_values="whee"), NA)
 })
 
 #######################################################################

@@ -26,7 +26,7 @@
     }
 
     # Returning the output.
-    return(list(size.factors=sf.list[seq_len(counter)], index=to.use)) 
+    return(list(size_factors=sf.list[seq_len(counter)], index=to.use)) 
 }
 
 .apply_to_size_factors <- function(object, FUN) 

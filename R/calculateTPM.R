@@ -8,8 +8,7 @@
 #' @param lengths Numeric vector providing the effective length for each feature in \code{x}.
 #' Alternatively \code{NULL}, see Details.
 #' @param effective_length Deprecated, same as \code{length}.
-#' @param assay.type A string specifying the assay of \code{x} containing the count matrix.
-#' @param exprs_values Deprecated, same as \code{assay.type}.
+#' @param exprs_values A string specifying the assay of \code{x} containing the count matrix.
 #' @param ... For the generic, arguments to pass to specific methods.
 #'
 #' For the ANY method, further arguments to pass to \code{\link{calculateCPM}}.
@@ -61,18 +60,17 @@ setMethod("calculateTPM", "ANY", .calculate_tpm)
 #' @rdname calculateTPM
 #' @importFrom SummarizedExperiment assay assay<-
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
-setMethod("calculateTPM", "SummarizedExperiment", function(x, ..., assay.type="counts", exprs_values=NULL) {
-    assay.type <- .switch_arg_names(exprs_values, assay.type)
-    .calculate_tpm(assay(x, assay.type), ...)
+setMethod("calculateTPM", "SummarizedExperiment", function(x, ..., exprs_values="counts") {
+    .calculate_tpm(assay(x, exprs_values), ...)
 })
 
 #' @export
 #' @rdname calculateTPM
 #' @importFrom SingleCellExperiment altExp
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
-setMethod("calculateTPM", "SingleCellExperiment", function(x, lengths=NULL, size.factors=NULL, ...) {
-    if (is.null(size.factors)) {
-        size.factors <- sizeFactors(x)
+setMethod("calculateTPM", "SingleCellExperiment", function(x, lengths=NULL, size_factors=NULL, ...) {
+    if (is.null(size_factors)) {
+        size_factors <- sizeFactors(x)
     }
-    callNextMethod(x=x, lengths=lengths, size.factors=size.factors, ...)
+    callNextMethod(x=x, lengths=lengths, size_factors=size_factors, ...)
 })

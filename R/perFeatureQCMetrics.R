@@ -8,19 +8,19 @@
 #' @param subsets A named list containing one or more vectors 
 #' (a character vector of cell names, a logical vector, or a numeric vector of indices),
 #' used to identify interesting sample subsets such as negative control wells.
-#' @param detection.limit A numeric scalar specifying the lower detection limit for expression.
+#' @param detection_limit A numeric scalar specifying the lower detection_limit for expression.
 #' @param BPPARAM A BiocParallelParam object specifying whether the QC calculations should be parallelized. 
 #' @param ... For the generic, further arguments to pass to specific methods.
 #' 
 #' For the SummarizedExperiment and SingleCellExperiment methods, further arguments to pass to the ANY method.
-#' @param assay.type A string or integer scalar indicating which \code{assays} in the \code{x} contains the count matrix.
+#' @param exprs_values A string or integer scalar indicating which \code{assays} in the \code{x} contains the count matrix.
 #'
 #' @return
 #' A \linkS4class{DataFrame} of QC statistics where each row corresponds to a row in \code{x}.
 #' This contains the following fields:
 #' \itemize{
 #' \item \code{mean}: numeric, the mean counts for each feature.
-#' \item \code{detected}: numeric, the percentage of observations above \code{detection.limit}.
+#' \item \code{detected}: numeric, the percentage of observations above \code{detection_limit}.
 #' \item \code{subsets}: A nested DataFrame containing statistics for each subset, see Details.
 #' }
 #' 
@@ -28,7 +28,7 @@
 #' 
 #' @details
 #' This function calculates useful QC metrics for features, including the mean across all cells
-#' and the number of expressed features (i.e., counts above the detection limit).
+#' and the number of expressed features (i.e., counts above the detection_limit).
 #' 
 #' If \code{subsets} is specified, the same statistics are computed for each subset of cells.
 #' This is useful for obtaining statistics for cell sets of interest, e.g., negative control wells.
@@ -71,7 +71,7 @@ NULL
 #' @importFrom S4Vectors DataFrame
 #' @importFrom BiocParallel bpmapply SerialParam
 #' @importClassesFrom S4Vectors DataFrame
-.per_feature_qc_metrics <- function(x, subsets = NULL, detection.limit = 0, BPPARAM=SerialParam()) 
+.per_feature_qc_metrics <- function(x, subsets = NULL, detection_limit = 0, BPPARAM=SerialParam()) 
 {
     if (length(subsets) && is.null(names(subsets))){ 
         stop("'subsets' must be named")
@@ -85,7 +85,7 @@ NULL
                 all_feature_sets=list(), 
                 all_cell_sets=subsets,
                 percent_top=integer(0),
-                detection_limit=detection.limit),
+                detection_limit=detection_limit),
             BPPARAM=BPPARAM, SIMPLIFY=FALSE, USE.NAMES=FALSE)
 
     # Aggregating across cores.
@@ -134,6 +134,6 @@ setMethod("perFeatureQCMetrics", "ANY", .per_feature_qc_metrics)
 #' @export
 #' @rdname perFeatureQCMetrics
 #' @importFrom SummarizedExperiment assay
-setMethod("perFeatureQCMetrics", "SummarizedExperiment", function(x, ..., assay.type="counts") {
-    .per_feature_qc_metrics(assay(x, assay.type), ...)
+setMethod("perFeatureQCMetrics", "SummarizedExperiment", function(x, ..., exprs_values="counts") {
+    .per_feature_qc_metrics(assay(x, exprs_values), ...)
 })
