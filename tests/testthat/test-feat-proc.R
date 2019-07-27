@@ -160,9 +160,12 @@ test_that("Aggregation across cells works correctly for SCEs", {
 
     # Behaves for alternative experiments.
     copy <- sce
-    altExp(copy, 1) <- sce
+    altExp(copy, "THING") <- sce
     copy <- aggregateAcrossCells(copy, ids)
-    expect_identical(altExp(copy, 1), alt)
+    expect_identical(counts(altExp(copy, "THING")), counts(alt))
+
+    copy <- aggregateAcrossCells(sce, ids, use_altexps=FALSE)
+    expect_identical(altExpNames(copy), character(0))
 })
 
 set.seed(100042)
