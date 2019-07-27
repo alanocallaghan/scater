@@ -12,7 +12,7 @@
 #' @param feature_names_to_plot String specifying which row-level metadata column contains the feature names.
 #' Alternatively, an \link{AsIs}-wrapped vector or a data.frame, see \code{?\link{retrieveFeatureInfo}} for possible values.
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in colouring - see \code{?"\link{scater-vis-var}"} for details.
+#' for use in colouring - see \code{?\link{retrieveCellInfo}} for details.
 #' @param by_show_single Deprecated and ignored.
 #' Default is \code{NULL}, in which case  \code{rownames(object)} are used.
 #' @param as_percentage logical scalar indicating whether percentages should be  plotted. 

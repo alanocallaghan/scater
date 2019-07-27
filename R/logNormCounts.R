@@ -10,7 +10,9 @@
 #' @param pseudo_count Numeric scalar specifying the pseudo-count to add when log-transforming expression values.
 #' @param center_sf Logical scalar indicating whether size fators should be centred.
 #' @param use_altexps Logical scalar indicating whether normalization should be performed for alternative experiments in \code{x}.
-#' If \code{TRUE}, statistics are computed for all alternative experiments. 
+#' 
+#' Alternatively, a character vector specifying the names of the alternative experiments to be normalized.
+#' @param ... Arguments passed to specific methods. 
 #'
 #' Alternatively, an integer or character vector specifying the alternative Experiments to use to compute QC statistics.
 #' 
@@ -23,7 +25,7 @@
 #' It returns a \linkS4class{SingleCellExperiment} or \linkS4class{SummarizedExperiment} containing the normalized values in a separate assay.
 #' This makes it easier to perform normalization by avoiding book-keeping errors during a long analysis workflow.
 #' 
-#' If \code{x} is a \linkS4class{SingleCEllExperiment} that contains alternative experiments, normalized values are computed and stored within each alternative experiment.
+#' If \code{x} is a \linkS4class{SingleCellExperiment} that contains alternative experiments, normalized values are computed and stored within each alternative experiment.
 #' If \code{size_factors=NULL}, size factors are obtained separately for each nested experiment following the rules in \code{\link{normalizeCounts}}.
 #' However, if \code{size_factors} is supplied, it will override any size factors available in the alternative experiments.
 #'

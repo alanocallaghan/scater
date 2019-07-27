@@ -5,6 +5,7 @@
 #' @param x A numeric matrix-like object containing counts for cells in the columns and features in the rows.
 #'
 #' Alternatively, a \linkS4class{SingleCellExperiment} or \linkS4class{SummarizedExperiment} object containing such a count matrix.
+#' @param exprs_values A string or integer scalar specifying the assay of \code{x} containing the count matrix.
 #' @param size_factors A numeric vector of cell-specific size factors.
 #' Alternatively \code{NULL}, in which case the size factors are extracted or computed from \code{x}.
 #' @param log Logical scalar indicating whether normalized values should be log2-transformed.

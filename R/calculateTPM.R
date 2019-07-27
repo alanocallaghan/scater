@@ -5,6 +5,8 @@
 #' @param x A numeric matrix of counts where features are rows and cells are columns.
 #'
 #' Alternatively, a \linkS4class{SummarizedExperiment} or a \linkS4class{SingleCellExperiment} containing such counts.
+#' @param size_factors A numeric vector containing size factors to adjust the library sizes.
+#' If \code{NULL}, the library sizes are used directly. 
 #' @param lengths Numeric vector providing the effective length for each feature in \code{x}.
 #' Alternatively \code{NULL}, see Details.
 #' @param effective_length Deprecated, same as \code{length}.

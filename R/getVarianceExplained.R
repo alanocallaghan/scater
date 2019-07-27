@@ -14,6 +14,8 @@
 #' @param chunk Integer scalar specifying the chunk size for chunk-wise processing.
 #' Only affects the speed/memory usage trade-off.
 #' @param subset_row A vector specifying the subset of rows of \code{x} for which to return a result.
+#' @param ... For the generic, arguments to be passed to specific methods.
+#' For the SummarizedExperiment method, arguments to be passed to the ANY method.
 #'
 #' @details 
 #' This function computes the percentage of variance in gene expression that is explained by variables in the sample-level metadata.

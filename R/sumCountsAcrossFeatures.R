@@ -9,7 +9,6 @@
 #' @param ids A factor specifying the set to which each feature in \code{x} belongs.
 #' @param exprs_values A string or integer scalar specifying the assay of \code{x} containing the matrix of counts
 #' (or any other expression quantity that can be meaningfully summed).
-#' @param exprs_values Deprecated, same as \code{exprs_values}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether summation should be parallelized.
 #' @param ... For the \code{sumCountsAcrossFeatures} generic, further arguments to be passed to specific methods.
 #' 

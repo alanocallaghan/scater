@@ -5,7 +5,6 @@
 #'
 #' @param x A \linkS4class{SingleCellExperiment} object.
 #' @param ncomponents Numeric scalar indicating the number of principal components to obtain.
-#' This will override any \code{ntop} argument if specified.
 #' @param variables List of strings or a character vector indicating which variables in \code{colData(x)} to use.
 #' If a list, each entry can also be an \link{AsIs} vector or a data.frame, as described in \code{?\link{retrieveCellInfo}}.
 #' @param selected_variables Deprecated, same as \code{variables}.
@@ -51,7 +50,7 @@
 #' # Can supply names of colData variables to 'variables',
 #' # as well as AsIs-wrapped vectors of interest.
 #' example_sce <- runColDataPCA(example_sce, variables=list(
-#'     "sum", "above.limit", # variable names 
+#'     "sum", "detected", # variable names 
 #'      I(log1p(qc.df$subsets$Mito$sum)) # AsIs-wrapped vectors
 #' ))
 #' reducedDimNames(example_sce)

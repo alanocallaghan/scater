@@ -15,7 +15,10 @@
 #' For the \code{sumCountsAcrossCells} SummarizedExperiment method, further arguments to be passed to the ANY method.
 #'
 #' For \code{aggregateAcrossCells}, further arguments to be passed to \code{sumCountsAcrossCells}.
-#' @param use_exprs_values a character or integer vector specifying the assay(s) of \code{x} containing count matrices.
+#' @param use_exprs_values A character or integer vector specifying the assay(s) of \code{x} containing count matrices.
+#' @param use_altexps Logical scalar indicating whether aggregation should be performed for alternative experiments in \code{x}.
+#'
+#' Alternatively, a character vector specifying the names of the alternative experiments to be aggregated.
 #'
 #' @return 
 #' For \code{sumCountsAcrossCells}, a count matrix is returned with one column per level of \code{ids}.

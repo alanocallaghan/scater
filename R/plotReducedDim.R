@@ -111,7 +111,7 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NUL
 
         # Adding text with the median locations of the 'text_by' vector.
         if (!is.null(text_by)) {
-            text_out <- retrieveCellInfo(object, text_by, column, search="colData")
+            text_out <- retrieveCellInfo(object, text_by, search="colData")
             text_out$val <- .coerce_to_factor(text_out$val, level.limit=Inf)
             by_text_x <- vapply(split(df_to_plot$X, text_out$val), median, FUN.VALUE=0)
             by_text_y <- vapply(split(df_to_plot$Y, text_out$val), median, FUN.VALUE=0)
