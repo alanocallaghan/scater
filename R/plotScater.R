@@ -3,7 +3,7 @@
 #' Plot the relative proportion of the library size that is accounted for by the most highly expressed features for each cell in a SingleCellExperiment object. 
 #'
 #' @param x A \linkS4class{SingleCellExperiment} object.
-#' @param y String specifying the column-level metadata field by which to separate the cells into separate panels in the plot. 
+#' @param block1 String specifying the column-level metadata field by which to separate the cells into separate panels in the plot. 
 #' Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
 #' Default is \code{NULL}, in which case there is no blocking.
 #' @param block2 Same as \code{block1}, providing another level of blocking.

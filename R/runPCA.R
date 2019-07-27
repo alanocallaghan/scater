@@ -25,6 +25,7 @@
 #'
 #' For \code{runPCA}, additional arguments to pass to \code{calculatePCA}.
 #' @param name String specifying the name to be used to store the result in the \code{\link{reducedDims}} of the output.
+#' @param transposed Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.
 #'
 #' @details 
 #' Algorithms like \code{BSPARAM=IrlbaParam()} or \code{RandomParam()} involve a random initialization, after which it converges towards the exact PCs.

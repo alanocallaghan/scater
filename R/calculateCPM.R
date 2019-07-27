@@ -7,7 +7,7 @@
 #' Alternatively, a \linkS4class{SummarizedExperiment} or a \linkS4class{SingleCellExperiment} containing such counts.
 #' @param size_factors A numeric vector containing size factors to adjust the library sizes.
 #' If \code{NULL}, the library sizes are used directly. 
-#' @param exprs_values A string specifying the assay of \code{x} containing the count matrix.
+#' @param exprs_values A string or integer scalar specifying the assay of \code{x} containing the count matrix.
 #' @param subset_row A vector specifying the subset of rows of \code{x} for which to return a result.
 #' @param ... For the generic, arguments to pass to specific methods.
 #'

@@ -14,8 +14,6 @@
 #' @param scale Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.
 #' @param scale_features Deprecated, same as \code{scale} but with a different default.
 #' @param transposed Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.
-#' @param feature_set Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for UMAP.
-#' This will override any \code{ntop} argument if specified.
 #' @param ... For the \code{calculateDiffusionMap} generic, additional arguments to pass to specific methods.
 #' For the ANY method, additional arguments to pass to \code{\link[destiny]{DiffusionMap}}.
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.

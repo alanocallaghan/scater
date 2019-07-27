@@ -61,7 +61,7 @@ annotateBMFeatures <- function(ids, biomart="ENSEMBL_MART_ENSEMBL", dataset="mmu
 getBMFeatureAnnos <- function(object, ids = rownames(object), ...) 
 {
     .Deprecated(new="annotateBMFeatures")
-    feature_info_full <- annotateFeaturesBM(ids, ...)
+    feature_info_full <- annotateBMFeatures(ids, ...)
 
     ## Drop duplicated columns that we want to replace
     old_rdata <- rowData(object)
