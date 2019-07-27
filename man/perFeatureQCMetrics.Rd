@@ -10,10 +10,10 @@
 perFeatureQCMetrics(x, ...)
 
 \S4method{perFeatureQCMetrics}{ANY}(x, subsets = NULL,
-  detection.limit = 0, BPPARAM = SerialParam())
+  detection_limit = 0, BPPARAM = SerialParam())
 
 \S4method{perFeatureQCMetrics}{SummarizedExperiment}(x, ...,
-  assay.type = "counts")
+  exprs_values = "counts")
 }
 \arguments{
 \item{x}{A numeric matrix of counts with cells in columns and features in rows.
@@ -28,25 +28,18 @@ For the SummarizedExperiment and SingleCellExperiment methods, further arguments
 (a character vector of cell names, a logical vector, or a numeric vector of indices),
 used to identify interesting sample subsets such as negative control wells.}
 
-\item{detection.limit}{A numeric scalar specifying the lower detection limit for expression.}
+\item{detection_limit}{A numeric scalar specifying the lower detection_limit for expression.}
 
 \item{BPPARAM}{A BiocParallelParam object specifying whether the QC calculations should be parallelized.}
 
-\item{assay.type}{A string or integer scalar indicating which \code{assays} in the \code{x} contains the count matrix.}
-
-\item{use.alt.exps}{Logical scalar indicating whether QC statistics should be computed for alternative Experiments in \code{x}.
-If \code{TRUE}, statistics are computed for all alternative experiments. 
-
-Alternatively, an integer or character vector specifying the alternative Experiments to use to compute QC statistics.
-
-Alternatively \code{NULL}, in which case alternative experiments are not used.}
+\item{exprs_values}{A string or integer scalar indicating which \code{assays} in the \code{x} contains the count matrix.}
 }
 \value{
 A \linkS4class{DataFrame} of QC statistics where each row corresponds to a row in \code{x}.
 This contains the following fields:
 \itemize{
 \item \code{mean}: numeric, the mean counts for each feature.
-\item \code{above.limit}: numeric, the proportion of observations above \code{detection.limit}.
+\item \code{detected}: numeric, the percentage of observations above \code{detection_limit}.
 \item \code{subsets}: A nested DataFrame containing statistics for each subset, see Details.
 }
 }
@@ -55,7 +48,7 @@ Compute per-feature quality control metrics for a count matrix or a \linkS4class
 }
 \details{
 This function calculates useful QC metrics for features, including the mean across all cells
-and the number of expressed features (i.e., counts above the detection limit).
+and the number of expressed features (i.e., counts above the detection_limit).
 
 If \code{subsets} is specified, the same statistics are computed for each subset of cells.
 This is useful for obtaining statistics for cell sets of interest, e.g., negative control wells.
@@ -63,18 +56,18 @@ These statistics are stored as nested \linkS4class{DataFrame}s in the output.
 For example, if \code{subsets} contained \code{"empty"} and \code{"cellpool"}, the output would look like:
 \preformatted{  output 
   |-- mean 
-  |-- above.limit
+  |-- detected
   +-- subsets
       |-- empty
       |   |-- mean 
-      |   |-- above.limit
-      |   +-- ratio.in
+      |   |-- detected
+      |   +-- ratio
       +-- cellpool 
           |-- mean
-          |-- above.limit
-          +-- ratio.in
+          |-- detected
+          +-- ratio
 }
-The \code{ratio.in} field contains the ratio of the mean within each subset to the mean across all cells.
+The \code{ratio} field contains the ratio of the mean within each subset to the mean across all cells.
 }
 \examples{
 data("sc_example_counts")

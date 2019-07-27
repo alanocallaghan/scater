@@ -10,13 +10,12 @@
 \usage{
 librarySizeFactors(x, ...)
 
-\S4method{librarySizeFactors}{ANY}(x, subset.row = NULL,
-  subset_row = NULL)
+\S4method{librarySizeFactors}{ANY}(x, subset_row = NULL)
 
 \S4method{librarySizeFactors}{SummarizedExperiment}(x,
-  assay.type = "counts", exprs_values = NULL, ...)
+  exprs_values = "counts", ...)
 
-computeLibraryFactors(x, ..., alt.exp = NULL)
+computeLibraryFactors(x, ..., use_altexp = NULL)
 }
 \arguments{
 \item{x}{For \code{libarySizeFactors}, a numeric matrix of counts with one row per feature and column per cell.
@@ -29,15 +28,11 @@ For the SummarizedExperiment method, further arguments to pass to the ANY method
 
 For \code{computeLibraryFactors}, further arguments to pass to \code{librarySizeFactors}.}
 
-\item{subset.row}{A vector specifying whether the size factors should be computed from a subset of rows of \code{x}.}
+\item{subset_row}{A vector specifying whether the size factors should be computed from a subset of rows of \code{x}.}
 
-\item{subset_row}{Deprecated, same as \code{subset_row}.}
+\item{exprs_values}{String or integer scalar indicating the assay of \code{x} containing the counts.}
 
-\item{assay.type}{String or integer scalar indicating the assay of \code{x} containing the counts.}
-
-\item{exprs_values}{Deprecated, same as \code{assay.type}.}
-
-\item{alt.exp}{String or integer scalar indicating which (if any) alternative experiment should be used
+\item{use_altexp}{String or integer scalar indicating which (if any) alternative experiment should be used
 to provide the counts to compute the size factors.}
 }
 \value{
@@ -57,7 +52,7 @@ Preserving the scale is useful for interpretation of operations on the normalize
 e.g., the pseudo-count used in \code{\link{logNormCounts}} can actually be considered an additional read/UMI.
 This is important for ensuring that the effect of the pseudo-count decreases with increasing sequencing depth.
 
-Setting \code{alt.exp} is occasionally useful for computing size factors from spike-in transcripts
+Setting \code{use_altexp} is occasionally useful for computing size factors from spike-in transcripts
 and using them on the count matrix for endogenous genes (stored in the main experiment).
 }
 \examples{

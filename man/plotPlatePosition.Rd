@@ -23,7 +23,7 @@ Alternatively, a list of two factors (\code{"row"} and \code{"column"}) can be s
 \item{shape_by}{Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.}
+for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
 
 \item{by_show_single}{Deprecated and ignored.}
 

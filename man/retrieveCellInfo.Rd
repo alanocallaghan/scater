@@ -5,7 +5,7 @@
 \title{Cell-based data retrieval}
 \usage{
 retrieveCellInfo(x, by, search = c("colData", "assays", "altExps"),
-  assay.type = "logcounts")
+  exprs_values = "logcounts")
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object.}
@@ -15,7 +15,7 @@ Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.}
 
 \item{search}{Character vector specifying the types of data or metadata to use.}
 
-\item{assay.type}{String or integer scalar specifying the assay from which expression values should be extracted.}
+\item{exprs_values}{String or integer scalar specifying the assay from which expression values should be extracted.}
 }
 \value{
 A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
@@ -38,12 +38,14 @@ Given a character string in \code{by}, this function will:
 \item Search \code{\link{colData}} for a column named \code{by}, 
 and return the corresponding field as the output \code{value}.
 We do not consider nested elements within the \code{colData}.
-\item Search \code{\link{assay}(x, assay.type)} for a row named \code{by}, 
+\item Search \code{\link{assay}(x, exprs_values)} for a row named \code{by}, 
 and return the expression vector for this feature as the output \code{value}.
 \item Search each alternative experiment in \code{\link{altExps}(x)} for a row names \code{by},
-and return the expression vector for this feature at \code{assay.type} as the output \code{value}.
+and return the expression vector for this feature at \code{exprs_values} as the output \code{value}.
 }
 Any match will cause the function to return without considering later possibilities.
+The search can be modified by changing the presence and ordering of elements in \code{search}. 
+
 If there is a name clash that results in retrieval of an unintended field,
 users should explicitly set \code{by} to a data.frame, DataFrame or AsIs-wrapped vector containing the desired values.
 Developers can also consider setting \code{search} to control the fields that are returned.

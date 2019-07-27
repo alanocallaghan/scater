@@ -12,17 +12,16 @@
 calculateDiffusionMap(x, ...)
 
 \S4method{calculateDiffusionMap}{ANY}(x, ncomponents = 2, ntop = 500,
-  subset.row = NULL, feature_set = NULL, scale = FALSE,
+  subset_row = NULL, feature_set = NULL, scale = FALSE,
   scale_features = NULL, transposed = FALSE, ...)
 
 \S4method{calculateDiffusionMap}{SummarizedExperiment}(x, ...,
-  assay.type = "logcounts")
+  exprs_values = "logcounts")
 
 \S4method{calculateDiffusionMap}{SingleCellExperiment}(x, ...,
-  assay.type = "logcounts", exprs_values = NULL, use.dimred = NULL,
-  use_dimred = NULL, n.dimred = NULL, n_dimred = NULL)
+  exprs_values = "logcounts", use_dimred = NULL, n_dimred = NULL)
 
-runDiffusionMap(x, ..., alt.exp = NULL, name = "DiffusionMap")
+runDiffusionMap(x, ..., use_altexp = NULL, name = "DiffusionMap")
 }
 \arguments{
 \item{x}{For \code{calculateDiffusionMap}, a numeric matrix of log-expression values where rows are features and columns are cells.
@@ -40,9 +39,9 @@ For \code{runDiffusionMap}, additional arguments to pass to \code{calculateDiffu
 
 \item{ntop}{Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{subset.row}{Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
+\item{subset_row}{Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{feature_set}{Deprecated, same as \code{subset.row}.}
+\item{feature_set}{Deprecated, same as \code{subset_row}.}
 
 \item{scale}{Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.}
 
@@ -50,24 +49,15 @@ For \code{runDiffusionMap}, additional arguments to pass to \code{calculateDiffu
 
 \item{transposed}{Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.}
 
-\item{assay.type}{Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.}
+\item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{exprs_values}{Deprecated, same as \code{assay.type}.}
+\item{use_dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{use.dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
+\item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{use_dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{use_dimred}{Deprecated, same as \code{use.dimred}.}
-
-\item{n.dimred}{Integer scalar or vector specifying the dimensions to use if \code{use.dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
-
-\item{n_dimred}{Deprecated, same as \code{n.dimred}.}
-
-\item{alt.exp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
+\item{use_altexp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
 \item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
-
-\item{feature_set}{Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for UMAP.
-This will override any \code{ntop} argument if specified.}
 }
 \value{
 For \code{calculateDiffusionMap}, a matrix is returned containing the diffusion map coordinates for each cell (row) and dimension (column).

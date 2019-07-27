@@ -10,16 +10,15 @@
 \usage{
 perCellQCMetrics(x, ...)
 
-\S4method{perCellQCMetrics}{ANY}(x, subsets = NULL,
-  percent.in.top = c(50, 100, 200, 500), detection.limit = 0,
-  BPPARAM = SerialParam())
+\S4method{perCellQCMetrics}{ANY}(x, subsets = NULL, percent_top = c(50,
+  100, 200, 500), detection.limit = 0, BPPARAM = SerialParam())
 
 \S4method{perCellQCMetrics}{SummarizedExperiment}(x, ...,
-  assay.type = "counts")
+  exprs_values = "counts")
 
 \S4method{perCellQCMetrics}{SingleCellExperiment}(x, subsets = NULL,
-  percent.in.top = c(50, 100, 200, 500), ..., assay.type = "counts",
-  use.alt.exps = TRUE)
+  percent_top = c(50, 100, 200, 500), ..., exprs_values = "counts",
+  use_altexps = TRUE)
 }
 \arguments{
 \item{x}{A numeric matrix of counts with cells in columns and features in rows.
@@ -34,16 +33,16 @@ For the SummarizedExperiment and SingleCellExperiment methods, further arguments
 (a character vector of feature names, a logical vector, or a numeric vector of indices),
 used to identify interesting feature subsets such as ERCC spike-in transcripts or mitochondrial genes.}
 
-\item{percent.in.top}{An integer vector. 
+\item{percent_top}{An integer vector. 
 Each element is treated as a number of top genes to compute the percentage of library size occupied by the most highly expressed genes in each cell.}
 
 \item{detection.limit}{A numeric scalar specifying the lower detection limit for expression.}
 
 \item{BPPARAM}{A BiocParallelParam object specifying whether the QC calculations should be parallelized.}
 
-\item{assay.type}{A string or integer scalar indicating which \code{assays} in the \code{x} contains the count matrix.}
+\item{exprs_values}{A string or integer scalar indicating which \code{assays} in the \code{x} contains the count matrix.}
 
-\item{use.alt.exps}{Logical scalar indicating whether QC statistics should be computed for alternative Experiments in \code{x}.
+\item{use_altexps}{Logical scalar indicating whether QC statistics should be computed for alternative Experiments in \code{x}.
 If \code{TRUE}, statistics are computed for all alternative experiments. 
 
 Alternatively, an integer or character vector specifying the alternative Experiments to use to compute QC statistics.
@@ -55,11 +54,11 @@ A \linkS4class{DataFrame} of QC statistics where each row corresponds to a colum
 This contains the following fields:
 \itemize{
 \item \code{sum}: numeric, the sum of counts for each cell.
-\item \code{above.limit}: numeric, the number of observations above \code{detection.limit}.
-\item \code{top.percent}: numeric matrix, the percentage of counts assigned to the top percentage of most highly expressed genes.
-Each column of the matrix corresponds to an entry of the sorted \code{percent.in.top}, in increasing order.
+\item \code{detected}: numeric, the number of observations above \code{detection.limit}.
+\item \code{percent_top}: numeric matrix, the percentage of counts assigned to the percent_topage of most highly expressed genes.
+Each column of the matrix corresponds to an entry of the sorted \code{percent_top}, in increasing order.
 \item \code{subsets}: A nested DataFrame containing statistics for each subset, see Details.
-\item \code{alt.exps}: A nested DataFrame containing statistics for each alternative experiment, see Details.
+\item \code{altexps}: A nested DataFrame containing statistics for each alternative experiment, see Details.
 This is only returned for the SingleCellExperiment method.
 \item \code{total}: numeric, the total sum of counts for each cell across main and alternative Experiments.
 This is only returned for the SingleCellExperiment method.
@@ -70,50 +69,50 @@ Compute per-cell quality control metrics for a count matrix or a \linkS4class{Si
 }
 \details{
 This function calculates useful QC metrics for identification and removal of potentially problematic cells.
-Obvious per-cell metrics are the sum of counts (i.e., the library size) and the number of expressed features (i.e., above the detection limit).
+Obvious per-cell metrics are the sum of counts (i.e., the library size) and the number of detected features.
 The percentage of counts in the top features also provides a measure of library complexity.
 
-If \code{subsets} is specified, the same statistics are computed for each subset of features.
-This is useful for obtaining statistics for gene sets of interest, e.g., mitochondrial genes, Y chromosome genes.
-These statistics are stored as nested \linkS4class{DataFrame}s in the output.
-For example, if \code{subsets} contained \code{"Mito"} and \code{"Sex"}, the output would look like:
+If \code{subsets} is specified, these statistics are also computed for each subset of features.
+This is useful for investigating gene sets of interest, e.g., mitochondrial genes, Y chromosome genes.
+These statistics are stored as nested \linkS4class{DataFrame}s in the \code{subsets} field of the output.
+For example, if the input \code{subsets} contained \code{"Mito"} and \code{"Sex"}, the output would look like:
 \preformatted{  output 
   |-- sum
-  |-- above.limit
-  |-- top.percent
+  |-- detected
+  |-- percent_top
   +-- subsets
       |-- Mito
       |   |-- sum
-      |   |-- above.limit
-      |   +-- percent.in
+      |   |-- detected
+      |   +-- percent
       +-- Sex 
           |-- sum
-          |-- above.limit
-          +-- percent.in
+          |-- detected
+          +-- percent
 }
-The \code{percent.in} field contains the percentage of counts assigned to each subset for each cell.
+Here, the \code{percent} field contains the percentage of each cell's count sum assigned to each subset. 
 
-If \code{use.alt.exps} is \code{TRUE}, the same statistics are computed for each alternative experiment in \code{x}.
+If \code{use_altexps} is \code{TRUE}, the same statistics are computed for each alternative experiment in \code{x}.
 This can also be an integer or character vector specifying the alternative Experiments to use.
-These statistics are also stored as nested \linkS4class{DataFrame}s.
+These statistics are also stored as nested \linkS4class{DataFrame}s, this time in the \code{altexps} field of the output.
 For example, if \code{x} contained the alternative Experiments \code{"Spike"} and \code{"Ab"}, the output would look like:
 \preformatted{  output 
   |-- sum
-  |-- above.limit
-  |-- top.percent
-  +-- alt.exps 
+  |-- detected
+  |-- percent_top
+  +-- altexps 
   |   |-- Spike
   |   |   |-- sum
-  |   |   |-- above.limit
+  |   |   |-- detected
   |   |   +-- percent.total
   |   +-- Ab
   |       |-- sum
-  |       |-- above.limit
+  |       |-- detected
   |       +-- percent.total
   +-- total 
 }
-The \code{total} field contains the total sum of counts for each cell, including both the main and alternative Experiments.
-The \code{percent.total} field contains the percentage of the total in each alternative Experiment for each cell.
+The \code{total} field contains the total sum of counts for each cell across the main and alternative Experiments.
+The \code{percent} field contains the percentage of the total count in each alternative Experiment for each cell.
 }
 \examples{
 data("sc_example_counts")
@@ -134,7 +133,7 @@ stats2$subsets
 pretend.spike <- ifelse(seq_len(nrow(example_sce)) < 10, "Spike", "Gene")
 alt_sce <- splitSCEByAlt(example_sce, pretend.spike)
 stats3 <- perCellQCMetrics(alt_sce)
-stats3$alt.exps
+stats3$altexps
 
 }
 \author{

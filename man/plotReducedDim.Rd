@@ -27,7 +27,7 @@ Only expected to be used in PCA settings, e.g., in the \code{\link[scater]{plotP
 \item{size_by}{Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.}
+for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
 
 \item{by_show_single}{Deprecated and ignored.}
 

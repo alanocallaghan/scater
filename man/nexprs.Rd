@@ -9,12 +9,10 @@
 \usage{
 nexprs(x, ...)
 
-\S4method{nexprs}{ANY}(x, byrow = FALSE, detection.limit = 0,
-  detection_limit = NULL, subset.row = NULL, subset_row = NULL,
-  subset.col = NULL, subset_col = NULL, BPPARAM = SerialParam())
+\S4method{nexprs}{ANY}(x, byrow = FALSE, detection_limit = 0,
+  subset_row = NULL, subset_col = NULL, BPPARAM = SerialParam())
 
-\S4method{nexprs}{SummarizedExperiment}(x, ..., assay.type = "counts",
-  exprs_values = NULL)
+\S4method{nexprs}{SummarizedExperiment}(x, ..., exprs_values = "counts")
 }
 \arguments{
 \item{x}{A numeric matrix of counts where features are rows and 
@@ -28,21 +26,15 @@ For the SummarizedExperiment method, further arguments to pass to the ANY method
 \item{byrow}{Logical scalar indicating whether to count the number of detected cells per feature.
 If \code{FALSE}, the function will count the number of detected features per cell.}
 
-\item{detection.limit}{Numeric scalar providing the value above which  observations are deemed to be expressed.}
+\item{detection_limit}{Numeric scalar providing the value above which  observations are deemed to be expressed.}
 
-\item{subset.row}{Logical, integer or character vector indicating which rows (i.e. features) to use.}
+\item{subset_row}{Logical, integer or character vector indicating which rows (i.e. features) to use.}
 
-\item{subset_row}{Deprecated, same as \code{subset.row}.}
-
-\item{subset.col}{Logical, integer or character vector indicating which columns (i.e., cells) to use.}
-
-\item{subset_col}{Deprecated, same as \code{subset.col}.}
+\item{subset_col}{Logical, integer or character vector indicating which columns (i.e., cells) to use.}
 
 \item{BPPARAM}{A BiocParallelParam object specifying whether the calculations should be parallelized.}
 
-\item{assay.type}{String or integer specifying the assay of \code{x} to obtain the count matrix from.}
-
-\item{exprs_values}{Deprecated, same as \code{assay.type}.}
+\item{exprs_values}{String or integer specifying the assay of \code{x} to obtain the count matrix from.}
 }
 \value{
 An integer vector containing counts per gene or cell, depending on the provided arguments.

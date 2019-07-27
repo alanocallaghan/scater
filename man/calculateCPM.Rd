@@ -10,13 +10,12 @@
 \usage{
 calculateCPM(x, ...)
 
-\S4method{calculateCPM}{ANY}(x, size.factors = NULL, subset.row = NULL,
-  subset_row = NULL)
+\S4method{calculateCPM}{ANY}(x, size_factors = NULL, subset_row = NULL)
 
 \S4method{calculateCPM}{SummarizedExperiment}(x, ...,
-  assay.type = "counts", exprs_values = NULL)
+  exprs_values = "counts")
 
-\S4method{calculateCPM}{SingleCellExperiment}(x, size.factors = NULL,
+\S4method{calculateCPM}{SingleCellExperiment}(x, size_factors = NULL,
   ...)
 }
 \arguments{
@@ -30,16 +29,12 @@ For the SummarizedExperiment method, further arguments to pass to the ANY method
 
 For the SingleCellExperiment method, further arguments to pass to the SummarizedExperiment method.}
 
-\item{size.factors}{A numeric vector containing size factors to adjust the library sizes.
+\item{size_factors}{A numeric vector containing size factors to adjust the library sizes.
 If \code{NULL}, the library sizes are used directly.}
 
-\item{subset.row}{A vector specifying the subset of rows of \code{x} for which to return a result.}
+\item{subset_row}{A vector specifying the subset of rows of \code{x} for which to return a result.}
 
-\item{subset_row}{Deprecated, same as \code{subset.row}.}
-
-\item{assay.type}{A string specifying the assay of \code{x} containing the count matrix.}
-
-\item{exprs_values}{Deprecated, same as \code{assay.type}.}
+\item{exprs_values}{A string or integer scalar specifying the assay of \code{x} containing the count matrix.}
 }
 \value{
 A numeric matrix of CPM values.
@@ -48,7 +43,7 @@ A numeric matrix of CPM values.
 Calculate count-per-million (CPM) values from the count data.
 }
 \details{
-If \code{size.factors} are provided or available in \code{x}, they are used to define the effective library sizes. 
+If \code{size_factors} are provided or available in \code{x}, they are used to define the effective library sizes. 
 This is done by scaling all size factors such that the mean factor is equal to the mean sum of counts across all features. 
 The effective library sizes are then used as the denominator of the CPM calculation.
 }

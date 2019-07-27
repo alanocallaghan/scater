@@ -4,7 +4,7 @@
 \alias{calculateFPKM}
 \title{Calculate FPKMs}
 \usage{
-calculateFPKM(x, effective.length, effective_length = NULL, ...,
+calculateFPKM(x, lengths, effective_length = NULL, ...,
   subset_row = NULL)
 }
 \arguments{
@@ -12,11 +12,13 @@ calculateFPKM(x, effective.length, effective_length = NULL, ...,
 
 Alternatively, a \linkS4class{SummarizedExperiment} or a \linkS4class{SingleCellExperiment} containing such counts.}
 
-\item{effective.length}{Numeric vector providing the effective length for each feature in \code{x}.}
+\item{lengths}{Numeric vector providing the effective length for each feature in \code{x}.}
 
-\item{effective_length}{Deprecated, same as \code{effective.length}.}
+\item{effective_length}{Deprecated, same as \code{lengths}.}
 
 \item{...}{Further arguments to pass to \code{\link{calculateCPM}}.}
+
+\item{subset_row}{A vector specifying the subset of rows of \code{x} for which to return a result.}
 }
 \value{
 A numeric matrix of FPKM values.
