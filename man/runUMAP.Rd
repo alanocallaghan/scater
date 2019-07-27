@@ -12,18 +12,19 @@
 calculateUMAP(x, ...)
 
 \S4method{calculateUMAP}{ANY}(x, ncomponents = 2, ntop = 500,
-  subset.row = NULL, feature_set = NULL, scale = FALSE,
-  scale_features = NULL, transposed = FALSE, method = "euclidean")
+  subset_row = NULL, feature_set = NULL, scale = FALSE,
+  scale_features = NULL, transposed = FALSE, pca = if (transposed)
+  NULL else 50, n_neighbors = 15, ..., external_neighbors = FALSE,
+  BNPARAM = KmknnParam(), BPPARAM = SerialParam())
 
 \S4method{calculateUMAP}{SummarizedExperiment}(x, ...,
-  assay.type = "logcounts")
+  exprs_values = "logcounts")
 
 \S4method{calculateUMAP}{SingleCellExperiment}(x, ..., pca = if
-  (!is.null(use.dimred)) NULL else 50, assay.type = "logcounts",
-  exprs_values = NULL, use.dimred = NULL, use_dimred = NULL,
-  n.dimred = NULL, n_dimred = NULL)
+  (!is.null(use_dimred)) NULL else 50, exprs_values = "logcounts",
+  use_dimred = NULL, n_dimred = NULL)
 
-runUMAP(x, ..., alt.exp = NULL, name = "UMAP")
+runUMAP(x, ..., use_altexp = NULL, name = "UMAP")
 }
 \arguments{
 \item{x}{For \code{calculateUMAP}, a numeric matrix of log-expression values where rows are features and columns are cells.
@@ -41,9 +42,9 @@ For \code{runUMAP}, additional arguments to pass to \code{calculateUMAP}.}
 
 \item{ntop}{Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{subset.row}{Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
+\item{subset_row}{Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{feature_set}{Deprecated, same as \code{subset.row}.}
+\item{feature_set}{Deprecated, same as \code{subset_row}.}
 
 \item{scale}{Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.}
 
@@ -51,39 +52,26 @@ For \code{runUMAP}, additional arguments to pass to \code{calculateUMAP}.}
 
 \item{transposed}{Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.}
 
-\item{assay.type}{Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.}
-
 \item{pca}{Integer scalar specifying how many PCs should be used as input into the UMAP algorithm.
 By default, no PCA is performed if the input is a dimensionality reduction result.}
 
-\item{exprs_values}{Deprecated, same as \code{assay.type}.}
+\item{n_neighbors}{Integer scalar, number of nearest neighbors to identify when constructing the initial graph.}
 
-\item{use.dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
-
-\item{use_dimred}{Deprecated, same as \code{use.dimred}.}
-
-\item{n.dimred}{Integer scalar or vector specifying the dimensions to use if \code{use.dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
-
-\item{n_dimred}{Deprecated, same as \code{n.dimred}.}
-
-\item{alt.exp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
-
-\item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
-
-\item{feature_set}{Character vector of row names, a logical vector or a numeric vector of indices indicating a set of features to use for UMAP.
-This will override any \code{ntop} argument if specified.}
-
-\item{n.neighbors}{Integer scalar, number of nearest neighbors to identify when constructing the initial graph.}
-
-\item{n_neighbors}{Deprecated, same as \code{n.neighbors}.}
-
-\item{external.neighbors}{Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.}
-
-\item{external_neighbors}{Deprecated, same as \code{external.neighbors}.}
+\item{external_neighbors}{Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.}
 
 \item{BNPARAM}{A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.}
+
+\item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.}
+
+\item{use_dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
+
+\item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{use_dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
+
+\item{use_altexp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
+
+\item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
 }
 \value{
 For \code{calculateUMAP}, a matrix is returned containing the UMAP coordinates for each cell (row) and dimension (column).
@@ -98,7 +86,7 @@ The function \code{\link[uwot]{umap}} is used internally to compute the UMAP.
 Note that the algorithm is not deterministic, so different runs of the function will produce differing results. 
 Users are advised to test multiple random seeds, and then use \code{\link{set.seed}} to set a random seed for replicable results. 
 
-If \code{external.neighbors=TRUE}, the nearest neighbor search is conducted using a different algorithm to that in the \code{\link[uwot]{umap}} function.
+If \code{external_neighbors=TRUE}, the nearest neighbor search is conducted using a different algorithm to that in the \code{\link[uwot]{umap}} function.
 This can be parallelized or approximate to achieve greater speed for large data sets.
 The neighbor search results are then used directly to create the UMAP embedding.
 }

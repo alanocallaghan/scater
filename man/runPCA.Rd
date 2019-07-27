@@ -13,19 +13,18 @@
 calculatePCA(x, ...)
 
 \S4method{calculatePCA}{ANY}(x, ncomponents = 50, ntop = 500,
-  subset.row = NULL, feature_set = NULL, scale = FALSE,
+  subset_row = NULL, feature_set = NULL, scale = FALSE,
   scale_features = NULL, transposed = FALSE, BSPARAM = ExactParam(),
   BPPARAM = SerialParam())
 
 \S4method{calculatePCA}{SummarizedExperiment}(x, ...,
-  assay.type = "logcounts")
+  exprs_values = "logcounts")
 
 \S4method{calculatePCA}{SingleCellExperiment}(x, ...,
-  assay.type = "logcounts", exprs_values = NULL, use.dimred = NULL,
-  use_dimred = NULL, n.dimred = NULL, n_dimred = NULL)
+  exprs_values = "logcounts", use_dimred = NULL, n_dimred = NULL)
 
 \S4method{runPCA}{SingleCellExperiment}(x, ..., use_coldata = FALSE,
-  alt.exp = NULL, name = "PCA")
+  use_altexp = NULL, name = "PCA")
 }
 \arguments{
 \item{x}{For \code{calculatePCA}, a numeric matrix of log-expression values where rows are features and columns are cells.
@@ -42,29 +41,29 @@ For \code{runPCA}, additional arguments to pass to \code{calculatePCA}.}
 
 \item{ntop}{Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{subset.row}{Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
+\item{subset_row}{Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{feature_set}{Deprecated, same as \code{subset.row}.}
+\item{feature_set}{Deprecated, same as \code{subset_row}.}
 
 \item{scale}{Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.}
 
 \item{scale_features}{Deprecated, same as \code{scale} but with a different default.}
 
+\item{transposed}{Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.}
+
 \item{BSPARAM}{A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.}
 
-\item{assay.type}{Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.}
+\item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{exprs_values}{Deprecated, same as \code{assay.type}.}
+\item{use_dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{use.dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
-
-\item{n.dimred}{Integer scalar or vector specifying the dimensions to use if \code{use.dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
+\item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{use_dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
 
 \item{use_coldata}{Deprecated, use \code{\link{runColDataPCA}} instead.}
 
-\item{alt.exp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
+\item{use_altexp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
 \item{name}{String specifying the name to be used to store the result in the \code{\link{reducedDims}} of the output.}
 }

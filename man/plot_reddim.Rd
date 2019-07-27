@@ -43,26 +43,25 @@ This can also be a numeric vector, see \code{?\link{plotReducedDim}} for details
 \item{run_args}{Arguments to pass to \code{\link{runPCA}}, \code{\link{runTSNE}}, etc.}
 }
 \value{
-A ggplot object.
+A \link{ggplot} object.
 }
 \description{
-Wrapper functions to create plots for specific types of reduced dimension results in a SingleCellExperiment object,
-or, if they are not already present, to calculate those results and then plot them.
+Wrapper functions to create plots for specific types of reduced dimension results in a SingleCellExperiment object.
 }
 \details{
-Each function will search the \code{\link{reducedDims}} slot for an appropriately named set of results and pass those coordinates onto \code{\link{plotReducedDim}}.
-If the results are not present or \code{rerun=TRUE}, they will be computed using the relevant \code{run*} function.
-The result name and \code{run*} function for each \code{plot*} function are:
+Each function is a convenient wrapper around \code{\link{plotReducedDim}} that searches the \code{\link{reducedDims}} slot for an appropriately named dimensionality reduction result:
 \itemize{
-\item \code{"PCA"} and \code{\link{runPCA}} for \code{plotPCA}
-\item \code{"TSNE"} and \code{\link{runTSNE}} for \code{plotTSNE}
-\item \code{"DiffusionMap"} and \code{\link{runDiffusionMap}} for \code{plotDiffusionMap}
-\item \code{"MDS"} and \code{\link{runMDS}} for \code{"plotMDS"}
+\item \code{"PCA"} for \code{plotPCA}
+\item \code{"TSNE"} for \code{plotTSNE}
+\item \code{"DiffusionMap"} for \code{plotDiffusionMap}
+\item \code{"MDS"} for \code{"plotMDS"}
+\item \code{"UMAP"} for \code{"plotUMAP"}
 }
-Users can specify arguments to the \code{run*} functions via \code{run_args}. 
+Its only purpose is to streamline workflows to avoid the need to specify the \code{use_dimred} argument.
 
-If \code{ncomponents} is a numeric vector, the maximum value will be used to determine the required number of dimensions to compute in the \code{run*} functions.
-However, only the specified dimensions in \code{ncomponents} will be plotted.
+Previous versions of these functions would recompute the dimensionality reduction results if they were not already present.
+This has been deprecated in favour of users explicitly calling the relevant \code{run*} function,
+to avoid uncertainties about what was actually being plotted.
 }
 \examples{
 ## Set up an example SingleCellExperiment
@@ -73,6 +72,7 @@ example_sce <- SingleCellExperiment(
     colData = sc_example_cell_info
 )
 example_sce <- normalize(example_sce)
+example_sce <- runPCA(example_sce)
 
 ## Examples plotting PC1 and PC2
 plotPCA(example_sce)
@@ -91,12 +91,15 @@ plotPCA(example_sce, ncomponents = 4, colour_by = "Treatment",
     shape_by = "Mutation_Status")
 
 ## Same for TSNE:
+example_sce <- runTSNE(example_sce)
 plotTSNE(example_sce, run_args=list(perplexity = 10))
 
 ## Same for DiffusionMaps:
+example_sce <- runDiffusionMap(example_sce)
 plotDiffusionMap(example_sce)
 
 ## Same for MDS plots:
+example_sce <- runMDS(example_sce)
 plotMDS(example_sce)
 
 }
@@ -105,7 +108,10 @@ plotMDS(example_sce)
 \code{\link{runDiffusionMap}}, 
 \code{\link{runTSNE}}, 
 \code{\link{runMDS}},
-\code{\link{plotReducedDim}}
+and \code{\link{runUMAP}},
+for the functions that actually perform the calculations.
+
+\code{\link{plotReducedDim}}, for the underlying plotting function.
 }
 \author{
 Davis McCarthy, with modifications by Aaron Lun

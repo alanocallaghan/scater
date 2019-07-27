@@ -12,8 +12,7 @@ runColDataPCA(x, ncomponents = 2, variables = NULL,
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object.}
 
-\item{ncomponents}{Numeric scalar indicating the number of principal components to obtain.
-This will override any \code{ntop} argument if specified.}
+\item{ncomponents}{Numeric scalar indicating the number of principal components to obtain.}
 
 \item{variables}{List of strings or a character vector indicating which variables in \code{colData(x)} to use.
 If a list, each entry can also be an \link{AsIs} vector or a data.frame, as described in \code{?\link{retrieveCellInfo}}.}
@@ -70,7 +69,7 @@ colData(example_sce) <- cbind(colData(example_sce), qc.df)
 # Can supply names of colData variables to 'variables',
 # as well as AsIs-wrapped vectors of interest.
 example_sce <- runColDataPCA(example_sce, variables=list(
-    "sum", "above.limit", # variable names 
+    "sum", "detected", # variable names 
      I(log1p(qc.df$subsets$Mito$sum)) # AsIs-wrapped vectors
 ))
 reducedDimNames(example_sce)

@@ -11,21 +11,19 @@
 \usage{
 normalizeCounts(x, ...)
 
-\S4method{normalizeCounts}{DelayedMatrix}(x, size.factors = NULL,
-  size_factors = NULL, log = TRUE, return_log = NULL,
-  pseudo.count = 1, center.sf = TRUE, subset.row = NULL,
-  subset_row = NULL)
+\S4method{normalizeCounts}{DelayedMatrix}(x, size_factors = NULL,
+  log = TRUE, return_log = NULL, pseudo_count = 1,
+  log_exprs_offset = NULL, center_sf = TRUE, subset_row = NULL)
 
-\S4method{normalizeCounts}{ANY}(x, size.factors = NULL,
-  size_factors = NULL, log = TRUE, return_log = NULL,
-  pseudo.count = 1, center.sf = TRUE, subset.row = NULL,
-  subset_row = NULL)
+\S4method{normalizeCounts}{ANY}(x, size_factors = NULL, log = TRUE,
+  return_log = NULL, pseudo_count = 1, log_exprs_offset = NULL,
+  center_sf = TRUE, subset_row = NULL)
 
 \S4method{normalizeCounts}{SummarizedExperiment}(x, ...,
-  assay.type = "counts", exprs_values = NULL)
+  exprs_values = "counts")
 
-\S4method{normalizeCounts}{SingleCellExperiment}(x, size.factors = NULL,
-  size_factors = NULL, ...)
+\S4method{normalizeCounts}{SingleCellExperiment}(x, size_factors = NULL,
+  ...)
 }
 \arguments{
 \item{x}{A numeric matrix-like object containing counts for cells in the columns and features in the rows.
@@ -38,22 +36,22 @@ For the SummarizedExperiment method, further arguments to pass to the ANY or \li
 
 For the SingleCellExperiment method, further arguments to pass to the SummarizedExperiment method.}
 
-\item{size.factors}{A numeric vector of cell-specific size factors.
+\item{size_factors}{A numeric vector of cell-specific size factors.
 Alternatively \code{NULL}, in which case the size factors are extracted or computed from \code{x}.}
-
-\item{size_factors}{Deprecated, same as \code{size.factors}.}
 
 \item{log}{Logical scalar indicating whether normalized values should be log2-transformed.}
 
 \item{return_log}{Deprecated, same as \code{log}.}
 
-\item{pseudo.count}{Numeric scalar specifying the pseudo-count to add when log-transforming expression values.}
+\item{pseudo_count}{Numeric scalar specifying the pseudo_count to add when log-transforming expression values.}
 
-\item{center.sf}{Logical scalar indicating whether size factors should be centered at unity before being used.}
+\item{log_exprs_offset}{Deprecated, same as \code{pseudo_count}.}
 
-\item{subset.row}{A vector specifying the subset of rows of \code{x} for which to return a result.}
+\item{center_sf}{Logical scalar indicating whether size factors should be centered at unity before being used.}
 
-\item{subset_row}{Deprecated, same as \code{subset.row}.}
+\item{subset_row}{A vector specifying the subset of rows of \code{x} for which to return a result.}
+
+\item{exprs_values}{A string or integer scalar specifying the assay of \code{x} containing the count matrix.}
 }
 \value{
 A matrix-like object of (log-)normalized expression values.
@@ -64,7 +62,7 @@ Compute (log-)normalized expression values by dividing counts for each cell by t
 \details{
 Normalized expression values are computed by dividing the counts for each cell by the size factor for that cell.
 This aims to remove cell-specific scaling biases, e.g., due to differences in sequencing coverage or capture efficiency.
-If \code{log=TRUE}, log-normalized values are calculated by adding \code{pseudo.count} to the normalized count and performing a log2 transformation.
+If \code{log=TRUE}, log-normalized values are calculated by adding \code{pseudo_count} to the normalized count and performing a log2 transformation.
 
 If no size factors are supplied, they are determined automatically from \code{x}:
 \itemize{
@@ -73,12 +71,12 @@ the sum of counts for each cell is used to compute a size factor via the \code{\
 \item For \linkS4class{SingleCellExperiment} instances, the function searches for \code{\link{sizeFactors}} from \code{x}.
 If none are available, it defaults to library size-derived size factors.
 }
-If \code{size.factors} are supplied, they will override any size factors present in \code{x}.
+If \code{size_factors} are supplied, they will override any size factors present in \code{x}.
 
-If \code{center.sf=TRUE}, all sets of size factors will be centered to have the same mean prior to calculation of normalized expression values.
+If \code{center_sf=TRUE}, all sets of size factors will be centered to have the same mean prior to calculation of normalized expression values.
 This ensures that abundances are roughly comparable between features normalized with different sets of size factors.
 By default, the centre mean is unity, which means that the computed \code{exprs} can be interpreted as being on the same scale as log-counts.
-It also means that the value of \code{pseudo.count} can be interpreted as a pseudo-count (i.e., on the same scale as the counts).
+It also means that the value of \code{pseudo_count} can be interpreted as a pseudo_count (i.e., on the same scale as the counts).
 }
 \examples{
 data("sc_example_counts")

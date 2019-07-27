@@ -11,13 +11,13 @@
 \usage{
 calculateAverage(x, ...)
 
-\S4method{calculateAverage}{ANY}(x, size.factors = NULL,
-  subset.row = NULL, subset_row = NULL, BPPARAM = SerialParam())
+\S4method{calculateAverage}{ANY}(x, size_factors = NULL,
+  subset_row = NULL, BPPARAM = SerialParam())
 
 \S4method{calculateAverage}{SummarizedExperiment}(x, ...,
-  assay.type = "counts", exprs_values = NULL)
+  exprs_values = "counts")
 
-\S4method{calculateAverage}{SingleCellExperiment}(x, size.factors = NULL,
+\S4method{calculateAverage}{SingleCellExperiment}(x, size_factors = NULL,
   ...)
 
 calcAverage(x, ...)
@@ -33,18 +33,14 @@ For the SummarizedExperiment method, further arguments to pass to the ANY method
 
 For the SingleCellExperiment method, further arguments to pass to the SummarizedExperiment method.}
 
-\item{size.factors}{A numeric vector containing size factors.
+\item{size_factors}{A numeric vector containing size factors.
 If \code{NULL}, these are calculated or extracted from \code{x}.}
 
-\item{subset.row}{A vector specifying the subset of rows of \code{object} for which to return a result.}
-
-\item{subset_row}{Deprecated, same as \code{subset.row}.}
+\item{subset_row}{A vector specifying the subset of rows of \code{object} for which to return a result.}
 
 \item{BPPARAM}{A BiocParallelParam object specifying whether the calculations should be parallelized.}
 
-\item{assay.type}{A string specifying the assay of \code{x} containing the count matrix.}
-
-\item{exprs_values}{Deprecated, same as \code{assay.type}.}
+\item{exprs_values}{A string specifying the assay of \code{x} containing the count matrix.}
 }
 \value{
 A numeric vector of average count values with same length as number of features 
@@ -64,7 +60,7 @@ the sum of counts for each cell is used to compute a size factor via the \code{\
 \item For \linkS4class{SingleCellExperiment} instances, the function searches for \code{\link{sizeFactors}} from \code{x}.
 If none are available, it defaults to library size-derived size factors.
 }
-If \code{size.factors} are supplied, they will override any size factors present in \code{x}.
+If \code{size_factors} are supplied, they will override any size factors present in \code{x}.
 }
 \examples{
 data("sc_example_counts")

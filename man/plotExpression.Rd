@@ -13,7 +13,8 @@ plotExpression(object, features, x = NULL, exprs_values = "logcounts",
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values and other metadata.}
 
-\item{features}{A character vector (of feature names), a logical vector or numeric vector (of indices) specifying the features to plot.}
+\item{features}{A character vector or a list specifying the features to plot.
+If a list is supplied, each entry of the list can be a string, an AsIs-wrapped vector or a data.frame - see \code{?\link{retrieveCellInfo}}.}
 
 \item{x}{Specification of a column metadata field or a feature to show on the x-axis, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
@@ -28,7 +29,7 @@ plotExpression(object, features, x = NULL, exprs_values = "logcounts",
 \item{size_by}{Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.}
+for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
 
 \item{by_show_single}{Deprecated and ignored.}
 
@@ -82,19 +83,24 @@ sizeFactors(example_sce) <- colSums(counts(example_sce))
 example_sce <- normalize(example_sce)
 
 ## default plot
-plotExpression(example_sce, 1:15)
+plotExpression(example_sce, rownames(example_sce)[1:15])
 
 ## plot expression against an x-axis value
-plotExpression(example_sce, c("Gene_0001", "Gene_0004"), x="Mutation_Status")
-plotExpression(example_sce, c("Gene_0001", "Gene_0004"), x="Gene_0002")
+plotExpression(example_sce, c("Gene_0001", "Gene_0004"), 
+    x="Mutation_Status")
+plotExpression(example_sce, c("Gene_0001", "Gene_0004"), 
+    x="Gene_0002")
 
 ## add visual options
-plotExpression(example_sce, 1:6, colour_by = "Mutation_Status")
-plotExpression(example_sce, 1:6, colour_by = "Mutation_Status",
-     shape_by = "Treatment", size_by = "Gene_0010")
+plotExpression(example_sce, rownames(example_sce)[1:6], 
+    colour_by = "Mutation_Status")
+plotExpression(example_sce, rownames(example_sce)[1:6], 
+    colour_by = "Mutation_Status", shape_by = "Treatment", 
+    size_by = "Gene_0010")
 
 ## plot expression against expression values for Gene_0004
-plotExpression(example_sce, 1:4, "Gene_0004", show_smooth = TRUE)
+plotExpression(example_sce, rownames(example_sce)[1:4],
+    "Gene_0004", show_smooth = TRUE)
 
 }
 \author{

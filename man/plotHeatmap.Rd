@@ -37,7 +37,7 @@ Each entry of the list can be any acceptable input to the \code{by} argument in 
 A character vector can also be supplied and will be treated as a list of strings.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for colouring of column-level data - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.}
+for colouring of column-level data - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
 
 \item{by_show_single}{Deprecated and ignored.}
 
@@ -66,7 +66,6 @@ example_sce <- SingleCellExperiment(
     assays = list(counts = sc_example_counts),
     colData = sc_example_cell_info
 )
-                                               
 example_sce <- normalize(example_sce)
 
 plotHeatmap(example_sce, features=rownames(example_sce)[1:10])

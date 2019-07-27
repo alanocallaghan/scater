@@ -9,16 +9,19 @@
 \usage{
 getVarianceExplained(x, ...)
 
-\S4method{getVarianceExplained}{ANY}(x, variables, subset.row = NULL,
+\S4method{getVarianceExplained}{ANY}(x, variables, subset_row = NULL,
   chunk = 1000)
 
 \S4method{getVarianceExplained}{SummarizedExperiment}(x,
-  variables = NULL, ..., assay.type = "counts", exprs_values = NULL)
+  variables = NULL, ..., exprs_values = "logcounts")
 }
 \arguments{
 \item{x}{A numeric matrix of expression values, usually log-transformed and normalized.
 
 Alternatively, a \linkS4class{SummarizedExperiment} containing such a matrix.}
+
+\item{...}{For the generic, arguments to be passed to specific methods.
+For the SummarizedExperiment method, arguments to be passed to the ANY method.}
 
 \item{variables}{A \linkS4class{DataFrame} or data.frame containing one or more variables of interest.
 This should have number of rows equal to the number of columns in \code{x}.
@@ -26,14 +29,12 @@ This should have number of rows equal to the number of columns in \code{x}.
 For the SummarizedExperiment method, this can also be a character vector specifying column names of \code{colData(x)} to use;
 or \code{NULL}, in which case all columns in \code{colData(x)} are used.}
 
-\item{subset.row}{A vector specifying the subset of rows of \code{x} for which to return a result.}
+\item{subset_row}{A vector specifying the subset of rows of \code{x} for which to return a result.}
 
 \item{chunk}{Integer scalar specifying the chunk size for chunk-wise processing.
 Only affects the speed/memory usage trade-off.}
 
-\item{assay.type}{String or integer scalar specifying the expression values for which to compute the variance.}
-
-\item{exprs_values}{Deprecated, same as \code{assay.type}.}
+\item{exprs_values}{String or integer scalar specifying the expression values for which to compute the variance.}
 }
 \value{
 A numeric matrix containing the percentage of variance explained by each factor (column) and for each gene (row).

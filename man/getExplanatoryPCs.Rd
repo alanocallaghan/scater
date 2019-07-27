@@ -4,24 +4,21 @@
 \alias{getExplanatoryPCs}
 \title{Per-PC variance explained by a variable}
 \usage{
-getExplanatoryPCs(x, use.dimred = "PCA", use_dimred = NULL,
-  n.dimred = 10, ncomponents = NULL, rerun = FALSE,
-  run_args = list(), ...)
+getExplanatoryPCs(x, use_dimred = "PCA", n_dimred = 10,
+  ncomponents = NULL, rerun = FALSE, run_args = list(), ...)
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object containing dimensionality reduction results.}
 
-\item{use.dimred}{String or integer scalar specifying the field in \code{reducedDims(x)} that contains the PCA results.}
+\item{use_dimred}{String or integer scalar specifying the field in \code{reducedDims(x)} that contains the PCA results.}
 
-\item{use_dimred}{Deprecated, same as \code{use.dimred}.}
+\item{n_dimred}{Integer scalar specifying the number of the top principal components to use.}
 
-\item{n.dimred}{Integer scalar specifying the number of the top principal components to use.}
+\item{ncomponents}{Deprecated, same as \code{n_dimred}.}
 
-\item{ncomponents}{Deprecated, same as \code{n.dimred}.}
+\item{rerun}{Deprecated. Logical scalar indicating whether the PCA should be repeated, even if pre-computed results are already present.}
 
-\item{rerun}{Logical scalar indicating whether the PCA should be repeated, even if pre-computed results are already present.}
-
-\item{run_args}{A named list of arguments to pass to \code{\link[scater]{runPCA}}.}
+\item{run_args}{Deprecated. A named list of arguments to pass to \code{\link[scater]{runPCA}}.}
 
 \item{...}{Additional arguments passed to \code{\link{getVarianceExplained}}.}
 }
@@ -37,7 +34,7 @@ It allows identification of important PCs that are driven by known experimental 
 PCs correlated with technical factors (e.g., batch effects, library size) can also be detected and removed prior to further analysis.
 
 By default, the function will attempt to use pre-computed PCA results in \code{object}.
-This is done by taking the top \code{n.dimred} PCs from the matrix specified by \code{use.dimred}.
+This is done by taking the top \code{n_dimred} PCs from the matrix specified by \code{use_dimred}.
 If these are not available or if \code{rerun=TRUE}, the function will rerun the PCA using \code{\link{runPCA}};
 however, this mode is deprecated and users are advised to explicitly call \code{runPCA} themselves.
 }

@@ -10,13 +10,14 @@
 \usage{
 calculateTPM(x, ...)
 
-\S4method{calculateTPM}{ANY}(x, lengths, effective_length = NULL, ...)
+\S4method{calculateTPM}{ANY}(x, lengths = NULL,
+  effective_length = NULL, ...)
 
 \S4method{calculateTPM}{SummarizedExperiment}(x, ...,
-  assay.type = "counts", exprs_values = NULL)
+  exprs_values = "counts")
 
-\S4method{calculateTPM}{SingleCellExperiment}(x, size.factors = NULL,
-  ...)
+\S4method{calculateTPM}{SingleCellExperiment}(x, lengths = NULL,
+  size_factors = NULL, ...)
 }
 \arguments{
 \item{x}{A numeric matrix of counts where features are rows and cells are columns.
@@ -36,9 +37,10 @@ Alternatively \code{NULL}, see Details.}
 
 \item{effective_length}{Deprecated, same as \code{length}.}
 
-\item{assay.type}{A string specifying the assay of \code{x} containing the count matrix.}
+\item{exprs_values}{A string specifying the assay of \code{x} containing the count matrix.}
 
-\item{exprs_values}{Deprecated, same as \code{assay.type}.}
+\item{size_factors}{A numeric vector containing size factors to adjust the library sizes.
+If \code{NULL}, the library sizes are used directly.}
 }
 \value{
 A numeric matrix of TPM values.

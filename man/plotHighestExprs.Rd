@@ -24,7 +24,7 @@ For example, spike-in transcripts might be dropped to examine the contribution f
 \item{exprs_values}{A integer scalar or string specifying the assay to obtain expression values from.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in colouring - see \code{?"\link{scater-vis-var}"} for details.}
+for use in colouring - see \code{?\link{retrieveCellInfo}} for details.}
 
 \item{by_show_single}{Deprecated and ignored.
 Default is \code{NULL}, in which case  \code{rownames(object)} are used.}
