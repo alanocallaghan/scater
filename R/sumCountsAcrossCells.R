@@ -122,5 +122,6 @@ setMethod("aggregateAcrossCells", "SingleCellExperiment", function(x, ids, ..., 
     for (i in use_altexps) {
         altExp(y, i) <- FUN(altExp(x, i), ...)
     }
+    altExps(y) <- altExps(y, withColData=FALSE)[use_altexps]
     y
 })
