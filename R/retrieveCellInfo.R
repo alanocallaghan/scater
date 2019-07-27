@@ -7,7 +7,7 @@
 #' @param by A string specifying the field to extract (see Details).
 #' Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.
 #' @param search Character vector specifying the types of data or metadata to use.
-#' @param assay.type String or integer scalar specifying the assay from which expression values should be extracted.
+#' @param exprs_values String or integer scalar specifying the assay from which expression values should be extracted.
 #' 
 #' @return A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
 #' and \code{value}, a vector of length equal to \code{ncol(x)} containing per-cell (meta)data values.
@@ -25,10 +25,10 @@
 #' \item Search \code{\link{colData}} for a column named \code{by}, 
 #' and return the corresponding field as the output \code{value}.
 #' We do not consider nested elements within the \code{colData}.
-#' \item Search \code{\link{assay}(x, assay.type)} for a row named \code{by}, 
+#' \item Search \code{\link{assay}(x, exprs_values)} for a row named \code{by}, 
 #' and return the expression vector for this feature as the output \code{value}.
 #' \item Search each alternative experiment in \code{\link{altExps}(x)} for a row names \code{by},
-#' and return the expression vector for this feature at \code{assay.type} as the output \code{value}.
+#' and return the expression vector for this feature at \code{exprs_values} as the output \code{value}.
 #' }
 #' Any match will cause the function to return without considering later possibilities.
 #' The search can be modified by changing the presence and ordering of elements in \code{search}. 
@@ -65,7 +65,7 @@
 #' @export
 #' @importFrom SingleCellExperiment altExp altExpNames
 #' @importFrom SummarizedExperiment colData assay
-retrieveCellInfo <- function(x, by, search=c("colData", "assays", "altExps"), assay.type="logcounts")
+retrieveCellInfo <- function(x, by, search=c("colData", "assays", "altExps"), exprs_values="logcounts")
 {
     .mopUp <- function(name, value) {
         list(name=name, value=value)
@@ -106,14 +106,14 @@ retrieveCellInfo <- function(x, by, search=c("colData", "assays", "altExps"), as
         } else if (s=="assays") {
             m <- match(by, rownames(x))
             if (!is.na(m)) {
-                return(.mopUp(by, assay(x, assay.type, withDimnames=FALSE)[m,]))
+                return(.mopUp(by, assay(x, exprs_values, withDimnames=FALSE)[m,]))
             }
         } else if (s=="altExps") {
             for (i in seq_along(altExpNames(x))) {
                 current <- altExp(x, i)
                 m <- match(by, rownames(current))
                 if (!is.na(m)) {
-                    return(.mopUp(by, assay(current, assay.type, withDimnames=FALSE)[m,]))
+                    return(.mopUp(by, assay(current, exprs_values, withDimnames=FALSE)[m,]))
                 }
             }
         }

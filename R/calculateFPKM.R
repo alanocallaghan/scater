@@ -5,9 +5,10 @@
 #' @param x A numeric matrix of counts where features are rows and cells are columns.
 #'
 #' Alternatively, a \linkS4class{SummarizedExperiment} or a \linkS4class{SingleCellExperiment} containing such counts.
-#' @param effective.length Numeric vector providing the effective length for each feature in \code{x}.
-#' @param effective_length Deprecated, same as \code{effective.length}.
+#' @param lengths Numeric vector providing the effective length for each feature in \code{x}.
+#' @param effective_length Deprecated, same as \code{lengths}.
 #' @param ... Further arguments to pass to \code{\link{calculateCPM}}.
+#' @param subset_row A vector specifying the subset of rows of \code{x} for which to return a result.
 #'
 #' @return A numeric matrix of FPKM values.
 #'
@@ -27,15 +28,14 @@
 #' fout <- calculateFPKM(example_sce, eff_len)
 #' str(fout)
 #' @export
-calculateFPKM <- function(x, lengths, effective_length=NULL, ..., subset.row=NULL, subset_row = NULL) {
-    subset.row <- .switch_arg_names(subset_row, subset.row)
+calculateFPKM <- function(x, lengths, effective_length=NULL, ..., subset_row=NULL) {
     lengths <- .switch_arg_names(effective_length, lengths)
 
-    if (!is.null(subset.row)) {
-        subset.row <- .subset2index(subset.row, x, byrow=TRUE)
-        lengths <- lengths[subset.row]
+    if (!is.null(subset_row)) {
+        subset_row <- .subset2index(subset_row, x, byrow=TRUE)
+        lengths <- lengths[subset_row]
     }
 
-    out <- calculateCPM(x, subset.row=subset.row, ...)
+    out <- calculateCPM(x, subset_row=subset_row, ...)
     out / (lengths / 1e3)
 }

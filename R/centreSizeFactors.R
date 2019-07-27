@@ -31,6 +31,7 @@
 #' mean(sizeFactors(example_sce, "ERCC"))
 #' 
 centreSizeFactors <- function(object, centre = 1) {
+    .Deprecated()
     centrefun <- function(x) { x/mean(x) * centre }
     .apply_to_size_factors(object, centrefun)
 }

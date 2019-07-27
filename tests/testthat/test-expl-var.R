@@ -37,8 +37,8 @@ test_that("getVarianceExplained responds to the options", {
     expect_identical(varexp, getVarianceExplained(logcounts(normed), variables=colData(normed)))
 
     # Responds to subsetting.
-    expect_identical(varexp[1:10,], getVarianceExplained(normed, subset.row=1:10))
-    expect_identical(varexp[2:20,], getVarianceExplained(normed, subset.row=rownames(normed)[2:20]))
+    expect_identical(varexp[1:10,], getVarianceExplained(normed, subset_row=1:10))
+    expect_identical(varexp[2:20,], getVarianceExplained(normed, subset_row=rownames(normed)[2:20]))
 
     # Unaffected by chunk size.
     expect_identical(varexp, getVarianceExplained(normed, chunk=10))
@@ -134,7 +134,7 @@ test_that("plotExplanatoryVariables works as expected", {
 # getExplanatoryPCs() tests:
 
 normed <- runPCA(normed, ncomponents=20)
-exppcs <- getExplanatoryPCs(normed, n.dimred=10)
+exppcs <- getExplanatoryPCs(normed, n_dimred=10)
 
 test_that("getExplanatoryPCs matches with a reference function", {
     expect_identical(nrow(exppcs), 10L)
@@ -161,17 +161,17 @@ test_that("getExplanatoryPCs responds to PC-specific options", {
     blah <- normed
     normed2 <- runPCA(normed, ncomponents=10)
     reducedDim(blah, "WHEE") <- reducedDim(normed2, "PCA")
-    expect_identical(res <- getExplanatoryPCs(normed2), getExplanatoryPCs(blah, use.dimred="WHEE"))
+    expect_identical(res <- getExplanatoryPCs(normed2), getExplanatoryPCs(blah, use_dimred="WHEE"))
     expect_identical(nrow(res), 10L)
 
     reducedDim(blah, "WHEE") <- reducedDim(normed2, "PCA")[,1:2]
-    expect_identical(getExplanatoryPCs(normed2)[1:2,], getExplanatoryPCs(blah, use.dimred="WHEE"))
+    expect_identical(getExplanatoryPCs(normed2)[1:2,], getExplanatoryPCs(blah, use_dimred="WHEE"))
     
     # Correctly truncates existing PCs.
-    expect_identical(res <- getExplanatoryPCs(normed2, n.dimred=2), getExplanatoryPCs(blah, use.dimred="WHEE"))
+    expect_identical(res <- getExplanatoryPCs(normed2, n_dimred=2), getExplanatoryPCs(blah, use_dimred="WHEE"))
     expect_identical(nrow(res), 2L)
 
-    expect_identical(getExplanatoryPCs(normed2, n.dimred=Inf), getExplanatoryPCs(normed)) # ignores Inf, as it's maxed out.
+    expect_identical(getExplanatoryPCs(normed2, n_dimred=Inf), getExplanatoryPCs(normed)) # ignores Inf, as it's maxed out.
 })
 
 test_that("getExplanatoryPCs responds to getVarianceExplained options", {
@@ -181,9 +181,9 @@ test_that("getExplanatoryPCs responds to getVarianceExplained options", {
     expect_identical(exppcs[,,drop=FALSE], getExplanatoryPCs(normed, variables=colnames(varexp)))
 
     # Unaffected by chunk size.
-    expect_identical(exppcs, getExplanatoryPCs(normed, n.dimred=nrow(exppcs), chunk=10))
-    expect_identical(exppcs, getExplanatoryPCs(normed, n.dimred=nrow(exppcs), chunk=1))
-    expect_identical(exppcs, getExplanatoryPCs(normed, n.dimred=nrow(exppcs), chunk=100000))
+    expect_identical(exppcs, getExplanatoryPCs(normed, n_dimred=nrow(exppcs), chunk=10))
+    expect_identical(exppcs, getExplanatoryPCs(normed, n_dimred=nrow(exppcs), chunk=1))
+    expect_identical(exppcs, getExplanatoryPCs(normed, n_dimred=nrow(exppcs), chunk=100000))
 })
 
 #############################################################

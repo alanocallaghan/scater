@@ -15,10 +15,10 @@ test_that("we can summarise counts at feature set level", {
     out2 <- sumCountsAcrossFeatures(counts(sce), ids)
     expect_identical(out, out2)
 
-    # assay.type= works correctly.
+    # exprs_values= works correctly.
     alt <- sce
     assayNames(alt) <- "whee"
-    out2 <- sumCountsAcrossFeatures(alt, ids, assay.type="whee")
+    out2 <- sumCountsAcrossFeatures(alt, ids, exprs_values="whee")
     expect_identical(out, out2)
 
     # Respects levels properly.
@@ -76,9 +76,9 @@ test_that("Aggregation across features works correctly", {
     alt2 <- aggregateAcrossFeatures(sce, ids)
     expect_identical(alt, alt2)
 
-    alt3 <- aggregateAcrossFeatures(sce, ids, use.assay.types=c("counts", "normcounts"))
+    alt3 <- aggregateAcrossFeatures(sce, ids, use_exprs_values=c("counts", "normcounts"))
     expect_identical(counts(alt), counts(alt3))
-    expect_identical(normcounts(alt3), sumCountsAcrossFeatures(sce, ids, assay.type="normcounts"))
+    expect_identical(normcounts(alt3), sumCountsAcrossFeatures(sce, ids, exprs_values="normcounts"))
 })
 
 ##########################################################
@@ -92,10 +92,10 @@ test_that("we can summarise counts at cell cluster level", {
     out2 <- sumCountsAcrossCells(counts(sce), ids)
     expect_identical(out, out2)
 
-    # assay.type= works correctly.
+    # exprs_values= works correctly.
     alt <- sce
     assayNames(alt) <- "whee"
-    out2 <- sumCountsAcrossCells(alt, ids, assay.type="whee")
+    out2 <- sumCountsAcrossCells(alt, ids, exprs_values="whee")
     expect_identical(out, out2)
 
     # Respects levels properly.
@@ -154,9 +154,9 @@ test_that("Aggregation across cells works correctly for SCEs", {
     alt2 <- aggregateAcrossCells(sce, ids)
     expect_identical(alt, alt2)
 
-    alt3 <- aggregateAcrossCells(sce, ids, use.assay.types=c("counts", "normcounts"))
+    alt3 <- aggregateAcrossCells(sce, ids, use_exprs_values=c("counts", "normcounts"))
     expect_identical(counts(alt), counts(alt3))
-    expect_identical(normcounts(alt3), sumCountsAcrossCells(sce, ids, assay.type="normcounts"))
+    expect_identical(normcounts(alt3), sumCountsAcrossCells(sce, ids, exprs_values="normcounts"))
 
     # Behaves for alternative experiments.
     copy <- sce

@@ -15,7 +15,7 @@ sizeFactors(X) <- ref
 #######################################################
 
 test_that("normalizeCounts works as expected", {
-    out <- normalizeCounts(dummy, ref, center.sf=FALSE)
+    out <- normalizeCounts(dummy, ref, center_sf=FALSE)
     expect_equal(out, log2(t(t(dummy)/ref)+1))
 
     # With size factor centering.
@@ -28,12 +28,12 @@ test_that("normalizeCounts works as expected", {
     expect_equal(out, t(t(dummy)/sf))
 
     # With subsetting.
-    out <- normalizeCounts(dummy, ref, subset.row=1:10)
+    out <- normalizeCounts(dummy, ref, subset_row=1:10)
     sub <- normalizeCounts(dummy[1:10,], ref)
     expect_equal(out, sub)
 
     chosen <- sample(rownames(dummy), 10)
-    out <- normalizeCounts(dummy, ref, subset.row=chosen)
+    out <- normalizeCounts(dummy, ref, subset_row=chosen)
     sub <- normalizeCounts(dummy[chosen,], ref)
     expect_equal(out, sub)
 
@@ -61,11 +61,11 @@ test_that("normalizeCounts behaves with sparse inputs", {
     expect_s4_class(out <- normalizeCounts(sparsed, ref, log=FALSE), "dgCMatrix")
     expect_equal(normalizeCounts(zeroed, ref, log=FALSE), as.matrix(out))
 
-    expect_true(is.matrix(out <- normalizeCounts(sparsed, ref, pseudo.count=2)))
-    expect_equal(normalizeCounts(zeroed, ref, pseudo.count=2), as.matrix(out))
+    expect_true(is.matrix(out <- normalizeCounts(sparsed, ref, pseudo_count=2)))
+    expect_equal(normalizeCounts(zeroed, ref, pseudo_count=2), as.matrix(out))
 
-    expect_s4_class(out <- normalizeCounts(sparsed, ref, subset.row=1:10), "dgCMatrix")
-    expect_equal(normalizeCounts(zeroed, ref, subset.row=1:10), as.matrix(out))
+    expect_s4_class(out <- normalizeCounts(sparsed, ref, subset_row=1:10), "dgCMatrix")
+    expect_equal(normalizeCounts(zeroed, ref, subset_row=1:10), as.matrix(out))
 })
 
 test_that("normalizeCounts behaves with DelayedArray inputs", {
@@ -78,11 +78,11 @@ test_that("normalizeCounts behaves with DelayedArray inputs", {
     expect_s4_class(out <- normalizeCounts(dadum, ref, log=FALSE), "DelayedMatrix")
     expect_equal(normalizeCounts(dummy, ref, log=FALSE), as.matrix(out))
 
-    expect_s4_class(out <- normalizeCounts(dadum, ref, pseudo.count=2), "DelayedMatrix")
-    expect_equal(normalizeCounts(dummy, ref, pseudo.count=2), as.matrix(out))
+    expect_s4_class(out <- normalizeCounts(dadum, ref, pseudo_count=2), "DelayedMatrix")
+    expect_equal(normalizeCounts(dummy, ref, pseudo_count=2), as.matrix(out))
 
-    expect_s4_class(out <- normalizeCounts(dadum, ref, subset.row=1:10), "DelayedMatrix")
-    expect_equal(normalizeCounts(dummy, ref, subset.row=1:10), as.matrix(out))
+    expect_s4_class(out <- normalizeCounts(dadum, ref, subset_row=1:10), "DelayedMatrix")
+    expect_equal(normalizeCounts(dummy, ref, subset_row=1:10), as.matrix(out))
 })
 
 test_that("normalizeCounts behaves with S(C)E inputs", {
@@ -108,13 +108,13 @@ test_that("logNormCounts works for SE objects", {
 
     expect_equal(lc(logNormCounts(se)), normalizeCounts(cn(se)))
     expect_equal(nc(logNormCounts(se, log=FALSE)), normalizeCounts(cn(se), log=FALSE))
-    expect_equal(lc(logNormCounts(se, pseudo.count=2)), normalizeCounts(cn(se), pseudo.count=2))
+    expect_equal(lc(logNormCounts(se, pseudo_count=2)), normalizeCounts(cn(se), pseudo_count=2))
 
     sf <- runif(ncol(X))
-    expect_equal(lc(logNormCounts(se, size.factors=sf)),
-        normalizeCounts(cn(se), size.factors=sf))
-    expect_equal(lc(logNormCounts(se, size.factors=sf, center.sf=FALSE)), 
-        normalizeCounts(cn(se), size.factors=sf, center.sf=FALSE))
+    expect_equal(lc(logNormCounts(se, size_factors=sf)),
+        normalizeCounts(cn(se), size_factors=sf))
+    expect_equal(lc(logNormCounts(se, size_factors=sf, center_sf=FALSE)), 
+        normalizeCounts(cn(se), size_factors=sf, center_sf=FALSE))
  
     ## Doesn't break on silly inputs.
     expect_equal(unname(dim(logNormCounts(X[,0,drop=FALSE]))), c(ngenes, 0L))
@@ -124,7 +124,7 @@ test_that("logNormCounts works for SE objects", {
 test_that("logNormCounts works for SCE objects (basic)", {
     expect_equal(logcounts(logNormCounts(X)), normalizeCounts(counts(X), sizeFactors(X)))
     expect_equal(normcounts(logNormCounts(X, log=FALSE)), normalizeCounts(counts(X), sizeFactors(X), log=FALSE))
-    expect_equal(logcounts(logNormCounts(X, pseudo.count=2)), normalizeCounts(counts(X), sizeFactors(X), pseudo.count=2))
+    expect_equal(logcounts(logNormCounts(X, pseudo_count=2)), normalizeCounts(counts(X), sizeFactors(X), pseudo_count=2))
 
     # Checking that size factors are correctly reported.
     Y <- X
@@ -133,19 +133,19 @@ test_that("logNormCounts works for SCE objects (basic)", {
     expect_identical(sizeFactors(Y), librarySizeFactors(X))
 
     sf <- runif(ncol(X))
-    Y <- logNormCounts(X, size.factors=sf)
+    Y <- logNormCounts(X, size_factors=sf)
     expect_identical(sizeFactors(Y), sf/mean(sf))
 
-    Y <- logNormCounts(X, size.factors=sf, center.sf=FALSE)
+    Y <- logNormCounts(X, size_factors=sf, center_sf=FALSE)
     expect_identical(sizeFactors(Y), sf)
 
     # Checking that my pseudo-count appears and does not overwrite other scater stuff.
-    expect_identical(int_metadata(Y)$scater$pseudo.count, 1)
+    expect_identical(int_metadata(Y)$scater$pseudo_count, 1)
 
     Z <- X
     int_metadata(Z)$scater <- list(whee="YAY")
     Z <- logNormCounts(Z)
-    expect_identical(int_metadata(Z)$scater$pseudo.count, 1)
+    expect_identical(int_metadata(Z)$scater$pseudo_count, 1)
     expect_identical(int_metadata(Z)$scater$whee, "YAY")
 
     # Diverts to other names.
@@ -171,12 +171,12 @@ test_that("logNormCounts works for SCE objects (altExp)", {
 
     # Global size factors are respected.
     sf <- runif(ncol(X))
-    sce2 <- logNormCounts(sce, size.factors=sf)
-    COMPFUN(altExp(sce2), logNormCounts(X, size.factors=sf))
+    sce2 <- logNormCounts(sce, size_factors=sf)
+    COMPFUN(altExp(sce2), logNormCounts(X, size_factors=sf))
 
     # Other parameters are respected.
-    sce3a <- logNormCounts(sce, pseudo.count=2)
-    COMPFUN(altExp(sce3a), logNormCounts(X, pseudo.count=2))
+    sce3a <- logNormCounts(sce, pseudo_count=2)
+    COMPFUN(altExp(sce3a), logNormCounts(X, pseudo_count=2))
 
     sce3b <- logNormCounts(sce, log=FALSE)
     COMPFUN(altExp(sce3b), logNormCounts(X, log=FALSE))
@@ -188,6 +188,6 @@ test_that("logNormCounts works for SCE objects (altExp)", {
     COMPFUN(altExp(sce4), logNormCounts(X))
 
     # Lack of centering is respected in downstream methods.
-    sce5 <- logNormCounts(sce, center.sf=FALSE)
-    COMPFUN(altExp(sce5), logNormCounts(X, center.sf=FALSE))
+    sce5 <- logNormCounts(sce, center_sf=FALSE)
+    COMPFUN(altExp(sce5), logNormCounts(X, center_sf=FALSE))
 })

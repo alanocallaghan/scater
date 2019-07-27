@@ -93,14 +93,14 @@ normalizeSCE <- function(object, exprs_values = "counts",
     ## only one set of size factors, we just compute it directly.
     cur_exprs <- assay(object, i = exprs_values, withDimnames=FALSE)
     if (is(cur_exprs, "DelayedMatrix") && length(used <- unique(sf.list$index))==1L) {
-        norm_exprs <- t(t(cur_exprs) / sf.list$size.factors[[used]])
+        norm_exprs <- t(t(cur_exprs) / sf.list$size_factors[[used]])
         if (return_log) {
             norm_exprs <- log2(norm_exprs + log_exprs_offset)
         }
 
     } else {
         norm_exprs <- .Call(cxx_norm_exprs, cur_exprs,
-            sf.list$size.factors, sf.list$index - 1L, 
+            sf.list$size_factors, sf.list$index - 1L, 
             as.numeric(log_exprs_offset),
             as.logical(return_log), 
             subset_row = seq_len(nrow(object)) - 1L)

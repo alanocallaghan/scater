@@ -12,7 +12,7 @@
 #' @param nfeatures Numeric scalar indicating the number of top-expressed features to show n the plot.
 #' @param exprs_values String or integer scalar indicating which assay of \code{object} should be used to obtain the expression values for this plot. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
+#' for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
 #' @param by_show_single Deprecated and ignored.
 #' @param ncol Number of columns to use for \code{\link{facet_wrap}} if only one block is defined.
 #' @param line_width Numeric scalar specifying the line width.
@@ -66,7 +66,7 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
     block2_vals <- block2_out$val
 
     ## Setting values to colour by.
-    colour_by_out <- retrieveCellInfo(x, colour_by, assay.type = by_exprs_values)
+    colour_by_out <- retrieveCellInfo(x, colour_by, exprs_values = by_exprs_values)
     colour_by <- colour_by_out$name
     colour_by_vals <- colour_by_out$val
 

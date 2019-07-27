@@ -19,7 +19,7 @@
 #' Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
 #' A character vector can also be supplied and will be treated as a list of strings.
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for colouring of column-level data - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
+#' for colouring of column-level data - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
 #' @param by_show_single Deprecated and ignored.
 #' @param show_colnames Logical scalar specifying whether column names should be shown, if available in \code{object}.
 #' @param ... Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.
@@ -102,7 +102,7 @@ plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts"
     if (length(colour_columns_by)) {
         column_variables <- column_colorings <- list()
         for (field in colour_columns_by) { 
-            colour_by_out <- retrieveCellInfo(object, field, assay.type = by_exprs_values)
+            colour_by_out <- retrieveCellInfo(object, field, exprs_values = by_exprs_values)
 
             if (is.null(colour_by_out$val)) { 
                 next

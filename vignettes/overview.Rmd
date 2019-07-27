@@ -378,7 +378,7 @@ This is demonstrated with the feature controls below, to identify technical fact
 
 ```{r plot-pca-feature-controls}
 chosen.genes <- 1:100
-example_sce2 <- runPCA(example_sce, subset.row=chosen.genes)
+example_sce2 <- runPCA(example_sce, subset_row=chosen.genes)
 plotPCA(example_sce2)
 ```
 
