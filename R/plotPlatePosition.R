@@ -16,6 +16,7 @@
 #' @param theme_size Numeric scalar, see \code{?"\link{scater-plot-args}"} for details.
 #' @param point_alpha Numeric scalar specifying the transparency of the points, see \code{?"\link{scater-plot-args}"} for details.
 #' @param point_size Numeric scalar specifying the size of the points, see \code{?"\link{scater-plot-args}"} for details.
+#' @param other_fields Additional arguments to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
 #' This function expects plate positions to be given in a charcter format where a letter indicates the row on the plate and a numeric value  indicates the column. 
@@ -56,9 +57,10 @@
 #'     colour_by = "Cell_Cycle")
 #'
 plotPlatePosition <- function(object, plate_position = NULL,
-                              colour_by = NULL, size_by = NULL, shape_by = NULL,
-                              by_exprs_values = "logcounts", by_show_single = FALSE,
-                              add_legend = TRUE, theme_size = 24, point_alpha = 0.6, point_size = 24) 
+    colour_by = NULL, size_by = NULL, shape_by = NULL,
+    by_exprs_values = "logcounts", by_show_single = FALSE,
+    add_legend = TRUE, theme_size = 24, point_alpha = 0.6, 
+    point_size = 24, other_fields=list()) 
 {
     ## check object is SingleCellExperiment object
     if ( !is(object, "SingleCellExperiment") ) {
@@ -88,7 +90,7 @@ plotPlatePosition <- function(object, plate_position = NULL,
     ## checking visualization arguments
     vis_out <- .incorporate_common_vis_col(df_to_plot, se = object, 
         colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-        by_exprs_values = by_exprs_values)
+        by_exprs_values = by_exprs_values, other_fields=other_fields)
 
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by

@@ -19,6 +19,7 @@
 #' Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
 #' @param text_size Numeric scalar specifying the size of added text.
 #' @param text_colour String specifying the colour of the added text.
+#' @param other_fields Additional arguments to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details
@@ -61,9 +62,10 @@
 #'     shape_by="Treatment")
 #'
 plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NULL, 
-                           colour_by = NULL, shape_by = NULL, size_by = NULL,
-                           by_exprs_values = "logcounts", by_show_single=NULL, 
-                           text_by=NULL, text_size=5, text_colour="black", ...)
+    colour_by = NULL, shape_by = NULL, size_by = NULL,
+    by_exprs_values = "logcounts", by_show_single=NULL, 
+    text_by=NULL, text_size=5, text_colour="black", 
+    other_fields=list(), ...)
 {
     ## Extract reduced dimension representation of cells
     red_dim <- reducedDim(object, use_dimred)
@@ -88,7 +90,7 @@ plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NUL
     ## checking visualization arguments
     vis_out <- .incorporate_common_vis_col(df_to_plot, se = object, 
         colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-        by_exprs_values = by_exprs_values)
+        by_exprs_values = by_exprs_values, other_fields=other_fields)
 
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by

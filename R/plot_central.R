@@ -29,6 +29,17 @@
 #' Defaults to \code{TRUE}.}
 #' }
 #'
+#' @section Miscellaneous fields:
+#' Addititional fields can be added to the data.frame passed to \link{ggplot} by setting the \code{other_fields} argument.
+#' This allows users to easily incorporate additional metadata for use in further \pkg{ggplot} operations.
+#'
+#' The \code{other_fields} argument should be character vector where each string is passed to \code{\link{retrieveCellInfo}} (for cell-based plots) or \code{\link{retrieveFeatureInfo}} (for feature-based plots).
+#' Alternatively, \code{other_fields} can be a named list where each element is of any type accepted by \code{\link{retrieveCellInfo}} or \code{\link{retrieveFeatureInfo}}.
+#' This includes \link{AsIs}-wrapped vectors, data.frames or \linkS4class{DataFrame}s.
+#'
+#' Each additional column of the output data.frame will be named according to the \code{name} returned by \code{\link{retrieveCellInfo}} or \code{\link{retreiveFeatureInfo}}.
+#' If these clash with inbuilt names (e.g., \code{X}, \code{Y}, \code{colour_by}), a warning will be raised and the additional column will not be added to avoid overwriting an existing column.
+#'
 #' @name scater-plot-args
 #' @importFrom stats runif
 #'

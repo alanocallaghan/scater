@@ -1,4 +1,6 @@
-.incorporate_common_vis_row <- function(df, se, mode, colour_by, size_by, shape_by, by_exprs_values, by_show_single) {
+.incorporate_common_vis_row <- function(df, se, mode, colour_by, size_by, shape_by, 
+    by_exprs_values, by_show_single, other_fields) 
+{
     colour_by_out <- retrieveFeatureInfo(se, colour_by, exprs_values = by_exprs_values)
     colour_by <- colour_by_out$name
     df$colour_by <- colour_by_out$val
@@ -11,10 +13,17 @@
     size_by <- size_by_out$name
     df$size_by <- size_by_out$val
 
+    for (o in other_fields) {
+        other <- retrieveFeatureInfo(se, o, exprs_values=by_exprs_values)
+        df <- .add_other_or_warn(df, other)
+    }
+
     list(df=df, colour_by = colour_by, shape_by = shape_by, size_by = size_by)
 }
 
-.incorporate_common_vis_col <- function(df, se, mode, colour_by, size_by, shape_by, by_exprs_values, by_show_single) {
+.incorporate_common_vis_col <- function(df, se, mode, colour_by, size_by, shape_by, 
+    by_exprs_values, by_show_single, other_fields) 
+{
     colour_by_out <- retrieveCellInfo(se, colour_by, exprs_values = by_exprs_values)
     colour_by <- colour_by_out$name
     df$colour_by <- colour_by_out$val
@@ -27,7 +36,23 @@
     size_by <- size_by_out$name
     df$size_by <- size_by_out$val
 
+    for (o in other_fields) {
+        other <- retrieveCellInfo(se, o, exprs_values=by_exprs_values)
+        df <- .add_other_or_warn(df, other)
+    }
+
     list(df=df, colour_by = colour_by, shape_by = shape_by, size_by = size_by)
+}
+
+.add_other_or_warn <- function(df, other) {
+    if (!is.null(other$name)) {
+        if (!other$name %in% colnames(df)) {
+            df[[other$name]] <- other$value
+        } else {
+            warning(sprintf("not adding duplicated '%s' from 'other_fields'", other$name))
+        }
+    }
+    df
 }
 
 ################################################
