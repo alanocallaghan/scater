@@ -7,7 +7,7 @@
 plotPlatePosition(object, plate_position = NULL, colour_by = NULL,
   size_by = NULL, shape_by = NULL, by_exprs_values = "logcounts",
   by_show_single = FALSE, add_legend = TRUE, theme_size = 24,
-  point_alpha = 0.6, point_size = 24)
+  point_alpha = 0.6, point_size = 24, other_fields = list())
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -34,6 +34,8 @@ for use in point aesthetics - see the \code{exprs_values} argument in \code{?\li
 \item{point_alpha}{Numeric scalar specifying the transparency of the points, see \code{?"\link{scater-plot-args}"} for details.}
 
 \item{point_size}{Numeric scalar specifying the size of the points, see \code{?"\link{scater-plot-args}"} for details.}
+
+\item{other_fields}{Additional arguments to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 }
 \value{
 A ggplot object.
