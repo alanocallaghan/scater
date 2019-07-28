@@ -112,7 +112,7 @@ plotExprsVsTxLength <- function(object, tx_length = "median_feat_eff_len", lengt
     ## Setting up visualization parameters
     vis_out <- .incorporate_common_vis_row(df_to_plot, se = object, 
         colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-        by_exprs_values = by_exprs_values)
+        by_exprs_values = by_exprs_values, other_fields=list())
 
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by

@@ -37,7 +37,7 @@
 #' Alternatively, \code{other_fields} can be a named list where each element is of any type accepted by \code{\link{retrieveCellInfo}} or \code{\link{retrieveFeatureInfo}}.
 #' This includes \link{AsIs}-wrapped vectors, data.frames or \linkS4class{DataFrame}s.
 #'
-#' Each additional column of the output data.frame will be named according to the \code{name} returned by \code{\link{retrieveCellInfo}} or \code{\link{retreiveFeatureInfo}}.
+#' Each additional column of the output data.frame will be named according to the \code{name} returned by \code{\link{retrieveCellInfo}} or \code{\link{retrieveFeatureInfo}}.
 #' If these clash with inbuilt names (e.g., \code{X}, \code{Y}, \code{colour_by}), a warning will be raised and the additional column will not be added to avoid overwriting an existing column.
 #'
 #' @name scater-plot-args
