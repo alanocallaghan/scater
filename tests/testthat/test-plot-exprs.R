@@ -50,3 +50,16 @@ test_that("plotExpression works for different exprs_values", {
     logcounts(sparsified) <- as(logcounts(sparsified), "dgCMatrix")
     expect_equal(plotExpression(sparsified, "Gene_0001"), plotExpression(example_sce, "Gene_0001"))
 })
+
+test_that("plotExpression works for other fields", {
+    gg <- plotExpression(example_sce, head(rownames(example_sce)), 
+        other_fields=c("Cell_Cycle", "Mutation_Status"))
+    expect_true("Cell_Cycle" %in% colnames(gg$data))
+    expect_true("Mutation_Status" %in% colnames(gg$data))
+
+    # This should throw a warning. 
+    example_sce$colour_by <- example_sce$Cell_Cycle
+    expect_warning(gg <- plotExpression(example_sce, head(rownames(example_sce)), 
+        colour_by="Cell_Cycle", other_fields=c("colour_by")), "duplicated")
+})
+

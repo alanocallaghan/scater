@@ -143,6 +143,21 @@ test_that("we can produce plots for row metadata", {
     expect_error(plotRowData(example_sce, "total_counts", x="Cell_002", exprs_values = "counts"), "cannot find")
 })
 
+test_that("plotRowData works for other fields", {
+    rowData(example_sce)$WHEE <- rep(LETTERS[1:10], length.out=nrow(example_sce))
+    rowData(example_sce)$STUFF <- rep(letters[1:10], length.out=nrow(example_sce))
+
+    gg <- plotRowData(example_sce, "total_counts",
+        other_fields=c("WHEE", "STUFF"))
+    expect_true("WHEE" %in% colnames(gg$data))
+    expect_true("STUFF" %in% colnames(gg$data))
+
+    # This should throw a warning.
+    rowData(example_sce)$colour_by <- rowData(example_sce)$STUFF
+    expect_warning(gg <- plotRowData(example_sce, "total_counts", 
+        colour_by="STUFF", other_fields=c("colour_by")), "duplicated")
+})
+
 #################################################
 # Testing plotRLE
 
