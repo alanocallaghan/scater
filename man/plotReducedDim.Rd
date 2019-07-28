@@ -7,7 +7,8 @@
 plotReducedDim(object, use_dimred, ncomponents = 2, percentVar = NULL,
   colour_by = NULL, shape_by = NULL, size_by = NULL,
   by_exprs_values = "logcounts", by_show_single = NULL,
-  text_by = NULL, text_size = 5, text_colour = "black", ...)
+  text_by = NULL, text_size = 5, text_colour = "black",
+  other_fields = list(), ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -38,6 +39,8 @@ Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCel
 \item{text_size}{Numeric scalar specifying the size of added text.}
 
 \item{text_colour}{String specifying the colour of the added text.}
+
+\item{other_fields}{Additional arguments to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }

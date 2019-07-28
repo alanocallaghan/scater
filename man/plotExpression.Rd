@@ -8,7 +8,8 @@ plotExpression(object, features, x = NULL, exprs_values = "logcounts",
   log2_values = FALSE, colour_by = NULL, shape_by = NULL,
   size_by = NULL, by_exprs_values = exprs_values,
   by_show_single = FALSE, xlab = NULL, feature_colours = TRUE,
-  one_facet = TRUE, ncol = 2, scales = "fixed", ...)
+  one_facet = TRUE, ncol = 2, scales = "fixed",
+  other_fields = list(), ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values and other metadata.}
@@ -45,6 +46,8 @@ Only relevant when \code{x=NULL}.}
 
 \item{scales}{String indicating whether should multi-facet scales be fixed (\code{"fixed"}), free (\code{"free"}), or free in one dimension (\code{"free_x"}, \code{"free_y"}).
 Passed to the \code{scales} argument in the \code{\link[ggplot2]{facet_wrap}} when multiple facets are generated.}
+
+\item{other_fields}{Additional arguments to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }
