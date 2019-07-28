@@ -22,6 +22,7 @@
 #' @param ncol Integer scalar, specifying the number of columns to be used for the panels of a multi-facet plot.
 #' @param scales String indicating whether should multi-facet scales be fixed (\code{"fixed"}), free (\code{"free"}), or free in one dimension (\code{"free_x"}, \code{"free_y"}).
 #' Passed to the \code{scales} argument in the \code{\link[ggplot2]{facet_wrap}} when multiple facets are generated.
+#' @param other_fields Additional arguments to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -85,12 +86,12 @@
 #'     "Gene_0004", show_smooth = TRUE)
 #'
 plotExpression <- function(object, features, x = NULL,
-                           exprs_values = "logcounts", log2_values = FALSE,
-                           colour_by = NULL, shape_by = NULL, size_by = NULL,
-                           by_exprs_values = exprs_values, by_show_single = FALSE,
-                           xlab = NULL, feature_colours = TRUE, 
-                           one_facet = TRUE, ncol = 2, scales = "fixed", 
-                           ...) 
+    exprs_values = "logcounts", log2_values = FALSE,
+    colour_by = NULL, shape_by = NULL, size_by = NULL,
+    by_exprs_values = exprs_values, by_show_single = FALSE,
+    xlab = NULL, feature_colours = TRUE, 
+    one_facet = TRUE, ncol = 2, scales = "fixed", 
+    other_fields=list(), ...) 
 {
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")
@@ -131,26 +132,18 @@ plotExpression <- function(object, features, x = NULL,
     if (is.null(xlab)) {
         xlab <- x_by_out$name
     }
-    evals_long$X <- rep(xcoord, each=nfeatures)
+    evals_long$X <- rep(xcoord, nfeatures)
 
     ## checking visualization arguments
-    colour_by_out <- retrieveCellInfo(object, colour_by, exprs_values = by_exprs_values)
-    colour_by <- colour_by_out$name
-    evals_long$colour_by <- rep(colour_by_out$value, each=nfeatures)
+    dummy <- data.frame(Feature=character(ncol(object)), X=numeric(ncol(object)), Y=numeric(ncol(object)))
+    vis_out <- .incorporate_common_vis_col(dummy, se = object, 
+        colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
+        by_exprs_values = by_exprs_values, other_fields=other_fields)
 
-    shape_by_out <- retrieveCellInfo(object, shape_by, exprs_values = by_exprs_values)
-    shape_by <- shape_by_out$name
-    if (!is.null(shape_by_out$value)) {
-        shape_by_out$value <- as.factor(shape_by_out$value)
-        if (nlevels(shape_by_out$value) > 10) {
-            stop("more than 10 levels for 'shape_by'")
-        }
-        evals_long$shape_by <- rep(shape_by_out$value, each=nfeatures)
-    }
-
-    size_by_out <- retrieveCellInfo(object, size_by, exprs_values = by_exprs_values)
-    size_by <- size_by_out$name
-    evals_long$size_by <- rep(size_by_out$value, each=nfeatures)
+    evals_long <- cbind(evals_long, vis_out$df[rep(seq_len(ncol(object)), nfeatures),-(1:3),drop=FALSE])
+    colour_by <- vis_out$colour_by
+    shape_by <- vis_out$shape_by
+    size_by <- vis_out$size_by
 
     ## Set up the faceting.
     if ( is.null(evals_long$X) ) { 
