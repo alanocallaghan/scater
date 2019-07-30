@@ -111,6 +111,7 @@ summary(per.cell$subsets_Mito_percent)
 ```
 
 It is often convenient to store this in the `colData()` of our `SingleCellExperiment` object for future reference.
+(This would automatically be done if we had used the `addQCPerCell()` function instead.)
 
 ```{r}
 colData(example_sce) <- cbind(colData(example_sce), per.cell)

@@ -73,6 +73,8 @@
 #' stats2 <- perFeatureQCMetrics(example_sce, subsets=list(Empty=1:10))
 #' stats2$subsets
 #'
+#' @seealso 
+#' \code{\link{addQCPerFeature}}, to add the QC metrics to the row metadata.
 #' @export
 #' @name perFeatureQCMetrics
 NULL
