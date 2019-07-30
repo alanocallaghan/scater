@@ -12,12 +12,14 @@
 normalizeCounts(x, ...)
 
 \S4method{normalizeCounts}{DelayedMatrix}(x, size_factors = NULL,
-  log = TRUE, return_log = NULL, pseudo_count = 1,
-  log_exprs_offset = NULL, center_sf = TRUE, subset_row = NULL)
+  use_size_factors = NULL, log = TRUE, return_log = NULL,
+  pseudo_count = 1, log_exprs_offset = NULL, center_sf = TRUE,
+  subset_row = NULL)
 
-\S4method{normalizeCounts}{ANY}(x, size_factors = NULL, log = TRUE,
-  return_log = NULL, pseudo_count = 1, log_exprs_offset = NULL,
-  center_sf = TRUE, subset_row = NULL)
+\S4method{normalizeCounts}{ANY}(x, size_factors = NULL,
+  use_size_factors = NULL, log = TRUE, return_log = NULL,
+  pseudo_count = 1, log_exprs_offset = NULL, center_sf = TRUE,
+  subset_row = NULL)
 
 \S4method{normalizeCounts}{SummarizedExperiment}(x, ...,
   exprs_values = "counts")
@@ -38,6 +40,8 @@ For the SingleCellExperiment method, further arguments to pass to the Summarized
 
 \item{size_factors}{A numeric vector of cell-specific size factors.
 Alternatively \code{NULL}, in which case the size factors are extracted or computed from \code{x}.}
+
+\item{use_size_factors}{Deprecated, same as \code{size_factors}.}
 
 \item{log}{Logical scalar indicating whether normalized values should be log2-transformed.}
 

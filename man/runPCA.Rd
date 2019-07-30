@@ -21,10 +21,11 @@ calculatePCA(x, ...)
   exprs_values = "logcounts")
 
 \S4method{calculatePCA}{SingleCellExperiment}(x, ...,
-  exprs_values = "logcounts", use_dimred = NULL, n_dimred = NULL)
+  exprs_values = "logcounts", dimred = NULL, use_dimred = NULL,
+  n_dimred = NULL)
 
 \S4method{runPCA}{SingleCellExperiment}(x, ..., use_coldata = FALSE,
-  use_altexp = NULL, name = "PCA")
+  altexp = NULL, name = "PCA")
 }
 \arguments{
 \item{x}{For \code{calculatePCA}, a numeric matrix of log-expression values where rows are features and columns are cells.
@@ -57,13 +58,15 @@ For \code{runPCA}, additional arguments to pass to \code{calculatePCA}.}
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{use_dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
+\item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{use_dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
+\item{use_dimred}{Deprecated, same as \code{dimred}.}
+
+\item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
 
 \item{use_coldata}{Deprecated, use \code{\link{runColDataPCA}} instead.}
 
-\item{use_altexp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
+\item{altexp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
 \item{name}{String specifying the name to be used to store the result in the \code{\link{reducedDims}} of the output.}
 }

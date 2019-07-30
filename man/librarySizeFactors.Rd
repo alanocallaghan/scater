@@ -15,7 +15,7 @@ librarySizeFactors(x, ...)
 \S4method{librarySizeFactors}{SummarizedExperiment}(x,
   exprs_values = "counts", ...)
 
-computeLibraryFactors(x, ..., use_altexp = NULL)
+computeLibraryFactors(x, ..., altexp = NULL)
 }
 \arguments{
 \item{x}{For \code{libarySizeFactors}, a numeric matrix of counts with one row per feature and column per cell.
@@ -32,7 +32,7 @@ For \code{computeLibraryFactors}, further arguments to pass to \code{librarySize
 
 \item{exprs_values}{String or integer scalar indicating the assay of \code{x} containing the counts.}
 
-\item{use_altexp}{String or integer scalar indicating which (if any) alternative experiment should be used
+\item{altexp}{String or integer scalar indicating which (if any) alternative experiment should be used
 to provide the counts to compute the size factors.}
 }
 \value{
@@ -52,7 +52,7 @@ Preserving the scale is useful for interpretation of operations on the normalize
 e.g., the pseudo-count used in \code{\link{logNormCounts}} can actually be considered an additional read/UMI.
 This is important for ensuring that the effect of the pseudo-count decreases with increasing sequencing depth.
 
-Setting \code{use_altexp} is occasionally useful for computing size factors from spike-in transcripts
+Setting \code{altexp} is occasionally useful for computing size factors from spike-in transcripts
 and using them on the count matrix for endogenous genes (stored in the main experiment).
 }
 \examples{
