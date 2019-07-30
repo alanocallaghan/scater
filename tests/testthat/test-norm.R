@@ -32,6 +32,10 @@ test_that("normalizeCounts works as expected", {
     sub <- normalizeCounts(dummy[1:10,], ref)
     expect_equal(out, sub)
 
+    out <- normalizeCounts(dummy, subset_row=1:10)
+    sub <- normalizeCounts(dummy[1:10,])
+    expect_equal(out, sub)
+
     chosen <- sample(rownames(dummy), 10)
     out <- normalizeCounts(dummy, ref, subset_row=chosen)
     sub <- normalizeCounts(dummy[chosen,], ref)
@@ -83,6 +87,13 @@ test_that("normalizeCounts behaves with DelayedArray inputs", {
 
     expect_s4_class(out <- normalizeCounts(dadum, ref, subset_row=1:10), "DelayedMatrix")
     expect_equal(normalizeCounts(dummy, ref, subset_row=1:10), as.matrix(out))
+
+    # Library sizes are correctly obtained.
+    expect_s4_class(out <- normalizeCounts(dadum), "DelayedMatrix")
+    expect_equal(normalizeCounts(dummy), as.matrix(out))
+
+    expect_s4_class(out <- normalizeCounts(dadum, subset_row=1:10), "DelayedMatrix")
+    expect_equal(normalizeCounts(dummy, subset_row=1:10), as.matrix(out))
 })
 
 test_that("normalizeCounts behaves with S(C)E inputs", {
