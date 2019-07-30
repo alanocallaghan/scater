@@ -3,7 +3,8 @@
 #' Plot cell-level reduced dimension results stored in a SingleCellExperiment object.
 #'
 #' @param object A SingleCellExperiment object.
-#' @param use_dimred A string or integer scalar indicating the reduced dimension result in \code{reducedDims(object)} to plot.
+#' @param dimred A string or integer scalar indicating the reduced dimension result in \code{reducedDims(object)} to plot.
+#' @param use_dimred Deprecated, same as \code{dimred}.
 #' @param ncomponents A numeric scalar indicating the number of dimensions to plot, starting from the first dimension.
 #' Alternatively, a numeric vector specifying the dimensions to be plotted.
 #' @param percentVar A numeric vector giving the proportion of variance in expression explained by each reduced dimension. 
@@ -39,9 +40,6 @@
 #'
 #' @name plotReducedDim
 #' @aliases plotReducedDim 
-#' @importFrom SingleCellExperiment reducedDim
-#' @importFrom ggplot2 annotate
-#' @export
 #'
 #' @examples
 #' data("sc_example_counts")
@@ -61,16 +59,20 @@
 #' plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle", 
 #'     shape_by="Treatment")
 #'
-plotReducedDim <- function(object, use_dimred, ncomponents = 2, percentVar = NULL, 
+#' @export
+#' @importFrom SingleCellExperiment reducedDim
+#' @importFrom ggplot2 annotate
+plotReducedDim <- function(object, dimred, use_dimred=NULL, ncomponents = 2, percentVar = NULL, 
     colour_by = NULL, shape_by = NULL, size_by = NULL,
     by_exprs_values = "logcounts", by_show_single=NULL, 
     text_by=NULL, text_size=5, text_colour="black", 
     other_fields=list(), ...)
 {
     ## Extract reduced dimension representation of cells
-    red_dim <- reducedDim(object, use_dimred)
+    dimred <- .switch_arg_names(use_dimred, dimred)
+    red_dim <- reducedDim(object, dimred)
     if ( any(ncomponents > ncol(red_dim)) ) {
-        stop(sprintf("'ncomponents' is larger than 'ncols(reducedDim(object, '%s'))'", use_dimred))
+        stop(sprintf("'ncomponents' is larger than 'ncols(reducedDim(object, '%s'))'", dimred))
     }
     if (is.null(percentVar)) {
         percentVar <- attr(red_dim, "percentVar")

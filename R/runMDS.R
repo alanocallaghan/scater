@@ -21,8 +21,9 @@
 #' For \code{runMDS}, additional arguments to pass to \code{calculateMDS}. 
 #' @param method String specifying the type of distance to be computed between cells.
 #' @param altexp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param use_dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
-#' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{use_dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
+#' @param dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
+#' @param use_dimred Deprecated, same as \code{dimred}.
+#' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
 #' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #'
 #' @return 
@@ -86,10 +87,12 @@ setMethod("calculateMDS", "SummarizedExperiment", function(x, ..., exprs_values=
 #' @export
 #' @rdname runMDS
 #' @importFrom SummarizedExperiment assay
-setMethod("calculateMDS", "SingleCellExperiment", function(x, ..., exprs_values="logcounts", use_dimred=NULL, n_dimred=NULL)
+setMethod("calculateMDS", "SingleCellExperiment", function(x, ..., exprs_values="logcounts", 
+    dimred=NULL, use_dimred=NULL, n_dimred=NULL)
 {
-    mat <- .get_mat_from_sce(x, exprs_values=exprs_values, use_dimred=use_dimred, n_dimred=n_dimred)
-    .calculate_mds(mat, transposed=!is.null(use_dimred), ...)
+    dimred <- .switch_arg_names(use_dimred, dimred)
+    mat <- .get_mat_from_sce(x, exprs_values=exprs_values, dimred=dimred, n_dimred=n_dimred)
+    .calculate_mds(mat, transposed=!is.null(dimred), ...)
 })
 
 #' @export

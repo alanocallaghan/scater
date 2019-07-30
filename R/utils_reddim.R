@@ -6,7 +6,7 @@
 #'
 #' @section Feature selection:
 #' This section is relevant if \code{x} is a numeric matrix of (log-)expression values with features in rows and cells in columns;
-#' or if \code{x} is a \linkS4class{SingleCellExperiment} and \code{use_dimred=NULL}.
+#' or if \code{x} is a \linkS4class{SingleCellExperiment} and \code{dimred=NULL}.
 #' In the latter, the expression values are obtained from the assay specified by \code{exprs_values}.
 #'
 #' The \code{subset_row} argument specifies the features to use in a dimensionality reduction algorithm.
@@ -21,19 +21,19 @@
 #' This will also remove features with standard deviations below 1e-8. 
 #'
 #' @section Using reduced dimensions:
-#' This section is relevant if \code{x} is a \linkS4class{SingleCellExperiment} and \code{use_dimred} is not \code{NULL}.
+#' This section is relevant if \code{x} is a \linkS4class{SingleCellExperiment} and \code{dimred} is not \code{NULL}.
 #' 
-#' All dimensionality reduction methods can be applied on existing dimensionality reduction results in \code{x} by setting \code{use_dimred}.
+#' All dimensionality reduction methods can be applied on existing dimensionality reduction results in \code{x} by setting \code{dimred}.
 #' This is typically used to run non-linear algorithms like t-SNE or UMAP on the PCA results.
 #' It may also be desirable in cases where the existing reduced dimensions are computed from \emph{a priori} knowledge (e.g., gene set scores).
 #' In such cases, further reduction with PCA could be used to compress the data.
 #' 
-#' The matrix of existing reduced dimensions is taken from \code{\link{reducedDims}(x, use_dimred)}.
+#' The matrix of existing reduced dimensions is taken from \code{\link{reducedDims}(x, dimred)}.
 #' By default, all dimensions are used to compute the second set of reduced dimensions.
 #' If \code{n_dimred} is also specified, only the first \code{n_dimred} columns are used.
 #' Alternatively, \code{n_dimred} can be an integer vector specifying the column indices of the dimensions to use.
 #'
-#' When \code{use_dimred} is specified, no additional feature selection or standardization is performed.
+#' When \code{dimred} is specified, no additional feature selection or standardization is performed.
 #' This means that any settings of \code{ntop}, \code{subset_row} and \code{scale} are ignored.
 #' 
 #' @section Transposed inputs:
@@ -50,7 +50,7 @@
 #' This is useful for performing dimensionality reduction on other features stored in \code{\link{altExp}(x, altexp)}, e.g., antibody tags. 
 #' 
 #' Setting \code{altexp} with \code{exprs_values} will use the specified assay from the alternative SummarizedExperiment.
-#' If the alternative is a SingleCellExperiment, setting \code{use_dimred} will use the specified dimensionality reduction results from the alternative. 
+#' If the alternative is a SingleCellExperiment, setting \code{dimred} will use the specified dimensionality reduction results from the alternative. 
 #' This option will also interact as expected with \code{n_dimred}.
 #'
 #' Note that the output is still stored in the \code{\link{reducedDims}} of the output SingleCellExperiment.
@@ -66,9 +66,9 @@ NULL
 
 #' @importFrom SummarizedExperiment assay
 #' @importFrom SingleCellExperiment reducedDim
-.get_mat_from_sce <- function(x, exprs_values, use_dimred, n_dimred) {
-    if (!is.null(use_dimred)) {
-        mat <- reducedDim(x, use_dimred)
+.get_mat_from_sce <- function(x, exprs_values, dimred, n_dimred) {
+    if (!is.null(dimred)) {
+        mat <- reducedDim(x, dimred)
         if (!is.null(n_dimred)) {
             if (length(n_dimred)==1L) {
                 n_dimred <- seq_len(n_dimred)

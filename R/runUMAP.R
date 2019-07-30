@@ -26,8 +26,9 @@
 #' @param BNPARAM A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.
 #' @param altexp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param use_dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
-#' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{use_dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
+#' @param dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
+#' @param use_dimred Deprecated, same as \code{dimred}.
+#' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
 #' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #'
 #' @return 
@@ -114,11 +115,12 @@ setMethod("calculateUMAP", "SummarizedExperiment", function(x, ..., exprs_values
 #' @rdname runUMAP
 #' @importFrom SummarizedExperiment assay
 setMethod("calculateUMAP", "SingleCellExperiment", function(x, ..., 
-    pca=if (!is.null(use_dimred)) NULL else 50,
-    exprs_values="logcounts", use_dimred=NULL, n_dimred=NULL)
+    pca=if (!is.null(dimred)) NULL else 50,
+    exprs_values="logcounts", dimred=NULL, use_dimred=NULL, n_dimred=NULL)
 {
-    mat <- .get_mat_from_sce(x, exprs_values=exprs_values, use_dimred=use_dimred, n_dimred=n_dimred)
-    .calculate_umap(mat, transposed=!is.null(use_dimred), pca=pca, ...)
+    dimred <- .switch_arg_names(use_dimred, dimred)
+    mat <- .get_mat_from_sce(x, exprs_values=exprs_values, dimred=dimred, n_dimred=n_dimred)
+    .calculate_umap(mat, transposed=!is.null(dimred), pca=pca, ...)
 })
 
 #' @export

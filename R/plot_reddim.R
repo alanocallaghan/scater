@@ -18,7 +18,7 @@
 #' \item \code{"MDS"} for \code{"plotMDS"}
 #' \item \code{"UMAP"} for \code{"plotUMAP"}
 #' }
-#' Its only purpose is to streamline workflows to avoid the need to specify the \code{use_dimred} argument.
+#' Its only purpose is to streamline workflows to avoid the need to specify the \code{dimred} argument.
 #'
 #' Previous versions of these functions would recompute the dimensionality reduction results if they were not already present.
 #' This has been deprecated in favour of users explicitly calling the relevant \code{run*} function,
@@ -131,5 +131,5 @@ setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
         .Deprecated(msg=sprintf("call 'run%s' explicitly to compute results", reddim_name))
         object <- do.call(reddim_FUN, c(list(x = object, ncomponents = max(ncomponents)), run_args))
     }
-    plotReducedDim(object = object, ncomponents = ncomponents, use_dimred = reddim_name, ...)
+    plotReducedDim(object = object, ncomponents = ncomponents, dimred = reddim_name, ...)
 }
