@@ -29,7 +29,7 @@
 #' example_sce <- SingleCellExperiment(
 #'     assays = list(counts = sc_example_counts), 
 #'     colData = sc_example_cell_info)
-#' example_sce <- normalize(example_sce)
+#' example_sce <- logNormCounts(example_sce)
 #'
 #' plotExplanatoryVariables(example_sce)
 plotExplanatoryVariables <- function(object, nvars_to_plot = 10, min_marginal_r2 = 0, theme_size = 10, ...) {

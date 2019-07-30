@@ -46,7 +46,7 @@
 #'     assays = list(counts = sc_example_counts),
 #'     colData = sc_example_cell_info
 #' )
-#' example_sce <- normalize(example_sce)
+#' example_sce <- logNormCounts(example_sce)
 #' rowData(example_sce)$blah <- sample(LETTERS,
 #'     nrow(example_sce), replace=TRUE)
 #'

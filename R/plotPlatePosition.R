@@ -27,8 +27,6 @@
 #' @return
 #' A ggplot object.
 #'
-#' @export
-#'
 #' @author Davis McCarthy, with modifications by Aaron Lun
 #'
 #' @examples
@@ -39,8 +37,7 @@
 #'     assays = list(counts = sc_example_counts),
 #'     colData = sc_example_cell_info
 #' )
-#' example_sce <- normalize(example_sce)
-#' example_sce <- calculateQCMetrics(example_sce)
+#' example_sce <- logNormCounts(example_sce)
 #'
 #' ## define plate positions
 #' example_sce$plate_position <- paste0(
@@ -51,11 +48,13 @@
 #' ## plot plate positions
 #' plotPlatePosition(example_sce, colour_by = "Mutation_Status")
 #'
-#' plotPlatePosition(example_sce, shape_by = "Treatment", colour_by = "Gene_0004")
+#' plotPlatePosition(example_sce, shape_by = "Treatment", 
+#'     colour_by = "Gene_0004")
 #'
 #' plotPlatePosition(example_sce, shape_by = "Treatment", size_by = "Gene_0001",
 #'     colour_by = "Cell_Cycle")
 #'
+#' @export
 plotPlatePosition <- function(object, plate_position = NULL,
     colour_by = NULL, size_by = NULL, shape_by = NULL,
     by_exprs_values = "logcounts", by_show_single = FALSE,

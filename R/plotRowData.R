@@ -36,7 +36,7 @@
 #' )
 #' example_sce <- calculateQCMetrics(example_sce,
 #'     feature_controls = list(ERCC=1:40))
-#' example_sce <- normalize(example_sce)
+#' example_sce <- logNormCounts(example_sce)
 #' 
 #' plotRowData(example_sce, y="n_cells_by_counts", x="log10_total_counts")
 #' plotRowData(example_sce, y="n_cells_by_counts", 

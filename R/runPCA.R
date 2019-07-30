@@ -55,7 +55,7 @@
 #'     assays = list(counts = sc_example_counts),
 #'     colData = sc_example_cell_info
 #' )
-#' example_sce <- normalize(example_sce)
+#' example_sce <- logNormCounts(example_sce)
 #'
 #' example_sce <- runPCA(example_sce, scale_features=NULL)
 #' reducedDimNames(example_sce)
