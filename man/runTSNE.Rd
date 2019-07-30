@@ -21,10 +21,10 @@ calculateTSNE(x, ...)
   exprs_values = "logcounts")
 
 \S4method{calculateTSNE}{SingleCellExperiment}(x, ...,
-  pca = is.null(use_dimred), exprs_values = "logcounts",
+  pca = is.null(dimred), exprs_values = "logcounts", dimred = NULL,
   use_dimred = NULL, n_dimred = NULL)
 
-runTSNE(x, ..., use_altexp = NULL, name = "TSNE")
+runTSNE(x, ..., altexp = NULL, name = "TSNE")
 }
 \arguments{
 \item{x}{For \code{calculateTSNE}, a numeric matrix of log-expression values where rows are features and columns are cells.
@@ -68,11 +68,13 @@ For \code{runTSNE}, additional arguments to pass to \code{calculateTSNE}.}
 
 \item{pca}{Logical scalar indicating whether a PCA step should be performed inside \code{\link[Rtsne]{Rtsne}}.}
 
-\item{use_dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
+\item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{use_dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
+\item{use_dimred}{Deprecated, same as \code{dimred}.}
 
-\item{use_altexp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
+\item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
+
+\item{altexp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
 \item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
 }
@@ -98,7 +100,7 @@ If \code{external_neighbors=TRUE}, the nearest neighbor search step will use a d
 This can be parallelized or approximate to achieve greater speed for large data sets.
 The neighbor search results are then used for t-SNE via the \code{\link[Rtsne]{Rtsne_neighbors}} function.
 
-If \code{use_dimred} is specified, the PCA step of the \code{Rtsne} function is automatically turned off by default.
+If \code{dimred} is specified, the PCA step of the \code{Rtsne} function is automatically turned off by default.
 This presumes that the existing dimensionality reduction is sufficient such that an additional PCA is not required.
 }
 \examples{

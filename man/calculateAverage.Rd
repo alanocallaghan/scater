@@ -12,7 +12,8 @@
 calculateAverage(x, ...)
 
 \S4method{calculateAverage}{ANY}(x, size_factors = NULL,
-  subset_row = NULL, BPPARAM = SerialParam())
+  use_size_factors = NULL, subset_row = NULL,
+  BPPARAM = SerialParam())
 
 \S4method{calculateAverage}{SummarizedExperiment}(x, ...,
   exprs_values = "counts")
@@ -35,6 +36,8 @@ For the SingleCellExperiment method, further arguments to pass to the Summarized
 
 \item{size_factors}{A numeric vector containing size factors.
 If \code{NULL}, these are calculated or extracted from \code{x}.}
+
+\item{use_size_factors}{Deprecated, same as \code{size_factors}.}
 
 \item{subset_row}{A vector specifying the subset of rows of \code{object} for which to return a result.}
 

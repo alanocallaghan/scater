@@ -4,16 +4,18 @@
 \alias{plotReducedDim}
 \title{Plot reduced dimensions}
 \usage{
-plotReducedDim(object, use_dimred, ncomponents = 2, percentVar = NULL,
-  colour_by = NULL, shape_by = NULL, size_by = NULL,
-  by_exprs_values = "logcounts", by_show_single = NULL,
-  text_by = NULL, text_size = 5, text_colour = "black",
-  other_fields = list(), ...)
+plotReducedDim(object, dimred, use_dimred = NULL, ncomponents = 2,
+  percentVar = NULL, colour_by = NULL, shape_by = NULL,
+  size_by = NULL, by_exprs_values = "logcounts",
+  by_show_single = NULL, text_by = NULL, text_size = 5,
+  text_colour = "black", other_fields = list(), ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
 
-\item{use_dimred}{A string or integer scalar indicating the reduced dimension result in \code{reducedDims(object)} to plot.}
+\item{dimred}{A string or integer scalar indicating the reduced dimension result in \code{reducedDims(object)} to plot.}
+
+\item{use_dimred}{Deprecated, same as \code{dimred}.}
 
 \item{ncomponents}{A numeric scalar indicating the number of dimensions to plot, starting from the first dimension.
 Alternatively, a numeric vector specifying the dimensions to be plotted.}

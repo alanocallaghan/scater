@@ -19,9 +19,10 @@ calculateDiffusionMap(x, ...)
   exprs_values = "logcounts")
 
 \S4method{calculateDiffusionMap}{SingleCellExperiment}(x, ...,
-  exprs_values = "logcounts", use_dimred = NULL, n_dimred = NULL)
+  exprs_values = "logcounts", dimred = NULL, use_dimred = NULL,
+  n_dimred = NULL)
 
-runDiffusionMap(x, ..., use_altexp = NULL, name = "DiffusionMap")
+runDiffusionMap(x, ..., altexp = NULL, name = "DiffusionMap")
 }
 \arguments{
 \item{x}{For \code{calculateDiffusionMap}, a numeric matrix of log-expression values where rows are features and columns are cells.
@@ -51,11 +52,13 @@ For \code{runDiffusionMap}, additional arguments to pass to \code{calculateDiffu
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{use_dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
+\item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{use_dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
+\item{use_dimred}{Deprecated, same as \code{dimred}.}
 
-\item{use_altexp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
+\item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
+
+\item{altexp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
 \item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
 }

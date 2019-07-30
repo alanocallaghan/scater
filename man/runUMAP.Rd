@@ -21,10 +21,10 @@ calculateUMAP(x, ...)
   exprs_values = "logcounts")
 
 \S4method{calculateUMAP}{SingleCellExperiment}(x, ..., pca = if
-  (!is.null(use_dimred)) NULL else 50, exprs_values = "logcounts",
-  use_dimred = NULL, n_dimred = NULL)
+  (!is.null(dimred)) NULL else 50, exprs_values = "logcounts",
+  dimred = NULL, use_dimred = NULL, n_dimred = NULL)
 
-runUMAP(x, ..., use_altexp = NULL, name = "UMAP")
+runUMAP(x, ..., altexp = NULL, name = "UMAP")
 }
 \arguments{
 \item{x}{For \code{calculateUMAP}, a numeric matrix of log-expression values where rows are features and columns are cells.
@@ -65,11 +65,13 @@ By default, no PCA is performed if the input is a dimensionality reduction resul
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{use_dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
+\item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{use_dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
+\item{use_dimred}{Deprecated, same as \code{dimred}.}
 
-\item{use_altexp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
+\item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
+
+\item{altexp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
 \item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
 }

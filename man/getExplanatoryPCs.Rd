@@ -4,13 +4,16 @@
 \alias{getExplanatoryPCs}
 \title{Per-PC variance explained by a variable}
 \usage{
-getExplanatoryPCs(x, use_dimred = "PCA", n_dimred = 10,
-  ncomponents = NULL, rerun = FALSE, run_args = list(), ...)
+getExplanatoryPCs(x, dimred = "PCA", use_dimred = NULL,
+  n_dimred = 10, ncomponents = NULL, rerun = FALSE,
+  run_args = list(), ...)
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object containing dimensionality reduction results.}
 
-\item{use_dimred}{String or integer scalar specifying the field in \code{reducedDims(x)} that contains the PCA results.}
+\item{dimred}{String or integer scalar specifying the field in \code{reducedDims(x)} that contains the PCA results.}
+
+\item{use_dimred}{Deprecated, same as \code{dimred}.}
 
 \item{n_dimred}{Integer scalar specifying the number of the top principal components to use.}
 
@@ -34,7 +37,7 @@ It allows identification of important PCs that are driven by known experimental 
 PCs correlated with technical factors (e.g., batch effects, library size) can also be detected and removed prior to further analysis.
 
 By default, the function will attempt to use pre-computed PCA results in \code{object}.
-This is done by taking the top \code{n_dimred} PCs from the matrix specified by \code{use_dimred}.
+This is done by taking the top \code{n_dimred} PCs from the matrix specified by \code{dimred}.
 If these are not available or if \code{rerun=TRUE}, the function will rerun the PCA using \code{\link{runPCA}};
 however, this mode is deprecated and users are advised to explicitly call \code{runPCA} themselves.
 }
