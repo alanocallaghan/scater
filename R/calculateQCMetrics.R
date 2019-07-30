@@ -183,7 +183,9 @@
 #' 
 calculateQCMetrics <- function(object, exprs_values="counts", feature_controls = NULL, cell_controls = NULL,
         percent_top = c(50, 100, 200, 500), detection_limit = 0, use_spikes = TRUE, compact = FALSE, 
-        BPPARAM=SerialParam()) {
+        BPPARAM=SerialParam()) 
+{
+    .Deprecated(msg="'calculateQCMetrics' is deprecated.\nUse 'perCellQCMetrics' or 'perFeatureQCMetrics' instead.")
 
     if ( !is(object, "SingleCellExperiment")) {
         stop("object must be a SingleCellExperiment")

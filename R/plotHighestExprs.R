@@ -33,11 +33,11 @@
 #'     assays = list(counts = sc_example_counts), 
 #'     colData = sc_example_cell_info
 #' )
-#' example_sce <- calculateQCMetrics(example_sce, 
-#'     feature_controls = list(set1 = 1:500)
-#' )
 #' 
-#' plotHighestExprs(example_sce, colour_cells_by ="total_features_by_counts")
+#' colData(example_sce) <- cbind(colData(example_sce),
+#'      perCellQCMetrics(example_sce))
+#' 
+#' plotHighestExprs(example_sce, colour_cells_by="detected")
 #' plotHighestExprs(example_sce, colour_cells_by="Mutation_Status")
 #'
 #' @export
