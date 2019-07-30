@@ -24,9 +24,6 @@
 #' 
 #' @author Aaron Lun
 #'
-#' @export
-#' @importFrom stats mad median
-#'
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
@@ -34,13 +31,20 @@
 #'     assays = list(counts = sc_example_counts), 
 #'     colData = sc_example_cell_info
 #' )
-#' example_sce <- calculateQCMetrics(example_sce)
-#'
-#' ## with a set of feature controls defined
-#' example_sce <- calculateQCMetrics(example_sce, 
-#' feature_controls = list(set1 = 1:40))
-#' isOutlier(example_sce$total_counts, nmads = 3)
 #' 
+#' stats <- perCellQCMetrics(example_sce)
+#'
+#' str(isOutlier(stats$sum, nmads = 3))
+#' str(isOutlier(stats$sum, nmads = 3, type="lower"))
+#' str(isOutlier(stats$sum, nmads = 3, type="higher"))
+#' 
+#' str(isOutlier(stats$sum, nmads = 3, log=TRUE))
+#'
+#' b <- sample(LETTERS[1:3], ncol(example_sce), replace=TRUE)
+#' str(isOutlier(stats$sum, nmads = 3, log=TRUE, batch=b))
+#' 
+#' @export
+#' @importFrom stats mad median
 isOutlier <- function(metric, nmads = 5, type = c("both", "lower", "higher"), 
                       log = FALSE, subset = NULL, batch = NULL, min_diff = NA) {
     if (log) {
