@@ -95,7 +95,7 @@ setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL, use_size_fact
         .Deprecated(old="'use_size_factors='")
         size_factors <- NULL
     } else if (!isTRUE(use_size_factors)) {
-        size_factors <- .switch_arg_names(size_factors, use_size_factors)
+        size_factors <- .switch_arg_names(use_size_factors, size_factors)
     } else {
         .Deprecated(old="'use_size_factors='")
     }
