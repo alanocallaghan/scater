@@ -17,7 +17,7 @@
 #' @param use_coldata Deprecated, use \code{\link{runColDataPCA}} instead.
 #' @param BSPARAM A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.
-#' @param use_altexp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
+#' @param altexp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
 #' @param use_dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
 #' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{use_dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
 #' @param ... For the \code{calculatePCA} generic, additional arguments to pass to specific methods.
@@ -112,14 +112,14 @@ setMethod("calculatePCA", "SingleCellExperiment", function(x, ..., exprs_values=
 #' @export
 #' @rdname runPCA
 #' @importFrom SingleCellExperiment reducedDim<-
-setMethod("runPCA", "SingleCellExperiment", function(x, ..., use_coldata = FALSE, use_altexp=NULL, name="PCA") 
+setMethod("runPCA", "SingleCellExperiment", function(x, ..., use_coldata = FALSE, altexp=NULL, name="PCA") 
 {
     if ( use_coldata ) {
         .Deprecated(msg="'use_coldata=TRUE is deprecated.\nUse 'runColDataPCA()' instead.")
         runColDataPCA(x, ..., name=name)
     } else {
-        if (!is.null(use_altexp)) {
-            y <- altExp(x, use_altexp)
+        if (!is.null(altexp)) {
+            y <- altExp(x, altexp)
         } else {
             y <- x
         }

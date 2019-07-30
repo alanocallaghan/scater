@@ -25,7 +25,7 @@
 #' @param external_neighbors Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.
 #' @param BNPARAM A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.
-#' @param use_altexp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
+#' @param altexp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
 #' @param use_dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
 #' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{use_dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
 #' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
@@ -124,9 +124,9 @@ setMethod("calculateUMAP", "SingleCellExperiment", function(x, ...,
 #' @export
 #' @rdname runUMAP
 #' @importFrom SingleCellExperiment reducedDim<-
-runUMAP <- function(x, ..., use_altexp=NULL, name="UMAP") {
-    if (!is.null(use_altexp)) {
-        y <- altExp(x, use_altexp)
+runUMAP <- function(x, ..., altexp=NULL, name="UMAP") {
+    if (!is.null(altexp)) {
+        y <- altExp(x, altexp)
     } else {
         y <- x
     }
