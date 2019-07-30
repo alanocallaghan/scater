@@ -27,8 +27,9 @@
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.
 #' @param pca Logical scalar indicating whether a PCA step should be performed inside \code{\link[Rtsne]{Rtsne}}.
 #' @param altexp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param use_dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
-#' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{use_dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
+#' @param dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
+#' @param use_dimred Deprecated, same as \code{dimred}.
+#' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
 #' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #'
 #' @return 
@@ -50,7 +51,7 @@
 #' This can be parallelized or approximate to achieve greater speed for large data sets.
 #' The neighbor search results are then used for t-SNE via the \code{\link[Rtsne]{Rtsne_neighbors}} function.
 #' 
-#' If \code{use_dimred} is specified, the PCA step of the \code{Rtsne} function is automatically turned off by default.
+#' If \code{dimred} is specified, the PCA step of the \code{Rtsne} function is automatically turned off by default.
 #' This presumes that the existing dimensionality reduction is sufficient such that an additional PCA is not required.
 #'
 #' @references
@@ -128,11 +129,12 @@ setMethod("calculateTSNE", "SummarizedExperiment", function(x, ..., exprs_values
 
 #' @export
 #' @rdname runTSNE
-setMethod("calculateTSNE", "SingleCellExperiment", function(x, ..., pca=is.null(use_dimred), 
-    exprs_values="logcounts", use_dimred=NULL, n_dimred=NULL)
+setMethod("calculateTSNE", "SingleCellExperiment", function(x, ..., pca=is.null(dimred), 
+    exprs_values="logcounts", dimred=NULL, use_dimred=NULL, n_dimred=NULL)
 {
-    mat <- .get_mat_from_sce(x, exprs_values=exprs_values, use_dimred=use_dimred, n_dimred=n_dimred)
-    .calculate_tsne(mat, transposed=!is.null(use_dimred), pca=pca, ...)
+    dimred <- .switch_arg_names(use_dimred, dimred)
+    mat <- .get_mat_from_sce(x, exprs_values=exprs_values, dimred=dimred, n_dimred=n_dimred)
+    .calculate_tsne(mat, transposed=!is.null(dimred), pca=pca, ...)
 })
 
 #' @export

@@ -3,7 +3,8 @@
 #' Compute, for each principal component, the percentage of variance that is explained by one or more variables of interest.
 #'
 #' @param x A \linkS4class{SingleCellExperiment} object containing dimensionality reduction results.
-#' @param use_dimred String or integer scalar specifying the field in \code{reducedDims(x)} that contains the PCA results.
+#' @param dimred String or integer scalar specifying the field in \code{reducedDims(x)} that contains the PCA results.
+#' @param use_dimred Deprecated, same as \code{dimred}.
 #' @param n_dimred Integer scalar specifying the number of the top principal components to use.
 #' @param ncomponents Deprecated, same as \code{n_dimred}. 
 #' @param rerun Deprecated. Logical scalar indicating whether the PCA should be repeated, even if pre-computed results are already present.
@@ -16,7 +17,7 @@
 #' PCs correlated with technical factors (e.g., batch effects, library size) can also be detected and removed prior to further analysis.
 #'
 #' By default, the function will attempt to use pre-computed PCA results in \code{object}.
-#' This is done by taking the top \code{n_dimred} PCs from the matrix specified by \code{use_dimred}.
+#' This is done by taking the top \code{n_dimred} PCs from the matrix specified by \code{dimred}.
 #' If these are not available or if \code{rerun=TRUE}, the function will rerun the PCA using \code{\link{runPCA}};
 #' however, this mode is deprecated and users are advised to explicitly call \code{runPCA} themselves.
 #'
@@ -44,16 +45,18 @@
 #'
 #' @export
 #' @importFrom SingleCellExperiment reducedDim reducedDimNames SingleCellExperiment
-getExplanatoryPCs <- function(x, use_dimred="PCA", n_dimred=10, ncomponents=NULL, 
-    rerun=FALSE, run_args=list(), ...)
+getExplanatoryPCs <- function(x, dimred="PCA", use_dimred=NULL, 
+    n_dimred=10, ncomponents=NULL, rerun=FALSE, run_args=list(), ...)
 {
     n_dimred <- .switch_arg_names(ncomponents, n_dimred)
-    if (!use_dimred %in% reducedDimNames(x) || rerun) {
+    dimred <- .switch_arg_names(use_dimred, dimred)
+
+    if (!dimred %in% reducedDimNames(x) || rerun) {
         .Deprecated(msg="'x' with no PCA results will no longer be supported")
         x <- do.call(runPCA, c(list(x=x, ncomponents=n_dimred), run_args))
         reddims <- reducedDim(x, "PCA")
     } else {
-        reddims <- reducedDim(x, use_dimred)
+        reddims <- reducedDim(x, dimred)
         n_dimred <- min(n_dimred, ncol(reddims))
         reddims <- reddims[,seq_len(n_dimred),drop=FALSE]
     }
