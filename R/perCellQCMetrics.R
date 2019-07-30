@@ -22,6 +22,7 @@
 #' Alternatively, an integer or character vector specifying the alternative Experiments to use to compute QC statistics.
 #' 
 #' Alternatively \code{NULL}, in which case alternative experiments are not used.
+#' @param flatten Logical scalar indicating whether the nested \linkS4class{DataFrame}s in the output should be flattened.
 #'
 #' @return
 #' A \linkS4class{DataFrame} of QC statistics where each row corresponds to a column in \code{x}.
@@ -37,6 +38,8 @@
 #' \item \code{total}: numeric, the total sum of counts for each cell across main and alternative Experiments.
 #' This is only returned for the SingleCellExperiment method.
 #' }
+#'
+#' If \code{flatten=TRUE}, the nested DataFrames are flattened to remove the hierarchical structure.
 #' 
 #' @author Aaron Lun
 #' 
@@ -87,6 +90,11 @@
 #' The \code{total} field contains the total sum of counts for each cell across the main and alternative Experiments.
 #' The \code{percent} field contains the percentage of the total count in each alternative Experiment for each cell.
 #' 
+#' If \code{flatten=TRUE}, the nested DataFrames are flattened by concatenating the column names with underscores.
+#' This means that, say, the \code{subsets$Mito$sum} nested field becomes the top-level \code{subsets_Mito_sum} field.
+#' A flattened structure is more convenient for end-users performing interactive analyses,
+#' but less convenient for programmatic access as artificial construction of strings is required.
+#' 
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
@@ -116,7 +124,7 @@ NULL
 #' @importFrom BiocParallel bpmapply SerialParam
 #' @importClassesFrom S4Vectors DataFrame
 .per_cell_qc_metrics <- function(x, subsets = NULL, percent_top = c(50, 100, 200, 500), 
-    detection.limit = 0, BPPARAM=SerialParam()) 
+    detection.limit = 0, BPPARAM=SerialParam(), flatten=FALSE) 
 {
     if (length(subsets) && is.null(names(subsets))){ 
         stop("'subsets' must be named")
@@ -169,6 +177,9 @@ NULL
 
     output <- do.call(DataFrame, lapply(output, I))
     rownames(output) <- colnames(x)
+    if (flatten) {
+        output <- .flatten_nested_dims(output)
+    }
     output
 }
 
@@ -189,12 +200,12 @@ setMethod("perCellQCMetrics", "SummarizedExperiment", function(x, ..., exprs_val
 #' @importFrom SingleCellExperiment altExp altExpNames
 #' @importClassesFrom S4Vectors DataFrame
 setMethod("perCellQCMetrics", "SingleCellExperiment", function(x, 
-    subsets=NULL, percent_top=c(50, 100, 200, 500), ..., 
+    subsets=NULL, percent_top=c(50, 100, 200, 500), ..., flatten=FALSE,
     exprs_values="counts", use_altexps=TRUE) 
 {
     # subsets and percent_top need to be explicitly listed,
     # because the altexps call sets them to NULL and integer(0).
-    main <- .per_cell_qc_metrics(assay(x, exprs_values), subsets=subsets, percent_top=percent_top, ...)
+    main <- .per_cell_qc_metrics(assay(x, exprs_values), subsets=subsets, percent_top=percent_top, flatten=FALSE, ...)
     use_altexps <- .get_altexps_to_use(x, use_altexps)
 
     alt <- list()
@@ -218,6 +229,9 @@ setMethod("perCellQCMetrics", "SingleCellExperiment", function(x,
     }
 
     main$total <- total
+    if (flatten) {
+        main <- .flatten_nested_dims(main)
+    }
     main
 })
 
@@ -230,4 +244,27 @@ setMethod("perCellQCMetrics", "SingleCellExperiment", function(x,
         }
     } 
     use_altexps
+}
+
+#' @importFrom S4Vectors DataFrame
+.flatten_nested_dims <- function(x, name="") {
+    if (!is.null(dim(x))) {
+        if (name!="") {
+            name <- paste0(name, "_")
+        }
+        names <- sprintf("%s%s", name, colnames(x))
+        df <- vector("list", ncol(x))
+        for (i in seq_along(df)) {
+            df[[i]] <- .flatten_nested_dims(x[,i], names[i])
+        }
+        if (length(df) > 0) {
+            df <- do.call(cbind, df)
+        } else {
+            df <- DataFrame(x[,0])
+        }
+    } else {
+        df <- DataFrame(x)
+        colnames(df) <- name
+    }
+    df
 }

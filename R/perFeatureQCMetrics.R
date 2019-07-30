@@ -14,6 +14,7 @@
 #' 
 #' For the SummarizedExperiment and SingleCellExperiment methods, further arguments to pass to the ANY method.
 #' @param exprs_values A string or integer scalar indicating which \code{assays} in the \code{x} contains the count matrix.
+#' @param flatten Logical scalar indicating whether the nested \linkS4class{DataFrame}s in the output should be flattened.
 #'
 #' @return
 #' A \linkS4class{DataFrame} of QC statistics where each row corresponds to a row in \code{x}.
@@ -49,6 +50,10 @@
 #' }
 #' The \code{ratio} field contains the ratio of the mean within each subset to the mean across all cells.
 #' 
+#' If \code{flatten=TRUE}, the nested DataFrames are flattened by concatenating the column names with underscores.
+#' This means that, say, the \code{subsets$empty$mean} nested field becomes the top-level \code{subsets_empty_mean} field.
+#' A flattened structure is more convenient for end-users performing interactive analyses,
+#' but less convenient for programmatic access as artificial construction of strings is required.
 #' @examples
 #' data("sc_example_counts")
 #' data("sc_example_cell_info")
@@ -71,7 +76,7 @@ NULL
 #' @importFrom S4Vectors DataFrame
 #' @importFrom BiocParallel bpmapply SerialParam
 #' @importClassesFrom S4Vectors DataFrame
-.per_feature_qc_metrics <- function(x, subsets = NULL, detection_limit = 0, BPPARAM=SerialParam()) 
+.per_feature_qc_metrics <- function(x, subsets = NULL, detection_limit = 0, BPPARAM=SerialParam(), flatten=FALSE) 
 {
     if (length(subsets) && is.null(names(subsets))){ 
         stop("'subsets' must be named")
@@ -120,6 +125,9 @@ NULL
 
     output <- do.call(DataFrame, lapply(output, I))
     rownames(output) <- rownames(x)
+    if (flatten) {
+        output <- .flatten_nested_dims(output)
+    }
     output
 }
 
