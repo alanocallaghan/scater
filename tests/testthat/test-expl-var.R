@@ -161,14 +161,14 @@ test_that("getExplanatoryPCs responds to PC-specific options", {
     blah <- normed
     normed2 <- runPCA(normed, ncomponents=10)
     reducedDim(blah, "WHEE") <- reducedDim(normed2, "PCA")
-    expect_identical(res <- getExplanatoryPCs(normed2), getExplanatoryPCs(blah, use_dimred="WHEE"))
+    expect_identical(res <- getExplanatoryPCs(normed2), getExplanatoryPCs(blah, dimred="WHEE"))
     expect_identical(nrow(res), 10L)
 
     reducedDim(blah, "WHEE") <- reducedDim(normed2, "PCA")[,1:2]
-    expect_identical(getExplanatoryPCs(normed2)[1:2,], getExplanatoryPCs(blah, use_dimred="WHEE"))
+    expect_identical(getExplanatoryPCs(normed2)[1:2,], getExplanatoryPCs(blah, dimred="WHEE"))
     
     # Correctly truncates existing PCs.
-    expect_identical(res <- getExplanatoryPCs(normed2, n_dimred=2), getExplanatoryPCs(blah, use_dimred="WHEE"))
+    expect_identical(res <- getExplanatoryPCs(normed2, n_dimred=2), getExplanatoryPCs(blah, dimred="WHEE"))
     expect_identical(nrow(res), 2L)
 
     expect_identical(getExplanatoryPCs(normed2, n_dimred=Inf), getExplanatoryPCs(normed)) # ignores Inf, as it's maxed out.
