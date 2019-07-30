@@ -20,7 +20,7 @@
 #'
 #' For \code{runMDS}, additional arguments to pass to \code{calculateMDS}. 
 #' @param method String specifying the type of distance to be computed between cells.
-#' @param use_altexp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
+#' @param altexp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
 #' @param use_dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
 #' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{use_dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
 #' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
@@ -95,9 +95,9 @@ setMethod("calculateMDS", "SingleCellExperiment", function(x, ..., exprs_values=
 #' @export
 #' @rdname runMDS
 #' @importFrom SingleCellExperiment reducedDim<- altExp
-runMDS <- function(x, ..., use_altexp=NULL, name="MDS") {
-    if (!is.null(use_altexp)) {
-        y <- altExp(x, use_altexp)
+runMDS <- function(x, ..., altexp=NULL, name="MDS") {
+    if (!is.null(altexp)) {
+        y <- altExp(x, altexp)
     } else {
         y <- x
     }

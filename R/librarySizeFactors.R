@@ -12,7 +12,7 @@
 #' For the SummarizedExperiment method, further arguments to pass to the ANY method.
 #'
 #' For \code{computeLibraryFactors}, further arguments to pass to \code{librarySizeFactors}.
-#' @param use_altexp String or integer scalar indicating which (if any) alternative experiment should be used
+#' @param altexp String or integer scalar indicating which (if any) alternative experiment should be used
 #' to provide the counts to compute the size factors.
 #'
 #' @details
@@ -23,7 +23,7 @@
 #' e.g., the pseudo-count used in \code{\link{logNormCounts}} can actually be considered an additional read/UMI.
 #' This is important for ensuring that the effect of the pseudo-count decreases with increasing sequencing depth.
 #'
-#' Setting \code{use_altexp} is occasionally useful for computing size factors from spike-in transcripts
+#' Setting \code{altexp} is occasionally useful for computing size factors from spike-in transcripts
 #' and using them on the count matrix for endogenous genes (stored in the main experiment).
 #'
 #' @author Aaron Lun
@@ -72,9 +72,9 @@ setMethod("librarySizeFactors", "SummarizedExperiment", function(x, exprs_values
 #' @rdname librarySizeFactors
 #' @importFrom BiocGenerics sizeFactors<-
 #' @importFrom SingleCellExperiment altExp
-computeLibraryFactors <- function(x, ..., use_altexp=NULL) {
-    if (!is.null(use_altexp)) {
-        y <- altExp(x, use_altexp)
+computeLibraryFactors <- function(x, ..., altexp=NULL) {
+    if (!is.null(altexp)) {
+        y <- altExp(x, altexp)
     } else {
         y <- x
     }

@@ -44,12 +44,12 @@
 #' As such, no feature selection or standardization is performed, i.e., \code{ntop}, \code{subset_row} and \code{scale} are ignored.
 #'
 #' @section Alternative experiments:
-#' This section is relevant if \code{x} is a \linkS4class{SingleCellExperiment} and \code{use_altexp} is not \code{NULL}.
+#' This section is relevant if \code{x} is a \linkS4class{SingleCellExperiment} and \code{altexp} is not \code{NULL}.
 #' 
-#' If \code{use_altexp} is specified, the method is run on data from an alternative \linkS4class{SummarizedExperiment} nested within \code{x}.
-#' This is useful for performing dimensionality reduction on other features stored in \code{\link{altExp}(x, use_altexp)}, e.g., antibody tags. 
+#' If \code{altexp} is specified, the method is run on data from an alternative \linkS4class{SummarizedExperiment} nested within \code{x}.
+#' This is useful for performing dimensionality reduction on other features stored in \code{\link{altExp}(x, altexp)}, e.g., antibody tags. 
 #' 
-#' Setting \code{use_altexp} with \code{exprs_values} will use the specified assay from the alternative SummarizedExperiment.
+#' Setting \code{altexp} with \code{exprs_values} will use the specified assay from the alternative SummarizedExperiment.
 #' If the alternative is a SingleCellExperiment, setting \code{use_dimred} will use the specified dimensionality reduction results from the alternative. 
 #' This option will also interact as expected with \code{n_dimred}.
 #'
