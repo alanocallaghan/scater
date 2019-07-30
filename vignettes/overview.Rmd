@@ -101,13 +101,19 @@ Cell-level metrics are computed by the `perCellQCMetrics()` function and include
 
 * `sum`: total number of counts for the cell (i.e., the library size).
 * `detected`: the number of features for the cell that have counts above the detection limit (default of zero).
-* `subsets$X$percent`: percentage of all counts that come from the feature control set named `X`.
+* `subsets_X_percent`: percentage of all counts that come from the feature control set named `X`.
 
 ```{r}
 per.cell <- perCellQCMetrics(example_sce, subsets=list(Mito=1:10))
 summary(per.cell$sum)
 summary(per.cell$detected)
-summary(per.cell$subsets$Mito$percent)
+summary(per.cell$subsets_Mito_percent)
+```
+
+It is often convenient to store this in the `colData()` of our `SingleCellExperiment` object for future reference.
+
+```{r}
+colData(example_sce) <- cbind(colData(example_sce), per.cell)
 ```
 
 ### Diagnostic plots
@@ -118,12 +124,9 @@ We take advantage of `r CRANpkg("ggplot2")` to fine-tune the plot aesthetics and
 Well-behaved cells should have a large number of expressed features and and a low percentage of expression from feature controls. 
 High percentage expression from feature controls and few expressed features are indicative of blank and failed cells.
 
-
 ```{r plot-pdata-pct-exprs-controls}
-plotColData(example_sce, x = data.frame(sum=per.cell$sum),
-    y = data.frame(pct_mito=per.cell$subsets$Mito$percent), 
-    colour = "Mutation_Status") +
-    theme(legend.position = "top") +
+plotColData(example_sce, x = "sum", y="subsets_Mito_percent",
+    colour_by = "Mutation_Status") + theme(legend.position = "top") +
     stat_smooth(method = "lm", se = FALSE, size = 2, fullrange = TRUE)
 ```
 
@@ -158,8 +161,8 @@ We can identify high-quality cells to retain by setting a fixed threshold on par
 For example, we could retain only cells that have at least 100,000 total counts _and_ at least 500 expressed features:
 
 ```{r}
-keep.total <- example_sce$total_counts > 1e5
-keep.n <- example_sce$total_features_by_counts > 500
+keep.total <- example_sce$sum > 1e5
+keep.n <- example_sce$detected > 500
 filtered <- example_sce[,keep.total & keep.n]
 dim(filtered)
 ```
@@ -187,13 +190,13 @@ Feature-level metrics are computed by the `perFeatureQCMetrics()` function and i
 
 * `mean`: the mean count of the gene/feature across all cells.
 * `detected`: the percentage of cells with non-zero counts for each gene.
-* `subsets$Y$ratio`: ratio of mean counts between the cell control set named Y and all cells.
+* `subsets_Y_ratio`: ratio of mean counts between the cell control set named Y and all cells.
 
 ```{r}
 per.feat <- perFeatureQCMetrics(example_sce, subsets=list(Empty=1:10))
 summary(per.feat$mean)
 summary(per.feat$detected)
-summary(per.feat$subsets$Empty$ratio)
+summary(per.feat$subsets_Empty_ratio)
 ```
 
 A more refined calculation of the average is provided by the `calculateAverage()` function, 
@@ -351,14 +354,14 @@ reducedDimNames(example_sce)
 Any reduced dimension results can be plotted using the `plotReducedDim` function:
 
 ```{r plot-reduceddim-4comp-colby-shapeby}
-plotReducedDim(example_sce, use_dimred = "PCA",
+plotReducedDim(example_sce, dimred = "PCA",
     colour_by = "Treatment", shape_by = "Mutation_Status")
 ```
 
 We can also colour and size points by the expression of particular features:
 
 ```{r plot-reduceddim-4comp-colby-sizeby-exprs}
-plotReducedDim(example_sce, use_dimred = "PCA",
+plotReducedDim(example_sce, dimred = "PCA",
     colour_by = "Gene_1000", size_by = "Gene_0500")
 ```
 
@@ -417,7 +420,7 @@ The code below uses the first 10 dimensions of the previously computed PCA resul
 
 ```{r plot-tsne-from-pca}
 set.seed(1000)
-example_sce <- runTSNE(example_sce, perplexity=10, use.dimred="PCA", n.dimred=10)
+example_sce <- runTSNE(example_sce, perplexity=10, use.dimred="PCA", n_dimred=10)
 plotTSNE(example_sce, colour_by="Treatment")
 ```
 
@@ -455,7 +458,7 @@ Users may need to be aware of the following when updating their own scripts:
 * Cell names can now be accessed/assigned with the `colnames` function (instead of `sampleNames` or `cellNames` for an `SCESet` object);
 * Feature (gene/transcript) names should now be accessed/assigned with the `rownames` function (instead of `featureNames`);
 * Cell metadata, stored as `phenoData` in an `SCESet`, corresponds to `colData` in a `SingleCellExperiment` object and is accessed/assigned with the `colData` function (this replaces the `pData` function);
-* Individual cell-level variables can still be accessed with the `$` operator (e.g. `sce$total_counts`);
+* Individual cell-level variables can still be accessed with the `$` operator (e.g. `sce$sum`);
 * Feature metadata, stored as `featureData` in an `SCESet`, corresponds to `rowData` in a `SingleCellExperiment` object and is accessed/assigned with the `rowData` function (this replaces the `fData` function);
 * `plotScater`, which produces a cumulative expression, overview plot, replaces 
 the generic `plot` function for `SCESet` objects.
