@@ -9,7 +9,8 @@
 #' If \code{NULL}, these are calculated or extracted from \code{x}.
 #' @param exprs_values A string specifying the assay of \code{x} containing the count matrix.
 #' @param subset_row A vector specifying the subset of rows of \code{object} for which to return a result.
-#' @param BPPARAM A BiocParallelParam object specifying whether the calculations should be parallelized. 
+#' @param BPPARAM A BiocParallelParam object specifying whether the calculations should be parallelized.
+#' @param use_size_factors Deprecated, same as \code{size_factors}.
 #' @param ... For the generic, arguments to pass to specific methods.
 #'
 #' For the SummarizedExperiment method, further arguments to pass to the ANY method.
@@ -54,10 +55,10 @@
 NULL
 
 #' @importFrom BiocParallel SerialParam bpmapply
-.calculate_average <- function(x, size_factors=NULL, subset_row=NULL, BPPARAM = SerialParam())
+.calculate_average <- function(x, size_factors=NULL, use_size_factors=NULL, subset_row=NULL, BPPARAM = SerialParam())
 {
     subset_row <- .subset2index(subset_row, x, byrow=TRUE)
-    size_factors <- .get_default_sizes(x, size_factors, center_sf=TRUE, subset_row=subset_row)
+    size_factors <- .get_default_sizes(x, size_factors, center_sf=TRUE, use_size_factors=use_size_factors, subset_row=subset_row)
 
     # Parallelize across *genes* to ensure numerically IDENTICAL results.
     by_core <- .split_vector_by_workers(subset_row, BPPARAM)

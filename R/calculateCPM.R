@@ -14,6 +14,7 @@
 #' For the SummarizedExperiment method, further arguments to pass to the ANY method.
 #'
 #' For the SingleCellExperiment method, further arguments to pass to the SummarizedExperiment method.
+#' @param use_size_factors Deprecated, same as \code{size_factors}.
 #'
 #' @details 
 #' If \code{size_factors} are provided or available in \code{x}, they are used to define the effective library sizes. 
@@ -39,12 +40,13 @@
 NULL
 
 #' @importFrom Matrix colSums
-.calculate_cpm <- function(x, size_factors=NULL, subset_row=NULL) {
+.calculate_cpm <- function(x, size_factors=NULL, subset_row=NULL, use_size_factors=NULL) {
     if (!is.null(subset_row)) {
         x <- x[subset_row,,drop=FALSE]
     }
 
     lib.sizes <- colSums(x) / 1e6
+    size_factors <- .switch_sf_args(size_factors, use_size_factors)
     if (!is.null(size_factors)) {
         lib.sizes <- size_factors / mean(size_factors) * mean(lib.sizes)
     }

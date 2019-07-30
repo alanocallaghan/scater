@@ -14,6 +14,7 @@
 #' @param log_exprs_offset Deprecated, same as \code{pseudo_count}.
 #' @param center_sf Logical scalar indicating whether size factors should be centered at unity before being used.
 #' @param subset_row A vector specifying the subset of rows of \code{x} for which to return a result.
+#' @param use_size_factors Deprecated, same as \code{size_factors}.
 #' @param ... For the generic, arguments to pass to specific methods.
 #'
 #' For the SummarizedExperiment method, further arguments to pass to the ANY or \linkS4class{DelayedMatrix} methods.
@@ -54,14 +55,14 @@ NULL
 #' @rdname normalizeCounts
 #' @importFrom Matrix t
 #' @importClassesFrom DelayedArray DelayedMatrix
-setMethod("normalizeCounts", "DelayedMatrix", function(x, size_factors=NULL, 
+setMethod("normalizeCounts", "DelayedMatrix", function(x, size_factors=NULL, use_size_factors=NULL,
     log=TRUE, return_log=NULL, pseudo_count=1, log_exprs_offset=NULL, center_sf=TRUE, subset_row=NULL)
 {
     if (!is.null(subset_row)) {
         x <- x[subset_row,,drop=FALSE]
     }
 
-    size_factors <- .get_default_sizes(x, size_factors, center_sf)
+    size_factors <- .get_default_sizes(x, size_factors, center_sf, use_size_factors)
     norm_exprs <- t(t(x) / size_factors)
 
     pseudo_count <- .switch_arg_names(log_exprs_offset, pseudo_count)
@@ -74,21 +75,35 @@ setMethod("normalizeCounts", "DelayedMatrix", function(x, size_factors=NULL,
 
 #' @export
 #' @rdname normalizeCounts
-setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL,
+setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL, use_size_factors=NULL,
     log=TRUE, return_log=NULL, pseudo_count=1, log_exprs_offset=NULL, center_sf=TRUE, subset_row=NULL) 
 {
-    size_factors <- .get_default_sizes(x, size_factors, center_sf)
     subset_row <- .subset2index(subset_row, x, byrow=TRUE)
+    size_factors <- .get_default_sizes(x, size_factors, center_sf, use_size_factors, subset_row=subset_row)
 
     pseudo_count <- .switch_arg_names(log_exprs_offset, pseudo_count)
     log <- .switch_arg_names(return_log, log)
+
     norm_exprs <- .Call(cxx_norm_exprs, x, list(size_factors), integer(nrow(x)),
         pseudo_count, log, subset_row - 1L)
     dimnames(norm_exprs) <- list(rownames(x)[subset_row], colnames(x))
     norm_exprs
 })
 
-.get_default_sizes <- function(x, size_factors, center_sf, ...) {
+.switch_sf_args <- function(size_factors, use_size_factors) {
+    if (isFALSE(use_size_factors)) {
+        .Deprecated(old="'use_size_factors='")
+        size_factors <- NULL
+    } else if (!isTRUE(use_size_factors)) {
+        size_factors <- .switch_arg_names(size_factors, use_size_factors)
+    } else {
+        .Deprecated(old="'use_size_factors='")
+    }
+    size_factors
+}
+
+.get_default_sizes <- function(x, size_factors, center_sf, use_size_factors, ...) {
+    size_factors <- .switch_sf_args(size_factors, use_size_factors)
     if (is.null(size_factors)) {
         size_factors <- librarySizeFactors(x, ...)
     }
