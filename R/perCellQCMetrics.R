@@ -30,6 +30,10 @@
 #' \itemize{
 #' \item \code{sum}: numeric, the sum of counts for each cell.
 #' \item \code{detected}: numeric, the number of observations above \code{detection.limit}.
+#' }
+#'
+#' If \code{flatten=FALSE}, the DataFrame will contain the additional columns:
+#' \itemize{
 #' \item \code{percent_top}: numeric matrix, the percentage of counts assigned to the percent_topage of most highly expressed genes.
 #' Each column of the matrix corresponds to an entry of the sorted \code{percent_top}, in increasing order.
 #' \item \code{subsets}: A nested DataFrame containing statistics for each subset, see Details.
@@ -39,7 +43,7 @@
 #' This is only returned for the SingleCellExperiment method.
 #' }
 #'
-#' If \code{flatten=TRUE}, the nested DataFrames are flattened to remove the hierarchical structure.
+#' If \code{flatten=TRUE}, nested matrices and DataFrames are flattened to remove the hierarchical structure from the output DataFrame.
 #' 
 #' @author Aaron Lun
 #' 
@@ -107,13 +111,14 @@
 #' stats
 #'
 #' # With subsets.
-#' stats2 <- perCellQCMetrics(example_sce, subsets=list(Mito=1:10))
+#' stats2 <- perCellQCMetrics(example_sce, subsets=list(Mito=1:10), 
+#'     flatten=FALSE)
 #' stats2$subsets
 #'
 #' # With alternative Experiments.
 #' pretend.spike <- ifelse(seq_len(nrow(example_sce)) < 10, "Spike", "Gene")
 #' alt_sce <- splitSCEByAlt(example_sce, pretend.spike)
-#' stats3 <- perCellQCMetrics(alt_sce)
+#' stats3 <- perCellQCMetrics(alt_sce, flatten=FALSE)
 #' stats3$altexps
 #'
 #' @export
@@ -124,7 +129,7 @@ NULL
 #' @importFrom BiocParallel bpmapply SerialParam
 #' @importClassesFrom S4Vectors DataFrame
 .per_cell_qc_metrics <- function(x, subsets = NULL, percent_top = c(50, 100, 200, 500), 
-    detection.limit = 0, BPPARAM=SerialParam(), flatten=FALSE) 
+    detection.limit = 0, BPPARAM=SerialParam(), flatten=TRUE) 
 {
     if (length(subsets) && is.null(names(subsets))){ 
         stop("'subsets' must be named")
@@ -200,7 +205,7 @@ setMethod("perCellQCMetrics", "SummarizedExperiment", function(x, ..., exprs_val
 #' @importFrom SingleCellExperiment altExp altExpNames
 #' @importClassesFrom S4Vectors DataFrame
 setMethod("perCellQCMetrics", "SingleCellExperiment", function(x, 
-    subsets=NULL, percent_top=c(50, 100, 200, 500), ..., flatten=FALSE,
+    subsets=NULL, percent_top=c(50, 100, 200, 500), ..., flatten=TRUE,
     exprs_values="counts", use_altexps=TRUE) 
 {
     # subsets and percent_top need to be explicitly listed,

@@ -22,8 +22,12 @@
 #' \itemize{
 #' \item \code{mean}: numeric, the mean counts for each feature.
 #' \item \code{detected}: numeric, the percentage of observations above \code{detection_limit}.
-#' \item \code{subsets}: A nested DataFrame containing statistics for each subset, see Details.
 #' }
+#'
+#' If \code{flatten=FALSE}, the output DataFrame also contains the \code{subsets} field.
+#' This a nested DataFrame containing per-feature QC statistics for each subset of columns.
+#'
+#' If \code{flatten=TRUE}, \code{subsets} is flattened to remove the hierarchical structure.
 #' 
 #' @author Aaron Lun
 #' 
@@ -76,7 +80,7 @@ NULL
 #' @importFrom S4Vectors DataFrame
 #' @importFrom BiocParallel bpmapply SerialParam
 #' @importClassesFrom S4Vectors DataFrame
-.per_feature_qc_metrics <- function(x, subsets = NULL, detection_limit = 0, BPPARAM=SerialParam(), flatten=FALSE) 
+.per_feature_qc_metrics <- function(x, subsets = NULL, detection_limit = 0, BPPARAM=SerialParam(), flatten=TRUE) 
 {
     if (length(subsets) && is.null(names(subsets))){ 
         stop("'subsets' must be named")
