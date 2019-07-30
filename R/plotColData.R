@@ -37,7 +37,7 @@
 #'     colData = sc_example_cell_info
 #' )
 #' example_sce <- calculateQCMetrics(example_sce)
-#' example_sce <- normalize(example_sce)
+#' example_sce <- logNormCounts(example_sce)
 #'
 #' plotColData(example_sce, y = "total_features_by_counts", 
 #'    x = "log10_total_counts", colour_by = "Mutation_Status")
