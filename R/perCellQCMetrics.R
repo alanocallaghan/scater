@@ -121,6 +121,9 @@
 #' stats3 <- perCellQCMetrics(alt_sce, flatten=FALSE)
 #' stats3$altexps
 #'
+#'
+#' @seealso 
+#' \code{\link{addQCPerCell}}, to add the QC metrics to the column metadata.
 #' @export
 #' @name perCellQCMetrics
 NULL
