@@ -194,12 +194,12 @@ calculateQCMetrics <- function(object, exprs_values="counts", feature_controls =
     percent_top <- sort(as.integer(percent_top))
     
     # Add any existing spike-ins to the feature control set.
-    existing_spikes <- spikeNames(object)
+    existing_spikes <- suppressWarnings(spikeNames(object))
     if (use_spikes && length(existing_spikes)) {
         existing <- vector("list", length(existing_spikes))
         names(existing) <- existing_spikes
         for (spset in existing_spikes) {
-            existing[[spset]] <- isSpike(object, type=spset)
+            existing[[spset]] <- suppressWarnings(isSpike(object, type=spset))
         }
 
         already_there <- names(existing) %in% names(feature_controls)
