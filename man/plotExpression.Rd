@@ -80,10 +80,8 @@ example_sce <- SingleCellExperiment(
     assays = list(counts = sc_example_counts), 
     colData = sc_example_cell_info
 )
-example_sce <- normalize(example_sce)
-example_sce <- calculateQCMetrics(example_sce)
-sizeFactors(example_sce) <- colSums(counts(example_sce))
-example_sce <- normalize(example_sce)
+
+example_sce <- logNormCounts(example_sce)
 
 ## default plot
 plotExpression(example_sce, rownames(example_sce)[1:15])

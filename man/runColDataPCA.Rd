@@ -69,8 +69,7 @@ colData(example_sce) <- cbind(colData(example_sce), qc.df)
 # Can supply names of colData variables to 'variables',
 # as well as AsIs-wrapped vectors of interest.
 example_sce <- runColDataPCA(example_sce, variables=list(
-    "sum", "detected", # variable names 
-     I(log1p(qc.df$subsets$Mito$sum)) # AsIs-wrapped vectors
+    "sum", "detected", "subsets_Mito_percent" 
 ))
 reducedDimNames(example_sce)
 head(reducedDim(example_sce))

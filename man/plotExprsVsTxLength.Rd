@@ -68,7 +68,7 @@ example_sce <- SingleCellExperiment(
     assays = list(counts = sc_example_counts),
     colData = sc_example_cell_info, rowData = rd
 )
-example_sce <- normalize(example_sce)
+example_sce <- logNormCounts(example_sce)
 
 plotExprsVsTxLength(example_sce, "median_tx_length")
 plotExprsVsTxLength(example_sce, "median_tx_length", show_smooth = TRUE)

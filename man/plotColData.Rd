@@ -54,20 +54,22 @@ example_sce <- SingleCellExperiment(
     assays = list(counts = sc_example_counts), 
     colData = sc_example_cell_info
 )
-example_sce <- calculateQCMetrics(example_sce)
-example_sce <- normalize(example_sce)
 
-plotColData(example_sce, y = "total_features_by_counts", 
-   x = "log10_total_counts", colour_by = "Mutation_Status")
+example_sce <- logNormCounts(example_sce)
+colData(example_sce) <- cbind(colData(example_sce), 
+    perCellQCMetrics(example_sce))
 
-plotColData(example_sce, y = "total_features_by_counts", 
-   x = "log10_total_counts", colour_by = "Mutation_Status",
-   size_by = "Gene_0001", shape_by = "Treatment")
+plotColData(example_sce, y = "detected", x = "sum", 
+   colour_by = "Mutation_Status") + scale_x_log10()
 
-plotColData(example_sce, y = "Treatment", 
-   x = "log10_total_counts", colour_by = "Mutation_Status")
+plotColData(example_sce, y = "detected", x = "sum", 
+   colour_by = "Mutation_Status", size_by = "Gene_0001", 
+   shape_by = "Treatment") + scale_x_log10()
 
-plotColData(example_sce, y = "total_features_by_counts", 
+plotColData(example_sce, y = "Treatment", x = "sum", 
+   colour_by = "Mutation_Status") + scale_y_log10() # flipped violin.
+
+plotColData(example_sce, y = "detected", 
    x = "Cell_Cycle", colour_by = "Mutation_Status")
 
 }

@@ -11,14 +11,15 @@
 perCellQCMetrics(x, ...)
 
 \S4method{perCellQCMetrics}{ANY}(x, subsets = NULL, percent_top = c(50,
-  100, 200, 500), detection.limit = 0, BPPARAM = SerialParam())
+  100, 200, 500), detection.limit = 0, BPPARAM = SerialParam(),
+  flatten = TRUE)
 
 \S4method{perCellQCMetrics}{SummarizedExperiment}(x, ...,
   exprs_values = "counts")
 
 \S4method{perCellQCMetrics}{SingleCellExperiment}(x, subsets = NULL,
-  percent_top = c(50, 100, 200, 500), ..., exprs_values = "counts",
-  use_altexps = TRUE)
+  percent_top = c(50, 100, 200, 500), ..., flatten = TRUE,
+  exprs_values = "counts", use_altexps = TRUE)
 }
 \arguments{
 \item{x}{A numeric matrix of counts with cells in columns and features in rows.
@@ -40,6 +41,8 @@ Each element is treated as a number of top genes to compute the percentage of li
 
 \item{BPPARAM}{A BiocParallelParam object specifying whether the QC calculations should be parallelized.}
 
+\item{flatten}{Logical scalar indicating whether the nested \linkS4class{DataFrame}s in the output should be flattened.}
+
 \item{exprs_values}{A string or integer scalar indicating which \code{assays} in the \code{x} contains the count matrix.}
 
 \item{use_altexps}{Logical scalar indicating whether QC statistics should be computed for alternative Experiments in \code{x}.
@@ -55,6 +58,10 @@ This contains the following fields:
 \itemize{
 \item \code{sum}: numeric, the sum of counts for each cell.
 \item \code{detected}: numeric, the number of observations above \code{detection.limit}.
+}
+
+If \code{flatten=FALSE}, the DataFrame will contain the additional columns:
+\itemize{
 \item \code{percent_top}: numeric matrix, the percentage of counts assigned to the percent_topage of most highly expressed genes.
 Each column of the matrix corresponds to an entry of the sorted \code{percent_top}, in increasing order.
 \item \code{subsets}: A nested DataFrame containing statistics for each subset, see Details.
@@ -63,6 +70,8 @@ This is only returned for the SingleCellExperiment method.
 \item \code{total}: numeric, the total sum of counts for each cell across main and alternative Experiments.
 This is only returned for the SingleCellExperiment method.
 }
+
+If \code{flatten=TRUE}, nested matrices and DataFrames are flattened to remove the hierarchical structure from the output DataFrame.
 }
 \description{
 Compute per-cell quality control metrics for a count matrix or a \linkS4class{SingleCellExperiment}.
@@ -113,6 +122,11 @@ For example, if \code{x} contained the alternative Experiments \code{"Spike"} an
 }
 The \code{total} field contains the total sum of counts for each cell across the main and alternative Experiments.
 The \code{percent} field contains the percentage of the total count in each alternative Experiment for each cell.
+
+If \code{flatten=TRUE}, the nested DataFrames are flattened by concatenating the column names with underscores.
+This means that, say, the \code{subsets$Mito$sum} nested field becomes the top-level \code{subsets_Mito_sum} field.
+A flattened structure is more convenient for end-users performing interactive analyses,
+but less convenient for programmatic access as artificial construction of strings is required.
 }
 \examples{
 data("sc_example_counts")
@@ -126,15 +140,20 @@ stats <- perCellQCMetrics(example_sce)
 stats
 
 # With subsets.
-stats2 <- perCellQCMetrics(example_sce, subsets=list(Mito=1:10))
+stats2 <- perCellQCMetrics(example_sce, subsets=list(Mito=1:10), 
+    flatten=FALSE)
 stats2$subsets
 
 # With alternative Experiments.
 pretend.spike <- ifelse(seq_len(nrow(example_sce)) < 10, "Spike", "Gene")
 alt_sce <- splitSCEByAlt(example_sce, pretend.spike)
-stats3 <- perCellQCMetrics(alt_sce)
+stats3 <- perCellQCMetrics(alt_sce, flatten=FALSE)
 stats3$altexps
 
+
+}
+\seealso{
+\code{\link{addQCPerCell}}, to add the QC metrics to the column metadata.
 }
 \author{
 Aaron Lun

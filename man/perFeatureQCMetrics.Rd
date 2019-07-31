@@ -10,7 +10,7 @@
 perFeatureQCMetrics(x, ...)
 
 \S4method{perFeatureQCMetrics}{ANY}(x, subsets = NULL,
-  detection_limit = 0, BPPARAM = SerialParam())
+  detection_limit = 0, BPPARAM = SerialParam(), flatten = TRUE)
 
 \S4method{perFeatureQCMetrics}{SummarizedExperiment}(x, ...,
   exprs_values = "counts")
@@ -32,6 +32,8 @@ used to identify interesting sample subsets such as negative control wells.}
 
 \item{BPPARAM}{A BiocParallelParam object specifying whether the QC calculations should be parallelized.}
 
+\item{flatten}{Logical scalar indicating whether the nested \linkS4class{DataFrame}s in the output should be flattened.}
+
 \item{exprs_values}{A string or integer scalar indicating which \code{assays} in the \code{x} contains the count matrix.}
 }
 \value{
@@ -40,8 +42,12 @@ This contains the following fields:
 \itemize{
 \item \code{mean}: numeric, the mean counts for each feature.
 \item \code{detected}: numeric, the percentage of observations above \code{detection_limit}.
-\item \code{subsets}: A nested DataFrame containing statistics for each subset, see Details.
 }
+
+If \code{flatten=FALSE}, the output DataFrame also contains the \code{subsets} field.
+This a nested DataFrame containing per-feature QC statistics for each subset of columns.
+
+If \code{flatten=TRUE}, \code{subsets} is flattened to remove the hierarchical structure.
 }
 \description{
 Compute per-feature quality control metrics for a count matrix or a \linkS4class{SummarizedExperiment}.
@@ -68,6 +74,11 @@ For example, if \code{subsets} contained \code{"empty"} and \code{"cellpool"}, t
           +-- ratio
 }
 The \code{ratio} field contains the ratio of the mean within each subset to the mean across all cells.
+
+If \code{flatten=TRUE}, the nested DataFrames are flattened by concatenating the column names with underscores.
+This means that, say, the \code{subsets$empty$mean} nested field becomes the top-level \code{subsets_empty_mean} field.
+A flattened structure is more convenient for end-users performing interactive analyses,
+but less convenient for programmatic access as artificial construction of strings is required.
 }
 \examples{
 data("sc_example_counts")
@@ -84,6 +95,9 @@ stats
 stats2 <- perFeatureQCMetrics(example_sce, subsets=list(Empty=1:10))
 stats2$subsets
 
+}
+\seealso{
+\code{\link{addQCPerFeature}}, to add the QC metrics to the row metadata.
 }
 \author{
 Aaron Lun
