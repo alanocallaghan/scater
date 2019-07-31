@@ -54,13 +54,12 @@ example_sce <- SingleCellExperiment(
     assays = list(counts = sc_example_counts), 
     colData = sc_example_cell_info
 )
-example_sce <- calculateQCMetrics(example_sce,
-    feature_controls = list(ERCC=1:40))
-example_sce <- normalize(example_sce)
 
-plotRowData(example_sce, y="n_cells_by_counts", x="log10_total_counts")
-plotRowData(example_sce, y="n_cells_by_counts", 
-   size_by ="log10_total_counts",
-   colour_by = "is_feature_control")
+example_sce <- logNormCounts(example_sce)
+rowData(example_sce) <- cbind(rowData(example_sce), 
+    perFeatureQCMetrics(example_sce))
+
+plotRowData(example_sce, y="detected", x="mean") +
+    scale_x_log10()
 
 }

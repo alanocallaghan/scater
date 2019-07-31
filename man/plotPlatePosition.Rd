@@ -57,8 +57,7 @@ example_sce <- SingleCellExperiment(
     assays = list(counts = sc_example_counts),
     colData = sc_example_cell_info
 )
-example_sce <- normalize(example_sce)
-example_sce <- calculateQCMetrics(example_sce)
+example_sce <- logNormCounts(example_sce)
 
 ## define plate positions
 example_sce$plate_position <- paste0(
@@ -69,7 +68,8 @@ example_sce$plate_position <- paste0(
 ## plot plate positions
 plotPlatePosition(example_sce, colour_by = "Mutation_Status")
 
-plotPlatePosition(example_sce, shape_by = "Treatment", colour_by = "Gene_0004")
+plotPlatePosition(example_sce, shape_by = "Treatment", 
+    colour_by = "Gene_0004")
 
 plotPlatePosition(example_sce, shape_by = "Treatment", size_by = "Gene_0001",
     colour_by = "Cell_Cycle")
