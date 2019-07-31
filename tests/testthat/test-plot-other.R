@@ -1,7 +1,9 @@
 ## Tests for other plotting functions
 ## library(scater); library(testthat); source("setup-sce.R"); source("test-plot-other.R")
 
-example_sce <- calculateQCMetrics(normed, exprs_values="counts")
+example_sce <- normed 
+colData(example_sce) <- cbind(colData(example_sce), perCellQCMetrics(example_sce))
+rowData(example_sce) <- cbind(rowData(example_sce), perFeatureQCMetrics(example_sce))
 
 #################################################
 # Testing plotHeatmap
@@ -76,8 +78,10 @@ test_that("we can produce plots showing cells in plate position", {
 # Testing plotColData and plotRowData
 
 test_that("we can produce plots for column metadata", {
-    for (y in c("total_features_by_counts", "Mutation_Status")) { # discrete or continuous.
-        for (x in list(NULL, "total_counts", "Cell_Cycle")) { # nothing, discrete or continuous. 
+    example_sce <- addQCPerCell(example_sce)
+
+    for (y in c("detected", "Mutation_Status")) { # discrete or continuous.
+        for (x in list(NULL, "sum", "Cell_Cycle")) { # nothing, discrete or continuous. 
               expect_s3_class(plotColData(example_sce, x = x, y = y, colour_by = "Treatment"), "ggplot")
               expect_s3_class(plotColData(example_sce, x = x, y = y, size_by = "Gene_0001"), "ggplot")
               expect_s3_class(plotColData(example_sce, x = x, y = y, shape_by = "Treatment"), "ggplot")
@@ -85,34 +89,36 @@ test_that("we can produce plots for column metadata", {
     }
 
     # Testing more visualization schemes.
-    expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Cell_Cycle", size_by = "Gene_0001"), "ggplot")
-    expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
-    expect_s3_class(plotColData(example_sce, "total_counts", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
-    expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+    expect_s3_class(plotColData(example_sce, "sum", colour_by = "Cell_Cycle", size_by = "Gene_0001"), "ggplot")
+    expect_s3_class(plotColData(example_sce, "sum", colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
+    expect_s3_class(plotColData(example_sce, "sum", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+    expect_s3_class(plotColData(example_sce, "sum", colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     
     # Testing that other arguments are passed through.
-    expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment", add_legend = FALSE), "ggplot")
-    expect_s3_class(plotColData(example_sce, "total_counts", size_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
-    expect_s3_class(plotColData(example_sce, "total_counts", colour_by = "Treatment", by_show_single = TRUE), "ggplot")
+    expect_s3_class(plotColData(example_sce, "sum", colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment", add_legend = FALSE), "ggplot")
+    expect_s3_class(plotColData(example_sce, "sum", size_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
+    expect_s3_class(plotColData(example_sce, "sum", colour_by = "Treatment", by_show_single = TRUE), "ggplot")
 
     # Fiddling with all the semi-analysis options.
-    expect_s3_class(plotColData(example_sce, "total_counts", show_violin=FALSE), "ggplot")
-    expect_s3_class(plotColData(example_sce, "total_counts", show_median=TRUE), "ggplot")
-    expect_s3_class(plotColData(example_sce, "total_counts", jitter_type="jitter"), "ggplot")
+    expect_s3_class(plotColData(example_sce, "sum", show_violin=FALSE), "ggplot")
+    expect_s3_class(plotColData(example_sce, "sum", show_median=TRUE), "ggplot")
+    expect_s3_class(plotColData(example_sce, "sum", jitter_type="jitter"), "ggplot")
 
-    expect_s3_class(plotColData(example_sce, "total_counts", x="total_features_by_counts", show_smooth=TRUE), "ggplot")
-    expect_s3_class(plotColData(example_sce, "total_counts", x="total_features_by_counts", show_smooth=TRUE, show_se=FALSE), "ggplot")
+    expect_s3_class(plotColData(example_sce, "sum", x="detected", show_smooth=TRUE), "ggplot")
+    expect_s3_class(plotColData(example_sce, "sum", x="detected", show_smooth=TRUE, show_se=FALSE), "ggplot")
 
     # Checking that it doesn't try to retrieve expression data.
     expect_error(plotColData(example_sce, "Gene_0001", exprs_values = "counts"), "cannot find")
-    expect_error(plotColData(example_sce, "total_counts", x="Gene_0001", exprs_values = "counts"), "cannot find")
+    expect_error(plotColData(example_sce, "sum", x="Gene_0001", exprs_values = "counts"), "cannot find")
 })
 
 test_that("we can produce plots for row metadata", {
     rowData(example_sce)$WHEE <- rep(LETTERS[1:10], length.out=nrow(example_sce))
+    rowData(example_sce)$is_feature_control <- rbinom(nrow(example_sce), 1, 0.5)
+    example_sce <- addQCPerFeature(example_sce)
 
-    for (y in c("mean_counts", "is_feature_control")) { # discrete or continuous.
-        for (x in list(NULL, "n_cells_by_counts", "WHEE")) { # nothing, discrete or continuous. 
+    for (y in c("mean", "is_feature_control")) { # discrete or continuous.
+        for (x in list(NULL, "detected", "WHEE")) { # nothing, discrete or continuous. 
               expect_s3_class(plotRowData(example_sce, x = x, y = y, colour_by = "WHEE"), "ggplot")
               expect_s3_class(plotRowData(example_sce, x = x, y = y, size_by = "Cell_001"), "ggplot")
               expect_s3_class(plotRowData(example_sce, x = x, y = y, shape_by = "WHEE"), "ggplot")
@@ -120,41 +126,41 @@ test_that("we can produce plots for row metadata", {
     }
 
     # Testing more visualization schemes.
-    expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", size_by = "Cell_002"), "ggplot")
-    expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", shape_by = "WHEE"), "ggplot")
-    expect_s3_class(plotRowData(example_sce, "total_counts", size_by = "Cell_002", shape_by = "WHEE"), "ggplot")
-    expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", size_by = "Cell_002", shape_by = "WHEE"), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "mean", colour_by = "is_feature_control", size_by = "Cell_002"), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "mean", colour_by = "is_feature_control", shape_by = "WHEE"), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "mean", size_by = "Cell_002", shape_by = "WHEE"), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "mean", colour_by = "is_feature_control", size_by = "Cell_002", shape_by = "WHEE"), "ggplot")
     
     # Testing that other arguments are passed through.
-    expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", size_by = "Cell_002", shape_by = "WHEE", add_legend = FALSE), "ggplot")
-    expect_s3_class(plotRowData(example_sce, "total_counts", size_by = "Cell_002", by_exprs_values = "counts"), "ggplot")
-    expect_s3_class(plotRowData(example_sce, "total_counts", colour_by = "is_feature_control", by_show_single = TRUE), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "mean", colour_by = "is_feature_control", size_by = "Cell_002", shape_by = "WHEE", add_legend = FALSE), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "mean", size_by = "Cell_002", by_exprs_values = "counts"), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "mean", colour_by = "is_feature_control", by_show_single = TRUE), "ggplot")
 
     # Fiddling with all the semi-analysis options.
-    expect_s3_class(plotRowData(example_sce, "total_counts", show_violin=FALSE), "ggplot")
-    expect_s3_class(plotRowData(example_sce, "total_counts", show_median=TRUE), "ggplot")
-    expect_s3_class(plotRowData(example_sce, "total_counts", jitter_type="jitter"), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "mean", show_violin=FALSE), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "mean", show_median=TRUE), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "mean", jitter_type="jitter"), "ggplot")
 
-    expect_s3_class(plotRowData(example_sce, "total_counts", x="n_cells_by_counts", show_smooth=TRUE), "ggplot")
-    expect_s3_class(plotRowData(example_sce, "total_counts", x="n_cells_by_counts", show_smooth=TRUE, show_se=FALSE), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "mean", x="detected", show_smooth=TRUE), "ggplot")
+    expect_s3_class(plotRowData(example_sce, "mean", x="detected", show_smooth=TRUE, show_se=FALSE), "ggplot")
 
     # Checking that it doesn't try to retrieve expression data.
     expect_error(plotRowData(example_sce, "Cell_002", exprs_values = "counts"), "cannot find")
-    expect_error(plotRowData(example_sce, "total_counts", x="Cell_002", exprs_values = "counts"), "cannot find")
+    expect_error(plotRowData(example_sce, "mean", x="Cell_002", exprs_values = "counts"), "cannot find")
 })
 
 test_that("plotRowData works for other fields", {
     rowData(example_sce)$WHEE <- rep(LETTERS[1:10], length.out=nrow(example_sce))
     rowData(example_sce)$STUFF <- rep(letters[1:10], length.out=nrow(example_sce))
 
-    gg <- plotRowData(example_sce, "total_counts",
+    gg <- plotRowData(example_sce, "mean",
         other_fields=c("WHEE", "STUFF"))
     expect_true("WHEE" %in% colnames(gg$data))
     expect_true("STUFF" %in% colnames(gg$data))
 
     # This should throw a warning.
     rowData(example_sce)$colour_by <- rowData(example_sce)$STUFF
-    expect_warning(gg <- plotRowData(example_sce, "total_counts", 
+    expect_warning(gg <- plotRowData(example_sce, "mean", 
         colour_by="STUFF", other_fields=c("colour_by")), "duplicated")
 })
 
