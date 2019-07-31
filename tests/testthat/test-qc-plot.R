@@ -1,11 +1,8 @@
 ## Test functions for QC plotting.
 ## library(scater); library(testthat); source("setup-sce.R"); source("test-qc-plot.R")
 
-wo_qc <- sce
-
-wt_qc <- calculateQCMetrics(wo_qc, 
-    feature_controls = list(set1 = 1:500),
-    cell_controls = list(whee = 1:10))
+wt_qc <- sce
+colData(wt_qc) <- cbind(colData(wt_qc), perCellQCMetrics(wt_qc))
 
 library(Matrix)
 sparsified <- wt_qc
@@ -20,7 +17,7 @@ test_that("plotHighestExprs works on vanilla cases", {
 })
 
 test_that("plotHighestExprs' aesthetics choices work", {
-    expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = c("total_counts")), "ggplot")
+    expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = "sum"), "ggplot")
     expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = "Mutation_Status"), "ggplot")
     expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = NULL), "ggplot")
     expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
@@ -30,9 +27,6 @@ test_that("plotHighestExprs' aesthetics choices work", {
     dummy$whee <- "A"
     expect_s3_class(plotHighestExprs(dummy, colour_cells_by = "whee", by_show_single = TRUE), "ggplot")
     expect_s3_class(plotHighestExprs(dummy, colour_cells_by = "whee", by_show_single = FALSE), "ggplot")
-
-    # Checking out the error messages when values are missing.
-    plotHighestExprs(wo_qc, colour_cells_by = NULL)
 })
 
 test_that("plotHighestExprs works with different feature selections", {

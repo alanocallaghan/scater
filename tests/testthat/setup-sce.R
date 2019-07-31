@@ -6,7 +6,7 @@ sce <- SingleCellExperiment(
     colData = sc_example_cell_info)
 
 # Generating a normalized SCE for specific methods.
-suppressWarnings(normed <- normalize(sce))
+normed <- logNormCounts(sce)
 
 # Because SnowParam() is too slow, yet MulticoreParam() fails on Windows.
 # See discussion at https://github.com/Bioconductor/BiocParallel/issues/98.

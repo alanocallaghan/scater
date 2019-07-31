@@ -20,20 +20,20 @@ test_that("retrieveCellInfo works in the basic case", {
 
     # Known gene exprs. 
     out <- retrieveCellInfo(example_sce, "Gene_0001")
-    expect_identical(out$val, unname(logcounts(example_sce)["Gene_0001",]))
+    expect_identical(out$val, logcounts(example_sce)["Gene_0001",])
     expect_identical(out$name, "Gene_0001")
 
     out <- retrieveCellInfo(example_sce, "Gene_0100")
-    expect_identical(out$val, unname(logcounts(example_sce)["Gene_0100",]))
+    expect_identical(out$val, logcounts(example_sce)["Gene_0100",])
     expect_identical(out$name, "Gene_0100")
 
     # Alternative experiments.
     out <- retrieveCellInfo(example_sce, "Gene_0005.0")
-    expect_identical(out$val, unname(logcounts(altExp(example_sce))["Gene_0005.0",]))
+    expect_identical(out$val, logcounts(altExp(example_sce))["Gene_0005.0",])
     expect_identical(out$name, "Gene_0005.0")
 
     out <- retrieveCellInfo(example_sce, "Gene_0005-R")
-    expect_identical(out$val, unname(logcounts(altExp(example_sce, 2))["Gene_0005-R",]))
+    expect_identical(out$val, logcounts(altExp(example_sce, 2))["Gene_0005-R",])
     expect_identical(out$name, "Gene_0005-R")
 
     # Known not to be either.
@@ -51,7 +51,7 @@ test_that("retrieveCellInfo handles clashes correctly", {
     expect_identical(out_m$name, "Gene_0002")
 
     out_f <- retrieveCellInfo(example_sce, "Gene_0002", search = "assays")
-    expect_identical(out_f$val, unname(logcounts(example_sce)["Gene_0002",]))
+    expect_identical(out_f$val, logcounts(example_sce)["Gene_0002",])
     expect_identical(out_f$name, "Gene_0002")
 
     # Respects ordering of inputs.
@@ -98,11 +98,11 @@ test_that("retrieveFeatureInfo works for rows with strings", {
 
     # Known exprs.
     out <- retrieveFeatureInfo(example_sce, "Cell_001")
-    expect_identical(out$val, unname(logcounts(example_sce)[,"Cell_001"]))
+    expect_identical(out$val, logcounts(example_sce)[,"Cell_001"])
     expect_identical(out$name, "Cell_001")
 
     out <- retrieveFeatureInfo(example_sce, "Cell_010")
-    expect_identical(out$val, unname(logcounts(example_sce)[,"Cell_010"]))
+    expect_identical(out$val, logcounts(example_sce)[,"Cell_010"])
     expect_identical(out$name, "Cell_010")
 
     # Handles errors properly.
@@ -120,7 +120,7 @@ test_that("retrieveFeatureInfo is responsive to search mode", {
     expect_identical(out_m$name, "Cell_002")
 
     out_f <- retrieveFeatureInfo(example_sce, "Cell_002", , search = "assays")
-    expect_identical(out_f$val, unname(logcounts(example_sce)[,"Cell_002"]))
+    expect_identical(out_f$val, logcounts(example_sce)[,"Cell_002"])
     expect_identical(out_f$name, "Cell_002")
 
     expect_identical(out_m, retrieveFeatureInfo(example_sce, "Cell_002", search=c("rowData", "assays")))
