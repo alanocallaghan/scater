@@ -9,8 +9,21 @@
     Deprecated use_coldata= and related options in favour of runColDataPCA().
     \item Added runColDataPCA() function for running PCA on colData().
     Switch outlier detection strategy to avoid mvoutlier's dependency tree.
-    \item Pass all ... options to biomaRt::useMart() in getBMFeatureAnnos().
+    \item Added the annotateBMFeatures() function to replace the deprecated getBMFeatureAnnos(). 
+    Pass all ... options to biomaRt::useMart().
     \item Added name= arguments to runPCA(), etc. to change the name of the output reducedDim.
+    \item Added the logNormCounts() function to compute log-normalized counts in an alternative experiment-aware manner.
+    \item Added the perCellQCMetrics() function to compute per-cell QC metrics in an alternative experiment-aware manner.
+    \item Deprecated the normalize() method, which was considered too vague to describe what the function was actually doing.
+    \item Added the perFeatureQCMetrics() function to compute per-feature QC metrics.
+    \item Deprecated the calculateQCMetrics() function, to be replaced by the streamlined addQCPerCell() and addQCPerFeature().
+    \item Generalized all functions, where possible, to operate on SummarizedExperiment and numeric matrices.
+    This involved converting a number of them to S4 methods to take advantage of dispatch.
+    Affected functions include normalizeCounts(), calculateCPM(), librarySizeFactors() and so on.
+    \item Added calculateTSNE() and related methods to operate directly on an input matrix.
+    \item Renamed the use_dimred= argument to dimred=, along with similar renamings of other arguments for consistency.
+    \item Report all percentages of variances explained as actual variances in runPCA() and getVarianceExplained().
+    \item Added aggregateAcrossCells() and aggregateAcrossFeatures() to create a summed SingleCellExperiment object.
   }
 }
 
