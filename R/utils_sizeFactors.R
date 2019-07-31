@@ -4,7 +4,7 @@
 ## Returns a list containing a list of sets of size factor values,
 ## as well as the indices of the rows to which each size factor set is to be applied.
 {
-    fcontrols <- spikeNames(object)
+    fcontrols <- suppressWarnings(spikeNames(object))
     
     # Storing the default size factors.
     sf.list <- vector("list", length(fcontrols)+1)
@@ -14,12 +14,12 @@
     # Filling up the controls.
     counter <- 1L
     for (fc in fcontrols) {
-        specific_sf <- sizeFactors(object, type=fc)
+        specific_sf <- suppressWarnings(sizeFactors(object, type=fc))
         if (is.null(specific_sf)) {
             warning(sprintf("spike-in set '%s' should have its own size factors", fc))
         } else {
             counter <- counter+1L
-            which.current <- isSpike(object, type=fc)
+            which.current <- suppressWarnings(isSpike(object, type=fc))
             to.use[which.current] <- counter # after increment, as 1 is the NULL sizeFactors.
             sf.list[[counter]] <- specific_sf
         }
@@ -37,12 +37,14 @@
         sizeFactors(object) <- FUN(sf)
     }
      
+    suppressWarnings({
     for (sf_name in sizeFactorNames(object)) {
         sf <- sizeFactors(object, sf_name)
         if (!is.null(sf)) {
             sizeFactors(object, sf_name) <- FUN(sf)
         }
     }
+    })
 
     return(object)
 }
@@ -53,7 +55,7 @@
 {
     if (is.logical(use_size_factors)) {
         if (!use_size_factors) {
-            object <- clearSizeFactors(object)
+            object <- suppressWarnings(clearSizeFactors(object))
 
             # Also eliminating spike-in information, to avoid warnings
             # when spike-in size factors are not available.
