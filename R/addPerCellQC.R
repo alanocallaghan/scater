@@ -1,6 +1,6 @@
-#' Add QC metrics
+#' Add QC to an SE
 #'
-#' Add per-feature or per-cell QC metrics to the row and column metadata, respectively, of a SummarizedExperiment object.
+#' Convenient utilities to compute QC metrics and add them to a \linkS4class{SummarizedExperiment}'s metadata.
 #'
 #' @param x A \linkS4class{SummarizedExperiment} object or one of its subclasses.
 #' @param ... For \code{addQCPerCell}, further arguments to pass to \code{\link{perCellQCMetrics}}.
@@ -11,9 +11,8 @@
 #' An object like \code{x} but with the QC metrics added to the row or column metadata.
 #'
 #' @details
-#' These are simply convenient functions that save the user from having to manually assign the QC metrics into SummarizedExperiment metadata.
-#'
-#' Any QC metrics are appended onto the existing metadata fields. 
+#' These functions are simply wrappers around \code{\link{perCellQCMetrics}} and \code{\link{perFeatureQCMetrics}}, respectively.
+#' The computed QC metrics are automatically appended onto the existing \code{\link{colData}} or \code{\link{rowData}}.
 #' No protection is provided to avoid duplicated column names.
 #'
 #' @author Aaron Lun
@@ -31,7 +30,7 @@
 #'
 #' example_sce <- addQCPerFeature(example_sce)
 #' rowData(example_sce)
-#' 
+#'
 #' @seealso
 #' \code{\link{perCellQCMetrics}} and \code{\link{perFeatureQCMetrics}}, which do the actual work.
 #' @export
