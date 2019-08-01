@@ -11,7 +11,7 @@ annotateBMFeatures(ids, biomart = "ENSEMBL_MART_ENSEMBL",
   "gene_biotype", "start_position", "end_position"), filters = id.type,
   ...)
 
-getBMFeatureAnnos(object, ids = rownames(object), ...)
+getBMFeatureAnnos(x, ids = rownames(x), ...)
 }
 \arguments{
 \item{ids}{A character vector containing feature identifiers.}
@@ -30,19 +30,22 @@ or to \code{"hgnc_symbol"} if \code{dataset="hsapiens_gene_ensembl"},}
 
 \item{filters}{String defining the type of identifier in \code{ids}, to be used as a filter in \code{\link[biomaRt]{getBM}}.}
 
-\item{...}{Further named arguments to pass to \code{biomaRt::useMart}.}
+\item{...}{For \code{annotateBMFeatures}, further named arguments to pass to \code{biomaRt::useMart}.
 
-\item{object}{A \linkS4class{SingleCellExperiment} object.}
+For \code{getBMFeatureAnnos}, further arguments to pass to \code{annotateBMFeatures}.}
+
+\item{x}{A \linkS4class{SingleCellExperiment} object.}
 }
 \value{
-A \linkS4class{DataFrame} containing feature annotation, with one row per value in \code{ids}.
+For \code{annotateBMFeatures}, a \linkS4class{DataFrame} containing feature annotation, with one row per value in \code{ids}.
+
+For \code{getBMFeatureAnnos}, \code{x} is returned containing the output of \code{annotateBMFeatures} appended to its \code{\link{rowData}}.
 }
 \description{
 Use the \pkg{biomaRt} package to add feature annotation information to an \code{\link{SingleCellExperiment}}.
 }
 \details{
-This function provides a convenient wrapper around \pkg{biomaRt} functions to quickly obtain annotation in the required format.
-For example, the output of this function can be directly added to the \code{\link{rowData}} of a \linkS4class{SummarizedExperiment}.
+These functions provide convenient wrappers around \pkg{biomaRt} to quickly obtain annotation in the required format.
 }
 \examples{
 \dontrun{
