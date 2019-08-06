@@ -8,7 +8,7 @@
 #' @param exprs_values String or integer scalar indicating which assay contains the count data. 
 #' @param log Logical scalar indicating whether normalized values should be log2-transformed.
 #' @param pseudo_count Numeric scalar specifying the pseudo-count to add when log-transforming expression values.
-#' @param center_sf Logical scalar indicating whether size fators should be centred.
+#' @param center_size_factors Logical scalar indicating whether size fators should be centred.
 #' @param use_altexps Logical scalar indicating whether normalization should be performed for alternative experiments in \code{x}.
 #' 
 #' Alternatively, a character vector specifying the names of the alternative experiments to be normalized.
@@ -33,7 +33,7 @@
 #' \code{x} is returned containing the (log-)normalized expression values in an additional assay named as \code{name}.
 #' 
 #' If \code{x} is a \linkS4class{SingleCellExperiment}, the size factors used for normalization are stored in \code{\link{sizeFactors}}.
-#' These are centered if \code{center_sf=TRUE}.
+#' These are centered if \code{center_size_factors=TRUE}.
 #'
 #' Morevoer, if there are alternative experiments and \code{use_altexps} is specified appropriately,
 #' each of the alternative experiments in \code{x} will also contain an additional assay.
@@ -58,11 +58,11 @@ NULL
 #' @export
 #' @rdname logNormCounts
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
-setMethod("logNormCounts", "SummarizedExperiment", function(x, size_factors=NULL, log=TRUE, pseudo_count=1, center_sf=TRUE, 
+setMethod("logNormCounts", "SummarizedExperiment", function(x, size_factors=NULL, log=TRUE, pseudo_count=1, center_size_factors=TRUE, 
     exprs_values="counts", name=NULL) 
 {
     FUN <- .se_lnc(exprs_values=exprs_values, log=log, pseudo_count=pseudo_count, name=name) 
-    FUN(x, size_factors=size_factors, center_sf=center_sf)
+    FUN(x, size_factors=size_factors, center_size_factors=center_size_factors)
 })
 
 #' @importFrom SummarizedExperiment assay<-
@@ -85,7 +85,7 @@ setMethod("logNormCounts", "SummarizedExperiment", function(x, size_factors=NULL
 #' @importFrom BiocGenerics sizeFactors sizeFactors<-
 #' @importFrom SingleCellExperiment altExp altExp<- int_metadata int_metadata<-
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
-setMethod("logNormCounts", "SingleCellExperiment", function(x, size_factors=NULL, log=TRUE, pseudo_count=1, center_sf=TRUE, 
+setMethod("logNormCounts", "SingleCellExperiment", function(x, size_factors=NULL, log=TRUE, pseudo_count=1, center_size_factors=TRUE, 
     exprs_values="counts", use_altexps=TRUE, name=NULL) 
 {
     # Guarantee that we get (centered) size factors back out.
@@ -96,12 +96,12 @@ setMethod("logNormCounts", "SingleCellExperiment", function(x, size_factors=NULL
             size_factors <- librarySizeFactors(x, exprs_values=exprs_values)
         }
     }
-    size_factors <- .center_sf(size_factors, center_sf)
+    size_factors <- .center_size_factors(size_factors, center_size_factors)
     sizeFactors(x) <- size_factors
 
-    # Set center_sf=FALSE, as we've already centered above.
+    # Set center_size_factors=FALSE, as we've already centered above.
     FUN <- .se_lnc(exprs_values=exprs_values, log=log, pseudo_count=pseudo_count, name=name) 
-    x <- FUN(x, size_factors=size_factors, center_sf=FALSE)
+    x <- FUN(x, size_factors=size_factors, center_size_factors=FALSE)
     if (log) {
         if (is.null(int_metadata(x)$scater)) {
             int_metadata(x)$scater <- list()
@@ -111,7 +111,7 @@ setMethod("logNormCounts", "SingleCellExperiment", function(x, size_factors=NULL
 
     use_altexps <- .get_altexps_to_use(x, use_altexps)
     for (i in use_altexps) {
-        altExp(x, i) <- FUN(altExp(x, i), size_factors=original, center_sf=center_sf)
+        altExp(x, i) <- FUN(altExp(x, i), size_factors=original, center_size_factors=center_size_factors)
     }
 
     x

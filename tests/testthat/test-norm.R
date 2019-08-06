@@ -15,7 +15,7 @@ sizeFactors(X) <- ref
 #######################################################
 
 test_that("normalizeCounts works as expected", {
-    out <- normalizeCounts(dummy, ref, center_sf=FALSE)
+    out <- normalizeCounts(dummy, ref, center_size_factors=FALSE)
     expect_equal(out, log2(t(t(dummy)/ref)+1))
 
     # With size factor centering.
@@ -124,8 +124,8 @@ test_that("logNormCounts works for SE objects", {
     sf <- runif(ncol(X))
     expect_equal(lc(logNormCounts(se, size_factors=sf)),
         normalizeCounts(cn(se), size_factors=sf))
-    expect_equal(lc(logNormCounts(se, size_factors=sf, center_sf=FALSE)), 
-        normalizeCounts(cn(se), size_factors=sf, center_sf=FALSE))
+    expect_equal(lc(logNormCounts(se, size_factors=sf, center_size_factors=FALSE)), 
+        normalizeCounts(cn(se), size_factors=sf, center_size_factors=FALSE))
  
     ## Doesn't break on silly inputs.
     expect_equal(unname(dim(logNormCounts(X[,0,drop=FALSE]))), c(ngenes, 0L))
@@ -147,7 +147,7 @@ test_that("logNormCounts works for SCE objects (basic)", {
     Y <- logNormCounts(X, size_factors=sf)
     expect_identical(sizeFactors(Y), sf/mean(sf))
 
-    Y <- logNormCounts(X, size_factors=sf, center_sf=FALSE)
+    Y <- logNormCounts(X, size_factors=sf, center_size_factors=FALSE)
     expect_identical(sizeFactors(Y), sf)
 
     # Checking that my pseudo-count appears and does not overwrite other scater stuff.
@@ -199,6 +199,6 @@ test_that("logNormCounts works for SCE objects (altExp)", {
     COMPFUN(altExp(sce4), logNormCounts(X))
 
     # Lack of centering is respected in downstream methods.
-    sce5 <- logNormCounts(sce, center_sf=FALSE)
-    COMPFUN(altExp(sce5), logNormCounts(X, center_sf=FALSE))
+    sce5 <- logNormCounts(sce, center_size_factors=FALSE)
+    COMPFUN(altExp(sce5), logNormCounts(X, center_size_factors=FALSE))
 })

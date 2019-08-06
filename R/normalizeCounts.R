@@ -12,7 +12,7 @@
 #' @param return_log Deprecated, same as \code{log}.
 #' @param pseudo_count Numeric scalar specifying the pseudo_count to add when log-transforming expression values.
 #' @param log_exprs_offset Deprecated, same as \code{pseudo_count}.
-#' @param center_sf Logical scalar indicating whether size factors should be centered at unity before being used.
+#' @param center_size_factors Logical scalar indicating whether size factors should be centered at unity before being used.
 #' @param subset_row A vector specifying the subset of rows of \code{x} for which to return a result.
 #' @param use_size_factors Deprecated, same as \code{size_factors}.
 #' @param ... For the generic, arguments to pass to specific methods.
@@ -35,7 +35,7 @@
 #' }
 #' If \code{size_factors} are supplied, they will override any size factors present in \code{x}.
 #'
-#' If \code{center_sf=TRUE}, all sets of size factors will be centered to have the same mean prior to calculation of normalized expression values.
+#' If \code{center_size_factors=TRUE}, all sets of size factors will be centered to have the same mean prior to calculation of normalized expression values.
 #' This ensures that abundances are roughly comparable between features normalized with different sets of size factors.
 #' By default, the centre mean is unity, which means that the computed \code{exprs} can be interpreted as being on the same scale as log-counts.
 #' It also means that the value of \code{pseudo_count} can be interpreted as a pseudo_count (i.e., on the same scale as the counts).
@@ -56,13 +56,13 @@ NULL
 #' @importFrom Matrix t
 #' @importClassesFrom DelayedArray DelayedMatrix
 setMethod("normalizeCounts", "DelayedMatrix", function(x, size_factors=NULL, use_size_factors=NULL,
-    log=TRUE, return_log=NULL, pseudo_count=1, log_exprs_offset=NULL, center_sf=TRUE, subset_row=NULL)
+    log=TRUE, return_log=NULL, pseudo_count=1, log_exprs_offset=NULL, center_size_factors=TRUE, subset_row=NULL)
 {
     if (!is.null(subset_row)) {
         x <- x[subset_row,,drop=FALSE]
     }
 
-    size_factors <- .get_default_sizes(x, size_factors, center_sf, use_size_factors)
+    size_factors <- .get_default_sizes(x, size_factors, center_size_factors, use_size_factors)
     norm_exprs <- t(t(x) / size_factors)
 
     pseudo_count <- .switch_arg_names(log_exprs_offset, pseudo_count)
@@ -76,10 +76,10 @@ setMethod("normalizeCounts", "DelayedMatrix", function(x, size_factors=NULL, use
 #' @export
 #' @rdname normalizeCounts
 setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL, use_size_factors=NULL,
-    log=TRUE, return_log=NULL, pseudo_count=1, log_exprs_offset=NULL, center_sf=TRUE, subset_row=NULL) 
+    log=TRUE, return_log=NULL, pseudo_count=1, log_exprs_offset=NULL, center_size_factors=TRUE, subset_row=NULL) 
 {
     subset_row <- .subset2index(subset_row, x, byrow=TRUE)
-    size_factors <- .get_default_sizes(x, size_factors, center_sf, use_size_factors, subset_row=subset_row)
+    size_factors <- .get_default_sizes(x, size_factors, center_size_factors, use_size_factors, subset_row=subset_row)
 
     pseudo_count <- .switch_arg_names(log_exprs_offset, pseudo_count)
     log <- .switch_arg_names(return_log, log)
@@ -102,16 +102,16 @@ setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL, use_size_fact
     size_factors
 }
 
-.get_default_sizes <- function(x, size_factors, center_sf, use_size_factors, ...) {
+.get_default_sizes <- function(x, size_factors, center_size_factors, use_size_factors, ...) {
     size_factors <- .switch_sf_args(size_factors, use_size_factors)
     if (is.null(size_factors)) {
         size_factors <- librarySizeFactors(x, ...)
     }
-    .center_sf(size_factors, center_sf)
+    .center_size_factors(size_factors, center_size_factors)
 }
 
-.center_sf <- function(size_factors, center_sf) {
-    if (center_sf) {
+.center_size_factors <- function(size_factors, center_size_factors) {
+    if (center_size_factors) {
         size_factors <- size_factors/mean(size_factors)
     }
     size_factors

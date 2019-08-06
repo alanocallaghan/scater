@@ -10,11 +10,11 @@
 logNormCounts(x, ...)
 
 \S4method{logNormCounts}{SummarizedExperiment}(x, size_factors = NULL,
-  log = TRUE, pseudo_count = 1, center_sf = TRUE,
+  log = TRUE, pseudo_count = 1, center_size_factors = TRUE,
   exprs_values = "counts", name = NULL)
 
 \S4method{logNormCounts}{SingleCellExperiment}(x, size_factors = NULL,
-  log = TRUE, pseudo_count = 1, center_sf = TRUE,
+  log = TRUE, pseudo_count = 1, center_size_factors = TRUE,
   exprs_values = "counts", use_altexps = TRUE, name = NULL)
 }
 \arguments{
@@ -33,7 +33,7 @@ Alternatively \code{NULL}, in which case the size factors are extracted or compu
 
 \item{pseudo_count}{Numeric scalar specifying the pseudo-count to add when log-transforming expression values.}
 
-\item{center_sf}{Logical scalar indicating whether size fators should be centred.}
+\item{center_size_factors}{Logical scalar indicating whether size fators should be centred.}
 
 \item{exprs_values}{String or integer scalar indicating which assay contains the count data.}
 
@@ -48,7 +48,7 @@ Alternatively, a character vector specifying the names of the alternative experi
 \code{x} is returned containing the (log-)normalized expression values in an additional assay named as \code{name}.
 
 If \code{x} is a \linkS4class{SingleCellExperiment}, the size factors used for normalization are stored in \code{\link{sizeFactors}}.
-These are centered if \code{center_sf=TRUE}.
+These are centered if \code{center_size_factors=TRUE}.
 
 Morevoer, if there are alternative experiments and \code{use_altexps} is specified appropriately,
 each of the alternative experiments in \code{x} will also contain an additional assay.

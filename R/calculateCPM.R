@@ -51,7 +51,7 @@ NULL
         lib.sizes <- size_factors / mean(size_factors) * mean(lib.sizes)
     }
 
-    normalizeCounts(x, size_factors=lib.sizes, log=FALSE, center_sf=FALSE)
+    normalizeCounts(x, size_factors=lib.sizes, log=FALSE, center_size_factors=FALSE)
 }
 
 #' @export

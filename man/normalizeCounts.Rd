@@ -13,13 +13,13 @@ normalizeCounts(x, ...)
 
 \S4method{normalizeCounts}{DelayedMatrix}(x, size_factors = NULL,
   use_size_factors = NULL, log = TRUE, return_log = NULL,
-  pseudo_count = 1, log_exprs_offset = NULL, center_sf = TRUE,
-  subset_row = NULL)
+  pseudo_count = 1, log_exprs_offset = NULL,
+  center_size_factors = TRUE, subset_row = NULL)
 
 \S4method{normalizeCounts}{ANY}(x, size_factors = NULL,
   use_size_factors = NULL, log = TRUE, return_log = NULL,
-  pseudo_count = 1, log_exprs_offset = NULL, center_sf = TRUE,
-  subset_row = NULL)
+  pseudo_count = 1, log_exprs_offset = NULL,
+  center_size_factors = TRUE, subset_row = NULL)
 
 \S4method{normalizeCounts}{SummarizedExperiment}(x, ...,
   exprs_values = "counts")
@@ -51,7 +51,7 @@ Alternatively \code{NULL}, in which case the size factors are extracted or compu
 
 \item{log_exprs_offset}{Deprecated, same as \code{pseudo_count}.}
 
-\item{center_sf}{Logical scalar indicating whether size factors should be centered at unity before being used.}
+\item{center_size_factors}{Logical scalar indicating whether size factors should be centered at unity before being used.}
 
 \item{subset_row}{A vector specifying the subset of rows of \code{x} for which to return a result.}
 
@@ -77,7 +77,7 @@ If none are available, it defaults to library size-derived size factors.
 }
 If \code{size_factors} are supplied, they will override any size factors present in \code{x}.
 
-If \code{center_sf=TRUE}, all sets of size factors will be centered to have the same mean prior to calculation of normalized expression values.
+If \code{center_size_factors=TRUE}, all sets of size factors will be centered to have the same mean prior to calculation of normalized expression values.
 This ensures that abundances are roughly comparable between features normalized with different sets of size factors.
 By default, the centre mean is unity, which means that the computed \code{exprs} can be interpreted as being on the same scale as log-counts.
 It also means that the value of \code{pseudo_count} can be interpreted as a pseudo_count (i.e., on the same scale as the counts).

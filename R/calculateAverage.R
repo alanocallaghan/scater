@@ -58,7 +58,7 @@ NULL
 .calculate_average <- function(x, size_factors=NULL, use_size_factors=NULL, subset_row=NULL, BPPARAM = SerialParam())
 {
     subset_row <- .subset2index(subset_row, x, byrow=TRUE)
-    size_factors <- .get_default_sizes(x, size_factors, center_sf=TRUE, use_size_factors=use_size_factors, subset_row=subset_row)
+    size_factors <- .get_default_sizes(x, size_factors, center_size_factors=TRUE, use_size_factors=use_size_factors, subset_row=subset_row)
 
     # Parallelize across *genes* to ensure numerically IDENTICAL results.
     by_core <- .split_vector_by_workers(subset_row, BPPARAM)
