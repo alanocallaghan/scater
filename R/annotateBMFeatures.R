@@ -9,16 +9,20 @@
 #' @param symbol.type String specifying the type of symbol to retrieve.
 #' If missing, this is set to \code{"mgi_symbol"} if \code{dataset="mmusculus_gene_ensembl"},
 #' or to \code{"hgnc_symbol"} if \code{dataset="hsapiens_gene_ensembl"},
-#' @param ... Further named arguments to pass to \code{biomaRt::useMart}.
 #' @param attributes Character vector defining the attributes to pass to \code{\link[biomaRt]{getBM}}.
 #' @param filters String defining the type of identifier in \code{ids}, to be used as a filter in \code{\link[biomaRt]{getBM}}.
-#' @param object A \linkS4class{SingleCellExperiment} object.
+#' @param x A \linkS4class{SingleCellExperiment} object.
+#' @param ... For \code{annotateBMFeatures}, further named arguments to pass to \code{biomaRt::useMart}.
+#'
+#' For \code{getBMFeatureAnnos}, further arguments to pass to \code{annotateBMFeatures}.
 #'
 #' @details
-#' This function provides a convenient wrapper around \pkg{biomaRt} functions to quickly obtain annotation in the required format.
-#' For example, the output of this function can be directly added to the \code{\link{rowData}} of a \linkS4class{SummarizedExperiment}.
+#' These functions provide convenient wrappers around \pkg{biomaRt} to quickly obtain annotation in the required format.
 #'
-#' @return A \linkS4class{DataFrame} containing feature annotation, with one row per value in \code{ids}.
+#' @return 
+#' For \code{annotateBMFeatures}, a \linkS4class{DataFrame} containing feature annotation, with one row per value in \code{ids}.
+#'
+#' For \code{getBMFeatureAnnos}, \code{x} is returned containing the output of \code{annotateBMFeatures} appended to its \code{\link{rowData}}.
 #' 
 #' @author Aaron Lun, based on code by Davis McCarthy
 #'
@@ -58,17 +62,8 @@ annotateBMFeatures <- function(ids, biomart="ENSEMBL_MART_ENSEMBL", dataset="mmu
 #' @rdname annotateBMFeatures
 #' @importFrom SummarizedExperiment rowData rowData<-
 #' @importFrom BiocGenerics rownames colnames
-getBMFeatureAnnos <- function(object, ids = rownames(object), ...) 
-{
-    .Deprecated(new="annotateBMFeatures")
-    feature_info_full <- annotateBMFeatures(ids, ...)
-
-    ## Drop duplicated columns that we want to replace
-    old_rdata <- rowData(object)
-    keep_cols <- !(colnames(old_rdata) %in% colnames(feature_info_full))
-    new_rdata <- cbind(old_rdata[,keep_cols], feature_info_full)
-
-    ## Add new feature annotations to SingleCellExperiment object
-    rowData(object) <- new_rdata
-    object
+getBMFeatureAnnos <- function(x, ids = rownames(x), ...) {
+    new_rdata <- annotateBMFeatures(ids, ...)
+    rowData(x) <- cbind(rowData(x), new_rdata)
+    x
 }
