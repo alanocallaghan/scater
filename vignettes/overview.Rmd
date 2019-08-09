@@ -7,6 +7,7 @@ author:
 - name: Aaron Lun
   affiliation:
   - Cancer Research UK Cambridge Institute, University of Cambridge
+date: "Revised: August 8, 2019"
 package: scater
 output:
   BiocStyle::html_document:
@@ -17,7 +18,7 @@ vignette: >
   %VignetteEncoding{UTF-8}
 ---
 
-```{r}
+```{r, echo=FALSE, results="hide"}
 knitr::opts_chunk$set(error=FALSE, warning=FALSE, message=FALSE)
 library(BiocStyle)
 ```
@@ -177,6 +178,16 @@ Here, we define small outliers (using `type="lower"`) for the _log_-total counts
 keep.total <- isOutlier(per.cell$sum, nmads=3, 
     type="lower", log=TRUE)
 filtered <- example_sce[,keep.total]
+```
+
+Detection of outliers can be done more conveniently for several common metrics using the `quickCellQC()` function.
+This uses the total count, number of detected features and the percentage of counts in gene sets of diagnostic value 
+(e.g., mitochondrial genes, spike-in transcripts) to identify which cells to discard and for what reason.
+
+```{r}
+qc.stats <- quickCellQC(per.cell, nmads=3, 
+    percent_subsets="subsets_Mito_percent")
+colSums(as.matrix(qc.stats))
 ```
 
 The `isOutlier` approach adjusts to experiment-specific aspects of the data, e.g., sequencing depth, amount of spike-in RNA added, cell type.
