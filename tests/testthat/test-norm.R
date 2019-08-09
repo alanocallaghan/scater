@@ -201,4 +201,9 @@ test_that("logNormCounts works for SCE objects (altExp)", {
     # Lack of centering is respected in downstream methods.
     sce5 <- logNormCounts(sce, center_size_factors=FALSE)
     COMPFUN(altExp(sce5), logNormCounts(X, center_size_factors=FALSE))
+
+    # Throws errors with zero-valued size factors.
+    sce6 <- sce
+    sizeFactors(altExp(sce6)) <- 0
+    expect_error(logNormCounts(sce6), 'altExp')
 })

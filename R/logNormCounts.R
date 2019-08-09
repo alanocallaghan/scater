@@ -111,7 +111,11 @@ setMethod("logNormCounts", "SingleCellExperiment", function(x, size_factors=NULL
 
     use_altexps <- .get_altexps_to_use(x, use_altexps)
     for (i in use_altexps) {
-        altExp(x, i) <- FUN(altExp(x, i), size_factors=original, center_size_factors=center_size_factors)
+        tryCatch({
+            altExp(x, i) <- FUN(altExp(x, i), size_factors=original, center_size_factors=center_size_factors)
+        }, error=function(err) {
+            stop(paste0(sprintf("failed to normalize 'altExp(x, %s)'\n", deparse(i)), err))
+        })
     }
 
     x
