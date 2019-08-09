@@ -356,13 +356,18 @@ test_that("runUMAP works with externally computed nearest neighbor results", {
     alt <- runUMAP(normedP, dimred="PCA", external_neighbors=TRUE, BNPARAM=BiocNeighbors::VptreeParam())
     expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
 
+    # Works with parallelization and more seed-related cajoling.
+    BPPARAM <- safeBPParam(2)
+    BiocParallel::bpstart(BPPARAM)
+
     set.seed(24) 
     seedSet()
-    invisible(safeBPParam(2)) # more seed-related cajoling!
     ref <- runUMAP(normedP, dimred="PCA")
     set.seed(24) 
-    alt <- runUMAP(normedP, dimred="PCA", external_neighbors=TRUE, BPPARAM=safeBPParam(2))
+    alt <- runUMAP(normedP, dimred="PCA", external_neighbors=TRUE, BPPARAM=BPPARAM)
     expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
+    
+    BiocParallel::bpstop(BPPARAM)
 })
 
 #############################################
