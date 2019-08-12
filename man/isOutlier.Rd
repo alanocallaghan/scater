@@ -39,13 +39,7 @@ This is a numeric vector of length 2 when \code{batch=NULL} for the threshold on
 Otherwise, it is a matrix with one named column per level of \code{batch} and two rows (one per threshold).
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
-    colData = sc_example_cell_info
-)
-
+example_sce <- mockSCE()
 stats <- perCellQCMetrics(example_sce)
 
 str(isOutlier(stats$sum, nmads = 3))

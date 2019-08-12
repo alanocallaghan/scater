@@ -66,15 +66,9 @@ If \code{size_factors=NULL}, size factors are obtained separately for each neste
 However, if \code{size_factors} is supplied, it will override any size factors available in the alternative experiments.
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts),
-    colData = sc_example_cell_info
-)
-
+example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
-
+assayNames(example_sce)
 }
 \seealso{
 \code{\link{normalizeCounts}}, which is used to compute the normalized expression values.

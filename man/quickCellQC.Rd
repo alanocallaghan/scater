@@ -38,16 +38,11 @@ This aims to remove cells with high spike-in or mitochondrial content.
 Users can change the number of MADs used to define an outlier or specify batches by passing appropriate arguments to \code{...}.
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
-    colData = sc_example_cell_info
-)
-
+example_sce <- mockSCE()
 df <- perCellQCMetrics(example_sce, subsets=list(Mito=1:100))
 
-discarded <- quickCellQC(df, percent_subsets="subsets_Mito_percent")
+discarded <- quickCellQC(df, percent_subsets=c(
+    "subsets_Mito_percent", "altexps_Spikes_percent"))
 colSums(as.data.frame(discarded))
 
 }

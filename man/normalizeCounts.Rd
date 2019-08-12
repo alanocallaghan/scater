@@ -83,8 +83,8 @@ By default, the centre mean is unity, which means that the computed \code{exprs}
 It also means that the value of \code{pseudo_count} can be interpreted as a pseudo_count (i.e., on the same scale as the counts).
 }
 \examples{
-data("sc_example_counts")
-normed <- normalizeCounts(sc_example_counts)
+example_sce <- mockSCE()
+normed <- normalizeCounts(example_sce)
 str(normed)
 }
 \author{

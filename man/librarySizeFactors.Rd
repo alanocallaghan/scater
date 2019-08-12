@@ -56,12 +56,8 @@ Setting \code{altexp} is occasionally useful for computing size factors from spi
 and using them on the count matrix for endogenous genes (stored in the main experiment).
 }
 \examples{
-data("sc_example_counts")
-summary(librarySizeFactors(sc_example_counts))
-
-sce <- SingleCellExperiment(list(counts=sc_example_counts))
-sce <- computeLibraryFactors(sce)
-summary(sizeFactors(sce))
+example_sce <- mockSCE()
+summary(librarySizeFactors(example_sce))
 }
 \seealso{
 \code{\link{logNormCounts}}, where these size factors are used by default.

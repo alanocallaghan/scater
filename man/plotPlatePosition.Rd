@@ -50,13 +50,7 @@ From these plate positions, the row is extracted as the letter, and the column a
 Alternatively, the row and column identities can be directly supplied by setting \code{plate_position} as a list of two factors.
 }
 \examples{
-## prepare data
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts),
-    colData = sc_example_cell_info
-)
+example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 
 ## define plate positions

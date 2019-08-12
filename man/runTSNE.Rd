@@ -104,13 +104,7 @@ If \code{dimred} is specified, the PCA step of the \code{Rtsne} function is auto
 This presumes that the existing dimensionality reduction is sufficient such that an additional PCA is not required.
 }
 \examples{
-## Set up an example SingleCellExperiment
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
-    colData = sc_example_cell_info
-)
+example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 
 example_sce <- runTSNE(example_sce, scale_features=NULL)

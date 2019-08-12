@@ -47,11 +47,7 @@ This function computes the percentage of variance in gene expression that is exp
 It allows problematic factors to be quickly identified, as well as the genes that are most affected.
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
-    colData = sc_example_cell_info)
+example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 
 r2mat <- getVarianceExplained(example_sce)

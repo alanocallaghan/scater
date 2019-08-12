@@ -48,13 +48,7 @@ If \code{y} is categorical and \code{x} is continuous, horizontal violin plots w
 If \code{x} is missing or categorical, rectangule plots will be generated where the area of a rectangle is proportional to the number of points for a combination of factors.
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
-    colData = sc_example_cell_info
-)
-
+example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 colData(example_sce) <- cbind(colData(example_sce), 
     perCellQCMetrics(example_sce))

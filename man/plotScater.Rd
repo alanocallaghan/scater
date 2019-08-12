@@ -52,14 +52,7 @@ If only one of \code{block1} and \code{block2} are specified, each panel corresp
 If both are specified, each panel corresponds to a combination of levels.
 }
 \examples{
-## Set up an example SingleCellExperiment
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
-    colData = sc_example_cell_info
-)
-
+example_sce <- mockSCE()
 plotScater(example_sce)
 plotScater(example_sce, exprs_values = "counts", colour_by = "Cell_Cycle")
 plotScater(example_sce, block1 = "Treatment", colour_by = "Cell_Cycle")

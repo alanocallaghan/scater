@@ -93,13 +93,7 @@ This can be parallelized or approximate to achieve greater speed for large data 
 The neighbor search results are then used directly to create the UMAP embedding.
 }
 \examples{
-## Set up an example SingleCellExperiment
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
-    colData = sc_example_cell_info
-)
+example_sce <- mockSCE() 
 example_sce <- logNormCounts(example_sce)
 
 example_sce <- runUMAP(example_sce, scale_features=NULL)

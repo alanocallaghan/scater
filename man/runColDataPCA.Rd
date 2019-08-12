@@ -56,20 +56,14 @@ This uses an \dQuote{outlyingness} measure computed by \code{adjOutlyingness} in
 Outliers are defined those cells with outlyingness values more than 5 MADs above the median, using \code{\link{isOutlier}}.
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts),
-    colData = sc_example_cell_info
-)
-
+example_sce <- mockSCE()
 qc.df <- perCellQCMetrics(example_sce, subset=list(Mito=1:10))
 colData(example_sce) <- cbind(colData(example_sce), qc.df)
 
 # Can supply names of colData variables to 'variables',
 # as well as AsIs-wrapped vectors of interest.
 example_sce <- runColDataPCA(example_sce, variables=list(
-    "sum", "detected", "subsets_Mito_percent" 
+    "sum", "detected", "subsets_Mito_percent", "altexps_Spikes_percent" 
 ))
 reducedDimNames(example_sce)
 head(reducedDim(example_sce))

@@ -85,13 +85,7 @@ This means that the result will change slightly across different runs.
 For full reproducibility, users should call \code{\link{set.seed}} prior to running \code{runPCA} with such algorithms.
 }
 \examples{
-## Set up an example SingleCellExperiment
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts),
-    colData = sc_example_cell_info
-)
+example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 
 example_sce <- runPCA(example_sce, scale_features=NULL)

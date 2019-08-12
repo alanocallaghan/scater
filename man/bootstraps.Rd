@@ -38,10 +38,7 @@ number of rows and columns as the \code{SingleCellExperiment} object as a
 whole.
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+example_sce <- mockSCE()
 bootstraps(example_sce)
 
 }

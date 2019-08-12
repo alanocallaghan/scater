@@ -62,13 +62,7 @@ This requires that the assay specified by \code{exprs_values} contains a \linkS4
 This avoids the need to explicitly calculate normalized expression values across a very large (possibly file-backed) matrix.
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts),
-    colData = sc_example_cell_info
-)
-
+example_sce <- mockSCE()
 example_sce <- normalize(example_sce)
 
 }

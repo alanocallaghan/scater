@@ -47,19 +47,11 @@ Convenience functions to access commonly-used assays of the
 \code{\link{SingleCellExperiment}} object.
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
-
+example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 head(logcounts(example_sce)[,1:10])
 head(exprs(example_sce)[,1:10]) # identical to logcounts()
 
-example_sce <- SingleCellExperiment(
-assays = list(norm_counts = sc_example_counts), colData = sc_example_cell_info)
-
-counts(example_sce) <- sc_example_counts
 norm_exprs(example_sce) <- log2(calculateCPM(example_sce) + 1)
 
 stand_exprs(example_sce) <- log2(calculateCPM(example_sce) + 1)

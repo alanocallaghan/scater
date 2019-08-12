@@ -66,12 +66,7 @@ Any \code{NA} values in \code{ids} are implicitly ignored and will not be consid
 This may be useful, e.g., to remove undesirable feature sets by setting their entries in \code{ids} to \code{NA}.
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
-    colData = sc_example_cell_info)
-
+example_sce <- mockSCE()
 ids <- sample(LETTERS, nrow(example_sce), replace=TRUE)
 out <- sumCountsAcrossFeatures(example_sce, ids)
 dimnames(out)

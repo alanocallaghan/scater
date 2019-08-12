@@ -76,13 +76,7 @@ Perform multi-dimensional scaling (MDS) on cells, based on the data in a SingleC
 The function \code{\link{cmdscale}} is used internally to compute the MDS components.
 }
 \examples{
-## Set up an example SingleCellExperiment
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts),
-    colData = sc_example_cell_info
-)
+example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 
 example_sce <- runMDS(example_sce, scale_features=NULL)

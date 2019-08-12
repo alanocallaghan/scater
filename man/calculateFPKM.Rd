@@ -27,12 +27,7 @@ A numeric matrix of FPKM values.
 Calculate fragments per kilobase of exon per million reads mapped (FPKM) values from the feature-level counts.
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    list(counts = sc_example_counts), 
-    colData = sc_example_cell_info)
-
+example_sce <- mockSCE()
 eff_len <- runif(nrow(example_sce), 500, 2000)
 fout <- calculateFPKM(example_sce, eff_len)
 str(fout)

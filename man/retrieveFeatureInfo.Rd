@@ -49,12 +49,7 @@ users should explicitly set \code{by} to a data.frame, DataFrame or AsIs-wrapped
 Developers can also consider setting \code{search} to control the fields that are returned.
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts),
-    colData = sc_example_cell_info
-)
+example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 rowData(example_sce)$blah <- sample(LETTERS,
     nrow(example_sce), replace=TRUE)

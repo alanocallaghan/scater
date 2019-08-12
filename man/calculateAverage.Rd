@@ -66,13 +66,7 @@ If none are available, it defaults to library size-derived size factors.
 If \code{size_factors} are supplied, they will override any size factors present in \code{x}.
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-   list(counts = sc_example_counts), 
-   colData = sc_example_cell_info)
-
-## calculate average counts
+example_sce <- mockSCE()
 ave_counts <- calculateAverage(example_sce)
 summary(ave_counts)
 }

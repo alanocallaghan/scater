@@ -73,14 +73,7 @@ If not, and \code{x} is continuous, horizontal violin plots will be generated.
 If \code{x} is missing or categorical, rectangule plots will be generated where the area of a rectangle is proportional to the number of points for a combination of factors.
 }
 \examples{
-## prepare data
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
-    colData = sc_example_cell_info
-)
-
+example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 
 ## default plot

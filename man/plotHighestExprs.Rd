@@ -48,13 +48,7 @@ The distribution of expression across all cells is shown as tick marks for each 
 These ticks can be coloured according to cell-level metadata, as specified by \code{colour_cells_by}.
 }
 \examples{
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
-    colData = sc_example_cell_info
-)
-
+example_sce <- mockSCE()
 colData(example_sce) <- cbind(colData(example_sce),
      perCellQCMetrics(example_sce))
 
