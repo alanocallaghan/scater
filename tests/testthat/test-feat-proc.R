@@ -154,6 +154,7 @@ test_that("Aggregation across cells works correctly for SCEs", {
     alt2 <- aggregateAcrossCells(sce, ids)
     expect_identical(alt, alt2)
 
+    sce <- logNormCounts(sce, log=FALSE)
     alt3 <- aggregateAcrossCells(sce, ids, use_exprs_values=c("counts", "normcounts"))
     expect_identical(counts(alt), counts(alt3))
     expect_identical(normcounts(alt3), sumCountsAcrossCells(sce, ids, exprs_values="normcounts"))

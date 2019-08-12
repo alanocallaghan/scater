@@ -1,9 +1,9 @@
 # Creating a common SCE for further operations.
-data("sc_example_counts")
-data("sc_example_cell_info")
-sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
-    colData = sc_example_cell_info)
+set.seed(100)
+sce <- mockSCE()
+
+# Killing alternative Experiments for simplicity.
+altExps(sce) <- NULL
 
 # Generating a normalized SCE for specific methods.
 normed <- logNormCounts(sce)

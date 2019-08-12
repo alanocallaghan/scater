@@ -27,6 +27,7 @@ test_that("feature selection is operational", {
 })
 
 test_that("scaling by feature variances work correctly", {
+    logcounts(normed)[100,] <- 0
     MAT <- t(logcounts(normed))
     cv <- DelayedMatrixStats::colVars(DelayedArray(MAT))
     novar <- cv < 1e-8
@@ -53,6 +54,8 @@ test_that("runPCA works as expected", {
     expect_identical(reducedDimNames(normedX), "PCA")     
     fullN <- min(dim(normed), 50L)
     expect_identical(dim(reducedDim(normedX, "PCA")), c(ncol(normed), fullN))
+
+    normedX <- runPCA(normed, ncol(normed)) 
     expect_equal(sum(attr(reducedDim(normedX), "percentVar")), 100)
 
     # Checking that it works with a restricted number of components.
@@ -67,6 +70,8 @@ test_that("runPCA works as expected", {
     expect_identical(ncol(reducedDim(normed2)), fullN)
     expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
+
+    normed3 <- runPCA(normed, scale=TRUE, ncol(normed)) 
     expect_equal(sum(attr(reducedDim(normed3), "percentVar")), 100)
 
     normed3 <- runPCA(normed, ntop = 100)

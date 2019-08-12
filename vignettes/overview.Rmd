@@ -41,12 +41,7 @@ Rows of the object correspond to features, while columns correspond to samples, 
 
 ```{r quickstart-load-data, message=FALSE, warning=FALSE}
 library(scater)
-data("sc_example_counts")
-data("sc_example_cell_info")
-example_sce <- SingleCellExperiment(
-    assays = list(counts = sc_example_counts), 
-    colData = sc_example_cell_info
-)
+example_sce <- mockSCE()
 example_sce
 ```
 
