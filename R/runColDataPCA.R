@@ -44,7 +44,7 @@
 #' # Can supply names of colData variables to 'variables',
 #' # as well as AsIs-wrapped vectors of interest.
 #' example_sce <- runColDataPCA(example_sce, variables=list(
-#'     "sum", "detected", "subsets_Mito_percent", "subsets_Spikes_percent" 
+#'     "sum", "detected", "subsets_Mito_percent", "altexps_Spikes_percent" 
 #' ))
 #' reducedDimNames(example_sce)
 #' head(reducedDim(example_sce))

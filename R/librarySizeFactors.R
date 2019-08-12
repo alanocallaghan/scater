@@ -40,11 +40,7 @@
 #' @name librarySizeFactors
 #' @examples
 #' example_sce <- mockSCE()
-#' summary(librarySizeFactors(sc_example_counts))
-#'
-#' sce <- SingleCellExperiment(list(counts=sc_example_counts))
-#' sce <- computeLibraryFactors(sce)
-#' summary(sizeFactors(sce))
+#' summary(librarySizeFactors(example_sce))
 NULL
 
 #' @importFrom Matrix colSums

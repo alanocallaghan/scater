@@ -165,7 +165,7 @@
 #' @importFrom BiocParallel SerialParam bpmapply 
 #'
 #' @examples
-#' example_Sce <- mockSCE()
+#' example_sce <- mockSCE()
 #' example_sce <- calculateQCMetrics(example_sce)
 #'
 #' ## with a set of feature controls defined

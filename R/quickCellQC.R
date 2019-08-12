@@ -31,7 +31,7 @@
 #' df <- perCellQCMetrics(example_sce, subsets=list(Mito=1:100))
 #'
 #' discarded <- quickCellQC(df, percent_subsets=c(
-#'     "subsets_Mito_percent", "subsets_Spikes_percent"))
+#'     "subsets_Mito_percent", "altexps_Spikes_percent"))
 #' colSums(as.data.frame(discarded))
 #'
 #' @seealso

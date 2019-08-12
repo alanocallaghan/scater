@@ -47,7 +47,7 @@
 #' @name normalizeCounts
 #' @examples
 #' example_sce <- mockSCE()
-#' normed <- normalizeCounts(sc_example_counts)
+#' normed <- normalizeCounts(example_sce)
 #' str(normed)
 NULL
 

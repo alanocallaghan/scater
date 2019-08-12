@@ -39,7 +39,7 @@ mockSCE <- function(ncells=200, ngenes=2000, nspikes=100) {
     cell.disp <- 100/cell.means + 0.5
     cell.data <- matrix(rnbinom(ngenes*ncells, mu=cell.means, size=1/cell.disp), ncol=ncells)
     rownames(cell.data) <- sprintf("Gene_%s", formatC(seq_len(ngenes), width=4, flag=0))
-    colnames(cell.data) <- sprintf("Cell_%s", formatC(seq_len(ncells), width=4, flag=0))
+    colnames(cell.data) <- sprintf("Cell_%s", formatC(seq_len(ncells), width=3, flag=0))
 
     sce <- SingleCellExperiment(list(counts=cell.data))
     colData(sce) <- cbind(colData(sce), DataFrame(
