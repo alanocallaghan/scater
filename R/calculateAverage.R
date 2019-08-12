@@ -43,13 +43,7 @@
 #' \code{\link{logNormCounts}}, for the calculation of normalized expression values.
 #'
 #' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#'    list(counts = sc_example_counts), 
-#'    colData = sc_example_cell_info)
-#'
-#' ## calculate average counts
+#' example_sce <- mockSCE()
 #' ave_counts <- calculateAverage(example_sce)
 #' summary(ave_counts)
 NULL

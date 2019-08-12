@@ -29,12 +29,7 @@
 #' \code{\link{normalizeCounts}}, on which this function is based.
 #'
 #' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#'     list(counts = sc_example_counts), 
-#'     colData = sc_example_cell_info)
-#'
+#' example_sce <- mockSCE()
 #' cpm(example_sce) <- calculateCPM(example_sce)
 #' str(cpm(example_sce))
 NULL

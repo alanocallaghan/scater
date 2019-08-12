@@ -25,13 +25,7 @@
 #' @author Aaron Lun
 #'
 #' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#'     assays = list(counts = sc_example_counts), 
-#'     colData = sc_example_cell_info
-#' )
-#' 
+#' example_sce <- mockSCE()
 #' stats <- perCellQCMetrics(example_sce)
 #'
 #' str(isOutlier(stats$sum, nmads = 3))

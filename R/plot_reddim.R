@@ -42,13 +42,7 @@
 #' \code{\link{plotReducedDim}}, for the underlying plotting function.
 #'
 #' @examples
-#' ## Set up an example SingleCellExperiment
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#'     assays = list(counts = sc_example_counts), 
-#'     colData = sc_example_cell_info
-#' )
+#' example_sce <- mockSCE()
 #' example_sce <- logNormCounts(example_sce)
 #' example_sce <- runPCA(example_sce)
 #'

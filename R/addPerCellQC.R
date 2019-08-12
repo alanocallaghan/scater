@@ -18,13 +18,7 @@
 #' @author Aaron Lun
 #'
 #' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#'     assays = list(counts = sc_example_counts), 
-#'     colData = sc_example_cell_info
-#' )
-#'
+#' example_sce <- mockSCE()
 #' example_sce <- addQCPerCell(example_sce)
 #' colData(example_sce)
 #'

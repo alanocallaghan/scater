@@ -39,7 +39,7 @@
 #'
 #' @name librarySizeFactors
 #' @examples
-#' data("sc_example_counts")
+#' example_sce <- mockSCE()
 #' summary(librarySizeFactors(sc_example_counts))
 #'
 #' sce <- SingleCellExperiment(list(counts=sc_example_counts))

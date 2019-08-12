@@ -15,14 +15,7 @@
 #' @seealso \code{\link{normalizeSCE}}
 #' @export
 #' @examples
-#'
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#'     assays = list(counts = sc_example_counts), 
-#'     colData = sc_example_cell_info
-#' )
-#'
+#' example_sce <- mockSCE()
 #' sizeFactors(example_sce) <- runif(ncol(example_sce))
 #' sizeFactors(example_sce, "ERCC") <- runif(ncol(example_sce))
 #' example_sce <- centreSizeFactors(example_sce)

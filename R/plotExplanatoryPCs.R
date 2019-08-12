@@ -24,13 +24,8 @@
 #'
 #' @rdname plotExplanatoryPCs
 #' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#'     assays = list(counts = sc_example_counts), 
-#'     colData = sc_example_cell_info)
+#' example_sce <- mockSCE()
 #' example_sce <- logNormCounts(example_sce)
-#'
 #' plotExplanatoryPCs(example_sce)
 plotExplanatoryPCs <- function(object, nvars_to_plot = 10, npcs_to_plot=50, theme_size=10, ...) {
     if (is(object, "SingleCellExperiment")) { 

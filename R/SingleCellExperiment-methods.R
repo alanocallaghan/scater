@@ -52,11 +52,7 @@ SET_FUN <- function(exprs_values) {
 #' @author Davis McCarthy
 #' @export
 #' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
-#'
+#' example_sce <- mockSCE()
 #' example_sce <- logNormCounts(example_sce)
 #' head(logcounts(example_sce)[,1:10])
 #' head(exprs(example_sce)[,1:10]) # identical to logcounts()
@@ -117,10 +113,7 @@ for (x in c("exprs", "norm_exprs", "stand_exprs", "fpkm")) {
 #' @aliases bootstraps bootstraps,SingleCellExperiment-method bootstraps<-,SingleCellExperiment,array-method
 #'
 #' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#' assays = list(counts = sc_example_counts), colData = sc_example_cell_info)
+#' example_sce <- mockSCE()
 #' bootstraps(example_sce)
 #'
 #' @rdname bootstraps

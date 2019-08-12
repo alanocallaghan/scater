@@ -24,11 +24,7 @@
 #' @name nexprs
 #' @export
 #' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#'     assays = list(counts = sc_example_counts), 
-#'     colData = sc_example_cell_info)
+#' example_sce <- mockSCE()
 #'
 #' nexprs(example_sce)[1:10]
 #' nexprs(example_sce, byrow = TRUE)[1:10]

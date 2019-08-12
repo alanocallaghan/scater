@@ -35,12 +35,7 @@
 #' \code{\link{calculateCPM}}, on which this function is based.
 #'
 #' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#'     assays = list(counts = sc_example_counts), 
-#'     colData = sc_example_cell_info)
-#'
+#' example_sce <- mockSCE()
 #' eff_len <- runif(nrow(example_sce), 500, 2000)
 #' tout <- calculateTPM(example_sce, lengths = eff_len)
 #' str(tout)

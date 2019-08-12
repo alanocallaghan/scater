@@ -32,17 +32,11 @@
 #' @author Davis McCarthy, with modifications by Aaron Lun
 #'
 #' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' rd <- DataFrame(gene_id = rownames(sc_example_counts),
+#' example_sce <- mockSCE()
+#' rowData(example_sce) <- DataFrame(gene_id = rownames(example_sce),
 #'     feature_id = paste("feature", rep(1:500, each = 4), sep = "_"),
 #'     median_tx_length = rnorm(2000, mean = 5000, sd = 500),
 #'     other = sample(LETTERS, 2000, replace = TRUE)
-#' )
-#' rownames(rd) <- rownames(sc_example_counts)
-#' example_sce <- SingleCellExperiment(
-#'     assays = list(counts = sc_example_counts),
-#'     colData = sc_example_cell_info, rowData = rd
 #' )
 #' example_sce <- logNormCounts(example_sce)
 #'

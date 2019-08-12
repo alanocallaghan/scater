@@ -44,12 +44,7 @@
 #' @name sumCountsAcrossCells
 #'
 #' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#'     assays = list(counts = sc_example_counts), 
-#'     colData = sc_example_cell_info)
-#'
+#' example_sce <- mockSCE()
 #' ids <- sample(LETTERS[1:5], ncol(example_sce), replace=TRUE)
 #' out <- sumCountsAcrossCells(example_sce, ids)
 #' dimnames(out)

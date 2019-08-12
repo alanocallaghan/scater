@@ -27,16 +27,11 @@
 #' @author Aaron Lun
 #'
 #' @examples
-#' data("sc_example_counts")
-#' data("sc_example_cell_info")
-#' example_sce <- SingleCellExperiment(
-#'     assays = list(counts = sc_example_counts), 
-#'     colData = sc_example_cell_info
-#' )
-#' 
+#' example_sce <- mockSCE()
 #' df <- perCellQCMetrics(example_sce, subsets=list(Mito=1:100))
 #'
-#' discarded <- quickCellQC(df, percent_subsets="subsets_Mito_percent")
+#' discarded <- quickCellQC(df, percent_subsets=c(
+#'     "subsets_Mito_percent", "subsets_Spikes_percent"))
 #' colSums(as.data.frame(discarded))
 #'
 #' @seealso
