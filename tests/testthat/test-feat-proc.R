@@ -141,6 +141,29 @@ test_that("by-cell count summarization behaves with odd inputs", {
     expect_identical(alt, ref)
 })
 
+set.seed(1000401)
+test_that("Aggregation across cells works correctly with DFs", {
+    # One factor.
+    ids <- sample(ncol(sce)/2, ncol(sce), replace=TRUE)
+    ref <- sumCountsAcrossCells(sce, ids)
+    out <- sumCountsAcrossCells(sce, DataFrame(X=ids))
+
+    expect_identical(sort(colnames(ref)), sort(as.character(out$X)))
+    m <- match(colnames(ref), as.character(out$X))
+    expect_equivalent(ref, assay(out)[,m])
+
+    # Two factors.
+    extra <- sample(LETTERS[1:3], ncol(sce), replace=TRUE)
+    combined <- paste0(ids, "-", extra)
+    ref <- sumCountsAcrossCells(sce, combined)
+    out <- sumCountsAcrossCells(sce, DataFrame(X=ids, Y=extra))
+
+    post.combined <- paste0(out$X, "-", out$Y)
+    expect_identical(sort(colnames(ref)), sort(post.combined))
+    m <- match(colnames(ref), post.combined)
+    expect_equivalent(ref, assay(out)[,m])
+})
+
 set.seed(100041)
 test_that("Aggregation across cells works correctly for SCEs", {
     ids <- paste0("CLUSTER_", sample(ncol(sce)/2, ncol(sce), replace=TRUE))
@@ -167,6 +190,28 @@ test_that("Aggregation across cells works correctly for SCEs", {
 
     copy <- aggregateAcrossCells(sce, ids, use_altexps=FALSE)
     expect_identical(altExpNames(copy), character(0))
+})
+
+set.seed(1000411)
+test_that("Aggregation across cells works correctly for SCEs with DFs", {
+    ids <- paste0("CLUSTER_", sample(ncol(sce)/2, ncol(sce), replace=TRUE))
+    extra <- sample(LETTERS[1:3], ncol(sce), replace=TRUE)
+
+    combined <- DataFrame(X=ids, Y=extra)
+    agg <- aggregateAcrossCells(sce, combined)
+    ref <- sumCountsAcrossCells(counts(sce), combined)
+
+    expect_identical(counts(agg), assay(ref))
+    expect_identical(agg$X, ref$X)
+    expect_identical(agg$Y, ref$Y)
+
+    # Same for alternative experiments.
+    copy <- sce
+    altExp(copy, "THING") <- sce
+    copy <- aggregateAcrossCells(copy, combined)
+    expect_identical(counts(altExp(copy, "THING")), assay(ref))
+    expect_identical(ref$X, altExp(copy)$X)
+    expect_identical(ref$Y, altExp(copy)$Y)
 })
 
 set.seed(100042)
