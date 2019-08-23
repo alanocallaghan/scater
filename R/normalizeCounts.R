@@ -86,7 +86,11 @@ setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL, use_size_fact
 
     norm_exprs <- .Call(cxx_norm_exprs, x, list(size_factors), integer(nrow(x)),
         pseudo_count, log, subset_row - 1L)
-    dimnames(norm_exprs) <- list(rownames(x)[subset_row], colnames(x))
+
+    if (!is.null(dimnames(x))) {
+        dimnames(norm_exprs) <- list(rownames(x)[subset_row], colnames(x))
+    }
+
     norm_exprs
 })
 
