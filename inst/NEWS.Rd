@@ -25,6 +25,7 @@
     \item Report all percentages of variances explained as actual variances in runPCA() and getVarianceExplained().
     \item Added aggregateAcrossCells() and aggregateAcrossFeatures() to create a summed SingleCellExperiment object.
     \item Added the mockSCE() function to generate example objects for the documentation.
+    \item Support multiple factors for grouping cells in sumCountsAcrossCells().
   }
 }
 
