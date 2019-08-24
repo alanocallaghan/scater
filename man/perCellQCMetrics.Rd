@@ -140,7 +140,7 @@ stats2$subsets
 
 # With alternative Experiments.
 pretend.spike <- ifelse(seq_len(nrow(example_sce)) < 10, "Spike", "Gene")
-alt_sce <- splitSCEByAlt(example_sce, pretend.spike)
+alt_sce <- splitAltExps(example_sce, pretend.spike)
 stats3 <- perCellQCMetrics(alt_sce, flatten=FALSE)
 stats3$altexps
 
