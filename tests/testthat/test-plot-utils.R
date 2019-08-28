@@ -3,10 +3,10 @@
 
 example_sce <- normed
 
-altExp(example_sce) <- normed[1:10,]
+altExp(example_sce, "thing") <- normed[1:10,]
 rownames(altExp(example_sce)) <- paste0(rownames(altExp(example_sce)), ".0")
 
-altExp(example_sce, 2) <- normed[1:5,]
+altExp(example_sce, "other") <- normed[1:5,]
 rownames(altExp(example_sce, 2)) <- paste0(rownames(altExp(example_sce, 2)), "-R")
 
 test_that("retrieveCellInfo works in the basic case", {
