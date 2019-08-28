@@ -35,6 +35,7 @@ Imports:
     BiocParallel
 Suggests: 
     BiocStyle, 
+    BiocFileCache,
     biomaRt, 
     beachmat, 
     cowplot, 
@@ -49,13 +50,13 @@ Suggests:
     Biobase, 
     limma
 VignetteBuilder: knitr
-LazyData: true
 biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,
         Visualization, DimensionReduction, Transcriptomics,
         GeneExpression, Sequencing, Software, DataImport,
         DataRepresentation, Infrastructure, Coverage
 LinkingTo: Rcpp, beachmat
 SystemRequirements: C++11
+BuildResaveData: no
 RoxygenNote: 6.1.1
 NeedsCompilation: yes
 URL: http://bioconductor.org/packages/scater/
