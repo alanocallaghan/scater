@@ -36,7 +36,7 @@ and thus is interoperable with many other Bioconductor packages such as `r Biocp
 ## Creating a `SingleCellExperiment` object
 
 We assume that you have a matrix containing expression count data summarised at the level of some features (gene, exon, region, etc.).
-First, we create a `SingleCellExperiment` object containing the data, as demonstrated below with some example data (`"sc_example_counts"`) and metadata (`"sc_example_cell_info"`): 
+First, we create a `SingleCellExperiment` object containing the data, as demonstrated below with some mocked-up example data.
 Rows of the object correspond to features, while columns correspond to samples, i.e., cells in the context of single-cell 'omics data.
 
 ```{r quickstart-load-data, message=FALSE, warning=FALSE}
