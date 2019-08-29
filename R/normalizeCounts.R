@@ -96,12 +96,13 @@ setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL, use_size_fact
 
 .switch_sf_args <- function(size_factors, use_size_factors) {
     if (isFALSE(use_size_factors)) {
-        .Deprecated(old="'use_size_factors='")
+        .Deprecated(old="use_size_factors=FALSE")
         size_factors <- NULL
     } else if (!isTRUE(use_size_factors)) {
         size_factors <- .switch_arg_names(use_size_factors, size_factors)
     } else {
-        .Deprecated(old="'use_size_factors='")
+        .Deprecated(old="use_size_factors=TRUE")
+        size_factors <- NULL
     }
     size_factors
 }
