@@ -4,7 +4,7 @@
 example_sce <- normed 
 
 test_that("we can produce PCA scatterplots", {
-    example_sce <- runPCA(example_sce)
+    example_sce <- runPCA(example_sce, BSPARAM=BiocSingular::ExactParam())
     expect_identical(reducedDimNames(example_sce), "PCA")
 
     # Checking that visual parameters work.
@@ -33,7 +33,7 @@ test_that("we can produce PCA scatterplots", {
 })
 
 test_that("we can produce PCA pairplots", {
-    example_sce <- runPCA(example_sce, ncomponents=4)
+    example_sce <- runPCA(example_sce, ncomponents=4, BSPARAM=BiocSingular::ExactParam())
     expect_identical(reducedDimNames(example_sce), "PCA")
 
     # Checking that visual parameters work.

@@ -133,7 +133,7 @@ test_that("plotExplanatoryVariables works as expected", {
 #############################################################
 # getExplanatoryPCs() tests:
 
-normed <- runPCA(normed, ncomponents=20)
+normed <- runPCA(normed, ncomponents=20, BSPARAM=BiocSingular::ExactParam())
 exppcs <- getExplanatoryPCs(normed, n_dimred=10)
 
 test_that("getExplanatoryPCs matches with a reference function", {
@@ -159,7 +159,7 @@ test_that("getExplanatoryPCs matches with a reference function", {
 test_that("getExplanatoryPCs responds to PC-specific options", {
     # Responds to differences in the reduced dimension slot.
     blah <- normed
-    normed2 <- runPCA(normed, ncomponents=10)
+    normed2 <- runPCA(normed, ncomponents=10, BSPARAM=BiocSingular::ExactParam())
     reducedDim(blah, "WHEE") <- reducedDim(normed2, "PCA")
     expect_identical(res <- getExplanatoryPCs(normed2), getExplanatoryPCs(blah, dimred="WHEE"))
     expect_identical(nrow(res), 10L)
@@ -197,7 +197,7 @@ test_that("plotExplanatoryPCs works with PC choice options", {
 
     # Handles situations where different numbers of PCs are requested.
     out <- plotExplanatoryPCs(normed, npcs=5)
-    allpcs <- runPCA(normed, ncomponents=5)
+    allpcs <- runPCA(normed, ncomponents=5, BSPARAM=BiocSingular::ExactParam())
     ref <- plotExplanatoryPCs(allpcs)
     expect_s3_class(out, "ggplot")
     expect_identical(out$data, ref$data)
