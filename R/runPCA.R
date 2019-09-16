@@ -58,13 +58,13 @@ NULL
 
 #' @importFrom DelayedMatrixStats colVars
 #' @importFrom DelayedArray DelayedArray 
-#' @importFrom BiocSingular runPCA ExactParam 
+#' @importFrom BiocSingular runPCA FastAutoParam
 #' @importFrom BiocParallel SerialParam
 .calculate_pca <- function(x, ncomponents = 50, ntop=500, 
     subset_row=NULL, feature_set = NULL, 
     scale=FALSE, scale_features = NULL,
     transposed=FALSE,
-    BSPARAM = ExactParam(), BPPARAM = SerialParam())
+    BSPARAM = FastAutoParam(), BPPARAM = SerialParam())
 {
     scale <- .switch_arg_names(scale_features, scale)
     subset_row <- .switch_arg_names(feature_set, subset_row)

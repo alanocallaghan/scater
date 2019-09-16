@@ -14,8 +14,8 @@ calculatePCA(x, ...)
 
 \S4method{calculatePCA}{ANY}(x, ncomponents = 50, ntop = 500,
   subset_row = NULL, feature_set = NULL, scale = FALSE,
-  scale_features = NULL, transposed = FALSE, BSPARAM = ExactParam(),
-  BPPARAM = SerialParam())
+  scale_features = NULL, transposed = FALSE,
+  BSPARAM = FastAutoParam(), BPPARAM = SerialParam())
 
 \S4method{calculatePCA}{SummarizedExperiment}(x, ...,
   exprs_values = "logcounts")
