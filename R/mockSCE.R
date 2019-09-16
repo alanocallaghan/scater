@@ -24,6 +24,7 @@
 #' sce <- mockSCE()
 #' sce
 #' 
+#' @aliases sc_example_counts sc_example_cell_info
 #' @export
 #' @importFrom stats rnbinom runif
 #' @importFrom S4Vectors DataFrame

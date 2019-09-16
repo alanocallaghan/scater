@@ -2,6 +2,8 @@
 % Please edit documentation in R/mockSCE.R
 \name{mockSCE}
 \alias{mockSCE}
+\alias{sc_example_counts}
+\alias{sc_example_cell_info}
 \title{Mock up a SingleCellExperiment}
 \usage{
 mockSCE(ncells = 200, ngenes = 2000, nspikes = 100)
