@@ -101,7 +101,7 @@ plotReducedDim <- function(object, dimred, use_dimred=NULL, ncomponents = 2, per
         if ( is.null(percentVar) ) {
             labs <- sprintf("Dimension %i", to_plot)
         } else {
-            labs <- sprintf("Dimension %i: %i%% variance", to_plot, round(percentVar[to_plot] * 100))
+            labs <- sprintf("Dimension %i: %i%% variance", to_plot, round(percentVar[to_plot]))
         }
 
         plot_out <- .central_plotter(df_to_plot, xlab = labs[1], ylab = labs[2],
