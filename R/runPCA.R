@@ -29,9 +29,10 @@
 #' @param transposed Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.
 #'
 #' @details 
-#' Algorithms like \code{BSPARAM=IrlbaParam()} or \code{RandomParam()} involve a random initialization, after which it converges towards the exact PCs.
+#' Fast approximate SVD algorithms like \code{BSPARAM=IrlbaParam()} or \code{RandomParam()} use a random initialization, after which they converge towards the exact PCs.
 #' This means that the result will change slightly across different runs.
 #' For full reproducibility, users should call \code{\link{set.seed}} prior to running \code{runPCA} with such algorithms.
+#' (Note that this includes \code{BSPARAM=\link{bsparam}()}, which uses approximate algorithms by default.)
 #'
 #' @return A SingleCellExperiment object containing the first \code{ncomponents} principal coordinates for each cell.
 #' By default, this is stored in the \code{"PCA"} entry of the \code{\link{reducedDims}}.
@@ -58,13 +59,13 @@ NULL
 
 #' @importFrom DelayedMatrixStats colVars
 #' @importFrom DelayedArray DelayedArray 
-#' @importFrom BiocSingular runPCA FastAutoParam
+#' @importFrom BiocSingular runPCA bsparam
 #' @importFrom BiocParallel SerialParam
 .calculate_pca <- function(x, ncomponents = 50, ntop=500, 
     subset_row=NULL, feature_set = NULL, 
     scale=FALSE, scale_features = NULL,
     transposed=FALSE,
-    BSPARAM = FastAutoParam(), BPPARAM = SerialParam())
+    BSPARAM = bsparam(), BPPARAM = SerialParam())
 {
     scale <- .switch_arg_names(scale_features, scale)
     subset_row <- .switch_arg_names(feature_set, subset_row)

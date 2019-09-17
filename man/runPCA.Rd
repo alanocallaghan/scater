@@ -14,8 +14,8 @@ calculatePCA(x, ...)
 
 \S4method{calculatePCA}{ANY}(x, ncomponents = 50, ntop = 500,
   subset_row = NULL, feature_set = NULL, scale = FALSE,
-  scale_features = NULL, transposed = FALSE,
-  BSPARAM = FastAutoParam(), BPPARAM = SerialParam())
+  scale_features = NULL, transposed = FALSE, BSPARAM = bsparam(),
+  BPPARAM = SerialParam())
 
 \S4method{calculatePCA}{SummarizedExperiment}(x, ...,
   exprs_values = "logcounts")
@@ -80,9 +80,10 @@ Perform a principal components analysis (PCA) on cells,
 based on the expression data in a SingleCellExperiment object.
 }
 \details{
-Algorithms like \code{BSPARAM=IrlbaParam()} or \code{RandomParam()} involve a random initialization, after which it converges towards the exact PCs.
+Fast approximate SVD algorithms like \code{BSPARAM=IrlbaParam()} or \code{RandomParam()} use a random initialization, after which they converge towards the exact PCs.
 This means that the result will change slightly across different runs.
 For full reproducibility, users should call \code{\link{set.seed}} prior to running \code{runPCA} with such algorithms.
+(Note that this includes \code{BSPARAM=\link{bsparam}()}, which uses approximate algorithms by default.)
 }
 \examples{
 example_sce <- mockSCE()

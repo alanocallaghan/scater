@@ -51,16 +51,16 @@ test_that("scaling by feature variances work correctly", {
 
 test_that("runPCA works as expected", {
     # Using ExactParam() simply to avoid issues due to randomness.
-    normedX <- runPCA(normed, BSPARAM=BiocSingular::ExactParam()) 
+    normedX <- runPCA(normed) 
     expect_identical(reducedDimNames(normedX), "PCA")     
     fullN <- min(dim(normed), 50L)
     expect_identical(dim(reducedDim(normedX, "PCA")), c(ncol(normed), fullN))
 
-    normedX <- runPCA(normed, ncol(normed), BSPARAM=BiocSingular::ExactParam()) 
+    normedX <- runPCA(normed, ncol(normed)) 
     expect_equal(sum(attr(reducedDim(normedX), "percentVar")), 100)
 
     # Checking that it works with a restricted number of components.
-    normedX <- runPCA(normed, ncomponents=4, BSPARAM=BiocSingular::ExactParam())
+    normedX <- runPCA(normed, ncomponents=4)
     expect_identical(reducedDimNames(normedX), "PCA")     
     expect_identical(dim(reducedDim(normedX, "PCA")), c(ncol(normedX), 4L))
     expect_true(sum(attr(reducedDim(normedX), "percentVar")) < 100)
@@ -68,23 +68,23 @@ test_that("runPCA works as expected", {
 
 test_that("runPCA responds to changes to various settings", {
     # Testing that various settings give different results.
-    normed2 <- runPCA(normed, BSPARAM=BiocSingular::ExactParam())
-    normed3 <- runPCA(normed, scale = TRUE, BSPARAM=BiocSingular::ExactParam())
+    normed2 <- runPCA(normed)
+    normed3 <- runPCA(normed, scale = TRUE)
 
     fullN <- min(dim(normed), 50L)
     expect_identical(ncol(reducedDim(normed2)), fullN)
     expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
-    normed3 <- runPCA(normed, ntop = 100, BSPARAM=BiocSingular::ExactParam())
+    normed3 <- runPCA(normed, ntop = 100)
     expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
-    normed3 <- runPCA(normed, exprs_values = "counts", BSPARAM=BiocSingular::ExactParam())
+    normed3 <- runPCA(normed, exprs_values = "counts")
     expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
-    normed3 <- runPCA(normed, subset_row = 1:100, BSPARAM=BiocSingular::ExactParam())
+    normed3 <- runPCA(normed, subset_row = 1:100)
     expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 })
@@ -92,8 +92,8 @@ test_that("runPCA responds to changes to various settings", {
 test_that("runPCA handles ntop selection", {
     most_var <- DelayedMatrixStats::rowVars(DelayedArray(logcounts(normed)))
     keep <- head(order(most_var, decreasing=TRUE), 100)
-    normed3 <- runPCA(normed, ncomponents=4, subset_row=keep, BSPARAM=BiocSingular::ExactParam())
-    normed4 <- runPCA(normed, ncomponents=4, ntop=100, BSPARAM=BiocSingular::ExactParam())
+    normed3 <- runPCA(normed, ncomponents=4, subset_row=keep)
+    normed4 <- runPCA(normed, ncomponents=4, ntop=100)
     expect_equal(reducedDim(normed3), reducedDim(normed4))    
 })
 
@@ -104,12 +104,12 @@ test_that("runPCA handles scaling", {
     rescaled[is.na(rescaled)] <- 0
     logcounts(normed_alt) <- rescaled
 
-    normed3 <- runPCA(normed_alt, ncomponents=4, scale=FALSE, ntop=Inf, BSPARAM=BiocSingular::ExactParam())
-    normed4 <- runPCA(normed, ncomponents=4, scale=TRUE, ntop=Inf, BSPARAM=BiocSingular::ExactParam())
+    normed3 <- runPCA(normed_alt, ncomponents=4, scale=FALSE, ntop=Inf)
+    normed4 <- runPCA(normed, ncomponents=4, scale=TRUE, ntop=Inf)
     expect_equal(reducedDim(normed3), reducedDim(normed4))
 
     # Checking that percentVar is computed correctly.
-    normed3 <- runPCA(normed, scale=TRUE, ncol(normed), BSPARAM=BiocSingular::ExactParam()) 
+    normed3 <- runPCA(normed, scale=TRUE, ncol(normed)) 
     expect_equal(sum(attr(reducedDim(normed3), "percentVar")), 100)
 })
 
@@ -118,8 +118,8 @@ test_that("runPCA behaves with alternative assays", {
     assay(normed_alt, "whee") <- logcounts(normed)
     logcounts(normed_alt) <- NULL
 
-    normed3 <- runPCA(normed_alt, ncomponents=4, exprs_values="whee", BSPARAM=BiocSingular::ExactParam())
-    normed4 <- runPCA(normed, ncomponents=4, BSPARAM=BiocSingular::ExactParam())
+    normed3 <- runPCA(normed_alt, ncomponents=4, exprs_values="whee")
+    normed4 <- runPCA(normed, ncomponents=4)
     expect_identical(reducedDim(normed3), reducedDim(normed4))
 })
 
@@ -216,7 +216,7 @@ test_that("runTSNE works as expected", {
 test_that("runTSNE on existing reduced dimension results works as expected", {
     # Function should not respond to any feature settings.
     set.seed(10)
-    normedP <- runPCA(normed, ncomponents = 4, BSPARAM=BiocSingular::ExactParam())
+    normedP <- runPCA(normed, ncomponents = 4)
     normed2 <- runTSNE(normedP, dimred="PCA")
 
     set.seed(10)
@@ -247,7 +247,7 @@ test_that("runTSNE on existing reduced dimension results works as expected", {
 test_that("runTSNE works with externally computed nearest neighbor results", {
     skip_on_os("windows") # https://github.com/jkrijthe/Rtsne/commit/f3f42504eeac627e4d886b1489ee289f8f9d082b#comments
 
-    normedP <- runPCA(normed, ncomponents = 20, BSPARAM=BiocSingular::ExactParam())
+    normedP <- runPCA(normed, ncomponents = 20)
 
     # Need to set the random seed to avoid different RNG states after the NN search. 
     set.seed(20) 
@@ -316,7 +316,7 @@ test_that("runUMAP works as expected", {
 test_that("runUMAP on existing reduced dimension results works as expected", {
     # Function should not respond to any feature settings.
     set.seed(10)
-    normedP <- runPCA(normed, ncomponents = 4, BSPARAM=BiocSingular::ExactParam())
+    normedP <- runPCA(normed, ncomponents = 4)
     normed2 <- runUMAP(normedP, dimred="PCA")
 
     set.seed(10)
@@ -339,7 +339,7 @@ test_that("runUMAP on existing reduced dimension results works as expected", {
 test_that("runUMAP works with externally computed nearest neighbor results", {
     skip_on_os("windows") # Use with VP-tree gives different results from internal NN search on Win32. Why? Who knows. 
 
-    normedP <- runPCA(normed, ncomponents = 20, BSPARAM=BiocSingular::ExactParam())
+    normedP <- runPCA(normed, ncomponents = 20)
 
     # Need to cajole the random seed to avoid different RNG states after the NN search. 
     seedSet <- function(...) invisible(BiocNeighbors::buildIndex(reducedDim(normedP, "PCA"), ...))
@@ -413,7 +413,7 @@ test_that("runMDS works as expected", {
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     # Testing out the use of existing reduced dimensions (this should not respond to any feature settings).
-    normedP <- runPCA(normed, ncomponents = 4, BSPARAM=BiocSingular::ExactParam())
+    normedP <- runPCA(normed, ncomponents = 4)
     normed2 <- runMDS(normedP, dimred="PCA")
 
     normed3 <- runMDS(normedP, dimred="PCA", ntop = 20)
@@ -468,7 +468,7 @@ test_that("runDiffusionMap works as expected", {
     SIGNAGNOSTIC(same=FALSE, reducedDim(normed2), reducedDim(normed3))
 
     # Testing out the use of existing reduced dimensions (this should not respond to any feature settings)
-    normedP <- runPCA(normed, ncomponents = 4, BSPARAM=BiocSingular::ExactParam())
+    normedP <- runPCA(normed, ncomponents = 4)
     normed2 <- runDiffusionMap(normedP, dimred="PCA")
 
     normed3 <- runDiffusionMap(normedP, dimred="PCA", ntop = 20)
@@ -492,7 +492,7 @@ test_that("run* functions work with sparse matrices", {
     counts(normed) <- as(counts(normed), "dgCMatrix")
     logcounts(normed) <- as(logcounts(normed), "dgCMatrix")
 
-    expect_error(runPCA(normed, BSPARAM=BiocSingular::ExactParam()), NA)
+    expect_error(runPCA(normed), NA)
     expect_error(runPCA(normed, BSPARAM=BiocSingular::IrlbaParam()), NA)
     expect_error(runTSNE(normed), NA)
     expect_error(runUMAP(normed), NA)
