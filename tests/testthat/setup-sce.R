@@ -17,3 +17,6 @@ safeBPParam <- function(nworkers) {
         BiocParallel::MulticoreParam(nworkers)
     }
 }
+
+# Using an exact algorithm to avoid needing to set the seed for reproducibility.
+options(BiocSingularParam.default=BiocSingular::ExactParam())

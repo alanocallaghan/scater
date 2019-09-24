@@ -7,6 +7,7 @@
     \item Removed deprecated method= option in runPCA().
     Increased ncomponents= default to 50.
     Deprecated use_coldata= and related options in favour of runColDataPCA().
+    Switched BSPARAM= default to bsparam().
     \item Added runColDataPCA() function for running PCA on colData().
     Switch outlier detection strategy to avoid mvoutlier's dependency tree.
     \item Added the annotateBMFeatures() function to perform annotation without modifying the input.

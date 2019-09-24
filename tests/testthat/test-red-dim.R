@@ -50,6 +50,7 @@ test_that("scaling by feature variances work correctly", {
 # Check PCA.
 
 test_that("runPCA works as expected", {
+    # Using ExactParam() simply to avoid issues due to randomness.
     normedX <- runPCA(normed) 
     expect_identical(reducedDimNames(normedX), "PCA")     
     fullN <- min(dim(normed), 50L)
@@ -63,16 +64,17 @@ test_that("runPCA works as expected", {
     expect_identical(reducedDimNames(normedX), "PCA")     
     expect_identical(dim(reducedDim(normedX, "PCA")), c(ncol(normedX), 4L))
     expect_true(sum(attr(reducedDim(normedX), "percentVar")) < 100)
+})
 
+test_that("runPCA responds to changes to various settings", {
     # Testing that various settings give different results.
     normed2 <- runPCA(normed)
     normed3 <- runPCA(normed, scale = TRUE)
+
+    fullN <- min(dim(normed), 50L)
     expect_identical(ncol(reducedDim(normed2)), fullN)
     expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
-
-    normed3 <- runPCA(normed, scale=TRUE, ncol(normed)) 
-    expect_equal(sum(attr(reducedDim(normed3), "percentVar")), 100)
 
     normed3 <- runPCA(normed, ntop = 100)
     expect_identical(ncol(reducedDim(normed3)), fullN)
@@ -85,30 +87,40 @@ test_that("runPCA works as expected", {
     normed3 <- runPCA(normed, subset_row = 1:100)
     expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
+})
 
-    # Testing that ntop selection works correctly.
+test_that("runPCA handles ntop selection", {
     most_var <- DelayedMatrixStats::rowVars(DelayedArray(logcounts(normed)))
     keep <- head(order(most_var, decreasing=TRUE), 100)
     normed3 <- runPCA(normed, ncomponents=4, subset_row=keep)
     normed4 <- runPCA(normed, ncomponents=4, ntop=100)
     expect_equal(reducedDim(normed3), reducedDim(normed4))    
+})
 
-    # Testing out the scaling (ntop=Inf, otherwise it will pick features based on scaled variance).
+test_that("runPCA handles scaling", {
+    # Setting ntop=Inf, otherwise it will pick 'normed_alt' features based on scaled variance.
     normed_alt <- normed
     rescaled <- t(scale(t(logcounts(normed_alt)), scale = TRUE))
     rescaled[is.na(rescaled)] <- 0
     logcounts(normed_alt) <- rescaled
 
-    normed3 <- runPCA(normed_alt, ncomponents=4, scale_features=FALSE, ntop=Inf)
-    normed4 <- runPCA(normed, ncomponents=4, scale_features=TRUE, ntop=Inf)
-    expect_equal(reducedDim(normed3), reducedDim(normed4))    
+    normed3 <- runPCA(normed_alt, ncomponents=4, scale=FALSE, ntop=Inf)
+    normed4 <- runPCA(normed, ncomponents=4, scale=TRUE, ntop=Inf)
+    expect_equal(reducedDim(normed3), reducedDim(normed4))
 
-    # Testing out alternative assays.
+    # Checking that percentVar is computed correctly.
+    normed3 <- runPCA(normed, scale=TRUE, ncol(normed)) 
+    expect_equal(sum(attr(reducedDim(normed3), "percentVar")), 100)
+})
+
+test_that("runPCA behaves with alternative assays", {
     normed_alt <- normed
     assay(normed_alt, "whee") <- logcounts(normed)
     logcounts(normed_alt) <- NULL
+
     normed3 <- runPCA(normed_alt, ncomponents=4, exprs_values="whee")
-    expect_equal(reducedDim(normed3), reducedDim(normedX))
+    normed4 <- runPCA(normed, ncomponents=4)
+    expect_identical(reducedDim(normed3), reducedDim(normed4))
 })
 
 test_that("runColDataPCA works as expected for QC metrics", {
@@ -144,7 +156,7 @@ test_that("runPCA works with irlba code", {
     set.seed(100)
     normedX3 <- runPCA(normed, ncomponents=4, BSPARAM=BiocSingular::IrlbaParam())
     expect_false(isTRUE(all.equal(reducedDim(normedX), reducedDim(normedX2))))
-    expect_equal(reducedDim(normedX2), reducedDim(normedX3))
+    expect_identical(reducedDim(normedX2), reducedDim(normedX3))
 })
 
 #############################################
@@ -487,4 +499,3 @@ test_that("run* functions work with sparse matrices", {
     expect_error(runDiffusionMap(normed), NA)
     expect_error(runMDS(normed), NA)
 })
-
