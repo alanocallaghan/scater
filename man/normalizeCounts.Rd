@@ -14,12 +14,14 @@ normalizeCounts(x, ...)
 \S4method{normalizeCounts}{DelayedMatrix}(x, size_factors = NULL,
   use_size_factors = NULL, log = TRUE, return_log = NULL,
   pseudo_count = 1, log_exprs_offset = NULL,
-  center_size_factors = TRUE, subset_row = NULL)
+  center_size_factors = TRUE, subset_row = NULL, downsample = FALSE,
+  down_prop = 0.01)
 
 \S4method{normalizeCounts}{ANY}(x, size_factors = NULL,
   use_size_factors = NULL, log = TRUE, return_log = NULL,
   pseudo_count = 1, log_exprs_offset = NULL,
-  center_size_factors = TRUE, subset_row = NULL)
+  center_size_factors = TRUE, subset_row = NULL, downsample = FALSE,
+  down_prop = 0.01)
 
 \S4method{normalizeCounts}{SummarizedExperiment}(x, ...,
   exprs_values = "counts")
@@ -55,6 +57,10 @@ Alternatively \code{NULL}, in which case the size factors are extracted or compu
 
 \item{subset_row}{A vector specifying the subset of rows of \code{x} for which to return a result.}
 
+\item{downsample}{Logical scalar indicating whether downsampling should be performed prior to scaling and log-transformation.}
+
+\item{down_prop}{Numeric scalar between 0 and 1 indicating the quantile to use to define the downsampling target when \code{downsample=TRUE}.}
+
 \item{exprs_values}{A string or integer scalar specifying the assay of \code{x} containing the count matrix.}
 }
 \value{
@@ -81,11 +87,22 @@ If \code{center_size_factors=TRUE}, all sets of size factors will be centered to
 This ensures that abundances are roughly comparable between features normalized with different sets of size factors.
 By default, the centre mean is unity, which means that the computed \code{exprs} can be interpreted as being on the same scale as log-counts.
 It also means that the value of \code{pseudo_count} can be interpreted as a pseudo_count (i.e., on the same scale as the counts).
+
+If \code{downsample=TRUE}, counts for each cell are randomly downsampled according to their size factors prior to log-transformation.
+This avoids major rescaling and is helpful for avoiding artifacts due to log-transformation of scaled count data.
+The downsampling proportion for each cell is theoretically computed as the reciprocal of its size factor, multiplied by the smallest size factor.
+In practice, this can lead to excessive downsampling, so we instead multiply by the \code{down_prop} quantile of the size factors.
+Cells with size factors below the chosen quantile are not downsampled and are simply scaled.
 }
 \examples{
 example_sce <- mockSCE()
 normed <- normalizeCounts(example_sce)
 str(normed)
+}
+\seealso{
+\code{\link{logNormCounts}}, which wraps this function for convenient use with SingleCellExperiment instances.
+
+\code{\link[DropletUtils]{downsampleMatrix}}, to perform the downsampling.
 }
 \author{
 Aaron Lun

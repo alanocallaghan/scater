@@ -10,39 +10,39 @@
 logNormCounts(x, ...)
 
 \S4method{logNormCounts}{SummarizedExperiment}(x, size_factors = NULL,
-  log = TRUE, pseudo_count = 1, center_size_factors = TRUE,
+  log = TRUE, pseudo_count = 1, center_size_factors = TRUE, ...,
   exprs_values = "counts", name = NULL)
 
 \S4method{logNormCounts}{SingleCellExperiment}(x, size_factors = NULL,
-  log = TRUE, pseudo_count = 1, center_size_factors = TRUE,
+  log = TRUE, pseudo_count = 1, center_size_factors = TRUE, ...,
   exprs_values = "counts", use_altexps = TRUE, name = NULL)
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} or \linkS4class{SummarizedExperiment} object containing a count matrix.}
 
-\item{...}{Arguments passed to specific methods. 
+\item{...}{For the generic, additional arguments passed to specific methods. 
 
-Alternatively, an integer or character vector specifying the alternative Experiments to use to compute QC statistics.
-
-Alternatively, \code{NULL} in which case alternative experiments are not used.}
+For the methods, additional arguments passed to \code{\link{normalizeCounts}}.}
 
 \item{size_factors}{A numeric vector of cell-specific size factors.
 Alternatively \code{NULL}, in which case the size factors are extracted or computed from \code{x}.}
 
 \item{log}{Logical scalar indicating whether normalized values should be log2-transformed.}
 
-\item{pseudo_count}{Numeric scalar specifying the pseudo-count to add when log-transforming expression values.}
+\item{pseudo_count}{Numeric scalar specifying the pseudo_count to add when log-transforming expression values.}
 
-\item{center_size_factors}{Logical scalar indicating whether size fators should be centred.}
+\item{center_size_factors}{Logical scalar indicating whether size factors should be centered at unity before being used.}
 
-\item{exprs_values}{String or integer scalar indicating which assay contains the count data.}
+\item{exprs_values}{A string or integer scalar specifying the assay of \code{x} containing the count matrix.}
 
 \item{name}{String containing an assay name for storing the output normalized values.
 Defaults to \code{"logcounts"} when \code{log=TRUE} and \code{"normcounts"} otherwise.}
 
 \item{use_altexps}{Logical scalar indicating whether normalization should be performed for alternative experiments in \code{x}.
 
-Alternatively, a character vector specifying the names of the alternative experiments to be normalized.}
+Alternatively, a character vector specifying the names of the alternative experiments to be normalized.
+
+Alternatively, \code{NULL} in which case alternative experiments are not used.}
 }
 \value{
 \code{x} is returned containing the (log-)normalized expression values in an additional assay named as \code{name}.
