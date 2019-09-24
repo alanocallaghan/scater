@@ -3,20 +3,15 @@
 #' Compute log-transformed normalized expression values from a count matrix in a \linkS4class{SingleCellExperiment} object.
 #'
 #' @param x A \linkS4class{SingleCellExperiment} or \linkS4class{SummarizedExperiment} object containing a count matrix.
-#' @param size_factors A numeric vector of cell-specific size factors.
-#' Alternatively \code{NULL}, in which case the size factors are extracted or computed from \code{x}.
-#' @param exprs_values String or integer scalar indicating which assay contains the count data. 
-#' @param log Logical scalar indicating whether normalized values should be log2-transformed.
-#' @param pseudo_count Numeric scalar specifying the pseudo-count to add when log-transforming expression values.
-#' @param center_size_factors Logical scalar indicating whether size fators should be centred.
+#' @inheritParams normalizeCounts
 #' @param use_altexps Logical scalar indicating whether normalization should be performed for alternative experiments in \code{x}.
 #' 
 #' Alternatively, a character vector specifying the names of the alternative experiments to be normalized.
-#' @param ... Arguments passed to specific methods. 
-#'
-#' Alternatively, an integer or character vector specifying the alternative Experiments to use to compute QC statistics.
 #' 
 #' Alternatively, \code{NULL} in which case alternative experiments are not used.
+#' @param ... For the generic, additional arguments passed to specific methods. 
+#'
+#' For the methods, additional arguments passed to \code{\link{normalizeCounts}}.
 #' @param name String containing an assay name for storing the output normalized values.
 #' Defaults to \code{"logcounts"} when \code{log=TRUE} and \code{"normcounts"} otherwise.
 #'
@@ -53,22 +48,20 @@ NULL
 #' @rdname logNormCounts
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
 setMethod("logNormCounts", "SummarizedExperiment", function(x, size_factors=NULL, log=TRUE, pseudo_count=1, center_size_factors=TRUE, 
-    exprs_values="counts", name=NULL) 
+    ..., exprs_values="counts", name=NULL) 
 {
-    FUN <- .se_lnc(exprs_values=exprs_values, log=log, pseudo_count=pseudo_count, name=name) 
+    FUN <- .se_lnc(exprs_values=exprs_values, log=log, pseudo_count=pseudo_count, ..., name=name) 
     FUN(x, size_factors=size_factors, center_size_factors=center_size_factors)
 })
 
 #' @importFrom SummarizedExperiment assay<-
-.se_lnc <- function(exprs_values, log, pseudo_count, name) {
-    force(exprs_values)
-    force(log)
-    force(pseudo_count)
+.se_lnc <- function(exprs_values, log, pseudo_count, ..., name) {
+    args <- list(..., exprs_values=exprs_values, log=log, pseudo_count=pseudo_count)
     if (is.null(name)) {
         name <- if (log) "logcounts" else "normcounts"
     }
     function(x, ...) {
-        out <- normalizeCounts(x, ..., exprs_values=exprs_values, log=log, pseudo_count=pseudo_count)
+        out <- do.call(normalizeCounts, c(list(x, ...), args))
         assay(x, name) <- out
         x
     }
@@ -80,7 +73,7 @@ setMethod("logNormCounts", "SummarizedExperiment", function(x, size_factors=NULL
 #' @importFrom SingleCellExperiment altExp altExp<- int_metadata int_metadata<-
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
 setMethod("logNormCounts", "SingleCellExperiment", function(x, size_factors=NULL, log=TRUE, pseudo_count=1, center_size_factors=TRUE, 
-    exprs_values="counts", use_altexps=TRUE, name=NULL) 
+    ..., exprs_values="counts", use_altexps=TRUE, name=NULL) 
 {
     # Guarantee that we get (centered) size factors back out.
     original <- size_factors
@@ -94,7 +87,7 @@ setMethod("logNormCounts", "SingleCellExperiment", function(x, size_factors=NULL
     sizeFactors(x) <- size_factors
 
     # Set center_size_factors=FALSE, as we've already centered above.
-    FUN <- .se_lnc(exprs_values=exprs_values, log=log, pseudo_count=pseudo_count, name=name) 
+    FUN <- .se_lnc(exprs_values=exprs_values, log=log, pseudo_count=pseudo_count, ..., name=name) 
     x <- FUN(x, size_factors=size_factors, center_size_factors=FALSE)
     if (log) {
         if (is.null(int_metadata(x)$scater)) {
