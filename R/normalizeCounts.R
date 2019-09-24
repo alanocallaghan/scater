@@ -15,6 +15,8 @@
 #' @param center_size_factors Logical scalar indicating whether size factors should be centered at unity before being used.
 #' @param subset_row A vector specifying the subset of rows of \code{x} for which to return a result.
 #' @param use_size_factors Deprecated, same as \code{size_factors}.
+#' @param downsample Logical scalar indicating whether downsampling should be performed prior to scaling and log-transformation.
+#' @param down_prop Numeric scalar between 0 and 1 indicating the quantile to use to define the downsampling target when \code{downsample=TRUE}.
 #' @param ... For the generic, arguments to pass to specific methods.
 #'
 #' For the SummarizedExperiment method, further arguments to pass to the ANY or \linkS4class{DelayedMatrix} methods.
@@ -40,11 +42,21 @@
 #' By default, the centre mean is unity, which means that the computed \code{exprs} can be interpreted as being on the same scale as log-counts.
 #' It also means that the value of \code{pseudo_count} can be interpreted as a pseudo_count (i.e., on the same scale as the counts).
 #'
+#' If \code{downsample=TRUE}, counts for each cell are randomly downsampled according to their size factors prior to log-transformation.
+#' This avoids major rescaling and is helpful for avoiding artifacts due to log-transformation of scaled count data.
+#' The downsampling proportion for each cell is theoretically computed as the reciprocal of its size factor, multiplied by the smallest size factor.
+#' In practice, this can lead to excessive downsampling, so we instead multiply by the \code{down_prop} quantile of the size factors.
+#' Cells with size factors below the chosen quantile are not downsampled and are simply scaled.
+#'  
 #' @return A matrix-like object of (log-)normalized expression values.
 #'
 #' @author Aaron Lun
 #'
 #' @name normalizeCounts
+#' @seealso
+#' \code{\link{logNormCounts}}, which wraps this function for convenient use with SingleCellExperiment instances.
+#'
+#' \code{\link[DropletUtils]{downsampleMatrix}}, to perform the downsampling.
 #' @examples
 #' example_sce <- mockSCE()
 #' normed <- normalizeCounts(example_sce)
@@ -56,13 +68,19 @@ NULL
 #' @importFrom Matrix t
 #' @importClassesFrom DelayedArray DelayedMatrix
 setMethod("normalizeCounts", "DelayedMatrix", function(x, size_factors=NULL, use_size_factors=NULL,
-    log=TRUE, return_log=NULL, pseudo_count=1, log_exprs_offset=NULL, center_size_factors=TRUE, subset_row=NULL)
+    log=TRUE, return_log=NULL, pseudo_count=1, log_exprs_offset=NULL, center_size_factors=TRUE, subset_row=NULL,
+    downsample=FALSE, down_prop=0.01)
 {
     if (!is.null(subset_row)) {
         x <- x[subset_row,,drop=FALSE]
     }
 
     size_factors <- .get_default_sizes(x, size_factors, center_size_factors, use_size_factors)
+    if (downsample) {
+        down.out <- .downsample_counts(x, size_factors, down_prop)
+        x <- down.out$x
+        size_factors <- down.out$size_factors
+    }
     norm_exprs <- t(t(x) / size_factors)
 
     pseudo_count <- .switch_arg_names(log_exprs_offset, pseudo_count)
@@ -76,10 +94,16 @@ setMethod("normalizeCounts", "DelayedMatrix", function(x, size_factors=NULL, use
 #' @export
 #' @rdname normalizeCounts
 setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL, use_size_factors=NULL,
-    log=TRUE, return_log=NULL, pseudo_count=1, log_exprs_offset=NULL, center_size_factors=TRUE, subset_row=NULL) 
+    log=TRUE, return_log=NULL, pseudo_count=1, log_exprs_offset=NULL, center_size_factors=TRUE, subset_row=NULL,
+    downsample=FALSE, down_prop=0.01)
 {
     subset_row <- .subset2index(subset_row, x, byrow=TRUE)
     size_factors <- .get_default_sizes(x, size_factors, center_size_factors, use_size_factors, subset_row=subset_row)
+    if (downsample) {
+        down.out <- .downsample_counts(x, size_factors, down_prop)
+        x <- down.out$x
+        size_factors <- down.out$size_factors
+    }
 
     pseudo_count <- .switch_arg_names(log_exprs_offset, pseudo_count)
     log <- .switch_arg_names(return_log, log)
@@ -120,6 +144,15 @@ setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL, use_size_fact
         size_factors <- size_factors/mean(size_factors)
     }
     size_factors
+}
+
+#' @importFrom stats quantile
+.downsample_counts <- function(x, size_factors, down_prop) {
+    target <- quantile(size_factors, probs=down_prop)
+    down.rate <- pmin(1, target/size_factors)
+    x <- DropletUtils::downsampleMatrix(x, down.rate, bycol=TRUE)
+    size_factors <- size_factors * down.rate
+    list(x=x, size_factors=size_factors)
 }
 
 #' @export
