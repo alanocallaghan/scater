@@ -96,6 +96,41 @@ test_that("normalizeCounts behaves with DelayedArray inputs", {
     expect_equal(normalizeCounts(dummy, subset_row=1:10), as.matrix(out))
 })
 
+test_that("normalizeCounts behaves with downsampling", {
+    library(DropletUtils) # loading changes the seed somehow, so do it outside.
+
+    # Testing the two extremes.
+    set.seed(1000)
+    out <- normalizeCounts(dummy, ref, downsample=TRUE, down_prop=0)
+    set.seed(1000)
+    tst <- downsampleMatrix(dummy, min(ref)/ref)
+    expect_equal(log2(tst+1), out)
+
+    out <- normalizeCounts(dummy, ref, downsample=TRUE, down_prop=1, log=FALSE)
+    tst <- normalizeCounts(dummy, ref, log=FALSE)
+    expect_identical(out==0, tst==0)
+    expect_true(mad(out/tst) <1e-8)
+
+    # Testing that it actually does the job w.r.t. equalizing coverage.
+    lsf <- colSums(dummy)
+    out <- normalizeCounts(dummy, lsf, downsample=TRUE, down_prop=0.01, log=FALSE)
+    expect_true(mad(colSums(out)) < 1e-8)
+
+    out <- normalizeCounts(dummy, lsf, downsample=TRUE, down_prop=0.05, log=FALSE)
+    expect_true(mad(colSums(out)) < 1e-8)
+
+    out <- normalizeCounts(dummy, lsf, downsample=TRUE, down_prop=0.1, log=FALSE)
+    expect_true(mad(colSums(out)) < 1e-8)
+
+    # Testing with DelayedArrays. 
+    dadum <- DelayedArray(dummy)      
+    set.seed(1000)
+    out <- normalizeCounts(dummy, ref, downsample=TRUE)
+    set.seed(1000)
+    tst <- normalizeCounts(dadum, ref, downsample=TRUE)
+    expect_equal(out, tst)
+})
+
 test_that("normalizeCounts behaves with S(C)E inputs", {
     expect_equivalent(normalizeCounts(counts(X)), 
         normalizeCounts(as(X, "SummarizedExperiment")))

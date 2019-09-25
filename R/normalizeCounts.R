@@ -151,7 +151,7 @@ setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL, use_size_fact
     target <- quantile(size_factors, probs=down_prop)
     down.rate <- pmin(1, target/size_factors)
     x <- DropletUtils::downsampleMatrix(x, down.rate, bycol=TRUE)
-    size_factors <- size_factors * down.rate
+    size_factors <- size_factors * down.rate/target
     list(x=x, size_factors=size_factors)
 }
 
