@@ -200,9 +200,12 @@ test_that("logNormCounts works for SCE objects (basic)", {
 })
 
 test_that("logNormCounts works for SCE objects (altExp)", {
+    Y <- X[1:10,]
+    counts(Y)[sample(length(counts(Y)))] <- counts(Y) # shuffling for some variety.
+
     sce <- X
-    altExp(sce, "BLAH") <- X
-    sce1 <- logNormCounts(sce)
+    altExp(sce, "BLAH") <- Y
+    sce1 <- logNormCounts(sce, use_altexps=TRUE)
 
     # Do a class round-trip to wipe out metadata added to the int_* fields.
     COMPFUN <- function(left, right) {
@@ -213,32 +216,37 @@ test_that("logNormCounts works for SCE objects (altExp)", {
         expect_equal(left, right)
     }
 
-    COMPFUN(altExp(sce1, "BLAH"), logNormCounts(X))
+    COMPFUN(altExp(sce1, "BLAH"), logNormCounts(Y))
+
+    ref <- logNormCounts(sce) # check that it doesn't affect normalization of the main assays.
+    altExps(ref) <- NULL
+    expect_identical(ref, logNormCounts(X))
 
     # Global size factors are respected.
-    sf <- runif(ncol(X))
-    sce2 <- logNormCounts(sce, size_factors=sf)
-    COMPFUN(altExp(sce2), logNormCounts(X, size_factors=sf))
+    sf <- runif(ncol(sce))
+    sce2 <- logNormCounts(sce, size_factors=sf, use_altexps=TRUE)
+    COMPFUN(altExp(sce2), logNormCounts(Y, size_factors=sf))
 
     # Other parameters are respected.
-    sce3a <- logNormCounts(sce, pseudo_count=2)
-    COMPFUN(altExp(sce3a), logNormCounts(X, pseudo_count=2))
+    sce3a <- logNormCounts(sce, pseudo_count=2, use_altexps=TRUE)
+    COMPFUN(altExp(sce3a), logNormCounts(Y, pseudo_count=2))
 
-    sce3b <- logNormCounts(sce, log=FALSE)
-    COMPFUN(altExp(sce3b), logNormCounts(X, log=FALSE))
+    sce3b <- logNormCounts(sce, log=FALSE, use_altexps=TRUE)
+    COMPFUN(altExp(sce3b), logNormCounts(Y, log=FALSE))
 
     # Internal size factors do not propagate to alternative experiments.
     sce4 <- sce
     sizeFactors(sce4) <- sf
-    sce4 <- logNormCounts(sce4)
-    COMPFUN(altExp(sce4), logNormCounts(X))
+    sce4 <- logNormCounts(sce4, use_altexps=TRUE)
+    COMPFUN(altExp(sce4), logNormCounts(Y))
 
     # Lack of centering is respected in downstream methods.
-    sce5 <- logNormCounts(sce, center_size_factors=FALSE)
-    COMPFUN(altExp(sce5), logNormCounts(X, center_size_factors=FALSE))
+    sce5 <- logNormCounts(sce, center_size_factors=FALSE, use_altexps=TRUE)
+    COMPFUN(altExp(sce5), logNormCounts(Y, center_size_factors=FALSE))
 
     # Throws errors with zero-valued size factors.
     sce6 <- sce
     sizeFactors(altExp(sce6)) <- 0
-    expect_error(logNormCounts(sce6), 'altExp')
+    expect_error(logNormCounts(sce6, use_altexps=TRUE), 'altExp')
+    expect_error(logNormCounts(sce6), NA)
 })

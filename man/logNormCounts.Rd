@@ -15,7 +15,7 @@ logNormCounts(x, ...)
 
 \S4method{logNormCounts}{SingleCellExperiment}(x, size_factors = NULL,
   log = TRUE, pseudo_count = 1, center_size_factors = TRUE, ...,
-  exprs_values = "counts", use_altexps = TRUE, name = NULL)
+  exprs_values = "counts", use_altexps = FALSE, name = NULL)
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} or \linkS4class{SummarizedExperiment} object containing a count matrix.}
@@ -50,8 +50,8 @@ Alternatively, \code{NULL} in which case alternative experiments are not used.}
 If \code{x} is a \linkS4class{SingleCellExperiment}, the size factors used for normalization are stored in \code{\link{sizeFactors}}.
 These are centered if \code{center_size_factors=TRUE}.
 
-Morevoer, if there are alternative experiments and \code{use_altexps} is specified appropriately,
-each of the alternative experiments in \code{x} will also contain an additional assay.
+If \code{x} contains alternative experiments and \code{use_altexps=TRUE},  each of the alternative experiments in \code{x} will also contain an additional assay.
+This can be limited to particular \code{\link{altExps}} entries by specifying them in \code{use_altexps}.
 }
 \description{
 Compute log-transformed normalized expression values from a count matrix in a \linkS4class{SingleCellExperiment} object.
@@ -61,7 +61,9 @@ This function is a convenience wrapper around \code{\link{normalizeCounts}}.
 It returns a \linkS4class{SingleCellExperiment} or \linkS4class{SummarizedExperiment} containing the normalized values in a separate assay.
 This makes it easier to perform normalization by avoiding book-keeping errors during a long analysis workflow.
 
-If \code{x} is a \linkS4class{SingleCellExperiment} that contains alternative experiments, normalized values are computed and stored within each alternative experiment.
+If \code{x} is a \linkS4class{SingleCellExperiment} that contains alternative experiments, normalized values can be computed and stored within each alternative experiment by setting \code{use_altexps} appropriately.
+By default, \code{use_altexps=FALSE} to avoid problems from attempting to library size-normalize alternative experiments that have zero total counts for some cells.
+
 If \code{size_factors=NULL}, size factors are obtained separately for each nested experiment following the rules in \code{\link{normalizeCounts}}.
 However, if \code{size_factors} is supplied, it will override any size factors available in the alternative experiments.
 }
