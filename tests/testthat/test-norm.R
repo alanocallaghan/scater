@@ -65,10 +65,26 @@ test_that("normalizeCounts behaves with sparse inputs", {
     expect_s4_class(out <- normalizeCounts(sparsed, ref, log=FALSE), "dgCMatrix")
     expect_equal(normalizeCounts(zeroed, ref, log=FALSE), as.matrix(out))
 
-    expect_true(is.matrix(out <- normalizeCounts(sparsed, ref, pseudo_count=2)))
-    expect_equal(normalizeCounts(zeroed, ref, pseudo_count=2), as.matrix(out))
+    out <- normalizeCounts(sparsed, ref, pseudo_count=2)
+    expect_equivalent(as.matrix(normalizeCounts(zeroed, ref, pseudo_count=2)), as.matrix(out))
 
     expect_s4_class(out <- normalizeCounts(sparsed, ref, subset_row=1:10), "dgCMatrix")
+    expect_equal(normalizeCounts(zeroed, ref, subset_row=1:10), as.matrix(out))
+
+    # Trying with a triplet form.
+    sparsed <- as(zeroed, "dgTMatrix")
+    dimnames(sparsed) <- dimnames(zeroed) # huh, bug in Matrix.
+   
+    expect_s4_class(out <- normalizeCounts(sparsed, ref), "dgTMatrix")
+    expect_equal(normalizeCounts(zeroed, ref), as.matrix(out))
+
+    expect_s4_class(out <- normalizeCounts(sparsed, ref, log=FALSE), "dgTMatrix")
+    expect_equal(normalizeCounts(zeroed, ref, log=FALSE), as.matrix(out))
+
+    out <- normalizeCounts(sparsed, ref, pseudo_count=2)
+    expect_equivalent(normalizeCounts(zeroed, ref, pseudo_count=2), as.matrix(out))
+
+    expect_s4_class(out <- normalizeCounts(sparsed, ref, subset_row=1:10), "dgTMatrix")
     expect_equal(normalizeCounts(zeroed, ref, subset_row=1:10), as.matrix(out))
 })
 
