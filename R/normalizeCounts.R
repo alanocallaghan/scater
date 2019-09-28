@@ -78,7 +78,7 @@ NULL
 #' @rdname normalizeCounts
 setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL, use_size_factors=NULL,
     log=TRUE, return_log=NULL, pseudo_count=1, log_exprs_offset=NULL, center_size_factors=TRUE, subset_row=NULL,
-    downsample=FALSE, down_target=0.1)
+    downsample=FALSE, down_target=NULL, down_prop=0.01)
 {
     if (!is.null(subset_row)) {
         x <- x[subset_row,,drop=FALSE]
@@ -93,7 +93,7 @@ setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL, use_size_fact
     }
 
     if (downsample) {
-        down.out <- .downsample_counts(x, size_factors, down_prop, down_target)
+        down.out <- .downsample_counts(x, size_factors, down_prop=down_prop, down_target=down_target)
         x <- down.out$x
         size_factors <- down.out$size_factors
     }

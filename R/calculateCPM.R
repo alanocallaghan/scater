@@ -46,7 +46,11 @@ NULL
         lib.sizes <- size_factors / mean(size_factors) * mean(lib.sizes)
     }
 
-    normalizeCounts(x, size_factors=lib.sizes, log=FALSE, center_size_factors=FALSE)
+    if (nrow(x)) {
+        normalizeCounts(x, size_factors=lib.sizes, log=FALSE, center_size_factors=FALSE)
+    } else {
+        x + 0 # coerce to numeric.
+    }
 }
 
 #' @export

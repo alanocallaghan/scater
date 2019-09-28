@@ -14,7 +14,7 @@ normalizeCounts(x, ...)
   use_size_factors = NULL, log = TRUE, return_log = NULL,
   pseudo_count = 1, log_exprs_offset = NULL,
   center_size_factors = TRUE, subset_row = NULL, downsample = FALSE,
-  down_target = 0.1)
+  down_target = NULL, down_prop = 0.01)
 
 \S4method{normalizeCounts}{SummarizedExperiment}(x, ...,
   exprs_values = "counts")
@@ -55,9 +55,9 @@ Alternatively \code{NULL}, in which case the size factors are extracted or compu
 \item{down_target}{Numeric scalar specifying the downsampling target when \code{downsample=TRUE}.
 If \code{NULL}, this is defined by \code{down_prop} and a warning is emitted.}
 
-\item{exprs_values}{A string or integer scalar specifying the assay of \code{x} containing the count matrix.}
-
 \item{down_prop}{Numeric scalar between 0 and 1 indicating the quantile to use to define the downsampling target when \code{downsample=TRUE}.}
+
+\item{exprs_values}{A string or integer scalar specifying the assay of \code{x} containing the count matrix.}
 }
 \value{
 A matrix-like object of (log-)normalized expression values.
