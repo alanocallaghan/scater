@@ -14,6 +14,7 @@
     \item Pass all ... options to biomaRt::useMart() in getBMFeatureAnnos(). 
     \item Added name= arguments to runPCA(), etc. to change the name of the output reducedDim.
     \item Added the logNormCounts() function to compute log-normalized counts in an alternative experiment-aware manner.
+    Added a normalization-by-downsampling option via DropletUtils.
     \item Added the perCellQCMetrics() function to compute per-cell QC metrics in an alternative experiment-aware manner.
     \item Deprecated the normalize() method, which was considered too vague to describe what the function was actually doing.
     \item Added the perFeatureQCMetrics() function to compute per-feature QC metrics.

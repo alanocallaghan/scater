@@ -3,7 +3,6 @@
 \docType{methods}
 \name{normalizeCounts}
 \alias{normalizeCounts}
-\alias{normalizeCounts,DelayedMatrix-method}
 \alias{normalizeCounts,ANY-method}
 \alias{normalizeCounts,SummarizedExperiment-method}
 \alias{normalizeCounts,SingleCellExperiment-method}
@@ -11,17 +10,11 @@
 \usage{
 normalizeCounts(x, ...)
 
-\S4method{normalizeCounts}{DelayedMatrix}(x, size_factors = NULL,
-  use_size_factors = NULL, log = TRUE, return_log = NULL,
-  pseudo_count = 1, log_exprs_offset = NULL,
-  center_size_factors = TRUE, subset_row = NULL, downsample = FALSE,
-  down_prop = 0.01)
-
 \S4method{normalizeCounts}{ANY}(x, size_factors = NULL,
   use_size_factors = NULL, log = TRUE, return_log = NULL,
   pseudo_count = 1, log_exprs_offset = NULL,
   center_size_factors = TRUE, subset_row = NULL, downsample = FALSE,
-  down_prop = 0.01)
+  down_target = 0.1)
 
 \S4method{normalizeCounts}{SummarizedExperiment}(x, ...,
   exprs_values = "counts")
@@ -59,9 +52,12 @@ Alternatively \code{NULL}, in which case the size factors are extracted or compu
 
 \item{downsample}{Logical scalar indicating whether downsampling should be performed prior to scaling and log-transformation.}
 
-\item{down_prop}{Numeric scalar between 0 and 1 indicating the quantile to use to define the downsampling target when \code{downsample=TRUE}.}
+\item{down_target}{Numeric scalar specifying the downsampling target when \code{downsample=TRUE}.
+If \code{NULL}, this is defined by \code{down_prop} and a warning is emitted.}
 
 \item{exprs_values}{A string or integer scalar specifying the assay of \code{x} containing the count matrix.}
+
+\item{down_prop}{Numeric scalar between 0 and 1 indicating the quantile to use to define the downsampling target when \code{downsample=TRUE}.}
 }
 \value{
 A matrix-like object of (log-)normalized expression values.
@@ -83,17 +79,28 @@ If none are available, it defaults to library size-derived size factors.
 }
 If \code{size_factors} are supplied, they will override any size factors present in \code{x}.
 
-If \code{center_size_factors=TRUE}, all sets of size factors will be centered to have the same mean prior to calculation of normalized expression values.
-This ensures that abundances are roughly comparable between features normalized with different sets of size factors.
-By default, the centre mean is unity, which means that the computed \code{exprs} can be interpreted as being on the same scale as log-counts.
-It also means that the value of \code{pseudo_count} can be interpreted as a pseudo_count (i.e., on the same scale as the counts).
+If \code{center_size_factors=TRUE}, size factors are centred at unity prior to calculation of normalized expression values.
+This means that the computed expression values can be interpreted as being on the same scale as log-counts,
+and that the value of \code{pseudo_count} can be interpreted as being on the same scale as the counts.
+It also ensures that abundances are roughly comparable between features normalized with different sets of size factors.
+}
+\section{Downsampling instead of scaling}{
 
 If \code{downsample=TRUE}, counts for each cell are randomly downsampled according to their size factors prior to log-transformation.
-This avoids major rescaling and is helpful for avoiding artifacts due to log-transformation of scaled count data.
-The downsampling proportion for each cell is theoretically computed as the reciprocal of its size factor, multiplied by the smallest size factor.
-In practice, this can lead to excessive downsampling, so we instead multiply by the \code{down_prop} quantile of the size factors.
-Cells with size factors below the chosen quantile are not downsampled and are simply scaled.
+This is occasionally useful for avoiding artifacts caused by scaling count data with a strong mean-variance relationship.
+Each cell is downsampled according to the ratio between \code{down_target} and that cell's size factor.
+(Cells with size factors below the target are not downsampled and are directly scaled by this ratio.)
+If \code{log=TRUE}, a log-transformation is also performed after adding \code{pseudo_count} to the downsampled counts.
+
+Note that the normalized expression values in this mode cannot be interpreted as being on the same abundance as the original counts,
+but instead have abundance equivalent to counts after downsampling to the target size factor.
+This motivates the use of a fixed \code{down_target} to ensure that expression values are comparable across different \code{normalizeCounts} calls. 
+We automatically set \code{down_target} to the 1st percentile of size factors across all cells involved in the analysis,
+but this is only appropriate if the resulting expression values are only compared within the same call to \code{normalizeCounts}.
+If expression values are to be compared across multiple calls (e.g., in \code{\link[scran]{modelGeneVarWithSpikes}} or \code{\link[batchelor]{multiBatchNorm}}),
+\code{down_target} should be manually set to a constant target value that can be considered a low size factor in every call.
 }
+
 \examples{
 example_sce <- mockSCE()
 normed <- normalizeCounts(example_sce)
