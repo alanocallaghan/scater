@@ -67,38 +67,36 @@ plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts"
     by_exprs_values = exprs_values, by_show_single=FALSE, show_colnames = FALSE, 
     cluster_cols=is.null(order_columns_by), ...) 
 {
-    # Stripping down the object to just the assay, features and columns that we want.
-    if (!is.character(exprs_values)) {
-        exprs_values <- assayNames(object)[exprs_values]
-    }
-    assays(object) <- assays(object)[exprs_values]
-    object <- object[features,]
-
+    # Setting names, otherwise the downstream colouring fails.
     if (is.null(colnames(object))) { 
-        colnames(object) <- seq_len(ncol(object)) # otherwise downstream colouring fails.
-    }
-    if (!is.null(columns)) {
-        object <- object[,columns]
+        colnames(object) <- seq_len(ncol(object)) 
     }
 
-    # Re-ordering the object, if requested.
-    if (!is.null(order_columns_by)) {
-        ordering <- list()
-        for (i in seq_along(order_columns_by)) { 
-            ordering[[i]] <- retrieveCellInfo(object, order_columns_by[[i]], exprs_values = by_exprs_values)$val
-        }
-        object <- object[,do.call(order, ordering)]
-
-        colour_columns_by <- c(colour_columns_by, order_columns_by)
-        cluster_cols <- FALSE
-    }
-
-    # Pulling out the features, possibly winsorizing to preserve the dynamic range.
+    # Pulling out the features.
     heat.vals <- assay(object, exprs_values)[features,,drop=FALSE]
+    if (!is.null(columns)) {
+        columns <- .subset2index(columns, object, byrow=FALSE)
+        heat.vals <- heat.vals[,columns,drop=FALSE]
+    }
     if (center) {
         heat.vals <- heat.vals - rowMeans2(DelayedArray(heat.vals))
     }
 
+    if (!is.null(order_columns_by)) {
+        ordering <- list()
+        for (i in seq_along(order_columns_by)) {
+            vals <- retrieveCellInfo(object, order_columns_by[[i]], exprs_values = by_exprs_values)$val
+            if (!is.null(columns)) {
+                vals <- vals[columns]
+            }
+            ordering[[i]] <- vals
+        }
+        heat.vals <- heat.vals[,do.call(order, ordering),drop=FALSE]
+        cluster_cols <- FALSE
+        colour_columns_by <- c(colour_columns_by, order_columns_by)
+    }
+
+    # Winsorizing to preserve the dynamic range of colours.
     if (is.null(zlim)) {
         zlim <- range(heat.vals)
     }
@@ -151,7 +149,9 @@ plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts"
             column_colorings[[col_name]] <- col_scale
         }
 
-        column_variables <- do.call(data.frame, c(column_variables, list(row.names=colnames(heat.vals))))
+        # No need to subset for 'columns' or 'order_columns_by',
+        # as pheatmap::pheatmap uses the rownames to handle this for us.
+        column_variables <- do.call(data.frame, c(column_variables, list(row.names=colnames(object))))
     } else {
         column_variables <- column_colorings <- NULL
     }
