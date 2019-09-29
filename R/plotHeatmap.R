@@ -4,8 +4,9 @@
 #'
 #' @param object A SingleCellExperiment object.
 #' @param features A character vector of row names, a logical vector of integer vector of indices specifying rows of \code{object} to show in the heatmap.
-#' @param columns A vector specifying the subset of columns in \code{object} to show as columns in the heatmp. 
-#' By default, all columns are used in their original order.
+#' @param columns A vector specifying the subset of columns in \code{object} to show as columns in the heatmap. 
+#' Also specifies the column order if \code{cluster_cols=FALSE} and \code{order_columns_by=NULL}.
+#' By default, all columns are used.
 #' @param exprs_values A string or integer scalar indicating which assay of \code{object} should be used as expression values for colouring in the heatmap.
 #' @param center A logical scalar indicating whether each row should have its mean expression centered at zero prior to plotting. 
 #' @param zlim A numeric vector of length 2, specifying the upper and lower bounds for the expression values. 
@@ -18,18 +19,24 @@
 #' @param colour_columns_by A list of values specifying how the columns should be annotated with colours.
 #' Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
 #' A character vector can also be supplied and will be treated as a list of strings.
+#' @param order_columns_by A list of values specifying how the columns should be ordered.
+#' Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
+#' A character vector can also be supplied and will be treated as a list of strings.
+#' This argument is automatically appended to \code{colour_columns_by}.
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for colouring of column-level data - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
 #' @param by_show_single Deprecated and ignored.
-#' @param show_colnames Logical scalar specifying whether column names should be shown, if available in \code{object}.
-#' @param ... Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.
+#' @param show_colnames,cluster_cols,... Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.
 #'
-#' @details Setting \code{center=TRUE} is useful for examining log-fold changes of each cell's expression profile from the average across all cells.
+#' @details 
+#' Setting \code{center=TRUE} is useful for examining log-fold changes of each cell's expression profile from the average across all cells.
 #' This avoids issues with the entire row appearing a certain colour because the gene is highly/lowly expressed across all cells.
 #'
 #' Setting \code{zlim} preserves the dynamic range of colours in the presence  of outliers. 
 #' Otherwise, the plot may be dominated by a few genes, which will \dQuote{flatten} the observed colours for the rest of the heatmap.
 #'
+#' Setting \code{order_columns_by} is useful for automatically ordering the heatmap by one or more factors of interest, e.g., cluster identity.
+#' This the need to set \code{colour_columns_by}, \code{cluster_cols} and \code{columns} to achieve the same effect.
 #' @return A heatmap is produced on the current graphics device. 
 #' The output of \code{\link[pheatmap]{pheatmap}} is invisibly returned.
 #'
@@ -53,31 +60,45 @@
 #' @importFrom DelayedArray DelayedArray
 #' @importFrom DelayedMatrixStats rowMeans2
 #' @importFrom viridis viridis
-#' @importFrom SummarizedExperiment assay
+#' @importFrom SummarizedExperiment assay assayNames
 plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts",
     center=FALSE, zlim=NULL, symmetric=FALSE, color=NULL, 
-    colour_columns_by=NULL, by_exprs_values = exprs_values, by_show_single=FALSE,
-    show_colnames = TRUE, ...) 
+    colour_columns_by=NULL, order_columns_by=NULL,
+    by_exprs_values = exprs_values, by_show_single=FALSE, show_colnames = FALSE, 
+    cluster_cols=is.null(order_columns_by), ...) 
 {
-    features_to_use <- .subset2index(features, object, byrow=TRUE)
-    heat.vals <- assay(object, exprs_values, withDimnames=FALSE)[features_to_use,,drop=FALSE]
+    # Stripping down the object to just the assay, features and columns that we want.
+    if (!is.character(exprs_values)) {
+        exprs_values <- assayNames(object)[exprs_values]
+    }
+    assays(object) <- assays(object)[exprs_values]
+    object <- object[features,]
 
-    rownames(heat.vals) <- rownames(object)[features_to_use]
     if (is.null(colnames(object))) { 
-        colnames(heat.vals) <- seq_len(ncol(object)) # otherwise downstream colouring fails.
-        show_colnames <- FALSE
-    } else {
-        colnames(heat.vals) <- colnames(object)
+        colnames(object) <- seq_len(ncol(object)) # otherwise downstream colouring fails.
+    }
+    if (!is.null(columns)) {
+        object <- object[,columns]
     }
 
-    if (!is.null(columns)) { 
-        heat.vals <- heat.vals[,columns,drop=FALSE]        
+    # Re-ordering the object, if requested.
+    if (!is.null(order_columns_by)) {
+        ordering <- list()
+        for (i in seq_along(order_columns_by)) { 
+            ordering[[i]] <- retrieveCellInfo(object, order_columns_by[[i]], exprs_values = by_exprs_values)$val
+        }
+        object <- object[,do.call(order, ordering)]
+
+        colour_columns_by <- c(colour_columns_by, order_columns_by)
+        cluster_cols <- FALSE
     }
+
+    # Pulling out the features, possibly winsorizing to preserve the dynamic range.
+    heat.vals <- assay(object, exprs_values)[features,,drop=FALSE]
     if (center) {
         heat.vals <- heat.vals - rowMeans2(DelayedArray(heat.vals))
     }
 
-    # Winsorizing to preserve the dynamic range.
     if (is.null(zlim)) {
         zlim <- range(heat.vals)
     }
@@ -96,34 +117,41 @@ plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts"
     # Collecting variables to colour_by.
     if (length(colour_columns_by)) {
         column_variables <- column_colorings <- list()
-        for (field in colour_columns_by) { 
+
+        for (i in seq_along(colour_columns_by)) { 
+            field <- colour_columns_by[[i]]
             colour_by_out <- retrieveCellInfo(object, field, exprs_values = by_exprs_values)
 
             if (is.null(colour_by_out$val)) { 
                 next
             } else if (is.numeric(colour_by_out$val)) { 
-                colour_fac <- cut(colour_by_out$val, 25)
+                colour_fac <- colour_by_out$val
+                col_scale <- viridis(25)
             } else {
                 colour_fac <- as.factor(colour_by_out$val)
-            } 
 
-            nlevs_colour_by <- nlevels(colour_fac)
-            if (nlevs_colour_by <= 10) {
-                col_scale <- .get_palette("tableau10medium")
-            } else if (nlevs_colour_by > 10 && nlevs_colour_by <= 20) {
-                col_scale <- .get_palette("tableau20") 
-            } else {
-                col_scale <- viridis(nlevs_colour_by)                    
+                nlevs_colour_by <- nlevels(colour_fac)
+                if (nlevs_colour_by <= 10) {
+                    col_scale <- .get_palette("tableau10medium")
+                } else if (nlevs_colour_by > 10 && nlevs_colour_by <= 20) {
+                    col_scale <- .get_palette("tableau20") 
+                } else {
+                    col_scale <- viridis(nlevs_colour_by)                    
+                }
+
+                col_scale <- col_scale[seq_len(nlevs_colour_by)]
+                names(col_scale) <- levels(colour_fac)
             }
 
-            col_scale <- col_scale[seq_len(nlevs_colour_by)]
-            names(col_scale) <- levels(colour_fac)
-
-            column_variables[[colour_by_out$name]] <- colour_fac
-            column_colorings[[colour_by_out$name]] <- col_scale
+            col_name <- colour_by_out$name
+            if (col_name=="") {
+                col_name <- paste0("unnamed", i)
+            }
+            column_variables[[col_name]] <- colour_fac
+            column_colorings[[col_name]] <- col_scale
         }
 
-        column_variables <- do.call(data.frame, c(column_variables, list(row.names=colnames(object))))
+        column_variables <- do.call(data.frame, c(column_variables, list(row.names=colnames(heat.vals))))
     } else {
         column_variables <- column_colorings <- NULL
     }
@@ -131,5 +159,5 @@ plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts"
     # Creating the heatmap as specified.
     pheatmap::pheatmap(heat.vals, color=color, breaks=color.breaks, 
         annotation_col=column_variables, annotation_colors=column_colorings, 
-        show_colnames=show_colnames, ...) 
+        show_colnames=show_colnames, cluster_cols=cluster_cols, ...) 
 }

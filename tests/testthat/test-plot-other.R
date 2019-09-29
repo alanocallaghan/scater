@@ -22,8 +22,18 @@ test_that("we can produce heatmaps", {
     # Testing out the column colouring. 
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
                 colour_columns_by=c("Mutation_Status", "Cell_Cycle"))
+
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
                 colour_columns_by=c("Mutation_Status", "Gene_0001"), 
+                by_exprs_values = "logcounts", by_show_single = TRUE)
+
+    plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
+                colour_columns_by=list(I(example_sce$Mutation_Status), "Gene_0001"), 
+                by_exprs_values = "logcounts", by_show_single = TRUE)
+
+    # Testing out the column ordering + colouring. 
+    plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
+                order_columns_by=c("Mutation_Status", "Gene_0001"), 
                 by_exprs_values = "logcounts", by_show_single = TRUE)
 
     # Testing that column colouring still works when columns have no names.
