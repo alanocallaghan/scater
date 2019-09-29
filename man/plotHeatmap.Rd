@@ -7,16 +7,18 @@
 plotHeatmap(object, features, columns = NULL,
   exprs_values = "logcounts", center = FALSE, zlim = NULL,
   symmetric = FALSE, color = NULL, colour_columns_by = NULL,
-  by_exprs_values = exprs_values, by_show_single = FALSE,
-  show_colnames = TRUE, ...)
+  order_columns_by = NULL, by_exprs_values = exprs_values,
+  by_show_single = FALSE, show_colnames = FALSE,
+  cluster_cols = is.null(order_columns_by), ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
 
 \item{features}{A character vector of row names, a logical vector of integer vector of indices specifying rows of \code{object} to show in the heatmap.}
 
-\item{columns}{A vector specifying the subset of columns in \code{object} to show as columns in the heatmp. 
-By default, all columns are used in their original order.}
+\item{columns}{A vector specifying the subset of columns in \code{object} to show as columns in the heatmap. 
+Also specifies the column order if \code{cluster_cols=FALSE} and \code{order_columns_by=NULL}.
+By default, all columns are used.}
 
 \item{exprs_values}{A string or integer scalar indicating which assay of \code{object} should be used as expression values for colouring in the heatmap.}
 
@@ -36,14 +38,17 @@ This defaults to the default setting in \code{\link[pheatmap]{pheatmap}}.}
 Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
 A character vector can also be supplied and will be treated as a list of strings.}
 
+\item{order_columns_by}{A list of values specifying how the columns should be ordered.
+Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
+A character vector can also be supplied and will be treated as a list of strings.
+This argument is automatically appended to \code{colour_columns_by}.}
+
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
 for colouring of column-level data - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
 
 \item{by_show_single}{Deprecated and ignored.}
 
-\item{show_colnames}{Logical scalar specifying whether column names should be shown, if available in \code{object}.}
-
-\item{...}{Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.}
+\item{show_colnames, cluster_cols, ...}{Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.}
 }
 \value{
 A heatmap is produced on the current graphics device. 
@@ -58,6 +63,9 @@ This avoids issues with the entire row appearing a certain colour because the ge
 
 Setting \code{zlim} preserves the dynamic range of colours in the presence  of outliers. 
 Otherwise, the plot may be dominated by a few genes, which will \dQuote{flatten} the observed colours for the rest of the heatmap.
+
+Setting \code{order_columns_by} is useful for automatically ordering the heatmap by one or more factors of interest, e.g., cluster identity.
+This the need to set \code{colour_columns_by}, \code{cluster_cols} and \code{columns} to achieve the same effect.
 }
 \examples{
 example_sce <- mockSCE()

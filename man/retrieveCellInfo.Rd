@@ -27,7 +27,7 @@ Retrieves a per-cell (meta)data field from a \linkS4class{SingleCellExperiment} 
 typically for use in visualization functions.
 }
 \details{
-Given a AsIs-wrapped vector in \code{by}, this function will directly return the vector values as \code{value},
+Given an \link{AsIs}-wrapped vector in \code{by}, this function will directly return the vector values as \code{value},
 while \code{name} is set to an empty string.
 For data.frame or DataFrame instances with a single column,
 this function will return the vector from that column as \code{value} and the column name as \code{name}.
