@@ -40,9 +40,12 @@ test_that("normalizeCounts works as expected", {
     out <- normalizeCounts(dummy, ref, subset_row=chosen)
     sub <- normalizeCounts(dummy[chosen,], ref)
     expect_equal(out, sub)
+})
 
-    # Handles silly inputs correctly.
+test_that("normalizeCounts handles silly inputs correctly", {
     out <- normalizeCounts(dummy[0,,drop=FALSE], ref, log=FALSE)
+    expect_identical(dim(out), c(0L, as.integer(ncells)))
+    out <- normalizeCounts(dummy[0,,drop=FALSE])
     expect_identical(dim(out), c(0L, as.integer(ncells)))
     out <- normalizeCounts(dummy[,0,drop=FALSE], ref[0], log=FALSE)
     expect_identical(dim(out), c(as.integer(ngenes), as.integer(0L)))
