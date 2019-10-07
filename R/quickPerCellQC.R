@@ -30,7 +30,7 @@
 #' example_sce <- mockSCE()
 #' df <- perCellQCMetrics(example_sce, subsets=list(Mito=1:100))
 #'
-#' discarded <- quickCellQC(df, percent_subsets=c(
+#' discarded <- quickPerCellQC(df, percent_subsets=c(
 #'     "subsets_Mito_percent", "altexps_Spikes_percent"))
 #' colSums(as.data.frame(discarded))
 #'
@@ -40,7 +40,7 @@
 #' \code{\link{isOutlier}}, to identify outliers with a MAD-based approach.
 #' @export
 #' @importFrom S4Vectors DataFrame
-quickCellQC <- function(df, lib_size="sum", n_features="detected", percent_subsets=NULL, ...) {
+quickPerCellQC <- function(df, lib_size="sum", n_features="detected", percent_subsets=NULL, ...) {
     output <- DataFrame(
         low_lib_size=isOutlier(df[[lib_size]], log=TRUE, type="lower", ...),
         low_n_features=isOutlier(df[[n_features]], log=TRUE, type="lower", ...)
