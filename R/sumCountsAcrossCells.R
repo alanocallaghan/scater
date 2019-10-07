@@ -1,6 +1,6 @@
-#' Sum counts across a set of cells
+#' Sum counts across sets of cells
 #' 
-#' Create a count matrix where counts for all cells in a set are summed together.
+#' Sum together expression values (by default, counts) for each set of cells and for each feature.
 #'
 #' @param x For \code{sumCountsAcrossCells}, a numeric matrix of counts containing features in rows and cells in columns.
 #' Alternatively, a \linkS4class{SummarizedExperiment} object containing such a count matrix.
@@ -11,8 +11,7 @@
 #' Alternatively, a \linkS4class{DataFrame} of such vectors or factors, in which case each unique combination of levels defines a set. 
 #' @param exprs_values A string or integer scalar specifying the assay of \code{x} containing the matrix of counts
 #' (or any other expression quantity that can be meaningfully summed).
-#' @param average Logical scalar indicating whether the average should be computed instead of the sum,
-#' e.g., for transformed expression values.
+#' @param average Logical scalar indicating whether the average should be computed instead of the sum.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether summation should be parallelized.
 #' @param ... For the generics, further arguments to be passed to specific methods.
 #' 
@@ -49,6 +48,10 @@
 #'
 #' Any \code{NA} values in \code{ids} are implicitly ignored and will not be considered or reported.
 #' This may be useful, e.g., to remove undesirable cells by setting their entries in \code{ids} to \code{NA}.
+#' 
+#' Setting \code{average=TRUE} will compute the average in each set rather than the sum.
+#' This is particularly useful if \code{x} contains expression values that have already been normalized in some manner,
+#' as computing the average avoids another round of normalization to account for differences in the size of each set.
 #'
 #' @author Aaron Lun
 #' @name sumCountsAcrossCells

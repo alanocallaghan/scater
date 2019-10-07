@@ -1,14 +1,13 @@
-#' Sum counts across a feature set
+#' Sum counts across feature sets
 #' 
-#' Create a count matrix where counts for all features in a set are summed together.
+#' Sum together expression values (by default, counts) for each feature set in each cell.
 #'
 #' @param x For \code{sumCountsAcrossFeatures}, a numeric matrix of counts containing features in rows and cells in columns.
 #' Alternatively, a \linkS4class{SummarizedExperiment} object containing such a count matrix.
 #'
 #' For \code{aggregateAcrossFeatures}, a SummarizedExperiment containing a count matrix.
 #' @param ids A factor specifying the set to which each feature in \code{x} belongs.
-#' @param average Logical scalar indicating whether the average should be computed instead of the sum,
-#' e.g., for transformed expression values.
+#' @param average Logical scalar indicating whether the average should be computed instead of the sum.
 #' @param exprs_values A string or integer scalar specifying the assay of \code{x} containing the matrix of counts
 #' (or any other expression quantity that can be meaningfully summed).
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether summation should be parallelized.
@@ -42,6 +41,10 @@
 #'
 #' Any \code{NA} values in \code{ids} are implicitly ignored and will not be considered or reported.
 #' This may be useful, e.g., to remove undesirable feature sets by setting their entries in \code{ids} to \code{NA}.
+#'
+#' Setting \code{average=TRUE} will compute the average in each set rather than the sum.
+#' This is particularly useful if \code{x} contains expression values that have already been normalized in some manner,
+#' as computing the average avoids another round of normalization to account for differences in the size of each set.
 #'
 #' @author Aaron Lun
 #' @name sumCountsAcrossFeatures

@@ -3,7 +3,7 @@
 #' Counting the number of non-zero counts in each row (per feature) or column (per cell),
 #' without constructing an intermediate logical matrix.
 #'
-#' @param x A numeric matrix of counts where features are rows and 
+#' @param x A numeric matrix of counts where features are rows and cells are columns.
 #'
 #' Alternatively, a \linkS4class{SummarizedExperiment} containing such counts.
 #' @param detection_limit Numeric scalar providing the value above which  observations are deemed to be expressed. 
@@ -12,7 +12,7 @@
 #' If \code{FALSE}, the function will count the number of detected features per cell.
 #' @param subset_row Logical, integer or character vector indicating which rows (i.e. features) to use.
 #' @param subset_col Logical, integer or character vector indicating which columns (i.e., cells) to use.
-#' @param BPPARAM A BiocParallelParam object specifying whether the calculations should be parallelized. 
+#' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized. 
 #' @param ... For the generic, further arguments to pass to specific methods.
 #'
 #' For the SummarizedExperiment method, further arguments to pass to the ANY method.
@@ -22,6 +22,8 @@
 #' @author Aaron Lun
 #'
 #' @name nexprs
+#' @seealso
+#' \code{\link{nexprsAcrossFeatures}} and \code{\link{nexprsAcrossCells}}, to do this calculation for each group of features or cells, respectively.
 #' @export
 #' @examples
 #' example_sce <- mockSCE()
