@@ -26,6 +26,9 @@ uniquifyFeatureNames <- function(ID, names) {
     if (length(ID)!=length(names)) {
         stop("lengths of 'ID' and 'names' must be equal")
     }
+    if (is.factor(names)) {
+        names <- as.character(names)
+    }
     missing.name <- is.na(names)
     names[missing.name] <- ID[missing.name]
     dup.name <- names %in% names[duplicated(names)]
