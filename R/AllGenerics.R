@@ -138,3 +138,11 @@ setGeneric("sumCountsAcrossCells", function(x, ...) standardGeneric("sumCountsAc
 #' @export
 #' @rdname sumCountsAcrossCells
 setGeneric("aggregateAcrossCells", function(x, ...) standardGeneric("aggregateAcrossCells"))
+
+#' @export
+#' @rdname numDetectedAcrossCells
+setGeneric("numDetectedAcrossCells", function(x, ...) standardGeneric("numDetectedAcrossCells"))
+
+#' @export
+#' @rdname numDetectedAcrossFeatures
+setGeneric("numDetectedAcrossFeatures", function(x, ...) standardGeneric("numDetectedAcrossFeatures"))
