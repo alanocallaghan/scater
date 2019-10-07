@@ -15,6 +15,10 @@ test_that("we can summarise counts at feature set level", {
     out2 <- sumCountsAcrossFeatures(counts(sce), ids)
     expect_identical(out, out2)
 
+    # Handles averaging correctly.
+    out2 <- sumCountsAcrossFeatures(sce, ids, average=TRUE)
+    expect_identical(out2, rowsum(counts(sce), ids)/as.integer(table(ids)))
+
     # exprs_values= works correctly.
     alt <- sce
     assayNames(alt) <- "whee"
@@ -92,6 +96,10 @@ test_that("we can summarise counts at cell cluster level", {
     out2 <- sumCountsAcrossCells(counts(sce), ids)
     expect_identical(out, out2)
 
+    # Handles averaging correctly.
+    out2 <- sumCountsAcrossCells(sce, ids, average=TRUE)
+    expect_identical(out2, t(t(colsum(counts(sce), ids))/as.integer(table(ids))))
+
     # exprs_values= works correctly.
     alt <- sce
     assayNames(alt) <- "whee"
@@ -162,6 +170,13 @@ test_that("Aggregation across cells works correctly with DFs", {
     expect_identical(sort(colnames(ref)), sort(post.combined))
     m <- match(colnames(ref), post.combined)
     expect_equivalent(ref, assay(out)[,m])
+
+#    # Handles NAs correctly.
+#    extra[1] <- NA
+#    ids[2] <- NA
+#    ref <- sumCountsAcrossCells(sce, DataFrame(X=ids, Y=extra))
+#    out <- sumCountsAcrossCells(sce[,-(1:2)], DataFrame(X=ids, Y=extra)[-(1:2),])
+#    expect_equal(ref, out)
 })
 
 set.seed(100041)

@@ -7,6 +7,8 @@
 #'
 #' For \code{aggregateAcrossFeatures}, a SummarizedExperiment containing a count matrix.
 #' @param ids A factor specifying the set to which each feature in \code{x} belongs.
+#' @param average Logical scalar indicating whether the average should be computed instead of the sum,
+#' e.g., for transformed expression values.
 #' @param exprs_values A string or integer scalar specifying the assay of \code{x} containing the matrix of counts
 #' (or any other expression quantity that can be meaningfully summed).
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether summation should be parallelized.
@@ -52,7 +54,7 @@
 NULL
 
 #' @importFrom BiocParallel SerialParam bpmapply
-.sum_counts_across_features <- function(x, ids, BPPARAM=SerialParam()) {
+.sum_counts_across_features <- function(x, ids, average=FALSE, BPPARAM=SerialParam()) {
     if (nrow(x)!=length(ids)) {
         stop("'length(ids)' and 'nrow(x)' are not equal")
     }
@@ -69,6 +71,10 @@ NULL
 
     out <- do.call(cbind, out_list)
     dimnames(out) <- list(levels(ids), colnames(x))
+    if (average) {
+        out <- out/as.integer(table(ids))
+    }
+
     out
 }
 

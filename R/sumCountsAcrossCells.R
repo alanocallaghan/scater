@@ -11,6 +11,8 @@
 #' Alternatively, a \linkS4class{DataFrame} of such vectors or factors, in which case each unique combination of levels defines a set. 
 #' @param exprs_values A string or integer scalar specifying the assay of \code{x} containing the matrix of counts
 #' (or any other expression quantity that can be meaningfully summed).
+#' @param average Logical scalar indicating whether the average should be computed instead of the sum,
+#' e.g., for transformed expression values.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether summation should be parallelized.
 #' @param ... For the generics, further arguments to be passed to specific methods.
 #' 
@@ -67,7 +69,8 @@ NULL
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom methods is
 #' @importFrom SummarizedExperiment SummarizedExperiment
-.sum_counts_across_cells <- function(x, ids, BPPARAM=SerialParam()) {
+#' @importFrom Matrix t
+.sum_counts_across_cells <- function(x, ids, average=FALSE, BPPARAM=SerialParam()) {
     multi <- is(ids, "DataFrame")
     if (multi) {
         coldata <- ids
@@ -84,6 +87,9 @@ NULL
 
     out <- do.call(rbind, out_list)
     dimnames(out) <- list(rownames(x), names(by_set))
+    if (average) {
+        out <- t(t(out)/lengths(by_set))
+    }
 
     if (multi) {
         m <- match(as.integer(colnames(out)), ids)
