@@ -132,13 +132,11 @@ test_that("by-cell count summarization behaves with odd inputs", {
     sparsified <- sce
     counts(sparsified) <- as(counts(sparsified), "dgCMatrix")
     spack <- sumCountsAcrossCells(sparsified, ids)
-    expect_s4_class(spack, "dgCMatrix")
     expect_equal(ref, as.matrix(spack))
 
     unknown <- sce
     counts(unknown) <- as(counts(unknown), "dgTMatrix")
     spack <- sumCountsAcrossCells(unknown, ids)
-    expect_true(is.matrix(spack))
     expect_equivalent(ref, as.matrix(spack))
 
     # Handles parallelization properly.
@@ -147,6 +145,17 @@ test_that("by-cell count summarization behaves with odd inputs", {
 
     alt <- sumCountsAcrossCells(sce, ids, BPPARAM=safeBPParam(3))
     expect_identical(alt, ref)
+})
+
+set.seed(10004001)
+test_that("by-cell count summarization behaves with subsetting", {
+    ids <- sample(LETTERS[1:5], ncol(sce), replace=TRUE)
+
+    expect_identical(sumCountsAcrossCells(counts(sce), ids, subset_row=10:1),
+        sumCountsAcrossCells(counts(sce), ids)[10:1,])
+
+    expect_identical(sumCountsAcrossCells(counts(sce), ids, subset_col=2:15),
+        sumCountsAcrossCells(counts(sce)[,2:15], ids[2:15]))
 })
 
 set.seed(1000401)
@@ -200,11 +209,24 @@ test_that("Aggregation across cells works correctly for SCEs", {
     # Behaves for alternative experiments.
     copy <- sce
     altExp(copy, "THING") <- sce
-    copy <- aggregateAcrossCells(copy, ids)
-    expect_identical(counts(altExp(copy, "THING")), counts(alt))
+    counts(altExp(copy)) <- counts(altExp(copy)) * 2
 
-    copy <- aggregateAcrossCells(sce, ids, use_altexps=FALSE)
-    expect_identical(altExpNames(copy), character(0))
+    agg <- aggregateAcrossCells(copy, ids)
+    expect_identical(counts(agg), counts(alt))
+    expect_identical(counts(altExp(agg, "THING")), counts(alt)*2)
+
+    agg0 <- aggregateAcrossCells(sce, ids, use_altexps=FALSE)
+    expect_identical(counts(agg0), counts(alt))
+    expect_identical(altExpNames(agg0), character(0))
+
+    # Subsetting only affects the main experiment.
+    agg2 <- aggregateAcrossCells(copy, ids, subset_row=1:5)
+    expect_equal(agg[1:5,], agg2)
+
+    # Other arguments are passed down.
+    agg3 <- aggregateAcrossCells(copy, ids, average=TRUE)
+    expect_identical(counts(agg3), sumCountsAcrossCells(copy, ids, average=TRUE))
+    expect_identical(counts(altExp(agg3)), sumCountsAcrossCells(copy, ids, average=TRUE)*2)
 })
 
 set.seed(1000411)
@@ -223,10 +245,13 @@ test_that("Aggregation across cells works correctly for SCEs with DFs", {
     # Same for alternative experiments.
     copy <- sce
     altExp(copy, "THING") <- sce
-    copy <- aggregateAcrossCells(copy, combined)
-    expect_identical(counts(altExp(copy, "THING")), assay(ref))
-    expect_identical(ref$X, altExp(copy)$X)
-    expect_identical(ref$Y, altExp(copy)$Y)
+    counts(altExp(copy)) <- counts(altExp(copy)) * 2
+
+    agg <- aggregateAcrossCells(copy, combined)
+    expect_identical(counts(agg), assay(ref))
+    expect_identical(counts(altExp(agg, "THING")), assay(ref)*2)
+    expect_identical(ref$X, altExp(agg)$X)
+    expect_identical(ref$Y, altExp(agg)$Y)
 })
 
 set.seed(100042)
