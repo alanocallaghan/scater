@@ -15,7 +15,7 @@ nexprs(x, ...)
 \S4method{nexprs}{SummarizedExperiment}(x, ..., exprs_values = "counts")
 }
 \arguments{
-\item{x}{A numeric matrix of counts where features are rows and 
+\item{x}{A numeric matrix of counts where features are rows and cells are columns.
 
 Alternatively, a \linkS4class{SummarizedExperiment} containing such counts.}
 
@@ -32,7 +32,7 @@ If \code{FALSE}, the function will count the number of detected features per cel
 
 \item{subset_col}{Logical, integer or character vector indicating which columns (i.e., cells) to use.}
 
-\item{BPPARAM}{A BiocParallelParam object specifying whether the calculations should be parallelized.}
+\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.}
 
 \item{exprs_values}{String or integer specifying the assay of \code{x} to obtain the count matrix from.}
 }
@@ -49,6 +49,9 @@ example_sce <- mockSCE()
 nexprs(example_sce)[1:10]
 nexprs(example_sce, byrow = TRUE)[1:10]
 
+}
+\seealso{
+\code{\link{nexprsAcrossFeatures}} and \code{\link{nexprsAcrossCells}}, to do this calculation for each group of features or cells, respectively.
 }
 \author{
 Aaron Lun

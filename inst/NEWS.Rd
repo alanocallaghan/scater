@@ -30,6 +30,7 @@
     \item Support multiple factors for grouping cells in sumCountsAcrossCells().
     \item Added the order_columns_by= argument to plotHeatmap() for easy plotting by a given factor.
     Changed defaults to more common values.
+    \item Added a plotDots() function to create a Seurat-style dot plot.
   }
 }
 

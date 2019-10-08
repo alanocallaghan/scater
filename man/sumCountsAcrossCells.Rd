@@ -8,13 +8,14 @@
 \alias{sumCountsAcrossCells,SummarizedExperiment-method}
 \alias{aggregateAcrossCells,SummarizedExperiment-method}
 \alias{aggregateAcrossCells,SingleCellExperiment-method}
-\title{Sum counts across a set of cells}
+\title{Sum counts across sets of cells}
 \usage{
 sumCountsAcrossCells(x, ...)
 
 aggregateAcrossCells(x, ...)
 
-\S4method{sumCountsAcrossCells}{ANY}(x, ids, BPPARAM = SerialParam())
+\S4method{sumCountsAcrossCells}{ANY}(x, ids, subset_row = NULL,
+  subset_col = NULL, average = FALSE, BPPARAM = SerialParam())
 
 \S4method{sumCountsAcrossCells}{SummarizedExperiment}(x, ...,
   exprs_values = "counts")
@@ -23,7 +24,7 @@ aggregateAcrossCells(x, ...)
   use_exprs_values = "counts")
 
 \S4method{aggregateAcrossCells}{SingleCellExperiment}(x, ids, ...,
-  use_exprs_values = "counts", use_altexps = TRUE)
+  subset_row = NULL, use_exprs_values = "counts", use_altexps = TRUE)
 }
 \arguments{
 \item{x}{For \code{sumCountsAcrossCells}, a numeric matrix of counts containing features in rows and cells in columns.
@@ -40,6 +41,17 @@ For \code{aggregateAcrossCells}, further arguments to be passed to \code{sumCoun
 \item{ids}{A factor specifying the set to which each cell in \code{x} belongs.
 
 Alternatively, a \linkS4class{DataFrame} of such vectors or factors, in which case each unique combination of levels defines a set.}
+
+\item{subset_row}{An integer, logical or character vector specifying the features to use.
+Defaults to all features.
+
+For the \linkS4class{SingleCellExperiment} method, this argument will not affect alternative Experiments,
+where summation is always performed for all features (or not at all, depending on \code{use_alt_exps}).}
+
+\item{subset_col}{An in teger, logical or character vector specifying the cells to use.
+Defaults to all cells with non-\code{NA} entries of \code{ids}.}
+
+\item{average}{Logical scalar indicating whether the average should be computed instead of the sum.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether summation should be parallelized.}
 
@@ -67,7 +79,7 @@ Column metadata is retained for the first instance of a cell from each set in \c
 If \code{ids} is a DataFrame, the combination of levels corresponding to each column is also reported in the column metadata.
 }
 \description{
-Create a count matrix where counts for all cells in a set are summed together.
+Sum together expression values (by default, counts) for each set of cells and for each feature.
 }
 \details{
 This function provides a convenient method for aggregating counts across multiple columns for each feature.
@@ -78,15 +90,20 @@ However, this function can operate on any matrix representation in \code{object}
 can do so in a parallelized manner for large matrices without resorting to block processing;
 and can natively support combinations of multiple factors in \code{ids}.
 
-Any \code{NA} values in \code{ids} are implicitly ignored and will not be considered or reported.
+Any \code{NA} values in \code{ids} are implicitly ignored and will not be considered during summation.
 This may be useful, e.g., to remove undesirable cells by setting their entries in \code{ids} to \code{NA}.
+Alternatively, we can explicitly select the cells of interest with \code{subset_col}.
+
+Setting \code{average=TRUE} will compute the average in each set rather than the sum.
+This is particularly useful if \code{x} contains expression values that have already been normalized in some manner,
+as computing the average avoids another round of normalization to account for differences in the size of each set.
 }
 \examples{
 example_sce <- mockSCE()
 ids <- sample(LETTERS[1:5], ncol(example_sce), replace=TRUE)
 
 out <- sumCountsAcrossCells(example_sce, ids)
-dimnames(out)
+head(out)
 
 batches <- sample(1:3, ncol(example_sce), replace=TRUE)
 out2 <- sumCountsAcrossCells(example_sce, DataFrame(label=ids, batch=batches))
