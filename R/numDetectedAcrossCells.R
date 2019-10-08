@@ -2,9 +2,11 @@
 #' 
 #' Computes the number of detected expression values (default defined as non-zero counts) for each feature in each group of cells.
 #'
-#' @param ids A vector specifying the group assignment for each cell. 
-#' @param subset_row A vector specifying the rows to use, defaults to all rows.
-#' @param subset_col A vector specifying the columns to use, defaults to all cells with non-\code{NA} entries of \code{ids}.
+#' @param ids A vector of length \code{ncol(x)}, specifying the group assignment for each cell. 
+#' @param subset_row A vector specifying the rows to use.
+#' Defaults to all rows.
+#' @param subset_col A vector specifying the columns to use.
+#' Defaults to all cells with non-\code{NA} entries of \code{ids}.
 #' @param average Logical scalar indicating whether the proportion of non-zero counts in each group should be computed instead.
 #' @param ... For the generic, further arguments to pass to specific methods.
 #'
@@ -38,7 +40,7 @@ NULL
     }
     
     if (!is.null(subset_col)) {
-        ids[!.subset2index(subset_col, x, byrow=FALSE)] <- NA
+        ids[!seq_along(ids) %in% .subset2index(subset_col, x, byrow=FALSE)] <- NA
     }
     by.ids <- split(seq_along(ids), ids)
 
@@ -49,7 +51,9 @@ NULL
 
     output <- do.call(cbind, collected)
     if (average) { 
-        out <- t(t(out)/lengths(by.ids))
+        n <- lengths(by.ids)
+        stopifnot(identical(names(n), colnames(output))) # Sanity check.
+        output <- t(t(output)/n)
     }
 
     output
