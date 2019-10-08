@@ -206,3 +206,15 @@ test_that("plotRLE works as expected", {
     }
 })
 
+#################################################
+# Testing plotDots. 
+
+test_that("plotDots works as expected", {
+    expect_s3_class(plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[1:10]), "ggplot")
+
+    expect_s3_class(plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[1:10], high_color="blue"), "ggplot")
+
+    expect_s3_class(plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[1:10], max_ave=1), "ggplot")
+
+    expect_s3_class(plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[1:10], max_detected=0.5), "ggplot")
+})
