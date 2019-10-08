@@ -31,29 +31,20 @@
 #' @name numDetectedAcrossCells
 NULL
 
-#' @importFrom BiocParallel SerialParam bpisup bpstart bpstop
+#' @importFrom BiocParallel SerialParam 
 #' @importFrom Matrix t
 .nexprs_across_cells <- function(x, ids, average=FALSE, subset_row=NULL, subset_col=NULL, ..., BPPARAM=SerialParam()) {
-    if (!bpisup(BPPARAM)) {
-        bpstart(BPPARAM)
-        on.exit(bpstop(BPPARAM))
-    }
-    
     if (!is.null(subset_col)) {
         ids[!seq_along(ids) %in% .subset2index(subset_col, x, byrow=FALSE)] <- NA
     }
-    by.ids <- split(seq_along(ids), ids)
+    col_sets <- split(seq_along(ids), ids)
+    row_sets <- .split_subset_by_workers(subset_row, target=x, BPPARAM=BPPARAM)
 
-    collected <- list()
-    for (j in names(by.ids)) {
-        collected[[j]] <- nexprs(x, byrow=TRUE, subset_row=subset_row, subset_col=by.ids[[j]], ..., BPPARAM=BPPARAM)
-    }
+    output <- .iterate_by_chunks(x, row_sets=row_sets, col_sets=col_sets, FUN=nexprs, byrow=TRUE, BPPARAM=BPPARAM)
+    colnames(output) <- names(col_sets)
 
-    output <- do.call(cbind, collected)
     if (average) { 
-        n <- lengths(by.ids)
-        stopifnot(identical(names(n), colnames(output))) # Sanity check.
-        output <- t(t(output)/n)
+        output <- t(t(output)/lengths(col_sets))
     }
 
     output
