@@ -91,15 +91,15 @@ NULL
         stop("length of 'ids' and 'ncol(x)' are not equal")
     }
 
-    if (is.null(subset_col)) {
+    if (!is.null(subset_col)) {
         ids[!seq_along(ids) %in% .subset2index(subset_col, x, byrow=FALSE)] <- NA
     }
-    by_set <- split(seq_along(ids) - 1L, ids)
+    col_sets <- split(seq_along(ids), ids)
+    row_sets <- .split_subset_by_workers(subset_row, target=x, BPPARAM=BPPARAM)
 
-    out_list <- .iterate_by_columns(x, column_sets=by_set, subset_row=subset_row,
+    out <- .iterate_by_chunks(x, row_sets=row_sets, col_sets=col_sets,
         FUN=if (average) rowMeans else rowSums, BPPARAM=BPPARAM)
-    names(out_list) <- names(by_set)
-    out <- do.call(cbind, out_list)
+    colnames(out) <- names(col_sets)
 
     if (multi) {
         m <- match(as.integer(colnames(out)), ids)
@@ -117,12 +117,6 @@ NULL
     x
 }
 
-.sum_across_cols_internal <- function(mat, by_set, start, end) 
-# Internal function to drag along the namespace.
-{
-    .Call(cxx_sum_col_counts, mat, by_set, start, end)
-}
-
 #' @export
 #' @rdname sumCountsAcrossCells
 setMethod("sumCountsAcrossCells", "ANY", .sum_counts_across_cells)
@@ -131,7 +125,7 @@ setMethod("sumCountsAcrossCells", "ANY", .sum_counts_across_cells)
 #' @rdname sumCountsAcrossCells
 #' @importFrom SummarizedExperiment assay
 setMethod("sumCountsAcrossCells", "SummarizedExperiment", function(x, ..., exprs_values="counts") {
-    .sum_counts_across_cells(assay(x, exprs_values), ...)    
+    .sum_counts_across_cells(assay(x, exprs_values), ...)
 })
 
 ##########################
@@ -156,7 +150,11 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., 
 
     force(use_exprs_values)
 
-    function(y, ...) {
+    function(y, ..., subset_row=NULL) {
+        if (!is.null(subset_row)) {
+            y <- y[subset_row,]
+        }
+
         collected <- list()
         for (i in seq_along(use_exprs_values)) {
             collected[[i]] <- sumCountsAcrossCells(y, ids=ids, ..., exprs_values=use_exprs_values[i])
@@ -165,6 +163,7 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., 
 
         m <- match(colnames(collected[[1]]), as.character(ids))
         y <- y[,m]
+
         assays(y) <- collected
         colnames(y) <- colnames(collected[[1]])
 
@@ -179,8 +178,9 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., 
 
 #' @export
 #' @rdname sumCountsAcrossCells
+#' @importFrom SingleCellExperiment altExp altExps altExp<- altExps<-
 setMethod("aggregateAcrossCells", "SingleCellExperiment", function(x, ids, 
-    subset_row=NULL, use_exprs_values="counts", use_altexps=TRUE)
+    ..., subset_row=NULL, use_exprs_values="counts", use_altexps=TRUE)
 {
     FUN <- .create_cell_aggregator(ids, use_exprs_values)
     y <- FUN(x, ..., subset_row=subset_row)
