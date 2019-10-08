@@ -60,6 +60,7 @@ plotDots <- function(object, features, group=NULL, exprs_values="logcounts", det
         group <- retrieveCellInfo(object, group, search="colData")$value
     }
 
+    group <- factor(group)
     num <- numDetectedAcrossCells(object, ids=group, subset_row=features,
         exprs_values=exprs_values, average=TRUE, detection_limit=detection_limit)
     ave <- sumCountsAcrossCells(object, ids=group, subset_row=features,
@@ -73,8 +74,8 @@ plotDots <- function(object, features, group=NULL, exprs_values="logcounts", det
         Average=as.numeric(ave)
     )
 
-    if (!is.null(max_num)) {
-        evals_long$NumDetected <- pmin(max_num, evals_long$NumDetected)
+    if (!is.null(max_detected)) {
+        evals_long$NumDetected <- pmin(max_detected, evals_long$NumDetected)
     }
     if (!is.null(max_ave)) {
         evals_long$Average <- pmin(max_ave, evals_long$Average)
