@@ -9,6 +9,13 @@
 #' @param ids A factor specifying the set to which each cell in \code{x} belongs.
 #'
 #' Alternatively, a \linkS4class{DataFrame} of such vectors or factors, in which case each unique combination of levels defines a set. 
+#' @param subset_row An integer, logical or character vector specifying the features to use.
+#' Defaults to all features.
+#' 
+#' For the \linkS4class{SingleCellExperiment} method, this argument will not affect alternative Experiments,
+#' where summation is always performed for all features (or not at all, depending on \code{use_alt_exps}).
+#' @param subset_col An in teger, logical or character vector specifying the cells to use.
+#' Defaults to all cells with non-\code{NA} entries of \code{ids}.
 #' @param exprs_values A string or integer scalar specifying the assay of \code{x} containing the matrix of counts
 #' (or any other expression quantity that can be meaningfully summed).
 #' @param average Logical scalar indicating whether the average should be computed instead of the sum.
@@ -46,8 +53,9 @@
 #' can do so in a parallelized manner for large matrices without resorting to block processing;
 #' and can natively support combinations of multiple factors in \code{ids}.
 #'
-#' Any \code{NA} values in \code{ids} are implicitly ignored and will not be considered or reported.
+#' Any \code{NA} values in \code{ids} are implicitly ignored and will not be considered during summation.
 #' This may be useful, e.g., to remove undesirable cells by setting their entries in \code{ids} to \code{NA}.
+#' Alternatively, we can explicitly select the cells of interest with \code{subset_col}.
 #' 
 #' Setting \code{average=TRUE} will compute the average in each set rather than the sum.
 #' This is particularly useful if \code{x} contains expression values that have already been normalized in some manner,
@@ -61,19 +69,19 @@
 #' ids <- sample(LETTERS[1:5], ncol(example_sce), replace=TRUE)
 #'
 #' out <- sumCountsAcrossCells(example_sce, ids)
-#' dimnames(out)
+#' head(out)
 #'
 #' batches <- sample(1:3, ncol(example_sce), replace=TRUE)
 #' out2 <- sumCountsAcrossCells(example_sce, DataFrame(label=ids, batch=batches))
 #' out2
 NULL
 
-#' @importFrom BiocParallel SerialParam bpmapply
+#' @importFrom BiocParallel SerialParam 
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom methods is
 #' @importFrom SummarizedExperiment SummarizedExperiment
-#' @importFrom Matrix t
-.sum_counts_across_cells <- function(x, ids, average=FALSE, BPPARAM=SerialParam()) {
+#' @importFrom Matrix t rowSums rowMeans
+.sum_counts_across_cells <- function(x, ids, subset_row=NULL, subset_col=NULL, average=FALSE, BPPARAM=SerialParam()) {
     multi <- is(ids, "DataFrame")
     if (multi) {
         coldata <- ids
@@ -83,16 +91,15 @@ NULL
         stop("length of 'ids' and 'ncol(x)' are not equal")
     }
 
-    by_set <- split(seq_along(ids) - 1L, ids)
-    assignments <- .assign_jobs_to_workers(nrow(x), BPPARAM)
-    out_list <- bpmapply(start=assignments$start, end=assignments$end, FUN=.sum_across_cols_internal, 
-        MoreArgs=list(by_set=by_set, mat=x), BPPARAM=BPPARAM, SIMPLIFY=FALSE, USE.NAMES=FALSE)
-
-    out <- do.call(rbind, out_list)
-    dimnames(out) <- list(rownames(x), names(by_set))
-    if (average) {
-        out <- t(t(out)/lengths(by_set))
+    if (is.null(subset_col)) {
+        ids[!seq_along(ids) %in% .subset2index(subset_col, x, byrow=FALSE)] <- NA
     }
+    by_set <- split(seq_along(ids) - 1L, ids)
+
+    out_list <- .iterate_by_columns(x, column_sets=by_set, subset_row=subset_row,
+        FUN=if (average) rowMeans else rowSums, BPPARAM=BPPARAM)
+    names(out_list) <- names(by_set)
+    out <- do.call(cbind, out_list)
 
     if (multi) {
         m <- match(as.integer(colnames(out)), ids)
@@ -172,9 +179,11 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., 
 
 #' @export
 #' @rdname sumCountsAcrossCells
-setMethod("aggregateAcrossCells", "SingleCellExperiment", function(x, ids, ..., use_exprs_values="counts", use_altexps=TRUE) {
+setMethod("aggregateAcrossCells", "SingleCellExperiment", function(x, ids, 
+    subset_row=NULL, use_exprs_values="counts", use_altexps=TRUE)
+{
     FUN <- .create_cell_aggregator(ids, use_exprs_values)
-    y <- FUN(x, ...)
+    y <- FUN(x, ..., subset_row=subset_row)
     use_altexps <- .get_altexps_to_use(x, use_altexps)
     for (i in use_altexps) {
         altExp(y, i) <- FUN(altExp(x, i), ...)

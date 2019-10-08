@@ -20,3 +20,23 @@
     }
     return(out)
 }
+
+#' @importFrom BiocParallel bpiterate bpnworkers
+.iterate_by_columns <- function(x, column_sets, subset_row, FUN, ..., BPPARAM) {
+    env <- new.env()
+    env$counter <- 1L
+    bpiterate(ITER=function() {
+        i <- env$counter
+        env$counter <- i + 1L
+        if (i > length(column_sets)) {
+            NULL
+        } else {
+            chosen <- column_sets[[i]]
+            if (!is.null(subset_row)) {
+                x[subset_row,chosen,drop=FALSE]
+            } else {
+                x[,chosen,drop=FALSE]
+            }
+        }
+    }, FUN=FUN, ..., BPPARAM=BPPARAM)
+}
