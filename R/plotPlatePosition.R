@@ -16,7 +16,7 @@
 #' @param theme_size Numeric scalar, see \code{?"\link{scater-plot-args}"} for details.
 #' @param point_alpha Numeric scalar specifying the transparency of the points, see \code{?"\link{scater-plot-args}"} for details.
 #' @param point_size Numeric scalar specifying the size of the points, see \code{?"\link{scater-plot-args}"} for details.
-#' @param other_fields Additional arguments to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
+#' @param other_fields Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
 #' This function expects plate positions to be given in a charcter format where a letter indicates the row on the plate and a numeric value  indicates the column. 

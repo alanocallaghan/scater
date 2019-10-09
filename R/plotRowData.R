@@ -14,7 +14,7 @@
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see \code{?\link{retrieveFeatureInfo}} for details.
 #' @param by_show_single Deprecated and ignored.
-#' @param other_fields Additional arguments to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
+#' @param other_fields Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 

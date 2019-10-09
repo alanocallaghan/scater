@@ -16,6 +16,10 @@
 #' @param high_color String specifying the color to use for high expression.
 #' @param max_ave Numeric value specifying the cap on the average expression.
 #' @param max_detected Numeric value specifying the cap on the proportion of detected expression values.
+#' @param other_fields Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
+#' Note that any \link{AsIs} vectors or data.frames must be of length equal to \code{nrow(object)}, not \code{features}.
+#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from,
+#' to use when extracting values according to each entry of \code{other_fields}. 
 #' 
 #' @return 
 #' A \link{ggplot} object containing a dot plot.
@@ -52,7 +56,8 @@
 #' @importFrom ggplot2 ggplot aes_string geom_point
 #' scale_size scale_color_gradient theme element_line element_rect
 plotDots <- function(object, features, group=NULL, exprs_values="logcounts", detection_limit=0,
-    low_color="white", high_color="red", max_ave=NULL, max_detected=NULL)
+    low_color="white", high_color="red", max_ave=NULL, max_detected=NULL,
+    other_fields=list(), by_exprs_values=exprs_values)
 {    
     if (is.null(group)) {
         group <- rep("all", ncol(object))
@@ -69,7 +74,7 @@ plotDots <- function(object, features, group=NULL, exprs_values="logcounts", det
     # Creating a long-form table.
     evals_long <- data.frame(
         Feature=rep(features, ncol(num)),
-        Group=rep(group, each=nrow(num)),
+        Group=rep(colnames(num), each=nrow(num)),
         NumDetected=as.numeric(num),
         Average=as.numeric(ave)
     )
@@ -80,6 +85,13 @@ plotDots <- function(object, features, group=NULL, exprs_values="logcounts", det
     if (!is.null(max_ave)) {
         evals_long$Average <- pmin(max_ave, evals_long$Average)
     }
+
+    # Adding other fields, if requested.
+    vis_out <- .incorporate_common_vis_row(evals_long, se = object, 
+        colour_by = NULL, shape_by = NULL, size_by = NULL, 
+        by_exprs_values = by_exprs_values, other_fields=other_fields,
+        multiplier=rep(.subset2index(features, object), ncol(num)))
+    evals_long <- vis_out$df
 
     ggplot(evals_long) + 
         geom_point(aes_string(x="Group", y="Feature", size="NumDetected", col="Average")) +

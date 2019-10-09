@@ -20,7 +20,7 @@
 #' Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
 #' @param text_size Numeric scalar specifying the size of added text.
 #' @param text_colour String specifying the colour of the added text.
-#' @param other_fields Additional arguments to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
+#' @param other_fields Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details

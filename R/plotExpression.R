@@ -22,7 +22,7 @@
 #' @param ncol Integer scalar, specifying the number of columns to be used for the panels of a multi-facet plot.
 #' @param scales String indicating whether should multi-facet scales be fixed (\code{"fixed"}), free (\code{"free"}), or free in one dimension (\code{"free_x"}, \code{"free_y"}).
 #' Passed to the \code{scales} argument in the \code{\link[ggplot2]{facet_wrap}} when multiple facets are generated.
-#' @param other_fields Additional arguments to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
+#' @param other_fields Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -126,12 +126,12 @@ plotExpression <- function(object, features, x = NULL,
     evals_long$X <- rep(xcoord, nfeatures)
 
     ## checking visualization arguments
-    dummy <- data.frame(Feature=character(ncol(object)), X=numeric(ncol(object)), Y=numeric(ncol(object)))
-    vis_out <- .incorporate_common_vis_col(dummy, se = object, 
+    vis_out <- .incorporate_common_vis_col(evals_long, se = object, 
         colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-        by_exprs_values = by_exprs_values, other_fields=other_fields)
+        by_exprs_values = by_exprs_values, other_fields=other_fields,
+        multiplier=rep(seq_len(ncol(object)), nfeatures))
 
-    evals_long <- cbind(evals_long, vis_out$df[rep(seq_len(ncol(object)), nfeatures),-(1:3),drop=FALSE])
+    evals_long <- vis_out$df
     colour_by <- vis_out$colour_by
     shape_by <- vis_out$shape_by
     size_by <- vis_out$size_by
