@@ -51,7 +51,8 @@ nexprs(example_sce, byrow = TRUE)[1:10]
 
 }
 \seealso{
-\code{\link{nexprsAcrossFeatures}} and \code{\link{nexprsAcrossCells}}, to do this calculation for each group of features or cells, respectively.
+\code{\link{numDetectedAcrossFeatures}} and \code{\link{numDetectedAcrossCells}}, 
+to do this calculation for each group of features or cells, respectively.
 }
 \author{
 Aaron Lun

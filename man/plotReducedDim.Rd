@@ -42,7 +42,7 @@ Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCel
 
 \item{text_colour}{String specifying the colour of the added text.}
 
-\item{other_fields}{Additional arguments to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
+\item{other_fields}{Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }

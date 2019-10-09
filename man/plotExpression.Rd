@@ -47,7 +47,7 @@ Only relevant when \code{x=NULL}.}
 \item{scales}{String indicating whether should multi-facet scales be fixed (\code{"fixed"}), free (\code{"free"}), or free in one dimension (\code{"free_x"}, \code{"free_y"}).
 Passed to the \code{scales} argument in the \code{\link[ggplot2]{facet_wrap}} when multiple facets are generated.}
 
-\item{other_fields}{Additional arguments to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
+\item{other_fields}{Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }

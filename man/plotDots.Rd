@@ -6,7 +6,8 @@
 \usage{
 plotDots(object, features, group = NULL, exprs_values = "logcounts",
   detection_limit = 0, low_color = "white", high_color = "red",
-  max_ave = NULL, max_detected = NULL)
+  max_ave = NULL, max_detected = NULL, other_fields = list(),
+  by_exprs_values = exprs_values)
 }
 \arguments{
 \item{object}{A \linkS4class{SingleCellExperiment} object.}
@@ -29,6 +30,12 @@ This is also used as the background color, see Details.}
 \item{max_ave}{Numeric value specifying the cap on the average expression.}
 
 \item{max_detected}{Numeric value specifying the cap on the proportion of detected expression values.}
+
+\item{other_fields}{Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
+Note that any \link{AsIs} vectors or data.frames must be of length equal to \code{nrow(object)}, not \code{features}.}
+
+\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from,
+to use when extracting values according to each entry of \code{other_fields}.}
 }
 \value{
 A \link{ggplot} object containing a dot plot.

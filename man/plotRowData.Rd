@@ -29,7 +29,7 @@ for use in point aesthetics - see \code{?\link{retrieveFeatureInfo}} for details
 
 \item{by_show_single}{Deprecated and ignored.}
 
-\item{other_fields}{Additional arguments to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
+\item{other_fields}{Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }
