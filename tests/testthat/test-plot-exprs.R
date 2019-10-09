@@ -54,8 +54,11 @@ test_that("plotExpression works for different exprs_values", {
 test_that("plotExpression works for other fields", {
     gg <- plotExpression(example_sce, head(rownames(example_sce)), 
         other_fields=c("Cell_Cycle", "Mutation_Status"))
+
     expect_true("Cell_Cycle" %in% colnames(gg$data))
     expect_true("Mutation_Status" %in% colnames(gg$data))
+
+    expect_identical(gg$data$Cell_Cycle, rep(example_sce$Cell_Cycle, 6)) # default 'n' in head().
 
     # This should throw a warning. 
     example_sce$colour_by <- example_sce$Cell_Cycle
