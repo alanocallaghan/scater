@@ -9,13 +9,13 @@ test_that("isOutlier works correctly with vanilla applications", {
     # Checking that thresholds are correctly computed.
     MAD <- mad(vals)
     MED <- median(vals)
-    lower <- MED - MAD * 5
-    higher <- MED + MAD * 5
+    lower <- MED - MAD * 3
+    higher <- MED + MAD * 3
     expect_equal(attr(out, "thresholds"), c(lower=lower, higher=higher))
     expect_identical(as.logical(out), vals > higher | vals < lower)
 
-    out.3 <- isOutlier(vals, nmads=3)
-    expect_equal(attr(out.3, "thresholds"), c(lower=MED - MAD * 3, higher=MED + MAD * 3))
+    out.5 <- isOutlier(vals, nmads=5)
+    expect_equal(attr(out.5, "thresholds"), c(lower=MED - MAD * 5, higher=MED + MAD * 5))
 
     # Consistent with just lower or higher.
     out.L <- isOutlier(vals, type="lower")
@@ -36,7 +36,7 @@ test_that("isOutlier responds to the minimum difference", {
         out <- isOutlier(vals, min_diff=min.diff)
        
         # Checking that thresholds are correctly computed.
-        relative.threshold <- max(min.diff, mad(vals) * 5)
+        relative.threshold <- max(min.diff, mad(vals) * 3)
         lower <- median(vals) - relative.threshold
         higher <- median(vals) + relative.threshold
         expect_equal(attr(out, "thresholds"), c(lower=lower, higher=higher))

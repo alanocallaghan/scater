@@ -170,8 +170,7 @@ Values beyond this threshold are considered outliers and can be filtered out, as
 Here, we define small outliers (using `type="lower"`) for the _log_-total counts at 3 MADs from the median.
 
 ```{r}
-keep.total <- isOutlier(per.cell$sum, nmads=3, 
-    type="lower", log=TRUE)
+keep.total <- isOutlier(per.cell$sum, type="lower", log=TRUE)
 filtered <- example_sce[,keep.total]
 ```
 
@@ -180,8 +179,7 @@ This uses the total count, number of detected features and the percentage of cou
 (e.g., mitochondrial genes, spike-in transcripts) to identify which cells to discard and for what reason.
 
 ```{r}
-qc.stats <- quickPerCellQC(per.cell, nmads=3, 
-    percent_subsets="subsets_Mito_percent")
+qc.stats <- quickPerCellQC(per.cell, percent_subsets="subsets_Mito_percent")
 colSums(as.matrix(qc.stats))
 ```
 

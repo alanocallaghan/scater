@@ -8,12 +8,11 @@
 #' @param log Logical scalar, should the values of the metric be transformed to the log10 scale before computing MADs?
 #' @param subset Logical or integer vector, which subset of values should be used to calculate the median/MAD? 
 #' If \code{NULL}, all values are used.
-#' Missing values will trigger a warning and will be automatically ignored. 
 #' @param batch Factor of length equal to \code{metric}, specifying the batch to which each observation belongs. 
 #' A median/MAD is calculated for each batch, and outliers are then identified within each batch.
 #' @param min_diff A numeric scalar indicating the minimum difference from the median to consider as an outlier. 
 #' The outlier threshold is defined from the larger of \code{nmads} MADs and \code{min_diff}, to avoid calling many outliers when the MAD is very small. 
-#' If \code{NA}, it is ignored.
+#' Ignored if \code{NA}.
 #' 
 #' @return A logical vector of the same length as the \code{metric} argument, specifying the observations that are considered as outliers.
 #'
@@ -22,25 +21,29 @@
 #' This is a numeric vector of length 2 when \code{batch=NULL} for the threshold on each side.
 #' Otherwise, it is a matrix with one named column per level of \code{batch} and two rows (one per threshold).
 #' 
+#' Missing values trigger a warning and are automatically ignored during estimation of the median and MAD.
+#' The corresponding entries of the output vector are also set to \code{NA} values.
+#'
 #' @author Aaron Lun
 #'
 #' @examples
 #' example_sce <- mockSCE()
 #' stats <- perCellQCMetrics(example_sce)
 #'
-#' str(isOutlier(stats$sum, nmads = 3))
-#' str(isOutlier(stats$sum, nmads = 3, type="lower"))
-#' str(isOutlier(stats$sum, nmads = 3, type="higher"))
+#' str(isOutlier(stats$sum))
+#' str(isOutlier(stats$sum, type="lower"))
+#' str(isOutlier(stats$sum, type="higher"))
 #' 
-#' str(isOutlier(stats$sum, nmads = 3, log=TRUE))
+#' str(isOutlier(stats$sum, log=TRUE))
 #'
 #' b <- sample(LETTERS[1:3], ncol(example_sce), replace=TRUE)
-#' str(isOutlier(stats$sum, nmads = 3, log=TRUE, batch=b))
+#' str(isOutlier(stats$sum, log=TRUE, batch=b))
 #' 
 #' @export
 #' @importFrom stats mad median
-isOutlier <- function(metric, nmads = 5, type = c("both", "lower", "higher"), 
-                      log = FALSE, subset = NULL, batch = NULL, min_diff = NA) {
+isOutlier <- function(metric, nmads = 3, type = c("both", "lower", "higher"), 
+    log = FALSE, subset = NULL, batch = NULL, min_diff = NA) 
+{
     if (log) {
         metric <- log10(metric)
     }
@@ -68,7 +71,8 @@ isOutlier <- function(metric, nmads = 5, type = c("both", "lower", "higher"),
         all.threshold <- vector("list", length(by.batch))
         for (b in seq_along(by.batch)) {
             bdx <- by.batch[[b]]
-            current <- Recall(metric[bdx], nmads = nmads, type = type, log = FALSE, subset = subset[bdx], batch = NULL, min_diff = min_diff)
+            current <- Recall(metric[bdx], nmads = nmads, type = type, log = FALSE, 
+                subset = subset[bdx], batch = NULL, min_diff = min_diff)
             all.threshold[[b]] <- .get_thresholds(current)
             collected[bdx] <- current
         }
