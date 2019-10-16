@@ -31,6 +31,7 @@
     \item Added the order_columns_by= argument to plotHeatmap() for easy plotting by a given factor.
     Changed defaults to more common values.
     \item Added a plotDots() function to create a Seurat-style dot plot.
+    \item Dropped default nmads= to 3 in isOutlier().
   }
 }
 
