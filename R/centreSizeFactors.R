@@ -1,6 +1,9 @@
 #' Centre size factors at unity
 #'
 #' Scales all size factors so that the average size factor across cells is equal to 1.
+#'
+#' This function is deprecated as support for multiple size factors in \linkS4class{SingleCellExperiment} is deprecated,
+#' and scaling one set of size factors is largely trivial.
 #' 
 #' @param object A SingleCellExperiment object containing any number (or zero) sets of size factors.
 #' @param centre A numeric scalar, the value around which all sets of size factors should be centred.

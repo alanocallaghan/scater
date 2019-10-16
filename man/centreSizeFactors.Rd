@@ -18,6 +18,10 @@ A SingleCellExperiment with modified size factors that are centred at unity.
 Scales all size factors so that the average size factor across cells is equal to 1.
 }
 \details{
+This function is deprecated as support for multiple size factors in \linkS4class{SingleCellExperiment} is deprecated,
+and scaling one set of size factors is largely trivial.
+
+
 Centering of size factors at unity ensures that division by size factors yields values on the same scale as the raw counts.
 This is important for the interpretation of the normalized values, as well as comaprisons between features normalized with different size factors (e.g., spike-ins).
 }
