@@ -3,9 +3,9 @@
 #' Convenient utilities to compute QC metrics and add them to a \linkS4class{SummarizedExperiment}'s metadata.
 #'
 #' @param x A \linkS4class{SummarizedExperiment} object or one of its subclasses.
-#' @param ... For \code{addQCPerCell}, further arguments to pass to \code{\link{perCellQCMetrics}}.
+#' @param ... For \code{addPerCellQC}, further arguments to pass to \code{\link{perCellQCMetrics}}.
 #' 
-#' For \code{addQCPerFeature}, further arguments to pass to \code{\link{perFeatureQCMetrics}}.
+#' For \code{addPerFeatureQC}, further arguments to pass to \code{\link{perFeatureQCMetrics}}.
 #'
 #' @return
 #' An object like \code{x} but with the QC metrics added to the row or column metadata.
@@ -19,10 +19,10 @@
 #'
 #' @examples
 #' example_sce <- mockSCE()
-#' example_sce <- addQCPerCell(example_sce)
+#' example_sce <- addPerCellQC(example_sce)
 #' colData(example_sce)
 #'
-#' example_sce <- addQCPerFeature(example_sce)
+#' example_sce <- addPerFeatureQC(example_sce)
 #' rowData(example_sce)
 #'
 #' @seealso
@@ -30,16 +30,16 @@
 #' @export
 #' @importFrom BiocGenerics cbind
 #' @importFrom SummarizedExperiment colData colData<-
-addQCPerCell <- function(x, ...) {
+addPerCellQC <- function(x, ...) {
     colData(x) <- cbind(colData(x), perCellQCMetrics(x, ...))
     x
 }
 
 #' @export
-#' @rdname addQCPerCell
+#' @rdname addPerCellQC
 #' @importFrom BiocGenerics cbind
 #' @importFrom SummarizedExperiment rowData rowData<-
-addQCPerFeature <- function(x, ...) {
+addPerFeatureQC <- function(x, ...) {
     rowData(x) <- cbind(rowData(x), perFeatureQCMetrics(x, ...))
     x
 }

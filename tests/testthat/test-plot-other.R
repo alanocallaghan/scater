@@ -92,7 +92,7 @@ test_that("we can produce plots showing cells in plate position", {
 # Testing plotColData and plotRowData
 
 test_that("we can produce plots for column metadata", {
-    example_sce <- addQCPerCell(example_sce)
+    example_sce <- addPerCellQC(example_sce)
 
     for (y in c("detected", "Mutation_Status")) { # discrete or continuous.
         for (x in list(NULL, "sum", "Cell_Cycle")) { # nothing, discrete or continuous. 
@@ -129,7 +129,7 @@ test_that("we can produce plots for column metadata", {
 test_that("we can produce plots for row metadata", {
     rowData(example_sce)$WHEE <- rep(LETTERS[1:10], length.out=nrow(example_sce))
     rowData(example_sce)$is_feature_control <- rbinom(nrow(example_sce), 1, 0.5)
-    example_sce <- addQCPerFeature(example_sce)
+    example_sce <- addPerFeatureQC(example_sce)
 
     for (y in c("mean", "is_feature_control")) { # discrete or continuous.
         for (x in list(NULL, "detected", "WHEE")) { # nothing, discrete or continuous. 

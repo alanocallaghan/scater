@@ -117,7 +117,7 @@
 #'
 #'
 #' @seealso 
-#' \code{\link{addQCPerCell}}, to add the QC metrics to the column metadata.
+#' \code{\link{addPerCellQC}}, to add the QC metrics to the column metadata.
 #' @export
 #' @name perCellQCMetrics
 NULL

@@ -68,7 +68,7 @@
 #' stats2$subsets
 #'
 #' @seealso 
-#' \code{\link{addQCPerFeature}}, to add the QC metrics to the row metadata.
+#' \code{\link{addPerFeatureQC}}, to add the QC metrics to the row metadata.
 #' @export
 #' @name perFeatureQCMetrics
 NULL
