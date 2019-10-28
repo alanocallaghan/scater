@@ -28,6 +28,7 @@
     \item Added aggregateAcrossCells() and aggregateAcrossFeatures() to create a summed SingleCellExperiment object.
     \item Added the mockSCE() function to generate example objects for the documentation.
     \item Support multiple factors for grouping cells in sumCountsAcrossCells().
+    \item Support list of grouping vectors in sumCountsAcrossFeatures().
     \item Added the order_columns_by= argument to plotHeatmap() for easy plotting by a given factor.
     Changed defaults to more common values.
     \item Added a plotDots() function to create a Seurat-style dot plot.

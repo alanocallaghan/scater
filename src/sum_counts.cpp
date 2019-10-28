@@ -13,12 +13,14 @@
  ***************************/
 
 template <class M, class O>
-Rcpp::RObject sum_row_counts_internal(Rcpp::RObject input, const Rcpp::IntegerVector& summable_set, 
-    size_t nsummations, size_t start_index, size_t end_index) 
+Rcpp::RObject sum_row_counts_internal(Rcpp::RObject input, 
+    const Rcpp::IntegerVector& genes, const Rcpp::IntegerVector& runs,
+    size_t start_index, size_t end_index) 
 {
     auto mat=beachmat::create_matrix<M>(input);
     const size_t ncells=mat->get_ncol();
 
+    const size_t nsummations=runs.size();
     typename M::vector holder_out(nsummations);
     if (end_index > ncells) {
         throw std::runtime_error("end index out of range");
@@ -35,12 +37,18 @@ Rcpp::RObject sum_row_counts_internal(Rcpp::RObject input, const Rcpp::IntegerVe
 
     for (size_t c=start_index; c<end_index; ++c) {
         col_holder.fill(c);
+
         auto it=col_holder.get_values();
-        for (auto s : summable_set) {
-            if (s!=NA_INTEGER) {
-                holder_out[s]+=*it;
+        auto hIt=holder_out.begin();
+        auto gIt=genes.begin();
+
+        for (auto s : runs) {
+            while (s > 0) {
+                (*hIt) += *(it + *gIt - 1); // get back to zero indexing.
+                --s;
+                ++gIt;
             }
-            ++it;
+            ++hIt;
         }
 
         out->set_col(c - start_index, holder_out.begin());
@@ -49,7 +57,7 @@ Rcpp::RObject sum_row_counts_internal(Rcpp::RObject input, const Rcpp::IntegerVe
     return out->yield();
 }
 
-SEXP sum_row_counts (SEXP counts, SEXP sumset, SEXP nsums, SEXP job_start, SEXP job_end) {
+SEXP sum_row_counts (SEXP counts, SEXP genes, SEXP runs, SEXP job_start, SEXP job_end) {
     BEGIN_RCPP
 
     // Determining the type and amount of work to do.
@@ -58,16 +66,15 @@ SEXP sum_row_counts (SEXP counts, SEXP sumset, SEXP nsums, SEXP job_start, SEXP 
     if (end_index < start_index) { 
         throw std::runtime_error("start index is less than end index"); 
     }
-    const size_t nsummations=check_integer_scalar(nsums, "number of sets");
 
     auto mattype=beachmat::find_sexp_type(counts);
     if (mattype==INTSXP) {
         return sum_row_counts_internal<beachmat::integer_matrix,
-           beachmat::integer_output>(counts, sumset, nsummations, start_index, end_index);
+           beachmat::integer_output>(counts, genes, runs, start_index, end_index);
 
     } else if (mattype==REALSXP) {
         return sum_row_counts_internal<beachmat::numeric_matrix,
-           beachmat::numeric_output>(counts, sumset, nsummations, start_index, end_index);
+           beachmat::numeric_output>(counts, genes, runs, start_index, end_index);
 
     } else {
         throw std::runtime_error("unacceptable matrix type");

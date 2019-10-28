@@ -29,8 +29,10 @@ test_that("we can summarise counts at feature set level", {
     fids <- factor(ids, levels=rev(sort(unique(ids))))
     fout <- sumCountsAcrossFeatures(sce, fids)
     expect_identical(out, fout[nrow(fout):1,])
+})
 
-    # Handles NA's correctly.
+set.seed(10001)
+test_that("count summarization at feature set level respects NAs", {
     ids2 <- sample(LETTERS, nrow(sce), replace=TRUE)
     out2 <- sumCountsAcrossFeatures(sce, ids2)
 
@@ -38,6 +40,28 @@ test_that("we can summarise counts at feature set level", {
     ids3[ids3=="A"] <- NA
     out3 <- sumCountsAcrossFeatures(sce, ids3)
     expect_identical(out2[setdiff(rownames(out2), "A"),], out3)
+
+    ids4 <- ids2
+    ids4[1:10] <- NA
+    out4a <- sumCountsAcrossFeatures(sce, ids4)
+    out4b <- sumCountsAcrossFeatures(sce[-(1:10),], ids4[-(1:10)])
+    expect_identical(out4a, out4b)
+})
+
+set.seed(10002)
+test_that("by-feature count summarization behaves with lists", {
+    idl <- list(10:1, sample(nrow(sce), 100), nrow(sce) - 1:10)
+    outl <- sumCountsAcrossFeatures(sce, idl)
+
+    manual <- list()
+    for (i in seq_along(idl)) {
+        manual[[i]] <- colSums(counts(sce)[idl[[i]],])
+    }
+    expect_identical(outl, do.call(rbind, manual))
+
+    expect_identical(outl, sumCountsAcrossFeatures(sce, lapply(idl, function(i) rownames(sce)[i])))
+    
+    expect_identical(outl/lengths(idl), sumCountsAcrossFeatures(sce, idl, average=TRUE))
 })
 
 set.seed(10002)

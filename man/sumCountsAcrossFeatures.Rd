@@ -30,7 +30,9 @@ For the SummarizedExperiment method, further arguments to be passed to the ANY m
 
 For \code{aggregateAcrossFeatures}, further arguments to be passed to \code{sumCountsAcrossFeatures}.}
 
-\item{ids}{A factor specifying the set to which each feature in \code{x} belongs.}
+\item{ids}{A factor specifying the set to which each feature in \code{x} belongs.
+
+Alternatively, a list of integer or character vectors, where each vector specifies the indices or names of features in a set.}
 
 \item{average}{Logical scalar indicating whether the average should be computed instead of the sum.}
 
@@ -55,17 +57,21 @@ Sum together expression values (by default, counts) for each feature set in each
 }
 \details{
 This function provides a convenient method for aggregating counts across multiple rows for each cell.
-For example, genes with multiple mapping locations in the reference will often manifest as multiple rows with distinct Ensembl/Entrez IDs.
+Several possible applications are listed below:
+\itemize{
+\item Using a list of genes in \code{ids}, we can obtain a summary expression value for all genes in one or more gene sets.
+This allows the activity of various pathways to be compared across cells.
+\item Genes with multiple mapping locations in the reference will often manifest as multiple rows with distinct Ensembl/Entrez IDs.
 These counts can be aggregated into a single feature by setting the shared identifier (usually the gene symbol) as \code{ids}.
-
-It is theoretically possible to aggregate transcript-level counts to gene-level counts with this function.
+\item It is theoretically possible to aggregate transcript-level counts to gene-level counts with this function.
 However, it is often better to do so with dedicated functions (e.g., from the \pkg{tximport} or \pkg{tximeta} packages) that account for differences in length across isoforms.
+}
 
 The behaviour of this function is equivalent to that of \code{\link{rowsum}}.
 However, this function can operate on any matrix representation in \code{object},
 and can do so in a parallelized manner for large matrices without resorting to block processing.
 
-Any \code{NA} values in \code{ids} are implicitly ignored and will not be considered or reported.
+If \code{ids} is a factor, any \code{NA} values are implicitly ignored and will not be considered or reported.
 This may be useful, e.g., to remove undesirable feature sets by setting their entries in \code{ids} to \code{NA}.
 
 Setting \code{average=TRUE} will compute the average in each set rather than the sum.

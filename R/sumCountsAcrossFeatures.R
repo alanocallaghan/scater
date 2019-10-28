@@ -7,6 +7,8 @@
 #'
 #' For \code{aggregateAcrossFeatures}, a SummarizedExperiment containing a count matrix.
 #' @param ids A factor specifying the set to which each feature in \code{x} belongs.
+#'
+#' Alternatively, a list of integer or character vectors, where each vector specifies the indices or names of features in a set.
 #' @param average Logical scalar indicating whether the average should be computed instead of the sum.
 #' @param exprs_values A string or integer scalar specifying the assay of \code{x} containing the matrix of counts
 #' (or any other expression quantity that can be meaningfully summed).
@@ -29,17 +31,21 @@
 #'
 #' @details
 #' This function provides a convenient method for aggregating counts across multiple rows for each cell.
-#' For example, genes with multiple mapping locations in the reference will often manifest as multiple rows with distinct Ensembl/Entrez IDs.
+#' Several possible applications are listed below:
+#' \itemize{
+#' \item Using a list of genes in \code{ids}, we can obtain a summary expression value for all genes in one or more gene sets.
+#' This allows the activity of various pathways to be compared across cells.
+#' \item Genes with multiple mapping locations in the reference will often manifest as multiple rows with distinct Ensembl/Entrez IDs.
 #' These counts can be aggregated into a single feature by setting the shared identifier (usually the gene symbol) as \code{ids}.
-#'
-#' It is theoretically possible to aggregate transcript-level counts to gene-level counts with this function.
+#' \item It is theoretically possible to aggregate transcript-level counts to gene-level counts with this function.
 #' However, it is often better to do so with dedicated functions (e.g., from the \pkg{tximport} or \pkg{tximeta} packages) that account for differences in length across isoforms.
+#' }
 #'
 #' The behaviour of this function is equivalent to that of \code{\link{rowsum}}.
 #' However, this function can operate on any matrix representation in \code{object},
 #' and can do so in a parallelized manner for large matrices without resorting to block processing.
 #'
-#' Any \code{NA} values in \code{ids} are implicitly ignored and will not be considered or reported.
+#' If \code{ids} is a factor, any \code{NA} values are implicitly ignored and will not be considered or reported.
 #' This may be useful, e.g., to remove undesirable feature sets by setting their entries in \code{ids} to \code{NA}.
 #'
 #' Setting \code{average=TRUE} will compute the average in each set rather than the sum.
@@ -58,33 +64,37 @@ NULL
 
 #' @importFrom BiocParallel SerialParam bpmapply
 .sum_counts_across_features <- function(x, ids, average=FALSE, BPPARAM=SerialParam()) {
-    if (nrow(x)!=length(ids)) {
-        stop("'length(ids)' and 'nrow(x)' are not equal")
+    if (is.list(ids)) {
+        ids <- lapply(ids, .subset2index, target=x, byrow=TRUE)
+        runs <- lengths(ids)
+        genes <- unlist(ids)
+        names <- names(ids)
+    } else {
+        ids <- factor(ids)
+        genes <- order(ids, na.last=NA)
+        runs <- as.integer(table(ids))
+        names <- levels(ids)
     }
-
-    ids <- as.factor(ids)
-    ans <- integer(length(ids))
-    ans <- as.integer(ids) - 1L
 
     assignments <- .assign_jobs_to_workers(ncol(x), BPPARAM)
     out_list <- bpmapply(start=assignments$start, end=assignments$end, 
         FUN=.sum_across_rows_internal, 
-        MoreArgs=list(by_set=ans, ntotal=nlevels(ids), mat=x), 
+        MoreArgs=list(genes=genes, runs=runs, mat=x), 
         BPPARAM=BPPARAM, SIMPLIFY=FALSE, USE.NAMES=FALSE)
 
     out <- do.call(cbind, out_list)
-    dimnames(out) <- list(levels(ids), colnames(x))
+    dimnames(out) <- list(names, colnames(x))
     if (average) {
-        out <- out/as.integer(table(ids))
+        out <- out/runs
     }
 
     out
 }
 
-.sum_across_rows_internal <- function(mat, by_set, ntotal, start, end) 
+.sum_across_rows_internal <- function(mat, genes, runs, start, end) 
 # Internal function to drag along the namespace.
 {
-    .Call(cxx_sum_row_counts, mat, by_set, ntotal, start, end)
+    .Call(cxx_sum_row_counts, mat, genes, runs, start, end)
 }
 
 #' @export
