@@ -13,7 +13,6 @@
 #' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
-#' @param by_show_single Deprecated and ignored.
 #' @param xlab String specifying the label for x-axis.
 #' If \code{NULL} (default), \code{x} will be used as the x-axis label.
 #' @param feature_colours Logical scalar indicating whether violins should be coloured by feature when \code{x} and \code{colour_by} are not specified and \code{one_facet=TRUE}.
@@ -79,10 +78,9 @@
 plotExpression <- function(object, features, x = NULL,
     exprs_values = "logcounts", log2_values = FALSE,
     colour_by = NULL, shape_by = NULL, size_by = NULL,
-    by_exprs_values = exprs_values, by_show_single = FALSE,
-    xlab = NULL, feature_colours = TRUE, 
-    one_facet = TRUE, ncol = 2, scales = "fixed", 
-    other_fields=list(), ...) 
+    by_exprs_values = exprs_values, xlab = NULL, 
+    feature_colours = TRUE, one_facet = TRUE, ncol = 2, 
+    scales = "fixed", other_fields=list(), ...) 
 {
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")

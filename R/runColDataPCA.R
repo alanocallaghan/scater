@@ -7,12 +7,9 @@
 #' @param ncomponents Numeric scalar indicating the number of principal components to obtain.
 #' @param variables List of strings or a character vector indicating which variables in \code{colData(x)} to use.
 #' If a list, each entry can also be an \link{AsIs} vector or a data.frame, as described in \code{?\link{retrieveCellInfo}}.
-#' @param selected_variables Deprecated, same as \code{variables}.
 #' @param scale Logical scalar, should the expression values be standardised so that each feature has unit variance?
 #' This will also remove features with standard deviations below 1e-8. 
-#' @param scale_features Deprecated, same as \code{scale}.
 #' @param outliers Logical indicating whether outliers should be detected based on PCA coordinates.
-#' @param detect_outliers Deprecated, same as \code{outliers}.
 #' @param BSPARAM A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.
 #' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
@@ -55,40 +52,15 @@
 #' @importFrom BiocSingular runPCA ExactParam 
 #' @importFrom BiocParallel SerialParam
 runColDataPCA <- function(x, ncomponents = 2, 
-    variables=NULL, selected_variables=NULL,
-    scale=TRUE, scale_features = NULL,
-    outliers = FALSE, detect_outliers = NULL,
+    variables=NULL, scale=TRUE, outliers = FALSE, 
     BSPARAM = ExactParam(), BPPARAM = SerialParam(), name = "PCA_coldata")
 {
-    variables <- .switch_arg_names(selected_variables, variables)
-    if (is.null(variables)) {
-        .Deprecated(msg="'variables' must now be explicitly specified")
-        candidates <- c("pct_counts_in_top_100_features",
-            "total_features_by_counts",
-            "pct_counts_feature_control",
-            "total_features_by_counts_feature_control",
-            "log10_total_counts_endogenous",
-            "log10_total_counts_feature_control")
-
-        # Fishing out the (possibly compacted) metadata fields.
-        variables <- list()
-        it <- 1L
-        for (field in candidates) {
-            out <- .qc_hunter(x, field, mode = "column", error = FALSE)
-            if (!is.null(out)) {
-                variables[[it]] <- out
-                it <- it + 1L
-            }
-        }
-    }
-
     # Constructing a matrix - presumably all doubles.
     exprs_to_plot <- matrix(0, ncol(x), length(variables))
     for (it in seq_along(variables)) {
         exprs_to_plot[,it] <- retrieveCellInfo(x, variables[[it]], search = "colData")$val
     }
 
-    scale <- .switch_arg_names(scale_features, scale)
     cv <- colVars(exprs_to_plot)
     if (scale) {
         keep <- cv >= 1e-8
@@ -98,7 +70,6 @@ runColDataPCA <- function(x, ncomponents = 2,
 
     # Outlier detection. We used to use mvoutlier but their dependency tree 
     # changed to require system libraries, which were untenable.
-    outliers <- .switch_arg_names(detect_outliers, outliers)
     if (outliers) {
         outlying <- robustbase::adjOutlyingness(exprs_to_plot, only.outlyingness=TRUE)
         x$outlier <- isOutlier(outlying, type="higher")

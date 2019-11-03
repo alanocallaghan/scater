@@ -4,7 +4,6 @@
 #'
 #' @param object A SingleCellExperiment object.
 #' @param dimred A string or integer scalar indicating the reduced dimension result in \code{reducedDims(object)} to plot.
-#' @param use_dimred Deprecated, same as \code{dimred}.
 #' @param ncomponents A numeric scalar indicating the number of dimensions to plot, starting from the first dimension.
 #' Alternatively, a numeric vector specifying the dimensions to be plotted.
 #' @param percentVar A numeric vector giving the proportion of variance in expression explained by each reduced dimension. 
@@ -14,7 +13,6 @@
 #' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
-#' @param by_show_single Deprecated and ignored.
 #' @param text_by String specifying the column metadata field with which to add text labels on the plot.
 #' This must refer to a categorical field, i.e., coercible into a factor.
 #' Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
@@ -57,14 +55,13 @@
 #' @export
 #' @importFrom SingleCellExperiment reducedDim
 #' @importFrom ggplot2 annotate
-plotReducedDim <- function(object, dimred, use_dimred=NULL, ncomponents = 2, percentVar = NULL, 
+plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL, 
     colour_by = NULL, shape_by = NULL, size_by = NULL,
-    by_exprs_values = "logcounts", by_show_single=NULL, 
+    by_exprs_values = "logcounts", 
     text_by=NULL, text_size=5, text_colour="black", 
     other_fields=list(), ...)
 {
     ## Extract reduced dimension representation of cells
-    dimred <- .switch_arg_names(use_dimred, dimred)
     red_dim <- reducedDim(object, dimred)
     if ( any(ncomponents > ncol(red_dim)) ) {
         stop(sprintf("'ncomponents' is larger than 'ncols(reducedDim(object, '%s'))'", dimred))

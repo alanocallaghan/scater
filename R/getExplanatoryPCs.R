@@ -4,11 +4,7 @@
 #'
 #' @param x A \linkS4class{SingleCellExperiment} object containing dimensionality reduction results.
 #' @param dimred String or integer scalar specifying the field in \code{reducedDims(x)} that contains the PCA results.
-#' @param use_dimred Deprecated, same as \code{dimred}.
 #' @param n_dimred Integer scalar specifying the number of the top principal components to use.
-#' @param ncomponents Deprecated, same as \code{n_dimred}. 
-#' @param rerun Deprecated. Logical scalar indicating whether the PCA should be repeated, even if pre-computed results are already present.
-#' @param run_args Deprecated. A named list of arguments to pass to \code{\link[scater]{runPCA}}.
 #' @param ... Additional arguments passed to \code{\link{getVarianceExplained}}.
 #'
 #' @details 
@@ -43,18 +39,9 @@
 getExplanatoryPCs <- function(x, dimred="PCA", use_dimred=NULL, 
     n_dimred=10, ncomponents=NULL, rerun=FALSE, run_args=list(), ...)
 {
-    n_dimred <- .switch_arg_names(ncomponents, n_dimred)
-    dimred <- .switch_arg_names(use_dimred, dimred)
-
-    if (!dimred %in% reducedDimNames(x) || rerun) {
-        .Deprecated(msg="'x' with no PCA results will no longer be supported")
-        x <- do.call(runPCA, c(list(x=x, ncomponents=n_dimred), run_args))
-        reddims <- reducedDim(x, "PCA")
-    } else {
-        reddims <- reducedDim(x, dimred)
-        n_dimred <- min(n_dimred, ncol(reddims))
-        reddims <- reddims[,seq_len(n_dimred),drop=FALSE]
-    }
+    reddims <- reducedDim(x, dimred)
+    n_dimred <- min(n_dimred, ncol(reddims))
+    reddims <- reddims[,seq_len(n_dimred),drop=FALSE]
 
     # Using getVarianceExplained to handle variable selection.
     dummy <- SingleCellExperiment(list(pc_space=t(reddims)), colData=colData(x))

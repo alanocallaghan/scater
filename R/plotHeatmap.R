@@ -25,7 +25,6 @@
 #' This argument is automatically appended to \code{colour_columns_by}.
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for colouring of column-level data - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
-#' @param by_show_single Deprecated and ignored.
 #' @param show_colnames,cluster_cols,... Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.
 #'
 #' @details 

@@ -13,7 +13,6 @@
 #' @param exprs_values String or integer scalar indicating which assay of \code{object} should be used to obtain the expression values for this plot. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
-#' @param by_show_single Deprecated and ignored.
 #' @param ncol Number of columns to use for \code{\link{facet_wrap}} if only one block is defined.
 #' @param line_width Numeric scalar specifying the line width.
 #' @param theme_size Numeric scalar specifying the font size to use for the plotting theme.
@@ -42,9 +41,9 @@
 #' @importFrom SummarizedExperiment assay
 #' @importFrom ggplot2 ggplot geom_line facet_grid facet_wrap xlab ylab theme_bw aes_string
 plotScater <- function(x, nfeatures = 500, exprs_values = "counts", 
-                       colour_by = NULL, by_exprs_values = exprs_values, by_show_single = FALSE,
-                       block1 = NULL, block2 = NULL, ncol = 3,
-                       line_width = 1.5, theme_size = 10)
+    colour_by = NULL, by_exprs_values = exprs_values, 
+    block1 = NULL, block2 = NULL, ncol = 3,
+    line_width = 1.5, theme_size = 10)
 {
     if (!is(x, "SingleCellExperiment")) {
         stop("x must be of class SingleCellExperiment")

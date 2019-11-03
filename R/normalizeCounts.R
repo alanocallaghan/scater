@@ -9,12 +9,9 @@
 #' @param size_factors A numeric vector of cell-specific size factors.
 #' Alternatively \code{NULL}, in which case the size factors are extracted or computed from \code{x}.
 #' @param log Logical scalar indicating whether normalized values should be log2-transformed.
-#' @param return_log Deprecated, same as \code{log}.
 #' @param pseudo_count Numeric scalar specifying the pseudo_count to add when log-transforming expression values.
-#' @param log_exprs_offset Deprecated, same as \code{pseudo_count}.
 #' @param center_size_factors Logical scalar indicating whether size factors should be centered at unity before being used.
 #' @param subset_row A vector specifying the subset of rows of \code{x} for which to return a result.
-#' @param use_size_factors Deprecated, same as \code{size_factors}.
 #' @param downsample Logical scalar indicating whether downsampling should be performed prior to scaling and log-transformation.
 #' @param down_target Numeric scalar specifying the downsampling target when \code{downsample=TRUE}.
 #' If \code{NULL}, this is defined by \code{down_prop} and a warning is emitted.
@@ -76,8 +73,8 @@ NULL
 
 #' @export
 #' @rdname normalizeCounts
-setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL, use_size_factors=NULL,
-    log=TRUE, return_log=NULL, pseudo_count=1, log_exprs_offset=NULL, center_size_factors=TRUE, subset_row=NULL,
+setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL, 
+    log=TRUE, pseudo_count=1, center_size_factors=TRUE, subset_row=NULL,
     downsample=FALSE, down_target=NULL, down_prop=0.01)
 {
     if (!is.null(subset_row)) {
@@ -101,26 +98,10 @@ setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL, use_size_fact
         size_factors <- down.out$size_factors
     }
 
-    pseudo_count <- .switch_arg_names(log_exprs_offset, pseudo_count)
-    log <- .switch_arg_names(return_log, log)
     .internal_transformer(x, size_factors, log, pseudo_count) 
 })
 
-.switch_sf_args <- function(size_factors, use_size_factors) {
-    if (isFALSE(use_size_factors)) {
-        .Deprecated(old="use_size_factors=FALSE")
-        size_factors <- NULL
-    } else if (!isTRUE(use_size_factors)) {
-        size_factors <- .switch_arg_names(use_size_factors, size_factors)
-    } else {
-        .Deprecated(old="use_size_factors=TRUE")
-        size_factors <- NULL
-    }
-    size_factors
-}
-
-.get_default_sizes <- function(x, size_factors, center_size_factors, use_size_factors, ...) {
-    size_factors <- .switch_sf_args(size_factors, use_size_factors)
+.get_default_sizes <- function(x, size_factors, center_size_factors, ...) {
     if (is.null(size_factors)) {
         size_factors <- librarySizeFactors(x, ...)
     }

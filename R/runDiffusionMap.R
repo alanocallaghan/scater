@@ -9,10 +9,8 @@
 #' @param ncomponents Numeric scalar indicating the number of UMAP dimensions to obtain.
 #' @param ntop Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
 #' @param subset_row Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param feature_set Deprecated, same as \code{subset_row}.
 #' @param exprs_values Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.
 #' @param scale Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.
-#' @param scale_features Deprecated, same as \code{scale} but with a different default.
 #' @param transposed Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.
 #' @param ... For the \code{calculateDiffusionMap} generic, additional arguments to pass to specific methods.
 #' For the ANY method, additional arguments to pass to \code{\link[destiny]{DiffusionMap}}.
@@ -21,7 +19,6 @@
 #' For \code{runDiffusionMap}, additional arguments to pass to \code{calculateDiffusionMap}.
 #' @param altexp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
 #' @param dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
-#' @param use_dimred Deprecated, same as \code{dimred}.
 #' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
 #' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #'
@@ -60,9 +57,7 @@
 NULL
 
 .calculate_diffusion_map <- function(x, ncomponents = 2, ntop = 500, 
-    subset_row = NULL, feature_set=NULL,
-    scale=FALSE, scale_features=NULL,
-    transposed=FALSE, ...)
+    subset_row = NULL, scale=FALSE, transposed=FALSE, ...)
 {
     if (!transposed) {
         x <- .get_mat_for_reddim(x, subset_row=subset_row, ntop=ntop, scale=scale) 
@@ -86,9 +81,8 @@ setMethod("calculateDiffusionMap", "SummarizedExperiment", function(x, ..., expr
 #' @export
 #' @rdname runDiffusionMap
 setMethod("calculateDiffusionMap", "SingleCellExperiment", function(x, ..., 
-    exprs_values="logcounts", dimred=NULL, use_dimred=NULL, n_dimred=NULL)
+    exprs_values="logcounts", dimred=NULL, n_dimred=NULL)
 {
-    dimred <- .switch_arg_names(use_dimred, dimred)
     mat <- .get_mat_from_sce(x, exprs_values=exprs_values, dimred=dimred, n_dimred=n_dimred)
     .calculate_diffusion_map(mat, transposed=!is.null(dimred), ...)
 })

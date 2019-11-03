@@ -6,7 +6,6 @@
 #'
 #' Alternatively, a \linkS4class{SummarizedExperiment} or a \linkS4class{SingleCellExperiment} containing such counts.
 #' @param lengths Numeric vector providing the effective length for each feature in \code{x}.
-#' @param effective_length Deprecated, same as \code{lengths}.
 #' @param ... Further arguments to pass to \code{\link{calculateCPM}}.
 #' @param subset_row A vector specifying the subset of rows of \code{x} for which to return a result.
 #'
@@ -23,9 +22,7 @@
 #' fout <- calculateFPKM(example_sce, eff_len)
 #' str(fout)
 #' @export
-calculateFPKM <- function(x, lengths, effective_length=NULL, ..., subset_row=NULL) {
-    lengths <- .switch_arg_names(effective_length, lengths)
-
+calculateFPKM <- function(x, lengths, ..., subset_row=NULL) {
     if (!is.null(subset_row)) {
         subset_row <- .subset2index(subset_row, x, byrow=TRUE)
         lengths <- lengths[subset_row]

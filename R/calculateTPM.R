@@ -9,7 +9,6 @@
 #' If \code{NULL}, the library sizes are used directly. 
 #' @param lengths Numeric vector providing the effective length for each feature in \code{x}.
 #' Alternatively \code{NULL}, see Details.
-#' @param effective_length Deprecated, same as \code{length}.
 #' @param exprs_values A string specifying the assay of \code{x} containing the count matrix.
 #' @param ... For the generic, arguments to pass to specific methods.
 #'
@@ -41,8 +40,7 @@
 #' str(tout)
 NULL
 
-.calculate_tpm <- function(x, lengths=NULL, effective_length=NULL, ...) {
-    lengths <- .switch_arg_names(effective_length, lengths)
+.calculate_tpm <- function(x, lengths=NULL, ...) {
     if (!is.null(lengths)) {
         x <- x/lengths
     }

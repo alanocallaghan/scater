@@ -10,7 +10,6 @@
 #' @param exprs_values A string specifying the assay of \code{x} containing the count matrix.
 #' @param subset_row A vector specifying the subset of rows of \code{object} for which to return a result.
 #' @param BPPARAM A BiocParallelParam object specifying whether the calculations should be parallelized.
-#' @param use_size_factors Deprecated, same as \code{size_factors}.
 #' @param ... For the generic, arguments to pass to specific methods.
 #'
 #' For the SummarizedExperiment method, further arguments to pass to the ANY method.
@@ -103,10 +102,3 @@ setMethod("calculateAverage", "SingleCellExperiment", function(x, size_factors=N
     }
     callNextMethod(x, size_factors=size_factors, ...)
 })
-
-#' @rdname calculateAverage
-#' @export
-calcAverage <- function(x, ...) {
-    .Deprecated(new="calculateAverage")
-    calculateAverage(x, ...)
-}

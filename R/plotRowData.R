@@ -13,7 +13,6 @@
 #' @param size_by Specification of a row metadata field or a cell to size by, see \code{?\link{retrieveFeatureInfo}} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see \code{?\link{retrieveFeatureInfo}} for details.
-#' @param by_show_single Deprecated and ignored.
 #' @param other_fields Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
@@ -39,7 +38,7 @@
 #' @export
 plotRowData <- function(object, y, x = NULL, 
     colour_by = NULL, shape_by = NULL, size_by = NULL, 
-    by_exprs_values = "logcounts", by_show_single = FALSE,
+    by_exprs_values = "logcounts", 
     other_fields=list(), ...)
 {
     if (!is(object, "SingleCellExperiment")) {

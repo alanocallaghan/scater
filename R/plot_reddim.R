@@ -6,8 +6,6 @@
 #' @param ncomponents Numeric scalar indicating the number of dimensions components to (calculate and) plot.
 #' This can also be a numeric vector, see \code{?\link{plotReducedDim}} for details.
 #' @param ... Additional arguments to pass to \code{\link{plotReducedDim}}. 
-#' @param rerun Logical, should the reduced dimensions be recomputed even if \code{object} contains an appropriately named set of results in the \code{reducedDims} slot?
-#' @param run_args Arguments to pass to \code{\link{runPCA}}, \code{\link{runTSNE}}, etc.
 #'
 #' @details 
 #' Each function is a convenient wrapper around \code{\link{plotReducedDim}} that searches the \code{\link{reducedDims}} slot for an appropriately named dimensionality reduction result:
@@ -19,10 +17,6 @@
 #' \item \code{"UMAP"} for \code{"plotUMAP"}
 #' }
 #' Its only purpose is to streamline workflows to avoid the need to specify the \code{dimred} argument.
-#'
-#' Previous versions of these functions would recompute the dimensionality reduction results if they were not already present.
-#' This has been deprecated in favour of users explicitly calling the relevant \code{run*} function,
-#' to avoid uncertainties about what was actually being plotted.
 #'
 #' @return A \link{ggplot} object.
 #'
@@ -53,11 +47,6 @@
 #' plotPCA(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment",
 #'     size_by = "Mutation_Status")
 #'
-#' ## Force legend to appear for shape:
-#' example_subset <- example_sce[, example_sce$Treatment == "treat1"]
-#' plotPCA(example_subset, colour_by = "Cell_Cycle", shape_by = "Treatment", 
-#'     by_show_single = TRUE)
-#'
 #' ## Examples plotting more than 2 PCs
 #' plotPCA(example_sce, ncomponents = 4, colour_by = "Treatment",
 #'     shape_by = "Mutation_Status")
@@ -75,55 +64,39 @@
 #' plotMDS(example_sce)
 #'
 #' @export
-plotPCASCE <- function(object, ..., rerun = FALSE, ncomponents = 2, run_args=list()) {
-   .reddim_dispatcher(object=object, ncomponents=ncomponents, reddim_name="PCA", 
-        rerun=rerun, reddim_FUN=runPCA, ..., run_args=run_args)
+plotPCASCE <- function(object, ..., ncomponents=2) {
+    plotReducedDim(object, ncomponents = ncomponents, dimred = "PCA", ...)
 }
 
 #' @rdname plot_reddim
 #' @aliases plotTSNE 
 #' @export
-plotTSNE <- function(object, ..., rerun = FALSE, ncomponents = 2, run_args=list()) {
-   .reddim_dispatcher(object=object, ncomponents=ncomponents, reddim_name="TSNE", 
-                      rerun=rerun, reddim_FUN=runTSNE, ..., run_args=run_args)
+plotTSNE <- function(object, ..., ncomponents=2) {
+    plotReducedDim(object, ncomponents = ncomponents, dimred = "TSNE", ...)
 }
 
 #' @rdname plot_reddim
 #' @aliases plotUMAP 
 #' @export
-plotUMAP <- function(object, ..., rerun = FALSE, ncomponents = 2, run_args=list()) {
-   .reddim_dispatcher(object=object, ncomponents=ncomponents, reddim_name="UMAP", 
-                      rerun=rerun, reddim_FUN=runUMAP, ..., run_args=run_args)
+plotUMAP <- function(object, ..., ncomponents=2) {
+    plotReducedDim(object, ncomponents = ncomponents, dimred = "UMAP", ...)
 }
 
 #' @rdname plot_reddim
 #' @aliases plotDiffusionMap 
 #' @export
-plotDiffusionMap <- function(object, ..., rerun = FALSE, ncomponents = 2, run_args=list()) {
-   .reddim_dispatcher(object=object, ncomponents=ncomponents, reddim_name="DiffusionMap",
-                      rerun=rerun, reddim_FUN=runDiffusionMap, ..., run_args=run_args)
+plotDiffusionMap <- function(object, ..., ncomponents=2) {
+    plotReducedDim(object, ncomponents = ncomponents, dimred = "DiffusionMap", ...)
 }
 
 #' @rdname plot_reddim
 #' @aliases plotMDS 
 #' @export
-plotMDS <- function(object, ..., rerun = FALSE, ncomponents=2, run_args=list()) {
-   .reddim_dispatcher(object=object, ncomponents=ncomponents, reddim_name="MDS",
-                      rerun=rerun, reddim_FUN=runMDS, ..., run_args=run_args)
+plotMDS <- function(object, ..., ncomponents=2) {
+    plotReducedDim(object, ncomponents = ncomponents, dimred = "MDS", ...)
 }
 
 #' @rdname plot_reddim
 #' @aliases plotPCA plotPCA,SingleCellExperiment-method
 #' @export
 setMethod("plotPCA", "SingleCellExperiment", plotPCASCE)
-
-#' @importFrom SingleCellExperiment reducedDimNames
-.reddim_dispatcher <- function(object, ncomponents, reddim_name, rerun, reddim_FUN, ..., run_args)
-# Central function to dispatch to the various run* functions and to plotReducedDim.
-{
-    if (!(reddim_name %in% reducedDimNames(object)) || rerun) {
-        .Deprecated(msg=sprintf("call 'run%s' explicitly to compute results", reddim_name))
-        object <- do.call(reddim_FUN, c(list(x = object, ncomponents = max(ncomponents)), run_args))
-    }
-    plotReducedDim(object = object, ncomponents = ncomponents, dimred = reddim_name, ...)
-}
