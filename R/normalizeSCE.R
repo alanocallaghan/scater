@@ -1,6 +1,7 @@
 #' Normalize a SingleCellExperiment object using pre-computed size factors
 #'
 #' Compute normalized expression values from count data in a SingleCellExperiment object, using the size factors stored in the object.
+#' This function is now deprecated, use \code{\link{logNormCounts}} instead.
 #'
 #' @param object A SingleCellExperiment object.
 #' @param exprs_values String indicating which assay contains the count data that should be used to compute log-transformed expression values.
@@ -55,6 +56,7 @@
 normalizeSCE <- function(object, exprs_values = "counts",
         return_log = TRUE, log_exprs_offset = NULL,
         centre_size_factors = TRUE, preserve_zeroes = FALSE) {
+    .Deprecated(old="normalizeSCE", new="logNormCounts")
 
     ## setting up the size factors.
     if (is.null(sizeFactors(object))) {

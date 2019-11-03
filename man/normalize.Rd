@@ -38,6 +38,7 @@ All size factors will also be centred in the output object if \code{centre_size_
 }
 \description{
 Compute normalized expression values from count data in a SingleCellExperiment object, using the size factors stored in the object.
+This function is now deprecated, use \code{\link{logNormCounts}} instead.
 }
 \details{
 Normalized expression values are computed by dividing the counts for each cell by the size factor for that cell.
