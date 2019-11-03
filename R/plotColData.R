@@ -50,8 +50,7 @@
 #' @export
 plotColData <- function(object, y, x = NULL, 
     colour_by = NULL, shape_by = NULL, size_by = NULL, 
-    by_exprs_values = "logcounts", by_show_single = FALSE,
-    other_fields=list(), ...)
+    by_exprs_values = "logcounts", other_fields=list(), ...)
 {
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")

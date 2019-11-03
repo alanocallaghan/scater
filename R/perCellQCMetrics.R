@@ -237,6 +237,15 @@ setMethod("perCellQCMetrics", "SingleCellExperiment", function(x,
     main
 })
 
+##################################################
+
+.compute_qc_metrics <- function(exprs_mat, start, end, all_feature_sets, all_cell_sets, percent_top, detection_limit)
+# A helper function defined in the scater namespace.
+# This avoids the need to reattach scater in bpmapply for SnowParam().
+{
+    .Call(cxx_combined_qc, exprs_mat, start, end, all_feature_sets, all_cell_sets, percent_top, detection_limit)
+}
+
 .get_altexps_to_use <- function(x, use_altexps) {
     if (is.logical(use_altexps)) {
         if (use_altexps) {

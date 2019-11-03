@@ -41,8 +41,7 @@
 #' scale_color_gradient scale_fill_manual guides
 plotHighestExprs <- function(object, n = 50, colour_cells_by=NULL, 
     drop_features = NULL, exprs_values = "counts",
-    by_exprs_values = exprs_values, by_show_single = TRUE,
-    feature_names_to_plot = NULL, as_percentage = TRUE) 
+    by_exprs_values = exprs_values, feature_names_to_plot = NULL, as_percentage = TRUE) 
 {
     ## Find the most highly expressed features in this dataset
     exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)

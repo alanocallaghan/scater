@@ -100,7 +100,7 @@ setMethod("calculatePCA", "SingleCellExperiment", function(x, ..., exprs_values=
 #' @export
 #' @rdname runPCA
 #' @importFrom SingleCellExperiment reducedDim<-
-setMethod("runPCA", "SingleCellExperiment", function(x, ..., use_coldata = FALSE, altexp=NULL, name="PCA") 
+setMethod("runPCA", "SingleCellExperiment", function(x, ..., altexp=NULL, name="PCA") 
 {
     if (!is.null(altexp)) {
         y <- altExp(x, altexp)

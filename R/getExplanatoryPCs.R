@@ -36,9 +36,7 @@
 #'
 #' @export
 #' @importFrom SingleCellExperiment reducedDim reducedDimNames SingleCellExperiment
-getExplanatoryPCs <- function(x, dimred="PCA", use_dimred=NULL, 
-    n_dimred=10, ncomponents=NULL, rerun=FALSE, run_args=list(), ...)
-{
+getExplanatoryPCs <- function(x, dimred="PCA", n_dimred=10, ...) {
     reddims <- reducedDim(x, dimred)
     n_dimred <- min(n_dimred, ncol(reddims))
     reddims <- reddims[,seq_len(n_dimred),drop=FALSE]

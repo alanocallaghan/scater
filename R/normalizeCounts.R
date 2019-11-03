@@ -84,7 +84,7 @@ setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL,
         return(x + 0) # coerce to numeric.
     }
 
-    size_factors <- .get_default_sizes(x, size_factors, center_size_factors, use_size_factors)
+    size_factors <- .get_default_sizes(x, size_factors, center_size_factors)
     if (length(size_factors)!=ncol(x)) {
         stop("number of size factors does not equal 'ncol(x)'")
     }

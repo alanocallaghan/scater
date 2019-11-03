@@ -63,7 +63,7 @@
 plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts",
     center=FALSE, zlim=NULL, symmetric=FALSE, color=NULL, 
     colour_columns_by=NULL, order_columns_by=NULL,
-    by_exprs_values = exprs_values, by_show_single=FALSE, show_colnames = FALSE, 
+    by_exprs_values = exprs_values, show_colnames = FALSE, 
     cluster_cols=is.null(order_columns_by), ...) 
 {
     # Setting names, otherwise the downstream colouring fails.

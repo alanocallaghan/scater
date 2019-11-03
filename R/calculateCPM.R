@@ -34,7 +34,7 @@
 NULL
 
 #' @importFrom Matrix colSums
-.calculate_cpm <- function(x, size_factors=NULL, subset_row=NULL, use_size_factors=NULL) {
+.calculate_cpm <- function(x, size_factors=NULL, subset_row=NULL) {
     if (!is.null(subset_row)) {
         x <- x[subset_row,,drop=FALSE]
     }
