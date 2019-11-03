@@ -44,8 +44,6 @@
 #' plotPCA(example_sce)
 #' plotPCA(example_sce, colour_by = "Cell_Cycle")
 #' plotPCA(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment")
-#' plotPCA(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment",
-#'     size_by = "Mutation_Status")
 #'
 #' ## Examples plotting more than 2 PCs
 #' plotPCA(example_sce, ncomponents = 4, colour_by = "Treatment",
@@ -53,7 +51,7 @@
 #'
 #' ## Same for TSNE:
 #' example_sce <- runTSNE(example_sce)
-#' plotTSNE(example_sce, run_args=list(perplexity = 10))
+#' plotTSNE(example_sce, colour_by="Mutation_Status")
 #'
 #' ## Same for DiffusionMaps:
 #' example_sce <- runDiffusionMap(example_sce)

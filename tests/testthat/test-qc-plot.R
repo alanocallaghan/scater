@@ -21,12 +21,6 @@ test_that("plotHighestExprs' aesthetics choices work", {
     expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = "Mutation_Status"), "ggplot")
     expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = NULL), "ggplot")
     expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
-
-    # Responds to by_show_single.
-    dummy <- wt_qc
-    dummy$whee <- "A"
-    expect_s3_class(plotHighestExprs(dummy, colour_cells_by = "whee", by_show_single = TRUE), "ggplot")
-    expect_s3_class(plotHighestExprs(dummy, colour_cells_by = "whee", by_show_single = FALSE), "ggplot")
 })
 
 test_that("plotHighestExprs works with different feature selections", {

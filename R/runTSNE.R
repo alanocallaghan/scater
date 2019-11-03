@@ -70,7 +70,7 @@
 #' example_sce <- mockSCE()
 #' example_sce <- logNormCounts(example_sce)
 #'
-#' example_sce <- runTSNE(example_sce, scale_features=NULL)
+#' example_sce <- runTSNE(example_sce)
 #' reducedDimNames(example_sce)
 #' head(reducedDim(example_sce))
 NULL

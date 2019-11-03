@@ -21,7 +21,6 @@ test_that("plotScater works as expected", {
     expect_s3_class(plotScater(example_sce, block1 = "Cell_Cycle", block2 = "Treatment", colour_by = "Gene_0001"), "ggplot")
     
     expect_s3_class(plotScater(example_sce, colour_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
-    expect_s3_class(plotScater(example_sce, colour_by = "Treatment", by_show_single = TRUE), "ggplot")
 
     # Responds to different type of expression values.
     cpm(example_sce) <- calculateCPM(example_sce)

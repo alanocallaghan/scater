@@ -26,10 +26,12 @@
 #' @examples
 #' example_sce <- mockSCE()
 #' example_sce <- logNormCounts(example_sce)
+#' example_sce <- runPCA(example_sce)
+#' 
 #' plotExplanatoryPCs(example_sce)
 plotExplanatoryPCs <- function(object, nvars_to_plot = 10, npcs_to_plot=50, theme_size=10, ...) {
     if (is(object, "SingleCellExperiment")) { 
-        rsquared_mat <- getExplanatoryPCs(object, ncomponents=npcs_to_plot, ...)
+        rsquared_mat <- getExplanatoryPCs(object, n_dimred=npcs_to_plot, ...)
     } else {
         rsquared_mat <- as.matrix(object)
     }

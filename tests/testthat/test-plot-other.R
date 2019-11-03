@@ -25,20 +25,20 @@ test_that("we can produce heatmaps", {
 
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
                 colour_columns_by=c("Mutation_Status", "Gene_0001"), 
-                by_exprs_values = "logcounts", by_show_single = TRUE)
+                by_exprs_values = "logcounts")
 
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
                 colour_columns_by=list(I(example_sce$Mutation_Status), "Gene_0001"), 
-                by_exprs_values = "logcounts", by_show_single = TRUE)
+                by_exprs_values = "logcounts")
 
     # Testing out the column ordering + colouring. 
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
                 order_columns_by=c("Mutation_Status", "Gene_0001"), 
-                by_exprs_values = "logcounts", by_show_single = TRUE)
+                by_exprs_values = "logcounts")
 
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], columns=1:10,
                 order_columns_by=c("Mutation_Status", "Gene_0001"), 
-                by_exprs_values = "logcounts", by_show_single = TRUE)
+                by_exprs_values = "logcounts")
 
     # Testing that column colouring still works when columns have no names.
     unnamed <- example_sce
@@ -77,7 +77,6 @@ test_that("we can produce plots showing cells in plate position", {
     expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     
-    expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", shape_by = "Treatment", by_show_single = TRUE), "ggplot")
     expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", shape_by = "Treatment", by_exprs_values = "counts"), "ggplot")
 
     # Checking that other arguments are passed through.
@@ -111,7 +110,6 @@ test_that("we can produce plots for column metadata", {
     # Testing that other arguments are passed through.
     expect_s3_class(plotColData(example_sce, "sum", colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment", add_legend = FALSE), "ggplot")
     expect_s3_class(plotColData(example_sce, "sum", size_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
-    expect_s3_class(plotColData(example_sce, "sum", colour_by = "Treatment", by_show_single = TRUE), "ggplot")
 
     # Fiddling with all the semi-analysis options.
     expect_s3_class(plotColData(example_sce, "sum", show_violin=FALSE), "ggplot")
@@ -148,7 +146,6 @@ test_that("we can produce plots for row metadata", {
     # Testing that other arguments are passed through.
     expect_s3_class(plotRowData(example_sce, "mean", colour_by = "is_feature_control", size_by = "Cell_002", shape_by = "WHEE", add_legend = FALSE), "ggplot")
     expect_s3_class(plotRowData(example_sce, "mean", size_by = "Cell_002", by_exprs_values = "counts"), "ggplot")
-    expect_s3_class(plotRowData(example_sce, "mean", colour_by = "is_feature_control", by_show_single = TRUE), "ggplot")
 
     # Fiddling with all the semi-analysis options.
     expect_s3_class(plotRowData(example_sce, "mean", show_violin=FALSE), "ggplot")
