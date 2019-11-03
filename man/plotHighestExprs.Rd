@@ -5,9 +5,9 @@
 \title{Plot the highest expressing features}
 \usage{
 plotHighestExprs(object, n = 50, colour_cells_by = NULL,
-  controls = NULL, drop_features = NULL, exprs_values = "counts",
-  by_exprs_values = exprs_values, by_show_single = TRUE,
-  feature_names_to_plot = NULL, as_percentage = TRUE)
+  drop_features = NULL, exprs_values = "counts",
+  by_exprs_values = exprs_values, feature_names_to_plot = NULL,
+  as_percentage = TRUE)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -15,8 +15,6 @@ plotHighestExprs(object, n = 50, colour_cells_by = NULL,
 \item{n}{A numeric scalar specifying the number of the most expressed features to show.}
 
 \item{colour_cells_by}{Specification of a column metadata field or a feature to colour by, see \code{?\link{retrieveCellInfo}} for possible values.}
-
-\item{controls}{Deprecated and ignored.}
 
 \item{drop_features}{A character, logical or numeric vector indicating which features (e.g. genes, transcripts) to drop when producing the plot. 
 For example, spike-in transcripts might be dropped to examine the contribution from endogenous genes.}
@@ -26,11 +24,9 @@ For example, spike-in transcripts might be dropped to examine the contribution f
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
 for use in colouring - see \code{?\link{retrieveCellInfo}} for details.}
 
-\item{by_show_single}{Deprecated and ignored.
-Default is \code{NULL}, in which case  \code{rownames(object)} are used.}
-
 \item{feature_names_to_plot}{String specifying which row-level metadata column contains the feature names.
-Alternatively, an \link{AsIs}-wrapped vector or a data.frame, see \code{?\link{retrieveFeatureInfo}} for possible values.}
+Alternatively, an \link{AsIs}-wrapped vector or a data.frame, see \code{?\link{retrieveFeatureInfo}} for possible values.
+Default is \code{NULL}, in which case \code{rownames(object)} are used.}
 
 \item{as_percentage}{logical scalar indicating whether percentages should be  plotted. 
 If \code{FALSE}, the raw \code{exprs_values} are shown instead.}

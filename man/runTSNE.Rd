@@ -12,17 +12,17 @@
 calculateTSNE(x, ...)
 
 \S4method{calculateTSNE}{ANY}(x, ncomponents = 2, ntop = 500,
-  subset_row = NULL, feature_set = NULL, scale = FALSE,
-  scale_features = NULL, transposed = FALSE, perplexity = NULL,
-  normalize = TRUE, theta = 0.5, ..., external_neighbors = FALSE,
-  BNPARAM = KmknnParam(), BPPARAM = SerialParam())
+  subset_row = NULL, scale = FALSE, transposed = FALSE,
+  perplexity = NULL, normalize = TRUE, theta = 0.5, ...,
+  external_neighbors = FALSE, BNPARAM = KmknnParam(),
+  BPPARAM = SerialParam())
 
 \S4method{calculateTSNE}{SummarizedExperiment}(x, ...,
   exprs_values = "logcounts")
 
 \S4method{calculateTSNE}{SingleCellExperiment}(x, ...,
   pca = is.null(dimred), exprs_values = "logcounts", dimred = NULL,
-  use_dimred = NULL, n_dimred = NULL)
+  n_dimred = NULL)
 
 runTSNE(x, ..., altexp = NULL, name = "TSNE")
 }
@@ -44,11 +44,7 @@ For \code{runTSNE}, additional arguments to pass to \code{calculateTSNE}.}
 
 \item{subset_row}{Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{feature_set}{Deprecated, same as \code{subset_row}.}
-
 \item{scale}{Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.}
-
-\item{scale_features}{Deprecated, same as \code{scale} but with a different default.}
 
 \item{transposed}{Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.}
 
@@ -69,8 +65,6 @@ For \code{runTSNE}, additional arguments to pass to \code{calculateTSNE}.}
 \item{pca}{Logical scalar indicating whether a PCA step should be performed inside \code{\link[Rtsne]{Rtsne}}.}
 
 \item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
-
-\item{use_dimred}{Deprecated, same as \code{dimred}.}
 
 \item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
 
@@ -107,7 +101,7 @@ This presumes that the existing dimensionality reduction is sufficient such that
 example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 
-example_sce <- runTSNE(example_sce, scale_features=NULL)
+example_sce <- runTSNE(example_sce)
 reducedDimNames(example_sce)
 head(reducedDim(example_sce))
 }

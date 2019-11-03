@@ -6,7 +6,7 @@
 \usage{
 plotColData(object, y, x = NULL, colour_by = NULL, shape_by = NULL,
   size_by = NULL, by_exprs_values = "logcounts",
-  by_show_single = FALSE, other_fields = list(), ...)
+  other_fields = list(), ...)
 }
 \arguments{
 \item{object}{A \linkS4class{SingleCellExperiment} object containing expression values and experimental information.}
@@ -26,8 +26,6 @@ If \code{NULL}, nothing is shown on the x-axis.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
 for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for details.}
-
-\item{by_show_single}{Deprecated and ignored.}
 
 \item{other_fields}{Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 

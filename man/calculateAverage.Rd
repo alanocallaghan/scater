@@ -6,22 +6,18 @@
 \alias{calculateAverage,ANY-method}
 \alias{calculateAverage,SummarizedExperiment-method}
 \alias{calculateAverage,SingleCellExperiment-method}
-\alias{calcAverage}
 \title{Calculate per-feature average counts}
 \usage{
 calculateAverage(x, ...)
 
 \S4method{calculateAverage}{ANY}(x, size_factors = NULL,
-  use_size_factors = NULL, subset_row = NULL,
-  BPPARAM = SerialParam())
+  subset_row = NULL, BPPARAM = SerialParam())
 
 \S4method{calculateAverage}{SummarizedExperiment}(x, ...,
   exprs_values = "counts")
 
 \S4method{calculateAverage}{SingleCellExperiment}(x, size_factors = NULL,
   ...)
-
-calcAverage(x, ...)
 }
 \arguments{
 \item{x}{A numeric matrix of counts where features are rows and 
@@ -36,8 +32,6 @@ For the SingleCellExperiment method, further arguments to pass to the Summarized
 
 \item{size_factors}{A numeric vector containing size factors.
 If \code{NULL}, these are calculated or extracted from \code{x}.}
-
-\item{use_size_factors}{Deprecated, same as \code{size_factors}.}
 
 \item{subset_row}{A vector specifying the subset of rows of \code{object} for which to return a result.}
 

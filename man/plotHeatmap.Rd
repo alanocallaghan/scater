@@ -8,8 +8,7 @@ plotHeatmap(object, features, columns = NULL,
   exprs_values = "logcounts", center = FALSE, zlim = NULL,
   symmetric = FALSE, color = NULL, colour_columns_by = NULL,
   order_columns_by = NULL, by_exprs_values = exprs_values,
-  by_show_single = FALSE, show_colnames = FALSE,
-  cluster_cols = is.null(order_columns_by), ...)
+  show_colnames = FALSE, cluster_cols = is.null(order_columns_by), ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -45,8 +44,6 @@ This argument is automatically appended to \code{colour_columns_by}.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
 for colouring of column-level data - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
-
-\item{by_show_single}{Deprecated and ignored.}
 
 \item{show_colnames, cluster_cols, ...}{Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.}
 }

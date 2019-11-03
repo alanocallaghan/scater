@@ -6,8 +6,8 @@
 \usage{
 plotPlatePosition(object, plate_position = NULL, colour_by = NULL,
   size_by = NULL, shape_by = NULL, by_exprs_values = "logcounts",
-  by_show_single = FALSE, add_legend = TRUE, theme_size = 24,
-  point_alpha = 0.6, point_size = 24, other_fields = list())
+  add_legend = TRUE, theme_size = 24, point_alpha = 0.6,
+  point_size = 24, other_fields = list())
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -24,8 +24,6 @@ Alternatively, a list of two factors (\code{"row"} and \code{"column"}) can be s
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
 for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
-
-\item{by_show_single}{Deprecated and ignored.}
 
 \item{add_legend}{Logical scalar specifying whether a legend should be shown.}
 

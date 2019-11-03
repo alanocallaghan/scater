@@ -4,24 +4,14 @@
 \alias{getExplanatoryPCs}
 \title{Per-PC variance explained by a variable}
 \usage{
-getExplanatoryPCs(x, dimred = "PCA", use_dimred = NULL,
-  n_dimred = 10, ncomponents = NULL, rerun = FALSE,
-  run_args = list(), ...)
+getExplanatoryPCs(x, dimred = "PCA", n_dimred = 10, ...)
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object containing dimensionality reduction results.}
 
 \item{dimred}{String or integer scalar specifying the field in \code{reducedDims(x)} that contains the PCA results.}
 
-\item{use_dimred}{Deprecated, same as \code{dimred}.}
-
 \item{n_dimred}{Integer scalar specifying the number of the top principal components to use.}
-
-\item{ncomponents}{Deprecated, same as \code{n_dimred}.}
-
-\item{rerun}{Deprecated. Logical scalar indicating whether the PCA should be repeated, even if pre-computed results are already present.}
-
-\item{run_args}{Deprecated. A named list of arguments to pass to \code{\link[scater]{runPCA}}.}
 
 \item{...}{Additional arguments passed to \code{\link{getVarianceExplained}}.}
 }

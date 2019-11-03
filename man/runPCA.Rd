@@ -13,19 +13,17 @@
 calculatePCA(x, ...)
 
 \S4method{calculatePCA}{ANY}(x, ncomponents = 50, ntop = 500,
-  subset_row = NULL, feature_set = NULL, scale = FALSE,
-  scale_features = NULL, transposed = FALSE, BSPARAM = bsparam(),
-  BPPARAM = SerialParam())
+  subset_row = NULL, scale = FALSE, transposed = FALSE,
+  BSPARAM = bsparam(), BPPARAM = SerialParam())
 
 \S4method{calculatePCA}{SummarizedExperiment}(x, ...,
   exprs_values = "logcounts")
 
 \S4method{calculatePCA}{SingleCellExperiment}(x, ...,
-  exprs_values = "logcounts", dimred = NULL, use_dimred = NULL,
-  n_dimred = NULL)
+  exprs_values = "logcounts", dimred = NULL, n_dimred = NULL)
 
-\S4method{runPCA}{SingleCellExperiment}(x, ..., use_coldata = FALSE,
-  altexp = NULL, name = "PCA")
+\S4method{runPCA}{SingleCellExperiment}(x, ..., altexp = NULL,
+  name = "PCA")
 }
 \arguments{
 \item{x}{For \code{calculatePCA}, a numeric matrix of log-expression values where rows are features and columns are cells.
@@ -44,11 +42,7 @@ For \code{runPCA}, additional arguments to pass to \code{calculatePCA}.}
 
 \item{subset_row}{Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{feature_set}{Deprecated, same as \code{subset_row}.}
-
 \item{scale}{Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.}
-
-\item{scale_features}{Deprecated, same as \code{scale} but with a different default.}
 
 \item{transposed}{Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.}
 
@@ -60,11 +54,7 @@ For \code{runPCA}, additional arguments to pass to \code{calculatePCA}.}
 
 \item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{use_dimred}{Deprecated, same as \code{dimred}.}
-
 \item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
-
-\item{use_coldata}{Deprecated, use \code{\link{runColDataPCA}} instead.}
 
 \item{altexp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
@@ -89,7 +79,7 @@ For full reproducibility, users should call \code{\link{set.seed}} prior to runn
 example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 
-example_sce <- runPCA(example_sce, scale_features=NULL)
+example_sce <- runPCA(example_sce)
 reducedDimNames(example_sce)
 head(reducedDim(example_sce))
 }

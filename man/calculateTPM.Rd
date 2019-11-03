@@ -10,8 +10,7 @@
 \usage{
 calculateTPM(x, ...)
 
-\S4method{calculateTPM}{ANY}(x, lengths = NULL,
-  effective_length = NULL, ...)
+\S4method{calculateTPM}{ANY}(x, lengths = NULL, ...)
 
 \S4method{calculateTPM}{SummarizedExperiment}(x, ...,
   exprs_values = "counts")
@@ -34,8 +33,6 @@ For the SingleCellExperiment method, further arguments to pass to the Summarized
 
 \item{lengths}{Numeric vector providing the effective length for each feature in \code{x}.
 Alternatively \code{NULL}, see Details.}
-
-\item{effective_length}{Deprecated, same as \code{length}.}
 
 \item{exprs_values}{A string specifying the assay of \code{x} containing the count matrix.}
 

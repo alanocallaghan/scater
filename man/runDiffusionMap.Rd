@@ -12,15 +12,13 @@
 calculateDiffusionMap(x, ...)
 
 \S4method{calculateDiffusionMap}{ANY}(x, ncomponents = 2, ntop = 500,
-  subset_row = NULL, feature_set = NULL, scale = FALSE,
-  scale_features = NULL, transposed = FALSE, ...)
+  subset_row = NULL, scale = FALSE, transposed = FALSE, ...)
 
 \S4method{calculateDiffusionMap}{SummarizedExperiment}(x, ...,
   exprs_values = "logcounts")
 
 \S4method{calculateDiffusionMap}{SingleCellExperiment}(x, ...,
-  exprs_values = "logcounts", dimred = NULL, use_dimred = NULL,
-  n_dimred = NULL)
+  exprs_values = "logcounts", dimred = NULL, n_dimred = NULL)
 
 runDiffusionMap(x, ..., altexp = NULL, name = "DiffusionMap")
 }
@@ -42,19 +40,13 @@ For \code{runDiffusionMap}, additional arguments to pass to \code{calculateDiffu
 
 \item{subset_row}{Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{feature_set}{Deprecated, same as \code{subset_row}.}
-
 \item{scale}{Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.}
-
-\item{scale_features}{Deprecated, same as \code{scale} but with a different default.}
 
 \item{transposed}{Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.}
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.}
 
 \item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
-
-\item{use_dimred}{Deprecated, same as \code{dimred}.}
 
 \item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
 
@@ -79,7 +71,7 @@ The reason for this is unknown.
 example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 
-example_sce <- runDiffusionMap(example_sce, scale_features=NULL)
+example_sce <- runDiffusionMap(example_sce)
 reducedDimNames(example_sce)
 head(reducedDim(example_sce))
 }

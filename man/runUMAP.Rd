@@ -12,17 +12,17 @@
 calculateUMAP(x, ...)
 
 \S4method{calculateUMAP}{ANY}(x, ncomponents = 2, ntop = 500,
-  subset_row = NULL, feature_set = NULL, scale = FALSE,
-  scale_features = NULL, transposed = FALSE, pca = if (transposed)
-  NULL else 50, n_neighbors = 15, ..., external_neighbors = FALSE,
-  BNPARAM = KmknnParam(), BPPARAM = SerialParam())
+  subset_row = NULL, scale = FALSE, transposed = FALSE, pca = if
+  (transposed) NULL else 50, n_neighbors = 15, ...,
+  external_neighbors = FALSE, BNPARAM = KmknnParam(),
+  BPPARAM = SerialParam())
 
 \S4method{calculateUMAP}{SummarizedExperiment}(x, ...,
   exprs_values = "logcounts")
 
 \S4method{calculateUMAP}{SingleCellExperiment}(x, ..., pca = if
   (!is.null(dimred)) NULL else 50, exprs_values = "logcounts",
-  dimred = NULL, use_dimred = NULL, n_dimred = NULL)
+  dimred = NULL, n_dimred = NULL)
 
 runUMAP(x, ..., altexp = NULL, name = "UMAP")
 }
@@ -44,11 +44,7 @@ For \code{runUMAP}, additional arguments to pass to \code{calculateUMAP}.}
 
 \item{subset_row}{Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{feature_set}{Deprecated, same as \code{subset_row}.}
-
 \item{scale}{Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.}
-
-\item{scale_features}{Deprecated, same as \code{scale} but with a different default.}
 
 \item{transposed}{Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.}
 
@@ -66,8 +62,6 @@ By default, no PCA is performed if the input is a dimensionality reduction resul
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.}
 
 \item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
-
-\item{use_dimred}{Deprecated, same as \code{dimred}.}
 
 \item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
 
@@ -96,7 +90,7 @@ The neighbor search results are then used directly to create the UMAP embedding.
 example_sce <- mockSCE() 
 example_sce <- logNormCounts(example_sce)
 
-example_sce <- runUMAP(example_sce, scale_features=NULL)
+example_sce <- runUMAP(example_sce)
 reducedDimNames(example_sce)
 head(reducedDim(example_sce))
 }

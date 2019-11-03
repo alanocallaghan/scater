@@ -6,10 +6,9 @@
 \usage{
 plotExpression(object, features, x = NULL, exprs_values = "logcounts",
   log2_values = FALSE, colour_by = NULL, shape_by = NULL,
-  size_by = NULL, by_exprs_values = exprs_values,
-  by_show_single = FALSE, xlab = NULL, feature_colours = TRUE,
-  one_facet = TRUE, ncol = 2, scales = "fixed",
-  other_fields = list(), ...)
+  size_by = NULL, by_exprs_values = exprs_values, xlab = NULL,
+  feature_colours = TRUE, one_facet = TRUE, ncol = 2,
+  scales = "fixed", other_fields = list(), ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values and other metadata.}
@@ -31,8 +30,6 @@ If a list is supplied, each entry of the list can be a string, an AsIs-wrapped v
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
 for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
-
-\item{by_show_single}{Deprecated and ignored.}
 
 \item{xlab}{String specifying the label for x-axis.
 If \code{NULL} (default), \code{x} will be used as the x-axis label.}

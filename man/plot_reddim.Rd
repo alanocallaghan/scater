@@ -12,35 +12,25 @@
 \alias{plotPCA}
 \title{Plot specific reduced dimensions}
 \usage{
-plotPCASCE(object, ..., rerun = FALSE, ncomponents = 2,
-  run_args = list())
+plotPCASCE(object, ..., ncomponents = 2)
 
-plotTSNE(object, ..., rerun = FALSE, ncomponents = 2,
-  run_args = list())
+plotTSNE(object, ..., ncomponents = 2)
 
-plotUMAP(object, ..., rerun = FALSE, ncomponents = 2,
-  run_args = list())
+plotUMAP(object, ..., ncomponents = 2)
 
-plotDiffusionMap(object, ..., rerun = FALSE, ncomponents = 2,
-  run_args = list())
+plotDiffusionMap(object, ..., ncomponents = 2)
 
-plotMDS(object, ..., rerun = FALSE, ncomponents = 2,
-  run_args = list())
+plotMDS(object, ..., ncomponents = 2)
 
-\S4method{plotPCA}{SingleCellExperiment}(object, ..., rerun = FALSE,
-  ncomponents = 2, run_args = list())
+\S4method{plotPCA}{SingleCellExperiment}(object, ..., ncomponents = 2)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
 
 \item{...}{Additional arguments to pass to \code{\link{plotReducedDim}}.}
 
-\item{rerun}{Logical, should the reduced dimensions be recomputed even if \code{object} contains an appropriately named set of results in the \code{reducedDims} slot?}
-
 \item{ncomponents}{Numeric scalar indicating the number of dimensions components to (calculate and) plot.
 This can also be a numeric vector, see \code{?\link{plotReducedDim}} for details.}
-
-\item{run_args}{Arguments to pass to \code{\link{runPCA}}, \code{\link{runTSNE}}, etc.}
 }
 \value{
 A \link{ggplot} object.
@@ -58,10 +48,6 @@ Each function is a convenient wrapper around \code{\link{plotReducedDim}} that s
 \item \code{"UMAP"} for \code{"plotUMAP"}
 }
 Its only purpose is to streamline workflows to avoid the need to specify the \code{dimred} argument.
-
-Previous versions of these functions would recompute the dimensionality reduction results if they were not already present.
-This has been deprecated in favour of users explicitly calling the relevant \code{run*} function,
-to avoid uncertainties about what was actually being plotted.
 }
 \examples{
 example_sce <- mockSCE()
@@ -72,13 +58,6 @@ example_sce <- runPCA(example_sce)
 plotPCA(example_sce)
 plotPCA(example_sce, colour_by = "Cell_Cycle")
 plotPCA(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment")
-plotPCA(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment",
-    size_by = "Mutation_Status")
-
-## Force legend to appear for shape:
-example_subset <- example_sce[, example_sce$Treatment == "treat1"]
-plotPCA(example_subset, colour_by = "Cell_Cycle", shape_by = "Treatment", 
-    by_show_single = TRUE)
 
 ## Examples plotting more than 2 PCs
 plotPCA(example_sce, ncomponents = 4, colour_by = "Treatment",
@@ -86,7 +65,7 @@ plotPCA(example_sce, ncomponents = 4, colour_by = "Treatment",
 
 ## Same for TSNE:
 example_sce <- runTSNE(example_sce)
-plotTSNE(example_sce, run_args=list(perplexity = 10))
+plotTSNE(example_sce, colour_by="Mutation_Status")
 
 ## Same for DiffusionMaps:
 example_sce <- runDiffusionMap(example_sce)

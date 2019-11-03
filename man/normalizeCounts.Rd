@@ -10,11 +10,9 @@
 \usage{
 normalizeCounts(x, ...)
 
-\S4method{normalizeCounts}{ANY}(x, size_factors = NULL,
-  use_size_factors = NULL, log = TRUE, return_log = NULL,
-  pseudo_count = 1, log_exprs_offset = NULL,
-  center_size_factors = TRUE, subset_row = NULL, downsample = FALSE,
-  down_target = NULL, down_prop = 0.01)
+\S4method{normalizeCounts}{ANY}(x, size_factors = NULL, log = TRUE,
+  pseudo_count = 1, center_size_factors = TRUE, subset_row = NULL,
+  downsample = FALSE, down_target = NULL, down_prop = 0.01)
 
 \S4method{normalizeCounts}{SummarizedExperiment}(x, ...,
   exprs_values = "counts")
@@ -36,15 +34,9 @@ For the SingleCellExperiment method, further arguments to pass to the Summarized
 \item{size_factors}{A numeric vector of cell-specific size factors.
 Alternatively \code{NULL}, in which case the size factors are extracted or computed from \code{x}.}
 
-\item{use_size_factors}{Deprecated, same as \code{size_factors}.}
-
 \item{log}{Logical scalar indicating whether normalized values should be log2-transformed.}
 
-\item{return_log}{Deprecated, same as \code{log}.}
-
 \item{pseudo_count}{Numeric scalar specifying the pseudo_count to add when log-transforming expression values.}
-
-\item{log_exprs_offset}{Deprecated, same as \code{pseudo_count}.}
 
 \item{center_size_factors}{Logical scalar indicating whether size factors should be centered at unity before being used.}
 

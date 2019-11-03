@@ -12,15 +12,14 @@
 calculateMDS(x, ...)
 
 \S4method{calculateMDS}{ANY}(x, ncomponents = 2, ntop = 500,
-  subset_row = NULL, feature_set = NULL, scale = FALSE,
-  scale_features = NULL, transposed = FALSE, method = "euclidean")
+  subset_row = NULL, scale = FALSE, transposed = FALSE,
+  method = "euclidean")
 
 \S4method{calculateMDS}{SummarizedExperiment}(x, ...,
   exprs_values = "logcounts")
 
 \S4method{calculateMDS}{SingleCellExperiment}(x, ...,
-  exprs_values = "logcounts", dimred = NULL, use_dimred = NULL,
-  n_dimred = NULL)
+  exprs_values = "logcounts", dimred = NULL, n_dimred = NULL)
 
 runMDS(x, ..., altexp = NULL, name = "MDS")
 }
@@ -41,11 +40,7 @@ For \code{runMDS}, additional arguments to pass to \code{calculateMDS}.}
 
 \item{subset_row}{Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
 
-\item{feature_set}{Deprecated, same as \code{subset_row}.}
-
 \item{scale}{Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.}
-
-\item{scale_features}{Deprecated, same as \code{scale} but with a different default.}
 
 \item{transposed}{Logical scalar, is \code{x} transposed with cells in rows? 
 See \code{?"\link{scater-red-dim-args}"} for details.}
@@ -55,8 +50,6 @@ See \code{?"\link{scater-red-dim-args}"} for details.}
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.}
 
 \item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
-
-\item{use_dimred}{Deprecated, same as \code{dimred}.}
 
 \item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
 
@@ -79,7 +72,7 @@ The function \code{\link{cmdscale}} is used internally to compute the MDS compon
 example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 
-example_sce <- runMDS(example_sce, scale_features=NULL)
+example_sce <- runMDS(example_sce)
 reducedDimNames(example_sce)
 head(reducedDim(example_sce))
 }

@@ -4,18 +4,15 @@
 \alias{plotReducedDim}
 \title{Plot reduced dimensions}
 \usage{
-plotReducedDim(object, dimred, use_dimred = NULL, ncomponents = 2,
-  percentVar = NULL, colour_by = NULL, shape_by = NULL,
-  size_by = NULL, by_exprs_values = "logcounts",
-  by_show_single = NULL, text_by = NULL, text_size = 5,
+plotReducedDim(object, dimred, ncomponents = 2, percentVar = NULL,
+  colour_by = NULL, shape_by = NULL, size_by = NULL,
+  by_exprs_values = "logcounts", text_by = NULL, text_size = 5,
   text_colour = "black", other_fields = list(), ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
 
 \item{dimred}{A string or integer scalar indicating the reduced dimension result in \code{reducedDims(object)} to plot.}
-
-\item{use_dimred}{Deprecated, same as \code{dimred}.}
 
 \item{ncomponents}{A numeric scalar indicating the number of dimensions to plot, starting from the first dimension.
 Alternatively, a numeric vector specifying the dimensions to be plotted.}
@@ -31,8 +28,6 @@ Only expected to be used in PCA settings, e.g., in the \code{\link[scater]{plotP
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
 for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
-
-\item{by_show_single}{Deprecated and ignored.}
 
 \item{text_by}{String specifying the column metadata field with which to add text labels on the plot.
 This must refer to a categorical field, i.e., coercible into a factor.

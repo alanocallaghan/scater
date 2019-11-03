@@ -4,10 +4,9 @@
 \alias{runColDataPCA}
 \title{Perform PCA on column metadata}
 \usage{
-runColDataPCA(x, ncomponents = 2, variables = NULL,
-  selected_variables = NULL, scale = TRUE, scale_features = NULL,
-  outliers = FALSE, detect_outliers = NULL, BSPARAM = ExactParam(),
-  BPPARAM = SerialParam(), name = "PCA_coldata")
+runColDataPCA(x, ncomponents = 2, variables = NULL, scale = TRUE,
+  outliers = FALSE, BSPARAM = ExactParam(), BPPARAM = SerialParam(),
+  name = "PCA_coldata")
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object.}
@@ -17,16 +16,10 @@ runColDataPCA(x, ncomponents = 2, variables = NULL,
 \item{variables}{List of strings or a character vector indicating which variables in \code{colData(x)} to use.
 If a list, each entry can also be an \link{AsIs} vector or a data.frame, as described in \code{?\link{retrieveCellInfo}}.}
 
-\item{selected_variables}{Deprecated, same as \code{variables}.}
-
 \item{scale}{Logical scalar, should the expression values be standardised so that each feature has unit variance?
 This will also remove features with standard deviations below 1e-8.}
 
-\item{scale_features}{Deprecated, same as \code{scale}.}
-
 \item{outliers}{Logical indicating whether outliers should be detected based on PCA coordinates.}
-
-\item{detect_outliers}{Deprecated, same as \code{outliers}.}
 
 \item{BSPARAM}{A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.}
 

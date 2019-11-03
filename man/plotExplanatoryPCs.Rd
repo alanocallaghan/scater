@@ -36,5 +36,7 @@ Users may prefer to run \code{\link{getExplanatoryPCs}} manually and pass the re
 \examples{
 example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
+example_sce <- runPCA(example_sce)
+
 plotExplanatoryPCs(example_sce)
 }

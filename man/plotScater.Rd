@@ -5,9 +5,8 @@
 \title{Plot an overview of expression for each cell}
 \usage{
 plotScater(x, nfeatures = 500, exprs_values = "counts",
-  colour_by = NULL, by_exprs_values = exprs_values,
-  by_show_single = FALSE, block1 = NULL, block2 = NULL, ncol = 3,
-  line_width = 1.5, theme_size = 10)
+  colour_by = NULL, by_exprs_values = exprs_values, block1 = NULL,
+  block2 = NULL, ncol = 3, line_width = 1.5, theme_size = 10)
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object.}
@@ -21,8 +20,6 @@ The curve for each cell will be coloured according to this specification.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
 for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
-
-\item{by_show_single}{Deprecated and ignored.}
 
 \item{block1}{String specifying the column-level metadata field by which to separate the cells into separate panels in the plot. 
 Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.

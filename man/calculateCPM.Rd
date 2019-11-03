@@ -10,8 +10,7 @@
 \usage{
 calculateCPM(x, ...)
 
-\S4method{calculateCPM}{ANY}(x, size_factors = NULL, subset_row = NULL,
-  use_size_factors = NULL)
+\S4method{calculateCPM}{ANY}(x, size_factors = NULL, subset_row = NULL)
 
 \S4method{calculateCPM}{SummarizedExperiment}(x, ...,
   exprs_values = "counts")
@@ -34,8 +33,6 @@ For the SingleCellExperiment method, further arguments to pass to the Summarized
 If \code{NULL}, the library sizes are used directly.}
 
 \item{subset_row}{A vector specifying the subset of rows of \code{x} for which to return a result.}
-
-\item{use_size_factors}{Deprecated, same as \code{size_factors}.}
 
 \item{exprs_values}{A string or integer scalar specifying the assay of \code{x} containing the count matrix.}
 }
