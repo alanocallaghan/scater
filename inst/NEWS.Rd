@@ -1,6 +1,11 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
+\section{Changes in version 1.16.0, Bioconductor 3.11 Release (March 2019)}{
+\itemize{
+    \item Added coldate_merge= argument to aggregateAcrossCells() for custom column metadata aggregation.
+}}
+
 \section{Changes in version 1.14.0, Bioconductor 3.10 Release (September 2019)}{
   \itemize{ 
     \item Removed deprecated dplyr verbs.
