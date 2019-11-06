@@ -278,6 +278,24 @@ test_that("Aggregation across cells works correctly for SCEs with DFs", {
     expect_identical(ref$Y, altExp(agg)$Y)
 })
 
+set.seed(1000412)
+test_that("Aggregation across cells works correctly with custom coldata acquisition", {
+    ids <- paste0("CLUSTER_", sample(ncol(sce)/2, ncol(sce), replace=TRUE))
+    sce$thing <- seq_len(ncol(sce))
+
+    # Defaults to taking the first.
+    alt <- aggregateAcrossCells(sce, ids)
+    expect_equivalent(colData(alt), colData(sce)[match(colnames(sce), ids),])
+
+    # Responds to taking the sum.
+    alt <- aggregateAcrossCells(sce, ids, coldata_merge=list(thing=sum))
+    expect_equivalent(alt$thing, as.integer(by(sce$thing, ids, sum)))
+    expect_identical(colnames(alt), sort(unique(ids)))
+
+    alt <- aggregateAcrossCells(sce, ids, coldata_merge=list(Cell_Cycle=function(x) paste(x, collapse="")))
+    expect_type(alt$Cell_Cycle, "character")
+})
+
 set.seed(100042)
 test_that("Aggregation across cells works correctly for SEs", {
     ids <- paste0("CLUSTER_", sample(ncol(sce)/2, ncol(sce), replace=TRUE))
