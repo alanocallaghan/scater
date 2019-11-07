@@ -18,6 +18,9 @@
 #' Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
 #' @param text_size Numeric scalar specifying the size of added text.
 #' @param text_colour String specifying the colour of the added text.
+#' @param label_format Character vector of length 2 containing format strings to use for the axis labels. 
+#' The first string expects a string containing the result type (e.g., \code{"PCA"}) and an integer containing the component number,
+#' while the second string shows the rounded percentage of variance explained and is only relevant when this information is provided in \code{object}.
 #' @param other_fields Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
@@ -59,6 +62,7 @@ plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL,
     colour_by = NULL, shape_by = NULL, size_by = NULL,
     by_exprs_values = "logcounts", 
     text_by=NULL, text_size=5, text_colour="black", 
+    label_format=c("%s %i", " (%i%%)"),
     other_fields=list(), ...)
 {
     ## Extract reduced dimension representation of cells
@@ -95,10 +99,9 @@ plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL,
     if (length(to_plot)==2L) {
         colnames(df_to_plot)[seq_along(to_plot)] <- c("X", "Y")
 
-        if ( is.null(percentVar) ) {
-            labs <- sprintf("Dimension %i", to_plot)
-        } else {
-            labs <- sprintf("Dimension %i: %i%% variance", to_plot, round(percentVar[to_plot]))
+        labs <- sprintf(label_format[1], dimred, to_plot)
+        if (!is.null(percentVar)) {
+            labs <- paste0(labs, sprintf(label_format[2], round(percentVar[to_plot])))
         }
 
         plot_out <- .central_plotter(df_to_plot, xlab = labs[1], ylab = labs[2],
@@ -120,21 +123,24 @@ plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL,
 
     ## Otherwise, creating a paired reddim plot.
     paired_reddim_plot(df_to_plot, to_plot = to_plot, percentVar = percentVar,
-        colour_by = colour_by, shape_by = shape_by, size_by = size_by, ...)
+        colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
+        dimred=dimred, label_format=label_format, ...)
 }
 
 #' @importFrom ggplot2 ggplot facet_grid stat_density geom_point theme
-paired_reddim_plot <- function(df_to_plot, to_plot, percentVar=NULL,
+paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar=NULL,
     colour_by=NULL, shape_by=NULL, size_by=NULL,
+    label_format=c("%s %i", " (%i%%)"),
     add_legend = TRUE, theme_size = 10, point_alpha = 0.6, point_size = NULL) 
 {
     reddim_cols <- seq_along(to_plot)
     df_to_expand <- df_to_plot[, reddim_cols]
-    if ( is.null(percentVar) ) {
-        colnames(df_to_expand) <- sprintf("Dim %i", to_plot)
-    } else {
-        colnames(df_to_expand) <- sprintf("Dim %i: %i%%", to_plot, round(percentVar[to_plot] * 100))
+
+    labs <- sprintf(label_format[1], dimred, to_plot)
+    if (!is.null(percentVar)) {
+        labs <- paste0(labs, sprintf(label_format[2], round(percentVar[to_plot])))
     }
+    colnames(df_to_expand) <- labs
 
     gg1 <- .makePairs(df_to_expand)
     df_to_plot_big <- data.frame(gg1$all, df_to_plot[, -reddim_cols])
