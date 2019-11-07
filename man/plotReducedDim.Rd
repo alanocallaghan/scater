@@ -8,7 +8,8 @@ plotReducedDim(object, dimred, use_dimred = NULL, ncomponents = 2,
   percentVar = NULL, colour_by = NULL, shape_by = NULL,
   size_by = NULL, by_exprs_values = "logcounts",
   by_show_single = NULL, text_by = NULL, text_size = 5,
-  text_colour = "black", other_fields = list(), ...)
+  text_colour = "black", label_format = c("\%s \%i", " (\%i\%\%)"),
+  other_fields = list(), ...)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
@@ -41,6 +42,10 @@ Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCel
 \item{text_size}{Numeric scalar specifying the size of added text.}
 
 \item{text_colour}{String specifying the colour of the added text.}
+
+\item{label_format}{Character vector of length 2 containing format strings to use for the axis labels. 
+The first string expects a string containing the result type (e.g., \code{"PCA"}) and an integer containing the component number,
+while the second string shows the rounded percentage of variance explained and is only relevant when this information is provided in \code{object}.}
 
 \item{other_fields}{Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
