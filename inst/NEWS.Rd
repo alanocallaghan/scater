@@ -3,7 +3,8 @@
 
 \section{Changes in version 1.16.0, Bioconductor 3.11 Release (March 2019)}{
 \itemize{
-    \item Added coldate_merge= argument to aggregateAcrossCells() for custom column metadata aggregation.
+    \item Added coldata_merge= argument to aggregateAcrossCells() for custom column metadata aggregation.
+    \item Added label_format= argument to plotReducedDim() for greater control over the axis labels.
 }}
 
 \section{Changes in version 1.14.0, Bioconductor 3.10 Release (September 2019)}{
