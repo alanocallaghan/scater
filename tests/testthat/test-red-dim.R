@@ -387,6 +387,22 @@ test_that("runUMAP works with externally computed nearest neighbor results", {
     BiocParallel::bpstop(BPPARAM)
 })
 
+test_that("multi-modal UMAP works as expected", {
+    stuff <- matrix(rnorm(10000), ncol=50)
+    things <- list(stuff, stuff[,1:5], stuff[,1:20])
+    metrics <- scater:::.compute_multi_modal_metrics(things)
+    expect_identical(lengths(metrics), vapply(things, ncol, 0L))
+    expect_identical(unlist(metrics), seq_len(sum(vapply(things, ncol, 0L))))
+
+    output <- runMultiUMAP(things)
+    expect_identical(nrow(output), nrow(stuff))
+    expect_identical(ncol(output), 2L)
+
+    output <- runMultiUMAP(things, n_components=10)
+    expect_identical(nrow(output), nrow(stuff))
+    expect_identical(ncol(output), 10L)
+})
+
 #############################################
 # Check MDS.
 
