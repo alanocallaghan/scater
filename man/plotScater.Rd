@@ -4,9 +4,18 @@
 \alias{plotScater}
 \title{Plot an overview of expression for each cell}
 \usage{
-plotScater(x, nfeatures = 500, exprs_values = "counts",
-  colour_by = NULL, by_exprs_values = exprs_values, block1 = NULL,
-  block2 = NULL, ncol = 3, line_width = 1.5, theme_size = 10)
+plotScater(
+  x,
+  nfeatures = 500,
+  exprs_values = "counts",
+  colour_by = NULL,
+  by_exprs_values = exprs_values,
+  block1 = NULL,
+  block2 = NULL,
+  ncol = 3,
+  line_width = 1.5,
+  theme_size = 10
+)
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object.}

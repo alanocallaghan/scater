@@ -4,8 +4,12 @@
 \alias{retrieveCellInfo}
 \title{Cell-based data retrieval}
 \usage{
-retrieveCellInfo(x, by, search = c("colData", "assays", "altExps"),
-  exprs_values = "logcounts")
+retrieveCellInfo(
+  x,
+  by,
+  search = c("colData", "assays", "altExps"),
+  exprs_values = "logcounts"
+)
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object.}

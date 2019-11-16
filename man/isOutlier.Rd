@@ -4,8 +4,15 @@
 \alias{isOutlier}
 \title{Identify outlier values}
 \usage{
-isOutlier(metric, nmads = 3, type = c("both", "lower", "higher"),
-  log = FALSE, subset = NULL, batch = NULL, min_diff = NA)
+isOutlier(
+  metric,
+  nmads = 3,
+  type = c("both", "lower", "higher"),
+  log = FALSE,
+  subset = NULL,
+  batch = NULL,
+  min_diff = NA
+)
 }
 \arguments{
 \item{metric}{Numeric vector of values.}

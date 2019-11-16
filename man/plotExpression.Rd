@@ -4,11 +4,24 @@
 \alias{plotExpression}
 \title{Plot expression values for all cells}
 \usage{
-plotExpression(object, features, x = NULL, exprs_values = "logcounts",
-  log2_values = FALSE, colour_by = NULL, shape_by = NULL,
-  size_by = NULL, by_exprs_values = exprs_values, xlab = NULL,
-  feature_colours = TRUE, one_facet = TRUE, ncol = 2,
-  scales = "fixed", other_fields = list(), ...)
+plotExpression(
+  object,
+  features,
+  x = NULL,
+  exprs_values = "logcounts",
+  log2_values = FALSE,
+  colour_by = NULL,
+  shape_by = NULL,
+  size_by = NULL,
+  by_exprs_values = exprs_values,
+  xlab = NULL,
+  feature_colours = TRUE,
+  one_facet = TRUE,
+  ncol = 2,
+  scales = "fixed",
+  other_fields = list(),
+  ...
+)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values and other metadata.}

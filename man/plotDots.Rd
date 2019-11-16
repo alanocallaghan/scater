@@ -4,10 +4,19 @@
 \alias{plotDots}
 \title{Create a dot plot of expression values}
 \usage{
-plotDots(object, features, group = NULL, exprs_values = "logcounts",
-  detection_limit = 0, low_color = "white", high_color = "red",
-  max_ave = NULL, max_detected = NULL, other_fields = list(),
-  by_exprs_values = exprs_values)
+plotDots(
+  object,
+  features,
+  group = NULL,
+  exprs_values = "logcounts",
+  detection_limit = 0,
+  low_color = "white",
+  high_color = "red",
+  max_ave = NULL,
+  max_detected = NULL,
+  other_fields = list(),
+  by_exprs_values = exprs_values
+)
 }
 \arguments{
 \item{object}{A \linkS4class{SingleCellExperiment} object.}

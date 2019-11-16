@@ -4,9 +4,16 @@
 \alias{runColDataPCA}
 \title{Perform PCA on column metadata}
 \usage{
-runColDataPCA(x, ncomponents = 2, variables = NULL, scale = TRUE,
-  outliers = FALSE, BSPARAM = ExactParam(), BPPARAM = SerialParam(),
-  name = "PCA_coldata")
+runColDataPCA(
+  x,
+  ncomponents = 2,
+  variables = NULL,
+  scale = TRUE,
+  outliers = FALSE,
+  BSPARAM = ExactParam(),
+  BPPARAM = SerialParam(),
+  name = "PCA_coldata"
+)
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object.}

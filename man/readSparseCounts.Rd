@@ -4,9 +4,19 @@
 \alias{readSparseCounts}
 \title{Read sparse count matrix from file}
 \usage{
-readSparseCounts(file, sep = "\\t", quote = NULL, comment.char = "",
-  row.names = TRUE, col.names = TRUE, ignore.row = 0L,
-  skip.row = 0L, ignore.col = 0L, skip.col = 0L, chunk = 1000L)
+readSparseCounts(
+  file,
+  sep = "\\t",
+  quote = NULL,
+  comment.char = "",
+  row.names = TRUE,
+  col.names = TRUE,
+  ignore.row = 0L,
+  skip.row = 0L,
+  ignore.col = 0L,
+  skip.col = 0L,
+  chunk = 1000L
+)
 }
 \arguments{
 \item{file}{A string containing a file path to a count table, or a connection object opened in read-only text mode.}

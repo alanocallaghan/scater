@@ -4,9 +4,17 @@
 \alias{plotColData}
 \title{Plot column metadata}
 \usage{
-plotColData(object, y, x = NULL, colour_by = NULL, shape_by = NULL,
-  size_by = NULL, by_exprs_values = "logcounts",
-  other_fields = list(), ...)
+plotColData(
+  object,
+  y,
+  x = NULL,
+  colour_by = NULL,
+  shape_by = NULL,
+  size_by = NULL,
+  by_exprs_values = "logcounts",
+  other_fields = list(),
+  ...
+)
 }
 \arguments{
 \item{object}{A \linkS4class{SingleCellExperiment} object containing expression values and experimental information.}

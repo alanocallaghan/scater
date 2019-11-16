@@ -4,10 +4,16 @@
 \alias{plotHighestExprs}
 \title{Plot the highest expressing features}
 \usage{
-plotHighestExprs(object, n = 50, colour_cells_by = NULL,
-  drop_features = NULL, exprs_values = "counts",
-  by_exprs_values = exprs_values, feature_names_to_plot = NULL,
-  as_percentage = TRUE)
+plotHighestExprs(
+  object,
+  n = 50,
+  colour_cells_by = NULL,
+  drop_features = NULL,
+  exprs_values = "counts",
+  by_exprs_values = exprs_values,
+  feature_names_to_plot = NULL,
+  as_percentage = TRUE
+)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}

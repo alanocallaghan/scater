@@ -11,6 +11,12 @@
 \alias{exprs}
 \alias{exprs,SingleCellExperiment-method,}
 \alias{exprs<-,SingleCellExperiment,ANY-method}
+\alias{norm_exprs,SingleCellExperiment-method}
+\alias{norm_exprs<-,SingleCellExperiment,ANY-method}
+\alias{stand_exprs,SingleCellExperiment-method,}
+\alias{stand_exprs<-,SingleCellExperiment,ANY-method}
+\alias{fpkm,SingleCellExperiment-method}
+\alias{fpkm<-,SingleCellExperiment,ANY-method}
 \title{Additional accessors for the typical elements of a SingleCellExperiment object.}
 \usage{
 norm_exprs(object)
