@@ -4,10 +4,20 @@
 \alias{plotPlatePosition}
 \title{Plot cells in plate positions}
 \usage{
-plotPlatePosition(object, plate_position = NULL, colour_by = NULL,
-  size_by = NULL, shape_by = NULL, by_exprs_values = "logcounts",
-  by_show_single = FALSE, add_legend = TRUE, theme_size = 24,
-  point_alpha = 0.6, point_size = 24, other_fields = list())
+plotPlatePosition(
+  object,
+  plate_position = NULL,
+  colour_by = NULL,
+  size_by = NULL,
+  shape_by = NULL,
+  by_exprs_values = "logcounts",
+  by_show_single = FALSE,
+  add_legend = TRUE,
+  theme_size = 24,
+  point_alpha = 0.6,
+  point_size = 24,
+  other_fields = list()
+)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}

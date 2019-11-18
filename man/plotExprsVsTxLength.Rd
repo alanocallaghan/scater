@@ -4,12 +4,21 @@
 \alias{plotExprsVsTxLength}
 \title{Plot expression against transcript length}
 \usage{
-plotExprsVsTxLength(object, tx_length = "median_feat_eff_len",
-  length_is_assay = FALSE, exprs_values = "logcounts",
-  log2_values = FALSE, colour_by = NULL, shape_by = NULL,
-  size_by = NULL, by_exprs_values = exprs_values,
-  by_show_single = FALSE, xlab = "Median transcript length",
-  show_exprs_sd = FALSE, ...)
+plotExprsVsTxLength(
+  object,
+  tx_length = "median_feat_eff_len",
+  length_is_assay = FALSE,
+  exprs_values = "logcounts",
+  log2_values = FALSE,
+  colour_by = NULL,
+  shape_by = NULL,
+  size_by = NULL,
+  by_exprs_values = exprs_values,
+  by_show_single = FALSE,
+  xlab = "Median transcript length",
+  show_exprs_sd = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}

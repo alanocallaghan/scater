@@ -4,10 +4,17 @@
 \alias{calculateQCMetrics}
 \title{Calculate QC metrics}
 \usage{
-calculateQCMetrics(object, exprs_values = "counts",
-  feature_controls = NULL, cell_controls = NULL, percent_top = c(50,
-  100, 200, 500), detection_limit = 0, use_spikes = TRUE,
-  compact = FALSE, BPPARAM = SerialParam())
+calculateQCMetrics(
+  object,
+  exprs_values = "counts",
+  feature_controls = NULL,
+  cell_controls = NULL,
+  percent_top = c(50, 100, 200, 500),
+  detection_limit = 0,
+  use_spikes = TRUE,
+  compact = FALSE,
+  BPPARAM = SerialParam()
+)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values, usually counts.}

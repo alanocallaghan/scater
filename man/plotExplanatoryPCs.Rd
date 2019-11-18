@@ -4,8 +4,13 @@
 \alias{plotExplanatoryPCs}
 \title{Plot the explanatory PCs for each variable}
 \usage{
-plotExplanatoryPCs(object, nvars_to_plot = 10, npcs_to_plot = 50,
-  theme_size = 10, ...)
+plotExplanatoryPCs(
+  object,
+  nvars_to_plot = 10,
+  npcs_to_plot = 50,
+  theme_size = 10,
+  ...
+)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values and experimental information. 

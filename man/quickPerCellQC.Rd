@@ -4,8 +4,13 @@
 \alias{quickPerCellQC}
 \title{Quick cell-level QC}
 \usage{
-quickPerCellQC(df, lib_size = "sum", n_features = "detected",
-  percent_subsets = NULL, ...)
+quickPerCellQC(
+  df,
+  lib_size = "sum",
+  n_features = "detected",
+  percent_subsets = NULL,
+  ...
+)
 }
 \arguments{
 \item{df}{A \linkS4class{DataFrame} containing per-cell QC statistics, as computed by \code{\link{perCellQCMetrics}}.}

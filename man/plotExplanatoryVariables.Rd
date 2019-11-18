@@ -4,8 +4,13 @@
 \alias{plotExplanatoryVariables}
 \title{Plot explanatory variables ordered by percentage of variance explained}
 \usage{
-plotExplanatoryVariables(object, nvars_to_plot = 10,
-  min_marginal_r2 = 0, theme_size = 10, ...)
+plotExplanatoryVariables(
+  object,
+  nvars_to_plot = 10,
+  min_marginal_r2 = 0,
+  theme_size = 10,
+  ...
+)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values and experimental information.

@@ -5,11 +5,17 @@
 \alias{getBMFeatureAnnos}
 \title{Get feature annotation information from Biomart}
 \usage{
-annotateBMFeatures(ids, biomart = "ENSEMBL_MART_ENSEMBL",
-  dataset = "mmusculus_gene_ensembl", id.type = "ensembl_gene_id",
-  symbol.type, attributes = c(id.type, symbol.type, "chromosome_name",
-  "gene_biotype", "start_position", "end_position"), filters = id.type,
-  ...)
+annotateBMFeatures(
+  ids,
+  biomart = "ENSEMBL_MART_ENSEMBL",
+  dataset = "mmusculus_gene_ensembl",
+  id.type = "ensembl_gene_id",
+  symbol.type,
+  attributes = c(id.type, symbol.type, "chromosome_name", "gene_biotype",
+    "start_position", "end_position"),
+  filters = id.type,
+  ...
+)
 
 getBMFeatureAnnos(x, ids = rownames(x), ...)
 }
@@ -50,7 +56,7 @@ These functions provide convenient wrappers around \pkg{biomaRt} to quickly obta
 \examples{
 \dontrun{
 # Making up Ensembl IDs for demonstration purposes.
-mock_id <- paste0("ENSMUSG", sprintf("\%011d", seq_len(1000)))
+mock_id <- paste0("ENSMUSG", sprintf("%011d", seq_len(1000)))
 anno <- annotateBMFeatures(ids=mock_id)
 }
 }

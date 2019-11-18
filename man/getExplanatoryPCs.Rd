@@ -4,9 +4,16 @@
 \alias{getExplanatoryPCs}
 \title{Per-PC variance explained by a variable}
 \usage{
-getExplanatoryPCs(x, dimred = "PCA", use_dimred = NULL,
-  n_dimred = 10, ncomponents = NULL, rerun = FALSE,
-  run_args = list(), ...)
+getExplanatoryPCs(
+  x,
+  dimred = "PCA",
+  use_dimred = NULL,
+  n_dimred = 10,
+  ncomponents = NULL,
+  rerun = FALSE,
+  run_args = list(),
+  ...
+)
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object containing dimensionality reduction results.}

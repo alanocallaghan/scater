@@ -4,9 +4,18 @@
 \alias{plotRowData}
 \title{Plot row metadata}
 \usage{
-plotRowData(object, y, x = NULL, colour_by = NULL, shape_by = NULL,
-  size_by = NULL, by_exprs_values = "logcounts",
-  by_show_single = FALSE, other_fields = list(), ...)
+plotRowData(
+  object,
+  y,
+  x = NULL,
+  colour_by = NULL,
+  shape_by = NULL,
+  size_by = NULL,
+  by_exprs_values = "logcounts",
+  by_show_single = FALSE,
+  other_fields = list(),
+  ...
+)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object containing expression values and experimental information.}

@@ -4,9 +4,17 @@
 \alias{plotExprsFreqVsMean}
 \title{Plot frequency against mean for each feature}
 \usage{
-plotExprsFreqVsMean(object, freq_exprs, mean_exprs, controls,
-  exprs_values = "counts", by_show_single = FALSE,
-  show_smooth = TRUE, show_se = TRUE, ...)
+plotExprsFreqVsMean(
+  object,
+  freq_exprs,
+  mean_exprs,
+  controls,
+  exprs_values = "counts",
+  by_show_single = FALSE,
+  show_smooth = TRUE,
+  show_se = TRUE,
+  ...
+)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}

@@ -4,8 +4,7 @@
 \alias{calculateFPKM}
 \title{Calculate FPKMs}
 \usage{
-calculateFPKM(x, lengths, effective_length = NULL, ...,
-  subset_row = NULL)
+calculateFPKM(x, lengths, effective_length = NULL, ..., subset_row = NULL)
 }
 \arguments{
 \item{x}{A numeric matrix of counts where features are rows and cells are columns.

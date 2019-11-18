@@ -4,8 +4,12 @@
 \alias{retrieveFeatureInfo}
 \title{Feature-based data retrieval}
 \usage{
-retrieveFeatureInfo(x, by, search = c("rowData", "assays"),
-  exprs_values = "logcounts")
+retrieveFeatureInfo(
+  x,
+  by,
+  search = c("rowData", "assays"),
+  exprs_values = "logcounts"
+)
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object.}

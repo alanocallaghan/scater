@@ -4,12 +4,24 @@
 \alias{plotReducedDim}
 \title{Plot reduced dimensions}
 \usage{
-plotReducedDim(object, dimred, use_dimred = NULL, ncomponents = 2,
-  percentVar = NULL, colour_by = NULL, shape_by = NULL,
-  size_by = NULL, by_exprs_values = "logcounts",
-  by_show_single = NULL, text_by = NULL, text_size = 5,
-  text_colour = "black", label_format = c("\%s \%i", " (\%i\%\%)"),
-  other_fields = list(), ...)
+plotReducedDim(
+  object,
+  dimred,
+  use_dimred = NULL,
+  ncomponents = 2,
+  percentVar = NULL,
+  colour_by = NULL,
+  shape_by = NULL,
+  size_by = NULL,
+  by_exprs_values = "logcounts",
+  by_show_single = NULL,
+  text_by = NULL,
+  text_size = 5,
+  text_colour = "black",
+  label_format = c("\%s \%i", " (\%i\%\%)"),
+  other_fields = list(),
+  ...
+)
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
