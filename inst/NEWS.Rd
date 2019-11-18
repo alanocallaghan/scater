@@ -5,6 +5,9 @@
 \itemize{
     \item Added coldata_merge= argument to aggregateAcrossCells() for custom column metadata aggregation.
     \item Added label_format= argument to plotReducedDim() for greater control over the axis labels.
+    \item Added geometric= argument to librarySizeFactors() to compute size factors with a geometric mean.
+    \item Added the runMultiUMAP() function to perform a combined UMAP on multiple feature sets.
+    \item Added the medianSizeFactors() function to perform a DESeq2-like size factor calculation.
 }}
 
 \section{Changes in version 1.14.0, Bioconductor 3.10 Release (September 2019)}{
