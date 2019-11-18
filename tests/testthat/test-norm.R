@@ -14,6 +14,40 @@ sizeFactors(X) <- ref
 
 #######################################################
 
+test_that("librarySizeFactors works as expected", {
+    sf <- librarySizeFactors(X)
+    expect_identical(mean(sf), 1)
+    expect_true(sd(sf/colSums(dummy)) < 1e-8)
+
+    sf <- librarySizeFactors(X, subset_row=1:10)
+    expect_identical(mean(sf), 1)
+    expect_true(sd(sf/colSums(dummy[1:10,])) < 1e-8)
+
+    sf <- librarySizeFactors(X, geometric=TRUE)
+    expect_identical(mean(sf), 1)
+    expect_true(sd(sf/exp(colMeans(log1p(dummy)))) < 1e-8)
+
+    sf <- librarySizeFactors(X, subset_row=100:200, geometric=TRUE)
+    expect_identical(mean(sf), 1)
+    expect_true(sd(sf/exp(colMeans(log1p(dummy[100:200,])))) < 1e-8)
+})
+
+test_that("medianSizeFactors works as expected", {
+    sf <- medianSizeFactors(X)
+    expect_identical(mean(sf), 1)
+
+    sf <- medianSizeFactors(X, subset_row=1:10)
+    expect_identical(mean(sf), 1)
+    expect_identical(sf, medianSizeFactors(X[1:10,]))
+
+    ref <- runif(nrow(X))
+    sf <- medianSizeFactors(X, subset_row=100:200, reference=ref)
+    expect_identical(mean(sf), 1)
+    expect_identical(sf, medianSizeFactors(X[100:200,], reference=ref[100:200]))
+})
+
+#######################################################
+
 test_that("normalizeCounts works as expected", {
     out <- normalizeCounts(dummy, ref, center_size_factors=FALSE)
     expect_equal(out, log2(t(t(dummy)/ref)+1))
