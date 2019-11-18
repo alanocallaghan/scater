@@ -113,6 +113,10 @@ setGeneric("logNormCounts", function(x, ...) standardGeneric("logNormCounts"))
 setGeneric("librarySizeFactors", function(x, ...) standardGeneric("librarySizeFactors"))
 
 #' @export
+#' @rdname medianSizeFactors
+setGeneric("medianSizeFactors", function(x, ...) standardGeneric("medianSizeFactors"))
+
+#' @export
 #' @rdname normalizeCounts
 setGeneric("normalizeCounts", function(x, ...) standardGeneric("normalizeCounts"))
 

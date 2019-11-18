@@ -32,6 +32,20 @@ test_that("librarySizeFactors works as expected", {
     expect_true(sd(sf/exp(colMeans(log1p(dummy[100:200,])))) < 1e-8)
 })
 
+test_that("medianSizeFactors works as expected", {
+    sf <- medianSizeFactors(X)
+    expect_identical(mean(sf), 1)
+
+    sf <- medianSizeFactors(X, subset_row=1:10)
+    expect_identical(mean(sf), 1)
+    expect_identical(sf, medianSizeFactors(X[1:10,]))
+
+    ref <- runif(nrow(X))
+    sf <- medianSizeFactors(X, subset_row=100:200, reference=ref)
+    expect_identical(mean(sf), 1)
+    expect_identical(sf, medianSizeFactors(X[100:200,], reference=ref[100:200]))
+})
+
 #######################################################
 
 test_that("normalizeCounts works as expected", {
