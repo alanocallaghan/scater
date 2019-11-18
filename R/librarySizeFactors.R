@@ -14,8 +14,6 @@
 #' For the SummarizedExperiment method, further arguments to pass to the ANY method.
 #'
 #' For \code{computeLibraryFactors}, further arguments to pass to \code{librarySizeFactors}.
-#' @param altexp String or integer scalar indicating which (if any) alternative experiment should be used
-#' to provide the counts to compute the size factors.
 #'
 #' @details
 #' Library sizes are converted into size factors by scaling them so that their mean across cells is unity.
@@ -32,9 +30,6 @@
 #' instead of the library size (which is proportional to the arithmetic mean).
 #' This is enabled with \code{geometric=TRUE} with addition of \code{pseudo_count} to avoid undefined values with zero counts.
 #' The geometric mean is more robust to composition biases from upregulated features but is a poor estimator of the relative bias when there are many zero counts, and thus is best suited for deeply sequenced features, e.g., antibody-derived tags.
-#'
-#' Setting \code{altexp} is occasionally useful for computing size factors from spike-in transcripts
-#' and using them on the count matrix for endogenous genes (stored in the main experiment).
 #'
 #' @author Aaron Lun
 #'
@@ -83,14 +78,8 @@ setMethod("librarySizeFactors", "SummarizedExperiment", function(x, exprs_values
 #' @export
 #' @rdname librarySizeFactors
 #' @importFrom BiocGenerics sizeFactors<-
-#' @importFrom SingleCellExperiment altExp
-computeLibraryFactors <- function(x, ..., altexp=NULL) {
-    if (!is.null(altexp)) {
-        y <- altExp(x, altexp)
-    } else {
-        y <- x
-    }
-    sf <- librarySizeFactors(y, ...)
+computeLibraryFactors <- function(x, ...) {
+    sf <- librarySizeFactors(x, ...)
     sizeFactors(x) <- sf
     x
 }
