@@ -57,7 +57,9 @@ In such cases, normalization by library size factors will not be entirely correc
 A closely related alternative approach involves using the geometric mean of counts within each cell to define the size factor,
 instead of the library size (which is proportional to the arithmetic mean).
 This is enabled with \code{geometric=TRUE} with addition of \code{pseudo_count} to avoid undefined values with zero counts.
-The geometric mean is more robust to composition biases from upregulated features but is a poor estimator of the relative bias when there are many zero counts, and thus is best suited for deeply sequenced features, e.g., antibody-derived tags.
+The geometric mean is more robust to composition biases from upregulated features but is a poor estimator of the relative bias at low counts or with many zero counts; it is thus is best suited for deeply sequenced features, e.g., antibody-derived tags.
+
+% Specifically, the scaling effect applies to the expectation of the raw counts, so the geometric mean only becomes an accurate estimator if the mean of the logs approaches the log of the mean - this usually only occurs at high counts.
 }
 \examples{
 example_sce <- mockSCE()

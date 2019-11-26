@@ -8,6 +8,8 @@
     \item Added geometric= argument to librarySizeFactors() to compute size factors with a geometric mean.
     \item Added the runMultiUMAP() function to perform a combined UMAP on multiple feature sets.
     \item Added the medianSizeFactors() function to perform a DESeq2-like size factor calculation.
+    \item Modified isOutlier() so that min_diff= now acts on the log2 scale when log=TRUE.
+    Added share_medians=, share_mads= and share_missing= options for sharing information across batches.
 }}
 
 \section{Changes in version 1.14.0, Bioconductor 3.10 Release (September 2019)}{
