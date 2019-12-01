@@ -47,38 +47,6 @@ test_that("nexprs handles silly inputs properly", {
 
 ############################################
 
-test_that("numDetectedAcrossCells works as expected", {
-    ids <- sample(LETTERS[1:5], ncol(sce), replace=TRUE)
-
-    expect_equal(numDetectedAcrossCells(counts(sce), ids),
-        colsum((counts(sce) > 0)+0, ids)) 
-    expect_identical(numDetectedAcrossCells(counts(sce), ids, average=TRUE),
-        t(t(colsum((counts(sce) > 0)+0, ids))/as.integer(table(ids))))
-
-    # Checking that it works direclty with SCEs.
-    expect_equal(numDetectedAcrossCells(counts(sce), ids),
-        numDetectedAcrossCells(sce, ids))
-    expect_equal(numDetectedAcrossCells(counts(sce), ids, average=TRUE),
-        numDetectedAcrossCells(sce, ids, average=TRUE))
-
-    # Checking that subsetting works.
-    expect_identical(numDetectedAcrossCells(counts(sce), ids, subset_row=10:1),
-        numDetectedAcrossCells(counts(sce), ids)[10:1,])
-
-    expect_identical(numDetectedAcrossCells(counts(sce), ids, subset_col=2:15),
-        numDetectedAcrossCells(counts(sce)[,2:15], ids[2:15]))
-
-    ids[c(1,3,5,6)] <- NA
-    expect_identical(numDetectedAcrossCells(counts(sce), ids),
-        numDetectedAcrossCells(counts(sce)[,!is.na(ids)], ids[!is.na(ids)]))
-
-    # Comparing to sumCountsAcrossCells.
-    expect_equal(numDetectedAcrossCells(counts(sce), ids),
-        sumCountsAcrossCells((counts(sce) > 0)+0, ids))
-    expect_equal(numDetectedAcrossCells(counts(sce), ids, average=TRUE),
-        sumCountsAcrossCells((counts(sce) > 0)+0, ids, average=TRUE))
-})
-
 test_that("numDetectedAcrossFeatures works as expected", {
     ids <- sample(LETTERS[1:5], nrow(sce), replace=TRUE)
 
