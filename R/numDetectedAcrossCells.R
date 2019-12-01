@@ -2,11 +2,9 @@
 #' 
 #' Computes the number of detected expression values (default defined as non-zero counts) for each feature in each group of cells.
 #'
-#' @param ids A vector of length \code{ncol(x)}, specifying the group assignment for each cell. 
-#' @param subset_row A vector specifying the rows to use.
-#' Defaults to all rows.
-#' @param subset_col A vector specifying the columns to use.
-#' Defaults to all cells with non-\code{NA} entries of \code{ids}.
+#' @param x A numeric matrix of counts containing features in rows and cells in columns.
+#' Alternatively, a \linkS4class{SummarizedExperiment} object containing such a count matrix.
+#' @inheritParams sumCountsAcrossCells
 #' @param average Logical scalar indicating whether the proportion of non-zero counts in each group should be computed instead.
 #' @param ... For the generic, further arguments to pass to specific methods.
 #'
@@ -15,11 +13,20 @@
 #' For the ANY method, further arguments to pass to the \code{\link{nexprs}} function.
 #' @inheritParams nexprs
 #' 
-#' @return An integer or numeric matrix containing the number or proportion of detected expression values for each feature (row) in each group of cells (column).
+#' @return 
+#' For \code{numDetectedAcrossCells} with a factor \code{ids}, a count matrix is returned with one column per level of \code{ids}.
+#' Each entry contains the number of cells in the same group (column) that express a given feature (row).
+#' Columns are ordered by \code{levels(ids)}.
+#'
+#' For \code{numDetectedAcrossCells} with a DataFrame \code{ids}, a SummarizedExperiment is returned containing a similar count matrix in the first assay.
+#' Each column corresponds to a unique combination of levels in \code{ids} and contains the sum of counts for all cells with that combination.
+#' The identities of the levels for each column are reported in the \code{\link{colData}}.
 #'
 #' @author Aaron Lun
 #' @seealso
 #' \code{\link{nexprs}}, on which this function is based.
+#'
+#' \code{\link{sumCountsAcrossCells}}, which computes the sum of counts within a group.
 #' 
 #' @examples
 #' example_sce <- mockSCE()
@@ -31,23 +38,16 @@
 #' @name numDetectedAcrossCells
 NULL
 
-#' @importFrom BiocParallel SerialParam 
-#' @importFrom Matrix t
-.nexprs_across_cells <- function(x, ids, average=FALSE, subset_row=NULL, subset_col=NULL, ..., BPPARAM=SerialParam()) {
-    if (!is.null(subset_col)) {
-        ids[!seq_along(ids) %in% .subset2index(subset_col, x, byrow=FALSE)] <- NA
+#' @importFrom BiocParallel SerialParam bpstart bpstop bpisup
+#' @importClassesFrom BiocParallel MulticoreParam
+.nexprs_across_cells <- function(x, ids, subset_row=NULL, subset_col=NULL, average=FALSE, 
+    detection_limit=0, BPPARAM=SerialParam()) 
+{
+    aboveFUN <- function(x) {
+        (x > detection_limit) + 0L
     }
-    col_sets <- split(seq_along(ids), ids)
-    row_sets <- .split_subset_by_workers(subset_row, target=x, BPPARAM=BPPARAM)
-
-    output <- .iterate_by_chunks(x, row_sets=row_sets, col_sets=col_sets, FUN=nexprs, byrow=TRUE, BPPARAM=BPPARAM)
-    colnames(output) <- names(col_sets)
-
-    if (average) { 
-        output <- t(t(output)/lengths(col_sets))
-    }
-
-    output
+    .sum_across_cells(x=x, ids=ids, subset_row=subset_row, subset_col=subset_col, average=average, 
+        BPPARAM=BPPARAM, modifier=aboveFUN)
 } 
 
 #' @export
