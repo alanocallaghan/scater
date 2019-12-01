@@ -163,6 +163,13 @@ test_that("by-cell count summarization behaves with odd inputs", {
     spack <- sumCountsAcrossCells(unknown, ids)
     expect_equivalent(ref, as.matrix(spack))
 
+    # Handles DelayedArrays properly.
+    library(Matrix)
+    delayed <- sce
+    counts(delayed) <- DelayedArray(counts(delayed))
+    dack <- sumCountsAcrossCells(delayed, ids)
+    expect_equivalent(ref, as.matrix(dack))
+
     # Handles parallelization properly.
     alt <- sumCountsAcrossCells(sce, ids, BPPARAM=safeBPParam(2))
     expect_identical(alt, ref)

@@ -14,7 +14,7 @@
 #' 
 #' For the \linkS4class{SingleCellExperiment} method, this argument will not affect alternative Experiments,
 #' where summation is always performed for all features (or not at all, depending on \code{use_alt_exps}).
-#' @param subset_col An in teger, logical or character vector specifying the cells to use.
+#' @param subset_col An integer, logical or character vector specifying the cells to use.
 #' Defaults to all cells with non-\code{NA} entries of \code{ids}.
 #' @param exprs_values A string or integer scalar specifying the assay of \code{x} containing the matrix of counts
 #' (or any other expression quantity that can be meaningfully summed).
@@ -86,11 +86,11 @@
 #'      coldata_merge=list(stuff=sum))
 NULL
 
-#' @importFrom BiocParallel SerialParam 
+#' @importFrom BiocParallel SerialParam bplapply 
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom methods is
 #' @importFrom SummarizedExperiment SummarizedExperiment
-#' @importFrom Matrix t rowSums rowMeans
+#' @importFrom Matrix t 
 .sum_counts_across_cells <- function(x, ids, subset_row=NULL, subset_col=NULL, average=FALSE, BPPARAM=SerialParam()) {
     multi <- is(ids, "DataFrame")
     if (multi) {
@@ -102,14 +102,22 @@ NULL
     }
 
     if (!is.null(subset_col)) {
-        ids[!seq_along(ids) %in% .subset2index(subset_col, x, byrow=FALSE)] <- NA
+        ids[!seq_along(ids) %in% .subset2index(subset_col, x, byrow=FALSE)] <- NA_integer_
     }
-    col_sets <- split(seq_along(ids), ids)
-    row_sets <- .split_subset_by_workers(subset_row, target=x, BPPARAM=BPPARAM)
+    lost <- is.na(ids)
 
-    out <- .iterate_by_chunks(x, row_sets=row_sets, col_sets=col_sets,
-        FUN=if (average) rowMeans else rowSums, BPPARAM=BPPARAM)
-    colnames(out) <- names(col_sets)
+    by.core <- .splitRowsByWorkers(x, BPPARAM=BPPARAM, 
+        subset_row=.subsetToIndexOrNull(subset_row, x, byrow=TRUE),
+        subset_col=if (any(lost)) which(!lost))
+
+    sub.ids <- ids[!lost]
+    out <- bplapply(by.core, FUN=.colsum, group=sub.ids, BPPARAM=BPPARAM)
+    out <- do.call(rbind, out)
+
+    if (average) {
+        freq <- table(sub.ids)
+        out <- t(t(out)/as.integer(freq[colnames(out)]))
+    }
 
     if (multi) {
         m <- match(as.integer(colnames(out)), ids)
@@ -136,6 +144,28 @@ setMethod("sumCountsAcrossCells", "ANY", .sum_counts_across_cells)
 #' @importFrom SummarizedExperiment assay
 setMethod("sumCountsAcrossCells", "SummarizedExperiment", function(x, ..., exprs_values="counts") {
     .sum_counts_across_cells(assay(x, exprs_values), ...)
+})
+
+##########################
+##########################
+
+setGeneric(".colsum", function(x, group) standardGeneric(".colsum"))
+
+#' @importFrom Matrix rowSums
+setMethod(".colsum", "ANY", function(x, group) {
+    by.group <- split(seq_len(ncol(x)), group)
+    out <- lapply(by.group, function(i) rowSums(x[,i,drop=FALSE]))
+    do.call(cbind, out)
+})
+
+#' @importFrom DelayedArray colsum
+setMethod(".colsum", "matrix", function(x, group) {
+    colsum(x, group)
+})
+
+#' @importFrom DelayedArray colsum
+setMethod(".colsum", "DelayedMatrix", function(x, group) {
+    colsum(x, group)
 })
 
 ##########################
