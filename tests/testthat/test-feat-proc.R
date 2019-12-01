@@ -211,12 +211,20 @@ test_that("Aggregation across cells works correctly with DFs", {
     m <- match(colnames(ref), post.combined)
     expect_equivalent(ref, assay(out)[,m])
 
-#    # Handles NAs correctly.
-#    extra[1] <- NA
-#    ids[2] <- NA
-#    ref <- sumCountsAcrossCells(sce, DataFrame(X=ids, Y=extra))
-#    out <- sumCountsAcrossCells(sce[,-(1:2)], DataFrame(X=ids, Y=extra)[-(1:2),])
-#    expect_equal(ref, out)
+    ref <- sumCountsAcrossCells(sce, combined, average=TRUE)
+    out <- sumCountsAcrossCells(sce, DataFrame(X=ids, Y=extra), average=TRUE)
+    expect_equivalent(ref, assay(out)[,m])
+
+    # Handles NAs correctly.
+    extra[1] <- NA
+    ids[2] <- NA
+    ref <- sumCountsAcrossCells(sce[,-(1:2)], DataFrame(X=ids, Y=extra)[-(1:2),])
+    out <- sumCountsAcrossCells(sce, DataFrame(X=ids, Y=extra))
+    expect_equal(assay(ref), assay(out))
+    expect_equal(colData(ref), colData(out))
+
+    out2 <- sumCountsAcrossCells(sce, DataFrame(X=ids, Y=extra), subset_col=-(1:2))
+    expect_equal(out, out2)
 })
 
 set.seed(100041)
