@@ -45,7 +45,8 @@ Rcpp::RObject sum_row_counts (Rcpp::RObject counts, Rcpp::IntegerVector genes, R
     if (mattype==INTSXP) {
         return sum_row_counts_internal<beachmat::integer_matrix, Rcpp::IntegerMatrix>(counts, genes, runs);
     } else if (mattype==LGLSXP) {
-        return sum_row_counts_internal<beachmat::logical_matrix, Rcpp::LogicalMatrix>(counts, genes, runs);
+        // Yes, the IntegerMatrix output is deliberate here.
+        return sum_row_counts_internal<beachmat::logical_matrix, Rcpp::IntegerMatrix>(counts, genes, runs);
     } else if (mattype==REALSXP) {
         return sum_row_counts_internal<beachmat::numeric_matrix, Rcpp::NumericMatrix>(counts, genes, runs);
     } else {
