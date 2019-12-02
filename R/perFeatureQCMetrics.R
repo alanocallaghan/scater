@@ -65,7 +65,7 @@
 #'
 #' # With subsets.
 #' stats2 <- perFeatureQCMetrics(example_sce, subsets=list(Empty=1:10))
-#' stats2$subsets
+#' stats2
 #'
 #' @seealso 
 #' \code{\link{addPerFeatureQC}}, to add the QC metrics to the row metadata.
@@ -74,65 +74,45 @@
 NULL
 
 #' @importFrom S4Vectors DataFrame
-#' @importFrom BiocParallel bpmapply SerialParam
-#' @importClassesFrom S4Vectors DataFrame
-.per_feature_qc_metrics <- function(x, subsets = NULL, detection_limit = 0, BPPARAM=SerialParam(), flatten=TRUE) 
-{
+#' @importFrom BiocParallel bplapply SerialParam
+#' @importClassesFrom S4Vectors DFrame 
+.per_feature_qc_metrics <- function(x, subsets = NULL, detection_limit = 0, BPPARAM=SerialParam(), flatten=TRUE) {
     if (length(subsets) && is.null(names(subsets))){ 
         stop("'subsets' must be named")
     }
     subsets <- lapply(subsets, FUN = .subset2index, target = x, byrow = FALSE)
 
-    # Computing all QC metrics, with cells split across workers. 
-    worker_assign <- .assign_jobs_to_workers(ncol(x), BPPARAM)
-    bp.out <- bpmapply(.compute_qc_metrics, start=worker_assign$start, end=worker_assign$end,
-            MoreArgs=list(exprs_mat=x, 
-                all_feature_sets=list(), 
-                all_cell_sets=subsets,
-                percent_top=integer(0),
-                detection_limit=detection_limit),
-            BPPARAM=BPPARAM, SIMPLIFY=FALSE, USE.NAMES=FALSE)
+    # Computing all QC metrics, with cells split across workers.
+    by.core <- .splitRowsByWorkers(x, BPPARAM)
+    bp.out <- bplapply(by.core, FUN=per_feature_qc,
+        cellcon=subsets, limit=detection_limit,
+        BPPARAM=BPPARAM)
 
     # Aggregating across cores.
-    feature_stats_by_cell_set <- bp.out[[1]][[2]]
-    if (length(bp.out) > 1L) {
-        for (i in seq_along(feature_stats_by_cell_set)) {
-            current <- lapply(bp.out, FUN=function(sublist) { sublist[[2]][[i]] })
-            feature_stats_by_cell_set[[i]] <- list(
-                Reduce("+", lapply(current, "[[", i=1)), # total count
-                Reduce("+", lapply(current, "[[", i=2))  # total non-zero cells
+    full.info <- DataFrame(
+        mean=unlist(lapply(bp.out, FUN=function(x) x[[1]][[1]])),
+        detected=unlist(lapply(bp.out, FUN=function(x) x[[1]][[2]])),
+        row.names=rownames(x)
+    )
+
+    # Collecting subset information.
+    if (!is.null(subsets)) {
+        sub.info <- new("DFrame", nrows=nrow(x))
+        for (i in seq_along(subsets)) {
+            sub.out <- DataFrame(
+                mean=unlist(lapply(bp.out, FUN=function(x) x[[2]][[i]][[1]])),
+                detected=unlist(lapply(bp.out, FUN=function(x) x[[2]][[i]][[2]]))
             )
+            sub.out$ratio <- sub.out$mean/full.info$mean
+            sub.info[[names(subsets)[i]]] <- sub.out
         }
+        full.info$subsets <- sub.info
     }
 
-    output <- feature_stats_by_cell_set[[1]]
-    output <- .sum2mean(output, ncol(x))
-
-    out.subsets <- list()
-    for (i in seq_along(subsets)) {
-        current <- feature_stats_by_cell_set[[i + 1]]
-        current <- .sum2mean(current, length(subsets[[i]]))
-        current$ratio <- current$mean/output$mean
-        out.subsets[[i]] <- DataFrame(current)
-    }
-        
-    if (length(out.subsets)!=0L) {
-        output$subsets <- do.call(DataFrame, lapply(out.subsets, I))
-        names(output$subsets) <- names(subsets)
-    } else {
-        output$subsets <- new("DataFrame", nrows=nrow(x)) 
-    }
-
-    output <- do.call(DataFrame, lapply(output, I))
-    rownames(output) <- rownames(x)
     if (flatten) {
-        output <- .flatten_nested_dims(output)
+        full.info <- .flatten_nested_dims(full.info)
     }
-    output
-}
-
-.sum2mean <- function(l, n) {
-    list(mean=l[[1]]/n, detected=l[[2]]/n*100)
+    full.info
 }
 
 #' @export

@@ -10,7 +10,7 @@
 #' used to identify interesting feature subsets such as ERCC spike-in transcripts or mitochondrial genes. 
 #' @param percent_top An integer vector. 
 #' Each element is treated as a number of top genes to compute the percentage of library size occupied by the most highly expressed genes in each cell.
-#' @param detection.limit A numeric scalar specifying the lower detection limit for expression.
+#' @param detection_limit A numeric scalar specifying the lower detection_limit for expression.
 #' @param BPPARAM A BiocParallelParam object specifying whether the QC calculations should be parallelized. 
 #' @param ... For the generic, further arguments to pass to specific methods.
 #' 
@@ -29,7 +29,7 @@
 #' This contains the following fields:
 #' \itemize{
 #' \item \code{sum}: numeric, the sum of counts for each cell.
-#' \item \code{detected}: numeric, the number of observations above \code{detection.limit}.
+#' \item \code{detected}: numeric, the number of observations above \code{detection_limit}.
 #' }
 #'
 #' If \code{flatten=FALSE}, the DataFrame will contain the additional columns:
@@ -126,7 +126,7 @@ NULL
 #' @importFrom BiocParallel bpmapply SerialParam
 #' @importClassesFrom S4Vectors DataFrame
 .per_cell_qc_metrics <- function(x, subsets = NULL, percent_top = c(50, 100, 200, 500), 
-    detection.limit = 0, BPPARAM=SerialParam(), flatten=TRUE) 
+    detection_limit = 0, BPPARAM=SerialParam(), flatten=TRUE) 
 {
     if (length(subsets) && is.null(names(subsets))){ 
         stop("'subsets' must be named")
@@ -135,54 +135,40 @@ NULL
     percent_top <- sort(as.integer(percent_top))
 
     # Computing all QC metrics, with cells split across workers. 
-    worker_assign <- .assign_jobs_to_workers(ncol(x), BPPARAM)
-    bp.out <- bpmapply(.compute_qc_metrics, start=worker_assign$start, end=worker_assign$end,
-            MoreArgs=list(exprs_mat=x, 
-                all_feature_sets=subsets, 
-                all_cell_sets=list(),
-                percent_top=percent_top,
-                detection_limit=detection.limit),
-            BPPARAM=BPPARAM, SIMPLIFY=FALSE, USE.NAMES=FALSE)
+    by.core <- .splitColsByWorkers(x, BPPARAM)
+    bp.out <- bplapply(by.core, FUN=per_cell_qc, 
+        featcon=subsets, top=percent_top, limit=detection_limit,
+        BPPARAM=BPPARAM)
 
-    # Aggregating across cores (concatenating pre-cell statistics, summing per-feature statistics).
-    cell_stats_by_feature_set <- bp.out[[1]][[1]]
-    if (length(bp.out) > 1L) {
-        for (i in seq_along(cell_stats_by_feature_set)) {
-            current <- lapply(bp.out, FUN=function(sublist) sublist[[1]][[i]])
-            cell_stats_by_feature_set[[i]] <- list(
-                unlist(lapply(current, "[[", i=1L)),  # total count
-                unlist(lapply(current, "[[", i=2L)),  # total features 
-                do.call(cbind, lapply(current, "[[", i=3L)) # percentage in top X.
+    # Aggregating across cores.
+    full.info <- DataFrame(
+        sum=unlist(lapply(bp.out, FUN=function(x) x[[1]][[1]])),
+        detected=unlist(lapply(bp.out, FUN=function(x) x[[1]][[2]])),
+        row.names=colnames(x)
+    )
+
+    pct <- do.call(cbind, lapply(bp.out, FUN=function(x) x[[1]][[3]]))
+    rownames(pct) <- percent_top
+    full.info$percent_top <- t(pct)
+
+    # Collecting subset information.
+    if (!is.null(subsets)) {
+        sub.info <- new("DFrame", nrows=ncol(x))
+        for (i in seq_along(subsets)) {
+            sub.out <- DataFrame(
+                sum=unlist(lapply(bp.out, FUN=function(x) x[[2]][[i]][[1]])),
+                detected=unlist(lapply(bp.out, FUN=function(x) x[[2]][[i]][[2]]))
             )
+            sub.out$percent <- sub.out$sum/full.info$sum
+            sub.info[[names(subsets)[i]]] <- sub.out
         }
+        full.info$subsets <- sub.info
     }
 
-    output <- cell_stats_by_feature_set[[1]]
-    names(output) <- c("sum", "detected", "percent_top")
-    output$percent_top <- I(t(output$percent_top))
-    colnames(output$percent_top) <- percent_top
-
-    out.subsets <- list()
-    for (i in seq_along(subsets)) {
-        current <- cell_stats_by_feature_set[[i + 1]][1:2]
-        names(current) <- c("sum", "detected")
-        current$percent <- current$sum/output$sum * 100
-        out.subsets[[i]] <- DataFrame(current)
-    }
-        
-    if (length(out.subsets)!=0L) {
-        output$subsets <- do.call(DataFrame, lapply(out.subsets, I))
-        names(output$subsets) <- names(subsets)
-    } else {
-        output$subsets <- new("DataFrame", nrows=ncol(x)) 
-    }
-
-    output <- do.call(DataFrame, lapply(output, I))
-    rownames(output) <- colnames(x)
     if (flatten) {
-        output <- .flatten_nested_dims(output)
+        full.info <- .flatten_nested_dims(full.info)
     }
-    output
+    full.info
 }
 
 #' @export
@@ -238,13 +224,6 @@ setMethod("perCellQCMetrics", "SingleCellExperiment", function(x,
 })
 
 ##################################################
-
-.compute_qc_metrics <- function(exprs_mat, start, end, all_feature_sets, all_cell_sets, percent_top, detection_limit)
-# A helper function defined in the scater namespace.
-# This avoids the need to reattach scater in bpmapply for SnowParam().
-{
-    .Call(cxx_combined_qc, exprs_mat, start, end, all_feature_sets, all_cell_sets, percent_top, detection_limit)
-}
 
 .get_altexps_to_use <- function(x, use_altexps) {
     if (is.logical(use_altexps)) {

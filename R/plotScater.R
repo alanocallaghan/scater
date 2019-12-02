@@ -69,7 +69,7 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
     ## Use C++ to get the sequencing real estate accounted for by features
     to_plot <- seq_len(nfeatures)
     ncells <- ncol(exprs_mat)
-    seq_real_estate <- .Call(cxx_top_cumprop, exprs_mat, to_plot)
+    seq_real_estate <- top_cumprop(exprs_mat, to_plot)
     seq_real_estate_long <- data.frame(Feature=rep(to_plot, each=ncells), Cell=rep(seq_len(ncells), nfeatures))
     seq_real_estate_long$Proportion_Library <- as.vector(t(seq_real_estate))
 
