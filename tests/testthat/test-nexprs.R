@@ -44,37 +44,3 @@ test_that("nexprs handles silly inputs properly", {
     expect_equivalent(nexprs(original, subset_row=integer(0), byrow=TRUE), integer(0))
     expect_equivalent(nexprs(original, subset_col=integer(0), byrow=TRUE), integer(nrow(original)))
 })
-
-############################################
-
-test_that("numDetectedAcrossFeatures works as expected", {
-    ids <- sample(LETTERS[1:5], nrow(sce), replace=TRUE)
-
-    expect_equal(numDetectedAcrossFeatures(counts(sce), ids),
-        rowsum((counts(sce) > 0)+0, ids)) 
-    expect_identical(numDetectedAcrossFeatures(counts(sce), ids, average=TRUE),
-        rowsum((counts(sce) > 0)+0, ids)/as.integer(table(ids)))
-
-    # Checking that it works direclty with SCEs.
-    expect_equal(numDetectedAcrossFeatures(counts(sce), ids),
-        numDetectedAcrossFeatures(sce, ids))
-    expect_equal(numDetectedAcrossFeatures(counts(sce), ids, average=TRUE),
-        numDetectedAcrossFeatures(sce, ids, average=TRUE))
-
-    # Checking that subsetting works.
-    expect_identical(numDetectedAcrossFeatures(counts(sce), ids, subset_col=10:1),
-        numDetectedAcrossFeatures(counts(sce), ids)[,10:1])
-
-    expect_identical(numDetectedAcrossFeatures(counts(sce), ids, subset_row=2:15),
-        numDetectedAcrossFeatures(counts(sce)[2:15,], ids[2:15]))
-
-    ids[c(1,3,5,6)] <- NA
-    expect_identical(numDetectedAcrossFeatures(counts(sce), ids),
-        numDetectedAcrossFeatures(counts(sce)[!is.na(ids),], ids[!is.na(ids)]))
-
-    # Comparing to sumCountsAcrossFeatures.
-    expect_equal(numDetectedAcrossFeatures(counts(sce), ids),
-        sumCountsAcrossFeatures((counts(sce) > 0)+0, ids))
-    expect_equal(numDetectedAcrossFeatures(counts(sce), ids, average=TRUE),
-        sumCountsAcrossFeatures((counts(sce) > 0)+0, ids, average=TRUE))
-})
