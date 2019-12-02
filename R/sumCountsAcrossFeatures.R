@@ -93,10 +93,10 @@ NULL
 
     if (!is.null(subset_row)) {
         subset_row <- .subset2index(subset_row, x, byrow=TRUE)
-        discard <- genes %in% subset_row
-        genes <- genes[!discard]
-        lost <- findInterval(which(discard), cumsum(runs), left.open=TRUE)
-        runs <- runs - tabulate(lost+1L, nbins=length(runs))
+        keep <- genes %in% subset_row
+        genes <- genes[keep]
+        kept <- findInterval(which(keep), cumsum(runs), left.open=TRUE)
+        runs <- tabulate(kept+1L, nbins=length(runs))
     }
 
     by.core <- .splitColsByWorkers(x, BPPARAM=BPPARAM, subset_col=subset_col)
@@ -106,7 +106,8 @@ NULL
     out_list <- bplapply(by.core, FUN=sum_row_counts, genes=genes, runs=runs, BPPARAM=BPPARAM)
 
     out <- do.call(cbind, out_list)
-    dimnames(out) <- list(names, colnames(by.core[[1]]))
+    rownames(out) <- names
+    colnames(out) <- unlist(lapply(by.core, colnames))
     if (average) {
         out <- out/runs
     }
