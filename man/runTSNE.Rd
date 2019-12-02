@@ -53,13 +53,14 @@ For \code{runTSNE}, additional arguments to pass to \code{calculateTSNE}.}
 
 \item{ncomponents}{Numeric scalar indicating the number of t-SNE dimensions to obtain.}
 
-\item{ntop}{Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
+\item{ntop}{Numeric scalar specifying the number of features with the highest variances to use for dimensionality reduction.}
 
-\item{subset_row}{Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.}
+\item{subset_row}{Vector specifying the subset of features to use for dimensionality reduction.
+This can be a character vector of row names, an integer vector of row indices or a logical vector.}
 
-\item{scale}{Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.}
+\item{scale}{Logical scalar, should the expression values be standardized?}
 
-\item{transposed}{Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.}
+\item{transposed}{Logical scalar, is \code{x} transposed with cells in rows?}
 
 \item{perplexity}{Numeric scalar defining the perplexity parameter, see \code{?\link[Rtsne]{Rtsne}} for more details.}
 
@@ -73,17 +74,17 @@ For \code{runTSNE}, additional arguments to pass to \code{calculateTSNE}.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.}
 
-\item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.}
+\item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
 
 \item{pca}{Logical scalar indicating whether a PCA step should be performed inside \code{\link[Rtsne]{Rtsne}}.}
 
-\item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.}
+\item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use.}
 
-\item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.}
+\item{n_dimred}{Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified.}
 
-\item{altexp}{String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.}
+\item{altexp}{String or integer scalar specifying an alternative experiment containing the input data.}
 
-\item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
+\item{name}{String specifying the name to be used to store the result in the \code{\link{reducedDims}} of the output.}
 }
 \value{
 For \code{calculateTSNE}, a numeric matrix is returned containing the t-SNE coordinates for each cell (row) and dimension (column).
@@ -110,6 +111,58 @@ The neighbor search results are then used for t-SNE via the \code{\link[Rtsne]{R
 If \code{dimred} is specified, the PCA step of the \code{Rtsne} function is automatically turned off by default.
 This presumes that the existing dimensionality reduction is sufficient such that an additional PCA is not required.
 }
+\section{Feature selection}{
+
+This section is relevant if \code{x} is a numeric matrix of (log-)expression values with features in rows and cells in columns;
+or if \code{x} is a \linkS4class{SingleCellExperiment} and \code{dimred=NULL}.
+In the latter, the expression values are obtained from the assay specified by \code{exprs_values}.
+
+The \code{subset_row} argument specifies the features to use for dimensionality reduction.
+The aim is to allow users to specify highly variable features to improve the signal/noise ratio,
+or to specify genes in a pathway of interest to focus on particular aspects of heterogeneity.
+
+If \code{subset_row=NULL}, the \code{ntop} features with the largest variances are used instead.
+We literally compute the variances from the expression values without considering any mean-variance trend,
+so often a more considered choice of genes is possible, e.g., with \pkg{scran} functions.
+Note that the value of \code{ntop} is ignored if \code{subset_row} is specified.
+
+If \code{scale=TRUE}, the expression values for each feature are standardized so that their variance is unity.
+This will also remove features with standard deviations below 1e-8.
+}
+
+\section{Using reduced dimensions}{
+
+If \code{x} is a \linkS4class{SingleCellExperiment}, the method can be applied on existing dimensionality reduction results in \code{x} by setting the \code{dimred} argument.
+This is typically used to run slower non-linear algorithms (t-SNE, UMAP) on the results of fast linear decompositions (PCA).
+We might also use this with existing reduced dimensions computed from \emph{a priori} knowledge (e.g., gene set scores), where further dimensionality reduction could be applied to compress the data.
+
+The matrix of existing reduced dimensions is taken from \code{\link{reducedDim}(x, dimred)}.
+By default, all dimensions are used to compute the second set of reduced dimensions.
+If \code{n_dimred} is also specified, only the first \code{n_dimred} columns are used.
+Alternatively, \code{n_dimred} can be an integer vector specifying the column indices of the dimensions to use.
+
+When \code{dimred} is specified, no additional feature selection or standardization is performed.
+This means that any settings of \code{ntop}, \code{subset_row} and \code{scale} are ignored.
+
+If \code{x} is a numeric matrix, setting \code{transposed=TRUE} will treat the rows as cells and the columns as the variables/diemnsions.
+This allows users to manually pass in dimensionality reduction results without needing to wrap them in a \linkS4class{SingleCellExperiment}.
+As such, no feature selection or standardization is performed, i.e., \code{ntop}, \code{subset_row} and \code{scale} are ignored.
+}
+
+\section{Using alternative Experiments}{
+
+This section is relevant if \code{x} is a \linkS4class{SingleCellExperiment} and \code{altexp} is not \code{NULL}.
+In such cases, the method is run on data from an alternative \linkS4class{SummarizedExperiment} nested within \code{x}.
+This is useful for performing dimensionality reduction on other features stored in \code{\link{altExp}(x, altexp)}, e.g., antibody tags. 
+
+Setting \code{altexp} with \code{exprs_values} will use the specified assay from the alternative SummarizedExperiment.
+If the alternative is a SingleCellExperiment, setting \code{dimred} will use the specified dimensionality reduction results from the alternative. 
+This option will also interact as expected with \code{n_dimred}.
+
+Note that the output is still stored in the \code{\link{reducedDims}} of the output SingleCellExperiment.
+It is advisable to use a different \code{name} to distinguish this output from the results generated from the main experiment's assay values.
+}
+
 \examples{
 example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
@@ -127,8 +180,6 @@ Visualizing High-Dimensional Data Using t-SNE.
 \code{\link[Rtsne]{Rtsne}}, for the underlying calculations.
 
 \code{\link{plotTSNE}}, to quickly visualize the results.
-
-\code{?"\link{scater-red-dim-args}"}, for a full description of various options.
 }
 \author{
 Aaron Lun, based on code by Davis McCarthy

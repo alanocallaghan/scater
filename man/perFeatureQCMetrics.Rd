@@ -90,7 +90,7 @@ stats
 
 # With subsets.
 stats2 <- perFeatureQCMetrics(example_sce, subsets=list(Empty=1:10))
-stats2$subsets
+stats2
 
 }
 \seealso{

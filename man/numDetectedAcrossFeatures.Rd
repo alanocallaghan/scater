@@ -11,19 +11,18 @@ numDetectedAcrossFeatures(x, ...)
 \S4method{numDetectedAcrossFeatures}{ANY}(
   x,
   ids,
-  average = FALSE,
+  detection_limit = 0,
   subset_row = NULL,
   subset_col = NULL,
-  ...,
+  average = FALSE,
   BPPARAM = SerialParam()
 )
 
 \S4method{numDetectedAcrossFeatures}{SummarizedExperiment}(x, ..., exprs_values = "counts")
 }
 \arguments{
-\item{x}{A numeric matrix of counts where features are rows and cells are columns.
-
-Alternatively, a \linkS4class{SummarizedExperiment} containing such counts.}
+\item{x}{A numeric matrix of counts containing features in rows and cells in columns.
+Alternatively, a \linkS4class{SummarizedExperiment} object containing such a count matrix.}
 
 \item{...}{For the generic, further arguments to pass to specific methods.
 
@@ -31,19 +30,24 @@ For the SummarizedExperiment method, further arguments to pass to the ANY method
 
 For the ANY method, further arguments to pass to the \code{\link{nexprs}} function.}
 
-\item{ids}{A vector of length \code{nrow(x)}, specifying the group assignment for each feature.}
+\item{ids}{A factor of length \code{nrow(x)}, specifying the set to which each feature in \code{x} belongs.
+
+Alternatively, a list of integer or character vectors, where each vector specifies the indices or names of features in a set.}
+
+\item{detection_limit}{Numeric scalar providing the value above which  observations are deemed to be expressed.}
+
+\item{subset_row}{An integer, logical or character vector specifying the features to use.
+Defaults to all features.}
+
+\item{subset_col}{An integer, logical or character vector specifying the cells to use.
+Defaults to all cells with non-\code{NA} entries of \code{ids}.}
 
 \item{average}{Logical scalar indicating whether the proportion of non-zero counts in each group should be computed instead.}
 
-\item{subset_row}{A vector specifying the rows to use.
-Defaults to all rows with non-\code{NA} entries of \code{ids}.}
+\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether summation should be parallelized.}
 
-\item{subset_col}{A vector specifying the columns to use.
-Defaults to all columns.}
-
-\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.}
-
-\item{exprs_values}{String or integer specifying the assay of \code{x} to obtain the count matrix from.}
+\item{exprs_values}{A string or integer scalar specifying the assay of \code{x} containing the matrix of counts
+(or any other expression quantity that can be meaningfully summed).}
 }
 \value{
 An integer or numeric matrix containing the number of detected expression values in each group of features (row) and cell (column).

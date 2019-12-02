@@ -9,7 +9,14 @@
 \usage{
 sumCountsAcrossFeatures(x, ...)
 
-\S4method{sumCountsAcrossFeatures}{ANY}(x, ids, average = FALSE, BPPARAM = SerialParam())
+\S4method{sumCountsAcrossFeatures}{ANY}(
+  x,
+  ids,
+  subset_row = NULL,
+  subset_col = NULL,
+  average = FALSE,
+  BPPARAM = SerialParam()
+)
 
 \S4method{sumCountsAcrossFeatures}{SummarizedExperiment}(x, ..., exprs_values = "counts")
 
@@ -27,9 +34,15 @@ For the SummarizedExperiment method, further arguments to be passed to the ANY m
 
 For \code{aggregateAcrossFeatures}, further arguments to be passed to \code{sumCountsAcrossFeatures}.}
 
-\item{ids}{A factor specifying the set to which each feature in \code{x} belongs.
+\item{ids}{A factor of length \code{nrow(x)}, specifying the set to which each feature in \code{x} belongs.
 
 Alternatively, a list of integer or character vectors, where each vector specifies the indices or names of features in a set.}
+
+\item{subset_row}{An integer, logical or character vector specifying the features to use.
+Defaults to all features.}
+
+\item{subset_col}{An integer, logical or character vector specifying the cells to use.
+Defaults to all cells with non-\code{NA} entries of \code{ids}.}
 
 \item{average}{Logical scalar indicating whether the average should be computed instead of the sum.}
 
@@ -79,7 +92,7 @@ as computing the average avoids another round of normalization to account for di
 example_sce <- mockSCE()
 ids <- sample(LETTERS, nrow(example_sce), replace=TRUE)
 out <- sumCountsAcrossFeatures(example_sce, ids)
-dimnames(out)
+str(out)
 }
 \author{
 Aaron Lun

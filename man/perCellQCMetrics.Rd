@@ -5,7 +5,7 @@
 \alias{perCellQCMetrics,ANY-method}
 \alias{perCellQCMetrics,SummarizedExperiment-method}
 \alias{perCellQCMetrics,SingleCellExperiment-method}
-\title{Per-cell quality control metrics}
+\title{Compute per-cell quality control metrics for a count matrix or a \linkS4class{SingleCellExperiment}.}
 \usage{
 perCellQCMetrics(x, ...)
 
@@ -13,7 +13,7 @@ perCellQCMetrics(x, ...)
   x,
   subsets = NULL,
   percent_top = c(50, 100, 200, 500),
-  detection.limit = 0,
+  detection_limit = 0,
   BPPARAM = SerialParam(),
   flatten = TRUE
 )
@@ -46,7 +46,7 @@ used to identify interesting feature subsets such as ERCC spike-in transcripts o
 \item{percent_top}{An integer vector. 
 Each element is treated as a number of top genes to compute the percentage of library size occupied by the most highly expressed genes in each cell.}
 
-\item{detection.limit}{A numeric scalar specifying the lower detection limit for expression.}
+\item{detection_limit}{A numeric scalar specifying the lower detection_limit for expression.}
 
 \item{BPPARAM}{A BiocParallelParam object specifying whether the QC calculations should be parallelized.}
 
@@ -66,7 +66,7 @@ A \linkS4class{DataFrame} of QC statistics where each row corresponds to a colum
 This contains the following fields:
 \itemize{
 \item \code{sum}: numeric, the sum of counts for each cell.
-\item \code{detected}: numeric, the number of observations above \code{detection.limit}.
+\item \code{detected}: numeric, the number of observations above \code{detection_limit}.
 }
 
 If \code{flatten=FALSE}, the DataFrame will contain the additional columns:

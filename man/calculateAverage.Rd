@@ -36,7 +36,8 @@ If \code{NULL}, these are calculated or extracted from \code{x}.}
 
 \item{subset_row}{A vector specifying the subset of rows of \code{object} for which to return a result.}
 
-\item{BPPARAM}{A BiocParallelParam object specifying whether the calculations should be parallelized.}
+\item{BPPARAM}{A BiocParallelParam object specifying whether the calculations should be parallelized.
+Only relevant for parallelized \code{\link{rowSums}(x)}, e.g., for \linkS4class{DelayedMatrix} inputs.}
 
 \item{exprs_values}{A string specifying the assay of \code{x} containing the count matrix.}
 }

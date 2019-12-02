@@ -37,7 +37,8 @@ If \code{FALSE}, the function will count the number of detected features per cel
 
 \item{subset_col}{Logical, integer or character vector indicating which columns (i.e., cells) to use.}
 
-\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.}
+\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.
+Only relevant for parallelized \code{\link{rowSums}(x)}, e.g., for \linkS4class{DelayedMatrix} inputs.}
 
 \item{exprs_values}{String or integer specifying the assay of \code{x} to obtain the count matrix from.}
 }
@@ -45,8 +46,7 @@ If \code{FALSE}, the function will count the number of detected features per cel
 An integer vector containing counts per gene or cell, depending on the provided arguments.
 }
 \description{
-Counting the number of non-zero counts in each row (per feature) or column (per cell),
-without constructing an intermediate logical matrix.
+Counting the number of non-zero counts in each row (per feature) or column (per cell).
 }
 \examples{
 example_sce <- mockSCE()
