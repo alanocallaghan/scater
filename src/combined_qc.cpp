@@ -27,10 +27,10 @@ void compute_cumsum (typename V::iterator it, size_t ngenes, const Rcpp::Integer
     }
 
     std::partial_sort(it, it + std::min(ngenes, size_t(top[ntop-1])), it + ngenes, std::greater<T>());
-    int x=0;
+    size_t x=0;
     T accumulated=0;
 
-    for (auto target_index : top) {
+    for (size_t target_index : top) {
         while (x<target_index && x<ngenes) { // '<' as top contains 1-based indices.
             accumulated+=*(it+x);
             ++x;
@@ -225,12 +225,12 @@ struct per_gene_statistics {
     Rcpp::List yield() {
         return Rcpp::List::create(totals, detected);
     }
-
-    Rcpp::NumericVector totals;
-    Rcpp::NumericVector detected;
 private:
     T limit;
     size_t counter;
+public:
+    Rcpp::NumericVector totals;
+    Rcpp::NumericVector detected;
 };
 
 template <class M>
@@ -260,8 +260,8 @@ Rcpp::RObject feature_qc_internal(Rcpp::RObject input, Rcpp::List cellcon, typen
     
     // Running through the requested stretch of genes.
     for (size_t g=0; g<ngenes; ++g) {
-        mat->get_col(g, holder.begin());
-        all_PGS.fill(holder.begin(), ngenes);
+        mat->get_row(g, holder.begin());
+        all_PGS.fill(holder.begin(), ncells);
         for (size_t cx=0; cx<nccontrols; ++cx) {
             control_PGS[cx].fill(holder.begin(), all_subsets[cx]);
         }
