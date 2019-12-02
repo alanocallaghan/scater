@@ -9,11 +9,11 @@
 #' @param ids A factor specifying the group to which each cell in \code{x} belongs.
 #'
 #' Alternatively, a \linkS4class{DataFrame} of such vectors or factors, in which case each unique combination of levels defines a group. 
-#' @param subgroup_row An integer, logical or character vector specifying the features to use.
+#' @param subset_row An integer, logical or character vector specifying the features to use.
 #' Defaults to all features.
 #' 
 #' For the \linkS4class{SingleCellExperiment} method, this argument will not affect alternative Experiments,
-#' where summation is always performed for all features (or not at all, depending on \code{use_alt_exps}).
+#' where aggregation is always performed for all features (or not at all, depending on \code{use_alt_exps}).
 #' @param subset_col An integer, logical or character vector specifying the cells to use.
 #' Defaults to all cells with non-\code{NA} entries of \code{ids}.
 #' @param exprs_values A string or integer scalar specifying the assay of \code{x} containing the matrix of counts
