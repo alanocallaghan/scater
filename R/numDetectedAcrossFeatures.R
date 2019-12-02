@@ -2,11 +2,9 @@
 #' 
 #' Computes the number of detected expression values (default defined as non-zero counts) for each cell in each group of features.
 #'
-#' @param ids A vector of length \code{nrow(x)}, specifying the group assignment for each feature.
-#' @param subset_row A vector specifying the rows to use.
-#' Defaults to all rows with non-\code{NA} entries of \code{ids}.
-#' @param subset_col A vector specifying the columns to use.
-#' Defaults to all columns.
+#' @param x A numeric matrix of counts containing features in rows and cells in columns.
+#' Alternatively, a \linkS4class{SummarizedExperiment} object containing such a count matrix.
+#' @inheritParams sumCountsAcrossFeatures
 #' @param average Logical scalar indicating whether the proportion of non-zero counts in each group should be computed instead.
 #' @param ... For the generic, further arguments to pass to specific methods.
 #'
@@ -32,30 +30,12 @@
 NULL
 
 #' @importFrom BiocParallel SerialParam bpisup bpstart bpstop
-.nexprs_across_features <- function(x, ids, average=FALSE, subset_row=NULL, subset_col=NULL, ..., BPPARAM=SerialParam()) {
-    if (!bpisup(BPPARAM)) {
-        bpstart(BPPARAM)
-        on.exit(bpstop(BPPARAM))
-    }
-
-    if (!is.null(subset_row)) {
-        ids[!seq_along(ids) %in% .subset2index(subset_row, x)] <- NA
-    }
-    by.ids <- split(seq_along(ids), ids)
-
-    collected <- list()
-    for (j in names(by.ids)) {
-        collected[[j]] <- nexprs(x, subset_row=by.ids[[j]], subset_col=subset_col, ..., BPPARAM=BPPARAM)
-    }
-    output <- do.call(rbind, collected)
-    
-    if (average) {
-        n <- lengths(by.ids)
-        stopifnot(identical(names(n), rownames(output))) # Sanity check.
-        output <- output/n
-    }
-
-    output
+.nexprs_across_features <- function(x, ids, detection_limit=0, 
+    subset_row=NULL, subset_col=NULL, average=FALSE, BPPARAM=SerialParam()) 
+{
+    .sum_across_features(x, ids, subset_row=subset_row, subset_col=subset_col, 
+        average=average, BPPARAM=BPPARAM,
+        modifier=function(x) x > detection_limit)
 } 
 
 #' @export

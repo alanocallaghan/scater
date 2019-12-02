@@ -6,10 +6,17 @@
 #' Alternatively, a \linkS4class{SummarizedExperiment} object containing such a count matrix.
 #'
 #' For \code{aggregateAcrossFeatures}, a SummarizedExperiment containing a count matrix.
-#' @param ids A factor specifying the set to which each feature in \code{x} belongs.
+#' @param ids A factor of length \code{nrow(x)}, specifying the set to which each feature in \code{x} belongs.
 #'
 #' Alternatively, a list of integer or character vectors, where each vector specifies the indices or names of features in a set.
 #' @param average Logical scalar indicating whether the average should be computed instead of the sum.
+#' @param subset_row An integer, logical or character vector specifying the features to use.
+#' Defaults to all features.
+#'
+#' For the \linkS4class{SingleCellExperiment} method, this argument will not affect alternative Experiments,
+#' where summation is always performed for all features (or not at all, depending on \code{use_alt_exps}).
+#' @param subset_col An integer, logical or character vector specifying the cells to use.
+#' Defaults to all cells with non-\code{NA} entries of \code{ids}.
 #' @param exprs_values A string or integer scalar specifying the assay of \code{x} containing the matrix of counts
 #' (or any other expression quantity that can be meaningfully summed).
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether summation should be parallelized.
@@ -59,42 +66,52 @@
 #' example_sce <- mockSCE()
 #' ids <- sample(LETTERS, nrow(example_sce), replace=TRUE)
 #' out <- sumCountsAcrossFeatures(example_sce, ids)
-#' dimnames(out)
+#' str(out)
 NULL
 
-#' @importFrom BiocParallel SerialParam bpmapply
-.sum_counts_across_features <- function(x, ids, average=FALSE, BPPARAM=SerialParam()) {
+#' @importFrom BiocParallel SerialParam 
+.sum_counts_across_features <- function(x, ids, subset_row=NULL, subset_col=NULL, average=FALSE, BPPARAM=SerialParam()) {
+    .sum_across_features(x, ids, subset_row=subset_row, subset_col=subset_col, average=average, BPPARAM=BPPARAM)
+}
+
+#' @importFrom BiocParallel SerialParam bplapply
+.sum_across_features <- function(x, ids, subset_row=NULL, subset_col=NULL, average=FALSE, BPPARAM=SerialParam(), modifier=NULL) {
     if (is.list(ids)) {
         ids <- lapply(ids, .subset2index, target=x, byrow=TRUE)
         runs <- lengths(ids)
         genes <- unlist(ids)
         names <- names(ids)
     } else {
+        if (length(ids)!=nrow(x)) {
+            stop("'ids' should be of length equal to 'nrow(x)'")            
+        }
         ids <- factor(ids)
         genes <- order(ids, na.last=NA)
         runs <- as.integer(table(ids))
         names <- levels(ids)
     }
 
-    assignments <- .assign_jobs_to_workers(ncol(x), BPPARAM)
-    out_list <- bpmapply(start=assignments$start, end=assignments$end, 
-        FUN=.sum_across_rows_internal, 
-        MoreArgs=list(genes=genes, runs=runs, mat=x), 
-        BPPARAM=BPPARAM, SIMPLIFY=FALSE, USE.NAMES=FALSE)
+    if (!is.null(subset_row)) {
+        subset_row <- .subset2index(subset_row, x, byrow=TRUE)
+        discard <- genes %in% subset_row
+        genes <- genes[!discard]
+        lost <- findInterval(which(discard), cumsum(runs), left.open=TRUE)
+        runs <- runs - tabulate(lost+1L, nbins=length(runs))
+    }
+
+    by.core <- .splitColsByWorkers(x, BPPARAM=BPPARAM, subset_col=subset_col)
+    if (!is.null(modifier)) {
+        by.core <- lapply(by.core, modifier)
+    }
+    out_list <- bplapply(by.core, FUN=sum_row_counts, genes=genes, runs=runs, BPPARAM=BPPARAM)
 
     out <- do.call(cbind, out_list)
-    dimnames(out) <- list(names, colnames(x))
+    dimnames(out) <- list(names, colnames(by.core[[1]]))
     if (average) {
         out <- out/runs
     }
 
     out
-}
-
-.sum_across_rows_internal <- function(mat, genes, runs, start, end) 
-# Internal function to drag along the namespace.
-{
-    .Call(cxx_sum_row_counts, mat, genes, runs, start, end)
 }
 
 #' @export
