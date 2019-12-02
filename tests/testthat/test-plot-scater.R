@@ -34,12 +34,12 @@ test_that("plotScater's underlying C++ code works as expected", {
         prop[pmin(top, length(x))]
     }
 
-    out <- .Call(scater:::cxx_top_cumprop, assay(example_sce), 1:50)
+    out <- scater:::top_cumprop(assay(example_sce), 1:50)
     ref <- apply(assay(example_sce), 2, REFFUN, top=1:50)
     colnames(out) <- colnames(ref)
     expect_equal(out, ref)
 
-    out <- .Call(scater:::cxx_top_cumprop, assay(example_sce), 1:20*5)
+    out <- scater:::top_cumprop(assay(example_sce), 1:20*5)
     ref <- apply(assay(example_sce), 2, REFFUN, top=1:20*5)
     colnames(out) <- colnames(ref)
     expect_equal(out, ref)
@@ -47,13 +47,13 @@ test_that("plotScater's underlying C++ code works as expected", {
     # Handles sparse matrices.
     library(Matrix)
     spmat <- as(assay(example_sce), "dgCMatrix")
-    out <- .Call(scater:::cxx_top_cumprop, spmat, 1:100)
+    out <- scater:::top_cumprop(spmat, 1:100)
     ref <- apply(spmat, 2, REFFUN, top=1:100)
     colnames(out) <- colnames(ref)
     expect_equal(out, ref)
 
     # Behaves with silly inputs.
-    out <- .Call(scater:::cxx_top_cumprop, assay(example_sce), integer(0))
+    out <- scater:::top_cumprop(assay(example_sce), integer(0))
     expect_identical(dim(out), c(0L, ncol(example_sce)))
-    expect_error(.Call(scater:::cxx_top_cumprop, assay(example_sce), 5:1), "sorted")
+    expect_error(scater:::top_cumprop(assay(example_sce), 5:1), "sorted")
 })

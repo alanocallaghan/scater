@@ -1,4 +1,4 @@
-#' Per-cell quality control metrics
+#_' Per-cell quality control metrics
 #'
 #' Compute per-cell quality control metrics for a count matrix or a \linkS4class{SingleCellExperiment}.
 #'
@@ -159,7 +159,7 @@ NULL
                 sum=unlist(lapply(bp.out, FUN=function(x) x[[2]][[i]][[1]])),
                 detected=unlist(lapply(bp.out, FUN=function(x) x[[2]][[i]][[2]]))
             )
-            sub.out$percent <- sub.out$sum/full.info$sum
+            sub.out$percent <- sub.out$sum/full.info$sum * 100
             sub.info[[names(subsets)[i]]] <- sub.out
         }
         full.info$subsets <- sub.info

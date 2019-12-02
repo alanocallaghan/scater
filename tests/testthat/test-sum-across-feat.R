@@ -178,7 +178,7 @@ test_that("numDetectedAcrossFeatures handles other matrix classes", {
     ids <- sample(LETTERS[1:6], nrow(thing), replace=TRUE)
 
     ref <- numDetectedAcrossFeatures(thing, ids)
-    expect_equal(rowSums(ref), rowSums(thing > 0))
+    expect_equal(colSums(ref), colSums(thing > 0))
 
     sparse <- as(thing, 'dgCMatrix')
     expect_equal(numDetectedAcrossFeatures(sparse, ids), ref)

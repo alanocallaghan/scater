@@ -91,7 +91,7 @@ NULL
     # Aggregating across cores.
     full.info <- DataFrame(
         mean=unlist(lapply(bp.out, FUN=function(x) x[[1]][[1]])),
-        detected=unlist(lapply(bp.out, FUN=function(x) x[[1]][[2]])),
+        detected=unlist(lapply(bp.out, FUN=function(x) x[[1]][[2]])) * 100,
         row.names=rownames(x)
     )
 
@@ -101,7 +101,7 @@ NULL
         for (i in seq_along(subsets)) {
             sub.out <- DataFrame(
                 mean=unlist(lapply(bp.out, FUN=function(x) x[[2]][[i]][[1]])),
-                detected=unlist(lapply(bp.out, FUN=function(x) x[[2]][[i]][[2]]))
+                detected=unlist(lapply(bp.out, FUN=function(x) x[[2]][[i]][[2]])) * 100
             )
             sub.out$ratio <- sub.out$mean/full.info$mean
             sub.info[[names(subsets)[i]]] <- sub.out
