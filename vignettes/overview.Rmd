@@ -330,7 +330,7 @@ plotExpression(example_sce, rownames(example_sce)[1:6])
 
 Principal components analysis (PCA) is often performed to denoise and compact the data prior to downstream analyses.
 The `runPCA()` function provides a simple wrapper around the base machinery in `r Biocpkg("BiocSingular")` for computing PCs from log-transformed expression values.
-This stores the output in the `reducedDims` slot of the `SingleCellExperiment`, which can be easily retrieved (along with the percfentage of variance explained by each PC) as shown below:
+This stores the output in the `reducedDims` slot of the `SingleCellExperiment`, which can be easily retrieved (along with the percentage of variance explained by each PC) as shown below:
 
 ```{r}
 example_sce <- runPCA(example_sce)
