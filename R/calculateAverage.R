@@ -10,6 +10,7 @@
 #' @param exprs_values A string specifying the assay of \code{x} containing the count matrix.
 #' @param subset_row A vector specifying the subset of rows of \code{object} for which to return a result.
 #' @param BPPARAM A BiocParallelParam object specifying whether the calculations should be parallelized.
+#' Only relevant for parallelized \code{\link{rowSums}(x)}, e.g., for \linkS4class{DelayedMatrix} inputs.
 #' @param ... For the generic, arguments to pass to specific methods.
 #'
 #' For the SummarizedExperiment method, further arguments to pass to the ANY method.
@@ -47,34 +48,19 @@
 #' summary(ave_counts)
 NULL
 
-#' @importFrom BiocParallel SerialParam bpmapply
+#' @importFrom BiocParallel register bpparam SerialParam
+#' @importFrom Matrix rowMeans
 .calculate_average <- function(x, size_factors=NULL, subset_row=NULL, BPPARAM = SerialParam())
 {
     subset_row <- .subset2index(subset_row, x, byrow=TRUE)
     size_factors <- .get_default_sizes(x, size_factors, center_size_factors=TRUE, subset_row=subset_row)
 
-    # Parallelize across *genes* to ensure numerically IDENTICAL results.
-    by_core <- .split_vector_by_workers(subset_row, BPPARAM)
-    for (i in seq_along(by_core)) {
-        by_core[[i]] <- x[by_core[[i]],,drop=FALSE]
-    }
+    # For DelayedArray's parallelized row/colSums.
+    oldbp <- bpparam()
+    register(BPPARAM)
+    on.exit(register(oldbp))
 
-    # Computes the average count, adjusting for size factors or library size.
-    bp.out <- bpmapply(FUN=.compute_averages, by_core,
-        MoreArgs=list(size_factors=size_factors),
-        BPPARAM=BPPARAM, SIMPLIFY=FALSE, USE.NAMES=FALSE)
-
-    ave <- unlist(bp.out)/ncol(x)
-    names(ave) <- rownames(x)[subset_row]
-    ave
-}
-
-.compute_averages <- function(mat, size_factors)
-# A helper function defined in the scater namespace.
-# This avoids the need to reattach scater in bplapply for SnowParam().
-# TODO: replace this with actual C++ code that avoids the problems.
-{
-    .Call(cxx_ave_exprs, mat, list(size_factors), integer(nrow(mat)), seq_len(nrow(mat))-1L)
+    rowMeans(normalizeCounts(x, size_factors, subset_row=subset_row, log=FALSE))
 }
 
 #' @export
