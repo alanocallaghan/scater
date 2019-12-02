@@ -7,26 +7,21 @@
 #'
 #' For \code{runMDS}, a \linkS4class{SingleCellExperiment} object.
 #' @param ncomponents Numeric scalar indicating the number of MDS?g dimensions to obtain.
-#' @param ntop Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param subset_row Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param exprs_values Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.
-#' @param scale Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.
-#' @param transposed Logical scalar, is \code{x} transposed with cells in rows? 
-#' See \code{?"\link{scater-red-dim-args}"} for details.
+#' @inheritParams runPCA
 #' @param ... For the \code{calculateMDS} generic, additional arguments to pass to specific methods.
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
 #'
 #' For \code{runMDS}, additional arguments to pass to \code{calculateMDS}. 
 #' @param method String specifying the type of distance to be computed between cells.
-#' @param altexp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
-#' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
-#' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #'
 #' @return 
 #' For \code{calculateMDS}, a matrix is returned containing the MDS coordinates for each cell (row) and dimension (column).
 #' 
 #' For \code{runMDS}, a modified \code{x} is returned that contains the MDS coordinates in \code{\link{reducedDim}(x, name)}.
+#'
+#' @inheritSection calculatePCA Feature selection
+#' @inheritSection calculatePCA Using reduced dimensions
+#' @inheritSection calculatePCA Using alternative Experiments
 #'
 #' @details 
 #' The function \code{\link{cmdscale}} is used internally to compute the MDS components. 
@@ -36,8 +31,6 @@
 #' \code{\link{cmdscale}}, to perform the underlying calculations.
 #'
 #' \code{\link[scater]{plotMDS}}, to quickly visualize the results.
-#'
-#' \code{?"\link{scater-red-dim-args}"}, for a full description of various options.
 #'
 #' @author Aaron Lun, based on code by Davis McCarthy
 #'

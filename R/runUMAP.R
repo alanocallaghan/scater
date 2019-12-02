@@ -7,11 +7,7 @@
 #'
 #' For \code{runTSNE}, a \linkS4class{SingleCellExperiment} object containing such a matrix.
 #' @param ncomponents Numeric scalar indicating the number of UMAP dimensions to obtain.
-#' @param ntop Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param subset_row Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param exprs_values Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.
-#' @param scale Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.
-#' @param transposed Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.
+#' @inheritParams runPCA 
 #' @param ... For the \code{calculateUMAP} generic, additional arguments to pass to specific methods.
 #' For the ANY method, additional arguments to pass to \code{\link[uwot]{umap}}.
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
@@ -20,13 +16,11 @@
 #' @param pca Integer scalar specifying how many PCs should be used as input into the UMAP algorithm.
 #' By default, no PCA is performed if the input is a dimensionality reduction result.
 #' @param n_neighbors Integer scalar, number of nearest neighbors to identify when constructing the initial graph.
-#' @param external_neighbors Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.
-#' @param BNPARAM A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.
-#' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.
-#' @param altexp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
-#' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
-#' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
+#' @inheritParams runTSNE
+#'
+#' @inheritSection calculatePCA Feature selection
+#' @inheritSection calculatePCA Using reduced dimensions
+#' @inheritSection calculatePCA Using alternative Experiments
 #'
 #' @return 
 #' For \code{calculateUMAP}, a matrix is returned containing the UMAP coordinates for each cell (row) and dimension (column).
@@ -52,8 +46,6 @@
 #' \code{\link[uwot]{umap}}, for the underlying calculations.
 #' 
 #' \code{\link{plotUMAP}}, to quickly visualize the results.
-#'
-#' \code{?"\link{scater-red-dim-args}"}, for a full description of various options.
 #'
 #' @author Aaron Lun
 #'

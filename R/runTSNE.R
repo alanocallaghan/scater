@@ -7,11 +7,7 @@
 #'
 #' For \code{runTSNE}, a \linkS4class{SingleCellExperiment} object.
 #' @param ncomponents Numeric scalar indicating the number of t-SNE dimensions to obtain.
-#' @param ntop Numeric scalar specifying the number of features with the highest variances to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param subset_row Vector specifying the subset of features to use for PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param exprs_values Integer scalar or string indicating which assay of \code{x} contains the expression values, see \code{?"\link{scater-red-dim-args}"}.
-#' @param scale Logical scalar, should the expression values be standardised? See \code{?"\link{scater-red-dim-args}"} for details.
-#' @param transposed Logical scalar, is \code{x} transposed with cells in rows? See \code{?"\link{scater-red-dim-args}"} for details.
+#' @inheritParams runPCA
 #' @param normalize Logical scalar indicating if input values should be scaled for numerical precision, see \code{\link[Rtsne]{normalize_input}}.
 #' @param perplexity Numeric scalar defining the perplexity parameter, see \code{?\link[Rtsne]{Rtsne}} for more details.
 #' @param theta Numeric scalar specifying the approximation accuracy of the Barnes-Hut algorithm, see \code{\link[Rtsne]{Rtsne}} for details.
@@ -24,11 +20,11 @@
 #' @param BNPARAM A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.
 #' @param pca Logical scalar indicating whether a PCA step should be performed inside \code{\link[Rtsne]{Rtsne}}.
-#' @param altexp String or integer scalar specifying an alternative experiment to use to compute the PCA, see \code{?"\link{scater-red-dim-args}"}.
-#' @param dimred String or integer scalar specifying the existing dimensionality reduction results to use, see \code{?"\link{scater-red-dim-args}"}.
-#' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified, see \code{?"\link{scater-red-dim-args}"}.
-#' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #'
+#' @inheritSection calculatePCA Feature selection
+#' @inheritSection calculatePCA Using reduced dimensions
+#' @inheritSection calculatePCA Using alternative Experiments
+#' 
 #' @return 
 #' For \code{calculateTSNE}, a numeric matrix is returned containing the t-SNE coordinates for each cell (row) and dimension (column).
 #' 
@@ -61,8 +57,6 @@
 #' \code{\link[Rtsne]{Rtsne}}, for the underlying calculations.
 #' 
 #' \code{\link{plotTSNE}}, to quickly visualize the results.
-#'
-#' \code{?"\link{scater-red-dim-args}"}, for a full description of various options.
 #'
 #' @author Aaron Lun, based on code by Davis McCarthy
 #'
