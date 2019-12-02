@@ -1,4 +1,4 @@
-#' @useDynLib scater, .registration=TRUE, .fixes="cxx_"
+#' @useDynLib scater, .registration=TRUE
 #' @importFrom Rcpp sourceCpp
 #' @import methods
 NULL
