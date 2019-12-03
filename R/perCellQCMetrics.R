@@ -122,7 +122,7 @@
 #' @name perCellQCMetrics
 NULL
 
-#' @importFrom S4Vectors DataFrame
+#' @importFrom S4Vectors DataFrame make_zero_col_DFrame
 #' @importFrom BiocParallel bpmapply SerialParam
 #' @importClassesFrom S4Vectors DataFrame
 .per_cell_qc_metrics <- function(x, subsets = NULL, percent_top = c(50, 100, 200, 500), 
@@ -153,7 +153,7 @@ NULL
 
     # Collecting subset information.
     if (!is.null(subsets)) {
-        sub.info <- new("DFrame", nrows=ncol(x))
+        sub.info <- make_zero_col_DFrame(ncol(x))
         for (i in seq_along(subsets)) {
             sub.out <- DataFrame(
                 sum=unlist(lapply(bp.out, FUN=function(x) x[[2]][[i]][[1]])),
@@ -186,6 +186,7 @@ setMethod("perCellQCMetrics", "SummarizedExperiment", function(x, ..., exprs_val
 #' @rdname perCellQCMetrics
 #' @importFrom SummarizedExperiment assay
 #' @importFrom SingleCellExperiment altExp altExpNames
+#' @importFrom S4Vectors make_zero_col_DFrame
 #' @importClassesFrom S4Vectors DataFrame
 setMethod("perCellQCMetrics", "SingleCellExperiment", function(x, 
     subsets=NULL, percent_top=c(50, 100, 200, 500), ..., flatten=TRUE,
@@ -213,7 +214,7 @@ setMethod("perCellQCMetrics", "SingleCellExperiment", function(x,
         main$altexps <- do.call(DataFrame, lapply(alt, I))
         names(main$altexps) <- altExpNames(x)[use_altexps]
     } else {
-        main$altexps <- new("DataFrame", nrows=ncol(x)) 
+        main$altexps <- make_zero_col_DFrame(ncol(x))
     }
 
     main$total <- total

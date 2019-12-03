@@ -73,7 +73,7 @@
 #' @name perFeatureQCMetrics
 NULL
 
-#' @importFrom S4Vectors DataFrame
+#' @importFrom S4Vectors DataFrame make_zero_col_DFrame
 #' @importFrom BiocParallel bplapply SerialParam
 #' @importClassesFrom S4Vectors DFrame 
 .per_feature_qc_metrics <- function(x, subsets = NULL, detection_limit = 0, BPPARAM=SerialParam(), flatten=TRUE) {
@@ -97,7 +97,7 @@ NULL
 
     # Collecting subset information.
     if (!is.null(subsets)) {
-        sub.info <- new("DFrame", nrows=nrow(x))
+        sub.info <- make_zero_col_DFrame(nrow(x))
         for (i in seq_along(subsets)) {
             sub.out <- DataFrame(
                 mean=unlist(lapply(bp.out, FUN=function(x) x[[2]][[i]][[1]])),
