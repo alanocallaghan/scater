@@ -36,10 +36,17 @@
 #' }
 #' If \code{size_factors} are supplied, they will override any size factors present in \code{x}.
 #'
+#' @section Centering the size factors:
 #' If \code{center_size_factors=TRUE}, size factors are centred at unity prior to calculation of normalized expression values.
-#' This means that the computed expression values can be interpreted as being on the same scale as log-counts,
-#' and that the value of \code{pseudo_count} can be interpreted as being on the same scale as the counts.
-#' It also ensures that abundances are roughly comparable between features normalized with different sets of size factors.
+#' This ensures that the computed expression values can be interpreted as being on the same scale as original counts.
+#' We can then compare abundances between features normalized with different sets of size factors; the most common use of this fact is in the comparison between spike-in and endogenous abundances when modelling technical noise (see \code{\link[scran]{modelGeneVarWithSpikes}} package for an example).
+#'
+#' More generally, when \code{log=TRUE}, centering of the size factors ensures that the value of \code{pseudo_count} can be interpreted as being on the same scale as the counts, i.e., the pseudo-count can actually be thought of as a \emph{count}.
+#' This is important as it implies that the pseudo-count's impact will diminish as sequencing coverage improves.
+#' Thus, if the size factors are centered, differences between log-normalized expression values will more closely approximate the true log-fold change with increasing coverage, whereas this would not be true of other metrics like log-CPMs with a fixed offset.
+#'
+#' The disadvantage of using centered size factors is that the expression values are not directly comparable across different calls to \code{\link{normalizeCounts}}, typically for multiple batches.
+#' In theory, this is not a problem for metrics like the CPM, but in practice, we have to apply batch correction methods anyway to perform any joint analysis - see \code{\link[batchelor]{multiBatchNorm}} for more details. 
 #'
 #' @section Downsampling instead of scaling:
 #' If \code{downsample=TRUE}, counts for each cell are randomly downsampled according to their size factors prior to log-transformation.
@@ -56,7 +63,7 @@
 #' If expression values are to be compared across multiple calls (e.g., in \code{\link[scran]{modelGeneVarWithSpikes}} or \code{\link[batchelor]{multiBatchNorm}}),
 #' \code{down_target} should be manually set to a constant target value that can be considered a low size factor in every call.
 #'  
-#' @return A matrix-like object of (log-)normalized expression values.
+#' @return A numeric matrix-like object of the same class as \code{x}, containing (log-)normalized expression values.
 #'
 #' @author Aaron Lun
 #'
