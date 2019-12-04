@@ -127,14 +127,54 @@ test_that("isOutlier thresholds are computed correctly with batch specification"
     expect_identical(as.logical(out), as.logical(c(out1, out2)))
 })
 
+set.seed(10041)
+test_that("isOutlier thresholds are computed correctly with sharingness", {
+    vals <- rnorm(1000)
+    batches <- gl(2, length(vals)/2)
+
+    out <- isOutlier(vals, batch=batches, share_medians=TRUE, share_mads=TRUE)
+    ref <- isOutlier(vals)
+    expect_identical(as.logical(out), as.logical(ref))
+    expect_identical(attr(out, "thresholds")[,1], attr(ref, "thresholds"))
+    expect_identical(attr(out, "thresholds")[,2], attr(ref, "thresholds"))
+
+    out <- isOutlier(vals, batch=batches, share_medians=TRUE)
+    common.med <- median(vals)
+    mad1 <- mad(vals[batches==1], center=common.med)
+    mad2 <- mad(vals[batches==2], center=common.med)
+    expect_equivalent(attr(out, "thresholds")[,1], common.med + c(-1, 1) * 3 * mad1)
+    expect_equivalent(attr(out, "thresholds")[,2], common.med + c(-1, 1) * 3 * mad2)
+
+    out <- isOutlier(vals, batch=batches, share_mads=TRUE)
+    med1 <- median(vals[batches==1])
+    med2 <- median(vals[batches==2])
+    common.mad <- median(abs(vals - c(med1, med2)[batches])) * formals(mad)$constant
+    expect_equivalent(attr(out, "thresholds")[,1], med1 + c(-1, 1) * 3 * common.mad)
+    expect_equivalent(attr(out, "thresholds")[,2], med2 + c(-1, 1) * 3 * common.mad)
+})
+
+set.seed(10041)
+test_that("isOutlier thresholds correctly recover missing batches", {
+    vals <- rnorm(1000)
+    batches <- gl(2, length(vals)/2)
+
+    out <- isOutlier(vals, batch=batches, subset=batches==1)
+    ref <- isOutlier(vals[batches==1])
+    expect_identical(attr(out, "thresholds")[,1], attr(ref, "thresholds"))
+    expect_identical(attr(out, "thresholds")[,2], attr(ref, "thresholds"))
+
+    out <- isOutlier(vals, batch=batches, subset=batches==1, share_missing=FALSE)
+    expect_equivalent(out[batches==1], ref)
+    expect_true(all(is.na(out[batches==2])))
+})    
+
 set.seed(1005)
 test_that("isOutlier handles silly inputs correctly", {
-    expect_warning(out <- isOutlier(numeric(0)))
+    out <- isOutlier(numeric(0))
     expect_identical(as.logical(out), logical(0))
-    expect_equal(attr(out, "thresholds"), c(lower=NA_real_, higher=NA_real_))
 
     expect_error(out <- isOutlier(numeric(0), batch=1), "length of 'batch'")
 
-    expect_warning(out <- isOutlier(1:10, subset=integer(0)), "no observations remaining")
+    out <- isOutlier(1:10, subset=integer(0))
     expect_identical(as.logical(out), rep(NA, 10))
 })
