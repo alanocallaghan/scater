@@ -6,8 +6,8 @@ Authors@R: c(
         person("Aaron", "Lun", role = c("aut", "ctb"), email="infinite.monkeys.with.keyboards@gmail.com"),
         person("Quin", "Wills", role=c("aut"), email="qilin@quinwills.net"),
         person("Vladimir", "Kiselev", role=c("ctb"), email="vk6@sanger.ac.uk"))
-Version: 1.14.4
-Date: 2019-11-17
+Version: 1.14.5
+Date: 2019-12-03
 License: GPL-3
 Title: Single-Cell Analysis Toolkit for Gene Expression Data in R
 Description: A collection of tools for doing various analyses of
@@ -59,7 +59,7 @@ biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, No
 LinkingTo: Rcpp, beachmat
 SystemRequirements: C++11
 BuildResaveData: no
-RoxygenNote: 7.0.0
+RoxygenNote: 7.0.2
 NeedsCompilation: yes
 URL: http://bioconductor.org/packages/scater/
 BugReports: https://support.bioconductor.org/

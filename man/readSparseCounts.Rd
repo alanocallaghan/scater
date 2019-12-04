@@ -57,7 +57,7 @@ Note that the distinction between the two parameters is only relevant when \code
 \examples{
 outfile <- tempfile()
 write.table(data.frame(A=1:5, B=0, C=0:4, row.names=letters[1:5]), 
-    file=outfile, col.names=NA, sep="\\t", quote=FALSE)
+    file=outfile, col.names=NA, sep="\t", quote=FALSE)
 
 readSparseCounts(outfile)
 

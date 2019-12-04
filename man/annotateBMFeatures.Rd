@@ -56,7 +56,7 @@ These functions provide convenient wrappers around \pkg{biomaRt} to quickly obta
 \examples{
 \dontrun{
 # Making up Ensembl IDs for demonstration purposes.
-mock_id <- paste0("ENSMUSG", sprintf("%011d", seq_len(1000)))
+mock_id <- paste0("ENSMUSG", sprintf("\%011d", seq_len(1000)))
 anno <- annotateBMFeatures(ids=mock_id)
 }
 }
