@@ -24,3 +24,7 @@
     }
     unname(subset)
 }
+
+.noOpSubset <- function(subset, n) {
+    is.null(subset) || identical(subset, seq_len(n))
+}

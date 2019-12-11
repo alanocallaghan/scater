@@ -18,10 +18,10 @@ NULL
 #' @importFrom BiocParallel bpnworkers
 .splitRowsByWorkers <- function(x, BPPARAM, subset_row=NULL, subset_col=NULL, assignments=NULL) {
     if (bpnworkers(BPPARAM)==1L) {
-        if (!is.null(subset_row)) {
+        if (!.noOpSubset(subset_row, nrow(x))) {
             x <- x[subset_row,,drop=FALSE]
         }
-        if (!is.null(subset_col)) {
+        if (!.noOpSubset(subset_col, ncol(x))) {
             x <- x[,subset_col,drop=FALSE]
         }
 
@@ -33,7 +33,7 @@ NULL
 
         for (i in seq_along(assignments)) {
             current <- x[assignments[[i]],,drop=FALSE]
-            if (!is.null(subset_col)) {
+            if (!.noOpSubset(subset_col, ncol(x))) {
                 current <- current[,subset_col,drop=FALSE]
             }
             assignments[[i]] <- current
@@ -47,10 +47,10 @@ NULL
 #' @importFrom BiocParallel bpnworkers
 .splitColsByWorkers <- function(x, BPPARAM, subset_row=NULL, subset_col=NULL, assignments=NULL) {
     if (bpnworkers(BPPARAM)==1L) {
-        if (!is.null(subset_row)) {
+        if (!.noOpSubset(subset_row, nrow(x))) {
             x <- x[subset_row,,drop=FALSE]
         }
-        if (!is.null(subset_col)) {
+        if (!.noOpSubset(subset_col, ncol(x))) {
             x <- x[,subset_col,drop=FALSE]
         }
 
@@ -62,7 +62,7 @@ NULL
 
         for (i in seq_along(assignments)) {
             current <- x[,assignments[[i]],drop=FALSE]
-            if (!is.null(subset_row)) {
+            if (!.noOpSubset(subset_row, nrow(x))) {
                 current <- current[subset_row,,drop=FALSE]
             }
             assignments[[i]] <- current
