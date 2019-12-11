@@ -114,7 +114,7 @@ NULL
     lost <- is.na(ids)
 
     by.core <- .splitRowsByWorkers(x, BPPARAM=BPPARAM, 
-        subset_row=.subsetToIndexOrNull(subset_row, x, byrow=TRUE),
+        subset_row=subset_row,
         subset_col=if (any(lost)) which(!lost))
 
     if (!is.null(modifier)) { # used by numDetectedAcrossCells.

@@ -24,12 +24,3 @@
     }
     unname(subset)
 }
-
-#' @export
-.subsetToIndexOrNull <- function(subset, target, byrow=TRUE) {
-    if (is.null(subset)) {
-        NULL
-    } else {
-        .subset2index(subset, target, byrow)
-    }
-}

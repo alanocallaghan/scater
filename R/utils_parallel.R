@@ -77,6 +77,10 @@ NULL
 #' @importFrom utils head
 .assignIndicesToWorkers <- function(njobs, BPPARAM, subset=NULL) {
     if (!is.null(subset)) {
+        subset <- as.vector(subset)
+        if (is.logical(subset)) {
+            subset <- which(subset)
+        }
         njobs <- length(subset)
     }
 
