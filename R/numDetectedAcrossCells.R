@@ -38,7 +38,7 @@
 #' @name numDetectedAcrossCells
 NULL
 
-#' @importFrom BiocParallel SerialParam bpstart bpstop bpisup
+#' @importFrom BiocParallel SerialParam 
 #' @importClassesFrom BiocParallel MulticoreParam
 .nexprs_across_cells <- function(x, ids, subset_row=NULL, subset_col=NULL, average=FALSE, 
     detection_limit=0, BPPARAM=SerialParam()) 

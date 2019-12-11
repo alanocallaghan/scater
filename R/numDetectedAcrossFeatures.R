@@ -29,7 +29,7 @@
 #' @name numDetectedAcrossFeatures
 NULL
 
-#' @importFrom BiocParallel SerialParam bpisup bpstart bpstop
+#' @importFrom BiocParallel SerialParam 
 .nexprs_across_features <- function(x, ids, detection_limit=0, 
     subset_row=NULL, subset_col=NULL, average=FALSE, BPPARAM=SerialParam()) 
 {

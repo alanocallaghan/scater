@@ -11,6 +11,7 @@
 #' .assignIndicesToWorkers 
 #' .subset2index
 #' .subsetToIndexOrNull
+#' .bpNotSharedOrUp
 NULL
 
 #' @export
@@ -93,3 +94,8 @@ NULL
 
     output
 }
+
+#' @export
+#' @importClassesFrom BiocParallel MulticoreParam
+#' @importFrom BiocParallel bpisup
+.bpNotSharedOrUp  <- function(BPPARAM) !bpisup(BPPARAM) && !is(BPPARAM, "MulticoreParam")

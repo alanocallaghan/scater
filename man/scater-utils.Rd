@@ -8,6 +8,7 @@
 \alias{.assignIndicesToWorkers}
 \alias{.subset2index}
 \alias{.subsetToIndexOrNull}
+\alias{.bpNotSharedOrUp}
 \title{Developer utilities}
 \description{
 Various utilities for re-use in packages that happen to depend on \pkg{scater}.
