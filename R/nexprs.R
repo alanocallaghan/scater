@@ -12,7 +12,7 @@
 #' @param subset_row Logical, integer or character vector indicating which rows (i.e. features) to use.
 #' @param subset_col Logical, integer or character vector indicating which columns (i.e., cells) to use.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.
-#' Only relevant for parallelized \code{\link{rowSums}(x)}, e.g., for \linkS4class{DelayedMatrix} inputs.
+#' Only relevant when \code{x} is a \linkS4class{DelayedMatrix}.
 #' @param ... For the generic, further arguments to pass to specific methods.
 #'
 #' For the SummarizedExperiment method, further arguments to pass to the ANY method.
@@ -34,8 +34,9 @@
 #'
 NULL
 
-#' @importFrom BiocParallel register bpparam SerialParam
+#' @importFrom BiocParallel SerialParam
 #' @importFrom Matrix rowSums colSums
+#' @importFrom DelayedArray getAutoBPPARAM setAutoBPPARAM
 .nexprs <- function(x, byrow=FALSE, detection_limit=0, subset_row=NULL, subset_col=NULL, BPPARAM=SerialParam()) {
     if (!is.null(subset_row)) {
         x <- x[subset_row,,drop=FALSE]
@@ -45,9 +46,9 @@ NULL
     }
 
     # For DelayedArray's parallelized row/colSums.
-    oldbp <- bpparam()
-    register(BPPARAM)
-    on.exit(register(oldbp))
+    oldbp <- getAutoBPPARAM()
+    setAutoBPPARAM(BPPARAM)
+    on.exit(setAutoBPPARAM(oldbp))
 
     x <- x > detection_limit
     if (byrow) {

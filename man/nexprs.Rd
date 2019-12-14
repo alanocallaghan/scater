@@ -38,7 +38,7 @@ If \code{FALSE}, the function will count the number of detected features per cel
 \item{subset_col}{Logical, integer or character vector indicating which columns (i.e., cells) to use.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.
-Only relevant for parallelized \code{\link{rowSums}(x)}, e.g., for \linkS4class{DelayedMatrix} inputs.}
+Only relevant when \code{x} is a \linkS4class{DelayedMatrix}.}
 
 \item{exprs_values}{String or integer specifying the assay of \code{x} to obtain the count matrix from.}
 }
