@@ -1,5 +1,5 @@
 # tests for feature pre-processing functions.
-# library(scater); library(testthat); source("setup-sce.R"); source("test-sum-across-cells.R")
+# library(scater); library(testthat); source("setup.R"); source("test-sum-across-cells.R")
 
 library(Matrix)
 library(DelayedArray)
@@ -16,8 +16,11 @@ test_that("internal .colsum method works correctly for all types", {
     sparse <- as(thing, 'dgCMatrix')
     expect_equal(scater:::.colsum(sparse, ids), ref)
 
+    oldBP <- getAutoBPPARAM()
+    setAutoBPPARAM(SerialParam())
     delayed <- DelayedArray(thing)
     expect_equal(scater:::.colsum(delayed, ids), ref)
+    setAutoBPPARAM(oldBP)
 })
 
 ##########################################################
