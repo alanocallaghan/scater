@@ -98,6 +98,7 @@ NULL
 #' @importFrom methods is
 #' @importFrom SummarizedExperiment SummarizedExperiment
 #' @importFrom Matrix t 
+#' @importFrom DelayedArray getAutoBPPARAM setAutoBPPARAM
 .sum_across_cells <- function(x, ids, subset_row=NULL, subset_col=NULL, average=FALSE,  BPPARAM=SerialParam(), modifier=NULL) {
     multi <- is(ids, "DataFrame")
     if (multi) {
@@ -120,6 +121,11 @@ NULL
     if (!is.null(modifier)) { # used by numDetectedAcrossCells.
         by.core <- lapply(by.core, modifier)
     }
+
+    # Avoid additional parallelization from DA methods.
+    oldBP <- getAutoBPPARAM()
+    setAutoBPPARAM(SerialParam()) 
+    on.exit(setAutoBPPARAM(oldBP))
 
     sub.ids <- ids[!lost]
     out <- bplapply(by.core, FUN=.colsum, group=sub.ids, BPPARAM=BPPARAM)

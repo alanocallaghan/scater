@@ -50,15 +50,16 @@ NULL
 
 #' @importFrom BiocParallel register bpparam SerialParam
 #' @importFrom Matrix rowMeans
+#' @importFrom DelayedArray getAutoBPPARAM setAutoBPPARAM
 .calculate_average <- function(x, size_factors=NULL, subset_row=NULL, BPPARAM = SerialParam())
 {
     subset_row <- .subset2index(subset_row, x, byrow=TRUE)
     size_factors <- .get_default_sizes(x, size_factors, center_size_factors=TRUE, subset_row=subset_row)
 
     # For DelayedArray's parallelized row/colSums.
-    oldbp <- bpparam()
-    register(BPPARAM)
-    on.exit(register(oldbp))
+    oldbp <- getAutoBPPARAM()
+    setAutoBPPARAM(BPPARAM)
+    on.exit(setAutoBPPARAM(oldbp))
 
     rowMeans(normalizeCounts(x, size_factors, subset_row=subset_row, log=FALSE))
 }
