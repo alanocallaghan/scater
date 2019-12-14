@@ -10,6 +10,8 @@
 #' @param exprs_values String or integer scalar indicating the assay of \code{x} containing the counts.
 #' @param geometric Logical scalar indicating whether the size factor should be defined using the geometric mean.
 #' @param pseudo_count Numeric scalar specifying the pseudo-count to add during log-transformation when \code{geometric=TRUE}.
+#' @param BPPARAM A \linkS4class{BiocParallelParam} object indicating how calculations are to be parallelized.
+#' Only relevant when \code{x} is a \linkS4class{DelayedArray} object.
 #' @param ... For the \code{librarySizeFactors} generic, arguments to pass to specific methods.
 #' For the SummarizedExperiment method, further arguments to pass to the ANY method.
 #'
@@ -51,10 +53,17 @@
 NULL
 
 #' @importFrom Matrix colSums colMeans
-.library_size_factors <- function(x, subset_row=NULL, geometric=FALSE, pseudo_count=1) {
+#' @importFrom BiocParallel SerialParam
+#' @importFrom DelayedArray getAutoBPPARAM setAutoBPPARAM
+.library_size_factors <- function(x, subset_row=NULL, geometric=FALSE, pseudo_count=1, BPPARAM=SerialParam()) {
     if (!is.null(subset_row)) {
        x <- x[.subset2index(subset_row, x, byrow=TRUE),,drop=FALSE]
     }
+
+    oldBP <- getAutoBPPARAM()
+    setAutoBPPARAM(BPPARAM)
+    on.exit(setAutoBPPARAM(oldBP))
+
     if (!geometric) {
         lib_sizes <- colSums(x)
         lib_sizes/mean(lib_sizes)

@@ -9,7 +9,13 @@
 \usage{
 librarySizeFactors(x, ...)
 
-\S4method{librarySizeFactors}{ANY}(x, subset_row = NULL, geometric = FALSE, pseudo_count = 1)
+\S4method{librarySizeFactors}{ANY}(
+  x,
+  subset_row = NULL,
+  geometric = FALSE,
+  pseudo_count = 1,
+  BPPARAM = SerialParam()
+)
 
 \S4method{librarySizeFactors}{SummarizedExperiment}(x, exprs_values = "counts", ...)
 
@@ -31,6 +37,9 @@ For \code{computeLibraryFactors}, further arguments to pass to \code{librarySize
 \item{geometric}{Logical scalar indicating whether the size factor should be defined using the geometric mean.}
 
 \item{pseudo_count}{Numeric scalar specifying the pseudo-count to add during log-transformation when \code{geometric=TRUE}.}
+
+\item{BPPARAM}{A \linkS4class{BiocParallelParam} object indicating how calculations are to be parallelized.
+Only relevant when \code{x} is a \linkS4class{DelayedArray} object.}
 
 \item{exprs_values}{String or integer scalar indicating the assay of \code{x} containing the counts.}
 }
