@@ -7,7 +7,6 @@
 \alias{.splitColsByWorkers}
 \alias{.assignIndicesToWorkers}
 \alias{.subset2index}
-\alias{.subsetToIndexOrNull}
 \alias{.bpNotSharedOrUp}
 \title{Developer utilities}
 \description{

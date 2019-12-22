@@ -10,7 +10,6 @@
 #' .splitColsByWorkers
 #' .assignIndicesToWorkers 
 #' .subset2index
-#' .subsetToIndexOrNull
 #' .bpNotSharedOrUp
 NULL
 

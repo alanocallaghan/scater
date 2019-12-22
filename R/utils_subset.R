@@ -1,3 +1,4 @@
+#' @export
 #' @importFrom BiocGenerics colnames rownames
 .subset2index <- function(subset, target, byrow=TRUE) 
 ## Converts a subsetting vector into a integer equivalent.
