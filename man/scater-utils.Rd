@@ -5,6 +5,7 @@
 \alias{scater-utils}
 \alias{.splitRowsByWorkers}
 \alias{.splitColsByWorkers}
+\alias{.splitVectorByWorkers}
 \alias{.assignIndicesToWorkers}
 \alias{.subset2index}
 \alias{.bpNotSharedOrUp}
