@@ -8,6 +8,7 @@
 #' @docType class
 #' @aliases .splitRowsByWorkers
 #' .splitColsByWorkers
+#' .splitVectorByWorkers
 #' .assignIndicesToWorkers 
 #' .subset2index
 #' .bpNotSharedOrUp
@@ -67,6 +68,24 @@ NULL
             assignments[[i]] <- current
         }
     
+        assignments
+    }
+}
+
+#' @export
+.splitVectorByWorkers <- function(x, BPPARAM, subset=NULL, assignments=NULL) {
+    if (bpnworkers(BPPARAM)==1L) {
+        if (!.noOpSubset(subset, length(x))) {
+            x <- x[subset]
+        }
+        list(x)
+    } else {
+        if (is.null(assignments)) {
+            assignments <- .assignIndicesToWorkers(length(x), BPPARAM, subset=subset)
+        }
+        for (i in seq_along(assignments)) {
+            assignments[[i]] <- x[assignments[[i]]]
+        }
         assignments
     }
 }
