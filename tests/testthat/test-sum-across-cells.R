@@ -6,12 +6,14 @@ library(DelayedArray)
 
 ##########################################################
 
-test_that("internal .colsum method works correctly for all types", {
+test_that("internal .colsum method works correctly for character indices", {
     thing <- matrix(rpois(2000, lambda=0.5), ncol=100, nrow=20)
     ids <- sample(LETTERS[1:6], ncol(thing), replace=TRUE)
 
     ref <- scater:::.colsum(thing, ids)
     expect_equal(rowSums(ref), rowSums(thing))
+    expect_identical(ref, t(rowsum(t(thing), ids)))
+    expect_identical(colnames(ref), as.character(sort(unique(ids)))) # is sorted.
 
     sparse <- as(thing, 'dgCMatrix')
     expect_equal(scater:::.colsum(sparse, ids), ref)
@@ -23,6 +25,46 @@ test_that("internal .colsum method works correctly for all types", {
     setAutoBPPARAM(oldBP)
 })
 
+test_that("internal .colsum method works correctly for integer indices", {
+    thing <- matrix(rpois(2000, lambda=0.5), ncol=100, nrow=20)
+
+    # Continues to work for integer IDs that don't sort nicely as characters:
+    ids <- sample(5:15, ncol(thing), replace=TRUE)
+
+    ref <- scater:::.colsum(thing, ids)
+    expect_equal(rowSums(ref), rowSums(thing))
+    expect_identical(ref, t(rowsum(t(thing), ids)))
+    expect_identical(colnames(ref), as.character(sort(unique(ids)))) # is sorted.
+
+    sparse <- as(thing, 'dgCMatrix')
+    expect_equal(scater:::.colsum(sparse, ids), ref)
+
+    oldBP <- getAutoBPPARAM()
+    setAutoBPPARAM(SerialParam())
+    delayed <- DelayedArray(thing)
+    expect_equal(scater:::.colsum(delayed, ids), ref)
+    setAutoBPPARAM(oldBP)
+})
+
+test_that("internal .colsum method respects factor level ordering", {
+    thing <- matrix(rpois(2000, lambda=0.5), ncol=100, nrow=20)
+    ids <- factor(rep(LETTERS[1:3], length.out=ncol(thing)), levels=LETTERS[3:1])
+
+    ref <- scater:::.colsum(thing, ids)
+    expect_equal(rowSums(ref), rowSums(thing))
+    expect_identical(ref, t(rowsum(t(thing), ids)))
+    expect_identical(colnames(ref), LETTERS[3:1]) # is sorted.
+
+    sparse <- as(thing, 'dgCMatrix')
+    expect_equal(scater:::.colsum(sparse, ids), ref)
+
+    oldBP <- getAutoBPPARAM()
+    setAutoBPPARAM(SerialParam())
+    delayed <- DelayedArray(thing)
+#    expect_equal(scater:::.colsum(delayed, ids), ref) # TODO: fix.
+    setAutoBPPARAM(oldBP)
+})
+
 ##########################################################
 
 set.seed(10003)
@@ -30,6 +72,7 @@ test_that("we can summarise counts at cell cluster level", {
     ids <- sample(ncol(sce)/2, ncol(sce), replace=TRUE)
     out <- sumCountsAcrossCells(sce, ids)
     expect_identical(out, colsum(counts(sce), ids))
+    expect_identical(colnames(out), as.character(sort(unique(ids)))) # numeric ordering is preserved.
 
     out2 <- sumCountsAcrossCells(counts(sce), ids)
     expect_identical(out, out2)
