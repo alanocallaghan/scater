@@ -61,7 +61,7 @@ test_that("internal .colsum method respects factor level ordering", {
     oldBP <- getAutoBPPARAM()
     setAutoBPPARAM(SerialParam())
     delayed <- DelayedArray(thing)
-#    expect_equal(scater:::.colsum(delayed, ids), ref) # TODO: fix.
+    expect_equal(scater:::.colsum(delayed, ids), ref)
     setAutoBPPARAM(oldBP)
 })
 
