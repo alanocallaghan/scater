@@ -19,6 +19,9 @@
 #' @param exprs_values A string or integer scalar specifying the assay of \code{x} containing the matrix of counts
 #' (or any other expression quantity that can be meaningfully summed).
 #' @param average Logical scalar indicating whether the average should be computed instead of the sum.
+#' @param store_number String specifying the field of the output \code{\link{colData}} 
+#' in which to store the number of cells in each group.
+#' Only used if \code{ids} is a DataFrame, and if \code{store_number=NULL}, this information is not stored.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether summation should be parallelized.
 #' @param ... For the generics, further arguments to be passed to specific methods.
 #' 
@@ -89,8 +92,12 @@
 #'      coldata_merge=list(stuff=sum))
 NULL
 
-.sum_counts_across_cells <- function(x, ids, subset_row=NULL, subset_col=NULL, average=FALSE, BPPARAM=SerialParam()) {
-    .sum_across_cells(x=x, ids=ids, subset_row=subset_row, subset_col, average=average, BPPARAM=BPPARAM)
+#' @importFrom BiocParallel SerialParam
+.sum_counts_across_cells <- function(x, ids, subset_row=NULL, subset_col=NULL, 
+    average=FALSE, store_number="ncells", BPPARAM=SerialParam()) 
+{
+    .sum_across_cells(x=x, ids=ids, subset_row=subset_row, subset_col, 
+        average=average, store_number=store_number, BPPARAM=BPPARAM)
 }
 
 #' @importFrom BiocParallel SerialParam bplapply 
@@ -99,7 +106,9 @@ NULL
 #' @importFrom SummarizedExperiment SummarizedExperiment
 #' @importFrom Matrix t 
 #' @importFrom DelayedArray getAutoBPPARAM setAutoBPPARAM
-.sum_across_cells <- function(x, ids, subset_row=NULL, subset_col=NULL, average=FALSE,  BPPARAM=SerialParam(), modifier=NULL) {
+.sum_across_cells <- function(x, ids, subset_row=NULL, subset_col=NULL, 
+    average=FALSE, store_number="ncells", BPPARAM=SerialParam(), modifier=NULL) 
+{
     multi <- is(ids, "DataFrame")
     if (multi) {
         coldata <- ids
@@ -137,9 +146,14 @@ NULL
     }
 
     if (multi) {
-        m <- match(as.integer(colnames(out)), ids)
+        cn <- as.integer(colnames(out))
+        m <- match(cn, ids)
         out <- SummarizedExperiment(list(sum=out), colData=coldata[m,,drop=FALSE])
         colnames(out) <- NULL
+
+        if (!is.null(store_number)) {
+            colData(out)[[store_number]] <- tabulate(ids)[cn]
+        }
     }
 
     out
@@ -147,7 +161,9 @@ NULL
 
 #' @importFrom S4Vectors selfmatch
 .df_to_factor <- function(ids) {
-    x <- selfmatch(ids) 
+    o <- order(ids)
+    x <- selfmatch(ids[o,,drop=FALSE]) 
+    x[o] <- x
     x[Reduce("|", lapply(ids, is.na))] <- NA_integer_
     x
 }

@@ -41,13 +41,13 @@ NULL
 #' @importFrom BiocParallel SerialParam 
 #' @importClassesFrom BiocParallel MulticoreParam
 .nexprs_across_cells <- function(x, ids, subset_row=NULL, subset_col=NULL, average=FALSE, 
-    detection_limit=0, BPPARAM=SerialParam()) 
+    store_number="ncells", detection_limit=0, BPPARAM=SerialParam()) 
 {
     aboveFUN <- function(x) {
         (x > detection_limit) + 0L
     }
     .sum_across_cells(x=x, ids=ids, subset_row=subset_row, subset_col=subset_col, average=average, 
-        BPPARAM=BPPARAM, modifier=aboveFUN)
+        store_number=store_number, BPPARAM=BPPARAM, modifier=aboveFUN)
 } 
 
 #' @export
