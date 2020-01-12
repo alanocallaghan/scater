@@ -1,5 +1,5 @@
 ## Tests for dimensionality reduction plotting functions
-## library(scater); library(testthat); source("setup-sce.R"); source("test-plot-dimred.R")
+## library(scater); library(testthat); source("setup.R"); source("test-plot-dimred.R")
 
 example_sce <- normed 
 
@@ -78,6 +78,18 @@ test_that("we can produce UMAP plots", {
     # Handles multiple components properly.
     set.seed(20)
     P4 <- plotUMAP(example_sce, ncomponents=4)
+    expect_s3_class(P4, "ggplot")
+})
+
+test_that("we can produce NMF plots", {
+    set.seed(100)
+    example_sce <- runNMF(example_sce, ncomponents=4)
+    expect_identical(reducedDimNames(example_sce), "NMF")
+    expect_s3_class(P <- plotNMF(example_sce), "ggplot")
+
+    # Handles multiple components properly.
+    set.seed(20)
+    P4 <- plotNMF(example_sce, ncomponents=4)
     expect_s3_class(P4, "ggplot")
 })
 

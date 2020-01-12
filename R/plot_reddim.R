@@ -14,6 +14,7 @@
 #' \item \code{"TSNE"} for \code{plotTSNE}
 #' \item \code{"DiffusionMap"} for \code{plotDiffusionMap}
 #' \item \code{"MDS"} for \code{"plotMDS"}
+#' \item \code{"NMF"} for \code{"plotNMF"}
 #' \item \code{"UMAP"} for \code{"plotUMAP"}
 #' }
 #' Its only purpose is to streamline workflows to avoid the need to specify the \code{dimred} argument.
@@ -30,6 +31,7 @@
 #' \code{\link{runDiffusionMap}}, 
 #' \code{\link{runTSNE}}, 
 #' \code{\link{runMDS}},
+#' \code{\link{runNMF}},
 #' and \code{\link{runUMAP}},
 #' for the functions that actually perform the calculations.
 #'
@@ -92,6 +94,13 @@ plotDiffusionMap <- function(object, ..., ncomponents=2) {
 #' @export
 plotMDS <- function(object, ..., ncomponents=2) {
     plotReducedDim(object, ncomponents = ncomponents, dimred = "MDS", ...)
+}
+
+#' @rdname plot_reddim
+#' @aliases plotNMF 
+#' @export
+plotNMF <- function(object, ..., ncomponents=2) {
+    plotReducedDim(object, ncomponents = ncomponents, dimred = "NMF", ...)
 }
 
 #' @rdname plot_reddim

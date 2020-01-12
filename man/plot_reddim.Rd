@@ -7,6 +7,7 @@
 \alias{plotUMAP}
 \alias{plotDiffusionMap}
 \alias{plotMDS}
+\alias{plotNMF}
 \alias{plotPCA,SingleCellExperiment-method}
 \alias{plotPCA}
 \title{Plot specific reduced dimensions}
@@ -20,6 +21,8 @@ plotUMAP(object, ..., ncomponents = 2)
 plotDiffusionMap(object, ..., ncomponents = 2)
 
 plotMDS(object, ..., ncomponents = 2)
+
+plotNMF(object, ..., ncomponents = 2)
 
 \S4method{plotPCA}{SingleCellExperiment}(object, ..., ncomponents = 2)
 }
@@ -44,6 +47,7 @@ Each function is a convenient wrapper around \code{\link{plotReducedDim}} that s
 \item \code{"TSNE"} for \code{plotTSNE}
 \item \code{"DiffusionMap"} for \code{plotDiffusionMap}
 \item \code{"MDS"} for \code{"plotMDS"}
+\item \code{"NMF"} for \code{"plotNMF"}
 \item \code{"UMAP"} for \code{"plotUMAP"}
 }
 Its only purpose is to streamline workflows to avoid the need to specify the \code{dimred} argument.
@@ -80,6 +84,7 @@ plotMDS(example_sce)
 \code{\link{runDiffusionMap}}, 
 \code{\link{runTSNE}}, 
 \code{\link{runMDS}},
+\code{\link{runNMF}},
 and \code{\link{runUMAP}},
 for the functions that actually perform the calculations.
 
