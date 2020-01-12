@@ -156,34 +156,40 @@ test_that("Aggregation across cells works correctly with DFs", {
     ref <- sumCountsAcrossCells(sce, ids)
     out <- sumCountsAcrossCells(sce, DataFrame(X=ids))
 
-    expect_identical(sort(colnames(ref)), sort(as.character(out$X)))
-    m <- match(colnames(ref), as.character(out$X))
-    expect_equivalent(ref, assay(out)[,m])
+    expect_identical(colnames(ref), as.character(out$X))
+    expect_equivalent(ref, assay(out))
+    expect_identical(out$ncells, as.integer(table(ids)))
 
     # Two factors.
     extra <- sample(LETTERS[1:3], ncol(sce), replace=TRUE)
     combined <- paste0(ids, "-", extra)
     ref <- sumCountsAcrossCells(sce, combined)
-    out <- sumCountsAcrossCells(sce, DataFrame(X=ids, Y=extra))
+    df <- DataFrame(X=ids, Y=extra)
+    out <- sumCountsAcrossCells(sce, df)
 
     post.combined <- paste0(out$X, "-", out$Y)
     expect_identical(sort(colnames(ref)), sort(post.combined))
     m <- match(colnames(ref), post.combined)
     expect_equivalent(ref, assay(out)[,m])
 
+    expect_identical(order(colData(out)), seq_len(ncol(out))) # output is ordered.
+    expect_identical(out$ncells, as.integer(table(selfmatch(sort(df)))))
+
     ref <- sumCountsAcrossCells(sce, combined, average=TRUE)
-    out <- sumCountsAcrossCells(sce, DataFrame(X=ids, Y=extra), average=TRUE)
+    out <- sumCountsAcrossCells(sce, df, average=TRUE)
     expect_equivalent(ref, assay(out)[,m])
 
     # Handles NAs correctly.
     extra[1] <- NA
     ids[2] <- NA
-    ref <- sumCountsAcrossCells(sce[,-(1:2)], DataFrame(X=ids, Y=extra)[-(1:2),])
-    out <- sumCountsAcrossCells(sce, DataFrame(X=ids, Y=extra))
+    df <- DataFrame(X=ids, Y=extra)
+
+    ref <- sumCountsAcrossCells(sce[,-(1:2)], df[-(1:2),])
+    out <- sumCountsAcrossCells(sce, df)
     expect_equal(assay(ref), assay(out))
     expect_equal(colData(ref), colData(out))
 
-    out2 <- sumCountsAcrossCells(sce, DataFrame(X=ids, Y=extra), subset_col=-(1:2))
+    out2 <- sumCountsAcrossCells(sce, df, subset_col=-(1:2))
     expect_equal(out, out2)
 })
 
