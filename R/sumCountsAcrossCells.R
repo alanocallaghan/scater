@@ -207,16 +207,16 @@ setMethod(".colsum", "DelayedMatrix", function(x, group) {
 #' @export
 #' @rdname sumCountsAcrossCells
 setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., 
-    coldata_merge=NULL, use_exprs_values="counts") 
+    store_number="ncells", coldata_merge=NULL, use_exprs_values="counts") 
 {
-    FUN <- .create_cell_aggregator(ids, use_exprs_values, coldata_merge)
+    FUN <- .create_cell_aggregator(ids, use_exprs_values, coldata_merge, store_number)
     FUN(x, ...)
 })
 
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom methods is
 #' @importFrom SummarizedExperiment assays<- assayNames colData<- colData
-.create_cell_aggregator <- function(ids, use_exprs_values, coldata_merge) {
+.create_cell_aggregator <- function(ids, use_exprs_values, coldata_merge, store_number) {
     multi <- is(ids, "DataFrame")
     if (multi) {
         combos <- ids
@@ -225,6 +225,7 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ...,
 
     force(use_exprs_values)
     force(coldata_merge)
+    force(store_number)
 
     function(y, ..., subset_row=NULL) {
         if (!is.null(subset_row)) {
@@ -249,6 +250,10 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ...,
         if (multi) {
             colData(y) <- cbind(colData(y), combos[m,,drop=FALSE])
             colnames(y) <- NULL
+
+            if (!is.null(store_number)) {
+                colData(y)[[store_number]] <- as.integer(table(ids)[cn])
+            }
         }
 
         y
@@ -286,10 +291,10 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ...,
 #' @rdname sumCountsAcrossCells
 #' @importFrom SingleCellExperiment altExp altExps altExp<- altExps<-
 setMethod("aggregateAcrossCells", "SingleCellExperiment", function(x, ids, 
-    ..., subset_row=NULL, coldata_merge=NULL,
+    ..., subset_row=NULL, coldata_merge=NULL, store_number="ncells",
     use_exprs_values="counts", use_altexps=TRUE)
 {
-    FUN <- .create_cell_aggregator(ids, use_exprs_values, coldata_merge)
+    FUN <- .create_cell_aggregator(ids, use_exprs_values, coldata_merge, store_number)
     y <- FUN(x, ..., subset_row=subset_row)
     use_altexps <- .get_altexps_to_use(x, use_altexps)
     for (i in use_altexps) {

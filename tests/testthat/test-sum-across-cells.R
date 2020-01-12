@@ -248,6 +248,7 @@ test_that("Aggregation across cells works correctly for SCEs with DFs", {
     expect_identical(counts(agg), assay(ref))
     expect_identical(agg$X, ref$X)
     expect_identical(agg$Y, ref$Y)
+    expect_identical(agg$ncells, ref$ncells)
 
     # Same for alternative experiments.
     copy <- sce
@@ -259,6 +260,9 @@ test_that("Aggregation across cells works correctly for SCEs with DFs", {
     expect_identical(counts(altExp(agg, "THING")), assay(ref)*2)
     expect_identical(ref$X, altExp(agg)$X)
     expect_identical(ref$Y, altExp(agg)$Y)
+
+    expect_identical(agg$ncells, ref$ncells)
+    expect_identical(altExp(agg)$ncells, ref$ncells)
 })
 
 set.seed(1000412)

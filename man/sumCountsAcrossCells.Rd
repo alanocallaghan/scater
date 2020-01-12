@@ -29,6 +29,7 @@ aggregateAcrossCells(x, ...)
   x,
   ids,
   ...,
+  store_number = "ncells",
   coldata_merge = NULL,
   use_exprs_values = "counts"
 )
@@ -39,6 +40,7 @@ aggregateAcrossCells(x, ...)
   ...,
   subset_row = NULL,
   coldata_merge = NULL,
+  store_number = "ncells",
   use_exprs_values = "counts",
   use_altexps = TRUE
 )
