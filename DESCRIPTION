@@ -6,8 +6,8 @@ Authors@R: c(
         person("Aaron", "Lun", role = c("aut", "ctb"), email="infinite.monkeys.with.keyboards@gmail.com"),
         person("Quin", "Wills", role=c("aut"), email="qilin@quinwills.net"),
         person("Vladimir", "Kiselev", role=c("ctb"), email="vk6@sanger.ac.uk"))
-Version: 1.15.14
-Date: 2019-01-11
+Version: 1.15.15
+Date: 2019-01-12
 License: GPL-3
 Title: Single-Cell Analysis Toolkit for Gene Expression Data in R
 Description: A collection of tools for doing various analyses of
@@ -45,7 +45,8 @@ Suggests:
     robustbase, 
     rmarkdown, 
     Rtsne, 
-    uwot, 
+    uwot,
+    NMF,
     testthat, 
     pheatmap, 
     Biobase, 
