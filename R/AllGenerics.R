@@ -98,6 +98,10 @@ setGeneric("calculateUMAP", function(x, ...) standardGeneric("calculateUMAP"))
 setGeneric("calculateMDS", function(x, ...) standardGeneric("calculateMDS"))
 
 #' @export
+#' @rdname runNMF
+setGeneric("calculateNMF", function(x, ...) standardGeneric("calculateNMF"))
+
+#' @export
 #' @rdname runDiffusionMap
 setGeneric("calculateDiffusionMap", function(x, ...) standardGeneric("calculateDiffusionMap"))
 

@@ -1,5 +1,5 @@
 # Tests the options in the various reduced dimension functions
-# library(scater); library(testthat); source("setup-sce.R"); source("test-red-dim.R")
+# library(scater); library(testthat); source("setup.R"); source("test-red-dim.R")
 
 #############################################
 # Check the feature selection and scaling work.
@@ -404,6 +404,58 @@ test_that("multi-modal UMAP works as expected", {
 })
 
 #############################################
+# Check NMF.
+
+test_that("runNMF works as expected", {
+    normedX <- runNMF(normed, ncomponents = 3)
+    expect_identical(reducedDimNames(normedX), "NMF")     
+    expect_identical(dim(reducedDim(normedX, "NMF")), c(ncol(normedX), 3L))
+
+    # Testing that various settings work.
+    set.seed(100)
+    normed2 <- runNMF(normed)
+
+    set.seed(100)
+    normed3 <- runNMF(normed, scale=TRUE)
+    expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
+
+    set.seed(100)
+    normed3 <- runNMF(normed, ntop = 100)
+    expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
+
+    set.seed(100)
+    normed3 <- runNMF(normed, exprs_values = "counts")
+    expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
+
+    set.seed(100)
+    normed3 <- runNMF(normed, subset_row = 1:100)
+    expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
+
+    set.seed(100)
+    normed3 <- runNMF(normed, method = "Frobenius")
+    expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
+
+    # Testing out the use of existing reduced dimensions (this should not respond to any feature settings).
+    normedP <- runPCA(normed, ncomponents = 4)
+    reducedDim(normedP, "PCA") <- abs(reducedDim(normedP, "PCA"))
+
+    set.seed(100)
+    normed2 <- runNMF(normedP, dimred="PCA")
+
+    set.seed(100)
+    normed3 <- runNMF(normedP, dimred="PCA", ntop = 20)
+    expect_identical(reducedDim(normed2, "NMF"), reducedDim(normed3, "NMF"))
+
+    set.seed(100)
+    normed3 <- runNMF(normedP, dimred="PCA", scale=TRUE)
+    expect_identical(reducedDim(normed2, "NMF"), reducedDim(normed3, "NMF"))
+
+    set.seed(100)
+    normed3 <- runNMF(normedP, dimred="PCA", subset_row = 1:20)
+    expect_identical(reducedDim(normed2, "NMF"), reducedDim(normed3, "NMF"))
+})
+
+#############################################
 # Check MDS.
 
 test_that("runMDS works as expected", {
@@ -511,6 +563,7 @@ test_that("run* functions work with sparse matrices", {
     expect_error(runPCA(normed), NA)
     expect_error(runPCA(normed, BSPARAM=BiocSingular::IrlbaParam()), NA)
     expect_error(runTSNE(normed), NA)
+    expect_error(runNMF(normed), NA)
     expect_error(runUMAP(normed), NA)
     expect_error(runDiffusionMap(normed), NA)
     expect_error(runMDS(normed), NA)
