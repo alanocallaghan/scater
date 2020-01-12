@@ -77,9 +77,12 @@
 #' Note that the output is still stored in the \code{\link{reducedDims}} of the output SingleCellExperiment.
 #' It is advisable to use a different \code{name} to distinguish this output from the results generated from the main experiment's assay values.
 #' 
-#' @return A SingleCellExperiment object containing the first \code{ncomponents} principal coordinates for each cell.
-#' By default, this is stored in the \code{"PCA"} entry of the \code{\link{reducedDims}}.
-#' The proportion of variance explained by each PC is stored as a numeric vector in the \code{"percentVar"} attribute of the reduced dimension matrix.
+#' @return 
+#' For \code{calculatePCA}, a numeric matrix of coordinates for each cell (row) in each of \code{ncomponents} PCs (column).
+#'
+#' For \code{runPCA}, a SingleCellExperiment object is returned containing this matrix in \code{\link{reducedDims}(..., name)}.
+#'
+#' In both cases, the proportion of variance explained by each PC is stored as a numeric vector in the \code{"percentVar"} attribute of the reduced dimension matrix, and the rotation matrix is stored as the \code{"rotation"} attribute.
 #'
 #' @name runPCA
 #' @seealso 
@@ -120,6 +123,7 @@ NULL
     # Saving the results
     pcs <- pca$x
     attr(pcs, "percentVar") <- percentVar
+    attr(pcs, "rotation") <- pca$rotation
     pcs
 }
 
