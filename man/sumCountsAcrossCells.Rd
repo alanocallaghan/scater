@@ -19,6 +19,7 @@ aggregateAcrossCells(x, ...)
   subset_row = NULL,
   subset_col = NULL,
   average = FALSE,
+  store_number = "ncells",
   BPPARAM = SerialParam()
 )
 
@@ -68,6 +69,10 @@ where aggregation is always performed for all features (or not at all, depending
 Defaults to all cells with non-\code{NA} entries of \code{ids}.}
 
 \item{average}{Logical scalar indicating whether the average should be computed instead of the sum.}
+
+\item{store_number}{String specifying the field of the output \code{\link{colData}} 
+in which to store the number of cells in each group.
+Only used if \code{ids} is a DataFrame, and if \code{store_number=NULL}, this information is not stored.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether summation should be parallelized.}
 

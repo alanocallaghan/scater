@@ -14,6 +14,7 @@ numDetectedAcrossCells(x, ...)
   subset_row = NULL,
   subset_col = NULL,
   average = FALSE,
+  store_number = "ncells",
   detection_limit = 0,
   BPPARAM = SerialParam()
 )
@@ -44,6 +45,10 @@ where aggregation is always performed for all features (or not at all, depending
 Defaults to all cells with non-\code{NA} entries of \code{ids}.}
 
 \item{average}{Logical scalar indicating whether the proportion of non-zero counts in each group should be computed instead.}
+
+\item{store_number}{String specifying the field of the output \code{\link{colData}} 
+in which to store the number of cells in each group.
+Only used if \code{ids} is a DataFrame, and if \code{store_number=NULL}, this information is not stored.}
 
 \item{detection_limit}{Numeric scalar providing the value above which  observations are deemed to be expressed.}
 
