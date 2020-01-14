@@ -432,7 +432,7 @@ test_that("runNMF works as expected", {
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     set.seed(100)
-    normed3 <- runNMF(normed, method = "Frobenius")
+    normed3 <- runNMF(normed, method = "lee")
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     # Testing out the use of existing reduced dimensions (this should not respond to any feature settings).
