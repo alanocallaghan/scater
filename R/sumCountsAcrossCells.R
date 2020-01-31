@@ -292,21 +292,26 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ...,
     rownames(collected) <- final
 
     for (cn in colnames(x)) {
-        if (is.list(coldata_merge)) {
-            if (is.null(FUN <- coldata_merge[[cn]])) {
-                next
-            }
-        } else if (is.null(coldata_merge)) {
-            FUN <- function(x) {
-                uq <- ifelse(length(unique(x))==1, unique(x), NA)
-                if (!any(is.na(uq))) uq else NULL
-            }
+        if (!is.function(coldata_merge)) {
+            FUN <- coldata_merge[[cn]]
         } else {
             FUN <- coldata_merge
         }
 
         grouped <- split(x[[cn]], ids)[final]
-        collected[[cn]] <- unlist(lapply(grouped, FUN))
+
+        if (is.null(FUN)) {
+            uniq <- lapply(grouped, FUN=unique)
+            if (all(lengths(uniq)==1L)) {
+                replacement <- unlist(uniq)
+            } else {
+                replacement <- NULL
+            }
+        } else {
+            replacement <- unlist(lapply(grouped, FUN))
+        }
+
+        collected[[cn]] <- replacement
     }
 
     collected
@@ -336,8 +341,14 @@ setMethod("aggregateAcrossCells", "SingleCellExperiment", function(x, ids,
             use_dimred <- NULL
         }
     } 
+    all.ids <- environment(FUN)$ids 
     for (i in use_dimred) {
-        reducedDim(y, i) <- t(FUN(t(reducedDim(x, i)), average=TRUE))
+        # We re-use sumCountsAcrossCells rather than using something
+        # else like rowsum(), in order to ensure that the order of the
+        # _rows_ here is the same as that in the aggregated `y`.
+        current <- t(reducedDim(x, i))
+        out <- sumCountsAcrossCells(current, all.ids, average=TRUE)
+        reducedDim(y, i) <- t(out)
     }
     reducedDims(y) <- reducedDims(y, withDimnames=FALSE)[use_dimred]
 
