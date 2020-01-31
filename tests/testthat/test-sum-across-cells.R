@@ -298,9 +298,16 @@ test_that("Aggregation across cells works correctly with custom coldata acquisit
     ids <- paste0("CLUSTER_", sample(ncol(sce)/2, ncol(sce), replace=TRUE))
     sce$thing <- seq_len(ncol(sce))
 
-    # Defaults to taking nothing, because none of them are unique.
+    # Defaults to partial NA's.
     alt <- aggregateAcrossCells(sce, ids)
-    expect_equivalent(ncol(colData(alt)), 0L)
+    tab <- table(ids)
+    expect_identical(colnames(alt)[is.na(alt$thing)], names(tab)[tab > 1])
+    expect_equivalent(alt$thing[!is.na(alt$thing)], sce$thing[match(names(tab)[tab==1], ids)])
+
+    # Defaults to a sensible value if we enforce identity within each group.
+    sce$thing2 <- ids
+    alt <- aggregateAcrossCells(sce, ids)
+    expect_equivalent(colnames(alt), alt$thing2)
 
     # Responds to taking the first.
     alt <- aggregateAcrossCells(sce, ids, coldata_merge=function(x) head(x, 1))
@@ -318,14 +325,11 @@ test_that("Aggregation across cells works correctly with custom coldata acquisit
     alt <- aggregateAcrossCells(sce, ids, coldata_merge=list(Cell_Cycle=function(x) paste(x, collapse="")))
     expect_type(alt$Cell_Cycle, "character")
 
-    # Responds to default if we enforce identity within each group.
-    sce$thing <- ids
-    alt <- aggregateAcrossCells(sce, ids)
-    expect_equivalent(colnames(alt), alt$thing)
-
-    sce$thing[1] <- ""
-    alt <- aggregateAcrossCells(sce, ids)
-    expect_equivalent(NULL, alt$thing)
+    # Setting FALSE works corectly.
+    alt <- aggregateAcrossCells(sce, ids, coldata_merge=FALSE)
+    expect_identical(ncol(colData(alt)), 0L)
+    alt <- aggregateAcrossCells(sce, ids, coldata_merge=list(thing=FALSE))
+    expect_identical(alt$thing, NULL)
 })
 
 set.seed(100042)

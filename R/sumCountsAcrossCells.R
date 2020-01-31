@@ -41,6 +41,7 @@
 #' Alternatively, a character vector specifying the names of the results to be aggregated.
 #' @param coldata_merge A named list of functions specifying how each column metadata field should be aggregated.
 #' Each function should be named according to the name of the column in \code{\link{colData}} to which it applies.
+#' Alternatively, a single function can be supplied, see below for more details.
 #'
 #' @return 
 #' For \code{sumCountsAcrossCells} with a factor \code{ids}, a matrix is returned with one column per level of \code{ids}.
@@ -78,9 +79,19 @@
 #' This makes it useful for analyses to obtain a \dQuote{reasonable} aggregated \linkS4class{SummarizedExperiment}.
 #' 
 #' Aggregation of the \code{\link{colData}} is controlled using functions in \code{coldata_merge}.
+#' This can either be:
+#' \itemize{
+#' \item A function that takes a subset of entries for any given column metadata field and returns a single value.
 #' This can be set to, e.g., \code{\link{sum}} or \code{\link{median}} for numeric covariates,
 #' or a function that takes the most abundant level for categorical factors.
-#' By default, for any unspecified field, we set the aggregated value for a group to the value for the first instance of a cell from that group; except if the values are not identical across all cells in the same group, in which case the field is discarded. 
+#' \item A named list of such functions, where each function is applied to the column metadata field after which it is named.
+#' Any field that does not have an entry in \code{coldata_merge} is \dQuote{unspecified} and handled as described below.
+#' A list element can also be set to \code{FALSE}, in which case no aggregation is performed for the corresponding field.
+#' \item \code{NULL}, in which case all fields are considered to be unspecified.
+#' \item \code{FALSE}, in which case no aggregation of column metadata is performed.
+#' }
+#' For any unspecified field, we check if all cells of a group have the same value.
+#' If so, that value is reported, otherwise a \code{NA} is reported for the offending group.
 #'
 #' If \code{x} is a \linkS4class{SingleCellExperiment},
 #' the assay values in the \code{\link{altExps}} are subjected to a similar summation/averaging across cells.
@@ -283,17 +294,24 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ...,
 }
 
 #' @importFrom BiocGenerics match
-#' @importFrom S4Vectors split
+#' @importFrom S4Vectors split 
 .merge_DF_rows <- function(x, ids, final, coldata_merge=NULL) {
     final <- as.character(final)
     ids <- as.character(ids)
-
     collected <- x[match(final, ids),,drop=FALSE] 
     rownames(collected) <- final
+
+    if (isFALSE(coldata_merge)) {
+        return(collected[,0])
+    }
 
     for (cn in colnames(x)) {
         if (!is.function(coldata_merge)) {
             FUN <- coldata_merge[[cn]]
+            if (isFALSE(FUN)) {
+                collected[[cn]] <- NULL
+                next
+            }
         } else {
             FUN <- coldata_merge
         }
@@ -301,17 +319,21 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ...,
         grouped <- split(x[[cn]], ids)[final]
 
         if (is.null(FUN)) {
-            uniq <- lapply(grouped, FUN=unique)
-            if (all(lengths(uniq)==1L)) {
-                replacement <- unlist(uniq)
-            } else {
-                replacement <- NULL
+            # Obtaining a NA of matched type.
+            FUN <- function(x) {
+                if (length(val <- unique(x))==1L) {
+                    val 
+                } else {
+                    val[1][NA]
+                }
             }
-        } else {
-            replacement <- unlist(lapply(grouped, FUN))
         }
 
-        collected[[cn]] <- replacement
+        per.group <- lapply(grouped, FUN)
+        if (length(per.group)>=1L) {
+            # Using 'c' instead of unlist to accommodate Vectors.
+            collected[[cn]] <- do.call(c, per.group)
+        }
     }
 
     collected
