@@ -7,7 +7,7 @@ Authors@R: c(
         person("Quin", "Wills", role=c("aut"), email="qilin@quinwills.net"),
         person("Vladimir", "Kiselev", role=c("ctb"), email="vk6@sanger.ac.uk"))
 Version: 1.15.17
-Date: 2019-01-30
+Date: 2020-01-30
 License: GPL-3
 Title: Single-Cell Analysis Toolkit for Gene Expression Data in R
 Description: A collection of tools for doing various analyses of
