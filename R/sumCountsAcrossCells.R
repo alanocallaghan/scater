@@ -1,6 +1,7 @@
-#' Sum counts across groups of cells
+#' Sum or average counts across groups of cells
 #' 
-#' Sum together expression values (by default, counts) for each group of cells and for each feature.
+#' Sum or average expression values (by default, counts) and aggregate the colData 
+#' for each group of cells and for each feature;
 #'
 #' @param x For \code{sumCountsAcrossCells}, a numeric matrix of counts containing features in rows and cells in columns.
 #' Alternatively, a \linkS4class{SummarizedExperiment} object containing such a count matrix.
@@ -34,7 +35,7 @@
 #' Alternatively, a character vector specifying the names of the alternative experiments to be aggregated.
 #' @param coldata_merge A named list of functions specifying how each column metadata field should be aggregated.
 #' For any unspecified field, metadata is retained for the first instance of a cell from each group in \code{ids}.
-#' If \code{NULL}, the first instance is retained for all fields.
+#' If \code{NULL}, only fields with unique entries for each group will be retained.
 #'
 #' @return 
 #' For \code{sumCountsAcrossCells} with a factor \code{ids}, a count matrix is returned with one column per level of \code{ids}.
@@ -96,7 +97,7 @@ NULL
 .sum_counts_across_cells <- function(x, ids, subset_row=NULL, subset_col=NULL, 
     average=FALSE, store_number="ncells", BPPARAM=SerialParam()) 
 {
-    .sum_across_cells(x=x, ids=ids, subset_row=subset_row, subset_col, 
+    .sum_across_cells(x=x, ids=ids, subset_row=subset_row, subset_col=subset_col, 
         average=average, store_number=store_number, BPPARAM=BPPARAM)
 }
 
@@ -275,7 +276,10 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ...,
                 next
             }
         } else if (is.null(coldata_merge)) {
-            next
+            FUN <- function(x) {
+                uq <- ifelse(length(unique(x))==1, unique(x), NA)
+                if (!any(is.na(uq))) uq else NULL
+            }
         } else {
             FUN <- coldata_merge
         }

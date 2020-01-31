@@ -7,7 +7,7 @@
 \alias{sumCountsAcrossCells,SummarizedExperiment-method}
 \alias{aggregateAcrossCells,SummarizedExperiment-method}
 \alias{aggregateAcrossCells,SingleCellExperiment-method}
-\title{Sum counts across groups of cells}
+\title{Sum or average counts across groups of cells}
 \usage{
 sumCountsAcrossCells(x, ...)
 
@@ -83,7 +83,7 @@ Only used if \code{ids} is a DataFrame, and if \code{store_number=NULL}, this in
 
 \item{coldata_merge}{A named list of functions specifying how each column metadata field should be aggregated.
 For any unspecified field, metadata is retained for the first instance of a cell from each group in \code{ids}.
-If \code{NULL}, the first instance is retained for all fields.}
+If \code{NULL}, only fields with unique entries for each group will be retained.}
 
 \item{use_exprs_values}{A character or integer vector specifying the assay(s) of \code{x} containing count matrices.}
 
@@ -107,7 +107,8 @@ but this behavior can be customized by supplying appropriate functions to \code{
 If \code{ids} is a DataFrame, the combination of levels corresponding to each column is also reported in the column metadata.
 }
 \description{
-Sum together expression values (by default, counts) for each group of cells and for each feature.
+Sum or average expression values (by default, counts) and aggregate the colData 
+for each group of cells and for each feature;
 }
 \details{
 This function provides a convenient method for aggregating counts across multiple columns for each feature.
