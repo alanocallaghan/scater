@@ -11,6 +11,8 @@
     \item Modified isOutlier() so that min_diff= now acts on the log2 scale when log=TRUE.
     Added share_medians=, share_mads= and share_missing= options for sharing information across batches.
     \item Exposed various developer utilities for downstream packages.
+    \item Modified aggregateAcrossCells() to default discard column metadata fields that are not identical within a group.
+    Also include averaged reduced dimension results for each group.
 }}
 
 \section{Changes in version 1.14.0, Bioconductor 3.10 Release (September 2019)}{
