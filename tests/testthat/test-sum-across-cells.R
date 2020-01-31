@@ -212,18 +212,20 @@ test_that("Aggregation across cells works correctly for SCEs", {
     alt3 <- aggregateAcrossCells(sce, ids, use_exprs_values=c("counts", "normcounts"))
     expect_identical(counts(alt), counts(alt3))
     expect_identical(normcounts(alt3), sumCountsAcrossCells(sce, ids, exprs_values="normcounts"))
+})
 
-    # Behaves for alternative experiments.
+set.seed(1000401)
+test_that("Aggregation across cells works correctly with altExps", {
+    ids <- paste0("CLUSTER_", sample(10, ncol(sce), replace=TRUE))
     copy <- sce
     altExp(copy, "THING") <- sce
     counts(altExp(copy)) <- counts(altExp(copy)) * 2
 
     agg <- aggregateAcrossCells(copy, ids)
-    expect_identical(counts(agg), counts(alt))
-    expect_identical(counts(altExp(agg, "THING")), counts(alt)*2)
+    expect_identical(counts(altExp(agg, "THING")), counts(agg)*2)
 
     agg0 <- aggregateAcrossCells(sce, ids, use_altexps=FALSE)
-    expect_identical(counts(agg0), counts(alt))
+    expect_identical(counts(agg0), counts(agg))
     expect_identical(altExpNames(agg0), character(0))
 
     # Subsetting only affects the main experiment.
@@ -234,6 +236,26 @@ test_that("Aggregation across cells works correctly for SCEs", {
     agg3 <- aggregateAcrossCells(copy, ids, average=TRUE)
     expect_identical(counts(agg3), sumCountsAcrossCells(copy, ids, average=TRUE))
     expect_identical(counts(altExp(agg3)), sumCountsAcrossCells(copy, ids, average=TRUE)*2)
+})
+
+set.seed(1000401)
+test_that("Aggregation across cells works correctly with reducedDims", {
+    ids <- paste0("CLUSTER_", sample(20, ncol(sce), replace=TRUE))
+    copy <- sce
+    reducedDim(copy, "PCA") <- t(assay(sce)[1:3,])
+    reducedDim(copy, "TSNE") <- t(assay(sce)[1:10,])
+
+    agg <- aggregateAcrossCells(copy, ids, average=TRUE)
+    expect_identical(reducedDim(agg, "PCA"), t(assay(agg)[1:3,]))
+    expect_identical(reducedDim(agg, "TSNE"), t(assay(agg)[1:10,]))
+
+    agg0 <- aggregateAcrossCells(sce, ids, average=TRUE, use_dimred=FALSE)
+    expect_identical(counts(agg0), counts(agg))
+    expect_identical(reducedDimNames(agg0), character(0))
+
+    # Setting average=FALSE has no effect.
+    agg2 <- aggregateAcrossCells(copy, ids, average=FALSE)
+    expect_identical(reducedDims(agg), reducedDims(agg2))
 })
 
 set.seed(1000411)
@@ -263,6 +285,12 @@ test_that("Aggregation across cells works correctly for SCEs with DFs", {
 
     expect_identical(agg$ncells, ref$ncells)
     expect_identical(altExp(agg)$ncells, ref$ncells)
+
+    # Same for reduced dimensions.
+    copy <- sce
+    reducedDim(copy, "PCA") <- t(assay(sce)[1:3,])
+    agg <- aggregateAcrossCells(copy, combined, average=TRUE)
+    expect_identical(reducedDim(agg, "PCA"), t(assay(agg)[1:3,]))
 })
 
 set.seed(1000412)
@@ -270,9 +298,17 @@ test_that("Aggregation across cells works correctly with custom coldata acquisit
     ids <- paste0("CLUSTER_", sample(ncol(sce)/2, ncol(sce), replace=TRUE))
     sce$thing <- seq_len(ncol(sce))
 
-    # Defaults to taking the first.
+    # Defaults to taking nothing, because none of them are unique.
     alt <- aggregateAcrossCells(sce, ids)
-    expect_equivalent(colData(alt), colData(sce)[match(colnames(sce), ids),])
+    expect_equivalent(ncol(colData(alt)), 0L)
+
+    # Responds to taking the first.
+    alt <- aggregateAcrossCells(sce, ids, coldata_merge=function(x) head(x, 1))
+    expect_equivalent(alt$thing, as.integer(by(sce$thing, ids, head, n=1)))
+    expect_equivalent(alt$Mutation_Status, as.character(
+        by(data.frame(sce$Mutation_Status, stringsAsFactors=FALSE), ids, FUN=head, n=1))
+    )
+    expect_identical(colnames(alt), sort(unique(ids)))
 
     # Responds to taking the sum.
     alt <- aggregateAcrossCells(sce, ids, coldata_merge=list(thing=sum))
@@ -281,6 +317,15 @@ test_that("Aggregation across cells works correctly with custom coldata acquisit
 
     alt <- aggregateAcrossCells(sce, ids, coldata_merge=list(Cell_Cycle=function(x) paste(x, collapse="")))
     expect_type(alt$Cell_Cycle, "character")
+
+    # Responds to default if we enforce identity within each group.
+    sce$thing <- ids
+    alt <- aggregateAcrossCells(sce, ids)
+    expect_equivalent(colnames(alt), alt$thing)
+
+    sce$thing[1] <- ""
+    alt <- aggregateAcrossCells(sce, ids)
+    expect_equivalent(NULL, alt$thing)
 })
 
 set.seed(100042)
