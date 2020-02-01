@@ -193,7 +193,6 @@ NULL
 #' @importFrom methods is
 .has_multi_ids <- function(ids) is(ids, "DataFrame")
 
-#' @importClassesFrom S4Vectors DataFrame
 .process_ids <- function(x, ids, subset_col) {    
     if (.has_multi_ids(ids)) {
         ids <- .df_to_factor(ids)
@@ -262,61 +261,46 @@ setMethod(".colsum", "DelayedMatrix", function(x, group) {
 
 #' @export
 #' @rdname sumCountsAcrossCells
+#' @importFrom S4Vectors DataFrame
+#' @importFrom SummarizedExperiment assay assays<- colData<- colData
 setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., subset_col=NULL,
     store_number="ncells", coldata_merge=NULL, use_exprs_values="counts") 
 {
     new.ids <- .process_ids(x, ids, subset_col)
-    FUN <- .create_cell_aggregator(original.ids=ids, new.ids=new.ids, use_exprs_values=use_exprs_values, 
-        coldata_merge=coldata_merge, store_number=store_number)
-    FUN(x, ...)
-})
+    new.ids.char <- as.character(new.ids) # Avoid re-coercion on every call to the output function.
 
-#' @importFrom S4Vectors DataFrame
-#' @importFrom SummarizedExperiment assay assays<- colData<- colData
-.create_cell_aggregator <- function(original.ids, new.ids, use_exprs_values, coldata_merge, store_number) {
-    force(original.ids)
-    force(new.ids)
-    force(use_exprs_values)
-    force(coldata_merge)
-    force(store_number)
-
-    # Avoid re-coercion on every call to the output function.
-    new.ids.char <- as.character(new.ids)
-
-    function(y, ..., subset_row=NULL) {
-        use_exprs_values <- .use_names_to_integer_indices(use_exprs_values, x=y, 
-            nameFUN=assayNames, msg="use_exprs_values")
-        if (length(use_exprs_values)==0L) {
-            stop("'use_exprs_values' must specify at least one assay")
-        }
-
-        collected <- list()
-        ncells <- NULL
-        for (i in seq_along(use_exprs_values)) {
-            sum.out <- .sum_across_cells(assay(y, i), ids=new.ids, ...)
-            ncells <- sum.out$freq
-            collected[[i]] <- sum.out$mat
-        }
-        names(collected) <- assayNames(y)[use_exprs_values]
-
-        cn <- colnames(collected[[1]])
-        m <- match(cn, new.ids.char)
-        coldata <- .create_coldata(original.ids, mapping=m, freq=ncells, store_number=store_number)
-
-        # Ensure endomorphism by modifying the original object.
-        shell <- y[,m]
-        assays(shell) <- collected
-        new.cd <- .merge_DF_rows(colData(y), ids=new.ids.char, final=cn, mergeFUN=coldata_merge)
-        new.cd <- do.call(DataFrame, c(new.cd, list(row.names=cn))) # need row.names here to guarantee the correct 
-                                                                    # number of rows, even if we remove it later.
-        colData(shell) <- cbind(new.cd, coldata)
-
-        if (.has_multi_ids(original.ids)) {
-            colnames(shell) <- NULL
-        }
-        shell
+    use_exprs_values <- .use_names_to_integer_indices(use_exprs_values, x=x, 
+        nameFUN=assayNames, msg="use_exprs_values")
+    if (length(use_exprs_values)==0L) {
+        stop("'use_exprs_values' must specify at least one assay")
     }
-}
+
+    collected <- list()
+    ncells <- NULL
+    for (i in seq_along(use_exprs_values)) {
+        sum.out <- .sum_across_cells(assay(x, i), ids=new.ids, ...)
+        ncells <- sum.out$freq
+        collected[[i]] <- sum.out$mat
+    }
+    names(collected) <- assayNames(x)[use_exprs_values]
+
+    cn <- colnames(collected[[1]])
+    m <- match(cn, new.ids.char)
+    coldata <- .create_coldata(ids, mapping=m, freq=ncells, store_number=store_number)
+
+    # Ensure endomorphism by modifying the original object.
+    shell <- x[,m]
+    assays(shell) <- collected
+    new.cd <- .merge_DF_rows(colData(x), ids=new.ids.char, final=cn, mergeFUN=coldata_merge)
+    new.cd <- do.call(DataFrame, c(new.cd, list(row.names=cn))) # need row.names here to guarantee the correct 
+                                                                # number of rows, even if we remove it later.
+    colData(shell) <- cbind(new.cd, coldata)
+
+    if (.has_multi_ids(ids)) {
+        colnames(shell) <- NULL
+    }
+    shell
+})
 
 .use_names_to_integer_indices <- function(use, x, nameFUN, msg) {
     if (isTRUE(use)) {
@@ -389,14 +373,19 @@ setMethod("aggregateAcrossCells", "SingleCellExperiment", function(x, ids,
     ..., subset_row=NULL, subset_col=NULL, coldata_merge=NULL, store_number="ncells",
     use_exprs_values="counts", use_altexps=TRUE, use_dimred=TRUE)
 {
-    new.ids <- .process_ids(x, ids, subset_col)
-    FUN <- .create_cell_aggregator(original.ids=ids, new.ids=new.ids, use_exprs_values=use_exprs_values, 
-        coldata_merge=coldata_merge, store_number=store_number)
-    y <- FUN(x, ..., subset_row=subset_row)
+    base.args <- list(x=x, ids=ids, ..., subset_col=subset_col, 
+        coldata_merge=coldata_merge, store_number=store_number, 
+        use_exprs_values=use_exprs_values)
+
+    y <- do.call(callNextMethod, c(base.args, list(subset_row=subset_row)))
 
     use_altexps <- .use_names_to_integer_indices(use_altexps, x=x, nameFUN=altExpNames, msg="use_altexps")
     for (i in use_altexps) {
-        altExp(y, i) <- FUN(altExp(x, i), ...)
+        # Do NOT pass use_altexps and use_dimred, as this
+        # part must work with any SE object.
+        args <- base.args
+        args$x <- altExp(x, i)
+        altExp(y, i) <- do.call(aggregateAcrossCells, args)
     }
     altExps(y) <- altExps(y, withColData=FALSE)[use_altexps]
 
