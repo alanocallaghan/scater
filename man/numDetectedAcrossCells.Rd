@@ -46,9 +46,8 @@ Defaults to all cells with non-\code{NA} entries of \code{ids}.}
 
 \item{average}{Logical scalar indicating whether the proportion of non-zero counts in each group should be computed instead.}
 
-\item{store_number}{String specifying the field of the output \code{\link{colData}} 
-in which to store the number of cells in each group.
-Only used if \code{ids} is a DataFrame, and if \code{store_number=NULL}, this information is not stored.}
+\item{store_number}{String specifying the field of the output \code{\link{colData}} to store the number of cells in each group.
+If \code{NULL}, nothing is stored.}
 
 \item{detection_limit}{Numeric scalar providing the value above which  observations are deemed to be expressed.}
 
@@ -58,12 +57,9 @@ Only used if \code{ids} is a DataFrame, and if \code{store_number=NULL}, this in
 (or any other expression quantity that can be meaningfully summed).}
 }
 \value{
-For \code{numDetectedAcrossCells} with a factor \code{ids}, a count matrix is returned with one column per level of \code{ids}.
-Each entry contains the number of cells in the same group (column) that express a given feature (row).
-Columns are ordered by \code{levels(ids)}.
-
-For \code{numDetectedAcrossCells} with a DataFrame \code{ids}, a SummarizedExperiment is returned containing a similar count matrix in the first assay.
-Each column corresponds to a unique combination of levels in \code{ids} and contains the sum of counts for all cells with that combination.
+A SummarizedExperiment is returned containing a count matrix in the first assay.
+Each column corresponds to group as defined by a unique level or combination of levels in \code{ids}.
+Each entry of the matrix contains the number or proportion of cells with detected expression for a feature and group.
 The identities of the levels for each column are reported in the \code{\link{colData}}.
 }
 \description{

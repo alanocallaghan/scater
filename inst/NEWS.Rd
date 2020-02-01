@@ -4,6 +4,7 @@
 \section{Changes in version 1.16.0, Bioconductor 3.11 Release (March 2019)}{
 \itemize{
     \item Added coldata_merge= argument to aggregateAcrossCells() for custom column metadata aggregation.
+    Also include averaged reduced dimension results for each group.
     \item Added label_format= argument to plotReducedDim() for greater control over the axis labels.
     \item Added geometric= argument to librarySizeFactors() to compute size factors with a geometric mean.
     \item Added the runMultiUMAP() function to perform a combined UMAP on multiple feature sets.
@@ -11,8 +12,8 @@
     \item Modified isOutlier() so that min_diff= now acts on the log2 scale when log=TRUE.
     Added share_medians=, share_mads= and share_missing= options for sharing information across batches.
     \item Exposed various developer utilities for downstream packages.
-    \item Modified aggregateAcrossCells() to default discard column metadata fields that are not identical within a group.
-    Also include averaged reduced dimension results for each group.
+    \item Modified sumCountsAcrossCells() to always return a SummarizedExperiment object, regardless of the class of ids.
+    Return the number of cells used for summation in the colData.
 }}
 
 \section{Changes in version 1.14.0, Bioconductor 3.10 Release (September 2019)}{
