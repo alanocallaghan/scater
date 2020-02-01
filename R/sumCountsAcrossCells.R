@@ -221,10 +221,10 @@ NULL
 #' @rdname sumCountsAcrossCells
 #' @importFrom BiocParallel SerialParam
 setMethod("sumCountsAcrossCells", "ANY", function(x, ids, subset_row=NULL, subset_col=NULL,
-    store_number="ncells", average=FALSE, BPPARAM=SerialParam(), modifier=NULL) 
+    store_number="ncells", average=FALSE, BPPARAM=SerialParam())
 {
     .sum_counts_across_cells(x, ids=ids, subset_row=subset_row, subset_col=subset_col,
-        store_number=store_number, average=average, BPPARAM=BPPARAMi)
+        store_number=store_number, average=average, BPPARAM=BPPARAM)
 })
 
 #' @export
@@ -263,8 +263,8 @@ setMethod(".colsum", "DelayedMatrix", function(x, group) {
 #' @rdname sumCountsAcrossCells
 #' @importFrom S4Vectors DataFrame
 #' @importFrom SummarizedExperiment assay assays<- colData<- colData
-setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., subset_col=NULL,
-    store_number="ncells", coldata_merge=NULL, use_exprs_values="counts") 
+setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., subset_row=NULL, 
+    subset_col=NULL, store_number="ncells", coldata_merge=NULL, use_exprs_values="counts") 
 {
     new.ids <- .process_ids(x, ids, subset_col)
     new.ids.char <- as.character(new.ids) # Avoid re-coercion on every call to the output function.
@@ -278,7 +278,7 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., 
     collected <- list()
     ncells <- NULL
     for (i in seq_along(use_exprs_values)) {
-        sum.out <- .sum_across_cells(assay(x, i), ids=new.ids, ...)
+        sum.out <- .sum_across_cells(assay(x, i), ids=new.ids, ..., subset_row=subset_row)
         ncells <- sum.out$freq
         collected[[i]] <- sum.out$mat
     }
@@ -290,6 +290,9 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., 
 
     # Ensure endomorphism by modifying the original object.
     shell <- x[,m]
+    if (!is.null(subset_row)) {
+        shell <- shell[subset_row,]
+    }
     assays(shell) <- collected
     new.cd <- .merge_DF_rows(colData(x), ids=new.ids.char, final=cn, mergeFUN=coldata_merge)
     new.cd <- do.call(DataFrame, c(new.cd, list(row.names=cn))) # need row.names here to guarantee the correct 
@@ -389,6 +392,7 @@ setMethod("aggregateAcrossCells", "SingleCellExperiment", function(x, ids,
     }
     altExps(y) <- altExps(y, withColData=FALSE)[use_altexps]
 
+    new.ids <- .process_ids(x, ids, subset_col)
     use_dimred <- .use_names_to_integer_indices(use_dimred, x=x, nameFUN=reducedDimNames, msg="use_dimred")
     for (i in use_dimred) {
         # We re-use sumCountsAcrossCells rather than using something
@@ -396,7 +400,7 @@ setMethod("aggregateAcrossCells", "SingleCellExperiment", function(x, ids,
         # _rows_ here is the same as that in the aggregated `y`.
         current <- t(reducedDim(x, i))
         out <- .sum_across_cells(current, ids=new.ids, average=TRUE)
-        reducedDim(y, i) <- t(out)
+        reducedDim(y, i) <- t(out$mat)
     }
     reducedDims(y) <- reducedDims(y, withDimnames=FALSE)[use_dimred]
 
