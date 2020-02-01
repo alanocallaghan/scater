@@ -14,12 +14,9 @@
 #' @inheritParams nexprs
 #' 
 #' @return 
-#' For \code{numDetectedAcrossCells} with a factor \code{ids}, a count matrix is returned with one column per level of \code{ids}.
-#' Each entry contains the number of cells in the same group (column) that express a given feature (row).
-#' Columns are ordered by \code{levels(ids)}.
-#'
-#' For \code{numDetectedAcrossCells} with a DataFrame \code{ids}, a SummarizedExperiment is returned containing a similar count matrix in the first assay.
-#' Each column corresponds to a unique combination of levels in \code{ids} and contains the sum of counts for all cells with that combination.
+#' A SummarizedExperiment is returned containing a count matrix in the first assay.
+#' Each column corresponds to group as defined by a unique level or combination of levels in \code{ids}.
+#' Each entry of the matrix contains the number or proportion of cells with detected expression for a feature and group.
 #' The identities of the levels for each column are reported in the \code{\link{colData}}.
 #'
 #' @author Aaron Lun
@@ -46,7 +43,7 @@ NULL
     aboveFUN <- function(x) {
         (x > detection_limit) + 0L
     }
-    .sum_across_cells(x=x, ids=ids, subset_row=subset_row, subset_col=subset_col, average=average, 
+    .sum_counts_across_cells(x=x, ids=ids, subset_row=subset_row, subset_col=subset_col, average=average, 
         store_number=store_number, BPPARAM=BPPARAM, modifier=aboveFUN)
 } 
 
