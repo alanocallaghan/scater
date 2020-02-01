@@ -71,15 +71,18 @@ set.seed(10003)
 test_that("we can summarise counts at cell cluster level", {
     ids <- sample(ncol(sce)/2, ncol(sce), replace=TRUE)
     out <- sumCountsAcrossCells(sce, ids)
-    expect_identical(out, colsum(counts(sce), ids))
+
+    expect_identical(assay(out), colsum(counts(sce), ids))
     expect_identical(colnames(out), as.character(sort(unique(ids)))) # numeric ordering is preserved.
+    expect_identical(sort(unique(ids)), out$ids)
 
     out2 <- sumCountsAcrossCells(counts(sce), ids)
     expect_identical(out, out2)
 
     # Handles averaging correctly.
     out2 <- sumCountsAcrossCells(sce, ids, average=TRUE)
-    expect_identical(out2, t(t(colsum(counts(sce), ids))/as.integer(table(ids))))
+    expect_identical(assay(out2), t(t(colsum(counts(sce), ids))/as.integer(table(ids))))
+    expect_identical(colData(out2), colData(out))
 
     # exprs_values= works correctly.
     alt <- sce
@@ -90,7 +93,9 @@ test_that("we can summarise counts at cell cluster level", {
     # Respects levels properly.
     fids <- factor(ids, levels=rev(sort(unique(ids))))
     fout <- sumCountsAcrossCells(sce, fids)
-    expect_identical(out, fout[,ncol(fout):1])
+    fout <- fout[,ncol(fout):1]
+    fout$ids <- as.integer(levels(fout$ids))[fout$ids]
+    expect_identical(out, fout)
 
     # Handles NA's correctly.
     ids2 <- sample(LETTERS, ncol(sce), replace=TRUE)
@@ -112,18 +117,18 @@ test_that("by-cell count summarization behaves with other classes", {
     sparsified <- sce
     counts(sparsified) <- as(counts(sparsified), "dgCMatrix")
     spack <- sumCountsAcrossCells(sparsified, ids)
-    expect_equal(ref, as.matrix(spack))
+    expect_identical(ref, spack)
 
     unknown <- sce
     counts(unknown) <- as(counts(unknown), "dgTMatrix")
     spack <- sumCountsAcrossCells(unknown, ids)
-    expect_equivalent(ref, as.matrix(spack))
+    expect_identical(ref, spack)
 
     # Handles DelayedArrays properly.
     delayed <- sce
     counts(delayed) <- DelayedArray(counts(delayed))
     dack <- sumCountsAcrossCells(delayed, ids)
-    expect_equivalent(ref, as.matrix(dack))
+    expect_equivalent(ref, dack)
 })
 
 set.seed(100041)
@@ -157,7 +162,8 @@ test_that("Aggregation across cells works correctly with DFs", {
     out <- sumCountsAcrossCells(sce, DataFrame(X=ids))
 
     expect_identical(colnames(ref), as.character(out$X))
-    expect_equivalent(ref, assay(out))
+    expect_equivalent(assay(ref), assay(out))
+    expect_identical(out$ncells, ref$ncells)
     expect_identical(out$ncells, as.integer(table(ids)))
 
     # Two factors.
@@ -170,14 +176,14 @@ test_that("Aggregation across cells works correctly with DFs", {
     post.combined <- paste0(out$X, "-", out$Y)
     expect_identical(sort(colnames(ref)), sort(post.combined))
     m <- match(colnames(ref), post.combined)
-    expect_equivalent(ref, assay(out)[,m])
+    expect_equivalent(assay(ref), assay(out)[,m])
 
     expect_identical(order(colData(out)), seq_len(ncol(out))) # output is ordered.
     expect_identical(out$ncells, as.integer(table(selfmatch(sort(df)))))
 
     ref <- sumCountsAcrossCells(sce, combined, average=TRUE)
     out <- sumCountsAcrossCells(sce, df, average=TRUE)
-    expect_equivalent(ref, assay(out)[,m])
+    expect_equivalent(assay(ref), assay(out)[,m])
 
     # Handles NAs correctly.
     extra[1] <- NA
@@ -199,9 +205,12 @@ set.seed(100041)
 test_that("Aggregation across cells works correctly for SCEs", {
     ids <- paste0("CLUSTER_", sample(ncol(sce)/2, ncol(sce), replace=TRUE))
     alt <- aggregateAcrossCells(sce, ids)
-
     expect_identical(colnames(alt), sort(unique(ids)))
-    expect_identical(counts(alt), sumCountsAcrossCells(counts(sce), ids))
+
+    ref <- sumCountsAcrossCells(counts(sce), ids)
+    expect_identical(counts(alt), assay(ref))
+    expect_identical(alt$ncells, ref$ncells)
+    expect_identical(alt$ids, ref$ids)
 
     # Behaves in the presence of multiple assays.
     normcounts(sce) <- normalizeCounts(sce, log=FALSE)
@@ -211,7 +220,9 @@ test_that("Aggregation across cells works correctly for SCEs", {
     sce <- logNormCounts(sce, log=FALSE)
     alt3 <- aggregateAcrossCells(sce, ids, use_exprs_values=c("counts", "normcounts"))
     expect_identical(counts(alt), counts(alt3))
-    expect_identical(normcounts(alt3), sumCountsAcrossCells(sce, ids, exprs_values="normcounts"))
+
+    ref <- sumCountsAcrossCells(sce, ids, exprs_values="normcounts")
+    expect_identical(normcounts(alt3), assay(ref))
 })
 
 set.seed(1000401)
@@ -234,8 +245,31 @@ test_that("Aggregation across cells works correctly with altExps", {
 
     # Other arguments are passed down.
     agg3 <- aggregateAcrossCells(copy, ids, average=TRUE)
-    expect_identical(counts(agg3), sumCountsAcrossCells(copy, ids, average=TRUE))
-    expect_identical(counts(altExp(agg3)), sumCountsAcrossCells(copy, ids, average=TRUE)*2)
+    ref <- sumCountsAcrossCells(copy, ids, average=TRUE)
+    expect_identical(counts(agg3), assay(ref))
+    expect_identical(counts(altExp(agg3)), assay(ref)*2)
+
+    # Behaves correctly with NAs.
+    ids2 <- ids
+    failed <- ids2==ids2[1]
+    ids2[failed] <- NA
+    expect_identical(
+        aggregateAcrossCells(copy, ids2, average=TRUE),
+        aggregateAcrossCells(copy[,!failed], ids[!failed], average=TRUE)
+    )
+
+    # Other options work correctly.
+    agg4 <- aggregateAcrossCells(copy, ids, use_altexps=1)
+    expect_identical(altExpNames(agg4), "THING")
+    expect_error(aggregateAcrossCells(copy, ids, use_altexps=10), 'use_altexps')
+    agg5 <- aggregateAcrossCells(copy, ids, use_altexps="THING")
+    expect_identical(altExpNames(agg5), "THING")
+    expect_error(aggregateAcrossCells(copy, ids, use_altexps="WASDA"), 'use_altexps')
+
+    # We get the same behavior for deeply nested alternative experiments.
+    altExp(altExp(copy, "THING"), "BLAH") <- sce[1:10,]
+    agg6 <- aggregateAcrossCells(copy, ids)
+    expect_identical(assay(altExp(altExp(agg6))), assay(agg6)[1:10,])
 })
 
 set.seed(1000401)
@@ -253,9 +287,26 @@ test_that("Aggregation across cells works correctly with reducedDims", {
     expect_identical(counts(agg0), counts(agg))
     expect_identical(reducedDimNames(agg0), character(0))
 
+    # Behaves with NAs.
+    ids2 <- ids
+    failed <- ids2==ids2[1]
+    ids2[failed] <- NA
+    expect_identical(
+        aggregateAcrossCells(copy, ids2, average=TRUE),
+        aggregateAcrossCells(copy[,!failed], ids[!failed], average=TRUE)
+    )
+
+    # Other options work correctly.
+    agg1 <- aggregateAcrossCells(copy, ids, use_dimred=1)
+    expect_identical(reducedDimNames(agg1), "PCA")
+    expect_error(aggregateAcrossCells(copy, ids, use_dimred=10), 'use_dimred')
+    agg2 <- aggregateAcrossCells(copy, ids, use_dimred="TSNE")
+    expect_identical(reducedDimNames(agg2), "TSNE")
+    expect_error(aggregateAcrossCells(copy, ids, use_dimred="WHEE"), 'use_dimred')
+
     # Setting average=FALSE has no effect.
-    agg2 <- aggregateAcrossCells(copy, ids, average=FALSE)
-    expect_identical(reducedDims(agg), reducedDims(agg2))
+    agg3 <- aggregateAcrossCells(copy, ids, average=FALSE)
+    expect_identical(reducedDims(agg), reducedDims(agg3))
 })
 
 set.seed(1000411)
@@ -327,7 +378,7 @@ test_that("Aggregation across cells works correctly with custom coldata acquisit
 
     # Setting FALSE works corectly.
     alt <- aggregateAcrossCells(sce, ids, coldata_merge=FALSE)
-    expect_identical(ncol(colData(alt)), 0L)
+    expect_identical(colnames(colData(alt)), c("ids", "ncells"))
     alt <- aggregateAcrossCells(sce, ids, coldata_merge=list(thing=FALSE))
     expect_identical(alt$thing, NULL)
 })
@@ -337,7 +388,11 @@ test_that("Aggregation across cells works correctly for SEs", {
     ids <- paste0("CLUSTER_", sample(ncol(sce)/2, ncol(sce), replace=TRUE))
     alt <- aggregateAcrossCells(sce, ids)
     expect_identical(colnames(alt), sort(unique(ids)))
-    expect_identical(counts(alt), sumCountsAcrossCells(counts(sce), ids))
+
+    ref <- sumCountsAcrossCells(counts(sce), ids)
+    expect_identical(counts(alt), assay(ref))
+    expect_identical(alt$ids, ref$ids)
+    expect_identical(alt$ncells, ref$ncells)
 })
 
 ##########################################################
@@ -345,10 +400,11 @@ test_that("Aggregation across cells works correctly for SEs", {
 test_that("numDetectedAcrossCells works as expected", {
     ids <- sample(LETTERS[1:5], ncol(sce), replace=TRUE)
 
-    expect_equal(numDetectedAcrossCells(counts(sce), ids),
-        colsum((counts(sce) > 0)+0, ids))
-    expect_identical(numDetectedAcrossCells(counts(sce), ids, average=TRUE),
-        t(t(colsum((counts(sce) > 0)+0, ids))/as.integer(table(ids))))
+    out <- numDetectedAcrossCells(counts(sce), ids)
+    expect_equal(assay(out), colsum((counts(sce) > 0)+0, ids))
+    expect_identical(out$ids, colnames(out))
+    out <- numDetectedAcrossCells(counts(sce), ids, average=TRUE)
+    expect_identical(assay(out), t(t(colsum((counts(sce) > 0)+0, ids))/as.integer(table(ids))))
 
     # Checking that it works direclty with SCEs.
     expect_equal(numDetectedAcrossCells(counts(sce), ids),
@@ -379,7 +435,7 @@ test_that("numDetectedAcrossCells handles other matrix classes", {
     ids <- sample(LETTERS[1:6], ncol(thing), replace=TRUE)
 
     ref <- numDetectedAcrossCells(thing, ids)
-    expect_equal(rowSums(ref), rowSums(thing > 0))
+    expect_equal(rowSums(assay(ref)), rowSums(thing > 0)) # basic sanity check.
 
     sparse <- as(thing, 'dgCMatrix')
     expect_equal(numDetectedAcrossCells(sparse, ids), ref)
