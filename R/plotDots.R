@@ -55,6 +55,7 @@
 #' @export
 #' @importFrom ggplot2 ggplot aes_string geom_point
 #' scale_size scale_color_gradient theme element_line element_rect
+#' @importFrom SummarizedExperiment assay
 plotDots <- function(object, features, group=NULL, exprs_values="logcounts", detection_limit=0,
     low_color="white", high_color="red", max_ave=NULL, max_detected=NULL,
     other_fields=list(), by_exprs_values=exprs_values)
@@ -66,10 +67,10 @@ plotDots <- function(object, features, group=NULL, exprs_values="logcounts", det
     }
 
     group <- factor(group)
-    num <- numDetectedAcrossCells(object, ids=group, subset_row=features,
-        exprs_values=exprs_values, average=TRUE, detection_limit=detection_limit)
-    ave <- sumCountsAcrossCells(object, ids=group, subset_row=features,
-        exprs_values=exprs_values, average=TRUE)
+    num <- assay(numDetectedAcrossCells(object, ids=group, subset_row=features,
+        exprs_values=exprs_values, average=TRUE, detection_limit=detection_limit))
+    ave <- assay(sumCountsAcrossCells(object, ids=group, subset_row=features,
+        exprs_values=exprs_values, average=TRUE))
 
     # Creating a long-form table.
     evals_long <- data.frame(
