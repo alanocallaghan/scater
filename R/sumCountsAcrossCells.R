@@ -33,11 +33,9 @@
 #' For \code{aggregateAcrossCells}, further arguments to be passed to \code{sumCountsAcrossCells}.
 #' @param use_exprs_values A character or integer vector specifying the assay(s) of \code{x} containing count matrices.
 #' @param use_altexps Logical scalar indicating whether aggregation should be performed for alternative experiments in \code{x}.
-#'
-#' Alternatively, a character vector specifying the names of the alternative experiments to be aggregated.
+#' Alternatively, a character or integer vector specifying the alternative experiments to be aggregated.
 #' @param use_dimred Logical scalar indicating whether aggregation should be performed for dimensionality reduction results in \code{x}.
-#'
-#' Alternatively, a character vector specifying the names of the results to be aggregated.
+#' Alternatively, a character or integer vector specifying the dimensionality reduction results to be aggregated.
 #' @param coldata_merge A named list of functions specifying how each column metadata field should be aggregated.
 #' Each function should be named according to the name of the column in \code{\link{colData}} to which it applies.
 #' Alternatively, a single function can be supplied, see below for more details.
@@ -72,7 +70,8 @@
 #' @section Aggregation of additional metadata:
 #' The \code{aggregateAcrossCells} sums the assay values in \code{x} using \code{sumCountsAcrossCells}
 #' while also aggregating metadata across cells in a sensible manner.
-#' This makes it useful for analyses to obtain a \dQuote{reasonable} aggregated \linkS4class{SummarizedExperiment}.
+#' This makes it useful for obtaining an aggregated \linkS4class{SummarizedExperiment} during an analysis session;
+#' in contrast, \code{sumCountsAcrossCells} is more lightweight and is better for use inside other functions.
 #' 
 #' Aggregation of the \code{\link{colData}} is controlled using functions in \code{coldata_merge}.
 #' This can either be:
@@ -91,10 +90,14 @@
 #'
 #' If \code{x} is a \linkS4class{SingleCellExperiment},
 #' the assay values in the \code{\link{altExps}} are subjected to a similar summation/averaging across cells.
-#' This uses the same arguments that were used for the main experiment's assay values.
-#' Values in the \code{\link{reducedDims}} are also averaged across cells, regardless of the value of \code{average}.
-#' Users can tune the behavior of the function for these additional fields with \code{use_altexps} and \code{use_dimred}.
+#' This uses the same arguments that were used for the main experiment.
+#' Values in the \code{\link{reducedDims}} are also averaged across cells (regardless of the value of \code{average}).
 #'
+#' Users can tune the behavior of the function for these additional fields with \code{use_altexps} and \code{use_dimred}.
+#' Note that if the alternative experiments themselves are \linkS4class{SingleCellExperiments},
+#' any further nested alternative experiment or reduced dimensions will always be aggregated
+#' regardless of the value of \code{use_altexps} or \code{use_dimred}.
+#' 
 #' If \code{ids} is a DataFrame, the combination of levels corresponding to each column is also reported in the column metadata.
 #' Otherwise, the level corresponding to each column is captured in the column names.
 #'
