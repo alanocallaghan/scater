@@ -6,7 +6,7 @@ author:
   - EMBL European Bioinformatics Institute
 - name: Aaron Lun
   email: infinite.monkeys.with.keyboards@gmail.com
-date: "Revised: November 2, 2019"
+date: "Revised: February 1, 2020"
 package: scater
 output:
   BiocStyle::html_document:
@@ -290,6 +290,43 @@ Of course, users can construct any arbitrary matrix of the same dimensions as th
 assay(example_sce, "normed") <- normalizeCounts(example_sce, 
     size_factors=runif(ncol(example_sce)), pseudo_count=1.5)
 ```
+
+## Utilities for aggregation
+
+The `aggregateAcrossCells()` function is helpful for aggregating expression values across groups of cells.
+For example, we might wish to sum together counts for all cells in the same cluster,
+possibly to use as a summary statistic for downstream analyses (e.g., for differential expression with `r Biocpkg("edgeR")`).
+This will also perform the courtesy of sensibly aggregating the column metadata for downstream use.
+
+```{r}
+agg_sce <- aggregateAcrossCells(example_sce, ids=example_sce$level1class)
+head(assay(agg_sce))
+colData(agg_sce)[,c("ids", "ncells")]
+```
+
+It is similarly possible to sum across multiple factors, as shown below for the cell type and the tissue of origin.
+This yields one column per combination of cell type and tissue,
+which allows us to conveniently perform downstream analyses with both factors.
+
+```{r}
+agg_sce <- aggregateAcrossCells(example_sce, 
+    ids=colData(example_sce)[,c("level1class", "tissue")])
+head(assay(agg_sce))
+colData(agg_sce)[,c("level1class", "tissue", "ncells")]
+```
+
+Summation across rows may occasionally be useful for obtaining a measure of the activity of a gene set, e.g., in a pathway.
+Given a list of gene sets, we can use the `sumCountsAcrossFeatures()` function to aggregate expression values across features.
+This is usually best done by averaging the log-expression values as shown below.
+
+```{r}
+agg_feat <- sumCountsAcrossFeatures(example_sce,
+    ids=list(GeneSet1=1:10, GeneSet2=11:50, GeneSet3=1:100),
+    average=TRUE, exprs_values="logcounts")
+agg_feat[,1:10]
+```
+
+Similar functions are available to compute the number or proportion of cells with detectable expression in each group.
 
 ## Visualizing expression values
 
