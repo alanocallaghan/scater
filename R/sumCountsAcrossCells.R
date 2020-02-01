@@ -94,7 +94,7 @@
 #' Values in the \code{\link{reducedDims}} are also averaged across cells (regardless of the value of \code{average}).
 #'
 #' Users can tune the behavior of the function for these additional fields with \code{use_altexps} and \code{use_dimred}.
-#' Note that if the alternative experiments themselves are \linkS4class{SingleCellExperiments},
+#' Note that if the alternative experiments themselves are \linkS4class{SingleCellExperiment}s,
 #' any further nested alternative experiment or reduced dimensions will always be aggregated
 #' regardless of the value of \code{use_altexps} or \code{use_dimred}.
 #' 
