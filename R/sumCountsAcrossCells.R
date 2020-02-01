@@ -125,26 +125,39 @@
 NULL
 
 #' @importFrom BiocParallel SerialParam 
+#' @importFrom SummarizedExperiment SummarizedExperiment
 .sum_counts_across_cells <- function(x, ids, subset_row=NULL, subset_col=NULL,
-    store_number="ncells", average=FALSE, BPPARAM=SerialParam(), modifier=NULL) 
+    store_number="ncells", average=FALSE, BPPARAM=SerialParam(), raw=FALSE, modifier=NULL) 
 {
-    new.ids <- .process_ids(ids, subset_col)
+    new.ids <- .process_ids(x, ids, subset_col)
     sum.out <- .sum_across_cells(x, ids=new.ids, subset_row=subset_row,
         average=average, BPPARAM=BPPARAM, modifier=modifier)
-    .create_se(original.ids=ids, new.ids=new.ids, mat=sum.out$mat,
+
+    mat <- sum.out$mat 
+    mapping <- match(colnames(mat), as.character(new.ids))
+    coldata <- .create_coldata(original.ids=ids, mapping=mapping, 
         freq=sum.out$freq, store_number=store_number)
+
+    if (.has_multi_ids(ids)) {
+        colnames(mat) <- NULL
+    }
+    output <- list(mat)
+    names(output) <- if(average) {
+        "average" 
+    } else { 
+        "sum" 
+    }
+    SummarizedExperiment(output, colData=coldata)
 }
 
 #' @importFrom Matrix t 
-#' @importFrom methods is
 #' @importFrom DelayedArray getAutoBPPARAM setAutoBPPARAM
 #' @importFrom BiocParallel SerialParam bplapply 
 .sum_across_cells <- function(x, ids, subset_row=NULL, average=FALSE, BPPARAM=SerialParam(), modifier=NULL) {
-    lost <- is.na(ids.out$ids)
-
+    lost <- is.na(ids)
+    subset_col <- if (any(lost)) which(!lost)
     by.core <- .splitRowsByWorkers(x, BPPARAM=BPPARAM, 
-        subset_row=subset_row,
-        subset_col=if (any(lost)) which(!lost))
+        subset_row=subset_row, subset_col=subset_col)
 
     if (!is.null(modifier)) { # used by numDetectedAcrossCells.
         by.core <- lapply(by.core, modifier)
@@ -177,10 +190,11 @@ NULL
     x
 }
 
+#' @importFrom methods is
 .has_multi_ids <- function(ids) is(ids, "DataFrame")
 
 #' @importClassesFrom S4Vectors DataFrame
-.process_ids <- function(ids, subset_col) {    
+.process_ids <- function(x, ids, subset_col) {    
     if (.has_multi_ids(ids)) {
         ids <- .df_to_factor(ids)
     } 
@@ -194,22 +208,14 @@ NULL
 }
 
 #' @importFrom S4Vectors DataFrame
-#' @importFrom SummarizedExperiment SummarizedExperiment
-.create_se <- function(original.ids, new.ids, mat, freq, store_number) {
-    cn <- colnames(mat)
-    m <- match(cn, as.character(new.ids))
-
+.create_coldata <- function(original.ids, mapping, freq, store_number) {
     if (.has_multi_ids(original.ids)) {
-        coldata <- original.ids[m,,drop=FALSE]
-        colnames(mat) <- NULL
+        coldata <- original.ids[mapping,,drop=FALSE]
     } else {
-        coldata <- DataFrame(ids=original.ids[m])
+        coldata <- DataFrame(ids=original.ids[mapping])
     }
     coldata[[store_number]] <- freq
-
-    output <- list(mat)
-    names(output) <- if(average) "average" else "sum"
-    SummarizedExperiment(output, colData=coldata)
+    coldata
 }
 
 #' @export
@@ -256,80 +262,97 @@ setMethod(".colsum", "DelayedMatrix", function(x, group) {
 
 #' @export
 #' @rdname sumCountsAcrossCells
-setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., 
+setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., subset_col=NULL,
     store_number="ncells", coldata_merge=NULL, use_exprs_values="counts") 
 {
-    FUN <- .create_cell_aggregator(ids, use_exprs_values, coldata_merge, store_number)
+    new.ids <- .process_ids(x, ids, subset_col)
+    FUN <- .create_cell_aggregator(original.ids=ids, new.ids=new.ids, use_exprs_values=use_exprs_values, 
+        coldata_merge=coldata_merge, store_number=store_number)
     FUN(x, ...)
 })
 
-#' @importClassesFrom S4Vectors DataFrame
-#' @importFrom methods is
-#' @importFrom SummarizedExperiment assays<- assayNames colData<- colData
-.create_cell_aggregator <- function(ids, use_exprs_values, coldata_merge, store_number) {
-    multi <- is(ids, "DataFrame")
-    if (multi) {
-        combos <- ids
-        ids <- .df_to_factor(ids)
-    } 
-
+#' @importFrom S4Vectors DataFrame
+#' @importFrom SummarizedExperiment assay assays<- colData<- colData
+.create_cell_aggregator <- function(original.ids, new.ids, use_exprs_values, coldata_merge, store_number) {
+    force(original.ids)
+    force(new.ids)
     force(use_exprs_values)
     force(coldata_merge)
     force(store_number)
 
+    # Avoid re-coercion on every call to the output function.
+    new.ids.char <- as.character(new.ids)
+
     function(y, ..., subset_row=NULL) {
-        if (!is.null(subset_row)) {
-            y <- y[subset_row,]
+        use_exprs_values <- .use_names_to_integer_indices(use_exprs_values, x=y, 
+            nameFUN=assayNames, msg="use_exprs_values")
+        if (length(use_exprs_values)==0L) {
+            stop("'use_exprs_values' must specify at least one assay")
         }
 
         collected <- list()
+        ncells <- NULL
         for (i in seq_along(use_exprs_values)) {
-            collected[[i]] <- sumCountsAcrossCells(y, ids=ids, ..., exprs_values=use_exprs_values[i])
+            sum.out <- .sum_across_cells(assay(y, i), ids=new.ids, ...)
+            ncells <- sum.out$freq
+            collected[[i]] <- sum.out$mat
         }
-        names(collected) <- .choose_assay_names(x, use_exprs_values)
+        names(collected) <- assayNames(y)[use_exprs_values]
 
         cn <- colnames(collected[[1]])
-        ids <- as.character(ids)
-        new.cd <- .merge_DF_rows(colData(y), ids, cn, coldata_merge)
+        m <- match(cn, new.ids.char)
+        coldata <- .create_coldata(original.ids, mapping=m, freq=ncells, store_number=store_number)
 
-        m <- match(cn, ids) 
-        y <- y[,m]
-        assays(y) <- collected
-        colData(y) <- new.cd # implicitly resets column names.
+        # Ensure endomorphism by modifying the original object.
+        shell <- y[,m]
+        assays(shell) <- collected
+        new.cd <- .merge_DF_rows(colData(y), ids=new.ids.char, final=cn, mergeFUN=coldata_merge)
+        new.cd <- do.call(DataFrame, c(new.cd, list(row.names=cn))) # need row.names here to guarantee the correct 
+                                                                    # number of rows, even if we remove it later.
+        colData(shell) <- cbind(new.cd, coldata)
 
-        if (multi) {
-            colData(y) <- cbind(colData(y), combos[m,,drop=FALSE])
-            colnames(y) <- NULL
+        if (.has_multi_ids(original.ids)) {
+            colnames(shell) <- NULL
         }
-        if (!is.null(store_number)) {
-            colData(y)[[store_number]] <- as.integer(table(ids)[cn])
-        }
-
-        y
+        shell
     }
+}
+
+.use_names_to_integer_indices <- function(use, x, nameFUN, msg) {
+    if (isTRUE(use)) {
+        use <- seq_along(nameFUN(x))
+    } else if (isFALSE(use)) {
+        use <- integer(0)
+    } else if (is.character(use)) {
+        use <- match(use, nameFUN(x))
+        if (any(is.na(use))) {
+            stop(sprintf("'%s' contains invalid values", msg))
+        }
+    } else {
+        if (any(use < 1L) || any(use > length(nameFUN(x)))) {
+            stop(sprintf("'%s' contains out-of-bounds indices", msg))
+        }
+    }
+    use
 }
 
 #' @importFrom BiocGenerics match
 #' @importFrom S4Vectors split 
-.merge_DF_rows <- function(x, ids, final, coldata_merge=NULL) {
-    final <- as.character(final)
-    ids <- as.character(ids)
-    collected <- x[match(final, ids),,drop=FALSE] 
-    rownames(collected) <- final
-
-    if (isFALSE(coldata_merge)) {
-        return(collected[,0])
+.merge_DF_rows <- function(x, ids, final, mapping=match(final, ids), mergeFUN=NULL) {
+    collected <- list()
+    if (isFALSE(mergeFUN)) {
+        return(collected)
     }
 
     for (cn in colnames(x)) {
-        if (!is.function(coldata_merge)) {
-            FUN <- coldata_merge[[cn]]
+        if (!is.function(mergeFUN)) {
+            FUN <- mergeFUN[[cn]]
             if (isFALSE(FUN)) {
                 collected[[cn]] <- NULL
                 next
             }
         } else {
-            FUN <- coldata_merge
+            FUN <- mergeFUN
         }
 
         grouped <- split(x[[cn]], ids)[final]
@@ -346,9 +369,12 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ...,
         }
 
         per.group <- lapply(grouped, FUN)
-        if (length(per.group)>=1L) {
+        collected[[cn]] <- if (length(per.group)>=1L) {
             # Using 'c' instead of unlist to accommodate Vectors.
-            collected[[cn]] <- do.call(c, per.group)
+            do.call(c, per.group)
+        } else {
+            # Obtaining a column of the correct type.
+            FUN(x[[cn]])[0]
         }
     }
 
@@ -360,32 +386,27 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ...,
 #' @importFrom SingleCellExperiment altExp altExps altExp<- altExps<-
 #' reducedDimNames reducedDim<- reducedDim reducedDims<- reducedDims
 setMethod("aggregateAcrossCells", "SingleCellExperiment", function(x, ids, 
-    ..., subset_row=NULL, coldata_merge=NULL, store_number="ncells",
+    ..., subset_row=NULL, subset_col=NULL, coldata_merge=NULL, store_number="ncells",
     use_exprs_values="counts", use_altexps=TRUE, use_dimred=TRUE)
 {
-    FUN <- .create_cell_aggregator(ids, use_exprs_values, coldata_merge, store_number)
+    new.ids <- .process_ids(x, ids, subset_col)
+    FUN <- .create_cell_aggregator(original.ids=ids, new.ids=new.ids, use_exprs_values=use_exprs_values, 
+        coldata_merge=coldata_merge, store_number=store_number)
     y <- FUN(x, ..., subset_row=subset_row)
 
-    use_altexps <- .get_altexps_to_use(x, use_altexps)
+    use_altexps <- .use_names_to_integer_indices(use_altexps, x=x, nameFUN=altExpNames, msg="use_altexps")
     for (i in use_altexps) {
         altExp(y, i) <- FUN(altExp(x, i), ...)
     }
     altExps(y) <- altExps(y, withColData=FALSE)[use_altexps]
 
-    if (is.logical(use_dimred)) {
-        if (use_dimred) {
-            use_dimred <- seq_along(reducedDimNames(x))
-        } else {
-            use_dimred <- NULL
-        }
-    } 
-    all.ids <- environment(FUN)$ids 
+    use_dimred <- .use_names_to_integer_indices(use_dimred, x=x, nameFUN=reducedDimNames, msg="use_dimred")
     for (i in use_dimred) {
         # We re-use sumCountsAcrossCells rather than using something
         # else like rowsum(), in order to ensure that the order of the
         # _rows_ here is the same as that in the aggregated `y`.
         current <- t(reducedDim(x, i))
-        out <- sumCountsAcrossCells(current, all.ids, average=TRUE)
+        out <- .sum_across_cells(current, ids=new.ids, average=TRUE)
         reducedDim(y, i) <- t(out)
     }
     reducedDims(y) <- reducedDims(y, withDimnames=FALSE)[use_dimred]
