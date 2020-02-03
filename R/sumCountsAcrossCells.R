@@ -141,9 +141,14 @@ NULL
     coldata <- .create_coldata(original.ids=ids, mapping=mapping, 
         freq=sum.out$freq, store_number=store_number)
 
+    # non-NULL coldata determines the output SE column names,
+    # so we make sure they're sync'd to something sensible.
     if (.has_multi_ids(ids)) {
-        colnames(mat) <- NULL
+        rownames(coldata) <- colnames(mat) <- NULL
+    } else {
+        rownames(coldata) <- colnames(mat)
     }
+
     output <- list(mat)
     names(output) <- if(average) {
         "average" 

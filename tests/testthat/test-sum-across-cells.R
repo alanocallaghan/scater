@@ -79,6 +79,11 @@ test_that("we can summarise counts at cell cluster level", {
     out2 <- sumCountsAcrossCells(counts(sce), ids)
     expect_identical(out, out2)
 
+    # Robust to column names.
+    copy <- sce
+    colnames(copy) <- paste0("CELL", seq_len(ncol(copy)))
+    expect_identical(sumCountsAcrossCells(copy, ids), out)
+
     # Handles averaging correctly.
     out2 <- sumCountsAcrossCells(sce, ids, average=TRUE)
     expect_identical(assay(out2), t(t(colsum(counts(sce), ids))/as.integer(table(ids))))
