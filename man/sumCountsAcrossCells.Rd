@@ -129,6 +129,9 @@ Alternatively, we can explicitly select the cells of interest with \code{subset_
 Setting \code{average=TRUE} will compute the average in each set rather than the sum.
 This is particularly useful if \code{x} contains expression values that have already been normalized in some manner,
 as computing the average avoids another round of normalization to account for differences in the size of each set.
+
+Note that, prior to version 1.16.0, \code{sumCountsAcrossCells} would return a raw matrix.
+This has now been wrapped in a \linkS4class{SummarizedExperiment} for consistency and to include per-group statistics.
 }
 \section{Aggregation of additional metadata}{
 

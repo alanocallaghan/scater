@@ -67,6 +67,9 @@
 #' This is particularly useful if \code{x} contains expression values that have already been normalized in some manner,
 #' as computing the average avoids another round of normalization to account for differences in the size of each set.
 #'
+#' Note that, prior to version 1.16.0, \code{sumCountsAcrossCells} would return a raw matrix.
+#' This has now been wrapped in a \linkS4class{SummarizedExperiment} for consistency and to include per-group statistics.
+#'
 #' @section Aggregation of additional metadata:
 #' The \code{aggregateAcrossCells} sums the assay values in \code{x} using \code{sumCountsAcrossCells}
 #' while also aggregating metadata across cells in a sensible manner.
