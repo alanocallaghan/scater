@@ -147,3 +147,51 @@ test_that("retrieveFeatureInfo works for rows with data.frames", {
     expect_error(retrieveFeatureInfo(example_sce, rething, ), "one column")
     expect_error(retrieveFeatureInfo(example_sce, rething[1:10,1,drop=FALSE], ), "number of rows")
 })
+
+###################################################
+
+test_that("perCellDataFrameFromSCE works as expected", {
+    df1 <- perCellDataFrameFromSCE(example_sce, "Mutation_Status", "Gene_0001")
+    expect_identical(df1$Mutation_Status, example_sce$Mutation_Status)
+    expect_identical(df1$Gene_0001, unname(logcounts(example_sce)["Gene_0001",]))
+
+    # Works with names.
+    df2 <- perCellDataFrameFromSCE(example_sce, stuff="Mutation_Status", whee="Gene_0001")
+    expect_identical(df2$stuff, example_sce$Mutation_Status)
+    expect_identical(df2$whee, unname(logcounts(example_sce)["Gene_0001",]))
+
+    # Works with reduced dimensions and size factors.
+    example_sce <- runPCA(example_sce)
+    df3 <- perCellDataFrameFromSCE(example_sce, include_size_factors=TRUE, include_dimred="PCA")
+    expect_identical(df3$size_factors, unname( sizeFactors(example_sce)))
+    expect_identical(df3$PCA.1, unname(reducedDim(example_sce)[,1]))
+    expect_identical(df3$PCA.2, unname(reducedDim(example_sce)[,2]))
+
+    # Handles edge cases gracefully.
+    df0 <- perCellDataFrameFromSCE(example_sce)
+    expect_identical(ncol(df0), 0L)
+    expect_identical(rownames(df0), colnames(example_sce))
+
+    dfr0 <- perCellDataFrameFromSCE(example_sce, include_dimred="PCA", ncomponents=0)
+    expect_identical(df0, dfr0)
+})
+
+test_that("perFeatureDataFrameFromSCE works as expected", {
+    rowData(example_sce)$foo <- runif(nrow(example_sce))
+    rowData(example_sce)$bar <- sample(LETTERS, nrow(example_sce), replace=TRUE)
+
+    df1 <- perFeatureDataFrameFromSCE(example_sce, "foo", "bar")
+    expect_identical(df1$foo, rowData(example_sce)$foo)
+    expect_identical(df1$bar, rowData(example_sce)$bar)
+
+    # Works with names.
+    df2 <- perFeatureDataFrameFromSCE(example_sce,  
+         more_stuff="foo", other_stuff="bar")
+    expect_identical(df2$more_stuff, rowData(example_sce)$foo)
+    expect_identical(df2$other_stuff, rowData(example_sce)$bar)
+
+    # Handles edge cases gracefully.
+    df0 <- perFeatureDataFrameFromSCE(example_sce)
+    expect_identical(ncol(df0), 0L)
+    expect_identical(rownames(df0), rownames(example_sce))
+})
