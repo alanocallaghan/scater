@@ -30,7 +30,7 @@
 #' e.g., \code{"PCA.1"}, \code{"PCA.2"}.
 #' Note that \code{n_dimred} is applied to all results listed in \code{include_dimred}.
 #'
-#' If \code{include_size_factors=TRUE}, an extra numeric \code{size_factors} column is added to the output
+#' If \code{include_size_factors=TRUE}, an extra numeric \code{size_factor} column is added to the output
 #' if there are any size factors present in \code{x}.
 #'
 #' The same \code{exprs_values} is used for all assay-related extractions in \code{...}.
@@ -90,7 +90,7 @@ perCellDataFrameFromSCE <- function(x, ..., exprs_values="logcounts",
     }
 
     if (include_size_factors) {
-        output$size_factors <- sizeFactors(x)
+        output$size_factor <- sizeFactors(x)
     }
 
     output

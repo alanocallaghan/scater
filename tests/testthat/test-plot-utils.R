@@ -163,7 +163,7 @@ test_that("perCellDataFrameFromSCE works as expected", {
     # Works with reduced dimensions and size factors.
     example_sce <- runPCA(example_sce)
     df3 <- perCellDataFrameFromSCE(example_sce, include_size_factors=TRUE, include_dimred="PCA")
-    expect_identical(df3$size_factors, unname( sizeFactors(example_sce)))
+    expect_identical(df3$size_factor, unname( sizeFactors(example_sce)))
     expect_identical(df3$PCA.1, unname(reducedDim(example_sce)[,1]))
     expect_identical(df3$PCA.2, unname(reducedDim(example_sce)[,2]))
 
