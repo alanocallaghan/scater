@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
-\section{Changes in version 1.16.0, Bioconductor 3.11 Release (March 2019)}{
+\section{Changes in version 1.16.0, Bioconductor 3.11 Release (March 2020)}{
 \itemize{
     \item Added coldata_merge= argument to aggregateAcrossCells() for custom column metadata aggregation.
     Also include averaged reduced dimension results for each group.
@@ -14,6 +14,7 @@
     \item Exposed various developer utilities for downstream packages.
     \item Modified sumCountsAcrossCells() to always return a SummarizedExperiment object, regardless of the class of ids.
     Return the number of cells used for summation in the colData.
+    \item Restored capability to create a data.frame from a SCE with perCellDataFrameFromSCE() and perFeatureDataFrameFromSCE(). 
 }}
 
 \section{Changes in version 1.14.0, Bioconductor 3.10 Release (September 2019)}{
