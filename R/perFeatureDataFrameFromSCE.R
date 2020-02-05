@@ -48,7 +48,6 @@
 #' head(df3)
 #'
 #' @export
-#' @rdname perCellDataFrameFromSCE
 perFeatureDataFrameFromSCE <- function(x, ..., exprs_values="logcounts") {
     fields <- .process_free_args(...)
     for (i in seq_along(fields)) {
