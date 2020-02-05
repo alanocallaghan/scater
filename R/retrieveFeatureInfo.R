@@ -37,6 +37,8 @@
 #'
 #' @author Aaron Lun
 #' @seealso
+#' \code{\link{perFeatureDataFrameFromSCE}}, which provides a more user-friendly interface to this function.
+#'
 #' \code{\link{plotRowData}} and other feature-based plotting functions.
 #' 
 #' @examples
