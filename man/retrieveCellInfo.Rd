@@ -67,7 +67,7 @@ retrieveCellInfo(example_sce, data.frame(stuff=arbitrary.field))
 
 }
 \seealso{
-\code{\link{perCellDataFrameFromSCE}}, which provides a more user-friendly interface to this function.
+\code{\link{makePerCellDF}}, which provides a more user-friendly interface to this function.
 
 \code{\link{plotColData}}, 
 \code{\link{plotReducedDim}}, 
