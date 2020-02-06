@@ -14,7 +14,7 @@
     \item Exposed various developer utilities for downstream packages.
     \item Modified sumCountsAcrossCells() to always return a SummarizedExperiment object, regardless of the class of ids.
     Return the number of cells used for summation in the colData.
-    \item Restored capability to create a data.frame from a SCE with perCellDataFrameFromSCE() and perFeatureDataFrameFromSCE(). 
+    \item Restored capability to create a data.frame from a SCE with makePerCellDF() and makePerFeatureDF(). 
 }}
 
 \section{Changes in version 1.14.0, Bioconductor 3.10 Release (September 2019)}{
