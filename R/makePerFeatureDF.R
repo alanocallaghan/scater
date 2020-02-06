@@ -35,20 +35,20 @@
 #' example_sce <- logNormCounts(example_sce)
 #' rowData(example_sce)$stuff <- rnorm(nrow(example_sce))
 #'
-#' df1 <- perFeatureDataFrameFromSCE(example_sce, "stuff", "Cell_001")
+#' df1 <- makePerFeatureDF(example_sce, "stuff", "Cell_001")
 #' head(df1)
 #' 
-#' df2 <- perFeatureDataFrameFromSCE(example_sce,  
+#' df2 <- makePerFeatureDF(example_sce,  
 #'     more_stuff="stuff", other_stuff="Cell_002")
 #' head(df2)
 #' 
 #' example_sce <- runPCA(example_sce)
-#' df3 <- perFeatureDataFrameFromSCE(example_sce, 
+#' df3 <- makePerFeatureDF(example_sce, 
 #'     blah=I(runif(nrow(example_sce))))
 #' head(df3)
 #'
 #' @export
-perFeatureDataFrameFromSCE <- function(x, ..., exprs_values="logcounts") {
+makePerFeatureDF <- function(x, ..., exprs_values="logcounts") {
     fields <- .process_free_args(...)
     for (i in seq_along(fields)) {
         fields[[i]] <- retrieveFeatureInfo(x, by=fields[[i]], exprs_values = exprs_values)$value

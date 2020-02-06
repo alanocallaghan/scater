@@ -45,22 +45,22 @@
 #' example_sce <- mockSCE()
 #' example_sce <- logNormCounts(example_sce)
 #'
-#' df1 <- perCellDataFrameFromSCE(example_sce, "Mutation_Status", "Gene_0001")
+#' df1 <- makePerCellDF(example_sce, "Mutation_Status", "Gene_0001")
 #' head(df1)
 #' 
-#' df2 <- perCellDataFrameFromSCE(example_sce, "Mutation_Status", 
+#' df2 <- makePerCellDF(example_sce, "Mutation_Status", 
 #'     stuff="Cell_Cycle", other_stuff="Gene_0002")
 #' head(df2)
 #' 
 #' example_sce <- runPCA(example_sce)
-#' df3 <- perCellDataFrameFromSCE(example_sce, "Mutation_Status", 
+#' df3 <- makePerCellDF(example_sce, "Mutation_Status", 
 #'     stuff=I(runif(ncol(example_sce))), include_dimred="PCA")
 #' head(df3)
 #'
 #' @export
 #' @importFrom SingleCellExperiment reducedDim reducedDimNames
 #' @importFrom BiocGenerics sizeFactors
-perCellDataFrameFromSCE <- function(x, ..., exprs_values="logcounts", 
+makePerCellDF <- function(x, ..., exprs_values="logcounts", 
     include_dimred=NULL, ncomponents=2, include_size_factors=FALSE) 
 {
     fields <- .process_free_args(...)
