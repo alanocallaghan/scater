@@ -1,4 +1,4 @@
-# tests for feature pre-processing functions.
+# tests for cell-based pre-processing functions.
 # library(scater); library(testthat); source("setup.R"); source("test-sum-across-cells.R")
 
 library(Matrix)
@@ -228,6 +228,13 @@ test_that("Aggregation across cells works correctly for SCEs", {
 
     ref <- sumCountsAcrossCells(sce, ids, exprs_values="normcounts")
     expect_identical(normcounts(alt3), assay(ref))
+
+    # Works when the count matrix is not the first.
+    sce2 <- sce
+    assays(sce2) <- assays(sce2)[2:1]
+    alt4 <- aggregateAcrossCells(sce2, ids)
+    ref <- sumCountsAcrossCells(counts(sce), ids)
+    expect_identical(counts(alt4), assay(ref))
 })
 
 set.seed(1000401)

@@ -289,7 +289,8 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., 
     collected <- list()
     ncells <- NULL
     for (i in seq_along(use_exprs_values)) {
-        sum.out <- .sum_across_cells(assay(x, i), ids=new.ids, ..., subset_row=subset_row)
+        sum.out <- .sum_across_cells(assay(x, use_exprs_values[i]), 
+            ids=new.ids, ..., subset_row=subset_row)
         ncells <- sum.out$freq
         collected[[i]] <- sum.out$mat
     }
