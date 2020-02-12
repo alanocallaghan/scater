@@ -18,7 +18,8 @@ normalizeCounts(x, ...)
   subset_row = NULL,
   downsample = FALSE,
   down_target = NULL,
-  down_prop = 0.01
+  down_prop = 0.01,
+  BPPARAM = SerialParam()
 )
 
 \S4method{normalizeCounts}{SummarizedExperiment}(x, ..., exprs_values = "counts")
@@ -53,6 +54,9 @@ Alternatively \code{NULL}, in which case the size factors are extracted or compu
 If \code{NULL}, this is defined by \code{down_prop} and a warning is emitted.}
 
 \item{down_prop}{Numeric scalar between 0 and 1 indicating the quantile to use to define the downsampling target when \code{downsample=TRUE}.}
+
+\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying how library size factor calculations should be parallelized.
+Only used if \code{size_factors} is not specified.}
 
 \item{exprs_values}{A string or integer scalar specifying the assay of \code{x} containing the count matrix.}
 }

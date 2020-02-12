@@ -16,7 +16,8 @@ logNormCounts(x, ...)
   center_size_factors = TRUE,
   ...,
   exprs_values = "counts",
-  name = NULL
+  name = NULL,
+  BPPARAM = SerialParam()
 )
 
 \S4method{logNormCounts}{SingleCellExperiment}(
@@ -28,7 +29,8 @@ logNormCounts(x, ...)
   ...,
   exprs_values = "counts",
   use_altexps = FALSE,
-  name = NULL
+  name = NULL,
+  BPPARAM = SerialParam()
 )
 }
 \arguments{
@@ -51,6 +53,9 @@ Alternatively \code{NULL}, in which case the size factors are extracted or compu
 
 \item{name}{String containing an assay name for storing the output normalized values.
 Defaults to \code{"logcounts"} when \code{log=TRUE} and \code{"normcounts"} otherwise.}
+
+\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying how library size factor calculations should be parallelized.
+Only used if \code{size_factors} is not specified.}
 
 \item{use_altexps}{Logical scalar indicating whether normalization should be performed for alternative experiments in \code{x}.
 
@@ -75,11 +80,13 @@ This function is a convenience wrapper around \code{\link{normalizeCounts}}.
 It returns a \linkS4class{SingleCellExperiment} or \linkS4class{SummarizedExperiment} containing the normalized values in a separate assay.
 This makes it easier to perform normalization by avoiding book-keeping errors during a long analysis workflow.
 
-If \code{x} is a \linkS4class{SingleCellExperiment} that contains alternative experiments, normalized values can be computed and stored within each alternative experiment by setting \code{use_altexps} appropriately.
+If \code{x} is a \linkS4class{SingleCellExperiment} that contains alternative Experiments, normalized values can be computed and stored within each alternative experiment by setting \code{use_altexps} appropriately.
 By default, \code{use_altexps=FALSE} to avoid problems from attempting to library size-normalize alternative experiments that have zero total counts for some cells.
 
-If \code{size_factors=NULL}, size factors are obtained separately for each nested experiment following the rules in \code{\link{normalizeCounts}}.
-However, if \code{size_factors} is supplied, it will override any size factors available in the alternative experiments.
+If \code{size_factors=NULL}, size factors are obtained following the rules in \code{\link{normalizeCounts}}.
+This is done independently for the main and alternative Experiments when \code{use_altexps} is specified,
+i.e. no information is shared between Experiments by default.
+However, if \code{size_factors} is supplied, it will override any size factors available in any Experiment.
 }
 \examples{
 example_sce <- mockSCE()

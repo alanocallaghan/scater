@@ -21,6 +21,8 @@
 #' For the SummarizedExperiment method, further arguments to pass to the ANY or \linkS4class{DelayedMatrix} methods.
 #' 
 #' For the SingleCellExperiment method, further arguments to pass to the SummarizedExperiment method.
+#' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how library size factor calculations should be parallelized.
+#' Only used if \code{size_factors} is not specified.
 #'
 #' @details 
 #' Normalized expression values are computed by dividing the counts for each cell by the size factor for that cell.
@@ -80,9 +82,11 @@ NULL
 
 #' @export
 #' @rdname normalizeCounts
+#' @importFrom BiocParallel SerialParam
 setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL, 
     log=TRUE, pseudo_count=1, center_size_factors=TRUE, subset_row=NULL,
-    downsample=FALSE, down_target=NULL, down_prop=0.01)
+    downsample=FALSE, down_target=NULL, down_prop=0.01,
+    BPPARAM=SerialParam())
 {
     if (!is.null(subset_row)) {
         x <- x[subset_row,,drop=FALSE]
@@ -91,7 +95,7 @@ setMethod("normalizeCounts", "ANY", function(x, size_factors=NULL,
         return(x + 0) # coerce to numeric.
     }
 
-    size_factors <- .get_default_sizes(x, size_factors, center_size_factors)
+    size_factors <- .get_default_sizes(x, size_factors, center_size_factors, BPPARAM=BPPARAM)
     if (length(size_factors)!=ncol(x)) {
         stop("number of size factors does not equal 'ncol(x)'")
     }
