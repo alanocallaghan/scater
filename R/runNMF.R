@@ -26,14 +26,14 @@
 #' In both cases, the matrix will have the attribute \code{"basis"} containing the gene-by-factor basis matrix.
 #'
 #' @details 
-#' The function \code{\link[NNLM]{nnmf}} is used internally to compute the NMF. 
+#' The function \code{\link[NMF]{nmf}} is used internally to compute the NMF. 
 #' Note that the algorithm is not deterministic, so different runs of the function will produce differing results. 
 #' Users are advised to test multiple random seeds, and then use \code{\link{set.seed}} to set a random seed for replicable results. 
 #'
 #'
 #' @name runNMF
 #' @seealso 
-#' \code{\link[NNLM]{nnmf}}, for the underlying calculations.
+#' \code{\link[NMF]{nmf}}, for the underlying calculations.
 #' 
 #' \code{\link{plotNMF}}, to quickly visualize the results.
 #'
@@ -58,12 +58,16 @@ NULL
     }
     x <- as.matrix(x) 
 
-    args <- list(k=ncomponents, ...)
-    nmf_out <- do.call(NNLM::nnmf, c(list(x), args))
+    # This package has some kind of .onAttach behavior... not good. Oh well,
+    # it's not the first hacky solution we've put in for other people's crap.
+    suppressPackageStartupMessages(require("NMF")) 
+
+    args <- list(rank=ncomponents, ...)
+    nmf_out <- do.call(NMF::nmf, c(list(x), args))
 
     # We transposed it earlier, so everything here has switched meanings.
-    nmf_x <- nmf_out$W
-    attr(nmf_x, "basis") <- t(nmf_out$H)
+    nmf_x <- NMF::.basis(nmf_out)
+    attr(nmf_x, "basis") <- t(NMF::.coef(nmf_out))
 
     nmf_x
 }

@@ -46,7 +46,7 @@ Suggests:
     rmarkdown, 
     Rtsne, 
     uwot,
-    NNLM,
+    NMF,
     testthat, 
     pheatmap, 
     Biobase, 
