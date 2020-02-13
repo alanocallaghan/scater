@@ -117,7 +117,7 @@ NULL
         cv <- colVars(DelayedArray(x))
     }
 
-    pca <- runPCA(x, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM, get.rotation=FALSE)
+    pca <- runPCA(x, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM)
     percentVar <- pca$sdev ^ 2 / sum(cv) * 100
 
     # Saving the results
