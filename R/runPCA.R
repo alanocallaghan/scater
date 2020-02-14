@@ -122,7 +122,9 @@ NULL
 
     # Saving the results
     pcs <- pca$x
+    rownames(pcs) <- rownames(x)
     attr(pcs, "percentVar") <- percentVar
+    rownames(pca$rotation) <- colnames(x)
     attr(pcs, "rotation") <- pca$rotation
     pcs
 }
