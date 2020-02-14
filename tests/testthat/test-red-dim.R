@@ -99,17 +99,25 @@ test_that("runPCA handles ntop selection", {
 
 test_that("runPCA names its outputs correctly", {
     normedX <- runPCA(normed, ntop=Inf) 
+    expect_true(!is.null(rownames(normedX)))
+    expect_true(!is.null(colnames(normedX)))
+
     rd <- reducedDim(normedX)
     expect_identical(rownames(rd), colnames(normedX))
-    expect_identical(sort(rownames(attr, "rotation")), sort(rownames(normedX)))
-    expect_true(!is.null(rownames(rd)))
-    expect_true(!is.null(colnames(rd)))
 
-    # What happens without named?
+    rot <- attr(rd, "rotation")
+    v <- DelayedMatrixStats::rowVars(logcounts(normedX))
+    expect_identical(rownames(rot), rownames(normedX)[order(v, decreasing=TRUE)])
 
-    normedX <- runPCA(normed) 
+    # What happens without row names?
+    unnamed <- normed
+    dimnames(unnamed) <- NULL
+    normedX <- runPCA(unnamed, ntop=Inf) 
+
     rd <- reducedDim(normedX)
-    expect_identical(rownames(rd), colnames(normedX))
+    rot <- attr(rd, "rotation")
+    v <- DelayedMatrixStats::rowVars(logcounts(normedX))
+    expect_identical(rownames(rot), as.character(order(v, decreasing=TRUE)))
 })
 
 test_that("runPCA handles scaling", {

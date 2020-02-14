@@ -37,7 +37,7 @@
     }
 
     x <- x[subset_row,, drop = FALSE]
-    if (is.null(x)) {
+    if (is.null(rownames(x))) {
         rownames(x) <- subset_row
     }
     if (use.var) {
