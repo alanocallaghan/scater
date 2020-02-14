@@ -97,6 +97,21 @@ test_that("runPCA handles ntop selection", {
     expect_equal(reducedDim(normed3), reducedDim(normed4))    
 })
 
+test_that("runPCA names its outputs correctly", {
+    normedX <- runPCA(normed, ntop=Inf) 
+    rd <- reducedDim(normedX)
+    expect_identical(rownames(rd), colnames(normedX))
+    expect_identical(sort(rownames(attr, "rotation")), sort(rownames(normedX)))
+    expect_true(!is.null(rownames(rd)))
+    expect_true(!is.null(colnames(rd)))
+
+    # What happens without named?
+
+    normedX <- runPCA(normed) 
+    rd <- reducedDim(normedX)
+    expect_identical(rownames(rd), colnames(normedX))
+})
+
 test_that("runPCA handles scaling", {
     # Setting ntop=Inf, otherwise it will pick 'normed_alt' features based on scaled variance.
     normed_alt <- normed
@@ -106,7 +121,20 @@ test_that("runPCA handles scaling", {
 
     normed3 <- runPCA(normed_alt, ncomponents=4, scale=FALSE, ntop=Inf)
     normed4 <- runPCA(normed, ncomponents=4, scale=TRUE, ntop=Inf)
-    expect_equal(reducedDim(normed3), reducedDim(normed4))
+
+    r3 <- reducedDim(normed3)
+    rot3 <- attr(r3, "rotation")
+    attr(r3, "rotation") <- NULL
+
+    r4 <- reducedDim(normed4)
+    rot4 <- attr(r4, "rotation")
+    attr(r4, "rotation") <- NULL
+
+    expect_equal(r3, r4)
+    
+    # Checking that the rotation vectors are correct.
+    combined <- union(rownames(rot4), rownames(rot3))
+    expect_equal(rot3[combined,], rot4[combined,])
 
     # Checking that percentVar is computed correctly.
     normed3 <- runPCA(normed, scale=TRUE, ncol(normed)) 
