@@ -135,7 +135,7 @@ aggregateAcrossFeatures <- function(x, ids, ..., use_exprs_values="counts") {
     names(collected) <- .choose_assay_names(x, use_exprs_values)
 
     x <- x[match(rownames(collected[[1]]), as.character(ids)),]
-    assays(x) <- collected
+    assays(x, withDimnames=FALSE) <- collected
     rownames(x) <- rownames(collected[[1]])
     x
 }

@@ -305,10 +305,12 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., 
     if (!is.null(subset_row)) {
         shell <- shell[subset_row,]
     }
-    assays(shell) <- collected
+    assays(shell, withDimnames=FALSE) <- collected
     new.cd <- .merge_DF_rows(colData(x), ids=new.ids.char, final=cn, mergeFUN=coldata_merge)
-    new.cd <- do.call(DataFrame, c(new.cd, list(row.names=cn))) # need row.names here to guarantee the correct 
-                                                                # number of rows, even if we remove it later.
+
+    # Need row.names here to guarantee the correct number of rows when new.cd
+    # is empty; even if we remove the row names later.
+    new.cd <- do.call(DataFrame, c(new.cd, list(row.names=cn))) 
     colData(shell) <- cbind(new.cd, coldata)
 
     if (.has_multi_ids(ids)) {
