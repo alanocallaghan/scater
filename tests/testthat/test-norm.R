@@ -264,8 +264,10 @@ test_that("logNormCounts works for SCE objects (altExp)", {
     COMPFUN <- function(left, right) {
         left <- as(left, "SummarizedExperiment")
         left <- as(left, "SingleCellExperiment")
+        sizeFactors(left) <- NULL
         right <- as(right, "SummarizedExperiment")
         right <- as(right, "SingleCellExperiment")
+        sizeFactors(right) <- NULL
         expect_equal(left, right)
     }
 
