@@ -2,76 +2,57 @@
 % Please edit documentation in R/makePerCellDF.R
 \name{makePerCellDF}
 \alias{makePerCellDF}
-\title{Create a per-cell data.frame}
+\title{Create a per-cell data.frame from a SingleCellDataFrame}
 \usage{
-makePerCellDF(
-  x,
-  ...,
-  exprs_values = "logcounts",
-  include_dimred = NULL,
-  ncomponents = 2,
-  include_size_factors = FALSE
-)
+makePerCellDF(x, exprs_values = "logcounts", use_altexps = FALSE)
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object.}
 
-\item{...}{Any number of elements, each following the format of the \code{by} argument in \code{\link{retrieveCellInfo}}.
+\item{exprs_values}{String or integer scalar indicating the assay to use to obtain expression values.
+Must refer to a matrix-like object with integer or numeric values.}
 
-Briefly, each element can be a single string, in which case it is assumed to refer to a \code{\link{colData}} column,
-a row of \code{\link{assay}(x, exprs_values)}, or a row of one of the \code{\link{altExps}(x)}.
-
-Alternatively, each element can be an \link{AsIs}-wrapped vector, in which case it is used directly.
-In this case, the element is expected to be named in \code{...}.}
-
-\item{exprs_values}{String or integer scalar specifying the assay from which expression values should be extracted.}
-
-\item{include_dimred}{Character vector containing the names of dimensionality reduction results to include.}
-
-\item{ncomponents}{Integer scalar indicating the number of components to return if \code{include_dimred} is set.}
-
-\item{include_size_factors}{Logical scalar indicating whether size factors should be included in the output.}
+\item{use_altexps}{Logical scalar indicating whether to extract assay/metadata values from \code{\link{altExps}(x)}.}
 }
 \value{
-A data.frame containing the requested fields,
-named according to the names in \code{...} or the values themselves (if the values are strings and no names are supplied).
-Each row corresponds to a cell (i.e., column) of \code{x},
+A data.frame containing one field per aspect of data in \code{x} - see Details.
+Each row corresponds to a cell (i.e., column) of \code{x}.
 }
 \description{
 Create a per-cell data.frame from a \linkS4class{SingleCellExperiment},
 most typically for creating custom \pkg{ggplot2} plots.
 }
 \details{
-This function enables us to conveniently create a data.frame from a \linkS4class{SingleCellExperiment},
-ostensibly to put in a \code{ggplot} command.
-The user can then use this to create custom plots that are not covered by \code{\link{plotExpression}} and related functions.
+This function enables us to conveniently create a per-cell data.frame from a \linkS4class{SingleCellExperiment}.
+Each column of the returned data.frame corresponds to one aspect of the (meta)data, and are provided in the following order:
+\enumerate{
+\item Columns named according to \code{rownames(x)} represent the expression values for the \code{exprs_values} assay.
+\item Columns named according to the columns of \code{colData(x)}, representing the column metadata variables.
+\item Columns named according to \code{DIM.N}, containing the various dimensions in \code{\link{reducedDims}(x)}.
+\code{DIM} is set to the name of the dimensionality reduction result and \code{N} is set to the specific dimension.
+\item If \code{use_altexps=TRUE}, columns named according to the row names and column metadata fields of successive the alternative Experiments.
+}
+Nothing is done to resolve duplicated column names, which will often lead (correctly) to an error in downstream functions like \code{\link{ggplot}}.
 
-If \code{include_dimred} is set,
-each set of dimensionality reduction results is named by appending the component number to the name of the result,
-e.g., \code{"PCA.1"}, \code{"PCA.2"}.
-Note that \code{n_dimred} is applied to all results listed in \code{include_dimred}.
-
-If \code{include_size_factors=TRUE}, an extra numeric \code{size_factor} column is added to the output
-if there are any size factors present in \code{x}.
-
-The same \code{exprs_values} is used for all assay-related extractions in \code{...}.
-See \code{\link{retrieveCellInfo}} for more details.
+For the columns derived from the assays and reduced dimensions,
+the individual integer or numeric vectors are never actually constructed in the returned data.frame.
+Rather, the ALTREP system is used to provide lazy evaluation where vectors are materialized from \code{x} on an as-needed basis.
+This allows us to mimic the data.frame structure without materializing the values \emph{en masse},
+thus avoiding problems due to loss of sparsity or delays from querying remote sources.
+As a result, though, it is probably best to avoid \code{\link{print}}ing or \code{\link{saveRDS}}ing the data.frame or any derivative objects.
 }
 \examples{
 example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
-
-df1 <- makePerCellDF(example_sce, "Mutation_Status", "Gene_0001")
-head(df1)
-
-df2 <- makePerCellDF(example_sce, "Mutation_Status", 
-    stuff="Cell_Cycle", other_stuff="Gene_0002")
-head(df2)
-
 example_sce <- runPCA(example_sce)
-df3 <- makePerCellDF(example_sce, "Mutation_Status", 
-    stuff=I(runif(ncol(example_sce))), include_dimred="PCA")
-head(df3)
+
+df <- makePerCellDF(example_sce)
+head(colnames(df))
+tail(colnames(df))
+
+df$Gene_0001
+df$Mutation_Status
+df$PCA.1
 
 }
 \seealso{
