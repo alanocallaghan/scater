@@ -1,98 +1,36 @@
+#' Create a ggplot from a SingleCellExperiment
+#'
+#' Create a base \link{ggplot} object from a \linkS4class{SingleCellExperiment},
+#' the contents of which can be directly referenced in subsequent layers without prior specification.
+#'
+#' @param x A \linkS4class{SingleCellExperiment} object.
+#' @param exprs_values String or integer scalar indicating the assay to use to obtain expression values.
+#' Must refer to a matrix-like object with integer or numeric values.
+#' @param use_altexps Logical scalar indicating whether to extract assay/metadata values from \code{\link{altExps}(x)}.
+#' @param ... Further arguments to pass to \link{ggplot}.
+#' 
+#' @details
+#' This function generates a data.frame from the contents of a \linkS4class{SingleCellExperiment} and passes it to \code{\link{ggplot}}.
+#' Almost any field in the \code{x} can be referenced in subsequent \pkg{ggplot2} commands.
+#' 
+#' @return
+#' A \link{ggplot} object containing (almost) everything in \code{x}.
+#'
+#' @author Aaron Lun
+#'
+#' @seealso
+#' \code{\link{makePerCellDF}}, for the construction of the data.frame.
+#'
+#' @examples
+#' example_sce <- mockSCE()
+#' example_sce <- logNormCounts(example_sce)
+#' example_sce <- runPCA(example_sce)
+#'
+#' ggsce(example_sce) + geom_point(aes(x=PCA.1, y=PCA.2, color=Gene_0001))
+#'
 #' @export
 #' @importFrom ggplot2 ggplot
-ggsce <- function(x, byrow=FALSE, exprs_values="logcounts", use_altexps=FALSE, ...) {
-    if (byrow) {
-
-    } else {
-        df <- ggsce_by_column(x, exprs_values=exprs_values)
-    }
+ggsce <- function(x, exprs_values="logcounts", use_altexps=FALSE, ...) {
+    df <- makePerCellDF(x, exprs_values=exprs_values, use_altexps=use_altexps)
     ggplot(df, ...)
 }
-
-#' @export
-#' @importFrom SingleCellExperiment reducedDim reducedDims 
-sce2dfByColumn <- function(x, exprs_values="logcounts", use_altexps=FALSE) {
-    output <- list(.harvest_se_by_column(x, exprs_values=exprs_values))
-
-    # Collecting the reduced dimensions.
-    all_reds <- reducedDims(x)
-    if (length(all_reds)) {
-        red_vals <- vector("list", length(all_reds))
-
-        for (r in seq_along(red_vals)) {
-            curred <- all_reds[[r]]
-            FUNc <- .choose_functions(curred, get_col=TRUE)
-
-            splitred <- vector("list", ncol(curred))
-            for (i in seq_along(splitred)) {
-                splitred[[i]] <- FUNc(curred, i)
-            }
-            names(splitred) <- sprintf("%s.%s", names(all_reds)[r], seq_along(splitred))
-
-            red_vals[[r]] <- splitred
-        }
-
-        red_vals <- unlist(red_vals, recursive=FALSE)
-        red_vals <- do.call(data.frame, red_vals)
-        output <- c(output, list(red_vals))
-    }
-
-    # Collecting the alternative Experiments.
-    all_alts <- altExps(x)
-    if (use_altexps && length(all_alts)) {
-        alt_vals <- vector("list", length(all_alts))
-        for (a in seq_along(alt_vals)) {
-            curalt <- .harvest_se_by_column(all_alts[[a]], exprs_values=exprs_values)
-            alt_vals[[a]] <- do.call(cbind, curalt)
-        }
-
-        alt_vals <- unlist(alt_vals, recursive=FALSE)
-        alt_vals <- do.call(data.frame, alt_vals)
-        output <- c(output, list(alt_vals))
-    }
-
-    do.call(cbind, output)
-}
-
-.choose_functions <- function(x, get_col=TRUE) {
-    if (is.integer(as.matrix(x[0,0]))) {
-        if (get_col) {
-            lazy_integer_column
-        } else {
-            lazy_integer_row
-        }
-    } else {
-        if (get_col) {
-            lazy_double_column
-        } else {
-            lazy_double_row
-        }
-    }
-}
-
-#' @importFrom SummarizedExperiment assay colData
-.harvest_se_by_column <- function(x, exprs_values) {
-    # Collecting the assay values.
-    curmat <- assay(x, exprs_values, withDimnames=FALSE)
-    if (is.null(rownames(x))) {
-        stop("'rownames(x)' cannot be NULL")
-    }
-
-    FUNr <- .choose_functions(curmat, get_col=FALSE)
-    assay_vals <- vector("list", nrow(x))
-    for (i in seq_along(assay_vals)) {
-        assay_vals[[i]] <- FUNr(curmat, i)
-    }
-    names(assay_vals) <- rownames(x)
-
-    # Adding column metadata.
-    list(
-        data.frame(assay_vals, row.names=colnames(x)),
-        as.data.frame(colData(x))
-    )
-}
-
-# Required for the C++ code.
-getRow <- function(mat, i) mat[i,]
-
-getColumn <- function(mat, j) mat[,j]
