@@ -454,12 +454,11 @@ This avoids repeatedly recomputing those coordinates just to change an aesthetic
 
 We provide some helper functions to easily convert from a `SingleCellExperiment` object to a `data.frame` for use in, say, `r CRANpkg("ggplot2")` functions.
 This allows users to create highly customized plots that are not covered by the existing `r Biocpkg("scater")` functions.
-The `makePerCellDF()` function will intelligently retrieve requested fields from the `colData()`, `assays()`, `altExps()` or `reducedDims()` to create a single `data.frame` for immediate use.
+The `ggsce()` function will intelligently retrieve requested fields from the `colData()`, `assays()`, `altExps()` or `reducedDims()` to create a single `data.frame` for immediate use.
 In the example below, we create boxplots of _Snap25_ expression stratified by cell type and tissue of origin:
 
 ```{r, fig.wide=TRUE}
-ggplot(makePerCellDF(example_sce, 
-        "level1class", "Snap25", "tissue")) +
+ggsce(example_sce) + 
     geom_boxplot(mapping=aes(x=level1class, y=Snap25)) +
     facet_wrap(~tissue)
 ```
@@ -468,9 +467,7 @@ Reduced dimension results are easily pulled in to create customized equivalents 
 In this example, we create a $t$-SNE plot faceted by tissue and coloured by _Snap25_ expression:
 
 ```{r}
-ggplot(makePerCellDF(example_sce, 
-        "Snap25", "tissue", include_dimred="TSNE"),
-    mapping=aes(x=TSNE.1, y=TSNE.2)) +
+ggsce(example_sce, mapping=aes(x=TSNE.1, y=TSNE.2)) +
     geom_point(aes(colour=Snap25)) +
     stat_density_2d() +
     facet_wrap(~tissue) +
@@ -480,9 +477,7 @@ ggplot(makePerCellDF(example_sce,
 It is also straightforward to examine the relationship between the size factors on the normalized gene expression:
 
 ```{r}
-ggplot(makePerCellDF(example_sce, "Actb", 
-        include_size_factors=TRUE),
-    mapping=aes(x=size_factor, y=Actb)) +
+ggsce(example_sce, mapping=aes(x=sizeFactor, y=Actb)) +
     geom_point() +
     geom_smooth()
 ```
