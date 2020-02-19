@@ -1,40 +1,34 @@
-#' Create a per-cell data.frame 
+#' Create a per-cell data.frame from a SingleCellDataFrame
 #'
 #' Create a per-cell data.frame from a \linkS4class{SingleCellExperiment},
 #' most typically for creating custom \pkg{ggplot2} plots.
 #'
 #' @param x A \linkS4class{SingleCellExperiment} object.
-#' @param ... Any number of elements, each following the format of the \code{by} argument in \code{\link{retrieveCellInfo}}.
-#' 
-#' Briefly, each element can be a single string, in which case it is assumed to refer to a \code{\link{colData}} column,
-#' a row of \code{\link{assay}(x, exprs_values)}, or a row of one of the \code{\link{altExps}(x)}.
+#' @param exprs_values String or integer scalar indicating the assay to use to obtain expression values.
+#' Must refer to a matrix-like object with integer or numeric values.
+#' @param use_altexps Logical scalar indicating whether to extract assay/metadata values from \code{\link{altExps}(x)}.
 #'
-#' Alternatively, each element can be an \link{AsIs}-wrapped vector, in which case it is used directly.
-#' In this case, the element is expected to be named in \code{...}.
-#' @param exprs_values String or integer scalar specifying the assay from which expression values should be extracted.
-#' @param include_dimred Character vector containing the names of dimensionality reduction results to include.
-#' @param ncomponents Integer scalar indicating the number of components to return if \code{include_dimred} is set.
-#' @param include_size_factors Logical scalar indicating whether size factors should be included in the output.
-#'
-#' @return A data.frame containing the requested fields,
-#' named according to the names in \code{...} or the values themselves (if the values are strings and no names are supplied).
-#' Each row corresponds to a cell (i.e., column) of \code{x},
+#' @return A data.frame containing one field per aspect of data in \code{x} - see Details.
+#' Each row corresponds to a cell (i.e., column) of \code{x}.
 #'
 #' @details
-#' This function enables us to conveniently create a data.frame from a \linkS4class{SingleCellExperiment},
-#' ostensibly to put in a \code{ggplot} command.
-#' The user can then use this to create custom plots that are not covered by \code{\link{plotExpression}} and related functions.
+#' This function enables us to conveniently create a per-cell data.frame from a \linkS4class{SingleCellExperiment}.
+#' Each column of the returned data.frame corresponds to one aspect of the (meta)data, and are provided in the following order:
+#' \enumerate{
+#' \item Columns named according to \code{rownames(x)} represent the expression values for the \code{exprs_values} assay.
+#' \item Columns named according to the columns of \code{colData(x)}, representing the column metadata variables.
+#' \item Columns named according to \code{DIM.N}, containing the various dimensions in \code{\link{reducedDims}(x)}.
+#' \code{DIM} is set to the name of the dimensionality reduction result and \code{N} is set to the specific dimension.
+#' \item If \code{use_altexps=TRUE}, columns named according to the row names and column metadata fields of successive the alternative Experiments.
+#' }
+#' Nothing is done to resolve duplicated column names, which will often lead (correctly) to an error in downstream functions like \code{\link{ggplot}}.
 #'
-#' If \code{include_dimred} is set,
-#' each set of dimensionality reduction results is named by appending the component number to the name of the result,
-#' e.g., \code{"PCA.1"}, \code{"PCA.2"}.
-#' Note that \code{n_dimred} is applied to all results listed in \code{include_dimred}.
-#'
-#' If \code{include_size_factors=TRUE}, an extra numeric \code{size_factor} column is added to the output
-#' if there are any size factors present in \code{x}.
-#'
-#' The same \code{exprs_values} is used for all assay-related extractions in \code{...}.
-#' See \code{\link{retrieveCellInfo}} for more details.
+#' For the columns derived from the assays and reduced dimensions,
+#' the individual integer or numeric vectors are never actually constructed in the returned data.frame.
+#' Rather, the ALTREP system is used to provide lazy evaluation where vectors are materialized from \code{x} on an as-needed basis.
+#' This allows us to mimic the data.frame structure without materializing the values \emph{en masse},
+#' thus avoiding problems due to loss of sparsity or delays from querying remote sources.
+#' As a result, though, it is probably best to avoid \code{\link{print}}ing or \code{\link{saveRDS}}ing the data.frame or any derivative objects.
 #'
 #' @author Aaron Lun
 #'
@@ -44,83 +38,100 @@
 #' @examples
 #' example_sce <- mockSCE()
 #' example_sce <- logNormCounts(example_sce)
-#'
-#' df1 <- makePerCellDF(example_sce, "Mutation_Status", "Gene_0001")
-#' head(df1)
-#' 
-#' df2 <- makePerCellDF(example_sce, "Mutation_Status", 
-#'     stuff="Cell_Cycle", other_stuff="Gene_0002")
-#' head(df2)
-#' 
 #' example_sce <- runPCA(example_sce)
-#' df3 <- makePerCellDF(example_sce, "Mutation_Status", 
-#'     stuff=I(runif(ncol(example_sce))), include_dimred="PCA")
-#' head(df3)
 #'
+#' df <- makePerCellDF(example_sce)
+#' head(colnames(df))
+#' tail(colnames(df))
+#'
+#' df$Gene_0001
+#' df$Mutation_Status
+#' df$PCA.1
+#' 
 #' @export
-#' @importFrom SingleCellExperiment reducedDim reducedDimNames
-#' @importFrom BiocGenerics sizeFactors
-makePerCellDF <- function(x, ..., exprs_values="logcounts", 
-    include_dimred=NULL, ncomponents=2, include_size_factors=FALSE) 
-{
-    fields <- .process_free_args(...)
-    for (i in seq_along(fields)) {
-        fields[[i]] <- retrieveCellInfo(x, by=fields[[i]], exprs_values = exprs_values)$value
-    }
-    output <- .create_df_from_list(fields, ncol(x))
-    rownames(output) <- colnames(x)
+#' @importFrom SingleCellExperiment reducedDims reducedDimNames altExps
+makePerCellDF <- function(x, exprs_values="logcounts", use_altexps=FALSE) {
+    output <- list(.harvest_se_by_column(x, exprs_values=exprs_values))
 
-    if (length(include_dimred)) {
-        if (!is.character(include_dimred)) {
-            include_dimred <- reducedDimNames(x)[include_dimred]
+    # Collecting the reduced dimensions.
+    all_reds <- reducedDims(x)
+    if (length(all_reds)) {
+        red_vals <- vector("list", length(all_reds))
+
+        for (r in seq_along(red_vals)) {
+            curred <- all_reds[[r]]
+            FUNc <- .choose_functions(curred, get_col=TRUE)
+
+            splitred <- vector("list", ncol(curred))
+            for (i in seq_along(splitred)) {
+                splitred[[i]] <- FUNc(curred, i)
+            }
+            names(splitred) <- sprintf("%s.%s", names(all_reds)[r], seq_along(splitred))
+
+            red_vals[[r]] <- splitred
         }
 
-        collected <- vector("list", length(include_dimred))
-        names(collected) <- include_dimred
+        red_vals <- unlist(red_vals, recursive=FALSE)
+        red_vals <- do.call(data.frame, red_vals)
+        output <- c(output, list(red_vals))
+    }
 
-        for (i in seq_along(collected)) {
-            current <- reducedDim(x, include_dimred[i])
-            nc <- seq_len(min(ncomponents, ncol(current)))
-            current <- current[,nc,drop=FALSE]
-            colnames(current) <- sprintf("%s.%s", include_dimred[i], nc)
-            collected[[i]] <- current
+    # Collecting the alternative Experiments.
+    all_alts <- altExps(x)
+    if (use_altexps && length(all_alts)) {
+        alt_vals <- vector("list", length(all_alts))
+        for (a in seq_along(alt_vals)) {
+            curalt <- .harvest_se_by_column(all_alts[[a]], exprs_values=exprs_values)
+            alt_vals[[a]] <- do.call(cbind, curalt)
         }
 
-        output <- cbind(output, data.frame(do.call(cbind, collected)))
+        alt_vals <- unlist(alt_vals, recursive=FALSE)
+        alt_vals <- do.call(data.frame, alt_vals)
+        output <- c(output, list(alt_vals))
     }
 
-    if (include_size_factors) {
-        output$size_factor <- sizeFactors(x)
-    }
-
-    output
+    do.call(cbind, output)
 }
 
-#' @importFrom S4Vectors isSingleString
-.process_free_args <- function(...) {
-    fields <- list(...)
-
-    if (is.null(all.names <- names(fields))) {
-        all.names <- character(length(fields))
-    }
-
-    renamed <- all.names=="" & vapply(fields, isSingleString, TRUE) 
-    if (any(renamed)) {
-        all.names[renamed] <- unlist(fields[renamed])
-    }
-
-    if (any(all.names=="")) {
-        stop("all elements in '...' must be named or strings")
-    }
-
-    names(fields) <- all.names
-    fields
-}
-
-.create_df_from_list <- function(fields, N) {
-    if (length(fields)) {
-        do.call(data.frame, c(fields, list(stringsAsFactors=FALSE)))
+.choose_functions <- function(x, get_col=TRUE) {
+    if (is.integer(as.matrix(x[0,0]))) {
+        if (get_col) {
+            lazy_integer_column
+        } else {
+            lazy_integer_row
+        }
     } else {
-        data.frame(matrix(0L, N, 0L))
+        if (get_col) {
+            lazy_double_column
+        } else {
+            lazy_double_row
+        }
     }
 }
+
+#' @importFrom SummarizedExperiment assay colData
+.harvest_se_by_column <- function(x, exprs_values) {
+    # Collecting the assay values.
+    curmat <- assay(x, exprs_values, withDimnames=FALSE)
+    if (is.null(rownames(x))) {
+        stop("'rownames(x)' cannot be NULL")
+    }
+
+    FUNr <- .choose_functions(curmat, get_col=FALSE)
+    assay_vals <- vector("list", nrow(x))
+    for (i in seq_along(assay_vals)) {
+        assay_vals[[i]] <- FUNr(curmat, i)
+    }
+    names(assay_vals) <- rownames(x)
+
+    # Adding column metadata.
+    list(
+        data.frame(assay_vals, row.names=colnames(x)),
+        as.data.frame(colData(x))
+    )
+}
+
+# Required for the C++ code.
+getRow <- function(mat, i) mat[i,]
+
+getColumn <- function(mat, j) mat[,j]
