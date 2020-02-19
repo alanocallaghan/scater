@@ -454,11 +454,11 @@ This avoids repeatedly recomputing those coordinates just to change an aesthetic
 
 We provide some helper functions to easily convert from a `SingleCellExperiment` object to a `data.frame` for use in, say, `r CRANpkg("ggplot2")` functions.
 This allows users to create highly customized plots that are not covered by the existing `r Biocpkg("scater")` functions.
-The `ggsce()` function will intelligently retrieve requested fields from the `colData()`, `assays()`, `altExps()` or `reducedDims()` to create a single `data.frame` for immediate use.
+The `ggcells()` function will intelligently retrieve fields from the `colData()`, `assays()`, `altExps()` or `reducedDims()` to create a single `data.frame` for immediate use.
 In the example below, we create boxplots of _Snap25_ expression stratified by cell type and tissue of origin:
 
 ```{r, fig.wide=TRUE}
-ggsce(example_sce) + 
+ggcells(example_sce) + 
     geom_boxplot(mapping=aes(x=level1class, y=Snap25)) +
     facet_wrap(~tissue)
 ```
@@ -467,7 +467,7 @@ Reduced dimension results are easily pulled in to create customized equivalents 
 In this example, we create a $t$-SNE plot faceted by tissue and coloured by _Snap25_ expression:
 
 ```{r}
-ggsce(example_sce, mapping=aes(x=TSNE.1, y=TSNE.2)) +
+ggcells(example_sce, mapping=aes(x=TSNE.1, y=TSNE.2)) +
     geom_point(aes(colour=Snap25)) +
     stat_density_2d() +
     facet_wrap(~tissue) +
@@ -477,19 +477,18 @@ ggsce(example_sce, mapping=aes(x=TSNE.1, y=TSNE.2)) +
 It is also straightforward to examine the relationship between the size factors on the normalized gene expression:
 
 ```{r}
-ggsce(example_sce, mapping=aes(x=sizeFactor, y=Actb)) +
+ggcells(example_sce, mapping=aes(x=sizeFactor, y=Actb)) +
     geom_point() +
     geom_smooth()
 ```
 
-Similar operations can be performed on the features using the `makePerFeatureDF()` function,
+Similar operations can be performed on the features using the `ggfeatures()` function,
 which will retrieve values either from `rowData` or from the columns of the `assays`.
 Here, we examine the relationship between the feature type and the expression within a given cell;
 note the renaming of the otherwise syntactically invalid cell name.
 
 ```{r}
-ggplot(makePerFeatureDF(example_sce, "featureType", 
-    MyCell="1772063078_E07")) + 
+ggfeatures(example_sce) + 
     geom_violin(mapping=aes(x=featureType, y=MyCell))
 ```
 
