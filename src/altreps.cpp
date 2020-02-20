@@ -44,8 +44,20 @@ SEXP Materialize(SEXP vec) {
             realized=FUN(mat, idx);
         }
 
-        R_set_altrep_data2(vec, SEXP(realized));
-        data2=R_altrep_data2(vec);
+        // Forcibly materialize this object and copy its guts 
+        // to avoid nested ALTREPs.
+        if (std::is_same<T, int>::value) {
+            Rcpp::IntegerVector tmp(realized);
+            data2=PROTECT(Rf_allocVector(INTSXP, tmp.size()));
+            std::copy(tmp.begin(), tmp.end(), INTEGER(data2));
+        } else {
+            Rcpp::NumericVector tmp(realized);
+            data2=PROTECT(Rf_allocVector(REALSXP, tmp.size()));
+            std::copy(tmp.begin(), tmp.end(), REAL(data2));
+        }
+
+        R_set_altrep_data2(vec, data2);
+        UNPROTECT(1);
     }
     return data2;
 }
