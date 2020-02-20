@@ -4,9 +4,8 @@
 #' the contents of which can be directly referenced in subsequent layers without prior specification.
 #'
 #' @param x A \linkS4class{SingleCellExperiment} object.
-#' @param exprs_values String or integer scalar indicating the assay to use to obtain expression values.
-#' Must refer to a matrix-like object with integer or numeric values.
-#' @param use_altexps Logical scalar indicating whether to extract assay/metadata values from \code{\link{altExps}(x)}.
+#' This is expected to have row names for \code{ggcells} and column names for \code{ggfeatures}.
+#' @inheritParams makePerCellDF
 #' @param ... Further arguments to pass to \link{ggplot}.
 #' 
 #' @details
@@ -48,14 +47,15 @@
 #' @export
 #' @importFrom ggplot2 ggplot
 #' @rdname ggsce
-ggcells <- function(x, exprs_values="logcounts", use_altexps=FALSE, ...) {
-    df <- makePerCellDF(x, exprs_values=exprs_values, use_altexps=use_altexps)
+ggcells <- function(x, exprs_values="logcounts", use_dimred=TRUE, use_altexps=FALSE, prefix_altexps=FALSE, check_names=TRUE, ...) {
+    df <- makePerCellDF(x, exprs_values=exprs_values, use_altexps=use_altexps, 
+        use_dimred=use_dimred, prefix_altexps=prefix_altexps, check_names=check_names)
     ggplot(df, ...)
 }
 
 #' @export
 #' @rdname ggsce
-ggfeatures <- function(x, exprs_values="logcounts", ...) {
-    df <- makePerFeatureDF(x, exprs_values=exprs_values)
+ggfeatures <- function(x, exprs_values="logcounts", check_names=TRUE, ...) {
+    df <- makePerFeatureDF(x, exprs_values=exprs_values, check_names=check_names)
     ggplot(df, ...)
 }

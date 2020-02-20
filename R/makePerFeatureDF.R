@@ -7,6 +7,7 @@
 #' This is expected to have non-\code{NULL} row names.
 #' @param exprs_values String or integer scalar indicating the assay to use to obtain expression values.
 #' Must refer to a matrix-like object with integer or numeric values.
+#' @param check_names Logical scalar indicating whether the column names of the output data.frame should be made syntactically valid and unique.
 #'
 #' @return A data.frame containing one field per aspect of data in \code{x} - see Details.
 #' Each row corresponds to a feature (i.e., row) of \code{x}.
@@ -20,7 +21,11 @@
 #' \item Columns named according to \code{colnames(x)} represent the expression values across features for each cell in the \code{exprs_values} assay.
 #' \item Columns named according to the columns of \code{rowData(x)} represent the row metadata variables.
 #' }
-#' Nothing is done to resolve duplicated column names, which will often lead (correctly) to an error in downstream functions like \code{\link{ggplot}}.
+#'
+#' By default, nothing is done to resolve syntactically invalid or duplicated column names;
+#' this will often lead (correctly) to an error in downstream functions like \code{\link{ggplot}}.
+#' If \code{check_names=TRUE}, this is resolved by passing the column names through \code{\link{make.names}}.
+#' Of course, as a result, some columns may not have the same names as the original fields in \code{x}.
 #'
 #' For the data.frame columns derived from the assays, 
 #' the individual integer or numeric vectors are never actually constructed in the returned data.frame.
@@ -48,7 +53,7 @@
 #' 
 #' @export
 #' @importFrom SummarizedExperiment assay rowData
-makePerFeatureDF <- function(x, exprs_values="logcounts") {
+makePerFeatureDF <- function(x, exprs_values="logcounts", check_names=FALSE) {
     # Collecting the assay values.
     curmat <- assay(x, exprs_values, withDimnames=FALSE)
     if (is.null(colnames(x))) {
@@ -63,8 +68,13 @@ makePerFeatureDF <- function(x, exprs_values="logcounts") {
     names(assay_vals) <- colnames(x)
 
     # Adding row metadata.
-    cbind(
+    output <- cbind(
         data.frame(assay_vals, row.names=rownames(x), check.names=FALSE),
         as.data.frame(rowData(x))
     )
+
+    if (check_names) {
+        colnames(output) <- make.names(colnames(output), unique=TRUE)
+    }
+    output
 }
