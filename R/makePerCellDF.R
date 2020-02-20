@@ -80,7 +80,7 @@ makePerCellDF <- function(x, exprs_values="logcounts", use_dimred=TRUE, use_alte
         }
 
         red_vals <- unlist(red_vals, recursive=FALSE)
-        red_vals <- do.call(data.frame, red_vals)
+        red_vals <- do.call(data.frame, c(red_vals, check.names=FALSE))
         output <- c(output, list(red_vals))
     }
 
@@ -138,7 +138,7 @@ makePerCellDF <- function(x, exprs_values="logcounts", use_dimred=TRUE, use_alte
 
     # Adding column metadata.
     list(
-        data.frame(assay_vals, row.names=colnames(x)),
+        data.frame(assay_vals, row.names=colnames(x), check.names=FALSE),
         as.data.frame(colData(x))
     )
 }

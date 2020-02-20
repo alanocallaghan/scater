@@ -64,7 +64,7 @@ makePerFeatureDF <- function(x, exprs_values="logcounts") {
 
     # Adding row metadata.
     cbind(
-        data.frame(assay_vals, row.names=rownames(x)),
+        data.frame(assay_vals, row.names=rownames(x), check.names=FALSE),
         as.data.frame(rowData(x))
     )
 }

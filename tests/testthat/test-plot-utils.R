@@ -181,6 +181,15 @@ test_that("makePerCellDF works as expected", {
     df0 <- makePerCellDF(stripped)
     expect_identical(ncol(df0), nrow(example_sce))
     expect_identical(rownames(df0), colnames(example_sce))
+
+    # Do not fix my names.
+    rownames(example_sce) <- paste0("+", seq_len(nrow(example_sce)))
+    df0b <- makePerCellDF(example_sce)
+    expect_identical(colnames(df0b)[1:10], rownames(example_sce)[1:10])
+
+    reducedDimNames(example_sce)[1] <- "+-PCA"
+    df0c <- makePerCellDF(example_sce)
+    expect_true("+-PCA.1" %in% colnames(df0c))
 })
 
 test_that("makePerFeatureDF works as expected", {
@@ -198,4 +207,9 @@ test_that("makePerFeatureDF works as expected", {
     df0 <- makePerFeatureDF(stripped)
     expect_identical(ncol(df0), ncol(example_sce))
     expect_identical(rownames(df0), rownames(example_sce))
+
+    # Do not fix my names.
+    colnames(example_sce) <- paste0("+", seq_len(ncol(example_sce)))
+    df0b <- makePerFeatureDF(example_sce)
+    expect_identical(colnames(df0b)[1:10], colnames(example_sce)[1:10])
 })
