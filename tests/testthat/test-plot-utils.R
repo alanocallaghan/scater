@@ -1,5 +1,5 @@
 ## Tests for the visualization variable picker.
-## library(scater); library(testthat); source("setup-sce.R"); source("test-plot-utils.R")
+## library(scater); library(testthat); source("setup.R"); source("test-plot-utils.R")
 
 example_sce <- normed
 
@@ -151,47 +151,51 @@ test_that("retrieveFeatureInfo works for rows with data.frames", {
 ###################################################
 
 test_that("makePerCellDF works as expected", {
-    df1 <- makePerCellDF(example_sce, "Mutation_Status", "Gene_0001")
+    df1 <- makePerCellDF(example_sce)
     expect_identical(df1$Mutation_Status, example_sce$Mutation_Status)
     expect_identical(df1$Gene_0001, unname(logcounts(example_sce)["Gene_0001",]))
 
-    # Works with names.
-    df2 <- makePerCellDF(example_sce, stuff="Mutation_Status", whee="Gene_0001")
-    expect_identical(df2$stuff, example_sce$Mutation_Status)
-    expect_identical(df2$whee, unname(logcounts(example_sce)["Gene_0001",]))
-
     # Works with reduced dimensions and size factors.
     example_sce <- runPCA(example_sce)
-    df3 <- makePerCellDF(example_sce, include_size_factors=TRUE, include_dimred="PCA")
-    expect_identical(df3$size_factor, unname( sizeFactors(example_sce)))
+    df3 <- makePerCellDF(example_sce)
+    expect_identical(df3$sizeFactor, unname( sizeFactors(example_sce)))
     expect_identical(df3$PCA.1, unname(reducedDim(example_sce)[,1]))
     expect_identical(df3$PCA.2, unname(reducedDim(example_sce)[,2]))
 
-    # Handles edge cases gracefully.
-    df0 <- makePerCellDF(example_sce)
-    expect_identical(ncol(df0), 0L)
-    expect_identical(rownames(df0), colnames(example_sce))
+    df3b <- makePerCellDF(example_sce, use_dimred=FALSE)
+    expect_true(all(!grepl("PCA", colnames(df3b))))
 
-    dfr0 <- makePerCellDF(example_sce, include_dimred="PCA", ncomponents=0)
-    expect_identical(df0, dfr0)
+    # Works with alternative experiments.
+    df4 <- makePerCellDF(example_sce, use_altexps=TRUE, prefix_altexps=TRUE)
+    expect_identical(df4$thing.Gene_0001, unname(logcounts(altExp(example_sce))["Gene_0001.0",]))
+    expect_identical(df4$other.Mutation_Status, altExp(example_sce, 2)$Mutation_Status)
+
+    df4b <- makePerCellDF(example_sce, use_altexps="other", prefix_altexps=TRUE)
+    expect_true(all(!grepl("^thing\\.", colnames(df4b))))
+
+    # Handles edge cases gracefully.
+    stripped <- example_sce
+    colData(stripped) <- NULL
+    reducedDims(stripped) <- NULL
+
+    df0 <- makePerCellDF(stripped)
+    expect_identical(ncol(df0), nrow(example_sce))
+    expect_identical(rownames(df0), colnames(example_sce))
 })
 
 test_that("makePerFeatureDF works as expected", {
     rowData(example_sce)$foo <- runif(nrow(example_sce))
     rowData(example_sce)$bar <- sample(LETTERS, nrow(example_sce), replace=TRUE)
 
-    df1 <- makePerFeatureDF(example_sce, "foo", "bar")
+    df1 <- makePerFeatureDF(example_sce)
     expect_identical(df1$foo, rowData(example_sce)$foo)
     expect_identical(df1$bar, rowData(example_sce)$bar)
-
-    # Works with names.
-    df2 <- makePerFeatureDF(example_sce,  
-         more_stuff="foo", other_stuff="bar")
-    expect_identical(df2$more_stuff, rowData(example_sce)$foo)
-    expect_identical(df2$other_stuff, rowData(example_sce)$bar)
+    expect_identical(df1$Cell_001, unname(logcounts(example_sce)[,"Cell_001"]))
 
     # Handles edge cases gracefully.
-    df0 <- makePerFeatureDF(example_sce)
-    expect_identical(ncol(df0), 0L)
+    stripped <- example_sce
+    rowData(stripped) <- NULL
+    df0 <- makePerFeatureDF(stripped)
+    expect_identical(ncol(df0), ncol(example_sce))
     expect_identical(rownames(df0), rownames(example_sce))
 })
