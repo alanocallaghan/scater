@@ -12,6 +12,7 @@
 #' @param use_dimred Logical scalar indicating whether data should be extracted for dimensionality reduction results in \code{x}.
 #' Alternatively, a character or integer vector specifying the dimensionality reduction results to use.
 #' @param prefix_altexps Logical scalar indicating whether \code{\link{altExp}}-derived fields should be prefixed with the name of the alternative Experiment.
+#' @param check_names Logical scalar indicating whether the column names of the output data.frame should be made syntactically valid and unique.
 #'
 #' @return A data.frame containing one field per aspect of data in \code{x} - see Details.
 #' Each row corresponds to a cell (i.e., column) of \code{x}.
@@ -28,7 +29,11 @@
 #' representing the assay data and metadata respectively in these objects.
 #' The names of these columns are prefixed with the name of the alternative Experiment if \code{prefix_altexps=TRUE}.
 #' }
-#' Nothing is done to resolve duplicated column names, which will often lead (correctly) to an error in downstream functions like \code{\link{ggplot}}.
+#'
+#' By default, nothing is done to resolve syntactically invalid or duplicated column names;
+#' this will often lead (correctly) to an error in downstream functions like \code{\link{ggplot}}.
+#' If \code{check_names=TRUE}, this is resolved by passing the column names through \code{\link{make.names}}.
+#' Of course, as a result, some columns may not have the same names as the original fields in \code{x}.
 #'
 #' For the data.frame columns derived from the assays and reduced dimensions,
 #' the individual integer or numeric vectors are never actually constructed in the returned data.frame.
@@ -57,7 +62,7 @@
 #' 
 #' @export
 #' @importFrom SingleCellExperiment reducedDims reducedDimNames altExps altExpNames
-makePerCellDF <- function(x, exprs_values="logcounts", use_dimred=TRUE, use_altexps=FALSE, prefix_altexps=FALSE) {
+makePerCellDF <- function(x, exprs_values="logcounts", use_dimred=TRUE, use_altexps=FALSE, prefix_altexps=FALSE, check_names=FALSE) {
     output <- .harvest_se_by_column(x, exprs_values=exprs_values)
 
     # Collecting the reduced dimensions.
@@ -102,7 +107,11 @@ makePerCellDF <- function(x, exprs_values="logcounts", use_dimred=TRUE, use_alte
         output <- c(output, list(alt_vals))
     }
 
-    do.call(cbind, output)
+    output <- do.call(cbind, output)
+    if (check_names) {
+        colnames(output) <- make.names(colnames(output), unique=TRUE)
+    }
+    output
 }
 
 .choose_functions <- function(x, get_col=TRUE) {
