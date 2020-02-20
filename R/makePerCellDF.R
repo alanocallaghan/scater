@@ -7,7 +7,11 @@
 #' This is expected to have non-\code{NULL} row names.
 #' @param exprs_values String or integer scalar indicating the assay to use to obtain expression values.
 #' Must refer to a matrix-like object with integer or numeric values.
-#' @param use_altexps Logical scalar indicating whether to extract assay/metadata values from \code{\link{altExps}(x)}.
+#' @param use_altexps Logical scalar indicating whether (meta)data should be extracted for alternative experiments in \code{x}.
+#' Alternatively, a character or integer vector specifying the alternative experiments to use. 
+#' @param use_dimred Logical scalar indicating whether data should be extracted for dimensionality reduction results in \code{x}.
+#' Alternatively, a character or integer vector specifying the dimensionality reduction results to use.
+#' @param prefix_altexps Logical scalar indicating whether \code{\link{altExp}}-derived fields should be prefixed with the name of the alternative Experiment.
 #'
 #' @return A data.frame containing one field per aspect of data in \code{x} - see Details.
 #' Each row corresponds to a cell (i.e., column) of \code{x}.
@@ -22,6 +26,7 @@
 #' \item Columns named according to the columns of \code{rowData(x)} represent the row metadata variables.
 #' \item If \code{use_altexps=TRUE}, columns are named according to the row names and column metadata fields of successive alternative Experiments,
 #' representing the assay data and metadata respectively in these objects.
+#' The names of these columns are prefixed with the name of the alternative Experiment if \code{prefix_altexps=TRUE}.
 #' }
 #' Nothing is done to resolve duplicated column names, which will often lead (correctly) to an error in downstream functions like \code{\link{ggplot}}.
 #'
@@ -51,13 +56,14 @@
 #' df$PCA.1
 #' 
 #' @export
-#' @importFrom SingleCellExperiment reducedDims reducedDimNames altExps
-makePerCellDF <- function(x, exprs_values="logcounts", use_altexps=FALSE) {
-    output <- list(.harvest_se_by_column(x, exprs_values=exprs_values))
+#' @importFrom SingleCellExperiment reducedDims reducedDimNames altExps altExpNames
+makePerCellDF <- function(x, exprs_values="logcounts", use_dimred=TRUE, use_altexps=FALSE, prefix_altexps=FALSE) {
+    output <- .harvest_se_by_column(x, exprs_values=exprs_values)
 
     # Collecting the reduced dimensions.
-    all_reds <- reducedDims(x)
-    if (length(all_reds)) {
+    use_dimred <- .use_names_to_integer_indices(use_dimred, x=x, nameFUN=reducedDimNames, msg="use_dimred")
+    if (length(use_dimred)) {
+        all_reds <- reducedDims(x)[use_dimred]
         red_vals <- vector("list", length(all_reds))
 
         for (r in seq_along(red_vals)) {
@@ -79,16 +85,20 @@ makePerCellDF <- function(x, exprs_values="logcounts", use_altexps=FALSE) {
     }
 
     # Collecting the alternative Experiments.
-    all_alts <- altExps(x)
-    if (use_altexps && length(all_alts)) {
+    use_altexps <- .use_names_to_integer_indices(use_altexps, x=x, nameFUN=altExpNames, msg="use_altexps")
+    if (length(use_altexps)) {
+        all_alts <- altExps(x)[use_altexps]
         alt_vals <- vector("list", length(all_alts))
+
         for (a in seq_along(alt_vals)) {
             curalt <- .harvest_se_by_column(all_alts[[a]], exprs_values=exprs_values)
             alt_vals[[a]] <- do.call(cbind, curalt)
+            if (prefix_altexps) {
+                colnames(alt_vals[[a]]) <- sprintf("%s.%s", names(all_alts)[a], colnames(alt_vals[[a]]))
+            }
         }
 
-        alt_vals <- unlist(alt_vals, recursive=FALSE)
-        alt_vals <- do.call(data.frame, alt_vals)
+        alt_vals <- do.call(cbind, alt_vals)
         output <- c(output, list(alt_vals))
     }
 
