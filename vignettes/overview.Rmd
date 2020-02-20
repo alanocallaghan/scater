@@ -489,7 +489,7 @@ note the renaming of the otherwise syntactically invalid cell name.
 
 ```{r}
 ggfeatures(example_sce) + 
-    geom_violin(mapping=aes(x=featureType, y=MyCell))
+    geom_violin(mapping=aes(x=featureType, y=X1772062111_E06))
 ```
 
 # Transitioning from the `SCESet` class
