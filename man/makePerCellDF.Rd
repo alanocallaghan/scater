@@ -4,37 +4,59 @@
 \alias{makePerCellDF}
 \title{Create a per-cell data.frame from a SingleCellDataFrame}
 \usage{
-makePerCellDF(x, exprs_values = "logcounts", use_altexps = FALSE)
+makePerCellDF(
+  x,
+  exprs_values = "logcounts",
+  use_dimred = TRUE,
+  use_altexps = FALSE,
+  prefix_altexps = FALSE,
+  check_names = FALSE
+)
 }
 \arguments{
-\item{x}{A \linkS4class{SingleCellExperiment} object.}
+\item{x}{A \linkS4class{SingleCellExperiment} object.
+This is expected to have non-\code{NULL} row names.}
 
 \item{exprs_values}{String or integer scalar indicating the assay to use to obtain expression values.
 Must refer to a matrix-like object with integer or numeric values.}
 
-\item{use_altexps}{Logical scalar indicating whether to extract assay/metadata values from \code{\link{altExps}(x)}.}
+\item{use_dimred}{Logical scalar indicating whether data should be extracted for dimensionality reduction results in \code{x}.
+Alternatively, a character or integer vector specifying the dimensionality reduction results to use.}
+
+\item{use_altexps}{Logical scalar indicating whether (meta)data should be extracted for alternative experiments in \code{x}.
+Alternatively, a character or integer vector specifying the alternative experiments to use.}
+
+\item{prefix_altexps}{Logical scalar indicating whether \code{\link{altExp}}-derived fields should be prefixed with the name of the alternative Experiment.}
+
+\item{check_names}{Logical scalar indicating whether the column names of the output data.frame should be made syntactically valid and unique.}
 }
 \value{
 A data.frame containing one field per aspect of data in \code{x} - see Details.
 Each row corresponds to a cell (i.e., column) of \code{x}.
 }
 \description{
-Create a per-cell data.frame from a \linkS4class{SingleCellExperiment},
+Create a per-cell data.frame (i.e., where each row represents a cell) from a \linkS4class{SingleCellExperiment},
 most typically for creating custom \pkg{ggplot2} plots.
 }
 \details{
-This function enables us to conveniently create a per-cell data.frame from a \linkS4class{SingleCellExperiment}.
-Each column of the returned data.frame corresponds to one aspect of the (meta)data, and are provided in the following order:
+This function enables us to conveniently create a per-feature data.frame from a \linkS4class{SingleCellExperiment}.
+Each row of the returned data.frame corresponds to a column in \code{x},
+while each column of the data.frame corresponds to one aspect of the (meta)data in \code{x}.
+Columns are provided in the following order:
 \enumerate{
-\item Columns named according to \code{rownames(x)} represent the expression values for the \code{exprs_values} assay.
-\item Columns named according to the columns of \code{colData(x)}, representing the column metadata variables.
-\item Columns named according to \code{DIM.N}, containing the various dimensions in \code{\link{reducedDims}(x)}.
-\code{DIM} is set to the name of the dimensionality reduction result and \code{N} is set to the specific dimension.
-\item If \code{use_altexps=TRUE}, columns named according to the row names and column metadata fields of successive the alternative Experiments.
+\item Columns named according to \code{rownames(x)} represent the expression values across cells for each feature in the \code{exprs_values} assay.
+\item Columns named according to the columns of \code{rowData(x)} represent the row metadata variables.
+\item If \code{use_altexps=TRUE}, columns are named according to the row names and column metadata fields of successive alternative Experiments,
+representing the assay data and metadata respectively in these objects.
+The names of these columns are prefixed with the name of the alternative Experiment if \code{prefix_altexps=TRUE}.
 }
-Nothing is done to resolve duplicated column names, which will often lead (correctly) to an error in downstream functions like \code{\link{ggplot}}.
 
-For the columns derived from the assays and reduced dimensions,
+By default, nothing is done to resolve syntactically invalid or duplicated column names;
+this will often lead (correctly) to an error in downstream functions like \code{\link{ggplot}}.
+If \code{check_names=TRUE}, this is resolved by passing the column names through \code{\link{make.names}}.
+Of course, as a result, some columns may not have the same names as the original fields in \code{x}.
+
+For the data.frame columns derived from the assays and reduced dimensions,
 the individual integer or numeric vectors are never actually constructed in the returned data.frame.
 Rather, the ALTREP system is used to provide lazy evaluation where vectors are materialized from \code{x} on an as-needed basis.
 This allows us to mimic the data.frame structure without materializing the values \emph{en masse},
@@ -56,7 +78,7 @@ df$PCA.1
 
 }
 \seealso{
-\code{\link{retrieveCellInfo}}, which powers this function.
+\code{\link{ggcells}}, which uses this function under the hood.
 }
 \author{
 Aaron Lun
