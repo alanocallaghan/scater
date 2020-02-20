@@ -145,11 +145,13 @@ makePerCellDF <- function(x, exprs_values="logcounts", use_dimred=TRUE, use_alte
     }
     names(assay_vals) <- rownames(x)
 
+    # Dirty hack to create a DF without using data.frame,
+    # as data.frame() is slow for thousands of columns.
+    class(assay_vals) <- "data.frame"
+    row.names(assay_vals) <- colnames(x)
+
     # Adding column metadata.
-    list(
-        data.frame(assay_vals, row.names=colnames(x), check.names=FALSE),
-        as.data.frame(colData(x))
-    )
+    list(assay_vals, as.data.frame(colData(x)))
 }
 
 # Required for the C++ code.
