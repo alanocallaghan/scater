@@ -48,8 +48,8 @@
 #' head(colnames(df))
 #' tail(colnames(df))
 #'
-#' df$Cell_001
-#' df$Length
+#' head(df$Cell_001)
+#' head(df$Length)
 #' 
 #' @export
 #' @importFrom SummarizedExperiment assay rowData
@@ -60,10 +60,10 @@ makePerFeatureDF <- function(x, exprs_values="logcounts", check_names=FALSE) {
         stop("'colnames(x)' cannot be NULL")
     }
 
-    FUNc <- .choose_functions(curmat, get_col=TRUE)
+    args <- .get_lazy_vector_args(curmat)
     assay_vals <- vector("list", ncol(x))
     for (i in seq_along(assay_vals)) {
-        assay_vals[[i]] <- FUNc(curmat, i)
+        assay_vals[[i]] <- create_lazy_vector(curmat, dim(curmat), i-1L, getcol=TRUE, matclass=args$matclass, type=args$type)
     }
     names(assay_vals) <- colnames(x)
 

@@ -73,11 +73,11 @@ makePerCellDF <- function(x, exprs_values="logcounts", use_dimred=TRUE, use_alte
 
         for (r in seq_along(red_vals)) {
             curred <- all_reds[[r]]
-            FUNc <- .choose_functions(curred, get_col=TRUE)
+            args <- .get_lazy_vector_args(curred)
 
             splitred <- vector("list", ncol(curred))
             for (i in seq_along(splitred)) {
-                splitred[[i]] <- FUNc(curred, i)
+                splitred[[i]] <- create_lazy_vector(curred, dim(curred), i-1L, getcol=TRUE, matclass=args$matclass, type=args$type)
             }
             names(splitred) <- sprintf("%s.%s", names(all_reds)[r], seq_along(splitred))
 
@@ -114,20 +114,25 @@ makePerCellDF <- function(x, exprs_values="logcounts", use_dimred=TRUE, use_alte
     output
 }
 
-.choose_functions <- function(x, get_col=TRUE) {
-    if (is.integer(as.matrix(x[0,0]))) {
-        if (get_col) {
-            lazy_integer_column
+#' @importClassesFrom Matrix dgCMatrix
+.get_lazy_vector_args <- function(x) {
+    if (is.matrix(x)) {
+        matclass <- 0L
+        if (is.integer(x)) {
+            type <- 0L
+        } else if (is.double(x)) {
+            type <- 1L
         } else {
-            lazy_integer_row
+            type <- 100L
         }
+    } else if (is(x, "dgCMatrix")) {
+        matclass <- 1L
+        type <- 1L
     } else {
-        if (get_col) {
-            lazy_double_column
-        } else {
-            lazy_double_row
-        }
+        matclass <- 100L
+        type <- 1L
     }
+    list(matclass=matclass, type=type)
 }
 
 #' @importFrom SummarizedExperiment assay colData
@@ -138,10 +143,10 @@ makePerCellDF <- function(x, exprs_values="logcounts", use_dimred=TRUE, use_alte
         stop("'rownames(x)' cannot be NULL")
     }
 
-    FUNr <- .choose_functions(curmat, get_col=FALSE)
+    args <- .get_lazy_vector_args(curmat)
     assay_vals <- vector("list", nrow(x))
     for (i in seq_along(assay_vals)) {
-        assay_vals[[i]] <- FUNr(curmat, i)
+        assay_vals[[i]] <- create_lazy_vector(curmat, dim(curmat), i-1L, getcol=FALSE, matclass=args$matclass, type=args$type)
     }
     names(assay_vals) <- rownames(x)
 
@@ -153,8 +158,3 @@ makePerCellDF <- function(x, exprs_values="logcounts", use_dimred=TRUE, use_alte
     # Adding column metadata.
     list(assay_vals, as.data.frame(colData(x)))
 }
-
-# Required for the C++ code.
-getRow <- function(mat, i) mat[i,]
-
-getColumn <- function(mat, j) mat[,j]

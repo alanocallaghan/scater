@@ -5,47 +5,18 @@
 
 using namespace Rcpp;
 
-// lazy_integer_column
-SEXP lazy_integer_column(SEXP mat, SEXP idx);
-RcppExport SEXP _scater_lazy_integer_column(SEXP matSEXP, SEXP idxSEXP) {
+// create_lazy_vector
+SEXP create_lazy_vector(SEXP mat, SEXP dim, SEXP idx, bool getcol, int matclass, int type);
+RcppExport SEXP _scater_create_lazy_vector(SEXP matSEXP, SEXP dimSEXP, SEXP idxSEXP, SEXP getcolSEXP, SEXP matclassSEXP, SEXP typeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type dim(dimSEXP);
     Rcpp::traits::input_parameter< SEXP >::type idx(idxSEXP);
-    rcpp_result_gen = Rcpp::wrap(lazy_integer_column(mat, idx));
-    return rcpp_result_gen;
-END_RCPP
-}
-// lazy_integer_row
-SEXP lazy_integer_row(SEXP mat, SEXP idx);
-RcppExport SEXP _scater_lazy_integer_row(SEXP matSEXP, SEXP idxSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type idx(idxSEXP);
-    rcpp_result_gen = Rcpp::wrap(lazy_integer_row(mat, idx));
-    return rcpp_result_gen;
-END_RCPP
-}
-// lazy_double_column
-SEXP lazy_double_column(SEXP mat, SEXP idx);
-RcppExport SEXP _scater_lazy_double_column(SEXP matSEXP, SEXP idxSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type idx(idxSEXP);
-    rcpp_result_gen = Rcpp::wrap(lazy_double_column(mat, idx));
-    return rcpp_result_gen;
-END_RCPP
-}
-// lazy_double_row
-SEXP lazy_double_row(SEXP mat, SEXP idx);
-RcppExport SEXP _scater_lazy_double_row(SEXP matSEXP, SEXP idxSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type idx(idxSEXP);
-    rcpp_result_gen = Rcpp::wrap(lazy_double_row(mat, idx));
+    Rcpp::traits::input_parameter< bool >::type getcol(getcolSEXP);
+    Rcpp::traits::input_parameter< int >::type matclass(matclassSEXP);
+    Rcpp::traits::input_parameter< int >::type type(typeSEXP);
+    rcpp_result_gen = Rcpp::wrap(create_lazy_vector(mat, dim, idx, getcol, matclass, type));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -99,10 +70,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_scater_lazy_integer_column", (DL_FUNC) &_scater_lazy_integer_column, 2},
-    {"_scater_lazy_integer_row", (DL_FUNC) &_scater_lazy_integer_row, 2},
-    {"_scater_lazy_double_column", (DL_FUNC) &_scater_lazy_double_column, 2},
-    {"_scater_lazy_double_row", (DL_FUNC) &_scater_lazy_double_row, 2},
+    {"_scater_create_lazy_vector", (DL_FUNC) &_scater_create_lazy_vector, 6},
     {"_scater_per_cell_qc", (DL_FUNC) &_scater_per_cell_qc, 4},
     {"_scater_per_feature_qc", (DL_FUNC) &_scater_per_feature_qc, 3},
     {"_scater_top_cumprop", (DL_FUNC) &_scater_top_cumprop, 2},
