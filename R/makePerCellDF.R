@@ -62,7 +62,7 @@
 makePerCellDF <- function(x, features=NULL, exprs_values="logcounts", 
     use_dimred=TRUE, use_altexps=FALSE, prefix_altexps=FALSE, check_names=FALSE) 
 {
-    output <- .harvest_se_by_column(x, features=features, exprs_values=exprs_values)
+    output <- list(.harvest_se_by_column(x, features=features, exprs_values=exprs_values))
 
     # Collecting the reduced dimensions.
     use_dimred <- .use_names_to_integer_indices(use_dimred, x=x, nameFUN=reducedDimNames, msg="use_dimred")
