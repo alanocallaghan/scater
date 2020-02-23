@@ -60,7 +60,7 @@
 #' @export
 #' @importFrom SingleCellExperiment reducedDims reducedDimNames altExps altExpNames
 makePerCellDF <- function(x, features=NULL, exprs_values="logcounts", 
-    use_dimred=TRUE, use_altexps=TRUE, prefix_altexps=TRUE, check_names=FALSE) 
+    use_dimred=TRUE, use_altexps=FALSE, prefix_altexps=FALSE, check_names=FALSE) 
 {
     output <- .harvest_se_by_column(x, features=features, exprs_values=exprs_values)
 
@@ -112,8 +112,8 @@ makePerCellDF <- function(x, features=NULL, exprs_values="logcounts",
     keep <- rownames(x) %in% features
     curmat <- assay(x, exprs_values, withDimnames=FALSE)[keep,,drop=FALSE]
     curmat <- as.matrix(t(curmat))
-    assay_vals <- data.frame(t(curmat), row.names=rownames(x)[keep])
-    colnames(assay_vals) <- features
+    assay_vals <- data.frame(curmat, row.names=colnames(x))
+    colnames(assay_vals) <- rownames(x)[keep]
 
     # Adding column metadata.
     cbind(assay_vals, colData(x))

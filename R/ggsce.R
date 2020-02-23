@@ -40,15 +40,16 @@
 #'     facet_wrap(~Cell_Cycle)
 #'
 #' rowData(example_sce)$GC <- runif(nrow(example_sce))
-#' ggfeatures(example_sce, cells="Cell_001") +
-#'     geom_point(mapping=aes(x=GC, y=Cell_001)) +
+#' ggfeatures(example_sce, cells="Cell_001",
+#'     mapping=aes(x=GC, y=Cell_001)) +
+#'     geom_point() +
 #'     stat_smooth()
 #'
 #' @export
 #' @importFrom ggplot2 ggplot
 #' @rdname ggsce
 ggcells <- function(x, features=NULL, exprs_values="logcounts", 
-    use_dimred=TRUE, use_altexps=TRUE, prefix_altexps=TRUE, check_names=TRUE, ...) 
+    use_dimred=TRUE, use_altexps=FALSE, prefix_altexps=FALSE, check_names=TRUE, ...) 
 {
     df <- makePerCellDF(x, features=features, exprs_values=exprs_values, use_altexps=use_altexps, 
         use_dimred=use_dimred, prefix_altexps=prefix_altexps, check_names=check_names)

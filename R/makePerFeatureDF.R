@@ -52,8 +52,9 @@ makePerFeatureDF <- function(x, cells=NULL, exprs_values="logcounts", check_name
     # Collecting the assay values.
     keep <- colnames(x) %in% cells
     curmat <- assay(x, exprs_values, withDimnames=FALSE)[,keep,drop=FALSE]
-    curmat <- as.matrix(t(curmat))
-    curmat <- data.frame(curmat, row.names=colnames(x)[keep])
+    curmat <- as.matrix(curmat)
+    curmat <- data.frame(curmat, row.names=rownames(x))
+    colnames(curmat) <- colnames(x)[keep]
 
     # Adding row metadata.
     output <- cbind(curmat, as.data.frame(rowData(x)))
