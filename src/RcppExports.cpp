@@ -5,21 +5,6 @@
 
 using namespace Rcpp;
 
-// create_lazy_vector
-SEXP create_lazy_vector(SEXP mat, SEXP dim, SEXP idx, bool getcol, int matclass, int type);
-RcppExport SEXP _scater_create_lazy_vector(SEXP matSEXP, SEXP dimSEXP, SEXP idxSEXP, SEXP getcolSEXP, SEXP matclassSEXP, SEXP typeSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type dim(dimSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type idx(idxSEXP);
-    Rcpp::traits::input_parameter< bool >::type getcol(getcolSEXP);
-    Rcpp::traits::input_parameter< int >::type matclass(matclassSEXP);
-    Rcpp::traits::input_parameter< int >::type type(typeSEXP);
-    rcpp_result_gen = Rcpp::wrap(create_lazy_vector(mat, dim, idx, getcol, matclass, type));
-    return rcpp_result_gen;
-END_RCPP
-}
 // per_cell_qc
 Rcpp::RObject per_cell_qc(Rcpp::RObject matrix, Rcpp::List featcon, Rcpp::IntegerVector top, SEXP limit);
 RcppExport SEXP _scater_per_cell_qc(SEXP matrixSEXP, SEXP featconSEXP, SEXP topSEXP, SEXP limitSEXP) {
@@ -70,7 +55,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_scater_create_lazy_vector", (DL_FUNC) &_scater_create_lazy_vector, 6},
     {"_scater_per_cell_qc", (DL_FUNC) &_scater_per_cell_qc, 4},
     {"_scater_per_feature_qc", (DL_FUNC) &_scater_per_feature_qc, 3},
     {"_scater_top_cumprop", (DL_FUNC) &_scater_top_cumprop, 2},
@@ -78,9 +62,7 @@ static const R_CallMethodDef CallEntries[] = {
     {NULL, NULL, 0}
 };
 
-void init_lazy_vector(DllInfo* dll);
 RcppExport void R_init_scater(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
-    init_lazy_vector(dll);
 }

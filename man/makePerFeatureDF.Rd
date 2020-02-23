@@ -4,11 +4,18 @@
 \alias{makePerFeatureDF}
 \title{Create a per-feature data.frame from a SingleCellDataFrame}
 \usage{
-makePerFeatureDF(x, exprs_values = "logcounts", check_names = FALSE)
+makePerFeatureDF(
+  x,
+  cells = NULL,
+  exprs_values = "logcounts",
+  check_names = FALSE
+)
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object.
 This is expected to have non-\code{NULL} row names.}
+
+\item{cells}{Character vector specifying the features for which to extract expression profiles across cells.}
 
 \item{exprs_values}{String or integer scalar indicating the assay to use to obtain expression values.
 Must refer to a matrix-like object with integer or numeric values.}
@@ -29,7 +36,7 @@ Each row of the returned data.frame corresponds to a row in \code{x},
 while each column of the data.frame corresponds to one aspect of the (meta)data in \code{x}.
 Columns are provided in the following order:
 \enumerate{
-\item Columns named according to \code{colnames(x)} represent the expression values across features for each cell in the \code{exprs_values} assay.
+\item Columns named according to values in \code{cells} represent the expression values across features for the specified cell in the \code{exprs_values} assay.
 \item Columns named according to the columns of \code{rowData(x)} represent the row metadata variables.
 }
 
@@ -37,25 +44,18 @@ By default, nothing is done to resolve syntactically invalid or duplicated colum
 this will often lead (correctly) to an error in downstream functions like \code{\link{ggplot}}.
 If \code{check_names=TRUE}, this is resolved by passing the column names through \code{\link{make.names}}.
 Of course, as a result, some columns may not have the same names as the original fields in \code{x}.
-
-For the data.frame columns derived from the assays, 
-the individual integer or numeric vectors are never actually constructed in the returned data.frame.
-Rather, the ALTREP system is used to provide lazy evaluation where vectors are materialized from \code{x} on an as-needed basis.
-This allows us to mimic the data.frame structure without materializing the values \emph{en masse},
-thus avoiding problems due to loss of sparsity or delays from querying remote sources.
-As a result, though, it is probably best to avoid \code{\link{print}}ing or \code{\link{saveRDS}}ing the data.frame or any derivative objects.
 }
 \examples{
 example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 rowData(example_sce)$Length <- runif(nrow(example_sce))
 
-df <- makePerFeatureDF(example_sce)
+df <- makePerFeatureDF(example_sce, cells="Cell_001")
 head(colnames(df))
 tail(colnames(df))
 
-df$Cell_001
-df$Length
+head(df$Cell_001)
+head(df$Length)
 
 }
 \seealso{

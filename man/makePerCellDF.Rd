@@ -6,16 +6,20 @@
 \usage{
 makePerCellDF(
   x,
+  features = NULL,
   exprs_values = "logcounts",
   use_dimred = TRUE,
-  use_altexps = FALSE,
-  prefix_altexps = FALSE,
+  use_altexps = TRUE,
+  prefix_altexps = TRUE,
   check_names = FALSE
 )
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object.
 This is expected to have non-\code{NULL} row names.}
+
+\item{features}{Character vector specifying the features for which to extract expression profiles across cells.
+May also include features in alternative Experiments if permitted by \code{use_altexps}.}
 
 \item{exprs_values}{String or integer scalar indicating the assay to use to obtain expression values.
 Must refer to a matrix-like object with integer or numeric values.}
@@ -44,31 +48,26 @@ Each row of the returned data.frame corresponds to a column in \code{x},
 while each column of the data.frame corresponds to one aspect of the (meta)data in \code{x}.
 Columns are provided in the following order:
 \enumerate{
-\item Columns named according to \code{rownames(x)} represent the expression values across cells for each feature in the \code{exprs_values} assay.
+\item Columns named according to the values in \code{features} represent the expression values across cells for the specified feature in the \code{exprs_values} assay.
 \item Columns named according to the columns of \code{rowData(x)} represent the row metadata variables.
+\item If \code{use_dimred=TRUE}, columns named in the format of \code{<DIM>.<NUM>} represent the \code{<NUM>}th dimension of the dimensionality reduction result \code{<DIM>}.
 \item If \code{use_altexps=TRUE}, columns are named according to the row names and column metadata fields of successive alternative Experiments,
 representing the assay data and metadata respectively in these objects.
 The names of these columns are prefixed with the name of the alternative Experiment if \code{prefix_altexps=TRUE}.
+Note that alternative Experiment rows will only be present if they are specified in \code{features}.
 }
 
 By default, nothing is done to resolve syntactically invalid or duplicated column names;
 this will often lead (correctly) to an error in downstream functions like \code{\link{ggplot}}.
 If \code{check_names=TRUE}, this is resolved by passing the column names through \code{\link{make.names}}.
 Of course, as a result, some columns may not have the same names as the original fields in \code{x}.
-
-For the data.frame columns derived from the assays and reduced dimensions,
-the individual integer or numeric vectors are never actually constructed in the returned data.frame.
-Rather, the ALTREP system is used to provide lazy evaluation where vectors are materialized from \code{x} on an as-needed basis.
-This allows us to mimic the data.frame structure without materializing the values \emph{en masse},
-thus avoiding problems due to loss of sparsity or delays from querying remote sources.
-As a result, though, it is probably best to avoid \code{\link{print}}ing or \code{\link{saveRDS}}ing the data.frame or any derivative objects.
 }
 \examples{
 example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 example_sce <- runPCA(example_sce)
 
-df <- makePerCellDF(example_sce)
+df <- makePerCellDF(example_sce, features="Gene_0001")
 head(colnames(df))
 tail(colnames(df))
 
