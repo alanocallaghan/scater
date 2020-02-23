@@ -458,8 +458,8 @@ The `ggcells()` function will intelligently retrieve fields from the `colData()`
 In the example below, we create boxplots of _Snap25_ expression stratified by cell type and tissue of origin:
 
 ```{r, fig.wide=TRUE}
-ggcells(example_sce) + 
-    geom_boxplot(mapping=aes(x=level1class, y=Snap25)) +
+ggcells(example_sce, mapping=aes(x=level1class, y=Snap25)) + 
+    geom_boxplot() +
     facet_wrap(~tissue)
 ```
 
@@ -467,8 +467,8 @@ Reduced dimension results are easily pulled in to create customized equivalents 
 In this example, we create a $t$-SNE plot faceted by tissue and coloured by _Snap25_ expression:
 
 ```{r}
-ggcells(example_sce, mapping=aes(x=TSNE.1, y=TSNE.2)) +
-    geom_point(aes(colour=Snap25)) +
+ggcells(example_sce, mapping=aes(x=TSNE.1, y=TSNE.2, colour=Snap25)) +
+    geom_point() +
     stat_density_2d() +
     facet_wrap(~tissue) +
     scale_colour_distiller(direction=1)
@@ -488,8 +488,9 @@ Here, we examine the relationship between the feature type and the expression wi
 note the renaming of the otherwise syntactically invalid cell name.
 
 ```{r}
-ggfeatures(example_sce) + 
-    geom_violin(mapping=aes(x=featureType, y=X1772062111_E06))
+colnames(example_sce) <- make.names(colnames(example_sce))
+ggfeatures(example_sce, mapping=aes(x=featureType, y=X1772062111_E06)) + 
+    geom_violin()
 ```
 
 # Transitioning from the `SCESet` class

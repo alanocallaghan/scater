@@ -234,3 +234,12 @@ test_that("makePer*DF functions work for non-ordinary matrices", {
     expect_identical(df1$Cell_010, unname(logcounts(example_sce)[,"Cell_010",]))
     expect_identical(df1$Cell_100, unname(logcounts(example_sce)[,"Cell_100",]))
 })
+
+test_that("gg functions work as expected", {
+    gg <- ggcells(example_sce, mapping=aes(x=Gene_0001, y=Gene_0002))
+    expect_s3_class(gg, "ggplot")
+    
+    gg <- ggfeatures(example_sce, mapping=aes(x=Cell_001, y=Cell_002))
+    expect_s3_class(gg, "ggplot")
+})
+
