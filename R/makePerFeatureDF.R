@@ -5,6 +5,7 @@
 #'
 #' @param x A \linkS4class{SingleCellExperiment} object.
 #' This is expected to have non-\code{NULL} row names.
+#' @param cells Character vector specifying the features for which to extract expression profiles across cells.
 #' @param exprs_values String or integer scalar indicating the assay to use to obtain expression values.
 #' Must refer to a matrix-like object with integer or numeric values.
 #' @param check_names Logical scalar indicating whether the column names of the output data.frame should be made syntactically valid and unique.
@@ -18,7 +19,7 @@
 #' while each column of the data.frame corresponds to one aspect of the (meta)data in \code{x}.
 #' Columns are provided in the following order:
 #' \enumerate{
-#' \item Columns named according to \code{colnames(x)} represent the expression values across features for each cell in the \code{exprs_values} assay.
+#' \item Columns named according to values in \code{cells} represent the expression values across features for the specified cell in the \code{exprs_values} assay.
 #' \item Columns named according to the columns of \code{rowData(x)} represent the row metadata variables.
 #' }
 #'
@@ -26,13 +27,6 @@
 #' this will often lead (correctly) to an error in downstream functions like \code{\link{ggplot}}.
 #' If \code{check_names=TRUE}, this is resolved by passing the column names through \code{\link{make.names}}.
 #' Of course, as a result, some columns may not have the same names as the original fields in \code{x}.
-#'
-#' For the data.frame columns derived from the assays, 
-#' the individual integer or numeric vectors are never actually constructed in the returned data.frame.
-#' Rather, the ALTREP system is used to provide lazy evaluation where vectors are materialized from \code{x} on an as-needed basis.
-#' This allows us to mimic the data.frame structure without materializing the values \emph{en masse},
-#' thus avoiding problems due to loss of sparsity or delays from querying remote sources.
-#' As a result, though, it is probably best to avoid \code{\link{print}}ing or \code{\link{saveRDS}}ing the data.frame or any derivative objects.
 #'
 #' @author Aaron Lun
 #'
@@ -44,7 +38,7 @@
 #' example_sce <- logNormCounts(example_sce)
 #' rowData(example_sce)$Length <- runif(nrow(example_sce))
 #'
-#' df <- makePerFeatureDF(example_sce)
+#' df <- makePerFeatureDF(example_sce, cells="Cell_001")
 #' head(colnames(df))
 #' tail(colnames(df))
 #'
@@ -53,25 +47,16 @@
 #' 
 #' @export
 #' @importFrom SummarizedExperiment assay rowData
-makePerFeatureDF <- function(x, exprs_values="logcounts", check_names=FALSE) {
+#' @importFrom Matrix t
+makePerFeatureDF <- function(x, cells=NULL, exprs_values="logcounts", check_names=FALSE) {
     # Collecting the assay values.
-    curmat <- assay(x, exprs_values, withDimnames=FALSE)
-    if (is.null(colnames(x))) {
-        stop("'colnames(x)' cannot be NULL")
-    }
-
-    args <- .get_lazy_vector_args(curmat)
-    assay_vals <- vector("list", ncol(x))
-    for (i in seq_along(assay_vals)) {
-        assay_vals[[i]] <- create_lazy_vector(curmat, dim(curmat), i-1L, getcol=TRUE, matclass=args$matclass, type=args$type)
-    }
-    names(assay_vals) <- colnames(x)
+    keep <- colnames(x) %in% cells
+    curmat <- assay(x, exprs_values, withDimnames=FALSE)[,keep,drop=FALSE]
+    curmat <- as.matrix(t(curmat))
+    curmat <- data.frame(curmat, row.names=colnames(x)[keep])
 
     # Adding row metadata.
-    output <- cbind(
-        data.frame(assay_vals, row.names=rownames(x), check.names=FALSE),
-        as.data.frame(rowData(x))
-    )
+    output <- cbind(curmat, as.data.frame(rowData(x)))
 
     if (check_names) {
         colnames(output) <- make.names(colnames(output), unique=TRUE)
