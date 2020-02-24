@@ -15,6 +15,7 @@
     \item Modified sumCountsAcrossCells() to always return a SummarizedExperiment object, regardless of the class of ids.
     Return the number of cells used for summation in the colData.
     \item Restored capability to create a data.frame from a SCE with makePerCellDF() and makePerFeatureDF(). 
+    \item Added ggcells() and ggfeatures() for convenient creation of ggplot objects from a SCE.
 }}
 
 \section{Changes in version 1.14.0, Bioconductor 3.10 Release (September 2019)}{

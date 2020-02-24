@@ -9,8 +9,8 @@ makePerCellDF(
   features = NULL,
   exprs_values = "logcounts",
   use_dimred = TRUE,
-  use_altexps = TRUE,
-  prefix_altexps = TRUE,
+  use_altexps = FALSE,
+  prefix_altexps = FALSE,
   check_names = FALSE
 )
 }
