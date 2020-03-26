@@ -164,6 +164,7 @@ NULL
 #' @importFrom Matrix t 
 #' @importFrom DelayedArray getAutoBPPARAM setAutoBPPARAM
 #' @importFrom BiocParallel SerialParam bplapply 
+#' @importClassesFrom BiocParallel BiocParallelParam
 .sum_across_cells <- function(x, ids, subset_row=NULL, average=FALSE, BPPARAM=SerialParam(), modifier=NULL) {
     lost <- is.na(ids)
     subset_col <- if (any(lost)) which(!lost)
@@ -175,9 +176,15 @@ NULL
     }
 
     # Avoid additional parallelization from DA methods.
+    # We do the check primarily for testing purposes, as
+    # flush tests with a FailParam defined in the GlobalEnv
+    # don't get the FailParam class definition when this 
+    # function is called via a SnowParam.
     oldBP <- getAutoBPPARAM()
     setAutoBPPARAM(SerialParam()) 
-    on.exit(setAutoBPPARAM(oldBP))
+    if (is(oldBP, "BiocParallelParam")) {
+        on.exit(setAutoBPPARAM(oldBP))
+    }
 
     sub.ids <- ids[!lost]
     out <- bplapply(by.core, FUN=.colsum, group=sub.ids, BPPARAM=BPPARAM)
