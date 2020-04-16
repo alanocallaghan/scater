@@ -111,7 +111,7 @@ plotExpression <- function(object, features, x = NULL,
 
     ## melt the expression data.
     evals_long <- data.frame(
-        Feature=rep(features, lengths(exprs_vals)),
+        Feature=rep(factor(features, features), lengths(exprs_vals)),
         Y=unlist(exprs_vals) 
     )
 
