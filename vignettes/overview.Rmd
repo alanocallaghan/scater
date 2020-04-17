@@ -213,7 +213,13 @@ Each row in the plot below corresponds to a gene, and each bar corresponds to th
 The circle indicates the median expression of each gene, with which genes are sorted.
 By default, "expression" is defined using the feature counts (if available), but other expression values can be used instead by changing `exprs_values`.
 
-```{r plot-highest, fig.asp=1, fig.wide=TRUE}
+<!--
+The damn thing was timing out on Windows due to some graphics issue.
+WHATEVER. 
+Fuck Windows and their stupid shit.
+-->
+
+```{r plot-highest, fig.asp=1, fig.wide=TRUE, eval=.Platform$OS.type!="windows"}
 plotHighestExprs(example_sce, exprs_values = "counts")
 ```
 
