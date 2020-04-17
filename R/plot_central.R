@@ -87,7 +87,7 @@ NULL
 
         # Adding median, if requested.
         if (show_median) {
-            plot_out <- plot_out + stat_summary(fun.y = median, fun.ymin = median, fun.ymax = median,
+            plot_out <- plot_out + stat_summary(fun = median, fun.min = median, fun.max = median,
                                                 geom = "crossbar", width = 0.3, alpha = 0.8)
         }
 
