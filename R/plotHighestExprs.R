@@ -35,6 +35,7 @@
 #' @export
 #' @importFrom utils head
 #' @importFrom DelayedArray DelayedArray
+#' @importMethodsFrom DelayedArray sweep
 #' @importFrom DelayedMatrixStats rowSums2 colSums2
 #' @importFrom SummarizedExperiment assay
 #' @importFrom ggplot2 ggplot geom_point ggtitle xlab ylab theme_bw theme element_text 
