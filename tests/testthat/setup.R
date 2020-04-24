@@ -12,7 +12,7 @@ normed <- logNormCounts(sce)
 # See discussion at https://github.com/Bioconductor/BiocParallel/issues/98.
 safeBPParam <- function(nworkers) {
     if (.Platform$OS.type=="windows") {
-        BiocParallel::SerialParam()
+        BiocParallel::SnowParam(nworkers)
     } else {
         BiocParallel::MulticoreParam(nworkers)
     }
