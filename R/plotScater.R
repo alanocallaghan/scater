@@ -71,7 +71,7 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
     ncells <- ncol(exprs_mat)
     seq_real_estate <- top_cumprop(exprs_mat, to_plot)
     seq_real_estate_long <- data.frame(Feature=rep(to_plot, each=ncells), Cell=rep(seq_len(ncells), nfeatures))
-    seq_real_estate_long$Proportion_Library <- as.vector(t(seq_real_estate))
+    seq_real_estate_long$Proportion_Library <- as.vector(seq_real_estate)
 
     ## Add block and colour_by information if provided
     seq_real_estate_long$block1 <- rep(block1_vals, nfeatures)
@@ -111,4 +111,10 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
     }
     
     plot_out
+}
+
+#' @importFrom scuttle perCellQCMetrics
+top_cumprop <- function(x, chosen) {
+    out <- perCellQCMetrics(x, percent.top=chosen, flatten=FALSE)
+    out$percent.top
 }

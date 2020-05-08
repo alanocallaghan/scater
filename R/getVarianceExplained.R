@@ -11,8 +11,6 @@
 #'
 #' For the SummarizedExperiment method, this can also be a character vector specifying column names of \code{colData(x)} to use;
 #' or \code{NULL}, in which case all columns in \code{colData(x)} are used.
-#' @param chunk Integer scalar specifying the chunk size for chunk-wise processing.
-#' Only affects the speed/memory usage trade-off.
 #' @param subset_row A vector specifying the subset of rows of \code{x} for which to return a result.
 #' @param ... For the generic, arguments to be passed to specific methods.
 #' For the SummarizedExperiment method, arguments to be passed to the ANY method.
@@ -44,16 +42,8 @@ NULL
 #' @importFrom DelayedMatrixStats rowVars
 #' @importFrom stats model.matrix
 .get_variance_explained <- function(x, variables, subset_row=NULL) {
-    # Chunk-wise processing to keep memory usage low.
     subset_row <- .subset2index(subset_row, x, byrow=TRUE)
     ngenes <- length(subset_row)
-    if (ngenes > chunk) {
-        by.chunk <- cut(seq_len(ngenes), ceiling(ngenes/chunk))
-    } else {
-        by.chunk <- factor(integer(ngenes))
-    }
-
-    # Initialise matrix to store R^2 values for each feature for each variable
     rsquared_mat <- matrix(NA_real_, ngenes, ncol(variables), 
         dimnames=list(rownames(x)[subset_row], colnames(variables)))
     tss.all <- rowVars(DelayedArray(x), rows=subset_row) * (ncol(x)-1) 
@@ -70,13 +60,15 @@ NULL
         keep <- !is.na(curvar)
         if (all(keep)) {
             tss <- tss.all
+            y <- x
         } else {
             curvar <- curvar[keep]
+            y <- x[,keep,drop=FALSE]
             tss <- rowVars(DelayedArray(x), rows=subset_row, cols=keep) * (sum(keep) - 1)
         }
 
         design <- model.matrix(~curvar)
-        fit <- fitLinearModel(x, design)
+        fit <- fitLinearModel(y, design, subset.row=subset_row)
         rss <- fit$variance * (nrow(design) - ncol(design))
         rsquared_mat[, V] <- 1 - rss/tss
     }
