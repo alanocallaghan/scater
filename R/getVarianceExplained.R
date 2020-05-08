@@ -43,7 +43,7 @@ NULL
 #' @importFrom DelayedArray DelayedArray
 #' @importFrom DelayedMatrixStats rowVars
 #' @importFrom stats model.matrix
-.get_variance_explained <- function(x, variables, subset_row=NULL, chunk=1000) {
+.get_variance_explained <- function(x, variables, subset_row=NULL) {
     # Chunk-wise processing to keep memory usage low.
     subset_row <- .subset2index(subset_row, x, byrow=TRUE)
     ngenes <- length(subset_row)
@@ -76,23 +76,17 @@ NULL
         }
 
         design <- model.matrix(~curvar)
-	    QR <- qr(design)
-
-        rss <- numeric(ngenes)
-        for (element in levels(by.chunk)) {
-            chunked <- by.chunk==element
-            cur.exprs <- x[subset_row[chunked],keep,drop=FALSE]
-            effects <- qr.qty(QR, as.matrix(t(cur.exprs)))
-
-            # no need for special colSums, as this is always dense.
-            rss[chunked] <- colSums(effects[-seq_len(QR$rank),, drop = FALSE] ^ 2) 
-        }
-        
+        fit <- fitLinearModel(x, design)
+        rss <- fit$variance * (nrow(design) - ncol(design))
         rsquared_mat[, V] <- 1 - rss/tss
     }
 
     rsquared_mat * 100
 }
+
+#' @export
+#' @rdname getVarianceExplained
+setGeneric("getVarianceExplained", function(x, ...) standardGeneric("getVarianceExplained"))
 
 #' @export
 #' @rdname getVarianceExplained

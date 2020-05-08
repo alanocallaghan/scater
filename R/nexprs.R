@@ -60,6 +60,10 @@ NULL
 
 #' @export
 #' @rdname nexprs
+setGeneric("nexprs", function(x, ...) standardGeneric("nexprs"))
+
+#' @export
+#' @rdname nexprs
 setMethod("nexprs", "ANY", .nexprs)
 
 #' @export
