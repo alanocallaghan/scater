@@ -25,21 +25,12 @@ set.seed(10918)
 
 # Introduction
 
-This document gives an introduction to and overview of the quality control functionality of the `r Biocpkg("scater")` package.
-`r Biocpkg("scater")` contains tools to help with the analysis of single-cell transcriptomic data, 
-focusing on low-level steps such as quality control, normalization and visualization.
+`r Biocpkg("scater")` provides tools for visualization of single-cell transcriptomic data. 
 It is based on the `SingleCellExperiment` class (from the `r Biocpkg("SingleCellExperiment")` package),
-and thus is interoperable with many other Bioconductor packages such as `r Biocpkg("scran")`, `r Biocpkg("batchelor")` and `r Biocpkg("iSEE")`.
-
-**Note:** A more comprehensive description of the use of `r Biocpkg("scater")` (along with other packages) in a scRNA-seq analysis workflow is available at https://osca.bioconductor.org.
-
-# Setting up the data
-
-## Generating a `SingleCellExperiment` object
-
-We assume that you have a matrix containing expression count data summarised at the level of some features (gene, exon, region, etc.).
-First, we create a `SingleCellExperiment` object containing the data, as demonstrated below with a famous brain dataset.
-Rows of the object correspond to features, while columns correspond to samples, i.e., cells in the context of single-cell 'omics data.
+and thus is interoperable with many other Bioconductor packages such as `r Biocpkg("scran")`, 
+`r Biocpkg("scuttle")` and `r Biocpkg("iSEE")`.
+To demonstrate the use of the various `r Biocpkg("scater")` functions,
+we will load in the classic Zeisel dataset:
 
 ```{r quickstart-load-data, message=FALSE, warning=FALSE}
 library(scRNAseq)
@@ -47,77 +38,21 @@ example_sce <- ZeiselBrainData()
 example_sce
 ```
 
-We usually expect (raw) count data to be labelled as `"counts"` in the assays, which can be easily retrieved with the `counts` accessor.
-Getters and setters are also provided for `exprs`, `tpm`, `cpm`, `fpkm` and versions of these with the prefix `norm_`.
+**Note:** A more comprehensive description of the use of `r Biocpkg("scater")` 
+(along with other packages) in a scRNA-seq analysis workflow is available at https://osca.bioconductor.org.
 
-```{r quickstart-add-exprs, results='hide'}
-str(counts(example_sce))
-```
+# Diagnostic plots for quality control
 
-Row and column-level metadata are easily accessed (or modified) as shown below.
-There are also dedicated getters and setters for size factor values (`sizeFactors()`); reduced dimensionality results (`reducedDim()`); and alternative experimental features (`altExp()`).
-
-```{r}
-example_sce$whee <- sample(LETTERS, ncol(example_sce), replace=TRUE)
-colData(example_sce)
-rowData(example_sce)$stuff <- runif(nrow(example_sce))
-rowData(example_sce)
-```
-
-Subsetting is very convenient with this class, as both data and metadata are processed in a synchronized manner.
-More details about the `SingleCellExperiment` class can be found in the documentation for `r Biocpkg("SingleCellExperiment")` package.
-
-## Other methods of data import 
-
-Count matrices stored as CSV files or equivalent can be easily read into R session using `read.table()` from _utils_ or `fread()` from the `r CRANpkg("data.table")` package.
-It is advisable to coerce the resulting object into a matrix before storing it in a `SingleCellExperiment` object.
-
-For large data sets, the matrix can be read in chunk-by-chunk with progressive coercion into a sparse matrix from the `r CRANpkg("Matrix")` package.
-This is performed using the `readSparseCounts()` function and reduces memory usage by not explicitly storing zeroes in memory.
-
-Data from 10X Genomics experiments can be read in using the `read10xCounts` function from the `r Biocpkg("DropletUtils")` package.
-This will automatically generate a `SingleCellExperiment` with a sparse matrix, see the documentation for more details.
-
-Transcript abundances from the `kallisto` and `Salmon` pseudo-aligners can be imported using methods from the `r Biocpkg("tximeta")` package.
-This produces a `SummarizedExperiment` object that can be coerced into a `SingleCellExperiment` simply with `as(se, "SingleCellExperiment")`.
-
-# Quality control
-
-## Background
-
-`r Biocpkg("scater")` provides functionality for three levels of quality control (QC):
-
-1. QC and filtering of cells
-2. QC and filtering of features (genes)
-3. QC of experimental variables
-
-## Cell-level QC 
-
-### Definition of metrics
-
-Cell-level metrics are computed by the `perCellQCMetrics()` function and include:
-
-* `sum`: total number of counts for the cell (i.e., the library size).
-* `detected`: the number of features for the cell that have counts above the detection limit (default of zero).
-* `subsets_X_percent`: percentage of all counts that come from the feature control set named `X`.
+Quality control to remove damaged cells and poorly sequenced libraries is a common step in single-cell analysis pipelines.
+We will use some utilities from the `r Biocpkg("scuttle")` package 
+(conveniently loaded for us when we load `r Biocpkg("scater")`) 
+to compute the usual quality control metrics for this dataset.
 
 ```{r}
 library(scater)
-per.cell <- perCellQCMetrics(example_sce, 
+example_sce <- addPerCellQC(example_sce, 
     subsets=list(Mito=grep("mt-", rownames(example_sce))))
-summary(per.cell$sum)
-summary(per.cell$detected)
-summary(per.cell$subsets_Mito_percent)
 ```
-
-It is often convenient to store this in the `colData()` of our `SingleCellExperiment` object for future reference.
-(In fact, the `addPerCellQC()` function will do this automatically.)
-
-```{r}
-colData(example_sce) <- cbind(colData(example_sce), per.cell)
-```
-
-### Diagnostic plots
 
 Metadata variables can be plotted against each other using the `plotColData()` function, as shown below.
 We expect to see an increasing number of detected genes with increasing total count.
@@ -137,81 +72,12 @@ plotColData(example_sce, x = "sum", y="subsets_Mito_percent",
     other_fields="tissue") + facet_wrap(~tissue)
 ```
 
-### Identifying low-quality cells
-
-Column subsetting of the `SingeCellExperiment` object will only retain the selected cells, thus removing low-quality or otherwise unwanted cells.
-We can identify high-quality cells to retain by setting a fixed threshold on particular metrics.
-For example, we could retain only cells that have at least 100,000 total counts _and_ at least 500 expressed features:
-
-```{r}
-keep.total <- example_sce$sum > 1e5
-keep.n <- example_sce$detected > 500
-filtered <- example_sce[,keep.total & keep.n]
-dim(filtered)
-```
-
-The `isOutlier` function provides a more data-adaptive way of choosing these thresholds.
-This defines the threshold at a certain number of median absolute deviations (MADs) away from the median.
-Values beyond this threshold are considered outliers and can be filtered out, assuming that they correspond to low-quality cells.
-Here, we define small outliers (using `type="lower"`) for the _log_-total counts at 3 MADs from the median.
-
-```{r}
-keep.total <- isOutlier(per.cell$sum, type="lower", log=TRUE)
-filtered <- example_sce[,keep.total]
-```
-
-Detection of outliers can be achieved more conveniently for several common metrics using the `quickPerCellQC()` function.
-This uses the total count, number of detected features and the percentage of counts in gene sets of diagnostic value 
-(e.g., mitochondrial genes, spike-in transcripts) to identify which cells to discard and for what reason.
-
-```{r}
-qc.stats <- quickPerCellQC(per.cell, percent_subsets="subsets_Mito_percent")
-colSums(as.matrix(qc.stats))
-filtered <- example_sce[,!qc.stats$discard]
-```
-
-The `isOutlier` approach adjusts to experiment-specific aspects of the data, e.g., sequencing depth, amount of spike-in RNA added, cell type.
-In contrast, a fixed threshold would require manual adjustment to account for changes to the experimental protocol or system.
-We refer readers to the `r Biocpkg("simpleSingleCell")` workflow for more details.
-
-## Feature-level QC
-
-### Definition of metrics
-
-Feature-level metrics are computed by the `perFeatureQCMetrics()` function and include:
-
-* `mean`: the mean count of the gene/feature across all cells.
-* `detected`: the percentage of cells with non-zero counts for each gene.
-* `subsets_Y_ratio`: ratio of mean counts between the cell control set named Y and all cells.
-
-```{r}
-# Pretending that the first 10 cells are empty wells, for demonstration.
-per.feat <- perFeatureQCMetrics(example_sce, subsets=list(Empty=1:10))
-summary(per.feat$mean)
-summary(per.feat$detected)
-summary(per.feat$subsets_Empty_ratio)
-```
-
-A more refined calculation of the average is provided by the `calculateAverage()` function, 
-which adjusts the counts by the relative library size (or size factor) prior to taking the mean.
-
-```{r}
-ave <- calculateAverage(example_sce)
-summary(ave)
-```
-
-We can also compute the number of cells expressing a gene directly.
-
-```{r}
-summary(nexprs(example_sce, byrow=TRUE))
-```
-
-### Diagnostic plots
-
-We look at a plot that shows the top 50 (by default) most-expressed features. 
-Each row in the plot below corresponds to a gene, and each bar corresponds to the expression of a gene in a single cell.
-The circle indicates the median expression of each gene, with which genes are sorted.
-By default, "expression" is defined using the feature counts (if available), but other expression values can be used instead by changing `exprs_values`.
+On the gene level, we can look at a plot that shows the top 50 (by default) most-expressed features. 
+Each row in the plot below corresponds to a gene; each bar corresponds to the expression of a gene in a single cell;
+and the circle indicates the median expression of each gene, with which genes are sorted.
+We expect to see the "usual suspects", i.e., mitochondrial genes, actin, ribosomal protein, MALAT1. 
+A few spike-in transcripts may also be present here, though if all of the spike-ins are in the top 50, it suggests that too much spike-in RNA was added.
+A large number of pseudo-genes or predicted genes may indicate problems with alignment.
 
 <!--
 The damn thing was timing out on Windows due to some graphics issue.
@@ -223,118 +89,24 @@ Fuck Windows and their stupid shit.
 plotHighestExprs(example_sce, exprs_values = "counts")
 ```
 
-We expect to see the "usual suspects", i.e., mitochondrial genes, actin, ribosomal protein, MALAT1. 
-A few spike-in transcripts may also be present here, though if all of the spike-ins are in the top 50, it suggests that too much spike-in RNA was added.
-A large number of pseudo-genes or predicted genes may indicate problems with alignment.
-
-### Subsetting by row
-
-Genes can be removed by row subsetting of the `SingleCellExperiment` object.
-For example, we can filter out features (genes) that are not expressed in any cells:
-
-```{r filter-no-exprs}
-keep_feature <- nexprs(example_sce, byrow=TRUE) > 0
-example_sce <- example_sce[keep_feature,]
-dim(example_sce)
-```
-
-Other filtering can be done using existing annotation.
-For example, ribosomal protein genes and predicted genes can be identified (and removed) using regular expressions or biotype information.
-Such genes are often uninteresting when the aim is to characterize population heterogeneity.
-
-## Variable-level QC
-
 Variable-level metrics are computed by the `getVarianceExplained()` function (after normalization, see below).
 This calculates the percentage of variance of each gene's expression that is explained by each variable in the `colData` of the `SingleCellExperiment` object.
-
-```{r}
-example_sce <- logNormCounts(example_sce) # see below.
-vars <- getVarianceExplained(example_sce, 
-    variables=c("tissue", "total mRNA mol", "sex", "age"))
-head(vars)
-```
-
 We can then use this to determine which experimental factors are contributing most to the variance in expression.
 This is useful for diagnosing batch effects or to quickly verify that a treatment has an effect.
 
 ```{r}
+# Computing variance explained on the log-counts,
+# so that the statistics reflect changes in relative expression.
+example_sce <- logNormCounts(example_sce) 
+
+vars <- getVarianceExplained(example_sce, 
+    variables=c("tissue", "total mRNA mol", "sex", "age"))
+head(vars)
+
 plotExplanatoryVariables(vars)
 ```
 
-# Computing expression values
-
-## Normalization for library size differences
-
-The most commonly used function is `logNormCounts()`, which calculates log~2~-transformed normalized expression values.
-This is done by dividing each count by its size factor, adding a pseudo-count and log-transforming.
-The resulting values can be interpreted on the same scale as log-transformed counts, and are stored in `"logcounts"`.
-
-```{r}
-example_sce <- logNormCounts(example_sce)
-assayNames(example_sce)
-```
-
-By default, the size factor is automatically computed from the library size of each cell using the `librarySizeFactors()` function.
-This calculation simply involves scaling the library sizes so that they have a mean of 1 across all cells.
-However, if size factors are explicitly provided in the `SingleCellExperiment`, they will be used by the normalization functions.
-
-```{r}
-summary(librarySizeFactors(example_sce))
-```
-
-Alternatively, we can calculate counts-per-million using the aptly-named `calculateCPM()` function.
-The output is most appropriately stored as an assay named `"cpm"` in the assays of the `SingleCellExperiment` object.
-Related functions include `calculateTPM()` and `calculateFPKM()`, which do pretty much as advertised.
-
-```{r}
-cpm(example_sce) <- calculateCPM(example_sce)
-```
-
-Of course, users can construct any arbitrary matrix of the same dimensions as the count matrix and store it as an assay.
-
-```{r}
-assay(example_sce, "normed") <- normalizeCounts(example_sce, 
-    size_factors=runif(ncol(example_sce)), pseudo_count=1.5)
-```
-
-## Aggregation across groups or clusters
-
-The `aggregateAcrossCells()` function is helpful for aggregating expression values across groups of cells.
-For example, we might wish to sum together counts for all cells in the same cluster,
-possibly to use as a summary statistic for downstream analyses (e.g., for differential expression with `r Biocpkg("edgeR")`).
-This will also perform the courtesy of sensibly aggregating the column metadata for downstream use.
-
-```{r}
-agg_sce <- aggregateAcrossCells(example_sce, ids=example_sce$level1class)
-head(assay(agg_sce))
-colData(agg_sce)[,c("ids", "ncells")]
-```
-
-It is similarly possible to sum across multiple factors, as shown below for the cell type and the tissue of origin.
-This yields one column per combination of cell type and tissue,
-which allows us to conveniently perform downstream analyses with both factors.
-
-```{r}
-agg_sce <- aggregateAcrossCells(example_sce, 
-    ids=colData(example_sce)[,c("level1class", "tissue")])
-head(assay(agg_sce))
-colData(agg_sce)[,c("level1class", "tissue", "ncells")]
-```
-
-Summation across rows may occasionally be useful for obtaining a measure of the activity of a gene set, e.g., in a pathway.
-Given a list of gene sets, we can use the `sumCountsAcrossFeatures()` function to aggregate expression values across features.
-This is usually best done by averaging the log-expression values as shown below.
-
-```{r}
-agg_feat <- sumCountsAcrossFeatures(example_sce,
-    ids=list(GeneSet1=1:10, GeneSet2=11:50, GeneSet3=1:100),
-    average=TRUE, exprs_values="logcounts")
-agg_feat[,1:10]
-```
-
-Similar functions are available to compute the number or proportion of cells with detectable expression in each group.
-
-## Visualizing expression values
+# Visualizing expression values
 
 The `plotExpression()` function makes it easy to plot expression values for a subset of genes or features.
 This can be particularly useful for further examination of features identified from differential expression testing, pseudotime analysis or other analyses.
@@ -498,29 +270,6 @@ colnames(example_sce) <- make.names(colnames(example_sce))
 ggfeatures(example_sce, mapping=aes(x=featureType, y=X1772062111_E06)) + 
     geom_violin()
 ```
-
-# Transitioning from the `SCESet` class
-
-As of July 2017, `scater` has switched from the `SCESet` class previously defined within the package to the more widely applicable `SingleCellExperiment` class. 
-From Bioconductor 3.6 (October 2017), the release version of `scater` will use `SingleCellExperiment`. 
-`SingleCellExperiment` is a more modern and robust class that provides a common data structure used by many single-cell Bioconductor packages. 
-Advantages include support for sparse data matrices and the capability for on-disk storage of data to minimise memory usage for large single-cell datasets.
-
-It should be straight-forward to convert existing scripts based on `SCESet` objects to `SingleCellExperiment` objects, with key changes outlined immediately below.
-
-* The functions `toSingleCellExperiment` and `updateSCESet` (for backwards compatibility) can be used to convert an old `SCESet` object to a `SingleCellExperiment` object;
-* Create a new `SingleCellExperiment` object with the function `SingleCellExperiment` (actually less fiddly than creating a new `SCESet`);
-* `scater` functions have been refactored to take `SingleCellExperiment`  objects, so once data is in a `SingleCellExperiment` object, the user experience is almost identical to that with the `SCESet` class.
-
-Users may need to be aware of the following when updating their own scripts:
-
-* Cell names can now be accessed/assigned with the `colnames` function (instead of `sampleNames` or `cellNames` for an `SCESet` object);
-* Feature (gene/transcript) names should now be accessed/assigned with the `rownames` function (instead of `featureNames`);
-* Cell metadata, stored as `phenoData` in an `SCESet`, corresponds to `colData` in a `SingleCellExperiment` object and is accessed/assigned with the `colData` function (this replaces the `pData` function);
-* Individual cell-level variables can still be accessed with the `$` operator (e.g. `sce$sum`);
-* Feature metadata, stored as `featureData` in an `SCESet`, corresponds to `rowData` in a `SingleCellExperiment` object and is accessed/assigned with the `rowData` function (this replaces the `fData` function);
-* `plotScater`, which produces a cumulative expression, overview plot, replaces 
-the generic `plot` function for `SCESet` objects.
 
 # Session information {.unnumbered}
 
