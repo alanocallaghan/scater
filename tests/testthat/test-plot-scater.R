@@ -1,5 +1,5 @@
 ## This stress-tests the plotScater-related functions. 
-## library(scater); library(testthat); source("setup-sce.R"); source("test-plot-scater.R")
+## library(scater); library(testthat); source("setup.R"); source("test-plot-scater.R")
 
 example_sce <- sce
 
@@ -31,29 +31,27 @@ test_that("plotScater works as expected", {
 test_that("plotScater's underlying C++ code works as expected", {
     REFFUN <- function(x, top) {
         prop <- cumsum(sort(x, decreasing=TRUE))/sum(x)
-        prop[pmin(top, length(x))]
+        prop[pmin(top, length(x))] * 100
     }
 
     out <- scater:::top_cumprop(assay(example_sce), 1:50)
     ref <- apply(assay(example_sce), 2, REFFUN, top=1:50)
-    colnames(out) <- colnames(ref)
-    expect_equal(out, ref)
+    expect_equivalent(out, t(ref))
 
     out <- scater:::top_cumprop(assay(example_sce), 1:20*5)
     ref <- apply(assay(example_sce), 2, REFFUN, top=1:20*5)
-    colnames(out) <- colnames(ref)
-    expect_equal(out, ref)
+    expect_equivalent(out, t(ref))
 
     # Handles sparse matrices.
     library(Matrix)
     spmat <- as(assay(example_sce), "dgCMatrix")
     out <- scater:::top_cumprop(spmat, 1:100)
     ref <- apply(spmat, 2, REFFUN, top=1:100)
-    colnames(out) <- colnames(ref)
-    expect_equal(out, ref)
+    expect_equivalent(out, t(ref))
 
     # Behaves with silly inputs.
     out <- scater:::top_cumprop(assay(example_sce), integer(0))
-    expect_identical(dim(out), c(0L, ncol(example_sce)))
-    expect_error(scater:::top_cumprop(assay(example_sce), 5:1), "sorted")
+    expect_identical(dim(out), c(ncol(example_sce), 0L))
+    expect_identical(scater:::top_cumprop(assay(example_sce), 5:1), 
+        scater:::top_cumprop(assay(example_sce), 1:5))
 })
