@@ -93,7 +93,6 @@ for (x in c("exprs", "norm_exprs", "stand_exprs", "fpkm")) {
 #'
 #' @docType methods
 #' @name bootstraps
-#' @rdname bootstraps
 #' @aliases bootstraps bootstraps,SingleCellExperiment-method bootstraps<-,SingleCellExperiment,array-method
 #'
 #' @param object a \code{SingleCellExperiment} object.
@@ -115,8 +114,9 @@ for (x in c("exprs", "norm_exprs", "stand_exprs", "fpkm")) {
 #' @rdname bootstraps
 #' @aliases bootstraps
 #' @export
+#' @importFrom SummarizedExperiment assayNames assays
 setMethod("bootstraps", "SingleCellExperiment", function(object) {
-    keep <- grep("^bootstrap", SummarizedExperiment::assayNames(object))
+    keep <- grep("^bootstrap", assayNames(object))
     assays(object)[keep]
 })
 
@@ -124,6 +124,7 @@ setMethod("bootstraps", "SingleCellExperiment", function(object) {
 #' @aliases bootstraps
 #' @rdname bootstraps
 #' @export "bootstraps<-"
+#' @importFrom SummarizedExperiment assay<-
 setReplaceMethod("bootstraps", c("SingleCellExperiment", "array"), 
                  function(object, value) {
     # Erase existing bootstrap assays.

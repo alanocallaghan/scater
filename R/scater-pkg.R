@@ -9,6 +9,7 @@
 #'
 #' @name scater-pkg
 #' @import scuttle
+#' @import SingleCellExperiment
 #' @import methods
 NULL
 
