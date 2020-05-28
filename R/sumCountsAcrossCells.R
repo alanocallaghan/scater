@@ -317,7 +317,7 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., 
 
     # Need row.names here to guarantee the correct number of rows when new.cd
     # is empty; even if we remove the row names later.
-    new.cd <- do.call(DataFrame, c(new.cd, list(row.names=cn))) 
+    new.cd <- do.call(DataFrame, c(new.cd, list(row.names=cn, check.names=FALSE))) 
     colData(shell) <- cbind(new.cd, coldata)
 
     if (.has_multi_ids(ids)) {
