@@ -1,6 +1,11 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
+\section{Changes in version 1.16.0, Bioconductor 3.12 Release}{
+\itemize{
+    \item Migrated many utilities to the \pkg{scuttle} package.
+}}
+
 \section{Changes in version 1.16.0, Bioconductor 3.11 Release (March 2020)}{
 \itemize{
     \item Added coldata_merge= argument to aggregateAcrossCells() for custom column metadata aggregation.
