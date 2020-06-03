@@ -1,5 +1,5 @@
 ## Test functions related to calculation of the variance explained.
-## library(scater); library(testthat); source("setup-sce.R"); source("test-expl-var.R")
+## library(scater); library(testthat); source("setup.R"); source("test-expl-var.R")
 
 #############################################################
 # getVarianceExplained() tests:
@@ -39,11 +39,6 @@ test_that("getVarianceExplained responds to the options", {
     # Responds to subsetting.
     expect_identical(varexp[1:10,], getVarianceExplained(normed, subset_row=1:10))
     expect_identical(varexp[2:20,], getVarianceExplained(normed, subset_row=rownames(normed)[2:20]))
-
-    # Unaffected by chunk size.
-    expect_identical(varexp, getVarianceExplained(normed, chunk=10))
-    expect_identical(varexp, getVarianceExplained(normed, chunk=1))
-    expect_identical(varexp, getVarianceExplained(normed, chunk=100000))
 })
 
 test_that("getVarianceExplained handles sparse inputs", {
@@ -179,11 +174,6 @@ test_that("getExplanatoryPCs responds to getVarianceExplained options", {
     expect_identical(exppcs[,1,drop=FALSE], getExplanatoryPCs(normed, variables=colnames(varexp)[1]))
     expect_identical(exppcs[,c(3,2),drop=FALSE], getExplanatoryPCs(normed, variables=colnames(varexp)[c(3,2)]))
     expect_identical(exppcs[,,drop=FALSE], getExplanatoryPCs(normed, variables=colnames(varexp)))
-
-    # Unaffected by chunk size.
-    expect_identical(exppcs, getExplanatoryPCs(normed, n_dimred=nrow(exppcs), chunk=10))
-    expect_identical(exppcs, getExplanatoryPCs(normed, n_dimred=nrow(exppcs), chunk=1))
-    expect_identical(exppcs, getExplanatoryPCs(normed, n_dimred=nrow(exppcs), chunk=100000))
 })
 
 #############################################################

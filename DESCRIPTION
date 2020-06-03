@@ -14,7 +14,8 @@ Description: A collection of tools for doing various analyses of
         single-cell RNA-seq gene expression data, with a focus on
         quality control and visualization.
 Depends: 
-    SingleCellExperiment, 
+    SingleCellExperiment,
+    scuttle,
     ggplot2
 Imports: 
     BiocGenerics, 
@@ -30,15 +31,12 @@ Imports:
     stats, 
     utils, 
     viridis, 
-    Rcpp, 
     BiocNeighbors, 
     BiocSingular, 
     BiocParallel
 Suggests: 
     BiocStyle, 
-    BiocFileCache,
     biomaRt, 
-    beachmat, 
     cowplot, 
     destiny, 
     knitr,
@@ -50,18 +48,12 @@ Suggests:
     NMF,
     testthat, 
     pheatmap, 
-    Biobase, 
-    limma,
-    DropletUtils
+    Biobase
 VignetteBuilder: knitr
 biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,
         Visualization, DimensionReduction, Transcriptomics,
         GeneExpression, Sequencing, Software, DataImport,
         DataRepresentation, Infrastructure, Coverage
-LinkingTo: Rcpp, beachmat
-SystemRequirements: C++11
-BuildResaveData: no
 RoxygenNote: 7.1.0
-NeedsCompilation: yes
 URL: http://bioconductor.org/packages/scater/
 BugReports: https://support.bioconductor.org/

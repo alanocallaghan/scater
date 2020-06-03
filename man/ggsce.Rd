@@ -37,18 +37,15 @@ This is expected to have row names for \code{ggcells} and column names for \code
 \item{features}{Character vector specifying the features for which to extract expression profiles across cells.
 May also include features in alternative Experiments if permitted by \code{use_altexps}.}
 
-\item{exprs_values}{String or integer scalar indicating the assay to use to obtain expression values.
-Must refer to a matrix-like object with integer or numeric values.}
+\item{exprs_values}{Soft-deprecated equivalents of the arguments described above.}
 
-\item{use_dimred}{Logical scalar indicating whether data should be extracted for dimensionality reduction results in \code{x}.
-Alternatively, a character or integer vector specifying the dimensionality reduction results to use.}
+\item{use_dimred}{Soft-deprecated equivalents of the arguments described above.}
 
-\item{use_altexps}{Logical scalar indicating whether (meta)data should be extracted for alternative experiments in \code{x}.
-Alternatively, a character or integer vector specifying the alternative experiments to use.}
+\item{use_altexps}{Soft-deprecated equivalents of the arguments described above.}
 
-\item{prefix_altexps}{Logical scalar indicating whether \code{\link{altExp}}-derived fields should be prefixed with the name of the alternative Experiment.}
+\item{prefix_altexps}{Soft-deprecated equivalents of the arguments described above.}
 
-\item{check_names}{Logical scalar indicating whether the column names of the output data.frame should be made syntactically valid and unique.}
+\item{check_names}{Soft-deprecated equivalents of the arguments described above.}
 
 \item{extract_mapping}{Logical scalar indicating whether \code{features} or \code{cells} should be automatically expanded to include variables referenced in \code{mapping}.}
 

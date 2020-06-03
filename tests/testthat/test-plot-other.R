@@ -1,5 +1,5 @@
 ## Tests for other plotting functions
-## library(scater); library(testthat); source("setup-sce.R"); source("test-plot-other.R")
+## library(scater); library(testthat); source("setup.R"); source("test-plot-other.R")
 
 example_sce <- normed 
 colData(example_sce) <- cbind(colData(example_sce), perCellQCMetrics(example_sce))

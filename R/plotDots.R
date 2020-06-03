@@ -67,9 +67,9 @@ plotDots <- function(object, features, group=NULL, exprs_values="logcounts", det
     }
 
     group <- factor(group)
-    num <- assay(numDetectedAcrossCells(object, ids=group, subset_row=features,
+    num <- assay(numDetectedAcrossCells(object, ids=group, subset.row=features,
         exprs_values=exprs_values, average=TRUE, detection_limit=detection_limit))
-    ave <- assay(sumCountsAcrossCells(object, ids=group, subset_row=features,
+    ave <- assay(sumCountsAcrossCells(object, ids=group, subset.row=features,
         exprs_values=exprs_values, average=TRUE))
 
     # Creating a long-form table.

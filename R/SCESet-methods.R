@@ -23,8 +23,8 @@ updateSCESet <- function(object) {
 #' @name toSingleCellExperiment
 #' @rdname toSingleCellExperiment
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
-#' @importFrom S4Vectors SimpleList
-#' @import SingleCellExperiment
+#' @importFrom S4Vectors SimpleList DataFrame
+#' @importFrom SingleCellExperiment reducedDims<-
 #' @export
 #' @examples
 #' \dontrun{

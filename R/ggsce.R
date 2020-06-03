@@ -6,8 +6,8 @@
 #' @param x A \linkS4class{SingleCellExperiment} object.
 #' This is expected to have row names for \code{ggcells} and column names for \code{ggfeatures}.
 #' @param mapping A list containing aesthetic mappings, usually the output of \code{\link{aes}} or related functions.
-#' @inheritParams makePerCellDF
-#' @inheritParams makePerFeatureDF
+#' @inheritParams scuttle::makePerCellDF
+#' @inheritParams scuttle::makePerFeatureDF
 #' @param extract_mapping Logical scalar indicating whether \code{features} or \code{cells} should be automatically expanded to include variables referenced in \code{mapping}.
 #' @param ... Further arguments to pass to \link{ggplot}.
 #' 
