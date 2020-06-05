@@ -16,6 +16,9 @@
 #' @param pca Integer scalar specifying how many PCs should be used as input into the UMAP algorithm.
 #' By default, no PCA is performed if the input is a dimensionality reduction result.
 #' @param n_neighbors Integer scalar, number of nearest neighbors to identify when constructing the initial graph.
+#' @param n_threads Integer scalar specifying the number of threads to use in \code{\link[uwot]{umap}}.
+#' If \code{NULL} and \code{BPPARAM} is a \linkS4class{MulticoreParam}, it is set to the number of workers in \code{BPPARAM};
+#' otherwise, the \code{\link[uwot]{umap}} defaults are used.
 #' @inheritParams runTSNE
 #'
 #' @inheritSection calculatePCA Feature selection
@@ -62,7 +65,8 @@ NULL
 #' @importFrom BiocParallel SerialParam
 .calculate_umap <- function(x, ncomponents = 2, ntop = 500, 
     subset_row = NULL, scale=FALSE, transposed=FALSE, pca=if (transposed) NULL else 50,
-    n_neighbors=15, ..., external_neighbors=FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam()) 
+    n_neighbors=15, n_threads=NULL, ..., 
+    external_neighbors=FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam()) 
 {
     if (!transposed) {
         x <- .get_mat_for_reddim(x, subset_row=subset_row, ntop=ntop, scale=scale) 
@@ -70,6 +74,10 @@ NULL
     x <- as.matrix(x) 
 
     args <- list(X=x, n_components=ncomponents, n_neighbors=n_neighbors, pca=min(pca, dim(x)), ...)
+    n_threads <- .choose_nthreads(n_threads, BPPARAM)
+    if (!is.null(n_threads)) {
+        args$n_threads <- n_threads
+    }
 
     if (external_neighbors) {
         # A point is considered to be its own nearest neighbor in umap().

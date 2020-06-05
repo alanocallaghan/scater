@@ -20,6 +20,7 @@ calculateTSNE(x, ...)
   perplexity = NULL,
   normalize = TRUE,
   theta = 0.5,
+  num_threads = NULL,
   ...,
   external_neighbors = FALSE,
   BNPARAM = KmknnParam(),
@@ -67,6 +68,9 @@ This can be a character vector of row names, an integer vector of row indices or
 \item{normalize}{Logical scalar indicating if input values should be scaled for numerical precision, see \code{\link[Rtsne]{normalize_input}}.}
 
 \item{theta}{Numeric scalar specifying the approximation accuracy of the Barnes-Hut algorithm, see \code{\link[Rtsne]{Rtsne}} for details.}
+
+\item{num_threads}{Integer scalar specifying the number of threads to use in \code{\link[Rtsne]{Rtsne}}.
+Defaults to the number of workers in a \linkS4class{MulticoreParam} \code{BPPARAM} and 1 otherwise.}
 
 \item{external_neighbors}{Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.}
 

@@ -16,6 +16,9 @@
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
 #'
 #' For \code{runTSNE}, additional arguments to pass to \code{calculateTSNE}.
+#' @param num_threads Integer scalar specifying the number of threads to use in \code{\link[Rtsne]{Rtsne}}.
+#' If \code{NULL} and \code{BPPARAM} is a \linkS4class{MulticoreParam}, it is set to the number of workers in \code{BPPARAM};
+#' otherwise, the \code{\link[Rtsne]{Rtsne}} defaults are used.
 #' @param external_neighbors Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.
 #' @param BNPARAM A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.
@@ -73,7 +76,8 @@ NULL
 #' @importFrom BiocParallel SerialParam
 .calculate_tsne <- function(x, ncomponents = 2, ntop = 500, 
     subset_row = NULL, scale=FALSE, transposed=FALSE,
-    perplexity=NULL, normalize = TRUE, theta = 0.5, ...,
+    perplexity=NULL, normalize = TRUE, theta = 0.5, 
+    num_threads=NULL, ...,
     external_neighbors=FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam())
 { 
     if (!transposed) {
@@ -86,6 +90,11 @@ NULL
     }
 
     args <- list(perplexity=perplexity, dims=ncomponents, theta=theta, ...)
+    num_threads <- .choose_nthreads(num_threads, BPPARAM)
+    if (!is.null(num_threads)) {
+        args$num_threads <- num_threads
+    }
+
     if (!external_neighbors || theta==0) {
         tsne_out <- do.call(Rtsne::Rtsne, c(list(x, check_duplicates = FALSE, normalize=normalize), args))
     } else {

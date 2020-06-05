@@ -19,6 +19,7 @@ calculateUMAP(x, ...)
   transposed = FALSE,
   pca = if (transposed) NULL else 50,
   n_neighbors = 15,
+  n_threads = NULL,
   ...,
   external_neighbors = FALSE,
   BNPARAM = KmknnParam(),
@@ -65,6 +66,9 @@ This can be a character vector of row names, an integer vector of row indices or
 By default, no PCA is performed if the input is a dimensionality reduction result.}
 
 \item{n_neighbors}{Integer scalar, number of nearest neighbors to identify when constructing the initial graph.}
+
+\item{n_threads}{Integer scalar specifying the number of threads to use in \code{\link[Rtsne]{Rtsne}}.
+Defaults to the number of workers in a \linkS4class{MulticoreParam} \code{BPPARAM} and 1 otherwise.}
 
 \item{external_neighbors}{Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.}
 
