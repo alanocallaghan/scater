@@ -18,7 +18,8 @@
 #' There is no way to tweak the relative heights or widths of the plots with this simple function. 
 #' It was adapted from \url{http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/}
 #'
-#' @return A ggplot object.
+#' @return A ggplot object if one plot is supplied, otherwise an object of class
+#' "gtable" returned by \code{\link{grid.arrange}}.
 #'
 #' @importFrom gridExtra grid.arrange
 #' @importFrom grid grid.draw

@@ -17,7 +17,8 @@ multiplot(..., plotlist = NULL, cols = 1, layout = NULL)
 If present, \code{cols} is ignored.}
 }
 \value{
-A ggplot object.
+A ggplot object if one plot is supplied, otherwise an object of class
+"gtable" returned by \code{\link{grid.arrange}}.
 }
 \description{
 Place multiple \code{\link[ggplot2]{ggplot}} plots on one page.
