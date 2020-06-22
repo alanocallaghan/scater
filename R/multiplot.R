@@ -57,6 +57,10 @@
 #' grid::grid.draw(g)
 #'
 multiplot <- function(..., plotlist = NULL, cols = 1, layout = NULL) {
+    ## a wrapper for grid.arrange is a bit pointless and there already exist
+    ## more comprehensive solutions (cowplot, egg, patchwork)
+    .Deprecated("gridExtra::grid.arrange")
+
     ## Make a list from the ... arguments and plotlist
     plots <- c(list(...), plotlist)
 
