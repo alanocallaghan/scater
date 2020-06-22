@@ -21,7 +21,7 @@
 #' @return A ggplot object.
 #'
 #' @importFrom gridExtra grid.arrange
-#' @importFrom grid grid.show
+#' @importFrom grid grid.draw
 #' @export
 #' @examples
 #' library(ggplot2)
@@ -53,7 +53,7 @@
 #' ## Combine plots and display
 #' multiplot(p1, p2, p3, p4, cols = 2)
 #' g <- multiplot(p1, p2, p3, p4, cols = 2)
-#' grid::grid.show(g)
+#' grid::grid.draw(g)
 #'
 multiplot <- function(..., plotlist = NULL, cols = 1, layout = NULL) {
     ## Make a list from the ... arguments and plotlist
