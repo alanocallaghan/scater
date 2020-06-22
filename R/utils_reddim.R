@@ -57,3 +57,13 @@
         x
     }
 }
+
+#' @importFrom BiocParallel bpnworkers
+#' @importClassesFrom BiocParallel MulticoreParam 
+.choose_nthreads <- function(val, BPPARAM) {
+    if (is.null(val) && is(BPPARAM, "MulticoreParam")) {
+        bpnworkers(BPPARAM)
+    } else {
+        val
+    }
+}

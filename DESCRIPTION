@@ -7,7 +7,7 @@ Authors@R: c(
         person("Quin", "Wills", role=c("aut"), email="qilin@quinwills.net"),
         person("Vladimir", "Kiselev", role=c("ctb"), email="vk6@sanger.ac.uk"))
 Version: 1.17.2
-Date: 2020-06-03
+Date: 2020-06-22
 License: GPL-3
 Title: Single-Cell Analysis Toolkit for Gene Expression Data in R
 Description: A collection of tools for doing various analyses of
@@ -17,43 +17,45 @@ Depends:
     SingleCellExperiment,
     ggplot2
 Imports: 
-    stats, 
-    utils, 
-    methods, 
-    grid, 
-    Matrix, 
-    BiocGenerics, 
-    S4Vectors, 
-    SummarizedExperiment, 
-    DelayedArray, 
-    DelayedMatrixStats, 
-    BiocNeighbors, 
-    BiocSingular, 
+    stats,
+    utils,
+    methods,
+    grid,
+    gridExtra,
+    Matrix,
+    BiocGenerics,
+    S4Vectors,
+    SummarizedExperiment,
+    DelayedArray,
+    DelayedMatrixStats,
+    BiocNeighbors,
+    BiocSingular,
     BiocParallel,
     scuttle,
     rlang,
-    ggbeeswarm, 
-    viridis 
+    ggbeeswarm,
+    viridis
 Suggests: 
-    BiocStyle, 
-    biomaRt, 
-    cowplot, 
-    destiny, 
+    BiocStyle,
+    biomaRt,
+    cowplot,
+    destiny,
     knitr,
     scRNAseq,
-    robustbase, 
-    rmarkdown, 
-    Rtsne, 
+    robustbase,
+    rmarkdown,
+    Rtsne,
     uwot,
     NMF,
-    testthat, 
-    pheatmap, 
+    testthat,
+    pheatmap,
     Biobase
 VignetteBuilder: knitr
 biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,
         Visualization, DimensionReduction, Transcriptomics,
         GeneExpression, Sequencing, Software, DataImport,
         DataRepresentation, Infrastructure, Coverage
+Encoding: UTF-8
 RoxygenNote: 7.1.0
 URL: http://bioconductor.org/packages/scater/
 BugReports: https://support.bioconductor.org/

@@ -20,11 +20,8 @@
 #'
 #' @return A ggplot object.
 #'
-#' @importFrom grid grid.newpage
-#' @importFrom grid pushViewport
-#' @importFrom grid viewport
-#' @importFrom grid grid.layout
-#'
+#' @importFrom gridExtra grid.arrange
+#' @importFrom grid grid.show
 #' @export
 #' @examples
 #' library(ggplot2)
@@ -55,6 +52,8 @@
 #'
 #' ## Combine plots and display
 #' multiplot(p1, p2, p3, p4, cols = 2)
+#' g <- multiplot(p1, p2, p3, p4, cols = 2)
+#' grid::grid.show(g)
 #'
 multiplot <- function(..., plotlist = NULL, cols = 1, layout = NULL) {
     ## Make a list from the ... arguments and plotlist
@@ -74,17 +73,6 @@ multiplot <- function(..., plotlist = NULL, cols = 1, layout = NULL) {
     if (num_plots == 1) {
         print(plots[[1]])
     } else {
-        ## Set up the page
-        grid::grid.newpage()
-        grid::pushViewport(grid::viewport(
-            layout = grid::grid.layout(nrow(layout), ncol(layout))))
-
-        # Make each plot, in the correct location
-        for (i in 1:num_plots) {
-            # Get i,j matrix positions of the regions that contain this subplot
-            matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-            print(plots[[i]], vp = grid::viewport(layout.pos.row = matchidx$row,
-                                            layout.pos.col = matchidx$col))
-        }
+        gridExtra::grid.arrange(grobs = plots, layout_matrix = layout)
     }
 }
