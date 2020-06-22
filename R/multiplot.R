@@ -1,6 +1,8 @@
 #' Multiple plot function for ggplot2 plots
 #'
 #' Place multiple \code{\link[ggplot2]{ggplot}} plots on one page.
+#' This function is deprecated in favour of \code{\link{grid.arrange}}.
+#' It will be defunct in the next release.
 #'
 #' @param ... One or more ggplot objects.
 #' @param plotlist A list of ggplot objects, as an alternative to \code{...}.
@@ -9,6 +11,7 @@
 #' If present, \code{cols} is ignored.
 #'
 #' @details 
+#' 
 #' If the layout is something like  \code{matrix(c(1,2,3,3), nrow=2, byrow=TRUE)}, then:
 #' \itemize{
 #' \item plot 1 will go in the upper left;
@@ -51,10 +54,12 @@
 #'    ggtitle("Final weight, by diet") +
 #'    theme(legend.position = "none")        # No legend (redundant in this graph)
 #'
-#' ## Combine plots and display
-#' multiplot(p1, p2, p3, p4, cols = 2)
-#' g <- multiplot(p1, p2, p3, p4, cols = 2)
-#' grid::grid.draw(g)
+#' \dontrun{
+#'   ## Combine plots and display
+#'   multiplot(p1, p2, p3, p4, cols = 2)
+#'   g <- multiplot(p1, p2, p3, p4, cols = 2)
+#'   grid::grid.draw(g)
+#' }
 #'
 multiplot <- function(..., plotlist = NULL, cols = 1, layout = NULL) {
     ## a wrapper for grid.arrange is a bit pointless and there already exist

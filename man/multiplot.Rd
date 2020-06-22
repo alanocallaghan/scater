@@ -22,6 +22,8 @@ A ggplot object if one plot is supplied, otherwise an object of class
 }
 \description{
 Place multiple \code{\link[ggplot2]{ggplot}} plots on one page.
+This function is deprecated in favour of \code{\link{grid.arrange}}.
+It will be defunct in the next release.
 }
 \details{
 If the layout is something like  \code{matrix(c(1,2,3,3), nrow=2, byrow=TRUE)}, then:
@@ -58,9 +60,11 @@ p4 <- ggplot(subset(ChickWeight, Time == 21), aes(x = weight, fill = Diet)) +
    ggtitle("Final weight, by diet") +
    theme(legend.position = "none")        # No legend (redundant in this graph)
 
-## Combine plots and display
-multiplot(p1, p2, p3, p4, cols = 2)
-g <- multiplot(p1, p2, p3, p4, cols = 2)
-grid::grid.draw(g)
+\dontrun{
+  ## Combine plots and display
+  multiplot(p1, p2, p3, p4, cols = 2)
+  g <- multiplot(p1, p2, p3, p4, cols = 2)
+  grid::grid.draw(g)
+}
 
 }
