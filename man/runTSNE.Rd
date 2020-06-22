@@ -70,7 +70,8 @@ This can be a character vector of row names, an integer vector of row indices or
 \item{theta}{Numeric scalar specifying the approximation accuracy of the Barnes-Hut algorithm, see \code{\link[Rtsne]{Rtsne}} for details.}
 
 \item{num_threads}{Integer scalar specifying the number of threads to use in \code{\link[Rtsne]{Rtsne}}.
-Defaults to the number of workers in a \linkS4class{MulticoreParam} \code{BPPARAM} and 1 otherwise.}
+If \code{NULL} and \code{BPPARAM} is a \linkS4class{MulticoreParam}, it is set to the number of workers in \code{BPPARAM};
+otherwise, the \code{\link[Rtsne]{Rtsne}} defaults are used.}
 
 \item{external_neighbors}{Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.}
 

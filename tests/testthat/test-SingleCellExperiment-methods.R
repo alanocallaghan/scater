@@ -7,7 +7,7 @@ test_that("accessor functions for SingleCellExperiment work as expected", {
     assay(example_sce, "exprs") <- log2(calculateCPM(example_sce) + 1)
 
     expect_that(counts(example_sce), is_a("matrix"))
-    expect_that(exprs(example_sce), is_null())
+    expect_null(exprs(example_sce))
     expect_error(cpm(example_sce), "'cpm' not in names")
 
     exprs(example_sce) <- log2(calculateCPM(example_sce) + 1)
@@ -27,7 +27,7 @@ test_that("accessor functions for SingleCellExperiment work as expected", {
     sparsified <- original
     counts(sparsified) <- as(counts(original), "dgCMatrix")
     
-    expect_that(exprs(sparsified), is_null())
+    expect_null(exprs(sparsified))
     expect_that(counts(sparsified), is_a("dgCMatrix"))
     exprs(sparsified) <- log2(calculateCPM(sparsified) + 1)
     expect_that(exprs(sparsified), is_a("dgeMatrix"))

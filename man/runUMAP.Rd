@@ -67,8 +67,9 @@ By default, no PCA is performed if the input is a dimensionality reduction resul
 
 \item{n_neighbors}{Integer scalar, number of nearest neighbors to identify when constructing the initial graph.}
 
-\item{n_threads}{Integer scalar specifying the number of threads to use in \code{\link[Rtsne]{Rtsne}}.
-Defaults to the number of workers in a \linkS4class{MulticoreParam} \code{BPPARAM} and 1 otherwise.}
+\item{n_threads}{Integer scalar specifying the number of threads to use in \code{\link[uwot]{umap}}.
+If \code{NULL} and \code{BPPARAM} is a \linkS4class{MulticoreParam}, it is set to the number of workers in \code{BPPARAM};
+otherwise, the \code{\link[uwot]{umap}} defaults are used.}
 
 \item{external_neighbors}{Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.}
 

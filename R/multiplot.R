@@ -1,6 +1,8 @@
 #' Multiple plot function for ggplot2 plots
 #'
 #' Place multiple \code{\link[ggplot2]{ggplot}} plots on one page.
+#' This function is deprecated in favour of \code{\link{grid.arrange}}.
+#' It will be defunct in the next release.
 #'
 #' @param ... One or more ggplot objects.
 #' @param plotlist A list of ggplot objects, as an alternative to \code{...}.
@@ -9,6 +11,7 @@
 #' If present, \code{cols} is ignored.
 #'
 #' @details 
+#' 
 #' If the layout is something like  \code{matrix(c(1,2,3,3), nrow=2, byrow=TRUE)}, then:
 #' \itemize{
 #' \item plot 1 will go in the upper left;
@@ -18,13 +21,11 @@
 #' There is no way to tweak the relative heights or widths of the plots with this simple function. 
 #' It was adapted from \url{http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/}
 #'
-#' @return A ggplot object.
+#' @return A ggplot object if one plot is supplied, otherwise an object of class
+#' "gtable" returned by \code{\link{grid.arrange}}.
 #'
-#' @importFrom grid grid.newpage
-#' @importFrom grid pushViewport
-#' @importFrom grid viewport
-#' @importFrom grid grid.layout
-#'
+#' @importFrom gridExtra grid.arrange
+#' @importFrom grid grid.draw
 #' @export
 #' @examples
 #' library(ggplot2)
@@ -53,10 +54,18 @@
 #'    ggtitle("Final weight, by diet") +
 #'    theme(legend.position = "none")        # No legend (redundant in this graph)
 #'
-#' ## Combine plots and display
-#' multiplot(p1, p2, p3, p4, cols = 2)
+#' \dontrun{
+#'   ## Combine plots and display
+#'   multiplot(p1, p2, p3, p4, cols = 2)
+#'   g <- multiplot(p1, p2, p3, p4, cols = 2)
+#'   grid::grid.draw(g)
+#' }
 #'
 multiplot <- function(..., plotlist = NULL, cols = 1, layout = NULL) {
+    ## a wrapper for grid.arrange is a bit pointless and there already exist
+    ## more comprehensive solutions (cowplot, egg, patchwork)
+    .Deprecated("gridExtra::grid.arrange")
+
     ## Make a list from the ... arguments and plotlist
     plots <- c(list(...), plotlist)
 
@@ -74,17 +83,6 @@ multiplot <- function(..., plotlist = NULL, cols = 1, layout = NULL) {
     if (num_plots == 1) {
         print(plots[[1]])
     } else {
-        ## Set up the page
-        grid::grid.newpage()
-        grid::pushViewport(grid::viewport(
-            layout = grid::grid.layout(nrow(layout), ncol(layout))))
-
-        # Make each plot, in the correct location
-        for (i in 1:num_plots) {
-            # Get i,j matrix positions of the regions that contain this subplot
-            matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-            print(plots[[i]], vp = grid::viewport(layout.pos.row = matchidx$row,
-                                            layout.pos.col = matchidx$col))
-        }
+        gridExtra::grid.arrange(grobs = plots, layout_matrix = layout)
     }
 }
