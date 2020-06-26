@@ -240,6 +240,7 @@ setMethod("perCellQCMetrics", "SingleCellExperiment", function(x,
 #' @importFrom S4Vectors DataFrame
 .flatten_nested_dims <- function(x, name="") {
     if (!is.null(dim(x))) {
+        rn <- rownames(x)
         if (name!="") {
             name <- paste0(name, "_")
         }
@@ -253,6 +254,7 @@ setMethod("perCellQCMetrics", "SingleCellExperiment", function(x,
         } else {
             df <- DataFrame(x[,0])
         }
+        rownames(df) <- rn
     } else {
         df <- DataFrame(x)
         colnames(df) <- name
