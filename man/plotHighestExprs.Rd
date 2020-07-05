@@ -12,7 +12,8 @@ plotHighestExprs(
   exprs_values = "counts",
   by_exprs_values = exprs_values,
   feature_names_to_plot = NULL,
-  as_percentage = TRUE
+  as_percentage = TRUE,
+  swap_rownames = NULL
 )
 }
 \arguments{
@@ -36,6 +37,10 @@ Default is \code{NULL}, in which case \code{rownames(object)} are used.}
 
 \item{as_percentage}{logical scalar indicating whether percentages should be  plotted. 
 If \code{FALSE}, the raw \code{exprs_values} are shown instead.}
+
+\item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
+identify features place of \code{rownames(object)} when labelling plot 
+elements.}
 }
 \value{
 A \link{ggplot} object.

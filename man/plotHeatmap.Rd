@@ -18,6 +18,7 @@ plotHeatmap(
   by_exprs_values = exprs_values,
   show_colnames = FALSE,
   cluster_cols = is.null(order_columns_by),
+  swap_rownames = NULL,
   ...
 )
 }
@@ -38,7 +39,7 @@ By default, all columns are used.}
 This winsorizes the expression matrix prior to plotting (but after centering, if \code{center=TRUE}). 
 If \code{NULL}, it defaults to the range of the expression matrix.}
 
-\item{symmetric}{A logical scalar specifying whether the default \code{zlim} should be symmetric around zero. 
+\item{symmetric}{A logical scalar specifying whether the default \code{zlim} should be symmetric ar7ound zero. 
 If \code{TRUE}, the maximum absolute value of \code{zlim} will be computed and multiplied by \code{c(-1, 1)} to redefine \code{zlim}.}
 
 \item{color}{A vector of colours specifying the palette to use for mapping expression values to colours. 
@@ -57,6 +58,10 @@ This argument is automatically appended to \code{colour_columns_by}.}
 for colouring of column-level data - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
 
 \item{show_colnames, cluster_cols, ...}{Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.}
+
+\item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
+identify features place of \code{rownames(object)} when labelling plot 
+elements.}
 }
 \value{
 A heatmap is produced on the current graphics device. 

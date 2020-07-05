@@ -8,6 +8,9 @@
 #' Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.
 #' @param search Character vector specifying the types of data or metadata to use.
 #' @param exprs_values String or integer scalar specifying the assay from which expression values should be extracted.
+#' @param swap_rownames Column name of \code{rowData(object)} to be used to 
+#'  identify features place of \code{rownames(object)} when labelling plot 
+#'  elements.
 #' 
 #' @return A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
 #' and \code{value}, a vector of length equal to \code{ncol(x)} containing per-cell (meta)data values.
@@ -61,7 +64,8 @@
 #' @export
 #' @importFrom SingleCellExperiment altExp altExpNames
 #' @importFrom SummarizedExperiment colData assay
-retrieveCellInfo <- function(x, by, search=c("colData", "assays", "altExps"), exprs_values="logcounts")
+retrieveCellInfo <- function(x, by, search = c("colData", "assays", "altExps"),
+        exprs_values = "logcounts", swap_rownames = NULL)
 {
     .mopUp <- function(name, value) {
         list(name=name, value=value)
@@ -102,6 +106,9 @@ retrieveCellInfo <- function(x, by, search=c("colData", "assays", "altExps"), ex
         } else if (s=="assays") {
             m <- match(by, rownames(x))
             if (!is.na(m)) {
+                if (!is.null(swap_rownames)) {
+                    by <- rowData(x)[m, swap_rownames]
+                }
                 return(.mopUp(by, assay(x, exprs_values, withDimnames=FALSE)[m,]))
             }
         } else if (s=="altExps") {

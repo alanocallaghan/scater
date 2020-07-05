@@ -15,7 +15,8 @@ plotPlatePosition(
   theme_size = 24,
   point_alpha = 0.6,
   point_size = 24,
-  other_fields = list()
+  other_fields = list(),
+  swap_rownames = NULL
 )
 }
 \arguments{
@@ -43,6 +44,10 @@ for use in point aesthetics - see the \code{exprs_values} argument in \code{?\li
 \item{point_size}{Numeric scalar specifying the size of the points, see \code{?"\link{scater-plot-args}"} for details.}
 
 \item{other_fields}{Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
+
+\item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
+identify features place of \code{rownames(object)} when labelling plot 
+elements.}
 }
 \value{
 A ggplot object.

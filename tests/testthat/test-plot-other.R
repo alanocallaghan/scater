@@ -4,6 +4,7 @@
 example_sce <- normed 
 colData(example_sce) <- cbind(colData(example_sce), perCellQCMetrics(example_sce))
 rowData(example_sce) <- cbind(rowData(example_sce), perFeatureQCMetrics(example_sce))
+rowData(example_sce)$ENS <- gsub("Gene", "ENS", rownames(example_sce))
 
 #################################################
 # Testing plotHeatmap
@@ -12,6 +13,8 @@ test_that("we can produce heatmaps", {
     # Testing out the options (need an expect_* clause to avoid skipping).
     expect_error(plotHeatmap(example_sce, features=rownames(example_sce)[1:10]), NA)
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], columns = 1:20)
+    plotHeatmap(example_sce, features=rownames(example_sce)[1:10], 
+        swap_rownames = "ENS", columns = 1:20)
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], exprs_values='counts')
 
     # Colour parameters for the expression values.
@@ -48,6 +51,10 @@ test_that("we can produce heatmaps", {
 
     # Testing out passing arguments to pheatmap.
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], fontsize = 20, legend = FALSE)
+
+    rowData(example_sce)[1:5, "ENS"] <- NA
+    plotHeatmap(example_sce, features=rownames(example_sce)[1:10], 
+        swap_rownames = "ENS", columns = 1:20)
 })
 
 #################################################
@@ -76,6 +83,9 @@ test_that("we can produce plots showing cells in plate position", {
     expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+
+    p <- plotPlatePosition(alt, colour_by = "Gene_0001", swap_rownames = "ENS")
+    expect_equal(p$scales$scales[[1]]$name, "ENS_0001")
     
     expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", shape_by = "Treatment", by_exprs_values = "counts"), "ggplot")
 
@@ -100,6 +110,8 @@ test_that("we can produce plots for column metadata", {
               expect_s3_class(plotColData(example_sce, x = x, y = y, shape_by = "Treatment"), "ggplot")
         }
     }
+    p <- plotColData(example_sce, x = "sum", y = "detected", colour_by = "Gene_0001", swap_rownames = "ENS")
+    expect_equal(p$scales$scales[[1]]$name, "ENS_0001")
 
     # Testing more visualization schemes.
     expect_s3_class(plotColData(example_sce, "sum", colour_by = "Cell_Cycle", size_by = "Gene_0001"), "ggplot")
@@ -214,6 +226,9 @@ test_that("plotDots works as expected", {
     expect_s3_class(plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[1:10], max_ave=1), "ggplot")
 
     expect_s3_class(plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[1:10], max_detected=0.5), "ggplot")
+
+    p <- plotDots(example_sce, features=rownames(example_sce)[1:10], swap_rownames = "ENS")
+    expect_equal(p$data$Feature, rowData(example_sce)[1:10, "ENS"])
 
     # Checking that other_fields play nice.
     rowData(example_sce)$stuff <- runif(nrow(example_sce))

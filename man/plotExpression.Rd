@@ -20,6 +20,7 @@ plotExpression(
   ncol = 2,
   scales = "fixed",
   other_fields = list(),
+  swap_rownames = NULL,
   ...
 )
 }
@@ -58,6 +59,10 @@ Only relevant when \code{x=NULL}.}
 Passed to the \code{scales} argument in the \code{\link[ggplot2]{facet_wrap}} when multiple facets are generated.}
 
 \item{other_fields}{Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
+
+\item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
+identify features place of \code{rownames(object)} when labelling plot 
+elements.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }
