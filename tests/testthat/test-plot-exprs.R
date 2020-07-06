@@ -24,9 +24,7 @@ test_that("plotExpression works for various aesthetics", {
     
     expect_s3_class(plotExpression(example_sce, gene_set, size_by = "Gene_0001", shape_by = "Treatment", by_exprs_values = "counts"), "ggplot")
 
-    p <- plotExpression(example_sce, gene_set, colour_by = "Gene_0001", swap_rownames="ENS")
-    expect_equal(p$scales$scales[[1]]$name, "ENS_0001")
-    expect_equal(as.character(p$data$Feature[[1]]), "ENS_0001")
+    expect_s3_class(plotExpression(example_sce, rowData(example_sce)[1:10, "ENS"], colour_by = "ENS_0001", swap_rownames="ENS"), "ggplot")
 
     # Testing options when dealing with many genes and no 'x' specified.
     expect_s3_class(plotExpression(example_sce, gene_set, one_facet=FALSE), "ggplot")

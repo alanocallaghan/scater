@@ -1,5 +1,5 @@
 .incorporate_common_vis_row <- function(df, se, mode, colour_by, size_by, shape_by, 
-    by_exprs_values, by_show_single, other_fields, multiplier = NULL, swap_rownames = NULL) 
+    by_exprs_values, by_show_single, other_fields, multiplier = NULL) 
 {
     colour_by_out <- retrieveFeatureInfo(se, colour_by, exprs_values = by_exprs_values)
     colour_by <- colour_by_out$name
@@ -109,10 +109,12 @@
     list(all = all_panels, densities = densities)
 }
 
+################################################
+## Using non-standard gene IDs
 .swap_rownames <- function(object, features, swap_rownames = NULL) {
     if (is.null(swap_rownames)) {
         return(features)
     }
-    m <- match(features, rownames(object))
-    rowData(object)[m, swap_rownames]
+    m <- match(features, rowData(object)[, swap_rownames])
+    rownames(object)[m]
 }

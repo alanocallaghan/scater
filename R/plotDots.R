@@ -69,21 +69,20 @@ plotDots <- function(object, features, group = NULL, exprs_values = "logcounts",
         group <- retrieveCellInfo(object, group, search="colData")$value
     }
 
+    feature_names <- .swap_rownames(object, features, swap_rownames)
     group <- factor(group)
-    num <- assay(numDetectedAcrossCells(object, ids=group, subset.row = features,
+    num <- assay(numDetectedAcrossCells(object, ids=group, subset.row = feature_names,
         exprs_values=exprs_values, average=TRUE, detection_limit=detection_limit))
-    ave <- assay(sumCountsAcrossCells(object, ids=group, subset.row = features,
+    ave <- assay(sumCountsAcrossCells(object, ids=group, subset.row = feature_names,
         exprs_values=exprs_values, average=TRUE))
 
-    feature_names <- .swap_rownames(object, features, swap_rownames)
     # Creating a long-form table.
     evals_long <- data.frame(
-        Feature=rep(feature_names, ncol(num)),
+        Feature=rep(features, ncol(num)),
         Group=rep(colnames(num), each=nrow(num)),
         NumDetected=as.numeric(num),
         Average=as.numeric(ave)
     )
-
     if (!is.null(max_detected)) {
         evals_long$NumDetected <- pmin(max_detected, evals_long$NumDetected)
     }
@@ -95,7 +94,7 @@ plotDots <- function(object, features, group = NULL, exprs_values = "logcounts",
     vis_out <- .incorporate_common_vis_row(evals_long, se = object, 
         colour_by = NULL, shape_by = NULL, size_by = NULL, 
         by_exprs_values = by_exprs_values, other_fields = other_fields,
-        multiplier = rep(.subset2index(features, object), ncol(num)))
+        multiplier = rep(.subset2index(feature_names, object), ncol(num)))
     evals_long <- vis_out$df
 
     ggplot(evals_long) + 

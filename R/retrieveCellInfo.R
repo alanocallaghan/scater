@@ -104,19 +104,20 @@ retrieveCellInfo <- function(x, by, search = c("colData", "assays", "altExps"),
                 return(.mopUp(by, cd[,by]))
             }
         } else if (s=="assays") {
-            m <- match(by, rownames(x))
+            if (!is.null(swap_rownames)) {
+                m <- match(by, rowData(x)[, swap_rownames])
+            } else {
+                m <- match(by, rownames(x))
+            }
             if (!is.na(m)) {
-                if (!is.null(swap_rownames)) {
-                    by <- rowData(x)[m, swap_rownames]
-                }
-                return(.mopUp(by, assay(x, exprs_values, withDimnames=FALSE)[m,]))
+                return(.mopUp(by, assay(x, exprs_values, withDimnames = FALSE)[m, ]))
             }
         } else if (s=="altExps") {
             for (i in seq_along(altExpNames(x))) {
                 current <- altExp(x, i)
                 m <- match(by, rownames(current))
                 if (!is.na(m)) {
-                    return(.mopUp(by, assay(current, exprs_values, withDimnames=FALSE)[m,]))
+                    return(.mopUp(by, assay(current, exprs_values, withDimnames = FALSE)[m, ]))
                 }
             }
         }

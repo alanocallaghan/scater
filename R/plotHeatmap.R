@@ -12,7 +12,7 @@
 #' @param zlim A numeric vector of length 2, specifying the upper and lower bounds for the expression values. 
 #' This winsorizes the expression matrix prior to plotting (but after centering, if \code{center=TRUE}). 
 #' If \code{NULL}, it defaults to the range of the expression matrix.
-#' @param symmetric A logical scalar specifying whether the default \code{zlim} should be symmetric ar7ound zero. 
+#' @param symmetric A logical scalar specifying whether the default \code{zlim} should be symmetric around zero. 
 #' If \code{TRUE}, the maximum absolute value of \code{zlim} will be computed and multiplied by \code{c(-1, 1)} to redefine \code{zlim}.
 #' @param color A vector of colours specifying the palette to use for mapping expression values to colours. 
 #' This defaults to the default setting in \code{\link[pheatmap]{pheatmap}}.
@@ -75,8 +75,9 @@ plotHeatmap <- function(object, features, columns = NULL,
     }
 
     # Pulling out the features.
-    heat.vals <- assay(object, exprs_values)[features, , drop=FALSE]
-    rownames(heat.vals) <- .swap_rownames(object, features, swap_rownames)
+    feats <- .swap_rownames(object, features, swap_rownames)
+    heat.vals <- assay(object, exprs_values)[feats, , drop=FALSE]
+    rownames(heat.vals) <- features
     if (!is.null(columns)) {
         columns <- .subset2index(columns, object, byrow=FALSE)
         heat.vals <- heat.vals[,columns,drop=FALSE]
