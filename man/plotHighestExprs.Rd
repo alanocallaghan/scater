@@ -39,7 +39,7 @@ Default is \code{NULL}, in which case \code{rownames(object)} are used.}
 If \code{FALSE}, the raw \code{exprs_values} are shown instead.}
 
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
-identify features place of \code{rownames(object)} when labelling plot 
+identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
 }
 \value{

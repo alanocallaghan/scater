@@ -27,7 +27,7 @@
 #' for colouring of column-level data - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
 #' @param show_colnames,cluster_cols,... Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to 
-#'  identify features place of \code{rownames(object)} when labelling plot 
+#'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
 #'
 #' @details 

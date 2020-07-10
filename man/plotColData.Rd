@@ -39,7 +39,7 @@ for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for details.}
 \item{other_fields}{Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
-identify features place of \code{rownames(object)} when labelling plot 
+identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}

@@ -48,7 +48,7 @@ Note that any \link{AsIs} vectors or data.frames must be of length equal to \cod
 to use when extracting values according to each entry of \code{other_fields}.}
 
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
-identify features place of \code{rownames(object)} when labelling plot 
+identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
 }
 \value{

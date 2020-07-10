@@ -21,7 +21,7 @@
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from,
 #' to use when extracting values according to each entry of \code{other_fields}. 
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to 
-#'  identify features place of \code{rownames(object)} when labelling plot 
+#'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
 #' @return 
 #' A \link{ggplot} object containing a dot plot.

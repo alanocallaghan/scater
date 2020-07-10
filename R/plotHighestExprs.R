@@ -16,7 +16,7 @@
 #' @param as_percentage logical scalar indicating whether percentages should be  plotted. 
 #' If \code{FALSE}, the raw \code{exprs_values} are shown instead.
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to 
-#'  identify features place of \code{rownames(object)} when labelling plot 
+#'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
 #'
 #' @details 

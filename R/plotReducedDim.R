@@ -23,7 +23,7 @@
 #' while the second string shows the rounded percentage of variance explained and is only relevant when this information is provided in \code{object}.
 #' @param other_fields Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to 
-#'  identify features place of \code{rownames(object)} when labelling plot 
+#'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'

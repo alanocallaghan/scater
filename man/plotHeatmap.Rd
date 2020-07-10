@@ -39,7 +39,7 @@ By default, all columns are used.}
 This winsorizes the expression matrix prior to plotting (but after centering, if \code{center=TRUE}). 
 If \code{NULL}, it defaults to the range of the expression matrix.}
 
-\item{symmetric}{A logical scalar specifying whether the default \code{zlim} should be symmetric ar7ound zero. 
+\item{symmetric}{A logical scalar specifying whether the default \code{zlim} should be symmetric around zero. 
 If \code{TRUE}, the maximum absolute value of \code{zlim} will be computed and multiplied by \code{c(-1, 1)} to redefine \code{zlim}.}
 
 \item{color}{A vector of colours specifying the palette to use for mapping expression values to colours. 
@@ -60,7 +60,7 @@ for colouring of column-level data - see the \code{exprs_values} argument in \co
 \item{show_colnames, cluster_cols, ...}{Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.}
 
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
-identify features place of \code{rownames(object)} when labelling plot 
+identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
 }
 \value{

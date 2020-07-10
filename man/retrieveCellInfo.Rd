@@ -23,7 +23,7 @@ Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.}
 \item{exprs_values}{String or integer scalar specifying the assay from which expression values should be extracted.}
 
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
-identify features place of \code{rownames(object)} when labelling plot 
+identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
 }
 \value{

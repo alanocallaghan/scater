@@ -9,7 +9,7 @@
 #' @param search Character vector specifying the types of data or metadata to use.
 #' @param exprs_values String or integer scalar specifying the assay from which expression values should be extracted.
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to 
-#'  identify features place of \code{rownames(object)} when labelling plot 
+#'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
 #' 
 #' @return A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
