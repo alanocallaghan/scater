@@ -115,6 +115,13 @@
     if (is.null(swap_rownames)) {
         return(features)
     }
-    m <- match(features, rowData(object)[, swap_rownames])
+    m <- match(features, .get_rowData_column(object, swap_rownames))
     rownames(object)[m]
+}
+
+.get_rowData_column <- function(object, column) {
+    if (!column %in% colnames(rowData(object))) {
+        stop("Cannot find column ", column, " in rowData")
+    }
+    rowData(object)[[column]]
 }

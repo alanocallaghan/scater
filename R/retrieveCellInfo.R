@@ -105,7 +105,7 @@ retrieveCellInfo <- function(x, by, search = c("colData", "assays", "altExps"),
             }
         } else if (s=="assays") {
             if (!is.null(swap_rownames)) {
-                m <- match(by, rowData(x)[, swap_rownames])
+                m <- match(by, .get_rowData_column(x, swap_rownames))
             } else {
                 m <- match(by, rownames(x))
             }

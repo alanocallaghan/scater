@@ -74,7 +74,7 @@ plotHeatmap <- function(object, features, columns = NULL,
         colnames(object) <- seq_len(ncol(object)) 
     }
 
-    # Pulling out the features.
+    # Pulling out the features. swap_rownames makes features index a rowdata col
     feats <- .swap_rownames(object, features, swap_rownames)
     heat.vals <- assay(object, exprs_values)[feats, , drop=FALSE]
     rownames(heat.vals) <- features

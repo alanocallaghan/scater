@@ -5,6 +5,9 @@ example_sce <- normed
 colData(example_sce) <- cbind(colData(example_sce), perCellQCMetrics(example_sce))
 rowData(example_sce) <- cbind(rowData(example_sce), perFeatureQCMetrics(example_sce))
 rowData(example_sce)$ENS <- gsub("Gene", "ENS", rownames(example_sce))
+rowData(example_sce)$ENS_e1 <- rowData(example_sce)$ENS
+rowData(example_sce)$ENS_e1[1:10] <- NA
+rowData(example_sce)$ENS_e2 <- "constant"
 
 #################################################
 # Testing plotHeatmap
@@ -54,6 +57,23 @@ test_that("we can produce heatmaps", {
 
     plotHeatmap(example_sce, features = rowData(example_sce)[1:10, "ENS"], 
         swap_rownames = "ENS", columns = 1:20)
+    expect_error(
+        plotHeatmap(example_sce, features = NA, swap_rownames = "ENS_e1",
+            columns = 1:20),
+        "must have n >= 2 objects to cluster"
+    )
+
+    expect_error(
+        plotHeatmap(example_sce, features = "constant", swap_rownames = "ENS_e2",
+            columns = 1:20),
+        "must have n >= 2 objects to cluster"
+    )
+
+    expect_error(
+        plotHeatmap(example_sce, features = NA, swap_rownames = "sdfsf",
+            columns = 1:20),
+        "Cannot find column sdfsf in rowData"
+    )
 })
 
 #################################################
@@ -85,6 +105,9 @@ test_that("we can produce plots showing cells in plate position", {
 
     expect_s3_class(plotPlatePosition(alt, colour_by = "ENS_0001", swap_rownames = "ENS"), "ggplot")
     
+    expect_error(plotPlatePosition(alt, colour_by = "ENS_0001", swap_rownames = "asda"),
+        "Cannot find column asda in rowData")
+
     expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", shape_by = "Treatment", by_exprs_values = "counts"), "ggplot")
 
     # Checking that other arguments are passed through.
