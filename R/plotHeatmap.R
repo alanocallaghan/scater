@@ -19,6 +19,13 @@
 #' @param colour_columns_by A list of values specifying how the columns should be annotated with colours.
 #' Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
 #' A character vector can also be supplied and will be treated as a list of strings.
+#' @param column_annotation_colors A named list of color scales to be used for
+#' the column annotations specified in \code{colour_columns_by}. Names
+#' should be character values present in \code{colour_columns_by},
+#' If a color scale is not specified for a particular annotation, a default
+#' color scale is chosen.
+#' The full list of colour maps is passed to \code{\link[pheatmap]{pheatmap}} 
+#' as the \code{annotation_colours} argument.
 #' @param order_columns_by A list of values specifying how the columns should be ordered.
 #' Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
 #' A character vector can also be supplied and will be treated as a list of strings.
@@ -65,9 +72,10 @@
 #' @importFrom SummarizedExperiment assay assayNames
 plotHeatmap <- function(object, features, columns = NULL,
     exprs_values = "logcounts", center = FALSE, zlim = NULL, symmetric = FALSE,
-    color = NULL, colour_columns_by = NULL, order_columns_by = NULL,
-    by_exprs_values = exprs_values, show_colnames = FALSE, 
-    cluster_cols = is.null(order_columns_by), swap_rownames = NULL, ...) 
+    color = NULL, colour_columns_by = NULL, column_annotation_colors = list(),
+    order_columns_by = NULL, by_exprs_values = exprs_values, 
+    show_colnames = FALSE, cluster_cols = is.null(order_columns_by),
+    swap_rownames = NULL, ...) 
 {
     # Setting names, otherwise the downstream colouring fails.
     if (is.null(colnames(object))) { 
@@ -118,11 +126,12 @@ plotHeatmap <- function(object, features, columns = NULL,
 
     # Collecting variables to colour_by.
     if (length(colour_columns_by)) {
-        column_variables <- column_colorings <- list()
+        column_variables <- list()
 
         for (i in seq_along(colour_columns_by)) { 
             field <- colour_columns_by[[i]]
-            colour_by_out <- retrieveCellInfo(object, field, exprs_values = by_exprs_values)
+            colour_by_out <- retrieveCellInfo(object, field,
+                exprs_values = by_exprs_values, swap_rownames = swap_rownames)
 
             if (is.null(colour_by_out$val)) { 
                 next
@@ -150,18 +159,22 @@ plotHeatmap <- function(object, features, columns = NULL,
                 col_name <- paste0("unnamed", i)
             }
             column_variables[[col_name]] <- colour_fac
-            column_colorings[[col_name]] <- col_scale
+            if (is.null(column_annotation_colors[[col_name]])) {
+                column_annotation_colors[[col_name]] <- col_scale
+            }
         }
 
         # No need to subset for 'columns' or 'order_columns_by',
         # as pheatmap::pheatmap uses the rownames to handle this for us.
-        column_variables <- do.call(data.frame, c(column_variables, list(row.names=colnames(object))))
+        column_variables <- do.call(data.frame,
+            c(column_variables, list(row.names=colnames(object))))
+        column_annotation_colors <- column_annotation_colors[colnames(column_variables)]
     } else {
-        column_variables <- column_colorings <- NULL
+        column_variables <- column_annotation_colors <- NULL
     }
 
     # Creating the heatmap as specified.
     pheatmap::pheatmap(heat.vals, color=color, breaks=color.breaks, 
-        annotation_col=column_variables, annotation_colors=column_colorings, 
+        annotation_col=column_variables, annotation_colors=column_annotation_colors, 
         show_colnames=show_colnames, cluster_cols=cluster_cols, ...) 
 }

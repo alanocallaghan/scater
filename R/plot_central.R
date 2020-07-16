@@ -191,7 +191,7 @@ NULL
 ## (Fill is still the default as it looks nicer.)
 {
     aes_args <- list()
-    fill_colour <- TRUE
+    fill_colour <- FALSE
     if (!is.null(shape_by)) {
         aes_args$shape <- "shape_by"
         fill_colour <- FALSE
@@ -216,7 +216,7 @@ NULL
         geom_args$fill <- "grey20"
     }
     if (is.null(shape_by)) {
-        geom_args$shape <- 21
+        geom_args$shape <- 19
     }
     if (is.null(size_by)) {
         geom_args$size <- size
