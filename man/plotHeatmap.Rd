@@ -14,6 +14,7 @@ plotHeatmap(
   symmetric = FALSE,
   color = NULL,
   colour_columns_by = NULL,
+  column_annotation_colors = NULL,
   order_columns_by = NULL,
   by_exprs_values = exprs_values,
   show_colnames = FALSE,
@@ -48,6 +49,9 @@ This defaults to the default setting in \code{\link[pheatmap]{pheatmap}}.}
 \item{colour_columns_by}{A list of values specifying how the columns should be annotated with colours.
 Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
 A character vector can also be supplied and will be treated as a list of strings.}
+
+\item{column_annotation_colors}{Passed to \code{\link{pheatmap}} 
+as the \code{annotation_colours} argument.}
 
 \item{order_columns_by}{A list of values specifying how the columns should be ordered.
 Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.

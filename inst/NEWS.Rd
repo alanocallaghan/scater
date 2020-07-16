@@ -4,6 +4,10 @@
 \section{Changes in version 1.16.0, Bioconductor 3.12 Release}{
 \itemize{
     \item Migrated many utilities to the \pkg{scuttle} package.
+    \item Deprecated \code{multiplot()} in favor of \code{gridExtras::grid.arrange()}.
+    \item Added \code{swap_rownames} argument to plot functions, allowing selection of genes using a rowData column.
+    \item Added \code{column_annotation_colors} argument to \code{plotHeatmap}
+    \item Changed default point aesthetics for all plots.
 }}
 
 \section{Changes in version 1.16.0, Bioconductor 3.11 Release (March 2020)}{

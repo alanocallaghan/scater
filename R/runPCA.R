@@ -82,7 +82,13 @@
 #'
 #' For \code{runPCA}, a SingleCellExperiment object is returned containing this matrix in \code{\link{reducedDims}(..., name)}.
 #'
-#' In both cases, the proportion of variance explained by each PC is stored as a numeric vector in the \code{"percentVar"} attribute of the reduced dimension matrix, and the rotation matrix is stored as the \code{"rotation"} attribute.
+#' In both cases, the attributes of the PC coordinate matrix contain the following elements:
+#' \itemize{
+#' \item \code{"percentVar"}, the percentage of variance explained by each PC.
+#' This may not sum to 100 if not all PCs are reported.
+#' \item \code{"varExplained"}, the actual variance explained by each PC.
+#' \item \code{"rotation"}, the rotation matrix containing loadings for all genes used in the analysis and for each PC.
+#' }
 #'
 #' @name runPCA
 #' @seealso 
@@ -118,11 +124,13 @@ NULL
     }
 
     pca <- runPCA(x, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM)
-    percentVar <- pca$sdev ^ 2 / sum(cv) * 100
+    varExplained <- pca$sdev^2
+    percentVar <- varExplained / sum(cv) * 100
 
     # Saving the results
     pcs <- pca$x
     rownames(pcs) <- rownames(x)
+    attr(pcs, "varExplained") <- varExplained
     attr(pcs, "percentVar") <- percentVar
     rownames(pca$rotation) <- colnames(x)
     attr(pcs, "rotation") <- pca$rotation
