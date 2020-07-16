@@ -1,7 +1,8 @@
 ## Tests for dimensionality reduction plotting functions
 ## library(scater); library(testthat); source("setup.R"); source("test-plot-dimred.R")
 
-example_sce <- normed 
+example_sce <- normed
+rowData(example_sce)$ENS <- gsub("Gene", "ENS", rownames(example_sce))
 
 test_that("we can produce PCA scatterplots", {
     example_sce <- runPCA(example_sce)
@@ -16,6 +17,8 @@ test_that("we can produce PCA scatterplots", {
     expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPCA(example_sce, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+
+    expect_s3_class(plotPCA(example_sce, colour_by = "ENS_0001", swap_rownames = "ENS"), "ggplot")
 
     # Checking other arguments are passed successfully to plotReducedDim.
     expect_s3_class(plotPCA(example_sce, colour_by = "Cell_Cycle", add_legend = FALSE), "ggplot")
@@ -44,6 +47,9 @@ test_that("we can produce PCA pairplots", {
     expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPCA(example_sce, ncomponents=4, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+
+    expect_s3_class(plotPCA(example_sce, ncomponents = 4, colour_by = "ENS_0001", swap_rownames = "ENS"), "ggplot")
+
 
     # Checking other arguments are passed successfully to plotReducedDim.
     expect_s3_class(plotPCA(example_sce, ncomponents=4, colour_by = "Cell_Cycle", add_legend = FALSE), "ggplot")

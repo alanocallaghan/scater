@@ -15,7 +15,8 @@ plotDots(
   max_ave = NULL,
   max_detected = NULL,
   other_fields = list(),
-  by_exprs_values = exprs_values
+  by_exprs_values = exprs_values,
+  swap_rownames = NULL
 )
 }
 \arguments{
@@ -45,6 +46,10 @@ Note that any \link{AsIs} vectors or data.frames must be of length equal to \cod
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from,
 to use when extracting values according to each entry of \code{other_fields}.}
+
+\item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
+identify features instead of \code{rownames(object)} when labelling plot 
+elements.}
 }
 \value{
 A \link{ggplot} object containing a dot plot.

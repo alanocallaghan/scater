@@ -18,6 +18,7 @@ plotReducedDim(
   text_colour = "black",
   label_format = c("\%s \%i", " (\%i\%\%)"),
   other_fields = list(),
+  swap_rownames = NULL,
   ...
 )
 }
@@ -54,6 +55,10 @@ The first string expects a string containing the result type (e.g., \code{"PCA"}
 while the second string shows the rounded percentage of variance explained and is only relevant when this information is provided in \code{object}.}
 
 \item{other_fields}{Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
+
+\item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
+identify features instead of \code{rownames(object)} when labelling plot 
+elements.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }

@@ -22,6 +22,9 @@
 #' @param scales String indicating whether should multi-facet scales be fixed (\code{"fixed"}), free (\code{"free"}), or free in one dimension (\code{"free_x"}, \code{"free_y"}).
 #' Passed to the \code{scales} argument in the \code{\link[ggplot2]{facet_wrap}} when multiple facets are generated.
 #' @param other_fields Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
+#' @param swap_rownames Column name of \code{rowData(object)} to be used to 
+#'  identify features instead of \code{rownames(object)} when labelling plot 
+#'  elements.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -80,29 +83,32 @@ plotExpression <- function(object, features, x = NULL,
     colour_by = NULL, shape_by = NULL, size_by = NULL,
     by_exprs_values = exprs_values, xlab = NULL, 
     feature_colours = TRUE, one_facet = TRUE, ncol = 2, 
-    scales = "fixed", other_fields=list(), ...) 
+    scales = "fixed", other_fields = list(),
+    swap_rownames = NULL, ...)
 {
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")
     }
 
     ## Define features to plot
-    if ( exprs_values == "exprs" && !(exprs_values %in% assayNames(object)) ) {
+    if (exprs_values == "exprs" && !(exprs_values %in% assayNames(object))) {
         exprs_values <- "logcounts"
     }
 
     exprs_vals <- vector("list", length(features))
     for (i in seq_along(features)) {
         current <- retrieveCellInfo(object, features[i], 
-            search=c("assays", "altExps"), exprs_values=exprs_values)$value
-        if (is.null(current)) {
+            search = c("assays", "altExps"), exprs_values = exprs_values,
+            swap_rownames = swap_rownames)
+        features[[i]] <- current$name
+        if (is.null(current$value)) {
             stop("cannot find '%s' in 'object'", features[i])
         }
-        exprs_vals[[i]] <- unname(current)
+        exprs_vals[[i]] <- unname(current$value)
     }
     nfeatures <- length(features)
 
-    if ( log2_values ) {
+    if (log2_values) {
         exprs_val <- lapply(exprs_vals, function(x) log2(x + 1))
         ylab <- paste0("Expression (", exprs_values, "; log2-scale)")
     } else {
@@ -126,8 +132,9 @@ plotExpression <- function(object, features, x = NULL,
     ## checking visualization arguments
     vis_out <- .incorporate_common_vis_col(evals_long, se = object, 
         colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-        by_exprs_values = by_exprs_values, other_fields=other_fields,
-        multiplier=rep(seq_len(ncol(object)), nfeatures))
+        by_exprs_values = by_exprs_values, other_fields = other_fields,
+        multiplier = rep(seq_len(ncol(object)), nfeatures),
+        swap_rownames = swap_rownames)
 
     evals_long <- vis_out$df
     colour_by <- vis_out$colour_by

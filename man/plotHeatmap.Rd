@@ -18,6 +18,7 @@ plotHeatmap(
   by_exprs_values = exprs_values,
   show_colnames = FALSE,
   cluster_cols = is.null(order_columns_by),
+  swap_rownames = NULL,
   ...
 )
 }
@@ -57,6 +58,10 @@ This argument is automatically appended to \code{colour_columns_by}.}
 for colouring of column-level data - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
 
 \item{show_colnames, cluster_cols, ...}{Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.}
+
+\item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
+identify features instead of \code{rownames(object)} when labelling plot 
+elements.}
 }
 \value{
 A heatmap is produced on the current graphics device. 

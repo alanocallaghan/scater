@@ -8,7 +8,8 @@ retrieveCellInfo(
   x,
   by,
   search = c("colData", "assays", "altExps"),
-  exprs_values = "logcounts"
+  exprs_values = "logcounts",
+  swap_rownames = NULL
 )
 }
 \arguments{
@@ -20,6 +21,10 @@ Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.}
 \item{search}{Character vector specifying the types of data or metadata to use.}
 
 \item{exprs_values}{String or integer scalar specifying the assay from which expression values should be extracted.}
+
+\item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
+identify features instead of \code{rownames(object)} when labelling plot 
+elements.}
 }
 \value{
 A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});

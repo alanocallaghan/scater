@@ -20,7 +20,9 @@
 #' Note that any \link{AsIs} vectors or data.frames must be of length equal to \code{nrow(object)}, not \code{features}.
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from,
 #' to use when extracting values according to each entry of \code{other_fields}. 
-#' 
+#' @param swap_rownames Column name of \code{rowData(object)} to be used to 
+#'  identify features instead of \code{rownames(object)} when labelling plot 
+#'  elements.
 #' @return 
 #' A \link{ggplot} object containing a dot plot.
 #' 
@@ -56,9 +58,10 @@
 #' @importFrom ggplot2 ggplot aes_string geom_point
 #' scale_size scale_color_gradient theme element_line element_rect
 #' @importFrom SummarizedExperiment assay
-plotDots <- function(object, features, group=NULL, exprs_values="logcounts", detection_limit=0,
-    low_color="white", high_color="red", max_ave=NULL, max_detected=NULL,
-    other_fields=list(), by_exprs_values=exprs_values)
+plotDots <- function(object, features, group = NULL, exprs_values = "logcounts",
+    detection_limit = 0, low_color = "white", high_color = "red",
+    max_ave = NULL, max_detected = NULL, other_fields = list(),
+    by_exprs_values = exprs_values, swap_rownames = NULL)
 {    
     if (is.null(group)) {
         group <- rep("all", ncol(object))
@@ -66,10 +69,11 @@ plotDots <- function(object, features, group=NULL, exprs_values="logcounts", det
         group <- retrieveCellInfo(object, group, search="colData")$value
     }
 
+    feature_names <- .swap_rownames(object, features, swap_rownames)
     group <- factor(group)
-    num <- assay(numDetectedAcrossCells(object, ids=group, subset.row=features,
+    num <- assay(numDetectedAcrossCells(object, ids=group, subset.row = feature_names,
         exprs_values=exprs_values, average=TRUE, detection_limit=detection_limit))
-    ave <- assay(sumCountsAcrossCells(object, ids=group, subset.row=features,
+    ave <- assay(sumCountsAcrossCells(object, ids=group, subset.row = feature_names,
         exprs_values=exprs_values, average=TRUE))
 
     # Creating a long-form table.
@@ -79,7 +83,6 @@ plotDots <- function(object, features, group=NULL, exprs_values="logcounts", det
         NumDetected=as.numeric(num),
         Average=as.numeric(ave)
     )
-
     if (!is.null(max_detected)) {
         evals_long$NumDetected <- pmin(max_detected, evals_long$NumDetected)
     }
@@ -90,8 +93,8 @@ plotDots <- function(object, features, group=NULL, exprs_values="logcounts", det
     # Adding other fields, if requested.
     vis_out <- .incorporate_common_vis_row(evals_long, se = object, 
         colour_by = NULL, shape_by = NULL, size_by = NULL, 
-        by_exprs_values = by_exprs_values, other_fields=other_fields,
-        multiplier=rep(.subset2index(features, object), ncol(num)))
+        by_exprs_values = by_exprs_values, other_fields = other_fields,
+        multiplier = rep(.subset2index(feature_names, object), ncol(num)))
     evals_long <- vis_out$df
 
     ggplot(evals_long) + 

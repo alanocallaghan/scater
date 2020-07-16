@@ -22,6 +22,9 @@
 #' The first string expects a string containing the result type (e.g., \code{"PCA"}) and an integer containing the component number,
 #' while the second string shows the rounded percentage of variance explained and is only relevant when this information is provided in \code{object}.
 #' @param other_fields Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
+#' @param swap_rownames Column name of \code{rowData(object)} to be used to 
+#'  identify features instead of \code{rownames(object)} when labelling plot 
+#'  elements.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details
@@ -61,13 +64,13 @@
 plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL, 
     colour_by = NULL, shape_by = NULL, size_by = NULL,
     by_exprs_values = "logcounts", 
-    text_by=NULL, text_size=5, text_colour="black", 
-    label_format=c("%s %i", " (%i%%)"),
-    other_fields=list(), ...)
+    text_by = NULL, text_size = 5, text_colour = "black", 
+    label_format = c("%s %i", " (%i%%)"), other_fields = list(),
+    swap_rownames = NULL, ...)
 {
     ## Extract reduced dimension representation of cells
     red_dim <- reducedDim(object, dimred)
-    if ( any(ncomponents > ncol(red_dim)) ) {
+    if (any(ncomponents > ncol(red_dim))) {
         stop(sprintf("'ncomponents' is larger than 'ncols(reducedDim(object, '%s'))'", dimred))
     }
     if (is.null(percentVar)) {
@@ -88,8 +91,8 @@ plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL,
     ## checking visualization arguments
     vis_out <- .incorporate_common_vis_col(df_to_plot, se = object, 
         colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-        by_exprs_values = by_exprs_values, other_fields=other_fields)
-
+        by_exprs_values = by_exprs_values, other_fields = other_fields,
+        swap_rownames = swap_rownames)
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by
     shape_by <- vis_out$shape_by
@@ -105,8 +108,8 @@ plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL,
         }
 
         plot_out <- .central_plotter(df_to_plot, xlab = labs[1], ylab = labs[2],
-                                     colour_by = colour_by, size_by = size_by, shape_by = shape_by, 
-                                     ..., point_FUN=NULL)
+                                     colour_by = colour_by, size_by = size_by,
+                                     shape_by = shape_by, ..., point_FUN=NULL)
 
         # Adding text with the median locations of the 'text_by' vector.
         if (!is.null(text_by)) {

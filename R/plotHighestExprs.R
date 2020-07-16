@@ -15,6 +15,9 @@
 #' for use in colouring - see \code{?\link{retrieveCellInfo}} for details.
 #' @param as_percentage logical scalar indicating whether percentages should be  plotted. 
 #' If \code{FALSE}, the raw \code{exprs_values} are shown instead.
+#' @param swap_rownames Column name of \code{rowData(object)} to be used to 
+#'  identify features instead of \code{rownames(object)} when labelling plot 
+#'  elements.
 #'
 #' @details 
 #' This function will plot the percentage of counts accounted for by the top \code{n} most highly expressed features across the dataset.
@@ -40,9 +43,10 @@
 #' @importFrom SummarizedExperiment assay
 #' @importFrom ggplot2 ggplot geom_point ggtitle xlab ylab theme_bw theme element_text 
 #' scale_color_gradient scale_fill_manual guides
-plotHighestExprs <- function(object, n = 50, colour_cells_by=NULL, 
+plotHighestExprs <- function(object, n = 50, colour_cells_by = NULL, 
     drop_features = NULL, exprs_values = "counts",
-    by_exprs_values = exprs_values, feature_names_to_plot = NULL, as_percentage = TRUE) 
+    by_exprs_values = exprs_values, feature_names_to_plot = NULL,
+    as_percentage = TRUE, swap_rownames = NULL)
 {
     ## Find the most highly expressed features in this dataset
     exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
@@ -67,6 +71,7 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by=NULL,
     } else {
         feature_names <- retrieveFeatureInfo(object, feature_names_to_plot, search = "rowData")$val
     }
+    feature_names <- .swap_rownames(object, feature_names, swap_rownames)
     sub_names <- feature_names[chosen]
 
     ## Compute expression values and reshape them for ggplot.

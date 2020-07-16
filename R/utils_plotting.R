@@ -1,5 +1,5 @@
 .incorporate_common_vis_row <- function(df, se, mode, colour_by, size_by, shape_by, 
-    by_exprs_values, by_show_single, other_fields, multiplier=NULL) 
+    by_exprs_values, by_show_single, other_fields, multiplier = NULL) 
 {
     colour_by_out <- retrieveFeatureInfo(se, colour_by, exprs_values = by_exprs_values)
     colour_by <- colour_by_out$name
@@ -34,23 +34,26 @@
 }
 
 .incorporate_common_vis_col <- function(df, se, mode, colour_by, size_by, shape_by, 
-    by_exprs_values, by_show_single, other_fields, multiplier=NULL) 
+    by_exprs_values, by_show_single, other_fields, multiplier = NULL, swap_rownames = NULL) 
 {
-    colour_by_out <- retrieveCellInfo(se, colour_by, exprs_values = by_exprs_values)
+    colour_by_out <- retrieveCellInfo(se, colour_by, exprs_values = by_exprs_values,
+        swap_rownames=swap_rownames)
     colour_by <- colour_by_out$name
     if (!is.null(multiplier)) {
-        colour_by_out$value<- colour_by_out$value[multiplier]
+        colour_by_out$value <- colour_by_out$value[multiplier]
     }
     df$colour_by <- colour_by_out$value
 
-    shape_by_out <- retrieveCellInfo(se, shape_by, exprs_values = by_exprs_values)
+    shape_by_out <- retrieveCellInfo(se, shape_by, exprs_values = by_exprs_values,
+        swap_rownames=swap_rownames)
     shape_by <- shape_by_out$name
     if (!is.null(multiplier)) {
-        shape_by_out$value<- shape_by_out$value[multiplier]
+        shape_by_out$value <- shape_by_out$value[multiplier]
     }
     df$shape_by <- .coerce_to_factor(shape_by_out$value, 10, "shape_by")
 
-    size_by_out <- retrieveCellInfo(se, size_by, exprs_values = by_exprs_values)
+    size_by_out <- retrieveCellInfo(se, size_by, exprs_values = by_exprs_values,
+        swap_rownames=swap_rownames)
     size_by <- size_by_out$name
     if (!is.null(multiplier)) {
         size_by_out$value <- size_by_out$value[multiplier]
@@ -58,14 +61,15 @@
     df$size_by <- size_by_out$value
 
     for (o in other_fields) {
-        other <- retrieveCellInfo(se, o, exprs_values=by_exprs_values)
+        other <- retrieveCellInfo(se, o, exprs_values=by_exprs_values,
+            swap_rownames=swap_rownames)
         if (!is.null(multiplier)) {
-            other$value<- other$value[multiplier]
+            other$value <- other$value[multiplier]
         }
         df <- .add_other_or_warn(df, other)
     }
 
-    list(df=df, colour_by = colour_by, shape_by = shape_by, size_by = size_by)
+    list(df = df, colour_by = colour_by, shape_by = shape_by, size_by = size_by)
 }
 
 .add_other_or_warn <- function(df, other) {
@@ -103,4 +107,21 @@
                    x = data_matrix[, i])
     }))
     list(all = all_panels, densities = densities)
+}
+
+################################################
+## Using non-standard gene IDs
+.swap_rownames <- function(object, features, swap_rownames = NULL) {
+    if (is.null(swap_rownames)) {
+        return(features)
+    }
+    m <- match(features, .get_rowData_column(object, swap_rownames))
+    rownames(object)[m]
+}
+
+.get_rowData_column <- function(object, column) {
+    if (!column %in% colnames(rowData(object))) {
+        stop("Cannot find column ", column, " in rowData")
+    }
+    rowData(object)[[column]]
 }

@@ -2,6 +2,7 @@
 ## library(scater); library(testthat); source("setup-sce.R"); source("test-plot-exprs.R")
 
 example_sce <- normed
+rowData(example_sce)$ENS <- gsub("Gene", "ENS", rownames(example_sce))
 
 test_that("plotExpression works for various 'x'", {
     for (gene_set in list("Gene_0001", rownames(example_sce)[1:5])) { # different numbers of genes, types of specification.
@@ -22,6 +23,8 @@ test_that("plotExpression works for various aesthetics", {
     expect_s3_class(plotExpression(example_sce, gene_set, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     
     expect_s3_class(plotExpression(example_sce, gene_set, size_by = "Gene_0001", shape_by = "Treatment", by_exprs_values = "counts"), "ggplot")
+
+    expect_s3_class(plotExpression(example_sce, rowData(example_sce)[1:10, "ENS"], colour_by = "ENS_0001", swap_rownames="ENS"), "ggplot")
 
     # Testing options when dealing with many genes and no 'x' specified.
     expect_s3_class(plotExpression(example_sce, gene_set, one_facet=FALSE), "ggplot")

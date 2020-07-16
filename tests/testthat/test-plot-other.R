@@ -4,6 +4,10 @@
 example_sce <- normed 
 colData(example_sce) <- cbind(colData(example_sce), perCellQCMetrics(example_sce))
 rowData(example_sce) <- cbind(rowData(example_sce), perFeatureQCMetrics(example_sce))
+rowData(example_sce)$ENS <- gsub("Gene", "ENS", rownames(example_sce))
+rowData(example_sce)$ENS_e1 <- rowData(example_sce)$ENS
+rowData(example_sce)$ENS_e1[1:10] <- NA
+rowData(example_sce)$ENS_e2 <- "constant"
 
 #################################################
 # Testing plotHeatmap
@@ -12,6 +16,8 @@ test_that("we can produce heatmaps", {
     # Testing out the options (need an expect_* clause to avoid skipping).
     expect_error(plotHeatmap(example_sce, features=rownames(example_sce)[1:10]), NA)
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], columns = 1:20)
+    plotHeatmap(example_sce, features=rowData(example_sce)[1:10, "ENS"], 
+        swap_rownames = "ENS", columns = 1:20)
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], exprs_values='counts')
 
     # Colour parameters for the expression values.
@@ -48,6 +54,26 @@ test_that("we can produce heatmaps", {
 
     # Testing out passing arguments to pheatmap.
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], fontsize = 20, legend = FALSE)
+
+    plotHeatmap(example_sce, features = rowData(example_sce)[1:10, "ENS"], 
+        swap_rownames = "ENS", columns = 1:20)
+    expect_error(
+        plotHeatmap(example_sce, features = NA, swap_rownames = "ENS_e1",
+            columns = 1:20),
+        "must have n >= 2 objects to cluster"
+    )
+
+    expect_error(
+        plotHeatmap(example_sce, features = "constant", swap_rownames = "ENS_e2",
+            columns = 1:20),
+        "must have n >= 2 objects to cluster"
+    )
+
+    expect_error(
+        plotHeatmap(example_sce, features = NA, swap_rownames = "sdfsf",
+            columns = 1:20),
+        "Cannot find column sdfsf in rowData"
+    )
 })
 
 #################################################
@@ -76,7 +102,12 @@ test_that("we can produce plots showing cells in plate position", {
     expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
     expect_s3_class(plotPlatePosition(alt, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"), "ggplot")
+
+    expect_s3_class(plotPlatePosition(alt, colour_by = "ENS_0001", swap_rownames = "ENS"), "ggplot")
     
+    expect_error(plotPlatePosition(alt, colour_by = "ENS_0001", swap_rownames = "asda"),
+        "Cannot find column asda in rowData")
+
     expect_s3_class(plotPlatePosition(alt, size_by = "Gene_0001", shape_by = "Treatment", by_exprs_values = "counts"), "ggplot")
 
     # Checking that other arguments are passed through.
@@ -100,6 +131,7 @@ test_that("we can produce plots for column metadata", {
               expect_s3_class(plotColData(example_sce, x = x, y = y, shape_by = "Treatment"), "ggplot")
         }
     }
+    expect_s3_class(plotColData(example_sce, x = "sum", y = "detected", colour_by = "ENS_0001", swap_rownames = "ENS"), "ggplot")
 
     # Testing more visualization schemes.
     expect_s3_class(plotColData(example_sce, "sum", colour_by = "Cell_Cycle", size_by = "Gene_0001"), "ggplot")
@@ -214,6 +246,8 @@ test_that("plotDots works as expected", {
     expect_s3_class(plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[1:10], max_ave=1), "ggplot")
 
     expect_s3_class(plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[1:10], max_detected=0.5), "ggplot")
+
+    expect_s3_class(plotDots(example_sce, features=rowData(example_sce)[1:10, "ENS"], swap_rownames = "ENS"), "ggplot")
 
     # Checking that other_fields play nice.
     rowData(example_sce)$stuff <- runif(nrow(example_sce))

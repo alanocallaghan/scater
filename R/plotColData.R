@@ -14,6 +14,9 @@
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for details.
 #' @param other_fields Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
+#' @param swap_rownames Column name of \code{rowData(object)} to be used to 
+#'  identify features instead of \code{rownames(object)} when labelling plot 
+#'  elements.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -50,7 +53,8 @@
 #' @export
 plotColData <- function(object, y, x = NULL, 
     colour_by = NULL, shape_by = NULL, size_by = NULL, 
-    by_exprs_values = "logcounts", other_fields=list(), ...)
+    by_exprs_values = "logcounts", other_fields=list(),
+    swap_rownames = NULL, ...)
 {
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")
@@ -79,7 +83,8 @@ plotColData <- function(object, y, x = NULL,
     ## checking visualization arguments
     vis_out <- .incorporate_common_vis_col(df_to_plot, se = object, 
         colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-        by_exprs_values = by_exprs_values, other_fields=other_fields)
+        by_exprs_values = by_exprs_values, other_fields = other_fields,
+        swap_rownames = swap_rownames)
 
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by

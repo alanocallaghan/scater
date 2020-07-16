@@ -38,8 +38,7 @@
 #' @export
 plotRowData <- function(object, y, x = NULL, 
     colour_by = NULL, shape_by = NULL, size_by = NULL, 
-    by_exprs_values = "logcounts", 
-    other_fields=list(), ...)
+    by_exprs_values = "logcounts", other_fields = list(), ...)
 {
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")
@@ -68,7 +67,7 @@ plotRowData <- function(object, y, x = NULL,
     ## checking visualization arguments
     vis_out <- .incorporate_common_vis_row(df_to_plot, se = object, 
         colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-        by_exprs_values = by_exprs_values, other_fields=other_fields)
+        by_exprs_values = by_exprs_values, other_fields = other_fields)
 
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by

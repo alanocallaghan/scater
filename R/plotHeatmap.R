@@ -26,6 +26,9 @@
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for colouring of column-level data - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
 #' @param show_colnames,cluster_cols,... Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.
+#' @param swap_rownames Column name of \code{rowData(object)} to be used to 
+#'  identify features instead of \code{rownames(object)} when labelling plot 
+#'  elements.
 #'
 #' @details 
 #' Setting \code{center=TRUE} is useful for examining log-fold changes of each cell's expression profile from the average across all cells.
@@ -60,19 +63,21 @@
 #' @importFrom DelayedMatrixStats rowMeans2
 #' @importFrom viridis viridis
 #' @importFrom SummarizedExperiment assay assayNames
-plotHeatmap <- function(object, features, columns=NULL, exprs_values="logcounts",
-    center=FALSE, zlim=NULL, symmetric=FALSE, color=NULL, 
-    colour_columns_by=NULL, order_columns_by=NULL,
+plotHeatmap <- function(object, features, columns = NULL,
+    exprs_values = "logcounts", center = FALSE, zlim = NULL, symmetric = FALSE,
+    color = NULL, colour_columns_by = NULL, order_columns_by = NULL,
     by_exprs_values = exprs_values, show_colnames = FALSE, 
-    cluster_cols=is.null(order_columns_by), ...) 
+    cluster_cols = is.null(order_columns_by), swap_rownames = NULL, ...) 
 {
     # Setting names, otherwise the downstream colouring fails.
     if (is.null(colnames(object))) { 
         colnames(object) <- seq_len(ncol(object)) 
     }
 
-    # Pulling out the features.
-    heat.vals <- assay(object, exprs_values)[features,,drop=FALSE]
+    # Pulling out the features. swap_rownames makes features index a rowdata col
+    feats <- .swap_rownames(object, features, swap_rownames)
+    heat.vals <- assay(object, exprs_values)[feats, , drop=FALSE]
+    rownames(heat.vals) <- features
     if (!is.null(columns)) {
         columns <- .subset2index(columns, object, byrow=FALSE)
         heat.vals <- heat.vals[,columns,drop=FALSE]
