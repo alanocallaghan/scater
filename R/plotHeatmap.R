@@ -163,7 +163,7 @@ plotHeatmap <- function(object, features, columns = NULL,
         # as pheatmap::pheatmap uses the rownames to handle this for us.
         column_variables <- do.call(data.frame,
             c(column_variables, list(row.names=colnames(object))))
-        column_annotation_colors <- column_annotation_colors[as.character(colour_columns_by)]
+        column_annotation_colors <- column_annotation_colors[colnames(column_variables)]
     } else {
         column_variables <- column_annotation_colors <- NULL
     }
