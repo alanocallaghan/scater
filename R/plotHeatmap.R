@@ -65,9 +65,10 @@
 #' @importFrom SummarizedExperiment assay assayNames
 plotHeatmap <- function(object, features, columns = NULL,
     exprs_values = "logcounts", center = FALSE, zlim = NULL, symmetric = FALSE,
-    color = NULL, colour_columns_by = NULL, order_columns_by = NULL,
-    by_exprs_values = exprs_values, show_colnames = FALSE, 
-    cluster_cols = is.null(order_columns_by), swap_rownames = NULL, ...) 
+    color = NULL, colour_columns_by = NULL, column_annotation_colors = NULL,
+    order_columns_by = NULL, by_exprs_values = exprs_values, 
+    show_colnames = FALSE, cluster_cols = is.null(order_columns_by),
+    swap_rownames = NULL, ...) 
 {
     # Setting names, otherwise the downstream colouring fails.
     if (is.null(colnames(object))) { 
@@ -122,7 +123,8 @@ plotHeatmap <- function(object, features, columns = NULL,
 
         for (i in seq_along(colour_columns_by)) { 
             field <- colour_columns_by[[i]]
-            colour_by_out <- retrieveCellInfo(object, field, exprs_values = by_exprs_values)
+            colour_by_out <- retrieveCellInfo(object, field,
+                exprs_values = by_exprs_values, swap_rownames = swap_rownames)
 
             if (is.null(colour_by_out$val)) { 
                 next
@@ -153,9 +155,13 @@ plotHeatmap <- function(object, features, columns = NULL,
             column_colorings[[col_name]] <- col_scale
         }
 
+        if (!missing(column_annotation_colors)) {
+            column_colorings <- column_annotation_colors
+        }
         # No need to subset for 'columns' or 'order_columns_by',
         # as pheatmap::pheatmap uses the rownames to handle this for us.
-        column_variables <- do.call(data.frame, c(column_variables, list(row.names=colnames(object))))
+        column_variables <- do.call(data.frame,
+            c(column_variables, list(row.names=colnames(object))))
     } else {
         column_variables <- column_colorings <- NULL
     }
