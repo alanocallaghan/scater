@@ -67,7 +67,7 @@
 #' @importFrom SummarizedExperiment assay assayNames
 plotHeatmap <- function(object, features, columns = NULL,
     exprs_values = "logcounts", center = FALSE, zlim = NULL, symmetric = FALSE,
-    color = NULL, colour_columns_by = NULL, column_annotation_colors = NULL,
+    color = NULL, colour_columns_by = NULL, column_annotation_colors = list(),
     order_columns_by = NULL, by_exprs_values = exprs_values, 
     show_colnames = FALSE, cluster_cols = is.null(order_columns_by),
     swap_rownames = NULL, ...) 
@@ -121,7 +121,7 @@ plotHeatmap <- function(object, features, columns = NULL,
 
     # Collecting variables to colour_by.
     if (length(colour_columns_by)) {
-        column_variables <- column_colorings <- list()
+        column_variables <- list()
 
         for (i in seq_along(colour_columns_by)) { 
             field <- colour_columns_by[[i]]
@@ -154,22 +154,22 @@ plotHeatmap <- function(object, features, columns = NULL,
                 col_name <- paste0("unnamed", i)
             }
             column_variables[[col_name]] <- colour_fac
-            column_colorings[[col_name]] <- col_scale
+            if (is.null(column_annotation_colors[[col_name]])) {
+                column_annotation_colors[[col_name]] <- col_scale
+            }
         }
 
-        if (!missing(column_annotation_colors)) {
-            column_colorings <- column_annotation_colors
-        }
         # No need to subset for 'columns' or 'order_columns_by',
         # as pheatmap::pheatmap uses the rownames to handle this for us.
         column_variables <- do.call(data.frame,
             c(column_variables, list(row.names=colnames(object))))
+        column_annotation_colors <- column_annotation_colors[colour_columns_by]
     } else {
-        column_variables <- column_colorings <- NULL
+        column_variables <- NULL
     }
 
     # Creating the heatmap as specified.
     pheatmap::pheatmap(heat.vals, color=color, breaks=color.breaks, 
-        annotation_col=column_variables, annotation_colors=column_colorings, 
+        annotation_col=column_variables, annotation_colors=column_annotation_colors, 
         show_colnames=show_colnames, cluster_cols=cluster_cols, ...) 
 }

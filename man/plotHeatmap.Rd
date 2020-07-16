@@ -14,7 +14,7 @@ plotHeatmap(
   symmetric = FALSE,
   color = NULL,
   colour_columns_by = NULL,
-  column_annotation_colors = NULL,
+  column_annotation_colors = list(),
   order_columns_by = NULL,
   by_exprs_values = exprs_values,
   show_colnames = FALSE,
