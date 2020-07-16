@@ -50,7 +50,7 @@ This defaults to the default setting in \code{\link[pheatmap]{pheatmap}}.}
 Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
 A character vector can also be supplied and will be treated as a list of strings.}
 
-\item{column_annotation_colors}{Passed to \code{\link{pheatmap}} 
+\item{column_annotation_colors}{Passed to \code{\link[pheatmap]{pheatmap}} 
 as the \code{annotation_colours} argument.}
 
 \item{order_columns_by}{A list of values specifying how the columns should be ordered.

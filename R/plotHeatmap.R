@@ -19,7 +19,7 @@
 #' @param colour_columns_by A list of values specifying how the columns should be annotated with colours.
 #' Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
 #' A character vector can also be supplied and will be treated as a list of strings.
-#' @param column_annotation_colors Passed to \code{\link{pheatmap}} 
+#' @param column_annotation_colors Passed to \code{\link[pheatmap]{pheatmap}} 
 #' as the \code{annotation_colours} argument.
 #' @param order_columns_by A list of values specifying how the columns should be ordered.
 #' Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
@@ -163,7 +163,7 @@ plotHeatmap <- function(object, features, columns = NULL,
         # as pheatmap::pheatmap uses the rownames to handle this for us.
         column_variables <- do.call(data.frame,
             c(column_variables, list(row.names=colnames(object))))
-        column_annotation_colors <- column_annotation_colors[colour_columns_by]
+        column_annotation_colors <- column_annotation_colors[as.character(colour_columns_by)]
     } else {
         column_variables <- column_annotation_colors <- NULL
     }
