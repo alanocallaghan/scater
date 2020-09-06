@@ -68,15 +68,15 @@ runColDataPCA <- function(x, ncomponents = 2,
         cv <- rep(1, ncol(exprs_to_plot))
     }
 
+    pca <- runPCA(exprs_to_plot, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM, get.rotation=FALSE)
+    percentVar <- pca$sdev ^ 2 / sum(cv)
+
     # Outlier detection. We used to use mvoutlier but their dependency tree 
     # changed to require system libraries, which were untenable.
     if (outliers) {
-        outlying <- robustbase::adjOutlyingness(exprs_to_plot, only.outlyingness=TRUE)
+        outlying <- robustbase::adjOutlyingness(pca$x, only.outlyingness=TRUE)
         x$outlier <- isOutlier(outlying, type="higher")
     }
-
-    pca <- runPCA(exprs_to_plot, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM, get.rotation=FALSE)
-    percentVar <- pca$sdev ^ 2 / sum(cv)
 
     pcs <- pca$x
     attr(pcs, "percentVar") <- percentVar

@@ -8,6 +8,7 @@
     \item Added \code{swap_rownames} argument to plot functions, allowing selection of genes using a rowData column.
     \item Added \code{column_annotation_colors} argument to \code{plotHeatmap}
     \item Changed default point aesthetics for all plots.
+    \item For \code{runColDataPCA}, reverted to documented behaviour of performing outlier detection on PCA coordinates rather than on non-transformed \code{colData}.
 }}
 
 \section{Changes in version 1.16.0, Bioconductor 3.11 Release (March 2020)}{
