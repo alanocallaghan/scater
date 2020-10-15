@@ -110,11 +110,22 @@ NULL
 #' @importFrom DelayedMatrixStats colVars
 #' @importFrom DelayedArray DelayedArray 
 #' @importFrom BiocSingular runPCA bsparam
-#' @importFrom BiocParallel SerialParam
+#' @importFrom BiocParallel SerialParam bpstart bpstop
+#' @importFrom scuttle .bpNotSharedOrUp
 .calculate_pca <- function(x, ncomponents = 50, ntop=500, 
     subset_row=NULL, scale=FALSE, transposed=FALSE,
     BSPARAM = bsparam(), BPPARAM = SerialParam())
 {
+    # For DelayedArray's parallelized rowVars/colVars.
+    oldbp <- getAutoBPPARAM()
+    setAutoBPPARAM(BPPARAM)
+    on.exit(setAutoBPPARAM(oldbp))
+
+    if (!.bpNotSharedOrUp(BPPARAM)) {
+        bpstart(BPPARAM)
+        on.exit(bpstop(BPPARAM), add=TRUE)
+    }
+
     if (!transposed) {
         out <- .get_mat_for_reddim(x, subset_row=subset_row, ntop=ntop, scale=scale, get.var=TRUE) 
         x <- out$x
