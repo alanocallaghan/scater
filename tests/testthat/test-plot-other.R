@@ -220,10 +220,7 @@ test_that("plotRLE works as expected", {
     
         p <- plotRLE(example_sce, style=style)
         expect_s3_class(p, "ggplot")
-    
-        p <- plotRLE(example_sce, add_legend=FALSE, style=style)
-        expect_s3_class(p, "ggplot")
-    
+        
         p <- plotRLE(example_sce, exprs_values="cpm", exprs_logged=FALSE, style=style)
         expect_s3_class(p, "ggplot")
     
