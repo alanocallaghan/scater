@@ -61,7 +61,12 @@
 #' @importFrom ggplot2 aes_string theme
 plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE, 
                     style = "minimal", legend = TRUE, ordering = NULL, 
-                    colour_by = NULL, by_exprs_values = exprs_values, ...) {
+                    colour_by = NULL, by_exprs_values = exprs_values, 
+                    BPPARAM = BiocParallel::bpparam(), ...) {
+
+    oldbp <- getAutoBPPARAM()
+    setAutoBPPARAM(BPPARAM)
+    on.exit(setAutoBPPARAM(oldbp))
 
     ## Check aesthetic arguments.
     colour_by_out <- retrieveCellInfo(object, colour_by, exprs_values = by_exprs_values)

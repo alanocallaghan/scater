@@ -23,13 +23,13 @@ options(BiocSingularParam.default=BiocSingular::ExactParam())
 
 # Adding a test to flush out any uncontrolled parallelization.
 library(BiocParallel)
-# failgen <- setRefClass("FailParam",
-#     contains="SerialParam",
-#     fields=list(),
-#     methods=list())
+failgen <- setRefClass("FailParam",
+    contains="BiocParallelParam",
+    fields=list(),
+    methods=list())
 
-# FAIL <- failgen()
+FAIL <- failgen()
 # register(FAIL) # TODO: once DelayedArray's %*% fix gets in.
 
 library(DelayedArray)
-setAutoBPPARAM(SerialParam())
+setAutoBPPARAM(FAIL)
