@@ -12,7 +12,7 @@ calculateMDS(x, ...)
 
 \S4method{calculateMDS}{ANY}(
   x,
-  FUN = stats::dist,
+  FUN = dist,
   ncomponents = 2,
   ntop = 500,
   subset_row = NULL,
@@ -45,7 +45,8 @@ For the SummarizedExperiment and SingleCellExperiment methods, additional argume
 
 For \code{runMDS}, additional arguments to pass to \code{calculateMDS}.}
 
-\item{FUN}{A function returning a \code{dist} object from a matrix, where rows are samples and rows are features.}
+\item{FUN}{A function that accepts a numeric matrix as its first argument, where rows are samples and columns are features;
+and returns a distance structure such as that returned by \code{dist} or a full symmetric matrix containing the dissimilarities.}
 
 \item{ncomponents}{Numeric scalar indicating the number of MDS?g dimensions to obtain.}
 

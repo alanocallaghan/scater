@@ -12,7 +12,8 @@
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
 #'
 #' For \code{runMDS}, additional arguments to pass to \code{calculateMDS}.
-#' @param FUN A function returning a \code{dist} object from a matrix, where rows are samples and rows are features.
+#' @param FUN A function that accepts a numeric matrix as its first argument, where rows are samples and columns are features;
+#'   and returns a distance structure such as that returned by \code{dist} or a full symmetric matrix containing the dissimilarities.
 #' @param keep_dist Logical scalar indicating whether the \code{dist} object calculated by \code{FUN}
 #'   should be stored as \sQuote{dist} attribute of the matrix returned/stored by \code{calculateMDS}/
 #'   \code{runMDS}.
@@ -49,7 +50,7 @@
 NULL
 
 #' @importFrom stats cmdscale dist
-.calculate_mds <- function(x, FUN = stats::dist, ncomponents = 2,
+.calculate_mds <- function(x, FUN = dist, ncomponents = 2,
     ntop = 500, subset_row = NULL, scale=FALSE, transposed=FALSE,
     keep_dist = FALSE, ...)
 {
