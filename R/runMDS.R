@@ -12,10 +12,10 @@
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
 #'
 #' For \code{runMDS}, additional arguments to pass to \code{calculateMDS}.
-#' @param FUN a function returning a \code{dist} object from a matrix, where rows are samples and rows are features
-#' @param keep_dist \code{TRUE} or \code{FALSE}: should the \code{dist} calculated by \code{FUN}
-#'   object be stored as \sQuote{dist} attribute of the matrix returned/stored by \code{calculateMDS}/
-#'   \code{runMDS}? (default: \code{keep_dist = FALSE})
+#' @param FUN A function returning a \code{dist} object from a matrix, where rows are samples and rows are features.
+#' @param keep_dist Logical scalar indicating whether the \code{dist} object calculated by \code{FUN}
+#'   should be stored as \sQuote{dist} attribute of the matrix returned/stored by \code{calculateMDS}/
+#'   \code{runMDS}.
 #'
 #' @return
 #' For \code{calculateMDS}, a matrix is returned containing the MDS coordinates for each cell (row) and dimension (column).
@@ -51,16 +51,16 @@ NULL
     ntop = 500, subset_row = NULL, scale=FALSE, transposed=FALSE,
     keep_dist = FALSE, ...)
 {
-    if(!is.logical(keep_dist) || length(keep_dist) != 1L){
+    if (!is.logical(keep_dist) || length(keep_dist) != 1L) {
         stop("'keep_dist' must be TRUE or FALSE.", call. = FALSE)
     }
     if (!transposed) {
         x <- .get_mat_for_reddim(x, subset_row=subset_row, ntop=ntop, scale=scale)
     }
     x <- as.matrix(x)
-    cell_dist <- do.call(FUN, c(list(x),list(...)))
+    cell_dist <- do.call(FUN, c(list(x), list(...)))
     ans <- cmdscale(cell_dist, k = ncomponents)
-    if(keep_dist){
+    if (keep_dist) {
         attr(ans,"dist") <- cell_dist
     }
     ans

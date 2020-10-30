@@ -45,7 +45,7 @@ For the SummarizedExperiment and SingleCellExperiment methods, additional argume
 
 For \code{runMDS}, additional arguments to pass to \code{calculateMDS}.}
 
-\item{FUN}{a function returning a \code{dist} object from a matrix, where rows are samples and rows are features}
+\item{FUN}{A function returning a \code{dist} object from a matrix, where rows are samples and rows are features.}
 
 \item{ncomponents}{Numeric scalar indicating the number of MDS?g dimensions to obtain.}
 
@@ -58,9 +58,9 @@ This can be a character vector of row names, an integer vector of row indices or
 
 \item{transposed}{Logical scalar, is \code{x} transposed with cells in rows?}
 
-\item{keep_dist}{\code{TRUE} or \code{FALSE}: should the \code{dist} calculated by \code{FUN}
-object be stored as \sQuote{dist} attribute of the matrix returned/stored by \code{calculateMDS}/
-\code{runMDS}? (default: \code{keep_dist = FALSE})}
+\item{keep_dist}{Logical scalar indicating whether the \code{dist} object calculated by \code{FUN}
+should be stored as \sQuote{dist} attribute of the matrix returned/stored by \code{calculateMDS}/
+\code{runMDS}.}
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
 
