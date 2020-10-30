@@ -33,6 +33,8 @@
 #' @seealso
 #' \code{\link{cmdscale}}, to perform the underlying calculations.
 #'
+#' \code{\link{dist}} for the function used as default to calculate the \code{dist} object.
+#'
 #' \code{\link[scater]{plotMDS}}, to quickly visualize the results.
 #'
 #' @author Aaron Lun, based on code by Davis McCarthy
