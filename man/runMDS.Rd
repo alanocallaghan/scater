@@ -12,12 +12,14 @@ calculateMDS(x, ...)
 
 \S4method{calculateMDS}{ANY}(
   x,
+  FUN = stats::dist,
   ncomponents = 2,
   ntop = 500,
   subset_row = NULL,
   scale = FALSE,
   transposed = FALSE,
-  method = "euclidean"
+  keep_dist = FALSE,
+  ...
 )
 
 \S4method{calculateMDS}{SummarizedExperiment}(x, ..., exprs_values = "logcounts")
@@ -43,6 +45,8 @@ For the SummarizedExperiment and SingleCellExperiment methods, additional argume
 
 For \code{runMDS}, additional arguments to pass to \code{calculateMDS}.}
 
+\item{FUN}{a function returning a \code{dist} object from a matrix, where rows are samples and rows are features}
+
 \item{ncomponents}{Numeric scalar indicating the number of MDS?g dimensions to obtain.}
 
 \item{ntop}{Numeric scalar specifying the number of features with the highest variances to use for dimensionality reduction.}
@@ -54,7 +58,9 @@ This can be a character vector of row names, an integer vector of row indices or
 
 \item{transposed}{Logical scalar, is \code{x} transposed with cells in rows?}
 
-\item{method}{String specifying the type of distance to be computed between cells.}
+\item{keep_dist}{\code{TRUE} or \code{FALSE}: should the \code{dist} calculated by \code{FUN}
+object be stored as \sQuote{dist} attribute of the matrix returned/stored by \code{calculateMDS}/
+\code{runMDS}? (default: \code{keep_dist = FALSE})}
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
 
