@@ -12,12 +12,14 @@ calculateMDS(x, ...)
 
 \S4method{calculateMDS}{ANY}(
   x,
+  FUN = dist,
   ncomponents = 2,
   ntop = 500,
   subset_row = NULL,
   scale = FALSE,
   transposed = FALSE,
-  method = "euclidean"
+  keep_dist = FALSE,
+  ...
 )
 
 \S4method{calculateMDS}{SummarizedExperiment}(x, ..., exprs_values = "logcounts")
@@ -43,6 +45,9 @@ For the SummarizedExperiment and SingleCellExperiment methods, additional argume
 
 For \code{runMDS}, additional arguments to pass to \code{calculateMDS}.}
 
+\item{FUN}{A function that accepts a numeric matrix as its first argument, where rows are samples and columns are features;
+and returns a distance structure such as that returned by \code{dist} or a full symmetric matrix containing the dissimilarities.}
+
 \item{ncomponents}{Numeric scalar indicating the number of MDS?g dimensions to obtain.}
 
 \item{ntop}{Numeric scalar specifying the number of features with the highest variances to use for dimensionality reduction.}
@@ -54,7 +59,9 @@ This can be a character vector of row names, an integer vector of row indices or
 
 \item{transposed}{Logical scalar, is \code{x} transposed with cells in rows?}
 
-\item{method}{String specifying the type of distance to be computed between cells.}
+\item{keep_dist}{Logical scalar indicating whether the \code{dist} object calculated by \code{FUN}
+should be stored as \sQuote{dist} attribute of the matrix returned/stored by \code{calculateMDS}/
+\code{runMDS}.}
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
 
@@ -139,6 +146,8 @@ head(reducedDim(example_sce))
 }
 \seealso{
 \code{\link{cmdscale}}, to perform the underlying calculations.
+
+\code{\link{dist}} for the function used as default to calculate the \code{dist} object.
 
 \code{\link[scater]{plotMDS}}, to quickly visualize the results.
 }

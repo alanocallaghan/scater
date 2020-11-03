@@ -1,6 +1,6 @@
 #' Perform MDS on cell-level data
 #'
-#' Perform multi-dimensional scaling (MDS) on cells, based on the data in a SingleCellExperiment object. 
+#' Perform multi-dimensional scaling (MDS) on cells, based on the data in a SingleCellExperiment object.
 #'
 #' @param x For \code{calculateMDS}, a numeric matrix of log-expression values where rows are features and columns are cells.
 #' Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
@@ -11,24 +11,30 @@
 #' @param ... For the \code{calculateMDS} generic, additional arguments to pass to specific methods.
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
 #'
-#' For \code{runMDS}, additional arguments to pass to \code{calculateMDS}. 
-#' @param method String specifying the type of distance to be computed between cells.
+#' For \code{runMDS}, additional arguments to pass to \code{calculateMDS}.
+#' @param FUN A function that accepts a numeric matrix as its first argument, where rows are samples and columns are features;
+#'   and returns a distance structure such as that returned by \code{dist} or a full symmetric matrix containing the dissimilarities.
+#' @param keep_dist Logical scalar indicating whether the \code{dist} object calculated by \code{FUN}
+#'   should be stored as \sQuote{dist} attribute of the matrix returned/stored by \code{calculateMDS}/
+#'   \code{runMDS}.
 #'
-#' @return 
+#' @return
 #' For \code{calculateMDS}, a matrix is returned containing the MDS coordinates for each cell (row) and dimension (column).
-#' 
+#'
 #' For \code{runMDS}, a modified \code{x} is returned that contains the MDS coordinates in \code{\link{reducedDim}(x, name)}.
 #'
 #' @inheritSection calculatePCA Feature selection
 #' @inheritSection calculatePCA Using reduced dimensions
 #' @inheritSection calculatePCA Using alternative Experiments
 #'
-#' @details 
-#' The function \code{\link{cmdscale}} is used internally to compute the MDS components. 
+#' @details
+#' The function \code{\link{cmdscale}} is used internally to compute the MDS components.
 #'
 #' @name runMDS
-#' @seealso 
+#' @seealso
 #' \code{\link{cmdscale}}, to perform the underlying calculations.
+#'
+#' \code{\link{dist}} for the function used as default to calculate the \code{dist} object.
 #'
 #' \code{\link[scater]{plotMDS}}, to quickly visualize the results.
 #'
@@ -44,15 +50,23 @@
 NULL
 
 #' @importFrom stats cmdscale dist
-.calculate_mds <- function(x, ncomponents = 2, ntop = 500, subset_row = NULL, 
-    scale=FALSE, transposed=FALSE, method = "euclidean")
+.calculate_mds <- function(x, FUN = dist, ncomponents = 2,
+    ntop = 500, subset_row = NULL, scale=FALSE, transposed=FALSE,
+    keep_dist = FALSE, ...)
 {
-    if (!transposed) {
-        x <- .get_mat_for_reddim(x, subset_row=subset_row, ntop=ntop, scale=scale) 
+    if (!is.logical(keep_dist) || length(keep_dist) != 1L) {
+        stop("'keep_dist' must be TRUE or FALSE.", call. = FALSE)
     }
-    x <- as.matrix(x) 
-    cell_dist <- dist(x, method = method)
-    cmdscale(cell_dist, k = ncomponents)
+    if (!transposed) {
+        x <- .get_mat_for_reddim(x, subset_row=subset_row, ntop=ntop, scale=scale)
+    }
+    x <- as.matrix(x)
+    cell_dist <- do.call(FUN, c(list(x), list(...)))
+    ans <- cmdscale(cell_dist, k = ncomponents)
+    if (keep_dist) {
+        attr(ans,"dist") <- cell_dist
+    }
+    ans
 }
 
 #' @export
