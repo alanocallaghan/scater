@@ -1,7 +1,12 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
-\section{Changes in version 1.16.0, Bioconductor 3.12 Release}{
+\section{Changes in version 1.20.0, Bioconductor 3.13 Release}{
+\itemize{
+    \item runMDS can use user-supplied function for calculating the distance matrix
+}}
+
+\section{Changes in version 1.18.0, Bioconductor 3.12 Release}{
 \itemize{
     \item Migrated many utilities to the \pkg{scuttle} package.
     \item Deprecated \code{multiplot()} in favor of \code{gridExtras::grid.arrange()}.
@@ -24,12 +29,12 @@
     \item Exposed various developer utilities for downstream packages.
     \item Modified sumCountsAcrossCells() to always return a SummarizedExperiment object, regardless of the class of ids.
     Return the number of cells used for summation in the colData.
-    \item Restored capability to create a data.frame from a SCE with makePerCellDF() and makePerFeatureDF(). 
+    \item Restored capability to create a data.frame from a SCE with makePerCellDF() and makePerFeatureDF().
     \item Added ggcells() and ggfeatures() for convenient creation of ggplot objects from a SCE.
 }}
 
 \section{Changes in version 1.14.0, Bioconductor 3.10 Release (September 2019)}{
-  \itemize{ 
+  \itemize{
     \item Removed deprecated dplyr verbs.
     \item Removed deprecated method= option in runPCA().
     Increased ncomponents= default to 50.
@@ -38,7 +43,7 @@
     \item Added runColDataPCA() function for running PCA on colData().
     Switch outlier detection strategy to avoid mvoutlier's dependency tree.
     \item Added the annotateBMFeatures() function to perform annotation without modifying the input.
-    \item Pass all ... options to biomaRt::useMart() in getBMFeatureAnnos(). 
+    \item Pass all ... options to biomaRt::useMart() in getBMFeatureAnnos().
     \item Added name= arguments to runPCA(), etc. to change the name of the output reducedDim.
     \item Added the logNormCounts() function to compute log-normalized counts in an alternative experiment-aware manner.
     Added a normalization-by-downsampling option via DropletUtils.
@@ -112,8 +117,8 @@
 
 \section{Changes in version 1.8.0, Bioconductor 3.7 Release (April 2018)}{
   \itemize{
-    \item Refactored calculateQCMetrics() to ignore potential non-linearity, rank genes by highest expression, 
-        rename automatically generated union sets, allow for output of a compact format. 
+    \item Refactored calculateQCMetrics() to ignore potential non-linearity, rank genes by highest expression,
+        rename automatically generated union sets, allow for output of a compact format.
      \item Refactored all plotting functions to allow access to nested fields in the colData() or rowData(), by supplying a character vector.
      \item Refactored plotTSNE(), plotPCA(), etc. to dispatch to the calculation functions (e.g., runTSNE(), runPCA()), with argument checks.
      \item Refactored plotColData() and plotRowData() to use the same argument types as other functions rather than aes= input.
@@ -121,10 +126,10 @@
      \item Deprecated read10xResults(), downsampleCounts() in favour of methods from the DropletUtils package.
      \item Deprecated scater_gui() in favour of methods from the iSEE package.
      \item Deprecated normalizeExprs() as this function made very little sense.
-     \item Added plotHeatmap() function, for easy plotting of heatmaps. 
+     \item Added plotHeatmap() function, for easy plotting of heatmaps.
      \item Added librarySizeFactors() function, to compute size factors from library sizes.
      \item Added by_exprs_values= argument to many plotting functions, to distinguish direct plotting of expression values from their use in aesthetics.
-     \item Renamed arguments in plotHighestExprs(), plotExprsVsTxLength(), plotExprsFreqVsMean() for greater clarity. 
+     \item Renamed arguments in plotHighestExprs(), plotExprsVsTxLength(), plotExprsFreqVsMean() for greater clarity.
      \item Added centreSizeFactors() function for centralized size factor centering.
      \item Added size_factor_grouping= argument to normalizeSCE(), calcAverage() and calculateCPM().
      \item Added subset_row= argument to calculateCPM().
@@ -158,7 +163,7 @@
     \item plotPlatePosition() function to visualise gene expression and cell metadata for cells in their position on a plate
     \item Adding plotExprsVsTxLength() to plot expression against transcript length
     \item Added fitted line and some tweaks to plotExprsFreqVsMean().
-    \item Adding support for scaled TPM counts when summarising expression at feature level. 
+    \item Adding support for scaled TPM counts when summarising expression at feature level.
     \item Adding NULL method for set_exprs(). Adding tests.
     \item Adding import of effective feature lengths with readKallistoResults()
     \item runSalmon() function for running Salmon from within R, following suggestions from Rob Patro.
