@@ -179,6 +179,10 @@ test_that("plotDots works as expected", {
 
     expect_s3_class(plotDots(example_sce, features=rowData(example_sce)[1:10, "ENS"], swap_rownames = "ENS"), "ggplot")
 
+    # Blocking works as expected.
+    expect_s3_class(plotDots(example_sce, group="Cell_Cycle", block="Mutation_Status",
+        features=rownames(example_sce)[1:10], max_detected=0.5), "ggplot")
+
     # Checking that other_fields play nice.
     rowData(example_sce)$stuff <- runif(nrow(example_sce))
     rowData(example_sce)$otherstuff <- runif(nrow(example_sce))

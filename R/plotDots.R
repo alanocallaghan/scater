@@ -6,7 +6,7 @@
 #' 
 #' @param object A \linkS4class{SingleCellExperiment} object.
 #' @param features A character vector of feature names to show as rows of the dot plot.
-#' @param group Specification of a column metadata field or a feature to show as columns.
+#' @param group Specification of a column metadata field to show as columns.
 #' Alternatively, an \link{AsIs} vector, see \code{?\link{retrieveCellInfo}} for details.
 #' @param exprs_values A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from.
 #' @param detection_limit Numeric scalar providing the value above which observations are deemed to be expressed.
@@ -23,12 +23,16 @@
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to 
 #'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
+#' @param block Specification of a column metadata field containing the blocking factors, e.g., batch of origin for each cell. 
+#' Alternatively, an \link{AsIs} vector, see \code{?\link{retrieveCellInfo}} for details.
+#'
 #' @return 
 #' A \link{ggplot} object containing a dot plot.
 #' 
 #' @details
 #' This implements a \pkg{Seurat}-style \dQuote{dot plot} that creates a dot for each feature (row) in each group of cells (column).
 #' The proportion of detected expression values and the average expression for each feature in each group of cells is visualized efficiently using the size and colour, respectively, of each dot.
+#' If \code{block} is specified, batch-corrected averages for each group are computed with \code{\link{averageBatchesByGroup}}.
 #' 
 #' We impose two restrictions - the low end of the color scale must correspond to the detection limit,
 #' and the color at this end of the scale must be the same as the background color.
@@ -49,16 +53,21 @@
 #' @examples
 #' sce <- mockSCE()
 #' sce <- logNormCounts(sce)
+#'
 #' plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle")
+#'
+#' plotDots(sce, features=rownames(sce)[1:10], group="Treatment", block="Cell_Cycle")
 #' 
 #' @seealso
 #' \code{\link{plotExpression}} and \code{\link{plotHeatmap}}, 
 #' for alternatives to visualizing group-level expression values.
+#'
 #' @export
 #' @importFrom ggplot2 ggplot aes_string geom_point
 #' scale_size scale_color_gradient theme element_line element_rect
 #' @importFrom SummarizedExperiment assay
-plotDots <- function(object, features, group = NULL, exprs_values = "logcounts",
+#' @importFrom scuttle summarizeAssayByGroup
+plotDots <- function(object, features, group = NULL, block=NULL, exprs_values = "logcounts",
     detection_limit = 0, low_color = "white", high_color = "red",
     max_ave = NULL, max_detected = NULL, other_fields = list(),
     by_exprs_values = exprs_values, swap_rownames = NULL)
@@ -71,15 +80,31 @@ plotDots <- function(object, features, group = NULL, exprs_values = "logcounts",
 
     feature_names <- .swap_rownames(object, features, swap_rownames)
     group <- factor(group)
-    num <- assay(numDetectedAcrossCells(object, ids=group, subset.row = feature_names,
-        exprs_values=exprs_values, average=TRUE, detection_limit=detection_limit))
-    ave <- assay(sumCountsAcrossCells(object, ids=group, subset.row = feature_names,
-        exprs_values=exprs_values, average=TRUE))
+
+    # Computing, possibly also batch correcting.
+    ids <- DataFrame(group=group)
+    if (!is.null(block)) {
+        ids$block <- retrieveCellInfo(object, block, search="colData")$value
+    }
+
+    summarized <- summarizeAssayByGroup(assay(object, exprs_values), 
+        ids=ids, subset.row=feature_names, 
+        statistics=c("mean", "prop.detected"), threshold=detection_limit)
+
+    ave <- assay(summarized, "mean")
+    num <- assay(summarized, "prop.detected")
+    group.names <- summarized$group
+
+    if (!is.null(block)) {
+        ave <- averageBatchesByGroup(ave, group=summarized$group, block=summarized$block)
+        num <- averageBatchesByGroup(num, group=summarized$group, block=summarized$block, transform="logit")
+        group.names <- colnames(ave)
+    }
 
     # Creating a long-form table.
     evals_long <- data.frame(
         Feature=rep(features, ncol(num)),
-        Group=rep(colnames(num), each=nrow(num)),
+        Group=rep(group.names, each=nrow(num)),
         NumDetected=as.numeric(num),
         Average=as.numeric(ave)
     )
