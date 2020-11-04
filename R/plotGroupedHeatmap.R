@@ -57,10 +57,9 @@
 #'     group="Group", block="Cell_Cycle", center=TRUE, symmetric=TRUE)
 #'
 #' @export
-#' @importFrom DelayedArray DelayedArray
-#' @importFrom DelayedMatrixStats rowMeans2
-#' @importFrom SummarizedExperiment assay assayNames
+#' @importFrom SummarizedExperiment assay 
 #' @importFrom Matrix rowMeans
+#' @importFrom scuttle summarizeAssayByGroup
 plotGroupedHeatmap <- function(object, features, group, block = NULL, columns=NULL, exprs_values = "logcounts", 
     center = FALSE, zlim = NULL, symmetric = FALSE, color = NULL, swap_rownames=NULL, ...) 
 {
