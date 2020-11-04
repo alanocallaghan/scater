@@ -8,6 +8,7 @@ plotDots(
   object,
   features,
   group = NULL,
+  block = NULL,
   exprs_values = "logcounts",
   detection_limit = 0,
   low_color = "white",
@@ -24,7 +25,10 @@ plotDots(
 
 \item{features}{A character vector of feature names to show as rows of the dot plot.}
 
-\item{group}{Specification of a column metadata field or a feature to show as columns.
+\item{group}{Specification of a column metadata field to show as columns.
+Alternatively, an \link{AsIs} vector, see \code{?\link{retrieveCellInfo}} for details.}
+
+\item{block}{Specification of a column metadata field containing the blocking factors, e.g., batch of origin for each cell. 
 Alternatively, an \link{AsIs} vector, see \code{?\link{retrieveCellInfo}} for details.}
 
 \item{exprs_values}{A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from.}
@@ -62,6 +66,7 @@ respectively, for each feature in each group of cells.
 \details{
 This implements a \pkg{Seurat}-style \dQuote{dot plot} that creates a dot for each feature (row) in each group of cells (column).
 The proportion of detected expression values and the average expression for each feature in each group of cells is visualized efficiently using the size and colour, respectively, of each dot.
+If \code{block} is specified, batch-corrected averages for each group are computed with \code{\link{batchCorrectedAverages}}.
 
 We impose two restrictions - the low end of the color scale must correspond to the detection limit,
 and the color at this end of the scale must be the same as the background color.
@@ -80,7 +85,10 @@ This aims to preserve resolution for low-abundance genes by preventing dominatio
 \examples{
 sce <- mockSCE()
 sce <- logNormCounts(sce)
+
 plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle")
+
+plotDots(sce, features=rownames(sce)[1:10], group="Treatment", block="Cell_Cycle")
 
 }
 \seealso{
