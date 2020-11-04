@@ -25,7 +25,7 @@
 #' @details 
 #' This function shows the average expression values for each group of cells on a heatmap, as defined using the \code{group} factor.
 #' A per-group visualization can be preferable to a per-cell visualization when dealing with large number of cells or groups with different size.
-#' If \code{block} is also specified, the block effect is regressed out of the averages with \code{\link{averageBatchesByGroup}} prior to visualization.
+#' If \code{block} is also specified, the block effect is regressed out of the averages with \code{\link{batchCorrectedAverages}} prior to visualization.
 #'
 #' Setting \code{center=TRUE} is useful for examining log-fold changes of each group's expression profile from the average across all groups.
 #' This avoids issues with the entire row appearing a certain colour because the gene is highly/lowly expressed across all cells.
@@ -86,7 +86,7 @@ plotGroupedHeatmap <- function(object, features, group, block = NULL, columns=NU
         ids <- ids[columns,,drop=FALSE]
     }
     heat.se <- summarizeAssayByGroup(heat.vals, ids, statistic="mean")
-    heat.vals <- averageBatchesByGroup(assay(heat.se), group=heat.se$group, block=heat.se$group)
+    heat.vals <- batchCorrectedAverages(assay(heat.se), group=heat.se$group, block=heat.se$group)
 
     # Applying centering and all that jazz.
     if (center) {

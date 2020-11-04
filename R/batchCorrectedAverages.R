@@ -1,9 +1,10 @@
-#' Compute batch-aware averages from group-level statistics
+#' Compute batch-corrected group-level averages
 #'
-#' Compute an average statistic for each group in a batch-aware manner, by fitting a linear model and extracting the coefficients.
-#' This handles statistics such as the average log-expression or the average number of cells with detected expression.
+#' Compute an average statistic for each group in a manner that corrects for batch effects, by fitting a linear model and extracting the coefficients.
+#' This handles statistics such as the average log-expression or the proportion of cells with detected expression.
 #'
-#' @param x A numeric matrix containing statistics for each gene (row) and combination of group and block (column).
+#' @param x A numeric matrix containing statistics for each gene (row) and combination of group and block (column),
+#' computed by functions such as \code{\link{summarizeAssayByGroup}} - see Examples.
 #' @param group A factor or vector specifying the group identity for each column of \code{x}, usually clusters or cell types.
 #' @param block A factor or vector specifying the blocking level for each column of \code{x}, e.g., batch of origin.
 #' @param transform String indicating how the differences between groups should be computed, for the batch adjustment.
@@ -13,13 +14,18 @@
 #' Each column corresponds to a group and contains the averaged statistic across batches.
 #'
 #' @details
+#' This function considers group-level statistics such as the average expression of all cells or the proportion with detectable expression.
+#' These are helpful for any visualizations that operate on individual groups, e.g., \code{\link{plotGroupedHeatmap}}.
+#' However, if groups are distributed across multiple batches, some manner of batch correction is required. 
 #' The problem with directly averaging group-level statistics across batches is that some groups may not exist in particular batches,
 #' e.g., due to the presence of unique cell types in different samples.
-#' A direct average would be affected by batch effects, making it difficult to intepret the value.
+#' A direct average would be biased by variable contributions of the batch effect for each group.
 #' 
-#' To overcome this, we use any shared levels to correct for the batch effect.
+#' To overcome this, we use groups that are present in multiple batches to correct for the batch effect.
+#' (That is, any level of \code{groups} that occurs for multiple levels of \code{block}.)
 #' For each gene, we fit a linear model to the (transformed) values containing both the group and block factors.
-#' We then report the coefficient for each group as the batch-adjusted average, which is possible as the fitted model has no intercept.
+#' We then report the coefficient for each group as the batch-adjusted average for that group;
+#' this is possible as the fitted model has no intercept.
 #'
 #' The default of \code{transform="raw"} will not transform the values, and is generally suitable for log-expression values.
 #' Setting \code{transform="log"} will perform a log-transformation after adding \code{offset}, and is suitable for normalized counts.
@@ -32,23 +38,32 @@
 #'
 #' @author Aaron Lun
 #'
+#' @seealso
+#' \code{\link{plotGroupedHeatmap}} and \code{\link{plotDots}}, where this function gets used.
+#'
+#' \code{regressBatches} from the \pkg{batchelor} package, to remove the batch effect from per-cell expression values.
+#'
 #' @examples
 #' y <- matrix(rnorm(10000), ncol=1000)
 #' group <- sample(10, ncol(y), replace=TRUE)
 #' block <- sample(5, ncol(y), replace=TRUE)
 #'
-#' # Note to self: replace with scuttle::summarizeAssayByGroup
-#' library(scater)
-#' summed <- sumCountsAcrossCells(y, DataFrame(group=group, block=block), average=TRUE)
+#' library(scuttle)
+#' summaries <- summarizeAssayByGroup(y, DataFrame(group=group, block=block), 
+#'     statistics=c("mean", "prop.detected"))
 #'
 #' # Computing batch-aware averages:
-#' averaged <- averageBatchesByGroup(assay(summed), 
-#'     group=summed$group, block=summed$block)
+#' library(scater)
+#' averaged <- batchCorrectedAverages(assay(summaries, "mean"), 
+#'     group=summaries$group, block=summaries$block)
+#' 
+#' num <- batchCorrectedAverages(assay(summaries, "prop.detected"),
+#'     group=summaries$group, block=summaries$block, transform="logit") 
 #' 
 #' @export
 #' @importFrom stats lm.fit model.matrix
 #' @importFrom Matrix t
-averageBatchesByGroup <- function(x, group, block, transform=c("raw", "log", "logit"), offset=NULL) { 
+batchCorrectedAverages <- function(x, group, block, transform=c("raw", "log", "logit"), offset=NULL) { 
     transform <- match.arg(transform)
     if (transform=="log") {
         if (is.null(offset)) {

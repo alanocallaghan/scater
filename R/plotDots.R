@@ -32,7 +32,7 @@
 #' @details
 #' This implements a \pkg{Seurat}-style \dQuote{dot plot} that creates a dot for each feature (row) in each group of cells (column).
 #' The proportion of detected expression values and the average expression for each feature in each group of cells is visualized efficiently using the size and colour, respectively, of each dot.
-#' If \code{block} is specified, batch-corrected averages for each group are computed with \code{\link{averageBatchesByGroup}}.
+#' If \code{block} is specified, batch-corrected averages for each group are computed with \code{\link{batchCorrectedAverages}}.
 #' 
 #' We impose two restrictions - the low end of the color scale must correspond to the detection limit,
 #' and the color at this end of the scale must be the same as the background color.
@@ -96,8 +96,8 @@ plotDots <- function(object, features, group = NULL, block=NULL, exprs_values = 
     group.names <- summarized$group
 
     if (!is.null(block)) {
-        ave <- averageBatchesByGroup(ave, group=summarized$group, block=summarized$block)
-        num <- averageBatchesByGroup(num, group=summarized$group, block=summarized$block, transform="logit")
+        ave <- batchCorrectedAverages(ave, group=summarized$group, block=summarized$block)
+        num <- batchCorrectedAverages(num, group=summarized$group, block=summarized$block, transform="logit")
         group.names <- colnames(ave)
     }
 
