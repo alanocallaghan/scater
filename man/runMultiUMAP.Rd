@@ -2,29 +2,92 @@
 % Please edit documentation in R/runMultiUMAP.R
 \name{runMultiUMAP}
 \alias{runMultiUMAP}
+\alias{calculateMultiUMAP}
+\alias{calculateMultiUMAP,ANY-method}
+\alias{calculateMultiUMAP,SummarizedExperiment-method}
+\alias{calculateMultiUMAP,SingleCellExperiment-method}
 \title{Multi-modal UMAP}
 \usage{
-runMultiUMAP(inputs, ..., metric = "euclidean")
+calculateMultiUMAP(x, ...)
+
+\S4method{calculateMultiUMAP}{ANY}(x, ..., metric = "euclidean")
+
+\S4method{calculateMultiUMAP}{SummarizedExperiment}(x, exprs_values, ...)
+
+\S4method{calculateMultiUMAP}{SingleCellExperiment}(
+  x,
+  exprs_values,
+  dimred,
+  altexp,
+  altexp_exprs_values = "logcounts",
+  ...
+)
+
+runMultiUMAP(x, ..., name = "MultiUMAP")
 }
 \arguments{
-\item{inputs}{A list of numeric matrices where each row is a cell and each column is some dimension/variable.
-For gene expression data, this is usually the matrix of PC coordinates.}
+\item{x}{For \code{calculateMultiUMAP}, a list of numeric matrices where each row is a cell and each column is some dimension/variable.
+For gene expression data, this is usually the matrix of PC coordinates.
 
-\item{...}{Further arguments to pass to \code{\link[uwot]{umap}}.}
+Alternatively, a \linkS4class{SummarizedExperiment} containing relevant matrices in its assays.
 
-\item{metric}{String specifying the type of distance to use.}
+Alternatively, a \linkS4class{SingleCellExperiment} containing relevant matrices in its assays, \code{\link{reducedDims}} or \code{\link{altExps}}.
+This is also the only permissible argument for \code{runMultiUMAP}.}
+
+\item{...}{For the generic, further arguments to pass to specific methods.
+
+For the ANY method, further arguments to pass to \code{\link[uwot]{umap}}.
+
+For the SummarizedExperiment and SingleCellExperiment methods, and for \code{runMultiUMAP}, further arguments to pass to the ANY method.}
+
+\item{metric}{Character vector specifying the type of distance to use for each matrix in \code{x}.
+This is recycled to the same number of matrices supplied in \code{x}.}
+
+\item{exprs_values}{A character or integer vector of assays to extract and transpose for use in the UMAP.
+For the SingleCellExperiment, this argument can be missing, in which case no assays are used.}
+
+\item{dimred}{A character or integer vector of \code{\link{reducedDims}} to extract for use in the UMAP.
+This argument can be missing, in which case no assays are used.}
+
+\item{altexp}{A character or integer vector of \code{\link{altExps}} to extract and transpose for use in the UMAP.
+This argument can be missing, in which case no alternative experiments are used.}
+
+\item{altexp_exprs_values}{A character or integer vector specifying the assay to extract from alternative experiments, when \code{altexp} is specified.
+This is recycled to the same length as \code{altexp}.}
+
+\item{name}{String specifying the name of the \code{\link{reducedDims}} in which to store the UMAP.}
 }
 \value{
-A numeric matrix containing the low-dimensional UMAP embedding.
+For \code{calculateMultiUMAP}, a numeric matrix containing the low-dimensional UMAP embedding.
+
+For \code{runMultiUMAP}, \code{x} is returned with a \code{MultiUMAP} field in its \code{\link{reducedDims}}.
 }
 \description{
 Perform UMAP with multiple input matrices by intersecting their simplicial sets.
 Typically used to combine results from multiple data modalities into a single embedding.
 }
 \details{
-This is simply a convenience wrapper around \code{\link[uwot]{umap}} for multi-modal analysis.
-All modes use the distance metric of \code{metric} to construct the simplicial sets \emph{within} each mode.
-Comparisons across modes are then performed after intersecting the sets to obtain a single graph.
+These functions serve as convenience wrappers around \code{\link[uwot]{umap}} for multi-modal analysis.
+The idea is that each input matrix in \code{x} corresponds to data for a different mode.
+A typical example would consist of the PC coordinates generated from gene expression counts,
+plus the log-abundance matrix for ADT counts from CITE-seq experiments;
+one might also include matrices of transformed intensities from indexed FACS, to name some more possibilities.
+
+Roughly speaking, the idea is to identify nearest neighbors \emph{within} each mode to construct the simplicial sets.
+Integration of multiple modes is performed by intersecting the sets to obtain a single graph, which is used in the rest of the UMAP algorithm.
+By performing an intersection, we focus on relationships between cells that are consistently neighboring across all the modes,
+thus providing greater resolution of differences at any mode.
+The neighbor search within each mode also avoids difficulties with quantitative comparisons of distances between modes.
+
+The most obvious use of this function is to generate a low-dimensional embedding for visualization.
+However, users can also set \code{n_components} to a higher value (e.g., 10-20) to retain more information for downstream steps like clustering.
+This 
+Do, however, remember to set the seed appropriately.
+
+By default, all modes use the distance metric of \code{metric} to construct the simplicial sets \emph{within} each mode.
+However, it is possible to vary this by supplying a vector of metrics, e.g., \code{"euclidean"} for the first matrix, \code{"manhattan"} for the second.
+For the SingleCellExperiment method, matrices are extracted in the order of assays, reduced dimensions and alternative experiments,
+so any variation in \code{metrics} is also assumed to follow this order.
 }
 \examples{
 # Mocking up a gene expression + ADT dataset:
@@ -38,15 +101,8 @@ altExp(exprs_sce, "ADT") <- adt_sce
 
 # Running a multimodal analysis using PCs for expression
 # and log-counts for the ADTs:
-output <- runMultiUMAP(
-    list(
-        reducedDim(exprs_sce, "PCA"),
-        t(logcounts(altExp(exprs_sce, "ADT")))
-    )
-)
-
-reducedDim(exprs_sce, "combinedUMAP") <- output
-plotReducedDim(exprs_sce, "combinedUMAP")
+exprs_sce <- runMultiUMAP(exprs_sce, dimred="PCA", altexp="ADT")
+plotReducedDim(exprs_sce, "MultiUMAP")
 
 }
 \seealso{
