@@ -427,16 +427,24 @@ test_that("multi-modal UMAP works as expected", {
     stuff <- matrix(rnorm(10000), ncol=50)
     things <- list(stuff, stuff[,1:5], stuff[,1:20])
     metrics <- scater:::.compute_multi_modal_metrics(things)
-    expect_identical(lengths(metrics), vapply(things, ncol, 0L))
-    expect_identical(unlist(metrics), seq_len(sum(vapply(things, ncol, 0L))))
+    expect_identical(unname(lengths(metrics)), vapply(things, ncol, 0L))
+    expect_identical(unname(unlist(metrics)), seq_len(sum(vapply(things, ncol, 0L))))
 
-    output <- runMultiUMAP(things)
+    output <- calculateMultiUMAP(things)
     expect_identical(nrow(output), nrow(stuff))
     expect_identical(ncol(output), 2L)
 
-    output <- runMultiUMAP(things, n_components=10)
+    set.seed(9999)
+    output <- calculateMultiUMAP(things, n_components=10)
     expect_identical(nrow(output), nrow(stuff))
     expect_identical(ncol(output), 10L)
+
+    # Same result for SCEs.
+    sce <- SingleCellExperiment(list(X=t(stuff)), reducedDims=list(Y=stuff[,1:5]), altExps=list(Z=SummarizedExperiment(t(stuff[,1:20]))))
+
+    set.seed(9999)
+    output2 <- runMultiUMAP(sce, exprs_values=1, dimred=1, altexp=1, altexp_exprs_values=1, n_components=10)
+    expect_identical(output, reducedDim(output2, "MultiUMAP"))
 })
 
 #############################################
