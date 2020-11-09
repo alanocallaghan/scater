@@ -10,13 +10,17 @@ plotDots(
   group = NULL,
   exprs_values = "logcounts",
   detection_limit = 0,
-  low_color = "white",
+  low_color = if (center) "blue" else "white",
+  mid_color = "white",
   high_color = "red",
   max_ave = NULL,
   max_detected = NULL,
   other_fields = list(),
   by_exprs_values = exprs_values,
-  swap_rownames = NULL
+  swap_rownames = NULL,
+  center = FALSE,
+  scale = FALSE,
+  bg_color = if (center) mid_color else low_color
 )
 }
 \arguments{
@@ -32,8 +36,10 @@ Alternatively, an \link{AsIs} vector, see \code{?\link{retrieveCellInfo}} for de
 \item{detection_limit}{Numeric scalar providing the value above which observations are deemed to be expressed.
 This is also used as the}
 
-\item{low_color}{String specifying the color to use for low expression.
-This is also used as the background color, see Details.}
+\item{low_color}{String specifying the color to use for low expression.}
+
+\item{mid_color}{String specifying the color to use for the midpoint of
+the expression level scale when \code{center=TRUE}.}
 
 \item{high_color}{String specifying the color to use for high expression.}
 
@@ -50,6 +56,13 @@ to use when extracting values according to each entry of \code{other_fields}.}
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
 identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
+
+\item{scale, center}{Logical scalars controlling whether the
+expression values should be centred to have mean zero
+(controlled by \code{center}) and/or scaled to have unit standard
+deviation (controlled by \code{scale}).}
+
+\item{bg_color}{The color used as the background color, see Details.}
 }
 \value{
 A \link{ggplot} object containing a dot plot.

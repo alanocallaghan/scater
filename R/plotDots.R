@@ -12,7 +12,8 @@
 #' @param detection_limit Numeric scalar providing the value above which observations are deemed to be expressed.
 #' This is also used as the 
 #' @param low_color String specifying the color to use for low expression.
-#' This is also used as the background color, see Details.
+#' @param mid_color String specifying the color to use for the midpoint of
+#' the expression level scale when \code{center=TRUE}.
 #' @param high_color String specifying the color to use for high expression.
 #' @param max_ave Numeric value specifying the cap on the average expression.
 #' @param max_detected Numeric value specifying the cap on the proportion of detected expression values.
@@ -23,6 +24,11 @@
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to 
 #'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
+#' @param scale,center Logical scalars controlling whether the
+#' expression values should be centred to have mean zero
+#' (controlled by \code{center}) and/or scaled to have unit standard
+#' deviation (controlled by \code{scale}).
+#' @param bg_color The color used as the background color, see Details.
 #' @return 
 #' A \link{ggplot} object containing a dot plot.
 #' 
@@ -56,12 +62,15 @@
 #' for alternatives to visualizing group-level expression values.
 #' @export
 #' @importFrom ggplot2 ggplot aes_string geom_point
-#' scale_size scale_color_gradient theme element_line element_rect
+#' scale_size scale_color_gradient theme element_line element_rect 
+#' scale_color_gradient2
 #' @importFrom SummarizedExperiment assay
 plotDots <- function(object, features, group = NULL, exprs_values = "logcounts",
-    detection_limit = 0, low_color = "white", high_color = "red",
-    max_ave = NULL, max_detected = NULL, other_fields = list(),
-    by_exprs_values = exprs_values, swap_rownames = NULL)
+    detection_limit = 0, low_color = if (center) "blue" else "white", 
+    mid_color = "white", high_color = "red", max_ave = NULL,
+    max_detected = NULL, other_fields = list(), by_exprs_values = exprs_values,
+    swap_rownames = NULL, center = FALSE, scale = FALSE,
+    bg_color = if (center) mid_color else low_color)
 {    
     if (is.null(group)) {
         group <- rep("all", ncol(object))
@@ -76,6 +85,18 @@ plotDots <- function(object, features, group = NULL, exprs_values = "logcounts",
     ave <- assay(sumCountsAcrossCells(object, ids=group, subset.row = feature_names,
         exprs_values=exprs_values, average=TRUE))
 
+    if (center) {
+        ave <- ave - rowMeans(ave)
+    }
+    if (scale) {
+        ave <- ave / apply(ave, 1, function(row) {
+            sqrt(sum(row^2) / (length(row) - 1))
+        })
+    }
+    if (!is.null(max_ave)) {
+        ave <- pmin(max_ave, ave)
+    }
+
     # Creating a long-form table.
     evals_long <- data.frame(
         Feature=rep(features, ncol(num)),
@@ -86,8 +107,17 @@ plotDots <- function(object, features, group = NULL, exprs_values = "logcounts",
     if (!is.null(max_detected)) {
         evals_long$NumDetected <- pmin(max_detected, evals_long$NumDetected)
     }
-    if (!is.null(max_ave)) {
-        evals_long$Average <- pmin(max_ave, evals_long$Average)
+    if (scale) {
+        ma <- max(abs(ave))
+        colour_scale <- scale_color_gradient2(
+            limits = c(-ma, ma),
+            low = low_color, mid = mid_color, high = high_color
+        )
+    } else {
+        colour_scale <- scale_color_gradient(
+            limits = c(detection_limit, max(evals_long$Average)),
+            low = low_color, high = high_color
+        )
     }
 
     # Adding other fields, if requested.
@@ -96,13 +126,11 @@ plotDots <- function(object, features, group = NULL, exprs_values = "logcounts",
         by_exprs_values = by_exprs_values, other_fields = other_fields,
         multiplier = rep(.subset2index(feature_names, object), ncol(num)))
     evals_long <- vis_out$df
-
     ggplot(evals_long) + 
         geom_point(aes_string(x="Group", y="Feature", size="NumDetected", col="Average")) +
         scale_size(limits=c(0, max(evals_long$NumDetected))) + 
-        scale_color_gradient(limits=c(detection_limit, max(evals_long$Average)),
-            low=low_color, high=high_color) +
-        theme(panel.background = element_rect(fill=low_color),
+        colour_scale +
+        theme(panel.background = element_rect(fill = bg_color),
             panel.grid.major = element_line(size=0.5, colour = "grey80"),
             panel.grid.minor = element_line(size=0.25, colour = "grey80"))
 }
