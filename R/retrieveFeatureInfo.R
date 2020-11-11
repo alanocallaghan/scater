@@ -11,7 +11,7 @@
 #' 
 #' @return A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
 #' and \code{value}, a vector of length equal to \code{ncol(x)} containing per-feature (meta)data values.
-#' If \code{by=NULL} or was not found in \code{x}, both \code{name} and \code{value} are set to \code{NULL}.
+#' If \code{by=NULL}, both \code{name} and \code{value} are set to \code{NULL}.
 #'
 #' @details
 #' Given a AsIs-wrapped vector in \code{by}, this function will directly return the vector values as \code{value},
