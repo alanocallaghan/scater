@@ -91,10 +91,10 @@
 # https://gastonsanchez.wordpress.com/2012/08/27/scatterplot-matrices-with-ggplot/
 {
     if ( is.null(names(data_matrix)) )
-        names(data_matrix) <- paste0("row", 1:nrow(data_matrix))
-    exp_grid <- expand.grid(x = 1:ncol(data_matrix), y = 1:ncol(data_matrix))
+        names(data_matrix) <- paste0("row", seq_len(nrow(data_matrix)))
+    exp_grid <- expand.grid(x = seq_len(ncol(data_matrix)), y = seq_len(ncol(data_matrix)))
     exp_grid <- exp_grid[exp_grid$x != exp_grid$y,]
-    all_panels <- do.call("rbind", lapply(1:nrow(exp_grid), function(i) {
+    all_panels <- do.call("rbind", lapply(seq_len(nrow(exp_grid)), function(i) {
         xcol <- exp_grid[i, "x"]
         ycol <- exp_grid[i, "y"]
         data.frame(xvar = names(data_matrix)[ycol], yvar = names(data_matrix)[xcol],
@@ -102,7 +102,7 @@
     }))
     all_panels$xvar <- factor(all_panels$xvar, levels = names(data_matrix))
     all_panels$yvar <- factor(all_panels$yvar, levels = names(data_matrix))
-    densities <- do.call("rbind", lapply(1:ncol(data_matrix), function(i) {
+    densities <- do.call("rbind", lapply(seq_len(ncol(data_matrix)), function(i) {
         data.frame(xvar = names(data_matrix)[i], yvar = names(data_matrix)[i],
                    x = data_matrix[, i])
     }))
