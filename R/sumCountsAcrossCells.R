@@ -379,8 +379,13 @@ setMethod("aggregateAcrossCells", "SummarizedExperiment", function(x, ids, ..., 
         per.group <- lapply(grouped, FUN)
         per.group <- unname(per.group)
         if (length(per.group)>=1L) {
-            # Using 'c' instead of unlist to accommodate Vectors.
-            collected[[cn]] <- do.call(c, per.group)
+            if (is.factor(per.group[[1]])) {
+                # Because factor's c() doesn't preserve factor-ness.
+                collected[[cn]] <- unlist(per.group)
+            } else {
+                # Using 'c' instead of unlist to accommodate Vectors.
+                collected[[cn]] <- do.call(c, per.group)
+            }
         } else {
             # Obtaining a column of the correct type.
             collected[[cn]] <- FUN(x[[cn]])[0]
