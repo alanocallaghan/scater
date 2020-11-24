@@ -11,17 +11,15 @@ plotDots(
   block = NULL,
   exprs_values = "logcounts",
   detection_limit = 0,
-  low_color = if (center) "blue" else "white",
-  mid_color = "white",
-  high_color = "red",
-  max_ave = NULL,
   max_detected = NULL,
   other_fields = list(),
   by_exprs_values = exprs_values,
   swap_rownames = NULL,
   center = FALSE,
   scale = FALSE,
-  bg_color = if (center) mid_color else low_color
+  symmetric = center,
+  zlim = NULL,
+  color = NULL
 )
 }
 \arguments{
@@ -40,16 +38,8 @@ Alternatively, an \link{AsIs} vector, see \code{?\link{retrieveCellInfo}} for de
 \item{detection_limit}{Numeric scalar providing the value above which observations are deemed to be expressed.
 This is also used as the}
 
-\item{low_color}{String specifying the color to use for low expression.}
-
-\item{mid_color}{String specifying the color to use for the midpoint of
-the expression level scale when \code{center=TRUE}.}
-
-\item{high_color}{String specifying the color to use for high expression.}
-
-\item{max_ave}{Numeric value specifying the cap on the average expression.}
-
-\item{max_detected}{Numeric value specifying the cap on the proportion of detected expression values.}
+\item{max_detected}{Numeric value specifying the cap on the proportion of 
+detected expression values.}
 
 \item{other_fields}{Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 Note that any \link{AsIs} vectors or data.frames must be of length equal to \code{nrow(object)}, not \code{features}.}
@@ -66,7 +56,16 @@ expression values should be centred to have mean zero
 (controlled by \code{center}) and/or scaled to have unit standard
 deviation (controlled by \code{scale}).}
 
-\item{bg_color}{The color used as the background color, see Details.}
+\item{symmetric}{Logical scalar controlling whether the colour scale for
+dots should be symmetric around zero.}
+
+\item{zlim}{A numeric vector of length 2, specifying the upper and lower 
+bounds for the expression values.}
+
+\item{color}{A vector of colours specifying the palette to use for mapping 
+expression values to colours. 
+This defaults to \link[viridis]{viridis} if, and the the \code{"RdYlBu"}
+color palette from \code{\link[RColorBrewer]{brewer.pal}} otherwise.}
 }
 \value{
 A \link{ggplot} object containing a dot plot.
@@ -92,7 +91,8 @@ For example, if we colored by z-score on a conventional blue-white-red color axi
 If the background color was also white, this might be mistaken for a gene that is not downregulated at all.
 On the other hand, any other background color would effectively require consideration of two color axes as expression decreases.
 
-We can also cap the color and size scales at \code{max_ave} and \code{max_detected}, respectively.
+We can also cap the color and size scales using \code{zlim} and 
+\code{max_detected}, respectively.
 This aims to preserve resolution for low-abundance genes by preventing domination of the scales by high-abundance features.
 }
 \examples{
@@ -100,6 +100,10 @@ sce <- mockSCE()
 sce <- logNormCounts(sce)
 
 plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle")
+plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE)
+plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", scale=TRUE)
+plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE, scale=TRUE)
+plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE, scale=TRUE, symmetric=FALSE)
 
 plotDots(sce, features=rownames(sce)[1:10], group="Treatment", block="Cell_Cycle")
 

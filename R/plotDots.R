@@ -11,12 +11,14 @@
 #' @param exprs_values A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from.
 #' @param detection_limit Numeric scalar providing the value above which observations are deemed to be expressed.
 #' This is also used as the 
-#' @param low_color String specifying the color to use for low expression.
-#' @param mid_color String specifying the color to use for the midpoint of
-#' the expression level scale when \code{center=TRUE}.
-#' @param high_color String specifying the color to use for high expression.
-#' @param max_ave Numeric value specifying the cap on the average expression.
-#' @param max_detected Numeric value specifying the cap on the proportion of detected expression values.
+#' @param color A vector of colours specifying the palette to use for mapping 
+#' expression values to colours. 
+#' This defaults to \link[viridis]{viridis} if, and the the \code{"RdYlBu"}
+#' color palette from \code{\link[RColorBrewer]{brewer.pal}} otherwise.
+#' @param zlim A numeric vector of length 2, specifying the upper and lower 
+#' bounds for the expression values. 
+#' @param max_detected Numeric value specifying the cap on the proportion of 
+#' detected expression values.
 #' @param other_fields Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' Note that any \link{AsIs} vectors or data.frames must be of length equal to \code{nrow(object)}, not \code{features}.
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from,
@@ -28,7 +30,6 @@
 #' expression values should be centred to have mean zero
 #' (controlled by \code{center}) and/or scaled to have unit standard
 #' deviation (controlled by \code{scale}).
-#' @param bg_color The color used as the background color, see Details.
 #' @param block Specification of a column metadata field containing the blocking factors, e.g., batch of origin for each cell. 
 #' Alternatively, an \link{AsIs} vector, see \code{?\link{retrieveCellInfo}} for details.
 #'
@@ -51,7 +52,8 @@
 #' If the background color was also white, this might be mistaken for a gene that is not downregulated at all.
 #' On the other hand, any other background color would effectively require consideration of two color axes as expression decreases.
 #' 
-#' We can also cap the color and size scales at \code{max_ave} and \code{max_detected}, respectively.
+#' We can also cap the color and size scales using \code{zlim} and 
+#' \code{max_detected}, respectively.
 #' This aims to preserve resolution for low-abundance genes by preventing domination of the scales by high-abundance features.
 #'
 #' @author Aaron Lun
@@ -61,6 +63,10 @@
 #' sce <- logNormCounts(sce)
 #'
 #' plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle")
+#' plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE)
+#' plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", scale=TRUE)
+#' plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE, scale=TRUE)
+#' plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE, scale=TRUE)
 #'
 #' plotDots(sce, features=rownames(sce)[1:10], group="Treatment", block="Cell_Cycle")
 #' 
@@ -75,12 +81,10 @@
 #' @importFrom SummarizedExperiment assay
 #' @importFrom scuttle summarizeAssayByGroup
 plotDots <- function(object, features, group = NULL, block=NULL,
-    exprs_values = "logcounts", detection_limit = 0, 
-    low_color = if (center) "blue" else "white",
-    mid_color = "white", high_color = "red", max_ave = NULL,
+    exprs_values = "logcounts", detection_limit = 0,
     max_detected = NULL, other_fields = list(), by_exprs_values = exprs_values,
     swap_rownames = NULL, center = FALSE, scale = FALSE,
-    bg_color = if (center) mid_color else low_color)
+    zlim = NULL, color = NULL)
 {    
     if (is.null(group)) {
         group <- rep("all", ncol(object))
@@ -115,12 +119,7 @@ plotDots <- function(object, features, group = NULL, block=NULL,
         ave <- ave - rowMeans(ave)
     }
     if (scale) {
-        ave <- ave / apply(ave, 1, function(row) {
-            sqrt(sum(row^2) / (length(row) - 1))
-        })
-    }
-    if (!is.null(max_ave)) {
-        ave <- pmin(max_ave, ave)
+        ave <- ave / sqrt(rowSums(ave^2) / (ncol(ave) - 1))
     }
 
     # Creating a long-form table.
@@ -133,18 +132,22 @@ plotDots <- function(object, features, group = NULL, block=NULL,
     if (!is.null(max_detected)) {
         evals_long$NumDetected <- pmin(max_detected, evals_long$NumDetected)
     }
-    if (scale) {
-        ma <- max(abs(ave))
-        colour_scale <- scale_color_gradient2(
-            limits = c(-ma, ma),
-            low = low_color, mid = mid_color, high = high_color
-        )
-    } else {
-        colour_scale <- scale_color_gradient(
-            limits = c(detection_limit, max(evals_long$Average)),
-            low = low_color, high = high_color
-        )
+    if (is.null(zlim)) {
+        if (center) {
+            extreme <- max(abs(ave))
+            zlim <- c(-extreme, extreme)
+        } else {
+            zlim <- c(min(ave), max(ave))
+        }
     }
+    if (is.null(color)) {
+        if (center) {
+            color <- rev(RColorBrewer::brewer.pal(9, "RdYlBu"))
+        } else {
+            color <- rev(viridis(9))
+        }
+    }
+    color_scale <- scale_color_gradientn(colours = color, limits = zlim)
 
     # Adding other fields, if requested.
     vis_out <- .incorporate_common_vis_row(evals_long, se = object, 
@@ -155,8 +158,9 @@ plotDots <- function(object, features, group = NULL, block=NULL,
     ggplot(evals_long) + 
         geom_point(aes_string(x="Group", y="Feature", size="NumDetected", col="Average")) +
         scale_size(limits=c(0, max(evals_long$NumDetected))) + 
-        colour_scale +
-        theme(panel.background = element_rect(fill = bg_color),
+        color_scale +
+        theme(
+            panel.background = element_rect(fill = "white"),
             panel.grid.major = element_line(size=0.5, colour = "grey80"),
             panel.grid.minor = element_line(size=0.25, colour = "grey80"))
 }
