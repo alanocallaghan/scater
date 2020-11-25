@@ -113,40 +113,18 @@ plotDots <- function(object, features, group = NULL, block=NULL,
         num <- batchCorrectedAverages(num, group=summarized$group, block=summarized$block, transform="logit")
         group.names <- colnames(ave)
     }
-
-    if (center) {
-        ave <- ave - rowMeans(ave)
-    }
-    if (scale) {
-        ave <- ave / sqrt(rowSums(ave^2) / (ncol(ave) - 1))
-    }
+    heatmap_scale <- .heatmap_scale(ave, center=center, scale=scale, color=color, zlim=zlim)
 
     # Creating a long-form table.
     evals_long <- data.frame(
         Feature=rep(features, ncol(num)),
         Group=rep(group.names, each=nrow(num)),
         NumDetected=as.numeric(num),
-        Average=as.numeric(ave)
+        Average=as.numeric(heatmap_scale$x)
     )
     if (!is.null(max_detected)) {
         evals_long$NumDetected <- pmin(max_detected, evals_long$NumDetected)
     }
-    if (is.null(zlim)) {
-        if (center) {
-            extreme <- max(abs(ave))
-            zlim <- c(-extreme, extreme)
-        } else {
-            zlim <- c(min(ave), max(ave))
-        }
-    }
-    if (is.null(color)) {
-        if (center) {
-            color <- rev(RColorBrewer::brewer.pal(9, "RdYlBu"))
-        } else {
-            color <- rev(viridis(9))
-        }
-    }
-    color_scale <- scale_color_gradientn(colours = color, limits = zlim)
 
     # Adding other fields, if requested.
     vis_out <- .incorporate_common_vis_row(evals_long, se = object, 
@@ -157,7 +135,7 @@ plotDots <- function(object, features, group = NULL, block=NULL,
     ggplot(evals_long) + 
         geom_point(aes_string(x="Group", y="Feature", size="NumDetected", col="Average")) +
         scale_size(limits=c(0, max(evals_long$NumDetected))) + 
-        color_scale +
+        heatmap_scale$color_scale +
         theme(
             panel.background = element_rect(fill = "white"),
             panel.grid.major = element_line(size=0.5, colour = "grey80"),

@@ -36,7 +36,8 @@ Imports:
     scuttle,
     rlang,
     ggbeeswarm,
-    viridis
+    viridis,
+    RColorBrewer
 Suggests: 
     BiocStyle,
     biomaRt,

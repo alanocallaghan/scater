@@ -9,6 +9,8 @@
 #' By default, all columns are used.
 #' @param exprs_values A string or integer scalar indicating which assay of \code{object} should be used as expression values for colouring in the heatmap.
 #' @param center A logical scalar indicating whether each row should have its mean expression centered at zero prior to plotting. 
+#' @param scale A logical scalar specifying whether each row should have its
+#' expression scaled to have unit variance prior to plotting.
 #' @param zlim A numeric vector of length 2, specifying the upper and lower bounds for the expression values. 
 #' This winsorizes the expression matrix prior to plotting (but after centering, if \code{center=TRUE}). 
 #' If \code{NULL}, it defaults to the range of the expression matrix.
@@ -69,7 +71,7 @@
 #' @importFrom viridis viridis
 #' @importFrom SummarizedExperiment assay assayNames
 plotHeatmap <- function(object, features, columns = NULL,
-    exprs_values = "logcounts", center = FALSE, zlim = NULL,
+    exprs_values = "logcounts", center = FALSE, scale = FALSE, zlim = NULL,
     color = NULL, colour_columns_by = NULL, column_annotation_colors = list(),
     order_columns_by = NULL, by_exprs_values = exprs_values, 
     show_colnames = FALSE, cluster_cols = is.null(order_columns_by),
@@ -106,21 +108,7 @@ plotHeatmap <- function(object, features, columns = NULL,
         colour_columns_by <- c(colour_columns_by, order_columns_by)
     }
 
-    # Winsorizing to preserve the dynamic range of colours.
-    if (is.null(zlim)) {
-        zlim <- range(heat.vals)
-    }
-    if (center) {
-        extreme <- max(abs(zlim))
-        zlim <- c(-extreme, extreme)
-    }
-    heat.vals[heat.vals < zlim[1]] <- zlim[1]
-    heat.vals[heat.vals > zlim[2]] <- zlim[2]
-
-    if (is.null(color)) {
-        color <- eval(formals(pheatmap::pheatmap)$color, envir=environment(pheatmap::pheatmap))
-    }
-    color.breaks <- seq(zlim[1], zlim[2], length.out=length(color)+1L) 
+    heatmap_scale <- .heatmap_scale(heat.vals, center=center, scale=scale, color=color, zlim=zlim)
 
     # Collecting variables to colour_by.
     if (length(colour_columns_by)) {
@@ -172,7 +160,42 @@ plotHeatmap <- function(object, features, columns = NULL,
     }
 
     # Creating the heatmap as specified.
-    pheatmap::pheatmap(heat.vals, color=color, breaks=color.breaks, 
+    pheatmap::pheatmap(heatmap_scale$x, color=heatmap_scale$color, breaks=heatmap_scale$color_breaks, 
         annotation_col=column_variables, annotation_colors=column_annotation_colors, 
         show_colnames=show_colnames, cluster_cols=cluster_cols, ...) 
+}
+
+#' @importFrom ggplot2 scale_color_gradientn
+.heatmap_scale <- function(x, center, scale, color=NULL, zlim=NULL) {
+    if (center) {
+        x <- x - rowMeans(x)
+    }
+    if (scale) {
+        x <- x / sqrt(rowSums(x^2) / (ncol(x) - 1))
+    }
+    if (is.null(zlim)) {
+        if (center) {
+            extreme <- max(abs(x))
+            zlim <- c(-extreme, extreme)
+        } else {
+            zlim <- range(x)
+        }
+    }
+    if (is.null(color)) {
+        if (center) {
+            color <- rev(RColorBrewer::brewer.pal(9, "RdYlBu"))
+        } else {
+            color <- rev(viridis::viridis(9))
+        }
+    }
+    x[x < zlim[1]] <- zlim[1]
+    x[x > zlim[2]] <- zlim[2]
+
+    list(
+        x = x,
+        color = color,
+        color_breaks = seq(zlim[1], zlim[2], length.out=length(color) + 1L),
+        color_scale = scale_color_gradientn(colours = color, limits = zlim),
+        zlim = zlim
+    )
 }

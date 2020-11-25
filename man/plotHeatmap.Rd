@@ -10,6 +10,7 @@ plotHeatmap(
   columns = NULL,
   exprs_values = "logcounts",
   center = FALSE,
+  scale = FALSE,
   zlim = NULL,
   color = NULL,
   colour_columns_by = NULL,
@@ -34,6 +35,9 @@ By default, all columns are used.}
 \item{exprs_values}{A string or integer scalar indicating which assay of \code{object} should be used as expression values for colouring in the heatmap.}
 
 \item{center}{A logical scalar indicating whether each row should have its mean expression centered at zero prior to plotting.}
+
+\item{scale}{A logical scalar specifying whether each row should have its
+expression scaled to have unit variance prior to plotting.}
 
 \item{zlim}{A numeric vector of length 2, specifying the upper and lower bounds for the expression values. 
 This winsorizes the expression matrix prior to plotting (but after centering, if \code{center=TRUE}). 

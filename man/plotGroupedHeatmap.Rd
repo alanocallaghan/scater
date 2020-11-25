@@ -12,8 +12,8 @@ plotGroupedHeatmap(
   columns = NULL,
   exprs_values = "logcounts",
   center = FALSE,
+  scale = FALSE,
   zlim = NULL,
-  symmetric = FALSE,
   color = NULL,
   swap_rownames = NULL,
   ...
@@ -36,12 +36,12 @@ Alternatively, any value that can be used in the \code{by} argument to \code{\li
 
 \item{center}{A logical scalar indicating whether each row should have its mean expression centered at zero prior to plotting.}
 
+\item{scale}{A logical scalar specifying whether each row should have its
+expression scaled to have unit variance prior to plotting.}
+
 \item{zlim}{A numeric vector of length 2, specifying the upper and lower bounds for color mapping of expression values.
 Values outside this range are set to the most extreme color.
 If \code{NULL}, it defaults to the range of the expression matrix.}
-
-\item{symmetric}{A logical scalar specifying whether the default \code{zlim} should be symmetric around zero. 
-If \code{TRUE}, the maximum absolute value of \code{zlim} will be computed and multiplied by \code{c(-1, 1)} to redefine \code{zlim}.}
 
 \item{color}{A vector of colours specifying the palette to use for mapping expression values to colours. 
 This defaults to the default setting in \code{\link[pheatmap]{pheatmap}}.}
@@ -78,10 +78,10 @@ plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10],
     group="Group")
 
 plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10],
-    group="Group", center=TRUE, symmetric=TRUE)
+    group="Group", center=TRUE)
 
 plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10],
-    group="Group", block="Cell_Cycle", center=TRUE, symmetric=TRUE)
+    group="Group", block="Cell_Cycle", center=TRUE)
 
 }
 \seealso{
