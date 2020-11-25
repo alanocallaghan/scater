@@ -81,10 +81,9 @@
 #' @importFrom SummarizedExperiment assay
 #' @importFrom scuttle summarizeAssayByGroup
 plotDots <- function(object, features, group = NULL, block=NULL,
-    exprs_values = "logcounts", detection_limit = 0,
+    exprs_values = "logcounts", detection_limit = 0, zlim = NULL, color = NULL,
     max_detected = NULL, other_fields = list(), by_exprs_values = exprs_values,
-    swap_rownames = NULL, center = FALSE, scale = FALSE,
-    zlim = NULL, color = NULL)
+    swap_rownames = NULL, center = FALSE, scale = FALSE)
 {    
     if (is.null(group)) {
         group <- rep("all", ncol(object))

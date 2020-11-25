@@ -11,7 +11,6 @@ plotHeatmap(
   exprs_values = "logcounts",
   center = FALSE,
   zlim = NULL,
-  symmetric = FALSE,
   color = NULL,
   colour_columns_by = NULL,
   column_annotation_colors = list(),
@@ -39,9 +38,6 @@ By default, all columns are used.}
 \item{zlim}{A numeric vector of length 2, specifying the upper and lower bounds for the expression values. 
 This winsorizes the expression matrix prior to plotting (but after centering, if \code{center=TRUE}). 
 If \code{NULL}, it defaults to the range of the expression matrix.}
-
-\item{symmetric}{A logical scalar specifying whether the default \code{zlim} should be symmetric around zero. 
-If \code{TRUE}, the maximum absolute value of \code{zlim} will be computed and multiplied by \code{c(-1, 1)} to redefine \code{zlim}.}
 
 \item{color}{A vector of colours specifying the palette to use for mapping expression values to colours. 
 This defaults to the default setting in \code{\link[pheatmap]{pheatmap}}.}
@@ -96,7 +92,7 @@ example_sce <- logNormCounts(example_sce)
 plotHeatmap(example_sce, features=rownames(example_sce)[1:10])
 
 plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
-    center=TRUE, symmetric=TRUE)
+    center=TRUE)
 
 plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
     colour_columns_by=c("Mutation_Status", "Cell_Cycle"))

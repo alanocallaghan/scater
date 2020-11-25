@@ -11,15 +11,14 @@ plotDots(
   block = NULL,
   exprs_values = "logcounts",
   detection_limit = 0,
+  zlim = NULL,
+  color = NULL,
   max_detected = NULL,
   other_fields = list(),
   by_exprs_values = exprs_values,
   swap_rownames = NULL,
   center = FALSE,
-  scale = FALSE,
-  symmetric = center,
-  zlim = NULL,
-  color = NULL
+  scale = FALSE
 )
 }
 \arguments{
@@ -38,6 +37,14 @@ Alternatively, an \link{AsIs} vector, see \code{?\link{retrieveCellInfo}} for de
 \item{detection_limit}{Numeric scalar providing the value above which observations are deemed to be expressed.
 This is also used as the}
 
+\item{zlim}{A numeric vector of length 2, specifying the upper and lower 
+bounds for the expression values.}
+
+\item{color}{A vector of colours specifying the palette to use for mapping 
+expression values to colours. 
+This defaults to \link[viridis]{viridis} if, and the the \code{"RdYlBu"}
+color palette from \code{\link[RColorBrewer]{brewer.pal}} otherwise.}
+
 \item{max_detected}{Numeric value specifying the cap on the proportion of 
 detected expression values.}
 
@@ -55,17 +62,6 @@ elements.}
 expression values should be centred to have mean zero
 (controlled by \code{center}) and/or scaled to have unit standard
 deviation (controlled by \code{scale}).}
-
-\item{symmetric}{Logical scalar controlling whether the colour scale for
-dots should be symmetric around zero.}
-
-\item{zlim}{A numeric vector of length 2, specifying the upper and lower 
-bounds for the expression values.}
-
-\item{color}{A vector of colours specifying the palette to use for mapping 
-expression values to colours. 
-This defaults to \link[viridis]{viridis} if, and the the \code{"RdYlBu"}
-color palette from \code{\link[RColorBrewer]{brewer.pal}} otherwise.}
 }
 \value{
 A \link{ggplot} object containing a dot plot.
@@ -103,7 +99,7 @@ plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle")
 plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE)
 plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", scale=TRUE)
 plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE, scale=TRUE)
-plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE, scale=TRUE, symmetric=FALSE)
+plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE, scale=TRUE)
 
 plotDots(sce, features=rownames(sce)[1:10], group="Treatment", block="Cell_Cycle")
 
