@@ -18,31 +18,34 @@ plotDots(
   by_exprs_values = exprs_values,
   swap_rownames = NULL,
   center = FALSE,
-  scale = FALSE
+  scale = FALSE,
+  low_color = NULL,
+  high_color = NULL,
+  max_ave = NULL
 )
 }
 \arguments{
 \item{object}{A \linkS4class{SingleCellExperiment} object.}
 
-\item{features}{A character vector of feature names to show as rows of the dot plot.}
+\item{features}{A character vector of row names, a logical vector, or integer vector of indices specifying rows of \code{object} to visualize.}
 
-\item{group}{Specification of a column metadata field to show as columns.
-Alternatively, an \link{AsIs} vector, see \code{?\link{retrieveCellInfo}} for details.}
+\item{group}{String specifying the field of \code{\link{colData}(object)} containing the grouping factor, e.g., cell types or clusters.
+Alternatively, any value that can be used in the \code{by} argument to \code{\link{retrieveCellInfo}}.}
 
-\item{block}{Specification of a column metadata field containing the blocking factors, e.g., batch of origin for each cell. 
-Alternatively, an \link{AsIs} vector, see \code{?\link{retrieveCellInfo}} for details.}
+\item{block}{String specifying the field of \code{\link{colData}(object)} containing a blocking factor (e.g., batch of origin).
+Alternatively, any value that can be used in the \code{by} argument to \code{\link{retrieveCellInfo}}.}
 
-\item{exprs_values}{A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from.}
+\item{exprs_values}{A string or integer scalar indicating which assay of \code{object} should be used as expression values.}
 
-\item{detection_limit}{Numeric scalar providing the value above which observations are deemed to be expressed.
-This is also used as the}
+\item{detection_limit}{Numeric scalar providing the value above which observations are deemed to be expressed.}
 
-\item{zlim}{A numeric vector of length 2, specifying the upper and lower 
-bounds for the expression values.}
+\item{zlim}{A numeric vector of length 2, specifying the upper and lower bounds for color mapping of expression values.
+Values outside this range are set to the most extreme color.
+If \code{NULL}, it defaults to the range of the expression matrix.
+If \code{center=TRUE}, this defaults to the range of the centered expression matrix, made symmetric around zero.}
 
-\item{color}{A vector of colours specifying the palette to use for mapping 
-expression values to colours. 
-This defaults to \link[viridis]{viridis} if, and the the \code{"RdYlBu"}
+\item{color}{A vector of colours specifying the palette to use for increasing expression. 
+This defaults to \link[viridis]{viridis} if \code{center=FALSE}, and the the \code{"RdYlBu"}
 color palette from \code{\link[RColorBrewer]{brewer.pal}} otherwise.}
 
 \item{max_detected}{Numeric value specifying the cap on the proportion of 
@@ -51,17 +54,19 @@ detected expression values.}
 \item{other_fields}{Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 Note that any \link{AsIs} vectors or data.frames must be of length equal to \code{nrow(object)}, not \code{features}.}
 
-\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from,
-to use when extracting values according to each entry of \code{other_fields}.}
+\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, for entries of \code{other_fields}.}
 
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
 identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
 
-\item{scale, center}{Logical scalars controlling whether the
-expression values should be centred to have mean zero
-(controlled by \code{center}) and/or scaled to have unit standard
-deviation (controlled by \code{scale}).}
+\item{center}{A logical scalar indicating whether each feature should have its mean expression 
+(specifically, the mean of averages across all groups) centered at zero prior to plotting.}
+
+\item{scale}{A logical scalar specifying whether each row should have its
+average expression values scaled to unit variance prior to plotting.}
+
+\item{low_color, high_color, max_ave}{Deprecated arguments.}
 }
 \value{
 A \link{ggplot} object containing a dot plot.
@@ -76,19 +81,13 @@ This implements a \pkg{Seurat}-style \dQuote{dot plot} that creates a dot for ea
 The proportion of detected expression values and the average expression for each feature in each group of cells is visualized efficiently using the size and colour, respectively, of each dot.
 If \code{block} is specified, batch-corrected averages for each group are computed with \code{\link{batchCorrectedAverages}}.
 
-We impose two restrictions - the low end of the color scale must correspond to the detection limit,
-and the color at this end of the scale must be the same as the background color.
-These ensure that the visual cues from low average expression or low detected proportions are consistent,
-as both will result in a stronger \code{low_color}.
-(In the latter case, the reduced size of the dot means that the background color dominates.)
-
-If these restrictions are violated, visualization can be misleading due to the difficulty of simultaneously interpreting both size and color.
+Some caution is required during interpretation due to the difficulty of simultaneously interpreting both size and color.
 For example, if we colored by z-score on a conventional blue-white-red color axis, a gene that is downregulated in a group of cells would show up as a small blue dot.
-If the background color was also white, this might be mistaken for a gene that is not downregulated at all.
-On the other hand, any other background color would effectively require consideration of two color axes as expression decreases.
+If the background color was also white, this could be easily mistaken for a gene that is not downregulated at all.
+We suggest choosing a color scale that remains distinguishable from the background color at all points.
+Admittedly, that is easier said than done as many color scales will approach a lighter color at some stage, so some magnifying glasses may be required.
 
-We can also cap the color and size scales using \code{zlim} and 
-\code{max_detected}, respectively.
+We can also cap the color and size scales using \code{zlim} and \code{max_detected}, respectively.
 This aims to preserve resolution for low-abundance genes by preventing domination of the scales by high-abundance features.
 }
 \examples{

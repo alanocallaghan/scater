@@ -4,34 +4,14 @@
 #' where the size and color of each dot represents the proportion of detected expression values and the average expression,
 #' respectively, for each feature in each group of cells.
 #' 
-#' @param object A \linkS4class{SingleCellExperiment} object.
-#' @param features A character vector of feature names to show as rows of the dot plot.
-#' @param group Specification of a column metadata field to show as columns.
-#' Alternatively, an \link{AsIs} vector, see \code{?\link{retrieveCellInfo}} for details.
-#' @param exprs_values A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from.
+#' @inheritParams plotGroupedHeatmap
 #' @param detection_limit Numeric scalar providing the value above which observations are deemed to be expressed.
-#' This is also used as the 
-#' @param color A vector of colours specifying the palette to use for mapping 
-#' expression values to colours. 
-#' This defaults to \link[viridis]{viridis} if, and the the \code{"RdYlBu"}
-#' color palette from \code{\link[RColorBrewer]{brewer.pal}} otherwise.
-#' @param zlim A numeric vector of length 2, specifying the upper and lower 
-#' bounds for the expression values. 
 #' @param max_detected Numeric value specifying the cap on the proportion of 
 #' detected expression values.
 #' @param other_fields Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' Note that any \link{AsIs} vectors or data.frames must be of length equal to \code{nrow(object)}, not \code{features}.
-#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from,
-#' to use when extracting values according to each entry of \code{other_fields}. 
-#' @param swap_rownames Column name of \code{rowData(object)} to be used to 
-#'  identify features instead of \code{rownames(object)} when labelling plot 
-#'  elements.
-#' @param scale,center Logical scalars controlling whether the
-#' expression values should be centred to have mean zero
-#' (controlled by \code{center}) and/or scaled to have unit standard
-#' deviation (controlled by \code{scale}).
-#' @param block Specification of a column metadata field containing the blocking factors, e.g., batch of origin for each cell. 
-#' Alternatively, an \link{AsIs} vector, see \code{?\link{retrieveCellInfo}} for details.
+#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, for entries of \code{other_fields}. 
+#' @param low_color,high_color,max_ave Deprecated arguments.
 #'
 #' @return 
 #' A \link{ggplot} object containing a dot plot.
@@ -41,19 +21,13 @@
 #' The proportion of detected expression values and the average expression for each feature in each group of cells is visualized efficiently using the size and colour, respectively, of each dot.
 #' If \code{block} is specified, batch-corrected averages for each group are computed with \code{\link{batchCorrectedAverages}}.
 #' 
-#' We impose two restrictions - the low end of the color scale must correspond to the detection limit,
-#' and the color at this end of the scale must be the same as the background color.
-#' These ensure that the visual cues from low average expression or low detected proportions are consistent,
-#' as both will result in a stronger \code{low_color}.
-#' (In the latter case, the reduced size of the dot means that the background color dominates.)
-#' 
-#' If these restrictions are violated, visualization can be misleading due to the difficulty of simultaneously interpreting both size and color.
+#' Some caution is required during interpretation due to the difficulty of simultaneously interpreting both size and color.
 #' For example, if we colored by z-score on a conventional blue-white-red color axis, a gene that is downregulated in a group of cells would show up as a small blue dot.
-#' If the background color was also white, this might be mistaken for a gene that is not downregulated at all.
-#' On the other hand, any other background color would effectively require consideration of two color axes as expression decreases.
+#' If the background color was also white, this could be easily mistaken for a gene that is not downregulated at all.
+#' We suggest choosing a color scale that remains distinguishable from the background color at all points.
+#' Admittedly, that is easier said than done as many color scales will approach a lighter color at some stage, so some magnifying glasses may be required.
 #' 
-#' We can also cap the color and size scales using \code{zlim} and 
-#' \code{max_detected}, respectively.
+#' We can also cap the color and size scales using \code{zlim} and \code{max_detected}, respectively.
 #' This aims to preserve resolution for low-abundance genes by preventing domination of the scales by high-abundance features.
 #'
 #' @author Aaron Lun
@@ -83,8 +57,21 @@
 plotDots <- function(object, features, group = NULL, block=NULL,
     exprs_values = "logcounts", detection_limit = 0, zlim = NULL, color = NULL,
     max_detected = NULL, other_fields = list(), by_exprs_values = exprs_values,
-    swap_rownames = NULL, center = FALSE, scale = FALSE)
-{    
+    swap_rownames = NULL, center = FALSE, scale = FALSE,
+    low_color = NULL, high_color = NULL, max_ave = NULL)
+{
+    # Handling all the deprecation.
+    if (!is.null(low_color)) {
+        .Deprecated(msg="'low_color=' is deprecated, use 'color=' instead")
+    }
+    if (!is.null(high_color)) {
+        .Deprecated(msg="'high_color=' is deprecated, use 'color=' instead")
+    }
+    if (!is.null(max_ave)) {
+        .Deprecated(msg="'max_ave=' is deprecated, use 'zlim=' instead")
+        zlim <- max_ave
+    }
+
     if (is.null(group)) {
         group <- rep("all", ncol(object))
     } else {
