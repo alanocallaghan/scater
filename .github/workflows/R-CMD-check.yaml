@@ -21,6 +21,7 @@ jobs:
           leftovers <- setdiff(dependencies, installed.packages())
           BiocManager::install(leftovers, ask=FALSE, Ncpu=2L)
           remotes::install_cran("rcmdcheck")
+          remotes::install_github("theislab/destiny")
         shell: Rscript {0}
 
       - name: Check
