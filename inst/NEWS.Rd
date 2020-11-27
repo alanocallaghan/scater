@@ -4,6 +4,8 @@
 \section{Changes in version 1.20.0, Bioconductor 3.13 Release}{
 \itemize{
     \item runMDS can use user-supplied function for calculating the distance matrix
+    \item Made the handling of center, scale, color and limits similar in 
+    plotDots, plotHeatmap, and plotGroupedHeatmap
 }}
 
 \section{Changes in version 1.18.0, Bioconductor 3.12 Release}{
