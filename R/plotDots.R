@@ -40,7 +40,6 @@
 #' plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE)
 #' plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", scale=TRUE)
 #' plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE, scale=TRUE)
-#' plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE, scale=TRUE)
 #'
 #' plotDots(sce, features=rownames(sce)[1:10], group="Treatment", block="Cell_Cycle")
 #' 
@@ -69,7 +68,7 @@ plotDots <- function(object, features, group = NULL, block=NULL,
     }
     if (!is.null(max_ave)) {
         .Deprecated(msg="'max_ave=' is deprecated, use 'zlim=' instead")
-        zlim <- max_ave
+        zlim <- c(detection_limit, max_ave)
     }
 
     if (is.null(group)) {

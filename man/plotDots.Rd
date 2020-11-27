@@ -98,7 +98,6 @@ plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle")
 plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE)
 plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", scale=TRUE)
 plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE, scale=TRUE)
-plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE, scale=TRUE)
 
 plotDots(sce, features=rownames(sce)[1:10], group="Treatment", block="Cell_Cycle")
 

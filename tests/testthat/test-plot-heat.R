@@ -23,7 +23,9 @@ test_that("we can produce heatmaps", {
     # Colour parameters for the expression values.
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], zlim=c(0, 2))
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], color=viridis::viridis(20))
-    plotHeatmap(example_sce, features=rownames(example_sce)[1:10], center=TRUE, symmetric=TRUE)
+    expect_warning(
+        plotHeatmap(example_sce, features=rownames(example_sce)[1:10], center=TRUE, symmetric=TRUE)
+    )
          
     # Testing out the column colouring. 
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
@@ -92,11 +94,15 @@ test_that("we can produce grouped heatmaps", {
     plotGroupedHeatmap(example_sce, features=1:10, group="Group", block="Cell_Cycle", columns=20:30)
 
     # Works with the various color options.
-    plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10],
-        group="Group", center=TRUE, symmetric=TRUE)
+    expect_warning(
+        plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10],
+            group="Group", center=TRUE, symmetric=TRUE)
+    )
 
-    plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10],
-        group="Group", center=TRUE, symmetric=TRUE)
+    expect_warning(
+        plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10],
+            group="Group", center=TRUE, symmetric=TRUE)
+    )
 
     plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10], group="Group", color=viridis::viridis(20))
     plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10], group="Group", zlim=c(0, 2))

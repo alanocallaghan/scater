@@ -102,7 +102,7 @@ setMethod("calculateMultiUMAP", "ANY", function(x, ..., metric="euclidean") {
 #' @rdname runMultiUMAP
 #' @importFrom Matrix t
 #' @importFrom SummarizedExperiment assay
-setMethod("calculateMultiUMAP", "SummarizedExperiment", function(x, exprs_values, ...) {
+setMethod("calculateMultiUMAP", "SummarizedExperiment", function(x, exprs_values, metric="euclidean", ...) {
     targets <- lapply(exprs_values, FUN=assay, x=x)
     targets <- lapply(targets, t)
     callGeneric(targets, ..., metric=metric)
