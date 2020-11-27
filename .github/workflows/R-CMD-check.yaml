@@ -9,7 +9,7 @@ name: R-CMD-check
 jobs:
   R-CMD-check:
     runs-on: ubuntu-latest
-    container: iseedevelopers/isee:latest
+    container: alanocallaghan/scater:latest
 
     steps:
       - name: Check out repo
