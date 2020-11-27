@@ -105,7 +105,7 @@ setMethod("calculateMultiUMAP", "ANY", function(x, ..., metric="euclidean") {
 setMethod("calculateMultiUMAP", "SummarizedExperiment", function(x, exprs_values, metric="euclidean", ...) {
     targets <- lapply(exprs_values, FUN=assay, x=x)
     targets <- lapply(targets, t)
-    callGeneric(targets, ..., metric=metric)
+    callGeneric(targets, ...) 
 }) 
 
 #' @export

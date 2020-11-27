@@ -6,6 +6,8 @@
 ^appveyor\.yml$
 ^\.git*
 README.md
+^Dockerfile$
+^\.gitignore$
 
 inst/scater_*
 inst/sticker_*
