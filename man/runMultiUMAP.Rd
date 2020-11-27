@@ -12,7 +12,7 @@ calculateMultiUMAP(x, ...)
 
 \S4method{calculateMultiUMAP}{ANY}(x, ..., metric = "euclidean")
 
-\S4method{calculateMultiUMAP}{SummarizedExperiment}(x, exprs_values, ...)
+\S4method{calculateMultiUMAP}{SummarizedExperiment}(x, exprs_values, metric = "euclidean", ...)
 
 \S4method{calculateMultiUMAP}{SingleCellExperiment}(
   x,

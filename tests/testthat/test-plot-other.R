@@ -171,9 +171,9 @@ test_that("plotRLE works as expected", {
 test_that("plotDots works as expected", {
     expect_s3_class(plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[1:10]), "ggplot")
 
-    expect_s3_class(plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[1:10], high_color="blue"), "ggplot")
+    expect_s3_class(plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[1:10], color = rainbow(7)), "ggplot")
 
-    expect_s3_class(plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[1:10], max_ave=1), "ggplot")
+    expect_s3_class(plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[1:10], zlim=c(-1, 1)), "ggplot")
 
     expect_s3_class(plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[1:10], max_detected=0.5), "ggplot")
 
@@ -182,6 +182,12 @@ test_that("plotDots works as expected", {
     # Blocking works as expected.
     expect_s3_class(plotDots(example_sce, group="Cell_Cycle", block="Mutation_Status",
         features=rownames(example_sce)[1:10], max_detected=0.5), "ggplot")
+
+    expect_warning(
+        plotDots(example_sce, features=rownames(example_sce)[1:10], group="Cell_Cycle", max_ave=5),
+        "use 'zlim=' instead"
+    )
+
 
     # Checking that other_fields play nice.
     rowData(example_sce)$stuff <- runif(nrow(example_sce))

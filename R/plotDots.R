@@ -4,27 +4,14 @@
 #' where the size and color of each dot represents the proportion of detected expression values and the average expression,
 #' respectively, for each feature in each group of cells.
 #' 
-#' @param object A \linkS4class{SingleCellExperiment} object.
-#' @param features A character vector of feature names to show as rows of the dot plot.
-#' @param group Specification of a column metadata field to show as columns.
-#' Alternatively, an \link{AsIs} vector, see \code{?\link{retrieveCellInfo}} for details.
-#' @param exprs_values A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from.
+#' @inheritParams plotGroupedHeatmap
 #' @param detection_limit Numeric scalar providing the value above which observations are deemed to be expressed.
-#' This is also used as the 
-#' @param low_color String specifying the color to use for low expression.
-#' This is also used as the background color, see Details.
-#' @param high_color String specifying the color to use for high expression.
-#' @param max_ave Numeric value specifying the cap on the average expression.
-#' @param max_detected Numeric value specifying the cap on the proportion of detected expression values.
+#' @param max_detected Numeric value specifying the cap on the proportion of 
+#' detected expression values.
 #' @param other_fields Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' Note that any \link{AsIs} vectors or data.frames must be of length equal to \code{nrow(object)}, not \code{features}.
-#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from,
-#' to use when extracting values according to each entry of \code{other_fields}. 
-#' @param swap_rownames Column name of \code{rowData(object)} to be used to 
-#'  identify features instead of \code{rownames(object)} when labelling plot 
-#'  elements.
-#' @param block Specification of a column metadata field containing the blocking factors, e.g., batch of origin for each cell. 
-#' Alternatively, an \link{AsIs} vector, see \code{?\link{retrieveCellInfo}} for details.
+#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, for entries of \code{other_fields}. 
+#' @param low_color,high_color,max_ave Deprecated arguments.
 #'
 #' @return 
 #' A \link{ggplot} object containing a dot plot.
@@ -34,18 +21,13 @@
 #' The proportion of detected expression values and the average expression for each feature in each group of cells is visualized efficiently using the size and colour, respectively, of each dot.
 #' If \code{block} is specified, batch-corrected averages for each group are computed with \code{\link{batchCorrectedAverages}}.
 #' 
-#' We impose two restrictions - the low end of the color scale must correspond to the detection limit,
-#' and the color at this end of the scale must be the same as the background color.
-#' These ensure that the visual cues from low average expression or low detected proportions are consistent,
-#' as both will result in a stronger \code{low_color}.
-#' (In the latter case, the reduced size of the dot means that the background color dominates.)
-#' 
-#' If these restrictions are violated, visualization can be misleading due to the difficulty of simultaneously interpreting both size and color.
+#' Some caution is required during interpretation due to the difficulty of simultaneously interpreting both size and color.
 #' For example, if we colored by z-score on a conventional blue-white-red color axis, a gene that is downregulated in a group of cells would show up as a small blue dot.
-#' If the background color was also white, this might be mistaken for a gene that is not downregulated at all.
-#' On the other hand, any other background color would effectively require consideration of two color axes as expression decreases.
+#' If the background color was also white, this could be easily mistaken for a gene that is not downregulated at all.
+#' We suggest choosing a color scale that remains distinguishable from the background color at all points.
+#' Admittedly, that is easier said than done as many color scales will approach a lighter color at some stage, so some magnifying glasses may be required.
 #' 
-#' We can also cap the color and size scales at \code{max_ave} and \code{max_detected}, respectively.
+#' We can also cap the color and size scales using \code{zlim} and \code{max_detected}, respectively.
 #' This aims to preserve resolution for low-abundance genes by preventing domination of the scales by high-abundance features.
 #'
 #' @author Aaron Lun
@@ -55,6 +37,9 @@
 #' sce <- logNormCounts(sce)
 #'
 #' plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle")
+#' plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE)
+#' plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", scale=TRUE)
+#' plotDots(sce, features=rownames(sce)[1:10], group="Cell_Cycle", center=TRUE, scale=TRUE)
 #'
 #' plotDots(sce, features=rownames(sce)[1:10], group="Treatment", block="Cell_Cycle")
 #' 
@@ -64,14 +49,28 @@
 #'
 #' @export
 #' @importFrom ggplot2 ggplot aes_string geom_point
-#' scale_size scale_color_gradient theme element_line element_rect
+#' scale_size scale_color_gradient theme element_line element_rect 
+#' scale_color_gradient2
 #' @importFrom SummarizedExperiment assay
 #' @importFrom scuttle summarizeAssayByGroup
-plotDots <- function(object, features, group = NULL, block=NULL, exprs_values = "logcounts",
-    detection_limit = 0, low_color = "white", high_color = "red",
-    max_ave = NULL, max_detected = NULL, other_fields = list(),
-    by_exprs_values = exprs_values, swap_rownames = NULL)
-{    
+plotDots <- function(object, features, group = NULL, block=NULL,
+    exprs_values = "logcounts", detection_limit = 0, zlim = NULL, color = NULL,
+    max_detected = NULL, other_fields = list(), by_exprs_values = exprs_values,
+    swap_rownames = NULL, center = FALSE, scale = FALSE,
+    low_color = NULL, high_color = NULL, max_ave = NULL)
+{
+    # Handling all the deprecation.
+    if (!is.null(low_color)) {
+        .Deprecated(msg="'low_color=' is deprecated, use 'color=' instead")
+    }
+    if (!is.null(high_color)) {
+        .Deprecated(msg="'high_color=' is deprecated, use 'color=' instead")
+    }
+    if (!is.null(max_ave)) {
+        .Deprecated(msg="'max_ave=' is deprecated, use 'zlim=' instead")
+        zlim <- c(detection_limit, max_ave)
+    }
+
     if (is.null(group)) {
         group <- rep("all", ncol(object))
     } else {
@@ -100,19 +99,17 @@ plotDots <- function(object, features, group = NULL, block=NULL, exprs_values = 
         num <- batchCorrectedAverages(num, group=summarized$group, block=summarized$block, transform="logit")
         group.names <- colnames(ave)
     }
+    heatmap_scale <- .heatmap_scale(ave, center=center, scale=scale, color=color, zlim=zlim)
 
     # Creating a long-form table.
     evals_long <- data.frame(
         Feature=rep(features, ncol(num)),
         Group=rep(group.names, each=nrow(num)),
         NumDetected=as.numeric(num),
-        Average=as.numeric(ave)
+        Average=as.numeric(heatmap_scale$x)
     )
     if (!is.null(max_detected)) {
         evals_long$NumDetected <- pmin(max_detected, evals_long$NumDetected)
-    }
-    if (!is.null(max_ave)) {
-        evals_long$Average <- pmin(max_ave, evals_long$Average)
     }
 
     # Adding other fields, if requested.
@@ -121,13 +118,12 @@ plotDots <- function(object, features, group = NULL, block=NULL, exprs_values = 
         by_exprs_values = by_exprs_values, other_fields = other_fields,
         multiplier = rep(.subset2index(feature_names, object), ncol(num)))
     evals_long <- vis_out$df
-
     ggplot(evals_long) + 
         geom_point(aes_string(x="Group", y="Feature", size="NumDetected", col="Average")) +
         scale_size(limits=c(0, max(evals_long$NumDetected))) + 
-        scale_color_gradient(limits=c(detection_limit, max(evals_long$Average)),
-            low=low_color, high=high_color) +
-        theme(panel.background = element_rect(fill=low_color),
+        heatmap_scale$color_scale +
+        theme(
+            panel.background = element_rect(fill = "white"),
             panel.grid.major = element_line(size=0.5, colour = "grey80"),
             panel.grid.minor = element_line(size=0.25, colour = "grey80"))
 }
