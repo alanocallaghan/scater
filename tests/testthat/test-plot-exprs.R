@@ -1,5 +1,5 @@
 ## Tests for plotExpression().
-## library(scater); library(testthat); source("setup-sce.R"); source("test-plot-exprs.R")
+## library(scater); library(testthat); source("setup.R"); source("test-plot-exprs.R")
 
 example_sce <- normed
 rowData(example_sce)$ENS <- gsub("Gene", "ENS", rownames(example_sce))
@@ -50,7 +50,9 @@ test_that("plotExpression works for different exprs_values", {
     # And on sparse matrices.        
     sparsified <- example_sce
     logcounts(sparsified) <- as(logcounts(sparsified), "dgCMatrix")
-    expect_equal(plotExpression(sparsified, "Gene_0001"), plotExpression(example_sce, "Gene_0001"))
+    sparse <- plotExpression(sparsified, "Gene_0001")
+    ref <- plotExpression(example_sce, "Gene_0001")
+    expect_equal(sparse$data, ref$data)
 })
 
 test_that("plotExpression works for other fields", {

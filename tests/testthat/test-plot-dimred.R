@@ -28,9 +28,9 @@ test_that("we can produce PCA scatterplots", {
     
     # Checking that specification of multiple ncomponents works.
     expect_s3_class(Pv <- plotPCA(example_sce, ncomponents=1:2), "ggplot")
-    expect_equal(P, Pv)
+    expect_equal(P$data, Pv$data)
     expect_s3_class(Pv2 <- plotPCA(example_sce, ncomponents=2:1), "ggplot")
-    expect_false(isTRUE(all.equal(P, Pv2)))
+    expect_false(isTRUE(all.equal(P$data, Pv2$data)))
     expect_error(plotPCA(example_sce, ncomponents=c(51,1)), "larger than")
 })
 
@@ -58,9 +58,9 @@ test_that("we can produce PCA pairplots", {
     
     # Checking that specification of multiple ncomponents works.
     expect_s3_class(Pv <- plotPCA(example_sce, ncomponents=1:4), "ggplot")
-    expect_equal(P, Pv)
+    expect_equal(P$data, Pv$data)
     expect_s3_class(Pv2 <- plotPCA(example_sce, ncomponents=4:1), "ggplot")
-    expect_false(isTRUE(all.equal(P, Pv2)))
+    expect_false(isTRUE(all.equal(P$data, Pv2$data)))
     expect_error(plotPCA(example_sce, ncomponents=5:1), "larger than")
 })
 
