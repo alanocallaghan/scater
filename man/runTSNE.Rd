@@ -24,7 +24,8 @@ calculateTSNE(x, ...)
   ...,
   external_neighbors = FALSE,
   BNPARAM = KmknnParam(),
-  BPPARAM = SerialParam()
+  BPPARAM = SerialParam(),
+  use_fitsne = FALSE
 )
 
 \S4method{calculateTSNE}{SummarizedExperiment}(x, ..., exprs_values = "logcounts")
@@ -67,7 +68,7 @@ This can be a character vector of row names, an integer vector of row indices or
 
 \item{normalize}{Logical scalar indicating if input values should be scaled for numerical precision, see \code{\link[Rtsne]{normalize_input}}.}
 
-\item{theta}{Numeric scalar specifying the approximation accuracy of the Barnes-Hut algorithm, see \code{\link[Rtsne]{Rtsne}} for details.}
+\item{theta}{Numeric scalar spec7ifying the approximation accuracy of the Barnes-Hut algorithm, see \code{\link[Rtsne]{Rtsne}} for details.}
 
 \item{num_threads}{Integer scalar specifying the number of threads to use in \code{\link[Rtsne]{Rtsne}}.
 If \code{NULL} and \code{BPPARAM} is a \linkS4class{MulticoreParam}, it is set to the number of workers in \code{BPPARAM};
@@ -78,6 +79,8 @@ otherwise, the \code{\link[Rtsne]{Rtsne}} defaults are used.}
 \item{BNPARAM}{A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.}
+
+\item{use_fitsne}{Logical scalar indicating whether \code{\link[snifter]{fitsne}} should be used to perform t-SNE.}
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
 

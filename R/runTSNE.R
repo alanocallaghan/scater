@@ -23,6 +23,7 @@
 #' @param BNPARAM A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.
 #' @param pca Logical scalar indicating whether a PCA step should be performed inside \code{\link[Rtsne]{Rtsne}}.
+#' @param use_fitsne Logical scalar indicating whether \code{\link[snifter]{fitsne}} should be used to perform t-SNE.
 #'
 #' @inheritSection calculatePCA Feature selection
 #' @inheritSection calculatePCA Using reduced dimensions
