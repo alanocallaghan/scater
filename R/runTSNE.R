@@ -78,7 +78,8 @@ NULL
     subset_row = NULL, scale=FALSE, transposed=FALSE,
     perplexity=NULL, normalize = TRUE, theta = 0.5, 
     num_threads=NULL, ...,
-    external_neighbors=FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam())
+    external_neighbors=FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam(),
+    use_fitsne=FALSE)
 { 
     if (!transposed) {
         x <- .get_mat_for_reddim(x, subset_row=subset_row, ntop=ntop, scale=scale) 
@@ -96,16 +97,29 @@ NULL
     }
 
     if (!external_neighbors || theta==0) {
-        tsne_out <- do.call(Rtsne::Rtsne, c(list(x, check_duplicates = FALSE, normalize=normalize), args))
+        if (use_fitsne) {
+            if (normalize) {
+                x <- Rtsne::normalize_input(x)
+            }
+            args$n_components <- as.integer(args$dims)
+            args$dims <- NULL
+            if (args$pca) {
+                args$initialization <- "pca"
+                args$pca <- NULL
+            }
+            tsne_out <- do.call(snifter::fitsne, c(list(x), args))
+        } else {
+            tsne_out <- do.call(Rtsne::Rtsne, c(list(x, check_duplicates = FALSE), args))$Y
+        }
     } else {
         if (normalize) {
             x <- Rtsne::normalize_input(x)
         }
         nn_out <- findKNN(x, k=floor(3*perplexity), BNPARAM=BNPARAM, BPPARAM=BPPARAM)
-        tsne_out <- do.call(Rtsne::Rtsne_neighbors, c(list(nn_out$index, nn_out$distance), args))
+        tsne_out <- do.call(Rtsne::Rtsne_neighbors, c(list(nn_out$index, nn_out$distance), args))$Y
     }
 
-    tsne_out$Y
+    tsne_out
 }
 
 #' @export
