@@ -10,7 +10,7 @@
 #' @inheritParams runPCA
 #' @param normalize Logical scalar indicating if input values should be scaled for numerical precision, see \code{\link[Rtsne]{normalize_input}}.
 #' @param perplexity Numeric scalar defining the perplexity parameter, see \code{?\link[Rtsne]{Rtsne}} for more details.
-#' @param theta Numeric scalar spec7ifying the approximation accuracy of the Barnes-Hut algorithm, see \code{\link[Rtsne]{Rtsne}} for details.
+#' @param theta Numeric scalar specifying the approximation accuracy of the Barnes-Hut algorithm, see \code{\link[Rtsne]{Rtsne}} for details.
 #' @param ... For the \code{calculateTSNE} generic, additional arguments to pass to specific methods.
 #' For the ANY method, additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.

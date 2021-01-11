@@ -68,7 +68,7 @@ This can be a character vector of row names, an integer vector of row indices or
 
 \item{normalize}{Logical scalar indicating if input values should be scaled for numerical precision, see \code{\link[Rtsne]{normalize_input}}.}
 
-\item{theta}{Numeric scalar spec7ifying the approximation accuracy of the Barnes-Hut algorithm, see \code{\link[Rtsne]{Rtsne}} for details.}
+\item{theta}{Numeric scalar specifying the approximation accuracy of the Barnes-Hut algorithm, see \code{\link[Rtsne]{Rtsne}} for details.}
 
 \item{num_threads}{Integer scalar specifying the number of threads to use in \code{\link[Rtsne]{Rtsne}}.
 If \code{NULL} and \code{BPPARAM} is a \linkS4class{MulticoreParam}, it is set to the number of workers in \code{BPPARAM};
