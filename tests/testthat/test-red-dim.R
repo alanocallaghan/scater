@@ -211,6 +211,11 @@ test_that("runTSNE works as expected", {
     normed3 <- runTSNE(normed)
     expect_equal(reducedDim(normed2), reducedDim(normed3))
 
+    # same with snifter
+    normed2 <- runTSNE(normed, use_fitsne=TRUE, random_state=100L)
+    normed3 <- runTSNE(normed, use_fitsne=TRUE, random_state=100L)
+    expect_equal(reducedDim(normed2), reducedDim(normed3))
+
     # Testing that various settings have some effect. 
     set.seed(100)
     normed3 <- runTSNE(normed, scale=TRUE)
@@ -247,6 +252,8 @@ test_that("runTSNE works as expected", {
     set.seed(100)
     normed3 <- runTSNE(normed, theta=0.1)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
+
+
 })
 
 test_that("runTSNE on existing reduced dimension results works as expected", {

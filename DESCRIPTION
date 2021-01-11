@@ -37,6 +37,7 @@ Imports:
     rlang,
     ggbeeswarm,
     viridis,
+    Rtsne,
     RColorBrewer
 Suggests: 
     BiocStyle,
@@ -47,11 +48,11 @@ Suggests:
     scRNAseq,
     robustbase,
     rmarkdown,
-    Rtsne,
     uwot,
     NMF,
     testthat,
     pheatmap,
+    snifter,
     Biobase
 VignetteBuilder: knitr
 biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,

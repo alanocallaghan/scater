@@ -6,6 +6,7 @@
     \item runMDS can use user-supplied function for calculating the distance matrix
     \item Made the handling of center, scale, color and limits similar in 
     plotDots, plotHeatmap, and plotGroupedHeatmap
+    \item Add \code{use_fitsne} argument to runTSNE allowing the use of fast interpolated t-SNE in place of Barnes-Hut t-SNE.
 }}
 
 \section{Changes in version 1.18.0, Bioconductor 3.12 Release}{

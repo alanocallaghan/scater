@@ -10,7 +10,7 @@
 #' @inheritParams runPCA
 #' @param normalize Logical scalar indicating if input values should be scaled for numerical precision, see \code{\link[Rtsne]{normalize_input}}.
 #' @param perplexity Numeric scalar defining the perplexity parameter, see \code{?\link[Rtsne]{Rtsne}} for more details.
-#' @param theta Numeric scalar specifying the approximation accuracy of the Barnes-Hut algorithm, see \code{\link[Rtsne]{Rtsne}} for details.
+#' @param theta Numeric scalar spec7ifying the approximation accuracy of the Barnes-Hut algorithm, see \code{\link[Rtsne]{Rtsne}} for details.
 #' @param ... For the \code{calculateTSNE} generic, additional arguments to pass to specific methods.
 #' For the ANY method, additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
@@ -23,6 +23,7 @@
 #' @param BNPARAM A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.
 #' @param pca Logical scalar indicating whether a PCA step should be performed inside \code{\link[Rtsne]{Rtsne}}.
+#' @param use_fitsne Logical scalar indicating whether \code{\link[snifter]{fitsne}} should be used to perform t-SNE.
 #'
 #' @inheritSection calculatePCA Feature selection
 #' @inheritSection calculatePCA Using reduced dimensions
@@ -78,7 +79,8 @@ NULL
     subset_row = NULL, scale=FALSE, transposed=FALSE,
     perplexity=NULL, normalize = TRUE, theta = 0.5, 
     num_threads=NULL, ...,
-    external_neighbors=FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam())
+    external_neighbors=FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam(),
+    use_fitsne=FALSE)
 { 
     if (!transposed) {
         x <- .get_mat_for_reddim(x, subset_row=subset_row, ntop=ntop, scale=scale) 
@@ -96,16 +98,29 @@ NULL
     }
 
     if (!external_neighbors || theta==0) {
-        tsne_out <- do.call(Rtsne::Rtsne, c(list(x, check_duplicates = FALSE, normalize=normalize), args))
+        if (use_fitsne) {
+            if (normalize) {
+                x <- Rtsne::normalize_input(x)
+            }
+            args$n_components <- as.integer(args$dims)
+            args$dims <- NULL
+            if (args$pca) {
+                args$initialization <- "pca"
+                args$pca <- NULL
+            }
+            tsne_out <- do.call(snifter::fitsne, c(list(x), args, simplified=TRUE))
+        } else {
+            tsne_out <- do.call(Rtsne::Rtsne, c(list(x, check_duplicates = FALSE, normalize=normalize), args))$Y
+        }
     } else {
         if (normalize) {
             x <- Rtsne::normalize_input(x)
         }
         nn_out <- findKNN(x, k=floor(3*perplexity), BNPARAM=BNPARAM, BPPARAM=BPPARAM)
-        tsne_out <- do.call(Rtsne::Rtsne_neighbors, c(list(nn_out$index, nn_out$distance), args))
+        tsne_out <- do.call(Rtsne::Rtsne_neighbors, c(list(nn_out$index, nn_out$distance), args))$Y
     }
 
-    tsne_out$Y
+    tsne_out
 }
 
 #' @export
