@@ -211,10 +211,13 @@ test_that("runTSNE works as expected", {
     normed3 <- runTSNE(normed)
     expect_equal(reducedDim(normed2), reducedDim(normed3))
 
-    # same with snifter
-    normed2 <- runTSNE(normed, use_fitsne=TRUE, random_state=100L)
-    normed3 <- runTSNE(normed, use_fitsne=TRUE, random_state=100L)
-    expect_equal(reducedDim(normed2), reducedDim(normed3))
+    ## Avoid testing on 32bit win
+    if (.Machine$sizeof.pointer == 8) {
+        # same with snifter
+        normed2 <- runTSNE(normed, use_fitsne=TRUE, random_state=100L)
+        normed3 <- runTSNE(normed, use_fitsne=TRUE, random_state=100L)
+        expect_equal(reducedDim(normed2), reducedDim(normed3))
+    }
 
     # Testing that various settings have some effect. 
     set.seed(100)
