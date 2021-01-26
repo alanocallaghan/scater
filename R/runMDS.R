@@ -52,7 +52,7 @@ NULL
 
 #' @importFrom stats cmdscale dist
 .calculate_mds <- function(x, FUN = dist, ncomponents = 2,
-    ntop = 500, subset_row = NULL, scale=FALSE, transposed=FALSE,
+    ntop = 500, subset_row = NULL, scale = FALSE, transposed = FALSE,
     keep_dist = FALSE, ...)
 {
     if (!is.logical(keep_dist) || length(keep_dist) != 1L) {
@@ -65,10 +65,10 @@ NULL
     cell_dist <- do.call(FUN, c(list(x), list(...)))
     mds <- cmdscale(cell_dist, k = ncomponents, eig = TRUE)
     ans <- mds$points
-    attr(ans,"eig") <- mds$eig
-    attr(ans,"GOF") <- mds$GOF
+    attr(ans, "eig") <- mds$eig
+    attr(ans, "GOF") <- mds$GOF
     if (keep_dist) {
-        attr(ans,"dist") <- cell_dist
+        attr(ans, "dist") <- cell_dist
     }
     ans
 }
