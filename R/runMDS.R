@@ -2,40 +2,51 @@
 #'
 #' Perform multi-dimensional scaling (MDS) on cells, based on the data in a SingleCellExperiment object.
 #'
-#' @param x For \code{calculateMDS}, a numeric matrix of log-expression values where rows are features and columns are cells.
+#' @param x For \code{calculateMDS}, a numeric matrix of log-expression values
+#' where rows are features and columns are cells.
 #' Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
 #'
 #' For \code{runMDS}, a \linkS4class{SingleCellExperiment} object.
-#' @param ncomponents Numeric scalar indicating the number of MDS?g dimensions to obtain.
+#' @param ncomponents Numeric scalar indicating the number of MDS?g dimensions
+#' to obtain.
 #' @inheritParams runPCA
-#' @param ... For the \code{calculateMDS} generic, additional arguments to pass to specific methods.
-#' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
+#' @param ... For the \code{calculateMDS} generic, additional arguments to pass 
+#' to specific methods. For the SummarizedExperiment and SingleCellExperiment 
+#' methods, additional arguments to pass to the ANY method.
 #'
 #' For \code{runMDS}, additional arguments to pass to \code{calculateMDS}.
-#' @param FUN A function that accepts a numeric matrix as its first argument, where rows are samples and columns are features;
-#'   and returns a distance structure such as that returned by \code{dist} or a full symmetric matrix containing the dissimilarities.
-#' @param keep_dist Logical scalar indicating whether the \code{dist} object calculated by \code{FUN}
-#'   should be stored as \sQuote{dist} attribute of the matrix returned/stored by \code{calculateMDS}/
-#'   \code{runMDS}.
+#' @param FUN A function that accepts a numeric matrix as its first argument,
+#' where rows are samples and columns are features; and returns a distance 
+#' structure such as that returned by \code{dist} or a full symmetric matrix 
+#' containing the dissimilarities.
+#' @param keep_dist Logical scalar indicating whether the \code{dist} object 
+#' calculated by \code{FUN} should be stored as \sQuote{dist} attribute of the 
+#' matrix returned/stored by \code{calculateMDS} or \code{runMDS}.
 #'
 #' @return
-#' For \code{calculateMDS}, a matrix is returned containing the MDS coordinates for each cell (row) and dimension (column).
+#' For \code{calculateMDS}, a matrix is returned containing the MDS coordinates
+#' for each cell (row) and dimension (column).
 #'
-#' For \code{runMDS}, a modified \code{x} is returned that contains the MDS coordinates in \code{\link{reducedDim}(x, name)}.
+#' For \code{runMDS}, a modified \code{x} is returned that contains the MDS 
+#' coordinates in \code{\link{reducedDim}(x, name)}.
 #'
 #' @inheritSection calculatePCA Feature selection
 #' @inheritSection calculatePCA Using reduced dimensions
 #' @inheritSection calculatePCA Using alternative Experiments
 #'
 #' @details
-#' The function \code{\link{cmdscale}} is used internally to compute the MDS components with \code{eig = TRUE}.
-#' The result of \code{eig} and \code{GOF} are stored as attributes \dQuote{eig} and \dQuote{GOF} of the matrix returned/stored.
+#' The function \code{\link{cmdscale}} is used internally to compute the MDS 
+#' components with \code{eig = TRUE}.
+#' The \code{eig} and \code{GOF} fields of the object returned by 
+#' \code{\link{cmdscale}} are stored as attributes \dQuote{eig} and \dQuote{GOF}
+#' of the MDS matrix calculated.
 #'
 #' @name runMDS
 #' @seealso
 #' \code{\link{cmdscale}}, to perform the underlying calculations.
 #'
-#' \code{\link{dist}} for the function used as default to calculate the \code{dist} object.
+#' \code{\link{dist}} for the function used as default to calculate the 
+#' \code{dist} object.
 #'
 #' \code{\link[scater]{plotMDS}}, to quickly visualize the results.
 #'
