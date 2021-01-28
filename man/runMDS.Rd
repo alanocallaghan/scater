@@ -82,7 +82,8 @@ For \code{runMDS}, a modified \code{x} is returned that contains the MDS coordin
 Perform multi-dimensional scaling (MDS) on cells, based on the data in a SingleCellExperiment object.
 }
 \details{
-The function \code{\link{cmdscale}} is used internally to compute the MDS components.
+The function \code{\link{cmdscale}} is used internally to compute the MDS components with \code{eig = TRUE}.
+The result of \code{eig} and \code{GOF} are stored as attributes \dQuote{eig} and \dQuote{GOF} of the matrix returned/stored.
 }
 \section{Feature selection}{
 

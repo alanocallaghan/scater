@@ -28,7 +28,8 @@
 #' @inheritSection calculatePCA Using alternative Experiments
 #'
 #' @details
-#' The function \code{\link{cmdscale}} is used internally to compute the MDS components.
+#' The function \code{\link{cmdscale}} is used internally to compute the MDS components with \code{eig = TRUE}.
+#' The result of \code{eig} and \code{GOF} are stored as attributes \dQuote{eig} and \dQuote{GOF} of the matrix returned/stored.
 #'
 #' @name runMDS
 #' @seealso
@@ -51,7 +52,7 @@ NULL
 
 #' @importFrom stats cmdscale dist
 .calculate_mds <- function(x, FUN = dist, ncomponents = 2,
-    ntop = 500, subset_row = NULL, scale=FALSE, transposed=FALSE,
+    ntop = 500, subset_row = NULL, scale = FALSE, transposed = FALSE,
     keep_dist = FALSE, ...)
 {
     if (!is.logical(keep_dist) || length(keep_dist) != 1L) {
@@ -62,9 +63,12 @@ NULL
     }
     x <- as.matrix(x)
     cell_dist <- do.call(FUN, c(list(x), list(...)))
-    ans <- cmdscale(cell_dist, k = ncomponents)
+    mds <- cmdscale(cell_dist, k = ncomponents, eig = TRUE)
+    ans <- mds$points
+    attr(ans, "eig") <- mds$eig
+    attr(ans, "GOF") <- mds$GOF
     if (keep_dist) {
-        attr(ans,"dist") <- cell_dist
+        attr(ans, "dist") <- cell_dist
     }
     ans
 }
