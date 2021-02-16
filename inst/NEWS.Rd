@@ -3,7 +3,10 @@
 
 \section{Changes in version 1.20.0, Bioconductor 3.13 Release}{
 \itemize{
-    \item runMDS can use user-supplied function for calculating the distance matrix
+    \item \code{runMDS} can use user-supplied function for calculating the 
+    distance matrix. \code{runMDS} can optionally store the distance matrix 
+    computed. \code{runMDS} also stores the \code{eig} and \code{GOF} fields 
+    of the object returned.
     \item Made the handling of center, scale, color and limits similar in 
     plotDots, plotHeatmap, and plotGroupedHeatmap
     \item Add \code{use_fitsne} argument to runTSNE allowing the use of fast interpolated t-SNE in place of Barnes-Hut t-SNE.

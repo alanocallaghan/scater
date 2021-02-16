@@ -35,20 +35,25 @@ calculateMDS(x, ...)
 runMDS(x, ..., altexp = NULL, name = "MDS")
 }
 \arguments{
-\item{x}{For \code{calculateMDS}, a numeric matrix of log-expression values where rows are features and columns are cells.
+\item{x}{For \code{calculateMDS}, a numeric matrix of log-expression values
+where rows are features and columns are cells.
 Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
 
 For \code{runMDS}, a \linkS4class{SingleCellExperiment} object.}
 
-\item{...}{For the \code{calculateMDS} generic, additional arguments to pass to specific methods.
-For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
+\item{...}{For the \code{calculateMDS} generic, additional arguments to pass 
+to specific methods. For the SummarizedExperiment and SingleCellExperiment 
+methods, additional arguments to pass to the ANY method.
 
 For \code{runMDS}, additional arguments to pass to \code{calculateMDS}.}
 
-\item{FUN}{A function that accepts a numeric matrix as its first argument, where rows are samples and columns are features;
-and returns a distance structure such as that returned by \code{dist} or a full symmetric matrix containing the dissimilarities.}
+\item{FUN}{A function that accepts a numeric matrix as its first argument,
+where rows are samples and columns are features; and returns a distance 
+structure such as that returned by \code{dist} or a full symmetric matrix 
+containing the dissimilarities.}
 
-\item{ncomponents}{Numeric scalar indicating the number of MDS?g dimensions to obtain.}
+\item{ncomponents}{Numeric scalar indicating the number of MDS?g dimensions
+to obtain.}
 
 \item{ntop}{Numeric scalar specifying the number of features with the highest variances to use for dimensionality reduction.}
 
@@ -59,9 +64,9 @@ This can be a character vector of row names, an integer vector of row indices or
 
 \item{transposed}{Logical scalar, is \code{x} transposed with cells in rows?}
 
-\item{keep_dist}{Logical scalar indicating whether the \code{dist} object calculated by \code{FUN}
-should be stored as \sQuote{dist} attribute of the matrix returned/stored by \code{calculateMDS}/
-\code{runMDS}.}
+\item{keep_dist}{Logical scalar indicating whether the \code{dist} object 
+calculated by \code{FUN} should be stored as \sQuote{dist} attribute of the 
+matrix returned/stored by \code{calculateMDS} or \code{runMDS}.}
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
 
@@ -74,15 +79,21 @@ should be stored as \sQuote{dist} attribute of the matrix returned/stored by \co
 \item{name}{String specifying the name to be used to store the result in the \code{\link{reducedDims}} of the output.}
 }
 \value{
-For \code{calculateMDS}, a matrix is returned containing the MDS coordinates for each cell (row) and dimension (column).
+For \code{calculateMDS}, a matrix is returned containing the MDS coordinates
+for each cell (row) and dimension (column).
 
-For \code{runMDS}, a modified \code{x} is returned that contains the MDS coordinates in \code{\link{reducedDim}(x, name)}.
+For \code{runMDS}, a modified \code{x} is returned that contains the MDS 
+coordinates in \code{\link{reducedDim}(x, name)}.
 }
 \description{
 Perform multi-dimensional scaling (MDS) on cells, based on the data in a SingleCellExperiment object.
 }
 \details{
-The function \code{\link{cmdscale}} is used internally to compute the MDS components.
+The function \code{\link{cmdscale}} is used internally to compute the MDS 
+components with \code{eig = TRUE}.
+The \code{eig} and \code{GOF} fields of the object returned by 
+\code{\link{cmdscale}} are stored as attributes \dQuote{eig} and \dQuote{GOF}
+of the MDS matrix calculated.
 }
 \section{Feature selection}{
 
@@ -147,7 +158,8 @@ head(reducedDim(example_sce))
 \seealso{
 \code{\link{cmdscale}}, to perform the underlying calculations.
 
-\code{\link{dist}} for the function used as default to calculate the \code{dist} object.
+\code{\link{dist}} for the function used as default to calculate the 
+\code{dist} object.
 
 \code{\link[scater]{plotMDS}}, to quickly visualize the results.
 }
