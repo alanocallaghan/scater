@@ -73,12 +73,16 @@ retrieveCellInfo <- function(x, by, search = c("colData", "assays", "altExps"),
     if (is.null(by)) {
         return(.mopUp(NULL, NULL))
     }
-
     if (is(by, "AsIs")) {
         if (length(by) != ncol(x)) {
             stop("length of 'AsIs' input should be equal to 'ncol(x)'")
         }
-        return(.mopUp("", as.vector(by)))
+        if (is.factor(by)) {
+            class(by) <- setdiff(class(by), "AsIs")
+        } else {
+            by <- as.vector(by)
+        }
+        return(.mopUp("", by))
     } else if (is.data.frame(by) || is(by, "DataFrame")) {
         if (ncol(by) != 1L) {
             stop("input data frame should only have one column")

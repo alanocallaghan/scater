@@ -44,6 +44,14 @@ test_that("retrieveCellInfo works in the basic case", {
     expect_identical(retrieveCellInfo(example_sce, NULL), list(name=NULL, value=NULL))
 })
 
+test_that("retrieveCellInfo works with AsIs'd factors", {
+    fac <- factor(example_sce$Mutation_Status)
+    out <- retrieveCellInfo(example_sce, I(fac))
+    expect_identical(out$val, fac)
+    expect_false("AsIs" %in% class(out$val))
+})
+
+
 test_that("retrieveCellInfo handles clashes correctly", {
     example_sce$Gene_0002 <- seq_len(ncol(example_sce))
     out_m <- retrieveCellInfo(example_sce, "Gene_0002", search = "colData")
@@ -126,7 +134,14 @@ test_that("retrieveFeatureInfo is responsive to search mode", {
     expect_identical(out_m, retrieveFeatureInfo(example_sce, "Cell_002", search=c("rowData", "assays")))
     expect_identical(out_f, retrieveFeatureInfo(example_sce, "Cell_002", search=c("assays", "rowData")))
 })
-     
+
+test_that("retrieveFeatureInfo works with AsIs'd factors", {
+    fac <- factor(rownames(example_sce))
+    out <- retrieveFeatureInfo(example_sce, I(fac))
+    expect_identical(out$val, fac)
+    expect_false("AsIs" %in% class(out$val))
+})
+
 test_that("retrieveFeatureInfo works for rows with data.frames", {
     thing <- data.frame(B=runif(nrow(example_sce)))
     out <- retrieveFeatureInfo(example_sce, thing, )
