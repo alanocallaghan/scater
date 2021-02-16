@@ -69,7 +69,12 @@ retrieveFeatureInfo <- function(x, by, search=c("rowData", "assays"), exprs_valu
         if (length(by) != nrow(x)) {
             stop("length of 'AsIs' input should be equal to 'nrow(x)'")
         }
-        return(.mopUp("", as.vector(by)))
+        if (is.factor(by)) {
+            class(by) <- setdiff(class(by), "AsIs")
+        } else {
+            by <- as.vector(by)
+        }
+        return(.mopUp("", by))
     } else if (is.data.frame(by) || is(by, "DataFrame")) {
         if (ncol(by) != 1L) {
             stop("input data frame should only have one column")
