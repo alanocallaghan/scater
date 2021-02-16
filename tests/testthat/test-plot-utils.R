@@ -42,6 +42,11 @@ test_that("retrieveCellInfo works in the basic case", {
     expect_error(retrieveCellInfo(example_sce, "Gene_0002", search = "colData"), "cannot find")
 
     expect_identical(retrieveCellInfo(example_sce, NULL), list(name=NULL, value=NULL))
+    
+    fac <- factor(example_sce$Mutation_Status)
+    out <- retrieveCellInfo(example_sce, I(fac))
+    expect_identical(out$val, fac)
+    expect_false("AsIs" %in% class(out$val))
 })
 
 test_that("retrieveCellInfo handles clashes correctly", {

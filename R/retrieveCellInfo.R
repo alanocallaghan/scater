@@ -73,7 +73,6 @@ retrieveCellInfo <- function(x, by, search = c("colData", "assays", "altExps"),
     if (is.null(by)) {
         return(.mopUp(NULL, NULL))
     }
-
     if (is(by, "AsIs")) {
         if (length(by) != ncol(x)) {
             stop("length of 'AsIs' input should be equal to 'ncol(x)'")
