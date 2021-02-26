@@ -32,6 +32,10 @@ test_that("we can produce PCA scatterplots", {
     expect_s3_class(Pv2 <- plotPCA(example_sce, ncomponents=2:1), "ggplot")
     expect_false(isTRUE(all.equal(P, Pv2)))
     expect_error(plotPCA(example_sce, ncomponents=c(51,1)), "larger than")
+
+    # Check that dataframes etc are allowed
+    reducedDim(example_sce, "PCA") <- DataFrame(reducedDim(example_sce, "PCA"))
+    expect_error(plotReducedDim(example_sce, "PCA"), NA)
 })
 
 test_that("we can produce PCA pairplots", {
