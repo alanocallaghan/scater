@@ -69,7 +69,7 @@ plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL,
     swap_rownames = NULL, ...)
 {
     ## Extract reduced dimension representation of cells
-    red_dim <- reducedDim(object, dimred)
+    red_dim <- as.matrix(reducedDim(object, dimred))
     if (any(ncomponents > ncol(red_dim))) {
         stop(sprintf("'ncomponents' is larger than 'ncols(reducedDim(object, '%s'))'", dimred))
     }
