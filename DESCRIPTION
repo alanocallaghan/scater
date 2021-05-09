@@ -8,8 +8,8 @@ Authors@R: c(
         person("Vladimir", "Kiselev", role=c("ctb"), email="vk6@sanger.ac.uk"),
         person("Felix G.M.", "Ernst", role=c("ctb"), email="felix.gm.ernst@outlook.com"),
         person("Alan", "O'Callaghan", role=c("ctb", "cre"), email="alan.ocallaghan@outlook.com"))
-Version: 1.19.11
-Date: 2021-02-26
+Version: 1.19.12
+Date: 2021-05-09
 License: GPL-3
 Title: Single-Cell Analysis Toolkit for Gene Expression Data in R
 Description: A collection of tools for doing various analyses of
@@ -17,6 +17,7 @@ Description: A collection of tools for doing various analyses of
         quality control and visualization.
 Depends: 
     SingleCellExperiment,
+    scuttle,
     ggplot2
 Imports: 
     stats,
@@ -33,7 +34,6 @@ Imports:
     BiocNeighbors,
     BiocSingular,
     BiocParallel,
-    scuttle,
     rlang,
     ggbeeswarm,
     viridis,
