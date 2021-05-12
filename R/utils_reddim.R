@@ -19,6 +19,7 @@
 #' @importFrom Matrix t
 #' @importFrom DelayedArray DelayedArray
 #' @importFrom DelayedMatrixStats rowVars
+#' @importFrom beachmat realizeFileBackedMatrix
 .get_mat_for_reddim <- function(x, subset_row, ntop, scale, get.var=FALSE)
 # Picking the 'ntop' most highly variable features or just using a pre-specified set of features.
 # Also removing zero-variance columns and scaling the variance of each column.
@@ -51,6 +52,8 @@
     }
 
     x <- t(x)
+    x <- realizeFileBackedMatrix(x)
+
     if (get.var) {
         list(x=x, v=rv)
     } else {
