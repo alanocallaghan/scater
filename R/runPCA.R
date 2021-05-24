@@ -121,7 +121,7 @@ NULL
     setAutoBPPARAM(BPPARAM)
     on.exit(setAutoBPPARAM(oldbp))
 
-    if (!.bpNotSharedOrUp(BPPARAM)) {
+    if (.bpNotSharedOrUp(BPPARAM)) {
         bpstart(BPPARAM)
         on.exit(bpstop(BPPARAM), add=TRUE)
     }
