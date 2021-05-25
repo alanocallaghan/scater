@@ -214,6 +214,10 @@ plotHeatmap <- function(object, features, columns = NULL,
     } else {
         row_variables <- row_annotation_colors <- NULL
     }
+    if (length(intersect(names(row_annotation_colors), names(column_annotation_colors)))) {
+        warning("Element with the same name in row and column annotations. ",
+            "Assuming they're the same.")
+    }
     annotation_colors <- c(row_annotation_colors, column_annotation_colors)
 
     # Creating the heatmap as specified.
