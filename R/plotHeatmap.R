@@ -211,6 +211,8 @@ plotHeatmap <- function(object, features, columns = NULL,
             c(row_variables, list(row.names = rownames(object)))
         )
         row_annotation_colors <- row_annotation_colors[colnames(row_variables)]
+    } else {
+        row_variables <- row_annotation_colors <- NULL
     }
     annotation_colors <- c(row_annotation_colors, column_annotation_colors)
 
