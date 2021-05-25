@@ -1,6 +1,14 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
+
+
+\section{Changes in version 1.20.0, Bioconductor 3.13 Release}{
+\itemize{
+    \item Add \code{color_rows_by} and \code{row_annotation_colors} arguments
+    to \code{plotHeatmap}, similar to analogous column arguments.
+}}
+
 \section{Changes in version 1.20.0, Bioconductor 3.13 Release}{
 \itemize{
     \item \code{runMDS} can use user-supplied function for calculating the 
