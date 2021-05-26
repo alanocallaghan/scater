@@ -9,16 +9,18 @@ plotReducedDim(
   dimred,
   ncomponents = 2,
   percentVar = NULL,
-  colour_by = NULL,
+  colour_by = color_by,
   shape_by = NULL,
   size_by = NULL,
   by_exprs_values = "logcounts",
   text_by = NULL,
   text_size = 5,
-  text_colour = "black",
+  text_colour = text_color,
   label_format = c("\%s \%i", " (\%i\%\%)"),
   other_fields = list(),
   swap_rownames = NULL,
+  text_color = "black",
+  color_by = NULL,
   ...
 )
 }
@@ -59,6 +61,10 @@ while the second string shows the rounded percentage of variance explained and i
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
 identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
+
+\item{text_color}{Alias to \code{text_colour}.}
+
+\item{color_by}{Alias to \code{colour_by}.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }

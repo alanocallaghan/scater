@@ -8,11 +8,12 @@ plotRowData(
   object,
   y,
   x = NULL,
-  colour_by = NULL,
+  colour_by = color_by,
   shape_by = NULL,
   size_by = NULL,
   by_exprs_values = "logcounts",
   other_fields = list(),
+  color_by = NULL,
   ...
 )
 }
@@ -36,6 +37,8 @@ If \code{NULL}, nothing is shown on the x-axis.}
 for use in point aesthetics - see \code{?\link{retrieveFeatureInfo}} for details.}
 
 \item{other_fields}{Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
+
+\item{color_by}{Alias to \code{colour_by}.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }

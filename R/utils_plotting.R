@@ -115,7 +115,15 @@
     if (is.null(swap_rownames)) {
         return(features)
     }
-    m <- match(features, .get_rowData_column(object, swap_rownames))
+    if (is.character(features) | is.factor(features)) {
+        m <- match(features, .get_rowData_column(object, swap_rownames))
+    }
+    if (is.logical(features)) {
+        stop("Logical vector not supported for features")
+    }
+    if (is.numeric(features)) {
+        stop("Numeric vector not supported for features")
+    }
     rownames(object)[m]
 }
 

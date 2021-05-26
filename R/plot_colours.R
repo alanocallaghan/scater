@@ -1,5 +1,5 @@
 .get_palette <- function(palette_name) 
-# Function to define color palettes.
+# Function to define colour palettes.
 {
     switch(palette_name,
            tableau20 = c("#1F77B4", "#AEC7E8", "#FF7F0E", "#FFBB78", "#2CA02C",
@@ -12,6 +12,9 @@
            colorblind10 = c("#006BA4", "#FF800E", "#ABABAB", "#595959",
                             "#5F9ED1", "#C85200", "#898989", "#A2C8EC",
                             "#FFBC79", "#CFCFCF"),
+           colourblind10 = c("#006BA4", "#FF800E", "#ABABAB", "#595959",
+                             "#5F9ED1", "#C85200", "#898989", "#A2C8EC",
+                             "#FFBC79", "#CFCFCF"),
            trafficlight = c("#B10318", "#DBA13A", "#309343", "#D82526",
                             "#FFC156", "#69B764", "#F26C64", "#FFDD71",
                             "#9FCD99"),
@@ -31,8 +34,8 @@
     )
 }
 
-#' @importFrom ggplot2 scale_fill_manual scale_color_manual
-#' @importFrom viridis scale_fill_viridis scale_color_viridis
+#' @importFrom ggplot2 scale_fill_manual scale_colour_manual
+#' @importFrom viridis scale_fill_viridis scale_colour_viridis
 .resolve_plot_colours <- function(plot_out, colour_by, colour_by_name, fill = FALSE) 
 # Get nice plotting colour schemes for very general colour variables
 {
@@ -45,8 +48,8 @@
         VIRIDFUN <- scale_fill_viridis
         SCALEFUN <- scale_fill_manual
     } else {
-        VIRIDFUN <- scale_color_viridis
-        SCALEFUN <- scale_color_manual
+        VIRIDFUN <- scale_colour_viridis
+        SCALEFUN <- scale_colour_manual
     }
 
     # Set a sensible colour scheme and return the plot_out object

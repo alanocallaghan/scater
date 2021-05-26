@@ -14,6 +14,7 @@
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from,
 #' for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object to be used to parallelise operations using \code{\link{DelayedArray}}.
+#' @param color_by Alias to \code{colour_by}.
 #' @param ... further arguments passed to \code{\link[ggplot2]{geom_boxplot}} when \code{style="full"}.
 #'
 #' @return A ggplot object
@@ -62,8 +63,9 @@
 #' @importFrom ggplot2 aes_string theme
 plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE, 
                     style = "minimal", legend = TRUE, ordering = NULL, 
-                    colour_by = NULL, by_exprs_values = exprs_values, 
-                    BPPARAM = BiocParallel::bpparam(), ...) {
+                    colour_by = color_by, by_exprs_values = exprs_values,
+                    BPPARAM = BiocParallel::bpparam(), color_by = NULL,
+                    ...) {
 
     oldbp <- getAutoBPPARAM()
     setAutoBPPARAM(BPPARAM)
@@ -156,7 +158,7 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
 .plotRLE_full <- function(df, aesth, ncol, ...) {
     plot_out <- ggplot(df, aesth) +
         geom_boxplot(...) + # geom_boxplot(notch=T) to compare groups
-        stat_summary(geom = "crossbar", width = 0.65, fatten = 0, color = "white", 
+        stat_summary(geom = "crossbar", width = 0.65, fatten = 0, colour = "white", 
             fun.data = function(x){ c(y = median(x), ymin = median(x), ymax = median(x)) }) +
         ylab("Relative log expression") + xlab("Sample") +
         theme_classic() +

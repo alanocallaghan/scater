@@ -19,6 +19,7 @@
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to 
 #'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
+#' @param color_by Alias to \code{colour_by}.
 #'
 #' @details 
 #' This function expects plate positions to be given in a charcter format where a letter indicates the row on the plate and a numeric value  indicates the column. 
@@ -52,11 +53,11 @@
 #'
 #' @export
 plotPlatePosition <- function(object, plate_position = NULL,
-    colour_by = NULL, size_by = NULL, shape_by = NULL,
+    colour_by = color_by, size_by = NULL, shape_by = NULL,
     by_exprs_values = "logcounts", 
     add_legend = TRUE, theme_size = 24, point_alpha = 0.6,
     point_size = 24, other_fields=list(),
-    swap_rownames = NULL) 
+    swap_rownames = NULL, color_by = NULL) 
 {
     ## check object is SingleCellExperiment object
     if ( !is(object, "SingleCellExperiment") ) {
