@@ -60,7 +60,7 @@
 #'
 #' @export
 #' @importFrom SingleCellExperiment reducedDim
-#' @importFrom ggplot2 annotate
+#' @importFrom ggrepel geom_text_repel
 plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL, 
     colour_by = NULL, shape_by = NULL, size_by = NULL,
     by_exprs_values = "logcounts", 
@@ -117,8 +117,13 @@ plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL,
             text_out$val <- .coerce_to_factor(text_out$val, level.limit=Inf)
             by_text_x <- vapply(split(df_to_plot$X, text_out$val), median, FUN.VALUE=0)
             by_text_y <- vapply(split(df_to_plot$Y, text_out$val), median, FUN.VALUE=0)
-            plot_out <- plot_out + annotate("text", x=by_text_x, y=by_text_y, 
-                label=names(by_text_x), size=text_size, colour=text_colour)
+            plot_out <- plot_out +
+                geom_text_repel(
+                    data = data.frame(x = by_text_x, y = by_text_y, label = names(by_text_x)),
+                    mapping = aes(x = x, y = y, label = label),
+                    inherit.aes = FALSE,
+                    size = text_size, colour = text_colour
+                )
         }
 
         return(plot_out)
