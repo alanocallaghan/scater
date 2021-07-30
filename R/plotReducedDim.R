@@ -1,41 +1,67 @@
 #' Plot reduced dimensions
 #'
-#' Plot cell-level reduced dimension results stored in a SingleCellExperiment object.
+#' Plot cell-level reduced dimension results stored in a SingleCellExperiment
+#' object.
 #'
 #' @param object A SingleCellExperiment object.
-#' @param dimred A string or integer scalar indicating the reduced dimension result in \code{reducedDims(object)} to plot.
-#' @param ncomponents A numeric scalar indicating the number of dimensions to plot, starting from the first dimension.
+#' @param dimred A string or integer scalar indicating the reduced dimension
+#' result in \code{reducedDims(object)} to plot.
+#' @param ncomponents A numeric scalar indicating the number of dimensions to
+#' plot, starting from the first dimension.
 #' Alternatively, a numeric vector specifying the dimensions to be plotted.
-#' @param percentVar A numeric vector giving the proportion of variance in expression explained by each reduced dimension. 
-#' Only expected to be used in PCA settings, e.g., in the \code{\link[scater]{plotPCA}} function.
-#' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
-#' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
-#' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
-#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
-#' @param text_by String specifying the column metadata field with which to add text labels on the plot.
+#' @param percentVar A numeric vector giving the proportion of variance in
+#' expression explained by each reduced dimension.
+#' Only expected to be used in PCA settings, e.g., in the
+#' \code{\link[scater]{plotPCA}} function.
+#' @param colour_by Specification of a column metadata field or a feature to
+#' colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for
+#' possible values.
+#' @param shape_by Specification of a column metadata field or a feature to
+#' shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for
+#' possible values.
+#' @param size_by Specification of a column metadata field or a feature to
+#' size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for
+#' possible values.
+#' @param by_exprs_values A string or integer scalar specifying which assay to
+#' obtain expression values from,
+#' for use in point aesthetics - see the \code{exprs_values} argument in
+#' \code{?\link{retrieveCellInfo}}.
+#' @param text_by String specifying the column metadata field with which to add
+#' text labels on the plot.
 #' This must refer to a categorical field, i.e., coercible into a factor.
-#' Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
+#' Alternatively, an \link{AsIs} vector or data.frame, see
+#' \code{?\link{retrieveCellInfo}}.
 #' @param text_size Numeric scalar specifying the size of added text.
 #' @param text_colour String specifying the colour of the added text.
-#' @param label_format Character vector of length 2 containing format strings to use for the axis labels. 
-#' The first string expects a string containing the result type (e.g., \code{"PCA"}) and an integer containing the component number,
-#' while the second string shows the rounded percentage of variance explained and is only relevant when this information is provided in \code{object}.
-#' @param other_fields Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
-#' @param swap_rownames Column name of \code{rowData(object)} to be used to 
-#'  identify features instead of \code{rownames(object)} when labelling plot 
+#' @param label_format Character vector of length 2 containing format strings
+#' to use for the axis labels.
+#' The first string expects a string containing the result type (e.g.,
+#' \code{"PCA"}) and an integer containing the component number,
+#' while the second string shows the rounded percentage of variance explained
+#' and is only relevant when this information is provided in \code{object}.
+#' @param other_fields Additional cell-based fields to include in the
+#' data.frame, see \code{?"\link{scater-plot-args}"} for details.
+#' @param swap_rownames Column name of \code{rowData(object)} to be used to
+#'  identify features instead of \code{rownames(object)} when labelling plot
 #'  elements.
-#' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
+#' @param ... Additional arguments for visualization, see
+#' \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details
-#' If \code{ncomponents} is a scalar equal to 2, a scatterplot of the first two dimensions is produced. 
-#' If \code{ncomponents} is greater than 2, a pairs plots for the top dimensions is produced.
+#' If \code{ncomponents} is a scalar equal to 2, a scatterplot of the first two
+#' dimensions is produced.
+#' If \code{ncomponents} is greater than 2, a pairs plots for the top
+#' dimensions is produced.
 #'
-#' Alternatively, if \code{ncomponents} is a vector of length 2, a scatterplot of the two specified dimensions is produced.
-#' If it is of length greater than 2, a pairs plot is produced containing all pairwise plots between the specified dimensions.
+#' Alternatively, if \code{ncomponents} is a vector of length 2, a scatterplot
+#' of the two specified dimensions is produced.
+#' If it is of length greater than 2, a pairs plot is produced containing all
+#' pairwise plots between the specified dimensions.
 #'
-#' The \code{text_by} option will add factor levels as labels onto the plot, placed at the median coordinate across all points in that level.
-#' This is useful for annotating position-related metadata (e.g., clusters) when there are too many levels to distinguish by colour.
+#' The \code{text_by} option will add factor levels as labels onto the plot,
+#' placed at the median coordinate across all points in that level.
+#' This is useful for annotating position-related metadata (e.g., clusters)
+#' when there are too many levels to distinguish by colour.
 #' It is only available for scatterplots.
 #'
 #' @return A ggplot object
@@ -43,7 +69,7 @@
 #' @author Davis McCarthy, with modifications by Aaron Lun
 #'
 #' @name plotReducedDim
-#' @aliases plotReducedDim 
+#' @aliases plotReducedDim
 #'
 #' @examples
 #' example_sce <- mockSCE()
@@ -55,42 +81,48 @@
 #' plotReducedDim(example_sce, "PCA", colour_by="Gene_0001")
 #'
 #' plotReducedDim(example_sce, "PCA", ncomponents=5)
-#' plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle", 
+#' plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle",
 #'     shape_by="Treatment")
 #'
 #' @export
 #' @importFrom SingleCellExperiment reducedDim
 #' @importFrom ggrepel geom_text_repel
-plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL, 
-    colour_by = NULL, shape_by = NULL, size_by = NULL,
-    by_exprs_values = "logcounts", 
-    text_by = NULL, text_size = 5, text_colour = "black", 
-    label_format = c("%s %i", " (%i%%)"), other_fields = list(),
-    swap_rownames = NULL, ...)
-{
+plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL,
+        colour_by = NULL, shape_by = NULL, size_by = NULL,
+        by_exprs_values = "logcounts",
+        text_by = NULL, text_size = 5, text_colour = "black",
+        label_format = c("%s %i", " (%i%%)"), other_fields = list(),
+        swap_rownames = NULL, ...
+    ) {
+
     ## Extract reduced dimension representation of cells
     red_dim <- as.matrix(reducedDim(object, dimred))
     if (any(ncomponents > ncol(red_dim))) {
-        stop(sprintf("'ncomponents' is larger than 'ncols(reducedDim(object, '%s'))'", dimred))
+        stop(
+            sprintf(
+                "'ncomponents' is larger than 'ncols(reducedDim(object,'%s'))'",
+                dimred
+            )
+        )
     }
     if (is.null(percentVar)) {
         percentVar <- attr(red_dim, "percentVar")
     }
 
     # Figuring out what we should plot.
-    if (length(ncomponents)==1L) {
+    if (length(ncomponents) == 1L) {
         to_plot <- seq_len(ncomponents)
     } else {
         to_plot <- ncomponents
     }
 
     ## Define data.frame for plotting (avoid clash between column names)
-    colnames(red_dim) <- NULL 
-    df_to_plot <- data.frame(red_dim[,to_plot,drop=FALSE])
+    colnames(red_dim) <- NULL
+    df_to_plot <- data.frame(red_dim[, to_plot, drop = FALSE])
 
     ## checking visualization arguments
-    vis_out <- .incorporate_common_vis_col(df_to_plot, se = object, 
-        colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
+    vis_out <- .incorporate_common_vis_col(df_to_plot, se = object,
+        colour_by = colour_by, shape_by = shape_by, size_by = size_by,
         by_exprs_values = by_exprs_values, other_fields = other_fields,
         swap_rownames = swap_rownames)
     df_to_plot <- vis_out$df
@@ -99,27 +131,40 @@ plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL,
     size_by <- vis_out$size_by
 
     ## Dispatching to the central plotter in the simple case of two dimensions.
-    if (length(to_plot)==2L) {
+    if (length(to_plot) == 2L) {
         colnames(df_to_plot)[seq_along(to_plot)] <- c("X", "Y")
 
         labs <- sprintf(label_format[1], dimred, to_plot)
         if (!is.null(percentVar)) {
-            labs <- paste0(labs, sprintf(label_format[2], round(percentVar[to_plot])))
+            labs <- paste0(
+                labs,
+                sprintf(label_format[2], round(percentVar[to_plot]))
+            )
         }
 
         plot_out <- .central_plotter(df_to_plot, xlab = labs[1], ylab = labs[2],
                                      colour_by = colour_by, size_by = size_by,
-                                     shape_by = shape_by, ..., point_FUN=NULL)
+                                     shape_by = shape_by, ..., point_FUN = NULL)
 
         # Adding text with the median locations of the 'text_by' vector.
         if (!is.null(text_by)) {
-            text_out <- retrieveCellInfo(object, text_by, search="colData")
-            text_out$val <- .coerce_to_factor(text_out$val, level.limit=Inf)
-            by_text_x <- vapply(split(df_to_plot$X, text_out$val), median, FUN.VALUE=0)
-            by_text_y <- vapply(split(df_to_plot$Y, text_out$val), median, FUN.VALUE=0)
+            text_out <- retrieveCellInfo(object, text_by, search = "colData")
+            text_out$val <- .coerce_to_factor(text_out$val, level.limit = Inf)
+            by_text_x <- vapply(
+                split(df_to_plot$X, text_out$val),
+                median,
+                FUN.VALUE = 0
+            )
+            by_text_y <- vapply(
+                split(df_to_plot$Y, text_out$val),
+                median,
+                FUN.VALUE = 0
+            )
             plot_out <- plot_out +
                 geom_text_repel(
-                    data = data.frame(x = by_text_x, y = by_text_y, label = names(by_text_x)),
+                    data = data.frame(
+                        x = by_text_x, y = by_text_y, label = names(by_text_x)
+                    ),
                     mapping = aes(x = x, y = y, label = label),
                     inherit.aes = FALSE,
                     size = text_size, colour = text_colour
@@ -131,22 +176,26 @@ plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL,
 
     ## Otherwise, creating a paired reddim plot.
     paired_reddim_plot(df_to_plot, to_plot = to_plot, percentVar = percentVar,
-        colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-        dimred=dimred, label_format=label_format, ...)
+        colour_by = colour_by, shape_by = shape_by, size_by = size_by,
+        dimred = dimred, label_format = label_format, ...)
 }
 
 #' @importFrom ggplot2 ggplot facet_grid stat_density geom_point theme
-paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar=NULL,
-    colour_by=NULL, shape_by=NULL, size_by=NULL,
-    label_format=c("%s %i", " (%i%%)"),
-    add_legend = TRUE, theme_size = 10, point_alpha = 0.6, point_size = NULL) 
-{
+paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
+        colour_by=NULL, shape_by=NULL, size_by=NULL,
+        label_format=c("%s %i", " (%i%%)"),
+        add_legend = TRUE, theme_size = 10, point_alpha = 0.6, point_size = NULL
+    ) {
+
     reddim_cols <- seq_along(to_plot)
     df_to_expand <- df_to_plot[, reddim_cols]
 
     labs <- sprintf(label_format[1], dimred, to_plot)
     if (!is.null(percentVar)) {
-        labs <- paste0(labs, sprintf(label_format[2], round(percentVar[to_plot])))
+        labs <- paste0(
+            labs,
+            sprintf(label_format[2], round(percentVar[to_plot]))
+        )
     }
     colnames(df_to_expand) <- labs
 
@@ -163,20 +212,23 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar=NULL,
         xlab("") +
         ylab("") +
         theme_bw(theme_size)
-    
+
     ## Setting up the point addition with various aesthetics.
-    point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size)
+    point_out <- .get_point_args(
+        colour_by, shape_by, size_by, alpha = point_alpha, size = point_size
+    )
     plot_out <- plot_out + do.call(geom_point, point_out$args)
-    if (!is.null(colour_by)) { 
-        plot_out <- .resolve_plot_colours(plot_out, df_to_plot$colour_by, colour_by, fill=point_out$fill)
-    } 
- 
+    if (!is.null(colour_by)) {
+        plot_out <- .resolve_plot_colours(
+            plot_out, df_to_plot$colour_by, colour_by, fill = point_out$fill
+        )
+    }
+
     # Setting the legend details.
     plot_out <- .add_extra_guide(plot_out, shape_by, size_by)
-    if ( !add_legend ) {
+    if (!add_legend) {
         plot_out <- plot_out + theme(legend.position = "none")
     }
 
     plot_out
 }
-

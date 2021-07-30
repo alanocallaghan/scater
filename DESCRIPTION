@@ -39,7 +39,8 @@ Imports:
     ggbeeswarm,
     viridis,
     Rtsne,
-    RColorBrewer
+    RColorBrewer,
+    ggrepel
 Suggests: 
     BiocStyle,
     biomaRt,
