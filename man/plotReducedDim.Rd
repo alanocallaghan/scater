@@ -25,58 +25,84 @@ plotReducedDim(
 \arguments{
 \item{object}{A SingleCellExperiment object.}
 
-\item{dimred}{A string or integer scalar indicating the reduced dimension result in \code{reducedDims(object)} to plot.}
+\item{dimred}{A string or integer scalar indicating the reduced dimension
+result in \code{reducedDims(object)} to plot.}
 
-\item{ncomponents}{A numeric scalar indicating the number of dimensions to plot, starting from the first dimension.
+\item{ncomponents}{A numeric scalar indicating the number of dimensions to
+plot, starting from the first dimension.
 Alternatively, a numeric vector specifying the dimensions to be plotted.}
 
-\item{percentVar}{A numeric vector giving the proportion of variance in expression explained by each reduced dimension. 
-Only expected to be used in PCA settings, e.g., in the \code{\link[scater]{plotPCA}} function.}
+\item{percentVar}{A numeric vector giving the proportion of variance in
+expression explained by each reduced dimension.
+Only expected to be used in PCA settings, e.g., in the
+\code{\link[scater]{plotPCA}} function.}
 
-\item{colour_by}{Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
+\item{colour_by}{Specification of a column metadata field or a feature to
+colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for
+possible values.}
 
-\item{shape_by}{Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
+\item{shape_by}{Specification of a column metadata field or a feature to
+shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for
+possible values.}
 
-\item{size_by}{Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
+\item{size_by}{Specification of a column metadata field or a feature to
+size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for
+possible values.}
 
-\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
+\item{by_exprs_values}{A string or integer scalar specifying which assay to
+obtain expression values from,
+for use in point aesthetics - see the \code{exprs_values} argument in
+\code{?\link{retrieveCellInfo}}.}
 
-\item{text_by}{String specifying the column metadata field with which to add text labels on the plot.
+\item{text_by}{String specifying the column metadata field with which to add
+text labels on the plot.
 This must refer to a categorical field, i.e., coercible into a factor.
-Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.}
+Alternatively, an \link{AsIs} vector or data.frame, see
+\code{?\link{retrieveCellInfo}}.}
 
 \item{text_size}{Numeric scalar specifying the size of added text.}
 
 \item{text_colour}{String specifying the colour of the added text.}
 
-\item{label_format}{Character vector of length 2 containing format strings to use for the axis labels. 
-The first string expects a string containing the result type (e.g., \code{"PCA"}) and an integer containing the component number,
-while the second string shows the rounded percentage of variance explained and is only relevant when this information is provided in \code{object}.}
+\item{label_format}{Character vector of length 2 containing format strings
+to use for the axis labels.
+The first string expects a string containing the result type (e.g.,
+\code{"PCA"}) and an integer containing the component number,
+while the second string shows the rounded percentage of variance explained
+and is only relevant when this information is provided in \code{object}.}
 
-\item{other_fields}{Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
+\item{other_fields}{Additional cell-based fields to include in the
+data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
-\item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
-identify features instead of \code{rownames(object)} when labelling plot 
+\item{swap_rownames}{Column name of \code{rowData(object)} to be used to
+identify features instead of \code{rownames(object)} when labelling plot
 elements.}
 
-\item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
+\item{...}{Additional arguments for visualization, see
+\code{?"\link{scater-plot-args}"} for details.}
 }
 \value{
 A ggplot object
 }
 \description{
-Plot cell-level reduced dimension results stored in a SingleCellExperiment object.
+Plot cell-level reduced dimension results stored in a SingleCellExperiment
+object.
 }
 \details{
-If \code{ncomponents} is a scalar equal to 2, a scatterplot of the first two dimensions is produced. 
-If \code{ncomponents} is greater than 2, a pairs plots for the top dimensions is produced.
+If \code{ncomponents} is a scalar equal to 2, a scatterplot of the first two
+dimensions is produced.
+If \code{ncomponents} is greater than 2, a pairs plots for the top
+dimensions is produced.
 
-Alternatively, if \code{ncomponents} is a vector of length 2, a scatterplot of the two specified dimensions is produced.
-If it is of length greater than 2, a pairs plot is produced containing all pairwise plots between the specified dimensions.
+Alternatively, if \code{ncomponents} is a vector of length 2, a scatterplot
+of the two specified dimensions is produced.
+If it is of length greater than 2, a pairs plot is produced containing all
+pairwise plots between the specified dimensions.
 
-The \code{text_by} option will add factor levels as labels onto the plot, placed at the median coordinate across all points in that level.
-This is useful for annotating position-related metadata (e.g., clusters) when there are too many levels to distinguish by colour.
+The \code{text_by} option will add factor levels as labels onto the plot,
+placed at the median coordinate across all points in that level.
+This is useful for annotating position-related metadata (e.g., clusters)
+when there are too many levels to distinguish by colour.
 It is only available for scatterplots.
 }
 \examples{
@@ -89,7 +115,7 @@ plotReducedDim(example_sce, "PCA", colour_by="Cell_Cycle")
 plotReducedDim(example_sce, "PCA", colour_by="Gene_0001")
 
 plotReducedDim(example_sce, "PCA", ncomponents=5)
-plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle", 
+plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle",
     shape_by="Treatment")
 
 }
