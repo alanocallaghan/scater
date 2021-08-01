@@ -3,11 +3,13 @@
 
 
 
-\section{Changes in version 1.20.0, Bioconductor 3.13 Release}{
+\section{Changes in version 1.22.0, Bioconductor 3.14 Release}{
 \itemize{
     \item Add \code{color_rows_by} and \code{row_annotation_colors} arguments
     to \code{plotHeatmap}, similar to analogous column arguments.
     \item Ensure all functions accept *colour* and *color* spelling throughout.
+    \item Change \code{text_by} annotations in plotReducedDim to use 
+    \code{geom_text_repel} from \code{ggrepel}.
 }}
 
 \section{Changes in version 1.20.0, Bioconductor 3.13 Release}{
