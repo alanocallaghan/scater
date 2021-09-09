@@ -52,18 +52,25 @@ test_that("scaling by feature variances work correctly", {
 test_that("runPCA works as expected", {
     # Using ExactParam() simply to avoid issues due to randomness.
     normedX <- runPCA(normed) 
-    expect_identical(reducedDimNames(normedX), "PCA")     
+    expect_identical(reducedDimNames(normedX), "PCA")
     fullN <- min(dim(normed), 50L)
     expect_identical(dim(reducedDim(normedX, "PCA")), c(ncol(normed), fullN))
 
-    normedX <- runPCA(normed, ncol(normed)) 
+    normedX <- runPCA(normed, ncol(normed))
     expect_equal(sum(attr(reducedDim(normedX), "percentVar")), 100)
 
     # Checking that it works with a restricted number of components.
-    normedX <- runPCA(normed, ncomponents=4)
-    expect_identical(reducedDimNames(normedX), "PCA")     
+    normedX <- runPCA(normed, ncomponents = 4)
+    expect_identical(reducedDimNames(normedX), "PCA")
     expect_identical(dim(reducedDim(normedX, "PCA")), c(ncol(normedX), 4L))
     expect_true(sum(attr(reducedDim(normedX), "percentVar")) < 100)
+})
+
+
+test_that("snifter option works with dimred set", {
+    # Using ExactParam() simply to avoid issues due to randomness.
+    normedX <- runPCA(normed)
+    expect_error(normedX <- runTSNE(normedX, dimred = "PCA"), NA)
 })
 
 test_that("runPCA responds to changes to various settings", {
@@ -139,7 +146,7 @@ test_that("runPCA handles scaling", {
     attr(r4, "rotation") <- NULL
 
     expect_equal(r3, r4)
-    
+
     # Checking that the rotation vectors are correct.
     combined <- union(rownames(rot4), rownames(rot3))
     expect_equal(rot3[combined,], rot4[combined,])
@@ -235,7 +242,7 @@ test_that("runTSNE works as expected", {
     set.seed(100)
     normed3 <- runTSNE(normed, subset_row = 1:100)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
-    
+
     set.seed(100)
     normed3 <- runTSNE(normed, perplexity = 5)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
