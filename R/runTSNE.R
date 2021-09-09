@@ -91,33 +91,40 @@ NULL
         perplexity <- min(50, floor(nrow(x) / 5))
     }
 
-    args <- list(perplexity=perplexity, dims=ncomponents, theta=theta, ...)
+    args <- list(perplexity=perplexity, dims = ncomponents, theta = theta, ...)
     num_threads <- .choose_nthreads(num_threads, BPPARAM)
     if (!is.null(num_threads)) {
         args$num_threads <- num_threads
     }
 
-    if (!external_neighbors || theta==0) {
+    if (!external_neighbors || theta == 0) {
         if (use_fitsne) {
             if (normalize) {
                 x <- Rtsne::normalize_input(x)
             }
             args$n_components <- as.integer(args$dims)
             args$dims <- NULL
-            if (args$pca) {
-                args$initialization <- "pca"
-                args$pca <- NULL
-            }
-            tsne_out <- do.call(snifter::fitsne, c(list(x), args, simplified=TRUE))
+            tsne_out <- do.call(
+                snifter::fitsne,
+                c(list(x), args, simplified = TRUE)
+            )
         } else {
-            tsne_out <- do.call(Rtsne::Rtsne, c(list(x, check_duplicates = FALSE, normalize=normalize), args))$Y
+            tsne_out <- do.call(
+                Rtsne::Rtsne,
+                c(list(x, check_duplicates = FALSE, normalize = normalize), args)
+            )$Y
         }
     } else {
         if (normalize) {
             x <- Rtsne::normalize_input(x)
         }
-        nn_out <- findKNN(x, k=floor(3*perplexity), BNPARAM=BNPARAM, BPPARAM=BPPARAM)
-        tsne_out <- do.call(Rtsne::Rtsne_neighbors, c(list(nn_out$index, nn_out$distance), args))$Y
+        nn_out <- findKNN(x,
+            k = floor(3*perplexity), BNPARAM = BNPARAM, BPPARAM = BPPARAM
+        )
+        tsne_out <- do.call(
+            Rtsne::Rtsne_neighbors,
+            c(list(nn_out$index, nn_out$distance), args)
+        )$Y
     }
 
     tsne_out
