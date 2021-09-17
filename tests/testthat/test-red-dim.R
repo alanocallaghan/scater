@@ -406,12 +406,9 @@ test_that("runUMAP on existing reduced dimension results works as expected", {
 
 #     set.seed(20)
 #     seedSet()
-#     sum(.Random.seed)
 #     ref <- runUMAP(normedP, dimred = "PCA")
-#     sum(.Random.seed)
 #     set.seed(20)
 #     alt <- runUMAP(normedP, dimred = "PCA", external_neighbors = TRUE)
-#     sum(.Random.seed)
 #     expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
 
 #     set.seed(21)
@@ -584,44 +581,45 @@ SIGNAGNOSTIC <- function(x, y, same = TRUE) {
     }
 }
 
-test_that("runDiffusionMap works as expected", {
-    normedX <- runDiffusionMap(normed, ncomponents = 3)
-    expect_identical(reducedDimNames(normedX), "DiffusionMap")
-    expect_identical(dim(reducedDim(normedX, "DiffusionMap")), c(ncol(normedX), 3L))
+## tests for deprecated functionality
+# test_that("runDiffusionMap works as expected", {
+#     normedX <- runDiffusionMap(normed, ncomponents = 3)
+#     expect_identical(reducedDimNames(normedX), "DiffusionMap")
+#     expect_identical(dim(reducedDim(normedX, "DiffusionMap")), c(ncol(normedX), 3L))
 
-    # Testing that various settings work.
-    normed2 <- runDiffusionMap(normed)
-    normed3 <- runDiffusionMap(normed, scale = TRUE)
-    SIGNAGNOSTIC(same = FALSE, reducedDim(normed2), reducedDim(normed3))
+#     # Testing that various settings work.
+#     normed2 <- runDiffusionMap(normed)
+#     normed3 <- runDiffusionMap(normed, scale = TRUE)
+#     SIGNAGNOSTIC(same = FALSE, reducedDim(normed2), reducedDim(normed3))
 
-    normed3 <- runDiffusionMap(normed, ntop = 100)
-    SIGNAGNOSTIC(same = FALSE, reducedDim(normed2), reducedDim(normed3))
+#     normed3 <- runDiffusionMap(normed, ntop = 100)
+#     SIGNAGNOSTIC(same = FALSE, reducedDim(normed2), reducedDim(normed3))
 
-    normed3 <- runDiffusionMap(normed, exprs_values = "counts")
-    SIGNAGNOSTIC(same = FALSE, reducedDim(normed2), reducedDim(normed3))
+#     normed3 <- runDiffusionMap(normed, exprs_values = "counts")
+#     SIGNAGNOSTIC(same = FALSE, reducedDim(normed2), reducedDim(normed3))
 
-    normed3 <- runDiffusionMap(normed, subset_row = 1:100)
-    SIGNAGNOSTIC(same = FALSE, reducedDim(normed2), reducedDim(normed3))
+#     normed3 <- runDiffusionMap(normed, subset_row = 1:100)
+#     SIGNAGNOSTIC(same = FALSE, reducedDim(normed2), reducedDim(normed3))
 
-    normed3 <- runDiffusionMap(normed, k = 13)
-    SIGNAGNOSTIC(same = FALSE, reducedDim(normed2), reducedDim(normed3))
+#     normed3 <- runDiffusionMap(normed, k = 13)
+#     SIGNAGNOSTIC(same = FALSE, reducedDim(normed2), reducedDim(normed3))
 
-    # Testing out the use of existing reduced dimensions (this should not respond to any feature settings)
-    normedP <- runPCA(normed, ncomponents = 4)
-    normed2 <- runDiffusionMap(normedP, dimred = "PCA")
+#     # Testing out the use of existing reduced dimensions (this should not respond to any feature settings)
+#     normedP <- runPCA(normed, ncomponents = 4)
+#     normed2 <- runDiffusionMap(normedP, dimred = "PCA")
 
-    normed3 <- runDiffusionMap(normedP, dimred = "PCA", ntop = 20)
-    SIGNAGNOSTIC(reducedDim(normed2, "DiffusionMap"), reducedDim(normed3, "DiffusionMap"))
+#     normed3 <- runDiffusionMap(normedP, dimred = "PCA", ntop = 20)
+#     SIGNAGNOSTIC(reducedDim(normed2, "DiffusionMap"), reducedDim(normed3, "DiffusionMap"))
 
-    normed3 <- runDiffusionMap(normedP, dimred = "PCA", scale = TRUE)
-    SIGNAGNOSTIC(reducedDim(normed2, "DiffusionMap"), reducedDim(normed3, "DiffusionMap"))
+#     normed3 <- runDiffusionMap(normedP, dimred = "PCA", scale = TRUE)
+#     SIGNAGNOSTIC(reducedDim(normed2, "DiffusionMap"), reducedDim(normed3, "DiffusionMap"))
 
-    normed3 <- runDiffusionMap(normedP, dimred = "PCA", subset_row = 1:20)
-    SIGNAGNOSTIC(reducedDim(normed2, "DiffusionMap"), reducedDim(normed3, "DiffusionMap"))
+#     normed3 <- runDiffusionMap(normedP, dimred = "PCA", subset_row = 1:20)
+#     SIGNAGNOSTIC(reducedDim(normed2, "DiffusionMap"), reducedDim(normed3, "DiffusionMap"))
 
-    normed3 <- runDiffusionMap(normedP, dimred = "PCA", n_dimred = 3)
-    SIGNAGNOSTIC(reducedDim(normed2, "DiffusionMap"), reducedDim(normed3, "DiffusionMap"), same = FALSE)
-})
+#     normed3 <- runDiffusionMap(normedP, dimred = "PCA", n_dimred = 3)
+#     SIGNAGNOSTIC(reducedDim(normed2, "DiffusionMap"), reducedDim(normed3, "DiffusionMap"), same = FALSE)
+# })
 
 #############################################
 # Check defences against sparse matrices.
@@ -636,6 +634,6 @@ test_that("run* functions work with sparse matrices", {
     expect_error(runTSNE(normed), NA)
     expect_error(runNMF(normed), NA)
     expect_error(runUMAP(normed), NA)
-    expect_error(runDiffusionMap(normed), NA)
+    # expect_error(runDiffusionMap(normed), NA)
     expect_error(runMDS(normed), NA)
 })

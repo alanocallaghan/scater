@@ -63,7 +63,7 @@ NULL
 
 #' @export
 #' @rdname runDiffusionMap
-setMethod("calculateDiffusionMap", "ANY", .calculate_diffusion_map) 
+setMethod("calculateDiffusionMap", "ANY", .calculate_diffusion_map)
 
 #' @export
 #' @rdname runDiffusionMap
@@ -85,11 +85,12 @@ setMethod("calculateDiffusionMap", "SingleCellExperiment", function(x, ...,
 #' @rdname runDiffusionMap
 #' @importFrom SingleCellExperiment reducedDim<-
 runDiffusionMap <- function(x, ..., altexp=NULL, name="DiffusionMap") {
+    .Deprecated()
     if (!is.null(altexp)) {
         y <- altExp(x, altexp)
     } else {
         y <- x
     }
     reducedDim(x, name) <- calculateDiffusionMap(y, ...)
-    x 
+    x
 }
