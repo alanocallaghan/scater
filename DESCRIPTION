@@ -8,8 +8,8 @@ Authors@R: c(
         person("Vladimir", "Kiselev", role=c("ctb"), email="vk6@sanger.ac.uk"),
         person("Felix G.M.", "Ernst", role=c("ctb"), email="felix.gm.ernst@outlook.com"),
         person("Alan", "O'Callaghan", role=c("ctb", "cre"), email="alan.ocallaghan@outlook.com"))
-Version: 1.21.5
-Date: 2021-09-09
+Version: 1.21.7
+Date: 2021-09-17
 License: GPL-3
 Title: Single-Cell Analysis Toolkit for Gene Expression Data in R
 Description: A collection of tools for doing various analyses of
@@ -62,6 +62,6 @@ biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, No
         GeneExpression, Sequencing, Software, DataImport,
         DataRepresentation, Infrastructure, Coverage
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 URL: http://bioconductor.org/packages/scater/
 BugReports: https://support.bioconductor.org/

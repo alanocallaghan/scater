@@ -80,4 +80,7 @@ setGeneric("calculateNMF", function(x, ...) standardGeneric("calculateNMF"))
 
 #' @export
 #' @rdname runDiffusionMap
-setGeneric("calculateDiffusionMap", function(x, ...) standardGeneric("calculateDiffusionMap"))
+setGeneric("calculateDiffusionMap", function(x, ...) {
+    .Deprecated()
+    standardGeneric("calculateDiffusionMap")
+})
