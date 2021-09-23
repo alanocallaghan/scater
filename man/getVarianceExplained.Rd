@@ -8,7 +8,7 @@
 \usage{
 getVarianceExplained(x, ...)
 
-\S4method{getVarianceExplained}{ANY}(x, variables, subset_row = NULL)
+\S4method{getVarianceExplained}{ANY}(x, variables, subset_row = NULL, BPPARAM = SerialParam())
 
 \S4method{getVarianceExplained}{SummarizedExperiment}(x, variables = NULL, ..., exprs_values = "logcounts")
 }
@@ -27,6 +27,8 @@ For the SummarizedExperiment method, this can also be a character vector specify
 or \code{NULL}, in which case all columns in \code{colData(x)} are used.}
 
 \item{subset_row}{A vector specifying the subset of rows of \code{x} for which to return a result.}
+
+\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.}
 
 \item{exprs_values}{String or integer scalar specifying the expression values for which to compute the variance.}
 }
