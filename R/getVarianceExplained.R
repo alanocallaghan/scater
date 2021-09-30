@@ -12,6 +12,7 @@
 #' For the SummarizedExperiment method, this can also be a character vector specifying column names of \code{colData(x)} to use;
 #' or \code{NULL}, in which case all columns in \code{colData(x)} are used.
 #' @param subset_row A vector specifying the subset of rows of \code{x} for which to return a result.
+#' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.
 #' @param ... For the generic, arguments to be passed to specific methods.
 #' For the SummarizedExperiment method, arguments to be passed to the ANY method.
 #'
@@ -37,18 +38,31 @@
 #' r2mat <- getVarianceExplained(example_sce)
 NULL
 
-#' @importFrom Matrix t
-#' @importFrom DelayedArray DelayedArray
-#' @importFrom DelayedMatrixStats rowVars
-#' @importFrom stats model.matrix
-.get_variance_explained <- function(x, variables, subset_row=NULL) {
-    subset_row <- .subset2index(subset_row, x, byrow=TRUE)
-    ngenes <- length(subset_row)
-    rsquared_mat <- matrix(NA_real_, ngenes, ncol(variables), 
-        dimnames=list(rownames(x)[subset_row], colnames(variables)))
-    tss.all <- rowVars(DelayedArray(x), rows=subset_row) * (ncol(x)-1) 
+#' @importFrom beachmat rowBlockApply
+.get_variance_explained <- function(x, variables, subset_row=NULL, BPPARAM=SerialParam()) {
+    if (!is.null(subset_row)) {
+        x <- x[subset_row,,drop=FALSE]
+    }
 
     # Get R^2 values for each feature and each variable
+    output <- rowBlockApply(x, FUN=.get_variance_explained_internal, variables=variables, BPPARAM=BPPARAM)
+
+    output <- do.call(rbind, output)    
+    rownames(output) <- rownames(x)
+    output * 100
+}
+
+#' @importFrom DelayedMatrixStats rowVars
+#' @importFrom stats model.matrix
+#' @importFrom scuttle fitLinearModel
+.get_variance_explained_internal <- function(block, variables) {
+    if (is(block, "SparseArraySeed")) {
+        block <- as(block, "dgCMatrix")
+    }
+
+    rsquared_mat <- matrix(NA_real_, nrow(block), ncol(variables), dimnames=list(NULL, colnames(variables))) 
+    tss.all <- NULL
+
     for (V in colnames(variables)) {
         curvar <- variables[[V]]
         if (length(unique(curvar))<=1L) {
@@ -59,21 +73,24 @@ NULL
         # Protect against NAs in the metadata.
         keep <- !is.na(curvar)
         if (all(keep)) {
+            if (is.null(tss.all)) {
+                tss.all <- rowVars(block) * (ncol(block) - 1) 
+            }
             tss <- tss.all
-            y <- x
+            y <- block
         } else {
             curvar <- curvar[keep]
-            y <- x[,keep,drop=FALSE]
-            tss <- rowVars(DelayedArray(x), rows=subset_row, cols=keep) * (sum(keep) - 1)
+            y <- block[,keep,drop=FALSE]
+            tss <- rowVars(y) * (ncol(y) - 1)
         }
 
         design <- model.matrix(~curvar)
-        fit <- fitLinearModel(y, design, subset.row=subset_row)
+        fit <- fitLinearModel(y, design)
         rss <- fit$variance * (nrow(design) - ncol(design))
         rsquared_mat[, V] <- 1 - rss/tss
     }
 
-    rsquared_mat * 100
+    rsquared_mat
 }
 
 #' @export
