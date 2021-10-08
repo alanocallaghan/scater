@@ -55,9 +55,11 @@
 #' example_sce <- runTSNE(example_sce)
 #' plotTSNE(example_sce, colour_by="Mutation_Status")
 #'
+#' \dontrun{
 #' ## Same for DiffusionMaps:
 #' example_sce <- runDiffusionMap(example_sce)
 #' plotDiffusionMap(example_sce)
+#' }
 #'
 #' ## Same for MDS plots:
 #' example_sce <- runMDS(example_sce)
