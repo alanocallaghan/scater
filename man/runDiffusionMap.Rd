@@ -133,10 +133,11 @@ It is advisable to use a different \code{name} to distinguish this output from t
 \examples{
 example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
-
+\dontrun{
 example_sce <- runDiffusionMap(example_sce)
 reducedDimNames(example_sce)
 head(reducedDim(example_sce))
+}
 }
 \references{
 Haghverdi L, Buettner F, Theis FJ (2015).
