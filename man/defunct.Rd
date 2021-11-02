@@ -5,6 +5,9 @@
 \alias{calculateQCMetrics}
 \alias{normalize,SingleCellExperiment-method}
 \alias{centreSizeFactors}
+\alias{calculateDiffusionMap}
+\alias{calculateDiffusionMap,ANY-method}
+\alias{runDiffusionMap}
 \title{Defunct functions}
 \usage{
 calculateQCMetrics(...)
@@ -12,9 +15,15 @@ calculateQCMetrics(...)
 \S4method{normalize}{SingleCellExperiment}(object, ...)
 
 centreSizeFactors(...)
+
+calculateDiffusionMap(x, ...)
+
+\S4method{calculateDiffusionMap}{ANY}(x, ...)
+
+runDiffusionMap(...)
 }
 \arguments{
-\item{object, ...}{Ignored arguments.}
+\item{object, x, ...}{Ignored arguments.}
 }
 \value{
 All functions error out with a defunct message pointing towards its descendent (if available).
@@ -29,6 +38,10 @@ Their successors are also listed.
 \code{normalize} is succeeded by \code{\link{logNormCounts}}.
 
 \code{centreSizeFactors} has no replacement - the \pkg{SingleCellExperiment} is removing support for multiple size factors, so this function is now trivial.
+
+\code{runDiffusionMap} and \code{calculateDiffusionMap} have no replacement.
+\pkg{destiny} is no longer on Bioconductor. You can calculate a diffusion map
+yourself, and add it to a \code{reducedDim} field, if you so wish.
 }
 \examples{
 try(calculateQCMetrics())
