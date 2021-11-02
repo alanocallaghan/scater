@@ -1,6 +1,10 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
+\section{Changes in version 1.24.0, Bioconductor 3.15 Release}{
+\itemize{
+    \item Remove diffusion map functions that relied on destiny
+}}
 
 
 \section{Changes in version 1.22.0, Bioconductor 3.14 Release}{

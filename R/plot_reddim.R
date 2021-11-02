@@ -85,7 +85,7 @@ plotUMAP <- function(object, ..., ncomponents=2) {
 }
 
 #' @rdname plot_reddim
-#' @aliases plotDiffusionMap 
+#' @aliases plotDiffusionMap
 #' @export
 plotDiffusionMap <- function(object, ..., ncomponents=2) {
     plotReducedDim(object, ncomponents = ncomponents, dimred = "DiffusionMap", ...)

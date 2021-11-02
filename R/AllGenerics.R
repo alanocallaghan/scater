@@ -79,8 +79,7 @@ setGeneric("calculateMDS", function(x, ...) standardGeneric("calculateMDS"))
 setGeneric("calculateNMF", function(x, ...) standardGeneric("calculateNMF"))
 
 #' @export
-#' @rdname runDiffusionMap
+#' @rdname defunct
 setGeneric("calculateDiffusionMap", function(x, ...) {
-    .Deprecated()
     standardGeneric("calculateDiffusionMap")
 })
