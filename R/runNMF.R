@@ -48,26 +48,24 @@
 #' head(reducedDim(example_sce))
 NULL
 
-#' @importFrom BiocNeighbors KmknnParam findKNN 
+#' @importFrom BiocNeighbors KmknnParam findKNN
 #' @importFrom BiocParallel SerialParam
-.calculate_nmf <- function(x, ncomponents = 2, ntop = 500, 
-    subset_row = NULL, scale=FALSE, transposed=FALSE, ...)
+.calculate_nmf <- function(x, ncomponents = 2, ntop = 500,
+    subset_row = NULL, scale=FALSE, transposed=FALSE, seed=1, ...)
 { 
     if (!transposed) {
         x <- .get_mat_for_reddim(x, subset_row=subset_row, ntop=ntop, scale=scale) 
     }
-    x <- as.matrix(x) 
+    x <- t(as.matrix(x))
 
-    # This package has some kind of .onAttach behavior... not good. Oh well,
-    # it's not the first hacky solution we've put in for other people's crap.
-    suppressPackageStartupMessages(require("NMF")) 
+    suppressPackageStartupMessages(require("RcppML"))
 
-    args <- list(rank=ncomponents, ...)
-    nmf_out <- do.call(NMF::nmf, c(list(x), args))
+    args <- list(k=ncomponents, verbose=FALSE, seed=seed, ...)
+    nmf_out <- do.call(RcppML::nmf, c(list(x), args))
 
-    # We transposed it earlier, so everything here has switched meanings.
-    nmf_x <- NMF::.basis(nmf_out)
-    attr(nmf_x, "basis") <- t(NMF::.coef(nmf_out))
+    # RcppML doesn't use transposed data
+    nmf_x <- t(nmf_out$h)
+    attr(nmf_x, "basis") <- nmf_out$w
 
     nmf_x
 }
