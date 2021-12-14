@@ -40,6 +40,7 @@ Imports:
     viridis,
     Rtsne,
     RColorBrewer,
+    RcppML,
     ggrepel
 Suggests: 
     BiocStyle,
@@ -50,7 +51,6 @@ Suggests:
     robustbase,
     rmarkdown,
     uwot,
-    RcppML,
     testthat,
     pheatmap,
     snifter,

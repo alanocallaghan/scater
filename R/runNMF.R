@@ -8,6 +8,7 @@
 #' For \code{runNMF}, a \linkS4class{SingleCellExperiment} object.
 #' @param ncomponents Numeric scalar indicating the number of NMF dimensions to obtain.
 #' @inheritParams runPCA
+#' @param seed Random number generation seed to be passed to \code{\link[RcppML]{nmf}}.
 #' @param ... For the \code{calculateNMF} generic, additional arguments to pass to specific methods.
 #' For the ANY method, additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
@@ -58,8 +59,6 @@ NULL
     }
     x <- t(as.matrix(x))
 
-    suppressPackageStartupMessages(require("RcppML"))
-
     args <- list(k=ncomponents, verbose=FALSE, seed=seed, ...)
     nmf_out <- do.call(RcppML::nmf, c(list(x), args))
 
@@ -83,9 +82,8 @@ setMethod("calculateNMF", "SummarizedExperiment", function(x, ..., exprs_values=
 
 #' @export
 #' @rdname runNMF
-setMethod("calculateNMF", "SingleCellExperiment", function(x, ..., 
-    exprs_values="logcounts", dimred=NULL, n_dimred=NULL)
-{
+setMethod("calculateNMF", "SingleCellExperiment",
+    function(x, ..., exprs_values="logcounts", dimred=NULL, n_dimred=NULL) {
     mat <- .get_mat_from_sce(x, exprs_values=exprs_values, dimred=dimred, n_dimred=n_dimred)
     .calculate_nmf(mat, transposed=!is.null(dimred), ...)
 })
