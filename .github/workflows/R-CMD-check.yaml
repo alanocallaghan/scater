@@ -10,7 +10,8 @@ jobs:
   R-CMD-check:
     runs-on: ubuntu-latest
     container: alanocallaghan/scater:latest
-
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out repo
         uses: actions/checkout@v2

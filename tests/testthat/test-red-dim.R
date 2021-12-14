@@ -499,9 +499,9 @@ test_that("runNMF works as expected", {
     normed3 <- runNMF(normed, subset_row = 1:100)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
-    set.seed(100)
-    normed3 <- runNMF(normed, method = "Frobenius")
-    expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
+    # set.seed(100)
+    # normed3 <- runNMF(normed, method = "Frobenius")
+    # expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     # Testing out the use of existing reduced dimensions (this should not respond to any feature settings).
     normedP <- runPCA(normed, ncomponents = 4)

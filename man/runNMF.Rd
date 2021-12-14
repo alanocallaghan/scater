@@ -17,6 +17,7 @@ calculateNMF(x, ...)
   subset_row = NULL,
   scale = FALSE,
   transposed = FALSE,
+  seed = 1,
   ...
 )
 
@@ -54,6 +55,8 @@ This can be a character vector of row names, an integer vector of row indices or
 \item{scale}{Logical scalar, should the expression values be standardized?}
 
 \item{transposed}{Logical scalar, is \code{x} transposed with cells in rows?}
+
+\item{seed}{Random number generation seed to be passed to \code{\link[RcppML]{nmf}}.}
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
 
