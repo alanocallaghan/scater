@@ -44,7 +44,7 @@
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to
 #'  identify features instead of \code{rownames(object)} when labelling plot
 #'  elements.
-#' @param point.padding See \code{?ggrepel::geom_text_repel}.
+#' @param point.padding,force See \code{?ggrepel::geom_text_repel}.
 #' @param ... Additional arguments for visualization, see
 #' \code{?"\link{scater-plot-args}"} for details.
 #'
@@ -93,7 +93,7 @@ plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL,
         by_exprs_values = "logcounts",
         text_by = NULL, text_size = 5, text_colour = "black",
         label_format = c("%s %i", " (%i%%)"), other_fields = list(),
-        swap_rownames = NULL, point.padding = NA, ...
+        swap_rownames = NULL, point.padding = NA, force = 1, ...
     ) {
 
     ## Extract reduced dimension representation of cells
@@ -169,13 +169,13 @@ plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL,
                     mapping = aes(x = x, y = y, label = label),
                     inherit.aes = FALSE,
                     size = text_size, colour = text_colour,
-                    point.padding = point.padding
+                    force = force, point.padding = point.padding
                 )
         }
 
         return(plot_out)
     }
-    
+
     ## Otherwise, creating a paired reddim plot.
     paired_reddim_plot(df_to_plot, to_plot = to_plot, percentVar = percentVar,
         colour_by = colour_by, shape_by = shape_by, size_by = size_by,
