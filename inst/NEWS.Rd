@@ -4,6 +4,7 @@
 \section{Changes in version 1.24.0, Bioconductor 3.15 Release}{
 \itemize{
     \item Remove diffusion map functions that relied on destiny
+    \item Add \code{point.padding} arg to \code{plotReducedDim}; passed to \code{geom_text_repel}.
 }}
 
 
