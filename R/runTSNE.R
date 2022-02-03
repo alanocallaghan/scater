@@ -146,6 +146,9 @@ setMethod("calculateTSNE", "SummarizedExperiment", function(x, ..., exprs_values
 setMethod("calculateTSNE", "SingleCellExperiment", function(x, ..., pca=is.null(dimred), 
     exprs_values="logcounts", dimred=NULL, n_dimred=NULL)
 {
+    if ("use_dimred" %in% names(list(...))) {
+        warning("`use_dimred` is unused; use `dimred` instead.")
+    }
     mat <- .get_mat_from_sce(x, exprs_values=exprs_values, dimred=dimred, n_dimred=n_dimred)
     .calculate_tsne(mat, transposed=!is.null(dimred), pca=pca, ...)
 })

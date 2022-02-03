@@ -175,7 +175,7 @@ plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL,
 
         return(plot_out)
     }
-
+    
     ## Otherwise, creating a paired reddim plot.
     paired_reddim_plot(df_to_plot, to_plot = to_plot, percentVar = percentVar,
         colour_by = colour_by, shape_by = shape_by, size_by = size_by,
