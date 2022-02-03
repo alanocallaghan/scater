@@ -19,6 +19,8 @@ plotReducedDim(
   label_format = c("\%s \%i", " (\%i\%\%)"),
   other_fields = list(),
   swap_rownames = NULL,
+  point.padding = NA,
+  force = 1,
   ...
 )
 }
@@ -77,6 +79,8 @@ data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to
 identify features instead of \code{rownames(object)} when labelling plot
 elements.}
+
+\item{point.padding, force}{See \code{?ggrepel::geom_text_repel}.}
 
 \item{...}{Additional arguments for visualization, see
 \code{?"\link{scater-plot-args}"} for details.}
