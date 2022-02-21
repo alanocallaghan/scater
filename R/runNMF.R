@@ -27,14 +27,14 @@
 #' In both cases, the matrix will have the attribute \code{"basis"} containing the gene-by-factor basis matrix.
 #'
 #' @details 
-#' The function \code{\link[NMF]{nmf}} is used internally to compute the NMF. 
+#' The function \code{\link[RcppML]{nmf}} is used internally to compute the NMF. 
 #' Note that the algorithm is not deterministic, so different runs of the function will produce differing results. 
 #' Users are advised to test multiple random seeds, and then use \code{\link{set.seed}} to set a random seed for replicable results. 
 #'
 #'
 #' @name runNMF
 #' @seealso 
-#' \code{\link[NMF]{nmf}}, for the underlying calculations.
+#' \code{\link[RcppML]{nmf}}, for the underlying calculations.
 #' 
 #' \code{\link{plotNMF}}, to quickly visualize the results.
 #'

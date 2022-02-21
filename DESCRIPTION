@@ -8,8 +8,8 @@ Authors@R: c(
         person("Vladimir", "Kiselev", role=c("ctb"), email="vk6@sanger.ac.uk"),
         person("Felix G.M.", "Ernst", role=c("ctb"), email="felix.gm.ernst@outlook.com"),
         person("Alan", "O'Callaghan", role=c("ctb", "cre"), email="alan.ocallaghan@outlook.com"))
-Version: 1.23.5
-Date: 2022-02-03
+Version: 1.23.6
+Date: 2022-02-21
 License: GPL-3
 Title: Single-Cell Analysis Toolkit for Gene Expression Data in R
 Description: A collection of tools for doing various analyses of
