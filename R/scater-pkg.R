@@ -12,4 +12,3 @@
 #' @import SingleCellExperiment
 #' @import methods
 NULL
-

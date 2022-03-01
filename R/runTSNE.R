@@ -104,6 +104,7 @@ NULL
             }
             args$n_components <- as.integer(args$dims)
             args$dims <- NULL
+            args$n_jobs <- num_threads
             tsne_out <- do.call(
                 snifter::fitsne,
                 c(list(x), args, simplified = TRUE)
