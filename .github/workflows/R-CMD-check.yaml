@@ -31,8 +31,6 @@ jobs:
         run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error", check_dir = "check")
         shell: Rscript {0}
 
+
       - name: BiocCheck
-        run: |
-          BiocManager::install("BiocCheck")
-          BiocCheck::BiocCheck(".")
-        shell: Rscript {0}
+        uses: insightsengineering/bioc-check-action@v1
