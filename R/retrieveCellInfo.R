@@ -108,11 +108,8 @@ retrieveCellInfo <- function(x, by, search = c("colData", "assays", "altExps"),
                 return(.mopUp(by, cd[,by]))
             }
         } else if (s=="assays") {
-            if (!is.null(swap_rownames)) {
-                m <- match(by, .get_rowData_column(x, swap_rownames))
-            } else {
-                m <- match(by, rownames(x))
-            }
+            x <- .swap_rownames(x, swap_rownames)
+            m <- match(by, rownames(x))
             if (!is.na(m)) {
                 return(.mopUp(by, assay(x, exprs_values, withDimnames = FALSE)[m, ]))
             }

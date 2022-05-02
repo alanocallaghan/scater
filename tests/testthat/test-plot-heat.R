@@ -57,14 +57,6 @@ test_that("we can produce heatmaps", {
     # Testing out passing arguments to pheatmap.
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], fontsize = 20, legend = FALSE)
 
-    plotHeatmap(example_sce, features = rowData(example_sce)[1:10, "ENS"], 
-        swap_rownames = "ENS", columns = 1:20)
-    expect_error(
-        plotHeatmap(example_sce, features = NA, swap_rownames = "ENS_e1",
-            columns = 1:20),
-        "must have n >= 2 objects to cluster"
-    )
-
     expect_error(
         plotHeatmap(example_sce, features = "constant", swap_rownames = "ENS_e2",
             columns = 1:20),

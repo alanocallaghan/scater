@@ -3,7 +3,7 @@
 #' Create a heatmap of expression values for each cell and specified features in a SingleCellExperiment object.
 #'
 #' @param object A \linkS4class{SingleCellExperiment} object.
-#' @param features A character vector of row names, a logical vector, or integer vector of indices specifying rows of \code{object} to visualize.
+#' @param features A character (or factor) vector of row names, a logical vector, or integer vector of indices specifying rows of \code{object} to visualize. When using character or integer vectors, the ordering specified by the user is retained. When using factor vectors, ordering is controlled by the factor levels.
 #' @param columns A vector specifying the subset of columns in \code{object} to show as columns in the heatmap. 
 #' Also specifies the column order if \code{cluster_cols=FALSE} and \code{order_columns_by=NULL}.
 #' By default, all columns are used.
@@ -91,14 +91,18 @@ plotHeatmap <- function(object, features, columns = NULL,
         colnames(object) <- seq_len(ncol(object)) 
     }
 
-    # Pulling out the features. swap_rownames makes features index a rowdata col
-    feats <- .swap_rownames(object, features, swap_rownames)
-    heat.vals <- assay(object, exprs_values)[feats, , drop=FALSE]
-    rownames(heat.vals) <- features
+    # Pulling out the features. swap_rownames swaps out for alt genenames
+    object <- .swap_rownames(object, swap_rownames)
+    # in case of numeric or logical features, converts to character or factor
+    features <- .handle_features(features, object)
+    heat.vals <- assay(object, exprs_values)[as.character(features), , drop=FALSE]
+    if (is.factor(features)) {
+        heat.vals <- heat.vals[levels(features), , drop = FALSE]
+    }
 
     if (!is.null(columns)) {
         columns <- .subset2index(columns, object, byrow=FALSE)
-        heat.vals <- heat.vals[,columns,drop=FALSE]
+        heat.vals <- heat.vals[, columns, drop=FALSE]
     }
     if (!is.null(order_columns_by)) {
         ordering <- list()
@@ -238,6 +242,9 @@ plotHeatmap <- function(object, features, columns = NULL,
         x <- x - rowMeans(x)
     }
     if (scale) {
+        if (!center & any(rowSums(x) == 0)) {
+            stop("Cannot include non-expressed genes when scale=TRUE.")
+        }
         x <- x / sqrt(rowSums(x^2) / (ncol(x) - 1))
     }
     if (is.null(zlim)) {
@@ -257,7 +264,6 @@ plotHeatmap <- function(object, features, columns = NULL,
     }
     x[x < zlim[1]] <- zlim[1]
     x[x > zlim[2]] <- zlim[2]
-
     list(
         x = x,
         color = color,

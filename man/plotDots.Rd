@@ -27,7 +27,7 @@ plotDots(
 \arguments{
 \item{object}{A \linkS4class{SingleCellExperiment} object.}
 
-\item{features}{A character vector of row names, a logical vector, or integer vector of indices specifying rows of \code{object} to visualize.}
+\item{features}{A character (or factor) vector of row names, a logical vector, or integer vector of indices specifying rows of \code{object} to visualize. When using character or integer vectors, the ordering specified by the user is retained. When using factor vectors, ordering is controlled by the factor levels.}
 
 \item{group}{String specifying the field of \code{\link{colData}(object)} containing the grouping factor, e.g., cell types or clusters.
 Alternatively, any value that can be used in the \code{by} argument to \code{\link{retrieveCellInfo}}.}

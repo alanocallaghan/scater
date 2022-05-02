@@ -61,13 +61,17 @@ plotGroupedHeatmap <- function(object, features, group, block = NULL,
         colnames(object) <- seq_len(ncol(object)) 
     }
 
-    # Pulling out the features. swap_rownames makes features index a rowdata col
-    feats <- .swap_rownames(object, features, swap_rownames)
-    heat.vals <- assay(object, exprs_values)[feats, , drop=FALSE]
-    rownames(heat.vals) <- features
+    # Pulling out the features. swap_rownames swaps the rownames of the object
+    object <- .swap_rownames(object, swap_rownames)
+    # in case of numeric or logical features, converts to character or factor
+    features <- .handle_features(features, object)
+    heat.vals <- assay(object, exprs_values)[as.character(features), , drop=FALSE]
+    if (is.factor(features)) {
+        heat.vals <- heat.vals[levels(features), , drop = FALSE]
+    }
     if (!is.null(columns)) {
         columns <- .subset2index(columns, object, byrow=FALSE)
-        heat.vals <- heat.vals[,columns,drop=FALSE]
+        heat.vals <- heat.vals[, columns, drop=FALSE]
     }
 
     # Computing aggregates for each group.

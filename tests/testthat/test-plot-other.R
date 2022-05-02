@@ -199,3 +199,49 @@ test_that("plotDots works as expected", {
     expect_identical(p$data$stuff, rep(rowData(example_sce)$stuff[1:10], nuniq))
     expect_identical(p$data$otherstuff, rep(rowData(example_sce)$otherstuff[1:10], nuniq))
 })
+
+test_that("plotDots works w/factors", {
+
+    counts <- matrix(rpois(100, 5), ncol = 10)
+    rownames(counts) <- paste("Feature", 1:10)
+    sce <- SingleCellExperiment(assays = list(counts = counts))
+    sce <- logNormCounts(sce)
+
+    p1 <- plotDots(sce, features=factor(rownames(counts), levels = paste("Feature", 10:1)))
+    p2 <- plotDots(sce, features=factor(rownames(counts), levels = paste("Feature", 1:10)))
+    pd1 <- p1$data
+    rownames(pd1) <- pd1$Feature
+    pd2 <- p2$data
+    rownames(pd2) <- pd2$Feature
+    expect_equal(
+        pd1[as.character(pd1$Feature), "Average"],
+        pd2[as.character(pd1$Feature), "Average"],
+    )
+})
+
+
+test_that("plotDots indexing is consistent", {
+    p1 <- plotDots(example_sce, features=rownames(example_sce)[1:10])
+    p2 <- plotDots(example_sce, features=1:10)
+    p3 <- plotDots(example_sce, features=c(rep(TRUE, 10), rep(FALSE, 1990)))
+    p4 <- plotDots(example_sce, features=factor(rownames(example_sce)[1:10]))
+    
+    expect_equal(p1, p2)
+    expect_equal(p2, p3)
+    expect_equal(p3, p4)
+
+    p1 <- plotDots(example_sce, features=rownames(example_sce)[10:1])
+    p2 <- plotDots(example_sce, features=10:1)
+    p3 <- plotDots(example_sce, features=factor(rownames(example_sce)[1:10], levels = rownames(example_sce)[10:1]))
+    
+    expect_equal(p1, p2)
+    ## this has a different order but we want to check the order
+    pd2 <- p2$data
+    rownames(pd2) <- pd2$Feature
+    pd3 <- p3$data
+    rownames(pd3) <- pd3$Feature
+    expect_equal(
+        pd2[as.character(pd2$Feature), "Average"],
+        pd3[as.character(pd2$Feature), "Average"],
+    )
+})
