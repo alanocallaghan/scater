@@ -77,3 +77,7 @@ setGeneric("calculateMDS", function(x, ...) standardGeneric("calculateMDS"))
 #' @export
 #' @rdname runNMF
 setGeneric("calculateNMF", function(x, ...) standardGeneric("calculateNMF"))
+
+#' @export
+#' @rdname projectReducedDim
+setGeneric("projectReducedDim", function(x, ...) standardGeneric("projectReducedDim"))

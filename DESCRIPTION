@@ -41,19 +41,19 @@ Imports:
     Rtsne,
     RColorBrewer,
     RcppML,
+    uwot,
+    pheatmap,
     ggrepel
 Suggests: 
     BiocStyle,
-    biomaRt,
+    snifter,
     cowplot,
+    biomaRt,
     knitr,
     scRNAseq,
     robustbase,
     rmarkdown,
-    uwot,
     testthat,
-    pheatmap,
-    snifter,
     Biobase
 VignetteBuilder: knitr
 biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,
@@ -61,6 +61,6 @@ biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, No
         GeneExpression, Sequencing, Software, DataImport,
         DataRepresentation, Infrastructure, Coverage
 Encoding: UTF-8
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 URL: http://bioconductor.org/packages/scater/
 BugReports: https://support.bioconductor.org/

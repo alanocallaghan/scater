@@ -584,3 +584,31 @@ test_that("run* functions work with sparse matrices", {
     # expect_error(runDiffusionMap(normed), NA)
     expect_error(runMDS(normed), NA)
 })
+
+test_that("projectReducedDim works as expected", {
+    example_sce <- mockSCE() 
+    example_sce <- logNormCounts(example_sce)
+    example_sce <- runUMAP(example_sce)
+    example_sce <- runPCA(example_sce)
+
+    example_sce_new <- mockSCE() 
+    example_sce_new <- logNormCounts(example_sce_new)
+    example_sce_new <- runPCA(example_sce_new)
+
+    projected <- projectReducedDim(
+        reducedDim(example_sce, "PCA"),
+        reducedDim(example_sce_new, "PCA"),
+        reducedDim(example_sce, "UMAP")
+    )
+    projected_sce <- projectReducedDim(
+        example_sce_new,
+        example_sce,
+        "UMAP"
+    )
+    expect_equal(projected, reducedDim(projected_sce, "UMAP"))
+    expect_true(
+        min(projected) > min(reducedDim(example_sce, "UMAP")),
+        max(projected) < max(reducedDim(example_sce, "UMAP")),
+    )
+
+})
