@@ -33,7 +33,16 @@ Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellEx
 
 \item{dimred.knn}{The name of the dimensionality reduction to use to identify the K-nearest neighbours from \code{x} in the dimensionality reduction slot of the same name defined in either \code{old} or \code{old.sce}.}
 
+\item{dimred.name}{The name of the dimensionality reduction that the projected embedding will be saved as, for the \linkS4class{SummarizedExperiment} method.}
+
 \item{k}{The number of nearest neighours to use to project points into the embedding.}
+}
+\value{
+When \code{x} is a matrix, a matrix is returned. When \code{x} is a
+\code{\linkS4class{SummarizedExperiment}}
+(or \code{\linkS4class{SingleCellExperiment}}), the return value is of
+the same class as the input, but the projected dimensionality reduction
+is added as a \code{reducedDim} field.
 }
 \description{
 Projects observations into arbitrary dimensionality reduction space (e.g., t-SNE, UMAP) using a tricube weighted average of the k nearest neighbours.

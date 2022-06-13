@@ -13,6 +13,11 @@
 #' @param ... Passed to methods.
 #' @name projectReducedDim
 #'
+#' @return When \code{x} is a matrix, a matrix is returned. When \code{x} is a
+#' \code{\linkS4class{SummarizedExperiment}}
+#' (or \code{\linkS4class{SingleCellExperiment}}), the return value is of
+#' the same class as the input, but the projected dimensionality reduction
+#' is added as a \code{reducedDim} field.
 #' @examples
 #' example_sce <- mockSCE() 
 #' example_sce <- logNormCounts(example_sce)
@@ -45,7 +50,6 @@ NULL
     rownames(new.embedding) <- rownames(new.points)
     new.embedding
 }
-
 
 #' @export
 #' @rdname projectReducedDim
