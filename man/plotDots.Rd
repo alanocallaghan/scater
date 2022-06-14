@@ -28,7 +28,7 @@ plotDots(
 \arguments{
 \item{object}{A \linkS4class{SingleCellExperiment} object.}
 
-\item{features}{A character vector of row names, a logical vector, or integer vector of indices specifying rows of \code{object} to visualize.}
+\item{features}{A character (or factor) vector of row names, a logical vector, or integer vector of indices specifying rows of \code{object} to visualize. When using character or integer vectors, the ordering specified by the user is retained. When using factor vectors, ordering is controlled by the factor levels.}
 
 \item{group}{String specifying the field of \code{\link{colData}(object)} containing the grouping factor, e.g., cell types or clusters.
 Alternatively, any value that can be used in the \code{by} argument to \code{\link{retrieveCellInfo}}.}
@@ -48,10 +48,6 @@ If \code{center=TRUE}, this defaults to the range of the centered expression mat
 \item{colour}{A vector of colours specifying the palette to use for increasing expression. 
 This defaults to \link[viridis]{viridis} if \code{center=FALSE}, and the the \code{"RdYlBu"}
 colour palette from \code{\link[RColorBrewer]{brewer.pal}} otherwise.}
-
-\item{color}{Aliases to \code{color}, \code{color_columns_by},
-\code{column_annotation_colors}, \code{color_rows_by}, 
-\code{row_annotation_colors}.}
 
 \item{max_detected}{Numeric value specifying the cap on the proportion of 
 detected expression values.}

@@ -10,7 +10,8 @@ jobs:
   R-CMD-check:
     runs-on: ubuntu-latest
     container: alanocallaghan/scater:latest
-
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
@@ -31,7 +32,4 @@ jobs:
         shell: Rscript {0}
 
       - name: BiocCheck
-        run: |
-          BiocManager::install("BiocCheck")
-          BiocCheck::BiocCheck(".")
-        shell: Rscript {0}
+        uses: insightsengineering/bioc-check-action@v1

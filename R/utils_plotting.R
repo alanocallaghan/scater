@@ -111,20 +111,36 @@
 
 ################################################
 ## Using non-standard gene IDs
-.swap_rownames <- function(object, features, swap_rownames = NULL) {
+.swap_rownames <- function(object, swap_rownames = NULL) {
     if (is.null(swap_rownames)) {
-        return(features)
+        return(object)
     }
-    if (is.character(features) | is.factor(features)) {
-        m <- match(features, .get_rowData_column(object, swap_rownames))
-    }
+    rownames(object) <- .get_rowData_column(object, swap_rownames)
+    object
+}
+
+.handle_features <- function(features, object) {
     if (is.logical(features)) {
-        stop("Logical vector not supported for features")
+        if (length(features) != nrow(object)) {
+            stop("logical features index should be the of length nrow(object).")
+        }
+        features <- rownames(object)[features]
+    } else if (is.numeric(features)) {
+        if (any(features > nrow(object)) | any(features <= 0) | any(features != round(features))) {
+            stop("All features should be round numbers; > 0 and <= nrow(object).")
+        }
+        features <- rownames(object)[features]
+    } else if (is.character(features) | is.factor(features)) {
+        if (!all(as.character(features) %in% rownames(object))) {
+            stop("Some features not in input object.")
+        }
     }
-    if (is.numeric(features)) {
-        stop("Numeric vector not supported for features")
+    # if it's character by now, preserve the order
+    if (is.character(features)) {
+        features <- factor(features, levels = features)
     }
-    rownames(object)[m]
+    # otherwise it's presumably a factor and should keep its levels
+    features
 }
 
 .get_rowData_column <- function(object, column) {

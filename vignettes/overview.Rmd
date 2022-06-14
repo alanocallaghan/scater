@@ -97,9 +97,9 @@ This is useful for diagnosing batch effects or to quickly verify that a treatmen
 ```{r}
 # Computing variance explained on the log-counts,
 # so that the statistics reflect changes in relative expression.
-example_sce <- logNormCounts(example_sce) 
+example_sce <- logNormCounts(example_sce)
 
-vars <- getVarianceExplained(example_sce, 
+vars <- getVarianceExplained(example_sce,
     variables=c("tissue", "total mRNA mol", "sex", "age"))
 head(vars)
 

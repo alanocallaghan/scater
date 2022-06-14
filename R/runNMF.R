@@ -8,6 +8,7 @@
 #' For \code{runNMF}, a \linkS4class{SingleCellExperiment} object.
 #' @param ncomponents Numeric scalar indicating the number of NMF dimensions to obtain.
 #' @inheritParams runPCA
+#' @param seed Random number generation seed to be passed to \code{\link[RcppML]{nmf}}.
 #' @param ... For the \code{calculateNMF} generic, additional arguments to pass to specific methods.
 #' For the ANY method, additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
@@ -26,14 +27,14 @@
 #' In both cases, the matrix will have the attribute \code{"basis"} containing the gene-by-factor basis matrix.
 #'
 #' @details 
-#' The function \code{\link[NMF]{nmf}} is used internally to compute the NMF. 
+#' The function \code{\link[RcppML]{nmf}} is used internally to compute the NMF. 
 #' Note that the algorithm is not deterministic, so different runs of the function will produce differing results. 
 #' Users are advised to test multiple random seeds, and then use \code{\link{set.seed}} to set a random seed for replicable results. 
 #'
 #'
 #' @name runNMF
 #' @seealso 
-#' \code{\link[NMF]{nmf}}, for the underlying calculations.
+#' \code{\link[RcppML]{nmf}}, for the underlying calculations.
 #' 
 #' \code{\link{plotNMF}}, to quickly visualize the results.
 #'
@@ -48,26 +49,22 @@
 #' head(reducedDim(example_sce))
 NULL
 
-#' @importFrom BiocNeighbors KmknnParam findKNN 
+#' @importFrom BiocNeighbors KmknnParam findKNN
 #' @importFrom BiocParallel SerialParam
-.calculate_nmf <- function(x, ncomponents = 2, ntop = 500, 
-    subset_row = NULL, scale=FALSE, transposed=FALSE, ...)
+.calculate_nmf <- function(x, ncomponents = 2, ntop = 500,
+    subset_row = NULL, scale=FALSE, transposed=FALSE, seed=1, ...)
 { 
     if (!transposed) {
         x <- .get_mat_for_reddim(x, subset_row=subset_row, ntop=ntop, scale=scale) 
     }
-    x <- as.matrix(x) 
+    x <- t(as.matrix(x))
 
-    # This package has some kind of .onAttach behavior... not good. Oh well,
-    # it's not the first hacky solution we've put in for other people's crap.
-    suppressPackageStartupMessages(require("NMF")) 
+    args <- list(k=ncomponents, verbose=FALSE, seed=seed, ...)
+    nmf_out <- do.call(RcppML::nmf, c(list(x), args))
 
-    args <- list(rank=ncomponents, ...)
-    nmf_out <- do.call(NMF::nmf, c(list(x), args))
-
-    # We transposed it earlier, so everything here has switched meanings.
-    nmf_x <- NMF::.basis(nmf_out)
-    attr(nmf_x, "basis") <- t(NMF::.coef(nmf_out))
+    # RcppML doesn't use transposed data
+    nmf_x <- t(nmf_out$h)
+    attr(nmf_x, "basis") <- nmf_out$w
 
     nmf_x
 }
@@ -85,9 +82,8 @@ setMethod("calculateNMF", "SummarizedExperiment", function(x, ..., exprs_values=
 
 #' @export
 #' @rdname runNMF
-setMethod("calculateNMF", "SingleCellExperiment", function(x, ..., 
-    exprs_values="logcounts", dimred=NULL, n_dimred=NULL)
-{
+setMethod("calculateNMF", "SingleCellExperiment",
+    function(x, ..., exprs_values="logcounts", dimred=NULL, n_dimred=NULL) {
     mat <- .get_mat_from_sce(x, exprs_values=exprs_values, dimred=dimred, n_dimred=n_dimred)
     .calculate_nmf(mat, transposed=!is.null(dimred), ...)
 })

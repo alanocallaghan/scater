@@ -1,6 +1,12 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
+\section{Changes in version 1.24.0, Bioconductor 3.15 Release}{
+\itemize{
+    \item Remove diffusion map functions that relied on destiny.
+    \item Add \code{point.padding},\code{force} args to \code{plotReducedDim}; passed to \code{geom_text_repel}.
+    \item Add warning about unused \code{use_dimred} argument in \code{runTSNE}.
+}}
 
 
 \section{Changes in version 1.22.0, Bioconductor 3.14 Release}{

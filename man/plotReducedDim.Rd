@@ -18,9 +18,11 @@ plotReducedDim(
   text_colour = text_color,
   label_format = c("\%s \%i", " (\%i\%\%)"),
   other_fields = list(),
-  swap_rownames = NULL,
   text_color = "black",
   color_by = NULL,
+  swap_rownames = NULL,
+  point.padding = NA,
+  force = 1,
   ...
 )
 }
@@ -76,13 +78,15 @@ and is only relevant when this information is provided in \code{object}.}
 \item{other_fields}{Additional cell-based fields to include in the
 data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
+\item{text_color}{Alias to \code{text_colour}.}
+
+\item{color_by}{Alias to \code{colour_by}.}
+
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to
 identify features instead of \code{rownames(object)} when labelling plot
 elements.}
 
-\item{text_color}{Alias to \code{text_colour}.}
-
-\item{color_by}{Alias to \code{colour_by}.}
+\item{point.padding, force}{See \code{?ggrepel::geom_text_repel}.}
 
 \item{...}{Additional arguments for visualization, see
 \code{?"\link{scater-plot-args}"} for details.}

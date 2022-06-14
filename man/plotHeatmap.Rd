@@ -34,7 +34,7 @@ plotHeatmap(
 \arguments{
 \item{object}{A \linkS4class{SingleCellExperiment} object.}
 
-\item{features}{A character vector of row names, a logical vector, or integer vector of indices specifying rows of \code{object} to visualize.}
+\item{features}{A character (or factor) vector of row names, a logical vector, or integer vector of indices specifying rows of \code{object} to visualize. When using character or integer vectors, the ordering specified by the user is retained. When using factor vectors, ordering is controlled by the factor levels.}
 
 \item{columns}{A vector specifying the subset of columns in \code{object} to show as columns in the heatmap. 
 Also specifies the column order if \code{cluster_cols=FALSE} and \code{order_columns_by=NULL}.

@@ -78,7 +78,8 @@ plotDots <- function(object, features, group = NULL, block=NULL,
         group <- retrieveCellInfo(object, group, search="colData")$value
     }
 
-    feature_names <- .swap_rownames(object, features, swap_rownames)
+    object <- .swap_rownames(object, swap_rownames)
+    features <- .handle_features(features, object)
     group <- factor(group)
 
     # Computing, possibly also batch correcting.
@@ -87,10 +88,11 @@ plotDots <- function(object, features, group = NULL, block=NULL,
         ids$block <- retrieveCellInfo(object, block, search="colData")$value
     }
 
-    summarized <- summarizeAssayByGroup(assay(object, exprs_values), 
-        ids=ids, subset.row=feature_names, 
-        statistics=c("mean", "prop.detected"), threshold=detection_limit)
-
+    summarized <- summarizeAssayByGroup(
+        assay(object, exprs_values)[as.character(features), , drop = FALSE],
+        ids=ids, statistics=c("mean", "prop.detected"),
+        threshold=detection_limit)
+    
     ave <- assay(summarized, "mean")
     num <- assay(summarized, "prop.detected")
     group.names <- summarized$group
@@ -117,7 +119,7 @@ plotDots <- function(object, features, group = NULL, block=NULL,
     vis_out <- .incorporate_common_vis_row(evals_long, se = object, 
         colour_by = NULL, shape_by = NULL, size_by = NULL, 
         by_exprs_values = by_exprs_values, other_fields = other_fields,
-        multiplier = rep(.subset2index(feature_names, object), ncol(num)))
+        multiplier = rep(.subset2index(features, object), ncol(num)))
     evals_long <- vis_out$df
     ggplot(evals_long) + 
         geom_point(aes_string(x="Group", y="Feature", size="NumDetected", col="Average")) +

@@ -103,17 +103,6 @@ test_that("we can produce NMF plots", {
     expect_s3_class(P4, "ggplot")
 })
 
-test_that("we can produce diffusion maps", {
-    set.seed(100)        
-    example_sce <- runDiffusionMap(example_sce, ncomponents=4)
-    expect_identical(reducedDimNames(example_sce), "DiffusionMap")
-    expect_s3_class(P <- plotDiffusionMap(example_sce), "ggplot")
-
-    # Handles multiple components properly.
-    set.seed(20)        
-    expect_s3_class(P4 <- plotDiffusionMap(example_sce, ncomponents=4), "ggplot")
-})
-
 test_that("we can produce MDS plots", {
     example_sce <- runMDS(example_sce, ncomponents=4)
     expect_identical(reducedDimNames(example_sce), "MDS")

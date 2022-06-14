@@ -64,6 +64,9 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by,
     sub_mat <- exprs_mat[chosen,,drop=FALSE]
     sub_ave <- ave_exprs[chosen]
 
+    ## swap out rownames for alt genenames
+    object <- .swap_rownames(object, swap_rownames)
+
     ## define feature names for plot
     if (is.null(feature_names_to_plot)) {  
         feature_names <- rownames(object)
@@ -73,7 +76,6 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by,
     } else {
         feature_names <- retrieveFeatureInfo(object, feature_names_to_plot, search = "rowData")$val
     }
-    feature_names <- .swap_rownames(object, feature_names, swap_rownames)
     sub_names <- feature_names[chosen]
 
     ## Compute expression values and reshape them for ggplot.

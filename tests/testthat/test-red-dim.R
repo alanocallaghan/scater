@@ -499,9 +499,9 @@ test_that("runNMF works as expected", {
     normed3 <- runNMF(normed, subset_row = 1:100)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
-    set.seed(100)
-    normed3 <- runNMF(normed, method = "Frobenius")
-    expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
+    # set.seed(100)
+    # normed3 <- runNMF(normed, method = "Frobenius")
+    # expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     # Testing out the use of existing reduced dimensions (this should not respond to any feature settings).
     normedP <- runPCA(normed, ncomponents = 4)
@@ -569,20 +569,8 @@ test_that("runMDS works as expected", {
 })
 
 #############################################
-# Check DiffusionMaps, which seems to oscillate the sign of particular components.
+# Check defences against sparse matrices.
 
-SIGNAGNOSTIC <- function(x, y, same = TRUE) {
-    ratios <- x/y
-    ratios <- t(t(ratios) / colSums(ratios))
-    if (same) {
-        expect_true(sd(ratios) < 1e-6)
-    } else {
-        expect_false(sd(ratios) < 1e-6)
-    }
-}
-
-## tests for deprecated functionality
-# test_that("runDiffusionMap works as expected", {
 test_that("run* functions work with sparse matrices", {
     library(Matrix)
     counts(normed) <- as(counts(normed), "dgCMatrix")

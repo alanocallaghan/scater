@@ -46,6 +46,7 @@
 #'  elements.
 #' @param color_by Alias to \code{colour_by}.
 #' @param text_color Alias to \code{text_colour}.
+#' @param point.padding,force See \code{?ggrepel::geom_text_repel}.
 #' @param ... Additional arguments for visualization, see
 #' \code{?"\link{scater-plot-args}"} for details.
 #'
@@ -95,8 +96,8 @@ plotReducedDim <- function(
         by_exprs_values = "logcounts", 
         text_by = NULL, text_size = 5, text_colour = text_color,
         label_format = c("%s %i", " (%i%%)"), other_fields = list(),
-        swap_rownames = NULL, 
-        text_color = "black", color_by = NULL, ...
+        text_color = "black", color_by = NULL,
+        swap_rownames = NULL, point.padding = NA, force = 1, ...
     ) {
 
     ## Extract reduced dimension representation of cells
@@ -171,7 +172,8 @@ plotReducedDim <- function(
                     ),
                     mapping = aes(x = x, y = y, label = label),
                     inherit.aes = FALSE,
-                    size = text_size, colour = text_colour
+                    size = text_size, colour = text_colour,
+                    force = force, point.padding = point.padding
                 )
         }
 

@@ -17,6 +17,7 @@ calculateNMF(x, ...)
   subset_row = NULL,
   scale = FALSE,
   transposed = FALSE,
+  seed = 1,
   ...
 )
 
@@ -55,6 +56,8 @@ This can be a character vector of row names, an integer vector of row indices or
 
 \item{transposed}{Logical scalar, is \code{x} transposed with cells in rows?}
 
+\item{seed}{Random number generation seed to be passed to \code{\link[RcppML]{nmf}}.}
+
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
 
 \item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use.}
@@ -76,7 +79,7 @@ In both cases, the matrix will have the attribute \code{"basis"} containing the 
 Perform non-negative matrix factorization (NMF) for the cells, based on the data in a SingleCellExperiment object.
 }
 \details{
-The function \code{\link[NMF]{nmf}} is used internally to compute the NMF. 
+The function \code{\link[RcppML]{nmf}} is used internally to compute the NMF. 
 Note that the algorithm is not deterministic, so different runs of the function will produce differing results. 
 Users are advised to test multiple random seeds, and then use \code{\link{set.seed}} to set a random seed for replicable results.
 }
@@ -141,7 +144,7 @@ reducedDimNames(example_sce)
 head(reducedDim(example_sce))
 }
 \seealso{
-\code{\link[NMF]{nmf}}, for the underlying calculations.
+\code{\link[RcppML]{nmf}}, for the underlying calculations.
 
 \code{\link{plotNMF}}, to quickly visualize the results.
 }
