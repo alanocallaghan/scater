@@ -13,7 +13,7 @@
 #' Alternatively, any value that can be used in the \code{by} argument to \code{\link{retrieveCellInfo}}.
 #' @param block String specifying the field of \code{\link{colData}(object)} containing a blocking factor (e.g., batch of origin).
 #' Alternatively, any value that can be used in the \code{by} argument to \code{\link{retrieveCellInfo}}.
-#'
+#' @param color Alias to \code{colour}.
 #' @details 
 #' This function shows the average expression values for each group of cells on a heatmap, as defined using the \code{group} factor.
 #' A per-group visualization can be preferable to a per-cell visualization when dealing with large number of cells or groups with different size.

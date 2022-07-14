@@ -49,6 +49,8 @@ If \code{center=TRUE}, this defaults to the range of the centered expression mat
 This defaults to \link[viridis]{viridis} if \code{center=FALSE}, and the the \code{"RdYlBu"}
 colour palette from \code{\link[RColorBrewer]{brewer.pal}} otherwise.}
 
+\item{color}{Alias to \code{colour}.}
+
 \item{max_detected}{Numeric value specifying the cap on the proportion of 
 detected expression values.}
 

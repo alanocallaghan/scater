@@ -57,6 +57,8 @@ elements.}
 
 \item{symmetric}{Deprecated and ignored.}
 
+\item{color}{Alias to \code{colour}.}
+
 \item{...}{Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.}
 }
 \value{
