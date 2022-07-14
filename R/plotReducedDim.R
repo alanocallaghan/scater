@@ -170,7 +170,7 @@ plotReducedDim <- function(
                     data = data.frame(
                         x = by_text_x, y = by_text_y, label = names(by_text_x)
                     ),
-                    mapping = aes(x = x, y = y, label = label),
+                    mapping = aes_string(x = "x", y = "y", label = "label"),
                     inherit.aes = FALSE,
                     size = text_size, colour = text_colour,
                     force = force, point.padding = point.padding

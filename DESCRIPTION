@@ -41,19 +41,19 @@ Imports:
     Rtsne,
     RColorBrewer,
     RcppML,
+    uwot,
+    pheatmap,
     ggrepel
 Suggests: 
     BiocStyle,
-    biomaRt,
+    snifter,
     cowplot,
+    biomaRt,
     knitr,
     scRNAseq,
     robustbase,
     rmarkdown,
-    uwot,
     testthat,
-    pheatmap,
-    snifter,
     Biobase
 VignetteBuilder: knitr
 biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,

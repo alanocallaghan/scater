@@ -1,6 +1,13 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
+\section{Changes in version 1.26.0, Bioconductor 3.16 Release}{
+  \itemize{
+    \item Add \code{projectReducedDim} function to project points into
+    an existing reduced dimensionality embedding.
+    \item Support "color" and "colour" spellings in all plotting functions.
+  }
+}
 \section{Changes in version 1.24.0, Bioconductor 3.15 Release}{
 \itemize{
     \item Remove diffusion map functions that relied on destiny.
