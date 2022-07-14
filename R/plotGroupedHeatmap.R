@@ -13,7 +13,7 @@
 #' Alternatively, any value that can be used in the \code{by} argument to \code{\link{retrieveCellInfo}}.
 #' @param block String specifying the field of \code{\link{colData}(object)} containing a blocking factor (e.g., batch of origin).
 #' Alternatively, any value that can be used in the \code{by} argument to \code{\link{retrieveCellInfo}}.
-#'
+#' @param color Alias to \code{colour}.
 #' @details 
 #' This function shows the average expression values for each group of cells on a heatmap, as defined using the \code{group} factor.
 #' A per-group visualization can be preferable to a per-cell visualization when dealing with large number of cells or groups with different size.
@@ -54,7 +54,8 @@
 #' @importFrom scuttle summarizeAssayByGroup
 plotGroupedHeatmap <- function(object, features, group, block = NULL, 
     columns=NULL, exprs_values = "logcounts", center = FALSE, scale = FALSE, 
-    zlim = NULL, color = NULL, swap_rownames=NULL, symmetric=NULL, ...) 
+    zlim = NULL, colour = color, swap_rownames=NULL, symmetric=NULL, 
+    color = NULL, ...) 
 {
     # Setting names, otherwise the downstream colouring fails.
     if (is.null(colnames(object))) { 
@@ -84,9 +85,9 @@ plotGroupedHeatmap <- function(object, features, group, block = NULL,
     }
     heat.se <- summarizeAssayByGroup(heat.vals, ids, statistic="mean")
     heat.vals <- correctGroupSummary(assay(heat.se), group=heat.se$group, block=heat.se$group)
-    heatmap_scale <- .heatmap_scale(heat.vals, center=center, scale=scale, color=color, zlim=zlim, symmetric=symmetric)
+    heatmap_scale <- .heatmap_scale(heat.vals, center=center, scale=scale, colour=colour, zlim=zlim, symmetric=symmetric)
 
     # Creating the heatmap as specified.
-    pheatmap::pheatmap(heatmap_scale$x, color=heatmap_scale$color, breaks=heatmap_scale$color_breaks, ...) 
+    pheatmap::pheatmap(heatmap_scale$x, colour=heatmap_scale$colour, breaks=heatmap_scale$colour_breaks, ...) 
 }
 

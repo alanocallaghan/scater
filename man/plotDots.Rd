@@ -12,6 +12,7 @@ plotDots(
   exprs_values = "logcounts",
   detection_limit = 0,
   zlim = NULL,
+  colour = color,
   color = NULL,
   max_detected = NULL,
   other_fields = list(),
@@ -19,8 +20,8 @@ plotDots(
   swap_rownames = NULL,
   center = FALSE,
   scale = FALSE,
-  low_color = NULL,
-  high_color = NULL,
+  low_colour = NULL,
+  high_colour = NULL,
   max_ave = NULL
 )
 }
@@ -39,14 +40,16 @@ Alternatively, any value that can be used in the \code{by} argument to \code{\li
 
 \item{detection_limit}{Numeric scalar providing the value above which observations are deemed to be expressed.}
 
-\item{zlim}{A numeric vector of length 2, specifying the upper and lower bounds for color mapping of expression values.
-Values outside this range are set to the most extreme color.
+\item{zlim}{A numeric vector of length 2, specifying the upper and lower bounds for colour mapping of expression values.
+Values outside this range are set to the most extreme colour.
 If \code{NULL}, it defaults to the range of the expression matrix.
 If \code{center=TRUE}, this defaults to the range of the centered expression matrix, made symmetric around zero.}
 
-\item{color}{A vector of colours specifying the palette to use for increasing expression. 
+\item{colour}{A vector of colours specifying the palette to use for increasing expression. 
 This defaults to \link[viridis]{viridis} if \code{center=FALSE}, and the the \code{"RdYlBu"}
-color palette from \code{\link[RColorBrewer]{brewer.pal}} otherwise.}
+colour palette from \code{\link[RColorBrewer]{brewer.pal}} otherwise.}
+
+\item{color}{Alias to \code{colour}.}
 
 \item{max_detected}{Numeric value specifying the cap on the proportion of 
 detected expression values.}
@@ -66,14 +69,14 @@ elements.}
 \item{scale}{A logical scalar specifying whether each row should have its
 average expression values scaled to unit variance prior to plotting.}
 
-\item{low_color, high_color, max_ave}{Deprecated arguments.}
+\item{low_colour, high_colour, max_ave}{Deprecated arguments.}
 }
 \value{
 A \link{ggplot} object containing a dot plot.
 }
 \description{
 Create a dot plot of expression values for a grouping of cells,
-where the size and color of each dot represents the proportion of detected expression values and the average expression,
+where the size and colour of each dot represents the proportion of detected expression values and the average expression,
 respectively, for each feature in each group of cells.
 }
 \details{
@@ -81,13 +84,13 @@ This implements a \pkg{Seurat}-style \dQuote{dot plot} that creates a dot for ea
 The proportion of detected expression values and the average expression for each feature in each group of cells is visualized efficiently using the size and colour, respectively, of each dot.
 If \code{block} is specified, batch-corrected averages for each group are computed with \code{\link{correctGroupSummary}}.
 
-Some caution is required during interpretation due to the difficulty of simultaneously interpreting both size and color.
-For example, if we colored by z-score on a conventional blue-white-red color axis, a gene that is downregulated in a group of cells would show up as a small blue dot.
-If the background color was also white, this could be easily mistaken for a gene that is not downregulated at all.
-We suggest choosing a color scale that remains distinguishable from the background color at all points.
-Admittedly, that is easier said than done as many color scales will approach a lighter color at some stage, so some magnifying glasses may be required.
+Some caution is required during interpretation due to the difficulty of simultaneously interpreting both size and colour.
+For example, if we coloured by z-score on a conventional blue-white-red colour axis, a gene that is downregulated in a group of cells would show up as a small blue dot.
+If the background colour was also white, this could be easily mistaken for a gene that is not downregulated at all.
+We suggest choosing a colour scale that remains distinguishable from the background colour at all points.
+Admittedly, that is easier said than done as many colour scales will approach a lighter colour at some stage, so some magnifying glasses may be required.
 
-We can also cap the color and size scales using \code{zlim} and \code{max_detected}, respectively.
+We can also cap the colour and size scales using \code{zlim} and \code{max_detected}, respectively.
 This aims to preserve resolution for low-abundance genes by preventing domination of the scales by high-abundance features.
 }
 \examples{

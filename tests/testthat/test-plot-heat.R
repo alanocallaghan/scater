@@ -22,7 +22,7 @@ test_that("we can produce heatmaps", {
 
     # Colour parameters for the expression values.
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], zlim=c(0, 2))
-    plotHeatmap(example_sce, features=rownames(example_sce)[1:10], color=viridis::viridis(20))
+    plotHeatmap(example_sce, features=rownames(example_sce)[1:10], colour=viridis::viridis(20))
     expect_warning(
         plotHeatmap(example_sce, features=rownames(example_sce)[1:10], center=TRUE, symmetric=TRUE)
     )
@@ -30,6 +30,27 @@ test_that("we can produce heatmaps", {
     # Testing out the column colouring. 
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
                 colour_columns_by=c("Mutation_Status", "Cell_Cycle"))
+
+    rowData(example_sce)$class <- sample(c("A", "B"), nrow(example_sce), replace = TRUE)
+
+    # Testing out the row colouring. 
+    plotHeatmap(example_sce,
+        features = rownames(example_sce)[1:10], colour_rows_by = "class")
+    plotHeatmap(example_sce, features = rownames(example_sce)[1:10],
+        colour_rows_by = "class",
+        row_annotation_colours = list(class = c("A" = "blue", "B" = "red")))
+
+    example_sce$class <- sample(c("A", "B"), ncol(example_sce), replace=TRUE)
+    expect_warning(
+        plotHeatmap(example_sce, features = rownames(example_sce)[1:10],
+            colour_rows_by = "class",
+            colour_columns_by = "class",
+            row_annotation_colours = list(class = c("A" = "blue", "B" = "red")),
+            column_annotation_colours = list(class = c("A" = "blue", "B" = "red"))
+        ),
+        "Element with the same name"
+    )
+
 
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
                 colour_columns_by=c("Mutation_Status", "Gene_0001"), 
@@ -57,6 +78,14 @@ test_that("we can produce heatmaps", {
     # Testing out passing arguments to pheatmap.
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], fontsize = 20, legend = FALSE)
 
+    plotHeatmap(example_sce, features = rowData(example_sce)[1:10, "ENS"], 
+        swap_rownames = "ENS", columns = 1:20)
+    expect_error(
+        plotHeatmap(example_sce, features = rownames(example_sce)[[1]], 
+            columns = 1:20),
+        "must have n >= 2 objects to cluster"
+    )
+
     expect_error(
         plotHeatmap(example_sce, features = "constant", swap_rownames = "ENS_e2",
             columns = 1:20),
@@ -64,7 +93,7 @@ test_that("we can produce heatmaps", {
     )
 
     expect_error(
-        plotHeatmap(example_sce, features = NA, swap_rownames = "sdfsf",
+        plotHeatmap(example_sce, features = rownames(example_sce)[[1]], swap_rownames = "sdfsf",
             columns = 1:20),
         "Cannot find column sdfsf in rowData"
     )
@@ -85,7 +114,7 @@ test_that("we can produce grouped heatmaps", {
     plotGroupedHeatmap(example_sce, features=1:10, group="Group", block="Cell_Cycle")
     plotGroupedHeatmap(example_sce, features=1:10, group="Group", block="Cell_Cycle", columns=20:30)
 
-    # Works with the various color options.
+    # Works with the various colour options.
     expect_warning(
         plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10],
             group="Group", center=TRUE, symmetric=TRUE)
@@ -96,7 +125,7 @@ test_that("we can produce grouped heatmaps", {
             group="Group", center=TRUE, symmetric=TRUE)
     )
 
-    plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10], group="Group", color=viridis::viridis(20))
+    plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10], group="Group", colour=viridis::viridis(20))
     plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10], group="Group", zlim=c(0, 2))
 
     # Works with rownames swapping.

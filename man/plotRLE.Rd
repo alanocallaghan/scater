@@ -12,9 +12,10 @@ plotRLE(
   style = "minimal",
   legend = TRUE,
   ordering = NULL,
-  colour_by = NULL,
+  colour_by = color_by,
   by_exprs_values = exprs_values,
   BPPARAM = BiocParallel::bpparam(),
+  color_by = NULL,
   ...
 )
 }
@@ -39,6 +40,8 @@ This can be useful for arranging cells by experimental conditions or batches.}
 for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object to be used to parallelise operations using \code{\link{DelayedArray}}.}
+
+\item{color_by}{Alias to \code{colour_by}.}
 
 \item{...}{further arguments passed to \code{\link[ggplot2]{geom_boxplot}} when \code{style="full"}.}
 }

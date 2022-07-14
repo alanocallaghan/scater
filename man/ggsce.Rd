@@ -70,7 +70,7 @@ example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 example_sce <- runPCA(example_sce)
 
-ggcells(example_sce, aes(x=PCA.1, y=PCA.2, color=Gene_0001)) +
+ggcells(example_sce, aes(x=PCA.1, y=PCA.2, colour=Gene_0001)) +
     geom_point()
 
 ggcells(example_sce, aes(x=Mutation_Status, y=Gene_0001)) +

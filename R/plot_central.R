@@ -154,7 +154,7 @@ NULL
         # Creating the plot:
         plot_out <- ggplot(object, aes_string(x="X", y="Y")) + xlab(xlab) + ylab(ylab)
         plot_out <- plot_out + geom_tile(aes_string(x = "X", y = "Y", height = "2*YWidth", width = "2*XWidth"),
-                                         data=summary.data, color = 'grey60', size = 0.5, fill='grey90')
+                                         data=summary.data, colour = 'grey60', size = 0.5, fill='grey90')
 
         # Adding points.
         point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size)

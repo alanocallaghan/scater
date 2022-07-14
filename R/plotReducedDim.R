@@ -44,6 +44,8 @@
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to
 #'  identify features instead of \code{rownames(object)} when labelling plot
 #'  elements.
+#' @param color_by Alias to \code{colour_by}.
+#' @param text_color Alias to \code{text_colour}.
 #' @param point.padding,force See \code{?ggrepel::geom_text_repel}.
 #' @param ... Additional arguments for visualization, see
 #' \code{?"\link{scater-plot-args}"} for details.
@@ -88,11 +90,13 @@
 #' @export
 #' @importFrom SingleCellExperiment reducedDim
 #' @importFrom ggrepel geom_text_repel
-plotReducedDim <- function(object, dimred, ncomponents = 2, percentVar = NULL,
-        colour_by = NULL, shape_by = NULL, size_by = NULL,
-        by_exprs_values = "logcounts",
-        text_by = NULL, text_size = 5, text_colour = "black",
+plotReducedDim <- function(
+        object, dimred, ncomponents = 2, percentVar = NULL, 
+        colour_by = color_by, shape_by = NULL, size_by = NULL,
+        by_exprs_values = "logcounts", 
+        text_by = NULL, text_size = 5, text_colour = text_color,
         label_format = c("%s %i", " (%i%%)"), other_fields = list(),
+        text_color = "black", color_by = NULL,
         swap_rownames = NULL, point.padding = NA, force = 1, ...
     ) {
 

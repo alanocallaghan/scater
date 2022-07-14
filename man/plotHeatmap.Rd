@@ -12,17 +12,22 @@ plotHeatmap(
   center = FALSE,
   scale = FALSE,
   zlim = NULL,
-  color = NULL,
-  color_columns_by = NULL,
-  column_annotation_colors = list(),
-  color_rows_by = NULL,
-  row_annotation_colors = list(),
+  colour = color,
+  colour_columns_by = color_columns_by,
+  column_annotation_colours = column_annotation_colors,
+  colour_rows_by = color_rows_by,
+  row_annotation_colours = row_annotation_colors,
   order_columns_by = NULL,
   by_exprs_values = exprs_values,
   show_colnames = FALSE,
   cluster_cols = is.null(order_columns_by),
   swap_rownames = NULL,
   symmetric = NULL,
+  color = NULL,
+  color_columns_by = NULL,
+  color_rows_by = NULL,
+  column_annotation_colors = list(),
+  row_annotation_colors = list(),
   ...
 )
 }
@@ -41,38 +46,38 @@ By default, all columns are used.}
 
 \item{scale}{A logical scalar specifying whether each feature should have its expression values scaled to have unit variance prior to plotting.}
 
-\item{zlim}{A numeric vector of length 2, specifying the upper and lower bounds for color mapping of expression values.
-Values outside this range are set to the most extreme color.
+\item{zlim}{A numeric vector of length 2, specifying the upper and lower bounds for colour mapping of expression values.
+Values outside this range are set to the most extreme colour.
 If \code{NULL}, it defaults to the range of the expression matrix.
 If \code{center=TRUE}, this defaults to the range of the centered expression matrix, made symmetric around zero.}
 
-\item{color}{A vector of colours specifying the palette to use for increasing expression. 
+\item{colour}{A vector of colours specifying the palette to use for increasing expression. 
 This defaults to \link[viridis]{viridis} if \code{center=FALSE}, and the the \code{"RdYlBu"}
-color palette from \code{\link[RColorBrewer]{brewer.pal}} otherwise.}
+colour palette from \code{\link[RColorBrewer]{brewer.pal}} otherwise.}
 
-\item{color_columns_by}{A list of values specifying how the columns should be annotated with colours.
+\item{colour_columns_by}{A list of values specifying how the columns should be annotated with colours.
 Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
 A character vector can also be supplied and will be treated as a list of strings.}
 
-\item{column_annotation_colors}{A named list of color scales to be used for
-the column annotations specified in \code{color_columns_by}. Names
-should be character values present in \code{color_columns_by},
-If a color scale is not specified for a particular annotation, a default
-color scale is chosen.
+\item{column_annotation_colours}{A named list of colour scales to be used for
+the column annotations specified in \code{colour_columns_by}. Names
+should be character values present in \code{colour_columns_by},
+If a colour scale is not specified for a particular annotation, a default
+colour scale is chosen.
 The full list of colour maps is passed to \code{\link[pheatmap]{pheatmap}} 
 as the \code{annotation_colours} argument.}
 
-\item{color_rows_by}{Similar to \code{color_columns_by} but for rows rather
+\item{colour_rows_by}{Similar to \code{colour_columns_by} but for rows rather
 than columns. Each entry of the list can be any acceptable input to the 
 \code{by} argument in \code{?\link{retrieveFeatureInfo}}.}
 
-\item{row_annotation_colors}{Similar to \code{column_annotation_colors} but 
+\item{row_annotation_colours}{Similar to \code{column_annotation_colours} but 
 relating to row annotation rather than column annotation.}
 
 \item{order_columns_by}{A list of values specifying how the columns should be ordered.
 Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
 A character vector can also be supplied and will be treated as a list of strings.
-This argument is automatically appended to \code{color_columns_by}.}
+This argument is automatically appended to \code{colour_columns_by}.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
 for colouring of column-level data - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
@@ -84,6 +89,10 @@ identify features instead of \code{rownames(object)} when labelling plot
 elements.}
 
 \item{symmetric}{Deprecated and ignored.}
+
+\item{color, color_columns_by, column_annotation_colors, color_rows_by, row_annotation_colors}{Aliases to \code{color}, \code{color_columns_by},
+\code{column_annotation_colors}, \code{color_rows_by}, 
+\code{row_annotation_colors}.}
 }
 \value{
 A heatmap is produced on the current graphics device. 
@@ -100,7 +109,7 @@ Setting \code{zlim} preserves the dynamic range of colours in the presence  of o
 Otherwise, the plot may be dominated by a few genes, which will \dQuote{flatten} the observed colours for the rest of the heatmap.
 
 Setting \code{order_columns_by} is useful for automatically ordering the heatmap by one or more factors of interest, e.g., cluster identity.
-This avoids the need to set \code{color_columns_by}, \code{cluster_cols} and \code{columns} to achieve the same effect.
+This avoids the need to set \code{colour_columns_by}, \code{cluster_cols} and \code{columns} to achieve the same effect.
 }
 \examples{
 example_sce <- mockSCE()
@@ -112,7 +121,7 @@ plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
     center=TRUE)
 
 plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
-    color_columns_by=c("Mutation_Status", "Cell_Cycle"))
+    colour_columns_by=c("Mutation_Status", "Cell_Cycle"))
 
 }
 \seealso{
