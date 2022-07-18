@@ -7,7 +7,7 @@
 plotPlatePosition(
   object,
   plate_position = NULL,
-  colour_by = NULL,
+  colour_by = color_by,
   size_by = NULL,
   shape_by = NULL,
   by_exprs_values = "logcounts",
@@ -16,7 +16,8 @@ plotPlatePosition(
   point_alpha = 0.6,
   point_size = 24,
   other_fields = list(),
-  swap_rownames = NULL
+  swap_rownames = NULL,
+  color_by = NULL
 )
 }
 \arguments{
@@ -48,6 +49,8 @@ for use in point aesthetics - see the \code{exprs_values} argument in \code{?\li
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
 identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
+
+\item{color_by}{Alias to \code{colour_by}.}
 }
 \value{
 A ggplot object.

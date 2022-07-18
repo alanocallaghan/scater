@@ -25,6 +25,8 @@
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to 
 #'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
+#' @param color_by Alias to \code{colour_by}.
+#' @param feature_colors Alias to \code{feature_colours}.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -80,11 +82,12 @@
 #'
 plotExpression <- function(object, features, x = NULL,
     exprs_values = "logcounts", log2_values = FALSE,
-    colour_by = NULL, shape_by = NULL, size_by = NULL,
+    colour_by = color_by, shape_by = NULL, size_by = NULL,
     by_exprs_values = exprs_values, xlab = NULL, 
-    feature_colours = TRUE, one_facet = TRUE, ncol = 2, 
+    feature_colours = feature_colors, one_facet = TRUE, ncol = 2, 
     scales = "fixed", other_fields = list(),
-    swap_rownames = NULL, ...)
+    swap_rownames = NULL, 
+    color_by = NULL, feature_colors = TRUE, ...)
 {
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")

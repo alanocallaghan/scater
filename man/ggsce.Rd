@@ -37,15 +37,7 @@ This is expected to have row names for \code{ggcells} and column names for \code
 \item{features}{Character vector specifying the features for which to extract expression profiles across cells.
 May also include features in alternative Experiments if permitted by \code{use_altexps}.}
 
-\item{exprs_values}{Soft-deprecated equivalents of the arguments described above.}
-
-\item{use_dimred}{Soft-deprecated equivalents of the arguments described above.}
-
-\item{use_altexps}{Soft-deprecated equivalents of the arguments described above.}
-
-\item{prefix_altexps}{Soft-deprecated equivalents of the arguments described above.}
-
-\item{check_names}{Soft-deprecated equivalents of the arguments described above.}
+\item{exprs_values, use_dimred, use_altexps, prefix_altexps, check_names}{Soft-deprecated equivalents of the arguments described above.}
 
 \item{extract_mapping}{Logical scalar indicating whether \code{features} or \code{cells} should be automatically expanded to include variables referenced in \code{mapping}.}
 
@@ -78,7 +70,7 @@ example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
 example_sce <- runPCA(example_sce)
 
-ggcells(example_sce, aes(x=PCA.1, y=PCA.2, color=Gene_0001)) +
+ggcells(example_sce, aes(x=PCA.1, y=PCA.2, colour=Gene_0001)) +
     geom_point()
 
 ggcells(example_sce, aes(x=Mutation_Status, y=Gene_0001)) +

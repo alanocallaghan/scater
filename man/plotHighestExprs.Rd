@@ -7,13 +7,14 @@
 plotHighestExprs(
   object,
   n = 50,
-  colour_cells_by = NULL,
+  colour_cells_by = color_cells_by,
   drop_features = NULL,
   exprs_values = "counts",
   by_exprs_values = exprs_values,
   feature_names_to_plot = NULL,
   as_percentage = TRUE,
-  swap_rownames = NULL
+  swap_rownames = NULL,
+  color_cells_by = NULL
 )
 }
 \arguments{
@@ -41,6 +42,8 @@ If \code{FALSE}, the raw \code{exprs_values} are shown instead.}
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
 identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
+
+\item{color_cells_by}{Alias to \code{colour_cells_by}.}
 }
 \value{
 A \link{ggplot} object.

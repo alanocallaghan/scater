@@ -8,13 +8,14 @@ plotScater(
   x,
   nfeatures = 500,
   exprs_values = "counts",
-  colour_by = NULL,
+  colour_by = color_by,
   by_exprs_values = exprs_values,
   block1 = NULL,
   block2 = NULL,
   ncol = 3,
   line_width = 1.5,
-  theme_size = 10
+  theme_size = 10,
+  color_by = NULL
 )
 }
 \arguments{
@@ -41,6 +42,8 @@ Default is \code{NULL}, in which case there is no blocking.}
 \item{line_width}{Numeric scalar specifying the line width.}
 
 \item{theme_size}{Numeric scalar specifying the font size to use for the plotting theme.}
+
+\item{color_by}{Alias to \code{colour_by}.}
 }
 \value{
 A \link{ggplot} object.

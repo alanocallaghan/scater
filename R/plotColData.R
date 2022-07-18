@@ -17,6 +17,7 @@
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to 
 #'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
+#' @param color_by Alias to \code{colour_by}.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -52,9 +53,9 @@
 #'
 #' @export
 plotColData <- function(object, y, x = NULL, 
-    colour_by = NULL, shape_by = NULL, size_by = NULL, 
+    colour_by = color_by, shape_by = NULL, size_by = NULL, 
     by_exprs_values = "logcounts", other_fields=list(),
-    swap_rownames = NULL, ...)
+    swap_rownames = NULL, color_by = NULL, ...)
 {
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")

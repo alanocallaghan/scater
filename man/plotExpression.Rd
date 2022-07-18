@@ -10,17 +10,19 @@ plotExpression(
   x = NULL,
   exprs_values = "logcounts",
   log2_values = FALSE,
-  colour_by = NULL,
+  colour_by = color_by,
   shape_by = NULL,
   size_by = NULL,
   by_exprs_values = exprs_values,
   xlab = NULL,
-  feature_colours = TRUE,
+  feature_colours = feature_colors,
   one_facet = TRUE,
   ncol = 2,
   scales = "fixed",
   other_fields = list(),
   swap_rownames = NULL,
+  color_by = NULL,
+  feature_colors = TRUE,
   ...
 )
 }
@@ -63,6 +65,10 @@ Passed to the \code{scales} argument in the \code{\link[ggplot2]{facet_wrap}} wh
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
 identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
+
+\item{color_by}{Alias to \code{colour_by}.}
+
+\item{feature_colors}{Alias to \code{feature_colours}.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }

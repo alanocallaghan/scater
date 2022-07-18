@@ -1,4 +1,4 @@
-#' Create a ggplot from a SingleCellExperiment
+4#' Create a ggplot from a SingleCellExperiment
 #'
 #' Create a base \link{ggplot} object from a \linkS4class{SingleCellExperiment},
 #' the contents of which can be directly referenced in subsequent layers without prior specification.
@@ -37,7 +37,7 @@
 #' example_sce <- logNormCounts(example_sce)
 #' example_sce <- runPCA(example_sce)
 #'
-#' ggcells(example_sce, aes(x=PCA.1, y=PCA.2, color=Gene_0001)) +
+#' ggcells(example_sce, aes(x=PCA.1, y=PCA.2, colour=Gene_0001)) +
 #'     geom_point()
 #'
 #' ggcells(example_sce, aes(x=Mutation_Status, y=Gene_0001)) +

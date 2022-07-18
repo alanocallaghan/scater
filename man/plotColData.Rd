@@ -8,12 +8,13 @@ plotColData(
   object,
   y,
   x = NULL,
-  colour_by = NULL,
+  colour_by = color_by,
   shape_by = NULL,
   size_by = NULL,
   by_exprs_values = "logcounts",
   other_fields = list(),
   swap_rownames = NULL,
+  color_by = NULL,
   ...
 )
 }
@@ -41,6 +42,8 @@ for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for details.}
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
 identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
+
+\item{color_by}{Alias to \code{colour_by}.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }

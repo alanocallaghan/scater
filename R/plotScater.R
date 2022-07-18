@@ -16,6 +16,7 @@
 #' @param ncol Number of columns to use for \code{\link{facet_wrap}} if only one block is defined.
 #' @param line_width Numeric scalar specifying the line width.
 #' @param theme_size Numeric scalar specifying the font size to use for the plotting theme.
+#' @param color_by Alias to \code{colour_by}.
 #'
 #' @details 
 #' For each cell, the features are ordered from most-expressed to least-expressed.
@@ -41,9 +42,9 @@
 #' @importFrom SummarizedExperiment assay
 #' @importFrom ggplot2 ggplot geom_line facet_grid facet_wrap xlab ylab theme_bw aes_string
 plotScater <- function(x, nfeatures = 500, exprs_values = "counts", 
-    colour_by = NULL, by_exprs_values = exprs_values, 
+    colour_by = color_by, by_exprs_values = exprs_values, 
     block1 = NULL, block2 = NULL, ncol = 3,
-    line_width = 1.5, theme_size = 10)
+    line_width = 1.5, theme_size = 10, color_by = NULL)
 {
     if (!is(x, "SingleCellExperiment")) {
         stop("x must be of class SingleCellExperiment")

@@ -14,6 +14,7 @@
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see \code{?\link{retrieveFeatureInfo}} for details.
 #' @param other_fields Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
+#' @param color_by Alias to \code{colour_by}.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -37,8 +38,9 @@
 #'
 #' @export
 plotRowData <- function(object, y, x = NULL, 
-    colour_by = NULL, shape_by = NULL, size_by = NULL, 
-    by_exprs_values = "logcounts", other_fields = list(), ...)
+    colour_by = color_by, shape_by = NULL, size_by = NULL, 
+    by_exprs_values = "logcounts", other_fields = list(), color_by = NULL,
+    ...)
 {
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")
