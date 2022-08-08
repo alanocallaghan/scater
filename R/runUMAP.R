@@ -19,6 +19,8 @@
 #' @param n_threads Integer scalar specifying the number of threads to use in \code{\link[uwot]{umap}}.
 #' If \code{NULL} and \code{BPPARAM} is a \linkS4class{MulticoreParam}, it is set to the number of workers in \code{BPPARAM};
 #' otherwise, the \code{\link[uwot]{umap}} defaults are used.
+#' @param use_densvis Logical scalar indicating whether \code{\link[densvis]{densne}} should be used to perform density-preserving t-SNE.
+#' @param dens_frac,dens_lambda See \code{\link[densvis]{densne}}
 #' @inheritParams runTSNE
 #'
 #' @inheritSection calculatePCA Feature selection
@@ -66,7 +68,8 @@ NULL
 .calculate_umap <- function(x, ncomponents = 2, ntop = 500, 
     subset_row = NULL, scale=FALSE, transposed=FALSE, pca=if (transposed) NULL else 50,
     n_neighbors=15, n_threads=NULL, ..., 
-    external_neighbors=FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam()) 
+    external_neighbors=FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam(),
+    use_densvis=FALSE, dens_frac = 0.3, dens_lambda = 0.1)
 {
     if (!transposed) {
         x <- .get_mat_for_reddim(x, subset_row=subset_row, ntop=ntop, scale=scale) 
@@ -86,7 +89,11 @@ NULL
         args$nn_method <- list(idx=cbind(seq_len(N), nn_out$index), dist=cbind(numeric(N), nn_out$distance))
     }
 
-    do.call(uwot::umap, args)
+    if (use_densvis) {
+        do.call(densvis::densmap, args)
+    } else {
+        do.call(uwot::umap, args)
+    }
 }
 
 #' @export

@@ -2,6 +2,7 @@
 
 ################################################################################
 ### defining the SCESet class
+## #' @inheritParams Biobase ExpressionSet
 
 #' The "Single Cell Expression Set" (SCESet)  class
 #'
@@ -36,7 +37,6 @@
 #'}
 #' @name SCESet
 #' @rdname SCESet
-#' @inheritParams Biobase ExpressionSet
 #' @aliases SCESet-class
 #' @references  Thanks to the Monocle package 
 #' (github.com/cole-trapnell-lab/monocle-release/) for their CellDataSet class, 

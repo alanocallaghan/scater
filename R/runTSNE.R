@@ -24,6 +24,8 @@
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.
 #' @param pca Logical scalar indicating whether a PCA step should be performed inside \code{\link[Rtsne]{Rtsne}}.
 #' @param use_fitsne Logical scalar indicating whether \code{\link[snifter]{fitsne}} should be used to perform t-SNE.
+#' @param use_densvis Logical scalar indicating whether \code{\link[densvis]{densne}} should be used to perform density-preserving t-SNE.
+#' @param dens_frac,dens_lambda See \code{\link[densvis]{densne}}
 #'
 #' @inheritSection calculatePCA Feature selection
 #' @inheritSection calculatePCA Using reduced dimensions
@@ -80,7 +82,7 @@ NULL
     perplexity=NULL, normalize = TRUE, theta = 0.5, 
     num_threads=NULL, ...,
     external_neighbors=FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam(),
-    use_fitsne=FALSE)
+    use_fitsne = FALSE, use_densvis=FALSE, dens_frac = 0.3, dens_lambda = 0.1)
 { 
     if (!transposed) {
         x <- .get_mat_for_reddim(x, subset_row=subset_row, ntop=ntop, scale=scale) 
@@ -99,6 +101,9 @@ NULL
 
     if (!external_neighbors || theta == 0) {
         if (use_fitsne) {
+            if (use_densne) {
+                warning("Can't use fitsne and use_densvis at the same time!")
+            }
             if (normalize) {
                 x <- Rtsne::normalize_input(x)
             }
@@ -110,10 +115,19 @@ NULL
                 c(list(x), args, simplified = TRUE)
             )
         } else {
-            tsne_out <- do.call(
-                Rtsne::Rtsne,
-                c(list(x, check_duplicates = FALSE, normalize = normalize), args)
-            )$Y
+            if (use_densvis) {
+                args$dens_frac <- dens_frac
+                args$dens_lambda <- dens_lambda
+                tsne_out <- do.call(
+                    densvis::densne,
+                    c(list(x, check_duplicates = FALSE, normalize = normalize), args)
+                )
+            } else {
+                tsne_out <- do.call(
+                    Rtsne::Rtsne,
+                    c(list(x, check_duplicates = FALSE, normalize = normalize), args)
+                )$Y
+            }
         }
     } else {
         if (normalize) {
