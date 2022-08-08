@@ -101,8 +101,8 @@ NULL
 
     if (!external_neighbors || theta == 0) {
         if (use_fitsne) {
-            if (use_densne) {
-                warning("Can't use fitsne and use_densvis at the same time!")
+            if (use_densvis) {
+                warning("Can't use fitsne and use_densvis at the same time; using fitsne")
             }
             if (normalize) {
                 x <- Rtsne::normalize_input(x)
