@@ -25,7 +25,7 @@ test_that("accessor functions for SingleCellExperiment work as expected", {
     # Same again for sparse matrices.    
     library(Matrix)
     sparsified <- original
-    counts(sparsified) <- as(counts(original), "dgCMatrix")
+    counts(sparsified) <- as(as(as(counts(original), "dMatrix"), "generalMatrix"), "CsparseMatrix")
     
     expect_null(exprs(sparsified))
     expect_that(counts(sparsified), is_a("dgCMatrix"))

@@ -6,7 +6,7 @@ colData(wt_qc) <- cbind(colData(wt_qc), perCellQCMetrics(wt_qc))
 
 library(Matrix)
 sparsified <- wt_qc
-counts(sparsified) <- as(counts(sparsified), "dgCMatrix")
+counts(sparsified) <- as(as(as(counts(sparsified), "dMatrix"), "generalMatrix"), "CsparseMatrix")
 
 #######################################################################
 
