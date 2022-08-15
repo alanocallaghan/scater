@@ -49,7 +49,7 @@ test_that("plotExpression works for different exprs_values", {
 
     # And on sparse matrices.        
     sparsified <- example_sce
-    logcounts(sparsified) <- as(as(as(logcounts(sparsified), "dMatrix"), "generalMatrix"), "CsparseMatrix")
+    logcounts(sparsified) <- as(logcounts(sparsified), "dgCMatrix")
     sparse <- plotExpression(sparsified, "Gene_0001")
     ref <- plotExpression(example_sce, "Gene_0001")
     expect_equal(sparse$data, ref$data)

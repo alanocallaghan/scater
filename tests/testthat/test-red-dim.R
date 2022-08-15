@@ -573,8 +573,8 @@ test_that("runMDS works as expected", {
 
 test_that("run* functions work with sparse matrices", {
     library(Matrix)
-    counts(normed) <- as(as(as(counts(normed), "dMatrix"), "generalMatrix"), "CsparseMatrix")
-    logcounts(normed) <- as(as(as(logcounts(normed), "dMatrix"), "generalMatrix"), "CsparseMatrix")
+    counts(normed) <- as(counts(normed), "dgCMatrix")
+    logcounts(normed) <- as(logcounts(normed), "dgCMatrix")
 
     expect_error(runPCA(normed), NA)
     expect_error(runPCA(normed, BSPARAM = BiocSingular::IrlbaParam()), NA)

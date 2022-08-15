@@ -57,7 +57,7 @@ NULL
 #' @importFrom scuttle fitLinearModel
 .get_variance_explained_internal <- function(block, variables) {
     if (is(block, "SparseArraySeed")) {
-        block <- as(as(as(block, "dMatrix"), "generalMatrix"), "CsparseMatrix")
+        block <- as(block, "dgCMatrix")
     }
 
     rsquared_mat <- matrix(NA_real_, nrow(block), ncol(variables), dimnames=list(NULL, colnames(variables))) 

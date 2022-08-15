@@ -44,7 +44,7 @@ test_that("plotScater's underlying C++ code works as expected", {
 
     # Handles sparse matrices.
     library(Matrix)
-    spmat <- as(as(as(assay(example_sce), "dMatrix"), "generalMatrix"), "CsparseMatrix")
+    spmat <- as(assay(example_sce), "dgCMatrix")
     out <- scater:::top_cumprop(spmat, 1:100)
     ref <- apply(spmat, 2, REFFUN, top=1:100)
     expect_equivalent(out, t(ref))
