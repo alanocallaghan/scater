@@ -13,6 +13,7 @@ plotExpression(
   colour_by = color_by,
   shape_by = NULL,
   size_by = NULL,
+  order_by = NULL,
   by_exprs_values = exprs_values,
   xlab = NULL,
   feature_colours = feature_colors,
@@ -43,6 +44,8 @@ If a list is supplied, each entry of the list can be a string, an AsIs-wrapped v
 \item{shape_by}{Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
 \item{size_by}{Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
+
+\item{order_by}{Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
 for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}

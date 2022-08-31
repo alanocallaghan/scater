@@ -22,6 +22,9 @@
 #' @param size_by Specification of a column metadata field or a feature to
 #' size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for
 #' possible values.
+#' @param order_by Specification of a column metadata field or a feature to
+#' order points by, see the \code{by} argument in
+#' \code{?\link{retrieveCellInfo}} for possible values.
 #' @param by_exprs_values A string or integer scalar specifying which assay to
 #' obtain expression values from,
 #' for use in point aesthetics - see the \code{exprs_values} argument in
@@ -93,11 +96,12 @@
 plotReducedDim <- function(
         object, dimred, ncomponents = 2, percentVar = NULL, 
         colour_by = color_by, shape_by = NULL, size_by = NULL,
-        by_exprs_values = "logcounts", 
+        order_by = NULL, by_exprs_values = "logcounts", 
         text_by = NULL, text_size = 5, text_colour = text_color,
         label_format = c("%s %i", " (%i%%)"), other_fields = list(),
         text_color = "black", color_by = NULL,
-        swap_rownames = NULL, point.padding = NA, force = 1, ...
+        swap_rownames = NULL, point.padding = NA, force = 1, 
+        ...
     ) {
 
     ## Extract reduced dimension representation of cells
@@ -128,13 +132,20 @@ plotReducedDim <- function(
     ## checking visualization arguments
     vis_out <- .incorporate_common_vis_col(df_to_plot, se = object,
         colour_by = colour_by, shape_by = shape_by, size_by = size_by,
+        order_by = order_by,
         by_exprs_values = by_exprs_values, other_fields = other_fields,
         swap_rownames = swap_rownames)
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by
     shape_by <- vis_out$shape_by
     size_by <- vis_out$size_by
+    order_by <- vis_out$order_by
 
+    if (!is.null(order_by)) {
+        # browser()
+        df_to_plot <- df_to_plot[order(df_to_plot$order_by), ]
+    }
+    
     ## Dispatching to the central plotter in the simple case of two dimensions.
     if (length(to_plot) == 2L) {
         colnames(df_to_plot)[seq_along(to_plot)] <- c("X", "Y")
@@ -146,7 +157,7 @@ plotReducedDim <- function(
                 sprintf(label_format[2], round(percentVar[to_plot]))
             )
         }
-
+        
         plot_out <- .central_plotter(df_to_plot, xlab = labs[1], ylab = labs[2],
                                      colour_by = colour_by, size_by = size_by,
                                      shape_by = shape_by, ..., point_FUN = NULL)

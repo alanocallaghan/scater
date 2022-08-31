@@ -11,6 +11,7 @@
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
+#' @param order_by Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
 #' @param xlab String specifying the label for x-axis.
@@ -82,7 +83,7 @@
 #'
 plotExpression <- function(object, features, x = NULL,
     exprs_values = "logcounts", log2_values = FALSE,
-    colour_by = color_by, shape_by = NULL, size_by = NULL,
+    colour_by = color_by, shape_by = NULL, size_by = NULL, order_by = NULL,
     by_exprs_values = exprs_values, xlab = NULL, 
     feature_colours = feature_colors, one_facet = TRUE, ncol = 2, 
     scales = "fixed", other_fields = list(),
@@ -134,7 +135,8 @@ plotExpression <- function(object, features, x = NULL,
 
     ## checking visualization arguments
     vis_out <- .incorporate_common_vis_col(evals_long, se = object, 
-        colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
+        colour_by = colour_by, shape_by = shape_by, size_by = size_by,
+        order_by = order_by,
         by_exprs_values = by_exprs_values, other_fields = other_fields,
         multiplier = rep(seq_len(ncol(object)), nfeatures),
         swap_rownames = swap_rownames)

@@ -9,6 +9,7 @@
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
+#' @param order_by Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
 #' @param add_legend Logical scalar specifying whether a legend should be shown.
@@ -53,7 +54,7 @@
 #'
 #' @export
 plotPlatePosition <- function(object, plate_position = NULL,
-    colour_by = color_by, size_by = NULL, shape_by = NULL,
+    colour_by = color_by, size_by = NULL, shape_by = NULL, order_by = NULL,
     by_exprs_values = "logcounts", 
     add_legend = TRUE, theme_size = 24, point_alpha = 0.6,
     point_size = 24, other_fields=list(),
@@ -87,6 +88,7 @@ plotPlatePosition <- function(object, plate_position = NULL,
     ## checking visualization arguments
     vis_out <- .incorporate_common_vis_col(df_to_plot, se = object, 
         colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
+        order_by = order_by,
         by_exprs_values = by_exprs_values, other_fields = other_fields,
         swap_rownames = swap_rownames)
 

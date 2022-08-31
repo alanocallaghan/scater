@@ -12,6 +12,7 @@ plotReducedDim(
   colour_by = color_by,
   shape_by = NULL,
   size_by = NULL,
+  order_by = NULL,
   by_exprs_values = "logcounts",
   text_by = NULL,
   text_size = 5,
@@ -52,6 +53,10 @@ possible values.}
 \item{size_by}{Specification of a column metadata field or a feature to
 size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for
 possible values.}
+
+\item{order_by}{Specification of a column metadata field or a feature to
+order points by, see the \code{by} argument in
+\code{?\link{retrieveCellInfo}} for possible values.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to
 obtain expression values from,

@@ -6,6 +6,7 @@
     \item Add \code{projectReducedDim} function to project points into
     an existing reduced dimensionality embedding.
     \item Support "color" and "colour" spellings in all plotting functions.
+    \item Add \code{order_by} parameter to cellwise plot functions.
   }
 }
 \section{Changes in version 1.24.0, Bioconductor 3.15 Release}{
