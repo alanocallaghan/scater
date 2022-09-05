@@ -58,7 +58,8 @@ NULL
                              colour_by = NULL, shape_by = NULL, size_by = NULL, fill_by = NULL,
                              show_median = FALSE, show_violin = TRUE, show_smooth = FALSE, show_se = TRUE,
                              theme_size = 10, point_alpha = 0.6, point_size = NULL, add_legend = TRUE,
-                             point_FUN = NULL, jitter_type = "swarm")
+                             point_FUN = NULL, jitter_type = "swarm",
+                             rasterise = FALSE)
 # Internal ggplot-creating function to plot anything that involves points.
 # Creates either a scatter plot, (horizontal) violin plots, or a rectangle plot.
 {
@@ -181,7 +182,9 @@ NULL
     if (!add_legend) {
         plot_out <- plot_out + theme(legend.position = "none")
     }
-
+    if (rasterise) {
+        plot_out <- ggrastr::rasterise(plot_out)
+    }
     plot_out
 }
 

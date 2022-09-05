@@ -24,6 +24,7 @@ plotReducedDim(
   swap_rownames = NULL,
   point.padding = NA,
   force = 1,
+  rasterise = FALSE,
   ...
 )
 }
@@ -92,6 +93,11 @@ identify features instead of \code{rownames(object)} when labelling plot
 elements.}
 
 \item{point.padding, force}{See \code{?ggrepel::geom_text_repel}.}
+
+\item{rasterise}{Whether to rasterise the points in the plot with
+\code{\link[ggrastr]{rasterise}}. To control the dpi, set
+\code{options(ggrastr.default.dpi)},
+for example \code{options(ggrastr.default.dpi=300)}.}
 
 \item{...}{Additional arguments for visualization, see
 \code{?"\link{scater-plot-args}"} for details.}
