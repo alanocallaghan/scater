@@ -68,7 +68,7 @@
     if (is.null(df$order_by)) {
         df$order_by <- seq_len(nrow(df))
     }
-    df <- df[df$order_by, ]
+    df <- df[order(df$order_by), ]
 
     for (o in other_fields) {
         other <- retrieveCellInfo(se, o, exprs_values=by_exprs_values,
