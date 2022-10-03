@@ -6,6 +6,9 @@
     \item Add \code{projectReducedDim} function to project points into
     an existing reduced dimensionality embedding.
     \item Support "color" and "colour" spellings in all plotting functions.
+    \item Add \code{order_by} argument to cellwise plot functions.
+    \item Add \code{rasterise} argument to \code{plotReducedDim} using
+    \code{\link[ggrastr]{rasterise}}.
   }
 }
 \section{Changes in version 1.24.0, Bioconductor 3.15 Release}{

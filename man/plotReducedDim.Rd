@@ -12,6 +12,7 @@ plotReducedDim(
   colour_by = color_by,
   shape_by = NULL,
   size_by = NULL,
+  order_by = NULL,
   by_exprs_values = "logcounts",
   text_by = NULL,
   text_size = 5,
@@ -23,6 +24,7 @@ plotReducedDim(
   swap_rownames = NULL,
   point.padding = NA,
   force = 1,
+  rasterise = FALSE,
   ...
 )
 }
@@ -52,6 +54,10 @@ possible values.}
 \item{size_by}{Specification of a column metadata field or a feature to
 size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for
 possible values.}
+
+\item{order_by}{Specification of a column metadata field or a feature to
+order points by, see the \code{by} argument in
+\code{?\link{retrieveCellInfo}} for possible values.}
 
 \item{by_exprs_values}{A string or integer scalar specifying which assay to
 obtain expression values from,
@@ -87,6 +93,11 @@ identify features instead of \code{rownames(object)} when labelling plot
 elements.}
 
 \item{point.padding, force}{See \code{?ggrepel::geom_text_repel}.}
+
+\item{rasterise}{Whether to rasterise the points in the plot with
+\code{\link[ggrastr]{rasterise}}. To control the dpi, set
+\code{options(ggrastr.default.dpi)},
+for example \code{options(ggrastr.default.dpi=300)}.}
 
 \item{...}{Additional arguments for visualization, see
 \code{?"\link{scater-plot-args}"} for details.}

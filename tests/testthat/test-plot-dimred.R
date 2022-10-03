@@ -111,3 +111,15 @@ test_that("we can produce MDS plots", {
     # Handles multiple components properly.
     expect_s3_class(P4 <- plotMDS(example_sce, ncomponents=4), "ggplot")
 })
+
+
+test_that("order by works", {
+    set.seed(42)
+    example_sce <- mockSCE()
+    example_sce <- logNormCounts(example_sce)
+    example_sce <- runPCA(example_sce)
+    p <- plotReducedDim(example_sce, "PCA", order_by = "Gene_0001")
+    expect_equal(order(p$data$order_by), seq_len(nrow(p$data)))
+    p <- plotReducedDim(example_sce, "PCA", order_by = "Mutation_Status")
+    expect_equal(order(p$data$order_by), seq_len(nrow(p$data)))
+})

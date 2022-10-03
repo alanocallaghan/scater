@@ -33,8 +33,9 @@
     list(df=df, colour_by = colour_by, shape_by = shape_by, size_by = size_by)
 }
 
-.incorporate_common_vis_col <- function(df, se, mode, colour_by, size_by, shape_by, 
-    by_exprs_values, by_show_single, other_fields, multiplier = NULL, swap_rownames = NULL) 
+.incorporate_common_vis_col <- function(df, se, mode, colour_by, size_by,
+        shape_by, order_by, by_exprs_values, by_show_single, other_fields,
+        multiplier = NULL, swap_rownames = NULL) 
 {
     colour_by_out <- retrieveCellInfo(se, colour_by, exprs_values = by_exprs_values,
         swap_rownames=swap_rownames)
@@ -60,6 +61,15 @@
     }
     df$size_by <- size_by_out$value
 
+    order_by_out <- retrieveCellInfo(se, order_by, exprs_values = by_exprs_values,
+        swap_rownames=swap_rownames)
+    order_by <- order_by_out$name
+    df$order_by <- order_by_out$value
+    if (is.null(df$order_by)) {
+        df$order_by <- seq_len(nrow(df))
+    }
+    df <- df[order(df$order_by), ]
+
     for (o in other_fields) {
         other <- retrieveCellInfo(se, o, exprs_values=by_exprs_values,
             swap_rownames=swap_rownames)
@@ -69,7 +79,7 @@
         df <- .add_other_or_warn(df, other)
     }
 
-    list(df = df, colour_by = colour_by, shape_by = shape_by, size_by = size_by)
+    list(df = df, colour_by = colour_by, shape_by = shape_by, size_by = size_by, order_by = order_by)
 }
 
 .add_other_or_warn <- function(df, other) {

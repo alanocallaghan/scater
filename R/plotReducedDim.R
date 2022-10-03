@@ -22,6 +22,9 @@
 #' @param size_by Specification of a column metadata field or a feature to
 #' size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for
 #' possible values.
+#' @param order_by Specification of a column metadata field or a feature to
+#' order points by, see the \code{by} argument in
+#' \code{?\link{retrieveCellInfo}} for possible values.
 #' @param by_exprs_values A string or integer scalar specifying which assay to
 #' obtain expression values from,
 #' for use in point aesthetics - see the \code{exprs_values} argument in
@@ -47,6 +50,10 @@
 #' @param color_by Alias to \code{colour_by}.
 #' @param text_color Alias to \code{text_colour}.
 #' @param point.padding,force See \code{?ggrepel::geom_text_repel}.
+#' @param rasterise Whether to rasterise the points in the plot with
+#' \code{\link[ggrastr]{rasterise}}. To control the dpi, set
+#' \code{options(ggrastr.default.dpi)},
+#' for example \code{options(ggrastr.default.dpi=300)}.
 #' @param ... Additional arguments for visualization, see
 #' \code{?"\link{scater-plot-args}"} for details.
 #'
@@ -93,11 +100,12 @@
 plotReducedDim <- function(
         object, dimred, ncomponents = 2, percentVar = NULL, 
         colour_by = color_by, shape_by = NULL, size_by = NULL,
-        by_exprs_values = "logcounts", 
+        order_by = NULL, by_exprs_values = "logcounts", 
         text_by = NULL, text_size = 5, text_colour = text_color,
         label_format = c("%s %i", " (%i%%)"), other_fields = list(),
         text_color = "black", color_by = NULL,
-        swap_rownames = NULL, point.padding = NA, force = 1, ...
+        swap_rownames = NULL, point.padding = NA, force = 1,
+        rasterise = FALSE, ...
     ) {
 
     ## Extract reduced dimension representation of cells
@@ -128,13 +136,14 @@ plotReducedDim <- function(
     ## checking visualization arguments
     vis_out <- .incorporate_common_vis_col(df_to_plot, se = object,
         colour_by = colour_by, shape_by = shape_by, size_by = size_by,
+        order_by = order_by,
         by_exprs_values = by_exprs_values, other_fields = other_fields,
         swap_rownames = swap_rownames)
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by
     shape_by <- vis_out$shape_by
     size_by <- vis_out$size_by
-
+    
     ## Dispatching to the central plotter in the simple case of two dimensions.
     if (length(to_plot) == 2L) {
         colnames(df_to_plot)[seq_along(to_plot)] <- c("X", "Y")
@@ -146,10 +155,11 @@ plotReducedDim <- function(
                 sprintf(label_format[2], round(percentVar[to_plot]))
             )
         }
-
+        
         plot_out <- .central_plotter(df_to_plot, xlab = labs[1], ylab = labs[2],
                                      colour_by = colour_by, size_by = size_by,
-                                     shape_by = shape_by, ..., point_FUN = NULL)
+                                     shape_by = shape_by, ..., point_FUN = NULL,
+                                     rasterise = rasterise)
 
         # Adding text with the median locations of the 'text_by' vector.
         if (!is.null(text_by)) {
@@ -179,18 +189,18 @@ plotReducedDim <- function(
 
         return(plot_out)
     }
-
     ## Otherwise, creating a paired reddim plot.
     paired_reddim_plot(df_to_plot, to_plot = to_plot, percentVar = percentVar,
         colour_by = colour_by, shape_by = shape_by, size_by = size_by,
-        dimred = dimred, label_format = label_format, ...)
+        dimred = dimred, label_format = label_format, rasterise = rasterise, ...)
 }
 
 #' @importFrom ggplot2 ggplot facet_grid stat_density geom_point theme
 paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
         colour_by=NULL, shape_by=NULL, size_by=NULL,
         label_format=c("%s %i", " (%i%%)"),
-        add_legend = TRUE, theme_size = 10, point_alpha = 0.6, point_size = NULL
+        add_legend = TRUE, theme_size = 10, point_alpha = 0.6, point_size = NULL,
+        rasterise = FALSE
     ) {
 
     reddim_cols <- seq_along(to_plot)
@@ -235,6 +245,8 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
     if (!add_legend) {
         plot_out <- plot_out + theme(legend.position = "none")
     }
-
+    if (rasterise) {
+        plot_out <- ggrastr::rasterise(plot_out, geoms = "Point")
+    }
     plot_out
 }
