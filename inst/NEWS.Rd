@@ -9,6 +9,7 @@
     \item Add \code{order_by} argument to cellwise plot functions.
     \item Add \code{rasterise} argument to \code{plotReducedDim} using
     \code{\link[ggrastr]{rasterise}}.
+    \item Add \code{use_densvis} argument to \code{runTSNE} to add densvis support in UMAP and TSNE embeddings.
   }
 }
 \section{Changes in version 1.24.0, Bioconductor 3.15 Release}{
