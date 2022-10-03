@@ -43,13 +43,9 @@ Imports:
     RcppML,
     uwot,
     pheatmap,
-<<<<<<< HEAD
     ggrepel,
-    densvis
-=======
-    ggrastr,
-    ggrepel
->>>>>>> master
+    densvis,
+    ggrastr
 Suggests: 
     BiocStyle,
     snifter,
