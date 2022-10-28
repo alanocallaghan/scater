@@ -16,6 +16,7 @@ plotColData(
   other_fields = list(),
   swap_rownames = NULL,
   color_by = NULL,
+  point_fun = NULL,
   ...
 )
 }
@@ -42,11 +43,13 @@ for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for details.}
 
 \item{other_fields}{Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
-\item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
-identify features instead of \code{rownames(object)} when labelling plot 
+\item{swap_rownames}{Column name of \code{rowData(object)} to be used to
+identify features instead of \code{rownames(object)} when labelling plot
 elements.}
 
 \item{color_by}{Alias to \code{colour_by}.}
+
+\item{point_fun}{Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }
@@ -67,20 +70,20 @@ If \code{x} is missing or categorical, rectangule plots will be generated where 
 \examples{
 example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
-colData(example_sce) <- cbind(colData(example_sce), 
+colData(example_sce) <- cbind(colData(example_sce),
     perCellQCMetrics(example_sce))
 
-plotColData(example_sce, y = "detected", x = "sum", 
+plotColData(example_sce, y = "detected", x = "sum",
    colour_by = "Mutation_Status") + scale_x_log10()
 
-plotColData(example_sce, y = "detected", x = "sum", 
-   colour_by = "Mutation_Status", size_by = "Gene_0001", 
+plotColData(example_sce, y = "detected", x = "sum",
+   colour_by = "Mutation_Status", size_by = "Gene_0001",
    shape_by = "Treatment") + scale_x_log10()
 
-plotColData(example_sce, y = "Treatment", x = "sum", 
+plotColData(example_sce, y = "Treatment", x = "sum",
    colour_by = "Mutation_Status") + scale_y_log10() # flipped violin.
 
-plotColData(example_sce, y = "detected", 
+plotColData(example_sce, y = "detected",
    x = "Cell_Cycle", colour_by = "Mutation_Status")
 
 }

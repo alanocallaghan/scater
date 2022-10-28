@@ -13,21 +13,20 @@ plotHeatmap(
   scale = FALSE,
   zlim = NULL,
   colour = color,
+  color = NULL,
   colour_columns_by = color_columns_by,
+  color_columns_by = NULL,
   column_annotation_colours = column_annotation_colors,
-  colour_rows_by = color_rows_by,
+  column_annotation_colors = list(),
   row_annotation_colours = row_annotation_colors,
+  row_annotation_colors = list(),
+  colour_rows_by = color_rows_by,
+  color_rows_by = NULL,
   order_columns_by = NULL,
   by_exprs_values = exprs_values,
   show_colnames = FALSE,
   cluster_cols = is.null(order_columns_by),
   swap_rownames = NULL,
-  symmetric = NULL,
-  color = NULL,
-  color_columns_by = NULL,
-  color_rows_by = NULL,
-  column_annotation_colors = list(),
-  row_annotation_colors = list(),
   ...
 )
 }
@@ -55,6 +54,10 @@ If \code{center=TRUE}, this defaults to the range of the centered expression mat
 This defaults to \link[viridis]{viridis} if \code{center=FALSE}, and the the \code{"RdYlBu"}
 colour palette from \code{\link[RColorBrewer]{brewer.pal}} otherwise.}
 
+\item{color, color_columns_by, column_annotation_colors, color_rows_by, row_annotation_colors}{Aliases to \code{color}, \code{color_columns_by},
+\code{column_annotation_colors}, \code{color_rows_by}, 
+\code{row_annotation_colors}.}
+
 \item{colour_columns_by}{A list of values specifying how the columns should be annotated with colours.
 Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
 A character vector can also be supplied and will be treated as a list of strings.}
@@ -67,12 +70,12 @@ colour scale is chosen.
 The full list of colour maps is passed to \code{\link[pheatmap]{pheatmap}} 
 as the \code{annotation_colours} argument.}
 
+\item{row_annotation_colours}{Similar to \code{column_annotation_colours} but 
+relating to row annotation rather than column annotation.}
+
 \item{colour_rows_by}{Similar to \code{colour_columns_by} but for rows rather
 than columns. Each entry of the list can be any acceptable input to the 
 \code{by} argument in \code{?\link{retrieveFeatureInfo}}.}
-
-\item{row_annotation_colours}{Similar to \code{column_annotation_colours} but 
-relating to row annotation rather than column annotation.}
 
 \item{order_columns_by}{A list of values specifying how the columns should be ordered.
 Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
@@ -87,12 +90,6 @@ for colouring of column-level data - see the \code{exprs_values} argument in \co
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
 identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
-
-\item{symmetric}{Deprecated and ignored.}
-
-\item{color, color_columns_by, column_annotation_colors, color_rows_by, row_annotation_colors}{Aliases to \code{color}, \code{color_columns_by},
-\code{column_annotation_colors}, \code{color_rows_by}, 
-\code{row_annotation_colors}.}
 }
 \value{
 A heatmap is produced on the current graphics device. 

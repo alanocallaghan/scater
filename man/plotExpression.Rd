@@ -24,6 +24,7 @@ plotExpression(
   swap_rownames = NULL,
   color_by = NULL,
   feature_colors = TRUE,
+  point_fun = NULL,
   ...
 )
 }
@@ -72,6 +73,8 @@ elements.}
 \item{color_by}{Alias to \code{colour_by}.}
 
 \item{feature_colors}{Alias to \code{feature_colours}.}
+
+\item{point_fun}{Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }

@@ -15,10 +15,11 @@
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for details.
 #' @param other_fields Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
-#' @param swap_rownames Column name of \code{rowData(object)} to be used to 
-#'  identify features instead of \code{rownames(object)} when labelling plot 
+#' @param swap_rownames Column name of \code{rowData(object)} to be used to
+#'  identify features instead of \code{rownames(object)} when labelling plot
 #'  elements.
 #' @param color_by Alias to \code{colour_by}.
+#' @param point_fun Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -36,28 +37,27 @@
 #' @examples
 #' example_sce <- mockSCE()
 #' example_sce <- logNormCounts(example_sce)
-#' colData(example_sce) <- cbind(colData(example_sce), 
+#' colData(example_sce) <- cbind(colData(example_sce),
 #'     perCellQCMetrics(example_sce))
 #'
-#' plotColData(example_sce, y = "detected", x = "sum", 
+#' plotColData(example_sce, y = "detected", x = "sum",
 #'    colour_by = "Mutation_Status") + scale_x_log10()
 #'
-#' plotColData(example_sce, y = "detected", x = "sum", 
-#'    colour_by = "Mutation_Status", size_by = "Gene_0001", 
+#' plotColData(example_sce, y = "detected", x = "sum",
+#'    colour_by = "Mutation_Status", size_by = "Gene_0001",
 #'    shape_by = "Treatment") + scale_x_log10()
 #'
-#' plotColData(example_sce, y = "Treatment", x = "sum", 
+#' plotColData(example_sce, y = "Treatment", x = "sum",
 #'    colour_by = "Mutation_Status") + scale_y_log10() # flipped violin.
 #'
-#' plotColData(example_sce, y = "detected", 
+#' plotColData(example_sce, y = "detected",
 #'    x = "Cell_Cycle", colour_by = "Mutation_Status")
 #'
 #' @export
 plotColData <- function(object, y, x = NULL, 
     colour_by = color_by, shape_by = NULL, size_by = NULL, order_by = NULL,
-    by_exprs_values = "logcounts", other_fields=list(),
-    swap_rownames = NULL, color_by = NULL, ...)
-{
+    by_exprs_values = "logcounts", other_fields = list(),
+    swap_rownames = NULL, color_by = NULL, point_fun = NULL, ...) {
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")
     }
@@ -68,7 +68,7 @@ plotColData <- function(object, y, x = NULL,
     if (is.null(y_lab)) {
         stop(sprintf("could not find '%s' in 'colData(object)'", y))
     }
-    df_to_plot <- data.frame(Y=y_by_out$val)
+    df_to_plot <- data.frame(Y = y_by_out$val)
 
     if (!is.null(x)) {
         x_by_out <- retrieveCellInfo(object, x, search = "colData")
@@ -83,8 +83,8 @@ plotColData <- function(object, y, x = NULL,
     }
 
     ## checking visualization arguments
-    vis_out <- .incorporate_common_vis_col(df_to_plot, se = object, 
-        colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
+    vis_out <- .incorporate_common_vis_col(df_to_plot, se = object,
+        colour_by = colour_by, shape_by = shape_by, size_by = size_by,
         by_exprs_values = by_exprs_values, other_fields = other_fields,
         order_by = order_by,
         swap_rownames = swap_rownames)
@@ -96,6 +96,6 @@ plotColData <- function(object, y, x = NULL,
 
     # Creating the plot object:
     .central_plotter(df_to_plot, xlab = x_lab, ylab = y_lab,
-        colour_by = colour_by, size_by = size_by, shape_by = shape_by, 
-        ..., point_FUN=NULL)
+        colour_by = colour_by, size_by = size_by, shape_by = shape_by,
+        ..., point_FUN = point_fun)
 }

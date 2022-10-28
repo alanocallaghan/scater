@@ -53,10 +53,9 @@
 #' @importFrom Matrix rowMeans
 #' @importFrom scuttle summarizeAssayByGroup
 plotGroupedHeatmap <- function(object, features, group, block = NULL, 
-    columns=NULL, exprs_values = "logcounts", center = FALSE, scale = FALSE, 
-    zlim = NULL, colour = color, swap_rownames=NULL, symmetric=NULL, 
-    color = NULL, ...) 
-{
+    columns=NULL, exprs_values = "logcounts", center = FALSE, scale = FALSE,
+    zlim = NULL, colour = color, swap_rownames = NULL, color = NULL, ...) {
+
     # Setting names, otherwise the downstream colouring fails.
     if (is.null(colnames(object))) { 
         colnames(object) <- seq_len(ncol(object)) 
@@ -85,7 +84,7 @@ plotGroupedHeatmap <- function(object, features, group, block = NULL,
     }
     heat.se <- summarizeAssayByGroup(heat.vals, ids, statistic="mean")
     heat.vals <- correctGroupSummary(assay(heat.se), group=heat.se$group, block=heat.se$group)
-    heatmap_scale <- .heatmap_scale(heat.vals, center=center, scale=scale, colour=colour, zlim=zlim, symmetric=symmetric)
+    heatmap_scale <- .heatmap_scale(heat.vals, center=center, scale=scale, colour=colour, zlim=zlim)
 
     # Creating the heatmap as specified.
     pheatmap::pheatmap(heatmap_scale$x, colour=heatmap_scale$colour, breaks=heatmap_scale$colour_breaks, ...) 

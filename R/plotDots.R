@@ -11,7 +11,6 @@
 #' @param other_fields Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' Note that any \link{AsIs} vectors or data.frames must be of length equal to \code{nrow(object)}, not \code{features}.
 #' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, for entries of \code{other_fields}. 
-#' @param low_colour,high_colour,max_ave Deprecated arguments.
 #'
 #' @return 
 #' A \link{ggplot} object containing a dot plot.
@@ -57,20 +56,8 @@ plotDots <- function(object, features, group = NULL, block=NULL,
     exprs_values = "logcounts", detection_limit = 0, zlim = NULL, 
     colour = color, color = NULL,
     max_detected = NULL, other_fields = list(), by_exprs_values = exprs_values,
-    swap_rownames = NULL, center = FALSE, scale = FALSE,
-    low_colour = NULL, high_colour = NULL, max_ave = NULL)
+    swap_rownames = NULL, center = FALSE, scale = FALSE)
 {
-    # Handling all the deprecation.
-    if (!is.null(low_colour)) {
-        .Deprecated(msg="'low_colour=' is deprecated, use 'colour=' instead")
-    }
-    if (!is.null(high_colour)) {
-        .Deprecated(msg="'high_colour=' is deprecated, use 'colour=' instead")
-    }
-    if (!is.null(max_ave)) {
-        .Deprecated(msg="'max_ave=' is deprecated, use 'zlim=' instead")
-        zlim <- c(detection_limit, max_ave)
-    }
 
     if (is.null(group)) {
         group <- rep("all", ncol(object))

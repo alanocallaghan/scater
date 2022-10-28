@@ -8,6 +8,7 @@
 \alias{calculateDiffusionMap}
 \alias{calculateDiffusionMap,ANY-method}
 \alias{runDiffusionMap}
+\alias{multiplot}
 \title{Defunct functions}
 \usage{
 calculateQCMetrics(...)
@@ -21,6 +22,8 @@ calculateDiffusionMap(x, ...)
 \S4method{calculateDiffusionMap}{ANY}(x, ...)
 
 runDiffusionMap(...)
+
+multiplot(...)
 }
 \arguments{
 \item{object, x, ...}{Ignored arguments.}

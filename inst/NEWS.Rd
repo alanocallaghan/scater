@@ -9,6 +9,10 @@
     \item Add \code{order_by} argument to cellwise plot functions.
     \item Add \code{rasterise} argument to \code{plotReducedDim} using
     \code{\link[ggrastr]{rasterise}}.
+    \item Make multiplot defunct, remove deprecated args in \code{plotHeatmap},
+    \code{plotDots}.
+    \item Add \code{point_fun} argument to \code{plotColData} and
+    \code{plotExpression} determine the geom used to draw cells in those plots.
   }
 }
 \section{Changes in version 1.24.0, Bioconductor 3.15 Release}{

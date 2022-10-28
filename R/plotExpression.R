@@ -28,6 +28,7 @@
 #'  elements.
 #' @param color_by Alias to \code{colour_by}.
 #' @param feature_colors Alias to \code{feature_colours}.
+#' @param point_fun Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -88,7 +89,7 @@ plotExpression <- function(object, features, x = NULL,
     feature_colours = feature_colors, one_facet = TRUE, ncol = 2, 
     scales = "fixed", other_fields = list(),
     swap_rownames = NULL, 
-    color_by = NULL, feature_colors = TRUE, ...)
+    color_by = NULL, feature_colors = TRUE, point_fun = NULL, ...)
 {
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")
@@ -165,7 +166,7 @@ plotExpression <- function(object, features, x = NULL,
     # Creating the plot with faceting.        
     plot_out <- .central_plotter(evals_long, xlab = xlab, ylab = ylab,
                                  shape_by = shape_by, colour_by = colour_by, size_by = size_by, fill_by = fill_by,
-                                 ..., point_FUN = NULL)
+                                 ..., point_FUN = point_fun)
     if (!one_facet) {
         plot_out <- plot_out + facet_wrap(~Feature, ncol = ncol, scales = scales)
     }

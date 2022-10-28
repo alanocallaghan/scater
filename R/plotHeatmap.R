@@ -42,7 +42,6 @@
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to 
 #'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
-#' @param symmetric Deprecated and ignored.
 #' @param color,color_columns_by,column_annotation_colors,color_rows_by,row_annotation_colors 
 #' Aliases to \code{color}, \code{color_columns_by},
 #' \code{column_annotation_colors}, \code{color_rows_by}, 
@@ -84,22 +83,22 @@
 #' @importFrom SummarizedExperiment assay assayNames
 plotHeatmap <- function(object, features, columns = NULL,
     exprs_values = "logcounts", center = FALSE, scale = FALSE, zlim = NULL,
-    colour = color, colour_columns_by = color_columns_by,
+    colour = color, color = NULL,
+    colour_columns_by = color_columns_by,
+    color_columns_by = NULL,
     column_annotation_colours = column_annotation_colors,
-    colour_rows_by = color_rows_by,
-    row_annotation_colours = row_annotation_colors,
-    order_columns_by = NULL, by_exprs_values = exprs_values, 
-    show_colnames = FALSE, cluster_cols = is.null(order_columns_by),
-    swap_rownames = NULL, symmetric=NULL, 
-    color = NULL,
-    color_columns_by = NULL, color_rows_by = NULL, 
     column_annotation_colors = list(),
+    row_annotation_colours = row_annotation_colors,
     row_annotation_colors = list(),
-    ...) 
-{
+    colour_rows_by = color_rows_by,
+    color_rows_by = NULL,
+    order_columns_by = NULL, by_exprs_values = exprs_values,
+    show_colnames = FALSE, cluster_cols = is.null(order_columns_by),
+    swap_rownames = NULL, ...) {
+
     # Setting names, otherwise the downstream colouring fails.
-    if (is.null(colnames(object))) { 
-        colnames(object) <- seq_len(ncol(object)) 
+    if (is.null(colnames(object))) {
+        colnames(object) <- seq_len(ncol(object))
     }
 
     # Pulling out the features. swap_rownames swaps out for alt genenames
@@ -128,20 +127,20 @@ plotHeatmap <- function(object, features, columns = NULL,
         cluster_cols <- FALSE
         colour_columns_by <- c(colour_columns_by, order_columns_by)
     }
-    heatmap_scale <- .heatmap_scale(heat.vals, center=center, scale=scale, colour=colour, zlim=zlim, symmetric=symmetric)
+    heatmap_scale <- .heatmap_scale(heat.vals, center=center, scale=scale, colour=colour, zlim=zlim)
 
     # Collecting variables to colour_by.
     if (length(colour_columns_by)) {
         column_variables <- list()
 
-        for (i in seq_along(colour_columns_by)) { 
+        for (i in seq_along(colour_columns_by)) {
             field <- colour_columns_by[[i]]
             colour_by_out <- retrieveCellInfo(object, field,
                 exprs_values = by_exprs_values, swap_rownames = swap_rownames)
 
-            if (is.null(colour_by_out$val)) { 
+            if (is.null(colour_by_out$val)) {
                 next
-            } else if (is.numeric(colour_by_out$val)) { 
+            } else if (is.numeric(colour_by_out$val)) {
                 colour_fac <- colour_by_out$val
                 col_scale <- viridis(25)
             } else {
@@ -151,9 +150,9 @@ plotHeatmap <- function(object, features, columns = NULL,
                 if (nlevs_colour_by <= 10) {
                     col_scale <- .get_palette("tableau10medium")
                 } else if (nlevs_colour_by > 10 && nlevs_colour_by <= 20) {
-                    col_scale <- .get_palette("tableau20") 
+                    col_scale <- .get_palette("tableau20")
                 } else {
-                    col_scale <- viridis(nlevs_colour_by)                    
+                    col_scale <- viridis(nlevs_colour_by)
                 }
 
                 col_scale <- col_scale[seq_len(nlevs_colour_by)]
@@ -161,7 +160,7 @@ plotHeatmap <- function(object, features, columns = NULL,
             }
 
             col_name <- colour_by_out$name
-            if (col_name=="") {
+            if (col_name == "") {
                 col_name <- paste0("unnamed", i)
             }
             column_variables[[col_name]] <- colour_fac
@@ -173,7 +172,7 @@ plotHeatmap <- function(object, features, columns = NULL,
         # No need to subset for 'columns' or 'order_columns_by',
         # as pheatmap::pheatmap uses the rownames to handle this for us.
         column_variables <- do.call(data.frame,
-            c(column_variables, list(row.names=colnames(object))))
+            c(column_variables, list(row.names = colnames(object))))
         column_annotation_colours <- column_annotation_colours[colnames(column_variables)]
     } else {
         column_variables <- column_annotation_colours <- NULL
@@ -182,14 +181,14 @@ plotHeatmap <- function(object, features, columns = NULL,
     if (length(colour_rows_by)) {
         row_variables <- list()
 
-        for (i in seq_along(colour_rows_by)) { 
+        for (i in seq_along(colour_rows_by)) {
             field <- colour_rows_by[[i]]
             colour_by_out <- retrieveFeatureInfo(object, field,
                 exprs_values = by_exprs_values)
 
-            if (is.null(colour_by_out$val)) { 
+            if (is.null(colour_by_out$val)) {
                 next
-            } else if (is.numeric(colour_by_out$val)) { 
+            } else if (is.numeric(colour_by_out$val)) {
                 colour_fac <- colour_by_out$val
                 col_scale <- viridis(25)
             } else {
@@ -199,9 +198,9 @@ plotHeatmap <- function(object, features, columns = NULL,
                 if (nlevs_colour_by <= 10) {
                     col_scale <- .get_palette("tableau10medium")
                 } else if (nlevs_colour_by > 10 && nlevs_colour_by <= 20) {
-                    col_scale <- .get_palette("tableau20") 
+                    col_scale <- .get_palette("tableau20")
                 } else {
-                    col_scale <- viridis(nlevs_colour_by)                    
+                    col_scale <- viridis(nlevs_colour_by)
                 }
 
                 col_scale <- col_scale[seq_len(nlevs_colour_by)]
@@ -234,21 +233,19 @@ plotHeatmap <- function(object, features, columns = NULL,
     # Creating the heatmap as specified.
     pheatmap::pheatmap(
         heatmap_scale$x,
-        color=heatmap_scale$colour,
-        breaks=heatmap_scale$colour_breaks, 
-        annotation_col=column_variables,
-        annotation_row=row_variables,
-        annotation_colors=annotation_colours,
-        show_colnames=show_colnames,
-        cluster_cols=cluster_cols,
-        ...) 
+        color = heatmap_scale$colour,
+        breaks = heatmap_scale$colour_breaks,
+        annotation_col = column_variables,
+        annotation_row = row_variables,
+        annotation_colors = annotation_colours,
+        show_colnames = show_colnames,
+        cluster_cols = cluster_cols,
+        ...)
 }
 
 #' @importFrom ggplot2 scale_colour_gradientn
 .heatmap_scale <- function(x, center, scale, colour=NULL, zlim=NULL, symmetric=NULL) {
-    if (!is.null(symmetric)) {
-        .Deprecated(msg="'symmetric=' is deprecated and is automatically set to TRUE when 'center=TRUE'")
-    }
+
     if (center) {
         x <- x - rowMeans(x)
     }

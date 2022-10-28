@@ -183,12 +183,6 @@ test_that("plotDots works as expected", {
     expect_s3_class(plotDots(example_sce, group="Cell_Cycle", block="Mutation_Status",
         features=rownames(example_sce)[1:10], max_detected=0.5), "ggplot")
 
-    expect_warning(
-        plotDots(example_sce, features=rownames(example_sce)[1:10], group="Cell_Cycle", max_ave=5),
-        "use 'zlim=' instead"
-    )
-
-
     # Checking that other_fields play nice.
     rowData(example_sce)$stuff <- runif(nrow(example_sce))
     rowData(example_sce)$otherstuff <- runif(nrow(example_sce))

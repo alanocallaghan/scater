@@ -57,6 +57,7 @@ NULL
 .central_plotter <- function(object, xlab = NULL, ylab = NULL,
                              colour_by = NULL, shape_by = NULL, size_by = NULL, fill_by = NULL,
                              show_median = FALSE, show_violin = TRUE, show_smooth = FALSE, show_se = TRUE,
+                            #  show_points = TRUE,
                              theme_size = 10, point_alpha = 0.6, point_size = NULL, add_legend = TRUE,
                              point_FUN = NULL, jitter_type = "swarm",
                              rasterise = FALSE)

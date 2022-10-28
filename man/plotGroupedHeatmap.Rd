@@ -16,7 +16,6 @@ plotGroupedHeatmap(
   zlim = NULL,
   colour = color,
   swap_rownames = NULL,
-  symmetric = NULL,
   color = NULL,
   ...
 )
@@ -54,8 +53,6 @@ colour palette from \code{\link[RColorBrewer]{brewer.pal}} otherwise.}
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
 identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
-
-\item{symmetric}{Deprecated and ignored.}
 
 \item{color}{Alias to \code{colour}.}
 

@@ -63,3 +63,8 @@ runDiffusionMap <- function(...) {
     .Defunct()
 }
 
+#' @export
+#' @rdname defunct
+multiplot <- function(...) {
+    .Defunct("scater::multiplot is defunct.\nUse 'gridExtra::grid.arrange' instead")
+}

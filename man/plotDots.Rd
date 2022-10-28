@@ -19,10 +19,7 @@ plotDots(
   by_exprs_values = exprs_values,
   swap_rownames = NULL,
   center = FALSE,
-  scale = FALSE,
-  low_colour = NULL,
-  high_colour = NULL,
-  max_ave = NULL
+  scale = FALSE
 )
 }
 \arguments{
@@ -68,8 +65,6 @@ elements.}
 
 \item{scale}{A logical scalar specifying whether each row should have its
 average expression values scaled to unit variance prior to plotting.}
-
-\item{low_colour, high_colour, max_ave}{Deprecated arguments.}
 }
 \value{
 A \link{ggplot} object containing a dot plot.
