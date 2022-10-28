@@ -8,7 +8,7 @@ Authors@R: c(
         person("Vladimir", "Kiselev", role=c("ctb"), email="vk6@sanger.ac.uk"),
         person("Felix G.M.", "Ernst", role=c("ctb"), email="felix.gm.ernst@outlook.com"),
         person("Alan", "O'Callaghan", role=c("ctb", "cre"), email="alan.ocallaghan@outlook.com"))
-Version: 1.25.8
+Version: 1.25.9
 Date: 2022-10-28
 License: GPL-3
 Title: Single-Cell Analysis Toolkit for Gene Expression Data in R
@@ -41,8 +41,9 @@ Imports:
     RcppML,
     uwot,
     pheatmap,
-    ggrastr,
-    ggrepel
+    ggrepel,
+    densvis,
+    ggrastr
 Suggests: 
     BiocStyle,
     snifter,

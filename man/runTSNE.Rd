@@ -25,7 +25,10 @@ calculateTSNE(x, ...)
   external_neighbors = FALSE,
   BNPARAM = KmknnParam(),
   BPPARAM = SerialParam(),
-  use_fitsne = FALSE
+  use_fitsne = FALSE,
+  use_densvis = FALSE,
+  dens_frac = 0.3,
+  dens_lambda = 0.1
 )
 
 \S4method{calculateTSNE}{SummarizedExperiment}(x, ..., exprs_values = "logcounts")
@@ -81,6 +84,10 @@ otherwise, the \code{\link[Rtsne]{Rtsne}} defaults are used.}
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.}
 
 \item{use_fitsne}{Logical scalar indicating whether \code{\link[snifter]{fitsne}} should be used to perform t-SNE.}
+
+\item{use_densvis}{Logical scalar indicating whether \code{\link[densvis]{densne}} should be used to perform density-preserving t-SNE.}
+
+\item{dens_frac, dens_lambda}{See \code{\link[densvis]{densne}}}
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
 
