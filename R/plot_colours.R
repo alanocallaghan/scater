@@ -39,12 +39,12 @@
 .resolve_plot_colours <- function(plot_out, colour_by, colour_by_name, fill = FALSE) 
 # Get nice plotting colour schemes for very general colour variables
 {
-    if ( is.null(colour_by) ) {
+    if (is.null(colour_by)) {
         return(plot_out)
     }
 
     # Picking whether to fill or not.
-    if ( fill ) {
+    if (fill) {
         VIRIDFUN <- scale_fill_viridis
         SCALEFUN <- scale_fill_manual
     } else {
@@ -53,7 +53,7 @@
     }
 
     # Set a sensible colour scheme and return the plot_out object
-    if ( is.numeric(colour_by) ) {
+    if (is.numeric(colour_by)) {
         plot_out <- plot_out + VIRIDFUN(name = colour_by_name)
     } else {
         nlevs_colour_by <- nlevels(as.factor(colour_by))

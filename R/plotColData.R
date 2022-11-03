@@ -19,7 +19,7 @@
 #'  identify features instead of \code{rownames(object)} when labelling plot
 #'  elements.
 #' @param color_by Alias to \code{colour_by}.
-#' @param point_fun Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}.
+#' @param point_fun Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}, or \code{point_fun=function(...) list()} to not plot points at all.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -56,6 +56,7 @@
 #' @export
 plotColData <- function(object, y, x = NULL, 
     colour_by = color_by, shape_by = NULL, size_by = NULL, order_by = NULL,
+    fill_by = NULL,
     by_exprs_values = "logcounts", other_fields = list(),
     swap_rownames = NULL, color_by = NULL, point_fun = NULL, ...) {
     if (!is(object, "SingleCellExperiment")) {
@@ -86,7 +87,7 @@ plotColData <- function(object, y, x = NULL,
     vis_out <- .incorporate_common_vis_col(df_to_plot, se = object,
         colour_by = colour_by, shape_by = shape_by, size_by = size_by,
         by_exprs_values = by_exprs_values, other_fields = other_fields,
-        order_by = order_by,
+        order_by = order_by, fill_by = fill_by,
         swap_rownames = swap_rownames)
 
     df_to_plot <- vis_out$df
@@ -97,5 +98,5 @@ plotColData <- function(object, y, x = NULL,
     # Creating the plot object:
     .central_plotter(df_to_plot, xlab = x_lab, ylab = y_lab,
         colour_by = colour_by, size_by = size_by, shape_by = shape_by,
-        ..., point_FUN = point_fun)
+        point_FUN = point_fun, ..., fill_by = fill_by)
 }
