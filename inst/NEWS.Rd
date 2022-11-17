@@ -1,6 +1,13 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
+\section{Changes in version 1.28.0, Bioconductor 3.17 Release}{
+  \itemize{
+    \item \code{swap_rownames} works in \code{retrieveCellInfo} for
+    \code{altExp} now as well as in the main assay.
+  }
+}
+
 \section{Changes in version 1.26.0, Bioconductor 3.16 Release}{
   \itemize{
     \item Add \code{projectReducedDim} function to project points into
