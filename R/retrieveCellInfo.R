@@ -2,16 +2,16 @@
 #'
 #' Retrieves a per-cell (meta)data field from a \linkS4class{SingleCellExperiment} based on a single keyword,
 #' typically for use in visualization functions.
-#' 
+#'
 #' @param x A \linkS4class{SingleCellExperiment} object.
 #' @param by A string specifying the field to extract (see Details).
 #' Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.
 #' @param search Character vector specifying the types of data or metadata to use.
 #' @param exprs_values String or integer scalar specifying the assay from which expression values should be extracted.
-#' @param swap_rownames Column name of \code{rowData(object)} to be used to 
-#'  identify features instead of \code{rownames(object)} when labelling plot 
+#' @param swap_rownames Column name of \code{rowData(object)} to be used to
+#'  identify features instead of \code{rownames(object)} when labelling plot
 #'  elements.
-#' 
+#'
 #' @return A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
 #' and \code{value}, a vector of length equal to \code{ncol(x)} containing per-cell (meta)data values.
 #' If \code{by=NULL}, both \code{name} and \code{value} are set to \code{NULL}.
@@ -25,17 +25,17 @@
 #'
 #' Given a character string in \code{by}, this function will:
 #' \enumerate{
-#' \item Search \code{\link{colData}} for a column named \code{by}, 
+#' \item Search \code{\link{colData}} for a column named \code{by},
 #' and return the corresponding field as the output \code{value}.
 #' We do not consider nested elements within the \code{colData}.
-#' \item Search \code{\link{assay}(x, exprs_values)} for a row named \code{by}, 
+#' \item Search \code{\link{assay}(x, exprs_values)} for a row named \code{by},
 #' and return the expression vector for this feature as the output \code{value}.
 #' \item Search each alternative experiment in \code{\link{altExps}(x)} for a row names \code{by},
 #' and return the expression vector for this feature at \code{exprs_values} as the output \code{value}.
 #' }
 #' Any match will cause the function to return without considering later possibilities.
-#' The search can be modified by changing the presence and ordering of elements in \code{search}. 
-#' 
+#' The search can be modified by changing the presence and ordering of elements in \code{search}.
+#'
 #' If there is a name clash that results in retrieval of an unintended field,
 #' users should explicitly set \code{by} to a data.frame, DataFrame or AsIs-wrapped vector containing the desired values.
 #' Developers can also consider setting \code{search} to control the fields that are returned.
@@ -43,13 +43,13 @@
 #' @author Aaron Lun
 #' @seealso
 #' \code{\link{makePerCellDF}}, which provides a more user-friendly interface to this function.
-#' 
-#' \code{\link{plotColData}}, 
-#' \code{\link{plotReducedDim}}, 
-#' \code{\link{plotExpression}}, 
+#'
+#' \code{\link{plotColData}},
+#' \code{\link{plotReducedDim}},
+#' \code{\link{plotExpression}},
 #' \code{\link{plotPlatePosition}},
 #' and most other cell-based plotting functions.
-#' 
+#'
 #' @examples
 #' example_sce <- mockSCE()
 #' example_sce <- logNormCounts(example_sce)
@@ -69,7 +69,7 @@ retrieveCellInfo <- function(x, by, search = c("colData", "assays", "altExps"),
 {
     .mopUp <- function(name, value) {
         list(name=name, value=value)
-    } 
+    }
     if (is.null(by)) {
         return(.mopUp(NULL, NULL))
     }
@@ -86,7 +86,7 @@ retrieveCellInfo <- function(x, by, search = c("colData", "assays", "altExps"),
     } else if (is.data.frame(by) || is(by, "DataFrame")) {
         if (ncol(by) != 1L) {
             stop("input data frame should only have one column")
-        } 
+        }
         if (nrow(by) != ncol(x)) {
             stop("number of rows of input data frame should be equal to 'ncol(x)'")
         }
@@ -116,6 +116,7 @@ retrieveCellInfo <- function(x, by, search = c("colData", "assays", "altExps"),
         } else if (s=="altExps") {
             for (i in seq_along(altExpNames(x))) {
                 current <- altExp(x, i)
+                current <- .swap_rownames(current, swap_rownames)
                 m <- match(by, rownames(current))
                 if (!is.na(m)) {
                     return(.mopUp(by, assay(current, exprs_values, withDimnames = FALSE)[m, ]))
