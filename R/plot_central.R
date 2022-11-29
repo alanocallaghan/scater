@@ -12,6 +12,8 @@
 #' Defaults to 0.6.}
 #' \item{\code{point_size}:}{Numeric scalar, specifying the size of the points.
 #' Defaults to \code{NULL}.}
+#' \item{\code{point_shape}:}{Numeric scalar, specifying the size of the points.
+#' Defaults to \code{19}.}
 #' \item{\code{jitter_type}:}{String to define how points are to be jittered in a violin plot.
 #' This is either with random jitter on the x-axis (\code{"jitter"}) or in a \dQuote{beeswarm} style (if \code{"swarm"}, default).
 #' The latter usually looks more attractive, but for datasets with a large number of cells, or for dense plots, the jitter option may work better.}
@@ -58,7 +60,7 @@ NULL
                              colour_by = NULL, shape_by = NULL, size_by = NULL, fill_by = NULL,
                              show_median = FALSE, show_violin = TRUE, show_smooth = FALSE, show_se = TRUE,
                             #  show_points = TRUE,
-                             theme_size = 10, point_alpha = 0.6, point_size = NULL, add_legend = TRUE,
+                             theme_size = 10, point_alpha = 0.6, point_size = NULL, point_shape = 19, add_legend = TRUE,
                              point_FUN = NULL, jitter_type = "swarm",
                              rasterise = FALSE)
 # Internal ggplot-creating function to plot anything that involves points.
@@ -94,7 +96,7 @@ NULL
         }
 
         # Adding points.
-        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size)
+        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size, shape = point_shape)
         if (is.null(point_FUN)) {
             if (jitter_type=="swarm") {
                 point_FUN <- function(...) geom_quasirandom(..., width=0.4, groupOnX=TRUE, bandwidth=1)
@@ -114,7 +116,7 @@ NULL
         plot_out <- ggplot(object, aes_string(x="X", y="Y")) + xlab(xlab) + ylab(ylab)
 
         # Adding points.
-        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size)
+        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size, shape = point_shape)
         if (is.null(point_FUN)) {
             point_FUN <- geom_point
         }
@@ -159,7 +161,7 @@ NULL
                                          data=summary.data, colour = 'grey60', size = 0.5, fill='grey90')
 
         # Adding points.
-        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size)
+        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size, shape = point_shape)
         if (is.null(point_FUN)) {
             point_FUN <- geom_point
         }
@@ -190,7 +192,7 @@ NULL
 }
 
 #' @importFrom ggplot2 aes_string
-.get_point_args <- function(colour_by, shape_by, size_by, alpha=0.65, size=NULL) 
+.get_point_args <- function(colour_by, shape_by, size_by, alpha=0.65, size=NULL, shape = NULL) 
 ## Note the use of colour instead of fill when shape_by is set, as not all shapes have fill.
 ## (Fill is still the default as it looks nicer.)
 {
@@ -220,7 +222,7 @@ NULL
         geom_args$fill <- "grey20"
     }
     if (is.null(shape_by)) {
-        geom_args$shape <- 19
+        geom_args$shape <- shape
     }
     if (is.null(size_by)) {
         geom_args$size <- size

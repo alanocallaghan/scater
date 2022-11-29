@@ -57,7 +57,7 @@ plotPlatePosition <- function(object, plate_position = NULL,
     colour_by = color_by, size_by = NULL, shape_by = NULL, order_by = NULL,
     by_exprs_values = "logcounts", 
     add_legend = TRUE, theme_size = 24, point_alpha = 0.6,
-    point_size = 24, other_fields=list(),
+    point_size = 24, point_shape = 19, other_fields=list(),
     swap_rownames = NULL, color_by = NULL) 
 {
     ## check object is SingleCellExperiment object
@@ -100,7 +100,7 @@ plotPlatePosition <- function(object, plate_position = NULL,
     ## make the plot with appropriate colours.
     plot_out <- ggplot(df_to_plot, aes_string(x="X", y="Y"))
 
-    point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size)
+    point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size, shape = point_shape)
     plot_out <- plot_out + do.call(geom_point, point_out$args)
 
     if (!is.null(colour_by)) {

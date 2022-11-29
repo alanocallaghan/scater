@@ -16,6 +16,7 @@ plotPlatePosition(
   theme_size = 24,
   point_alpha = 0.6,
   point_size = 24,
+  point_shape = 19,
   other_fields = list(),
   swap_rownames = NULL,
   color_by = NULL
