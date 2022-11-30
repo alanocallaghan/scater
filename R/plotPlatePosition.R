@@ -16,6 +16,8 @@
 #' @param theme_size Numeric scalar, see \code{?"\link{scater-plot-args}"} for details.
 #' @param point_alpha Numeric scalar specifying the transparency of the points, see \code{?"\link{scater-plot-args}"} for details.
 #' @param point_size Numeric scalar specifying the size of the points, see \code{?"\link{scater-plot-args}"} for details.
+#' @param point_shape An integer, or a string specifying the shape
+#' of the points. See \code{?"\link{scater-plot-args}"} for details. 
 #' @param other_fields Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to 
 #'  identify features instead of \code{rownames(object)} when labelling plot 
@@ -57,7 +59,7 @@ plotPlatePosition <- function(object, plate_position = NULL,
     colour_by = color_by, size_by = NULL, shape_by = NULL, order_by = NULL,
     by_exprs_values = "logcounts", 
     add_legend = TRUE, theme_size = 24, point_alpha = 0.6,
-    point_size = 24, other_fields=list(),
+    point_size = 24, point_shape = 19, other_fields=list(),
     swap_rownames = NULL, color_by = NULL) 
 {
     ## check object is SingleCellExperiment object
@@ -100,7 +102,7 @@ plotPlatePosition <- function(object, plate_position = NULL,
     ## make the plot with appropriate colours.
     plot_out <- ggplot(df_to_plot, aes_string(x="X", y="Y"))
 
-    point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size)
+    point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size, shape = point_shape)
     plot_out <- plot_out + do.call(geom_point, point_out$args)
 
     if (!is.null(colour_by)) {

@@ -199,7 +199,7 @@ plotReducedDim <- function(
 paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
         colour_by=NULL, shape_by=NULL, size_by=NULL,
         label_format=c("%s %i", " (%i%%)"),
-        add_legend = TRUE, theme_size = 10, point_alpha = 0.6, point_size = NULL,
+        add_legend = TRUE, theme_size = 10, point_alpha = 0.6, point_size = NULL, point_shape = NULL,
         rasterise = FALSE
     ) {
 
@@ -231,7 +231,8 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
 
     ## Setting up the point addition with various aesthetics.
     point_out <- .get_point_args(
-        colour_by, shape_by, size_by, alpha = point_alpha, size = point_size
+        colour_by, shape_by, size_by, alpha = point_alpha, size = point_size,
+        shape = point_shape
     )
     plot_out <- plot_out + do.call(geom_point, point_out$args)
     if (!is.null(colour_by)) {
