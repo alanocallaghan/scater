@@ -18,8 +18,8 @@
 #' @details
 #' This implements a \pkg{Seurat}-style \dQuote{dot plot} that creates a dot for each feature (row) in each group of cells (column).
 #' The proportion of detected expression values and the average expression for each feature in each group of cells is visualized efficiently using the size and colour, respectively, of each dot.
-#' If \code{block} is specified, batch-corrected averages for each group are computed with \code{\link{correctGroupSummary}}.
-#' 
+#' If \code{block} is specified, batch-corrected averages and proportions for each group are computed with \code{\link{correctGroupSummary}}.
+#'
 #' Some caution is required during interpretation due to the difficulty of simultaneously interpreting both size and colour.
 #' For example, if we coloured by z-score on a conventional blue-white-red colour axis, a gene that is downregulated in a group of cells would show up as a small blue dot.
 #' If the background colour was also white, this could be easily mistaken for a gene that is not downregulated at all.

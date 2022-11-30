@@ -89,4 +89,3 @@ plotGroupedHeatmap <- function(object, features, group, block = NULL,
     # Creating the heatmap as specified.
     pheatmap::pheatmap(heatmap_scale$x, color=heatmap_scale$colour, breaks=heatmap_scale$colour_breaks, ...) 
 }
-

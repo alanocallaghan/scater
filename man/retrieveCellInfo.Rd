@@ -22,8 +22,8 @@ Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.}
 
 \item{exprs_values}{String or integer scalar specifying the assay from which expression values should be extracted.}
 
-\item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
-identify features instead of \code{rownames(object)} when labelling plot 
+\item{swap_rownames}{Column name of \code{rowData(object)} to be used to
+identify features instead of \code{rownames(object)} when labelling plot
 elements.}
 }
 \value{
@@ -44,16 +44,16 @@ This allows downstream visualization functions to accommodate arbitrary inputs f
 
 Given a character string in \code{by}, this function will:
 \enumerate{
-\item Search \code{\link{colData}} for a column named \code{by}, 
+\item Search \code{\link{colData}} for a column named \code{by},
 and return the corresponding field as the output \code{value}.
 We do not consider nested elements within the \code{colData}.
-\item Search \code{\link{assay}(x, exprs_values)} for a row named \code{by}, 
+\item Search \code{\link{assay}(x, exprs_values)} for a row named \code{by},
 and return the expression vector for this feature as the output \code{value}.
 \item Search each alternative experiment in \code{\link{altExps}(x)} for a row names \code{by},
 and return the expression vector for this feature at \code{exprs_values} as the output \code{value}.
 }
 Any match will cause the function to return without considering later possibilities.
-The search can be modified by changing the presence and ordering of elements in \code{search}. 
+The search can be modified by changing the presence and ordering of elements in \code{search}.
 
 If there is a name clash that results in retrieval of an unintended field,
 users should explicitly set \code{by} to a data.frame, DataFrame or AsIs-wrapped vector containing the desired values.
@@ -74,9 +74,9 @@ retrieveCellInfo(example_sce, data.frame(stuff=arbitrary.field))
 \seealso{
 \code{\link{makePerCellDF}}, which provides a more user-friendly interface to this function.
 
-\code{\link{plotColData}}, 
-\code{\link{plotReducedDim}}, 
-\code{\link{plotExpression}}, 
+\code{\link{plotColData}},
+\code{\link{plotReducedDim}},
+\code{\link{plotExpression}},
 \code{\link{plotPlatePosition}},
 and most other cell-based plotting functions.
 }
