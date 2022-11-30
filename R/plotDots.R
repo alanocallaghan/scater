@@ -87,7 +87,7 @@ plotDots <- function(object, features, group = NULL, block=NULL,
     if (!is.null(block)) {
         ave <- correctGroupSummary(ave, group=summarized$group, block=summarized$block)
         num <- correctGroupSummary(num, group=summarized$group, block=summarized$block, transform="logit")
-        group.names <- colnames(ave)
+        group.names <- factor(colnames(ave), levels = levels(summarized$group))
     }
     heatmap_scale <- .heatmap_scale(ave, center=center, scale=scale, colour=colour, zlim=zlim)
 

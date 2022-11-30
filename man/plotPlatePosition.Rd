@@ -16,6 +16,7 @@ plotPlatePosition(
   theme_size = 24,
   point_alpha = 0.6,
   point_size = 24,
+  point_shape = 19,
   other_fields = list(),
   swap_rownames = NULL,
   color_by = NULL
@@ -46,6 +47,9 @@ for use in point aesthetics - see the \code{exprs_values} argument in \code{?\li
 \item{point_alpha}{Numeric scalar specifying the transparency of the points, see \code{?"\link{scater-plot-args}"} for details.}
 
 \item{point_size}{Numeric scalar specifying the size of the points, see \code{?"\link{scater-plot-args}"} for details.}
+
+\item{point_shape}{An integer, or a string specifying the shape
+of the points. See \code{?"\link{scater-plot-args}"} for details.}
 
 \item{other_fields}{Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
