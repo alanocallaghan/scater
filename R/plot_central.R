@@ -12,8 +12,9 @@
 #' Defaults to 0.6.}
 #' \item{\code{point_size}:}{Numeric scalar, specifying the size of the points.
 #' Defaults to \code{NULL}.}
-#' \item{\code{point_shape}:}{Numeric scalar, specifying the size of the points.
-#' Defaults to \code{19}.}
+#' \item{\code{point_shape}:}{An integer, or a string specifying the shape
+#' of the points. Details see \code{vignette("ggplot2-specs")}. Defaults to
+#' \code{19}.}
 #' \item{\code{jitter_type}:}{String to define how points are to be jittered in a violin plot.
 #' This is either with random jitter on the x-axis (\code{"jitter"}) or in a \dQuote{beeswarm} style (if \code{"swarm"}, default).
 #' The latter usually looks more attractive, but for datasets with a large number of cells, or for dense plots, the jitter option may work better.}
