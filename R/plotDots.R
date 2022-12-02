@@ -103,10 +103,14 @@ plotDots <- function(object, features, group = NULL, block=NULL,
     }
 
     # Adding other fields, if requested.
-    vis_out <- .incorporate_common_vis_row(evals_long, se = object, 
-        colour_by = NULL, shape_by = NULL, size_by = NULL, 
+    vis_out <- .incorporate_common_vis_row(evals_long,
+        se = object,
+        colour_by = NULL, shape_by = NULL, size_by = NULL,
         by_exprs_values = by_exprs_values, other_fields = other_fields,
-        multiplier = rep(.subset2index(features, object), ncol(num)))
+        multiplier = rep(
+            .subset2index(as.character(features), object), ncol(num)
+        )
+    )
     evals_long <- vis_out$df
     ggplot(evals_long) + 
         geom_point(aes_string(x="Group", y="Feature", size="NumDetected", col="Average")) +
