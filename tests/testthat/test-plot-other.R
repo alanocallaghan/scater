@@ -239,3 +239,33 @@ test_that("plotDots indexing is consistent", {
         pd3[as.character(pd2$Feature), "Average"],
     )
 })
+
+test_that("plotDots factor indexing retains order", {
+    example_sce <- logNormCounts(example_sce)
+    levs <- c("G1", "G2M", "S", "G0")
+    example_sce$CycleF <- factor(example_sce$Cell_Cycle, levels = levs)
+    p1 <- plotDots(example_sce, 1:10, group="Cell_Cycle", block="Mutation_Status")
+    p2 <- plotDots(example_sce, 1:10, group = "CycleF", block = "Cell_Cycle")
+    expect_equal(p1$data$Group, levs)
+})
+
+
+test_that("plotDots factor indexing retains order", {
+    example_sce <- logNormCounts(example_sce)
+    levs <- c("G1", "G2M", "S", "G0")
+    example_sce$CycleF <- factor(example_sce$Cell_Cycle, levels = levs)
+    p1 <- plotDots(example_sce, 1:10, group="Cell_Cycle", block="Mutation_Status")
+    p2 <- plotDots(example_sce, 1:10, group = "CycleF", block = "Cell_Cycle")
+    expect_equal(p1$data$Group, levs)
+})
+
+
+test_that("subset2index bug", {
+    example_sce <- mockSCE()
+    example_sce <- logNormCounts(example_sce)
+    cols <- rownames(example_sce)[2000:1000]
+    f <- factor(cols, levels = cols)
+    p1 <- plotHighestExprs(example_sce, drop_features = cols)
+    p2 <- plotHighestExprs(example_sce, drop_features = f)
+    expect_equal(sort(p1$data$Tag), sort(p2$data$Tag))
+})
