@@ -47,7 +47,7 @@
 #' for alternatives to visualizing group-level expression values.
 #'
 #' @export
-#' @importFrom ggplot2 ggplot aes_string geom_point
+#' @importFrom ggplot2 ggplot geom_point
 #' scale_size scale_colour_gradient theme element_line element_rect 
 #' scale_colour_gradient2
 #' @importFrom SummarizedExperiment assay
@@ -109,11 +109,11 @@ plotDots <- function(object, features, group = NULL, block=NULL,
         multiplier = rep(.subset2index(features, object), ncol(num)))
     evals_long <- vis_out$df
     ggplot(evals_long) + 
-        geom_point(aes_string(x="Group", y="Feature", size="NumDetected", col="Average")) +
-        scale_size(limits=c(0, max(evals_long$NumDetected))) + 
+        geom_point(aes(x=Group, y=Feature, size=NumDetected, col=Average)) +
+        scale_size(limits=c(0, max(evals_long$NumDetected))) +
         heatmap_scale$colour_scale +
         theme(
             panel.background = element_rect(fill = "white"),
-            panel.grid.major = element_line(size=0.5, colour = "grey80"),
-            panel.grid.minor = element_line(size=0.25, colour = "grey80"))
+            panel.grid.major = element_line(linewidth=0.5, colour = "grey80"),
+            panel.grid.minor = element_line(linewidth=0.25, colour = "grey80"))
 }

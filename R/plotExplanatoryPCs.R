@@ -50,7 +50,7 @@ plotExplanatoryPCs <- function(object, nvars_to_plot = 10, npcs_to_plot=50, them
         Pct_Var_Explained=as.numeric(chosen_rsquared) * 100 # column major collapse.
     )
     
-    plot_out <- ggplot(df_to_plot, aes_string(x = "PC", y = "Pct_Var_Explained", colour = "Expl_Var")) +
+    plot_out <- ggplot(df_to_plot, aes(x = PC, y = Pct_Var_Explained, colour = Expl_Var)) +
         geom_point(alpha= 1, shape = 16, size = 3) +
         geom_line(alpha = 0.7, size = 2) +
         scale_y_log10(breaks = 10 ^ (-3:2), labels = c(0.001, 0.01, 0.1, 1, 10, 100)) +

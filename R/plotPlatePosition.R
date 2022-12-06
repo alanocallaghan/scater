@@ -100,7 +100,7 @@ plotPlatePosition <- function(object, plate_position = NULL,
     size_by <- vis_out$size_by
 
     ## make the plot with appropriate colours.
-    plot_out <- ggplot(df_to_plot, aes_string(x="X", y="Y"))
+    plot_out <- ggplot(df_to_plot, aes(x=X, y=Y))
 
     point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size, shape = point_shape)
     plot_out <- plot_out + do.call(geom_point, point_out$args)
