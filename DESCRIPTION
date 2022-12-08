@@ -8,7 +8,7 @@ Authors@R: c(
         person("Vladimir", "Kiselev", role=c("ctb"), email="vk6@sanger.ac.uk"),
         person("Felix G.M.", "Ernst", role=c("ctb"), email="felix.gm.ernst@outlook.com"),
         person("Alan", "O'Callaghan", role=c("ctb", "cre"), email="alan.ocallaghan@outlook.com"),
-        person("Yun", "Peng", role=c("ctb"), email="yunyunp96@gmail.com")))
+        person("Yun", "Peng", role=c("ctb"), email="yunyunp96@gmail.com"))
 Version: 1.27.3
 Date: 2022-12-08
 License: GPL-3
