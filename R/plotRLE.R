@@ -60,7 +60,7 @@
 #' @importFrom DelayedArray DelayedArray
 #' @importFrom DelayedMatrixStats rowMedians
 #' @importFrom SummarizedExperiment assay
-#' @importFrom ggplot2 theme
+#' @importFrom ggplot2 aes_string theme
 plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE, 
                     style = "minimal", legend = TRUE, ordering = NULL, 
                     colour_by = color_by, by_exprs_values = exprs_values,
@@ -105,7 +105,7 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
             rle=as.numeric(med_devs) # column-major.
         )
         df_to_plot[["colour_by"]] <- rep(colour_by_vals, each=nrow(med_devs)) # done outside, just in case it's NULL.
-        aesth <- aes(x = .data$x, group = .data$x, y = .data$rle, colour = .data[[colour_lab]], fill = .data[[colour_lab]])
+        aesth <- aes_string(x = "x", group = "x", y = "rle", colour = colour_lab, fill = colour_lab)
         plot_out <- .plotRLE_full(df_to_plot, aesth, ncol, ...)
 
     } else if (style == "minimal") {
@@ -139,13 +139,13 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
     boxdf
 }
 
-#' @importFrom ggplot2 ggplot .data geom_segment geom_point geom_hline ylab xlab theme_classic theme element_blank
+#' @importFrom ggplot2 ggplot aes_string geom_segment geom_point geom_hline ylab xlab theme_classic theme element_blank
 .plotRLE_minimal <- function(df, colour_by, ncol) {
-    plot_out <- ggplot(df, aes(x = .data$x, fill = .data[[colour_by]])) +
-        geom_segment(aes(xend = .data$x, y = .data$q25, yend = .data$q75), colour = "gray60") +
-        geom_segment(aes(xend = .data$x, y = .data$q75, yend = .data$whiskMax, colour = .data[[colour_by]])) +
-        geom_segment(aes(xend = .data$x, y = .data$q25, yend = .data$whiskMin, colour = .data[[colour_by]])) +
-        geom_point(aes(y = .data$q50), shape = 21) +
+    plot_out <- ggplot(df, aes_string(x = "x", fill = colour_by)) +
+        geom_segment(aes_string(xend = "x", y = "q25", yend = "q75"), colour = "gray60") +
+        geom_segment(aes_string(xend = "x", y = "q75", yend = "whiskMax", colour = colour_by)) +
+        geom_segment(aes_string(xend = "x", y = "q25", yend = "whiskMin", colour = colour_by)) +
+        geom_point(aes_string(y = "q50"), shape = 21) +
         geom_hline(yintercept = 0, colour = "gray40", alpha = 0.5) +
         ylab("Relative log expression") + xlab("Sample") +
         theme_classic() +

@@ -35,7 +35,7 @@ This is expected to have row names for \code{ggcells} and column names for \code
 \item{mapping}{A list containing aesthetic mappings, usually the output of \code{\link{aes}} or related functions.}
 
 \item{features}{Character vector specifying the features for which to extract expression profiles across cells.
-May also include features in alternative Experiments if permitted by \code{use.altexps}.}
+May also include features in alternative Experiments if permitted by \code{use_altexps}.}
 
 \item{exprs_values, use_dimred, use_altexps, prefix_altexps, check_names}{Soft-deprecated equivalents of the arguments described above.}
 

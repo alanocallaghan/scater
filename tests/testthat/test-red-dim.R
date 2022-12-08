@@ -1,4 +1,5 @@
 # Tests the options in the various reduced dimension functions
+# library(scater); library(testthat); source("setup.R"); source("test-red-dim.R")
 
 #############################################
 # Check the feature selection and scaling work.
@@ -392,6 +393,60 @@ test_that("runUMAP on existing reduced dimension results works as expected", {
 })
 
 
+## these tests no longer work because bp*apply now always changes the RNG stream
+## see https://github.com/Bioconductor/BiocParallel/pull/140#issuecomment-921627153
+
+# test_that("runUMAP works with externally computed nearest neighbor results", {
+#     skip_on_os("windows") # Use with VP-tree gives different results from internal NN search on Win32. Why? Who knows. 
+
+#     normedP <- runPCA(normed, ncomponents = 20)
+
+#     # Need to cajole the random seed to avoid different RNG states after the NN search. 
+#     seedSet <- function(...) invisible(BiocNeighbors::buildIndex(reducedDim(normedP, "PCA"), ...))
+
+#     set.seed(20)
+#     seedSet()
+#     ref <- runUMAP(normedP, dimred = "PCA")
+#     set.seed(20)
+#     alt <- runUMAP(normedP, dimred = "PCA", external_neighbors = TRUE)
+#     expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
+
+#     set.seed(21)
+#     seedSet()
+#     ref <- runUMAP(normedP, dimred = "PCA", n_neighbors = 10)
+#     set.seed(21)
+#     alt <- runUMAP(normedP, dimred = "PCA", n_neighbors = 10, external_neighbors = TRUE)
+#     expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
+
+#     set.seed(22)
+#     seedSet()
+#     ref <- runUMAP(normedP, dimred = "PCA", bandwidth = 1.5)
+#     set.seed(22) 
+#     alt <- runUMAP(normedP, dimred = "PCA", bandwidth = 1.5, external_neighbors = TRUE)
+#     expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
+
+#     # Works with alternative neighbor searching options.
+#     set.seed(23)
+#     seedSet(BNPARAM = BiocNeighbors::VptreeParam())
+#     ref <- runUMAP(normedP, dimred = "PCA")
+#     set.seed(23)
+#     alt <- runUMAP(normedP, dimred = "PCA", external_neighbors = TRUE, BNPARAM = BiocNeighbors::VptreeParam())
+#     expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
+
+#     # Works with parallelization and more seed-related cajoling.
+#     BPPARAM <- safeBPParam(2)
+#     BiocParallel::bpstart(BPPARAM)
+
+#     set.seed(24)
+#     seedSet()
+#     ref <- runUMAP(normedP, dimred = "PCA")
+#     set.seed(24) 
+#     alt <- runUMAP(normedP, dimred = "PCA", external_neighbors = TRUE, BPPARAM = BPPARAM)
+#     expect_identical(reducedDim(ref, "UMAP"), reducedDim(alt, "UMAP"))
+
+#     BiocParallel::bpstop(BPPARAM)
+# })
+
 test_that("multi-modal UMAP works as expected", {
     stuff <- matrix(rnorm(10000), ncol = 50)
     things <- list(stuff, stuff[, 1:5], stuff[, 1:20])
@@ -444,8 +499,11 @@ test_that("runNMF works as expected", {
     normed3 <- runNMF(normed, subset_row = 1:100)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
-    # Testing out the use of existing reduced dimensions
-    # (this should not respond to any feature settings).
+    # set.seed(100)
+    # normed3 <- runNMF(normed, method = "Frobenius")
+    # expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
+
+    # Testing out the use of existing reduced dimensions (this should not respond to any feature settings).
     normedP <- runPCA(normed, ncomponents = 4)
     reducedDim(normedP, "PCA") <- abs(reducedDim(normedP, "PCA"))
 
@@ -490,8 +548,7 @@ test_that("runMDS works as expected", {
     normed3 <- runMDS(normed, method = "manhattan")
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
-    # Testing out the use of existing reduced dimensions
-    # (this should not respond to any feature settings).
+    # Testing out the use of existing reduced dimensions (this should not respond to any feature settings).
     normedP <- runPCA(normed, ncomponents = 4)
     normed2 <- runMDS(normedP, dimred = "PCA")
 
@@ -504,8 +561,7 @@ test_that("runMDS works as expected", {
     normed3 <- runMDS(normedP, dimred = "PCA", subset_row = 1:20)
     expect_identical(reducedDim(normed2, "MDS"), reducedDim(normed3, "MDS"))
 
-    # This does, in fact, happen to be equal,
-    # due to the relationship between MDS and PCA.
+    # This does, in fact, happen to be equal, due to the relationship between MDS and PCA.
     # This is not identifiable by the sign, hence the finagling.
     normed3 <- runMDS(normedP, dimred = "PCA", n_dimred = 3)
     fold <- reducedDim(normed2, "MDS") / reducedDim(normed3, "MDS")
@@ -525,16 +581,17 @@ test_that("run* functions work with sparse matrices", {
     expect_error(runTSNE(normed), NA)
     expect_error(runNMF(normed), NA)
     expect_error(runUMAP(normed), NA)
+    # expect_error(runDiffusionMap(normed), NA)
     expect_error(runMDS(normed), NA)
 })
 
 test_that("projectReducedDim works as expected", {
-    example_sce <- mockSCE()
+    example_sce <- mockSCE() 
     example_sce <- logNormCounts(example_sce)
     example_sce <- runUMAP(example_sce)
     example_sce <- runPCA(example_sce)
 
-    example_sce_new <- mockSCE()
+    example_sce_new <- mockSCE() 
     example_sce_new <- logNormCounts(example_sce_new)
     example_sce_new <- runPCA(example_sce_new)
 
@@ -554,15 +611,4 @@ test_that("projectReducedDim works as expected", {
         max(projected) < max(reducedDim(example_sce, "UMAP")),
     )
 
-})
-
-
-test_that("plotReducedDim works with point_shape", {
-    example_sce <- mockSCE()
-    example_sce <- logNormCounts(example_sce)
-    example_sce <- runUMAP(example_sce)
-    p1 <- plotReducedDim(example_sce, "UMAP", point_shape = 15)
-    expect_equal(p1$layers[[1]]$aes_params$shape, 15)
-    p2 <- plotReducedDim(example_sce, "UMAP", point_shape = 12)
-    expect_equal(p2$layers[[1]]$aes_params$shape, 12)
 })

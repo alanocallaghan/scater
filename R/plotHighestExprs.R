@@ -97,9 +97,9 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by,
         colour_out <- retrieveCellInfo(object, colour_cells_by, exprs_values = by_exprs_values)
         colour_cells_by <- colour_out$name
         df_exprs_by_cell_long$colour_by <- colour_out$val[df_exprs_by_cell_long$Cell]
-        aes_to_use <- aes(y=.data$Tag, x=.data$value, colour=.data$colour_by)
+        aes_to_use <- aes_string(y="Tag", x="value", colour="colour_by")
     } else {
-        aes_to_use <- aes(y=.data$Tag, x=.data$value)
+        aes_to_use <- aes_string(y="Tag", x="value")
     }
 
     ## Create the plot and annotations. 
@@ -126,6 +126,6 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by,
         legend_val <- sprintf("ave_%s", exprs_values)
     }
 
-    aes <- aes(x = .data[[legend_val]], y = .data$Feature)
+    aes <- aes_string(x = legend_val, y = "Feature")
     plot_most_expressed + geom_point(aes, data = df_to_plot, colour = "gray30", shape = 21) 
 }
