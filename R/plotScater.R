@@ -40,7 +40,7 @@
 #' @export
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom SummarizedExperiment assay
-#' @importFrom ggplot2 ggplot geom_line facet_grid facet_wrap xlab ylab theme_bw aes_string
+#' @importFrom ggplot2 ggplot geom_line facet_grid facet_wrap xlab ylab theme_bw
 plotScater <- function(x, nfeatures = 500, exprs_values = "counts", 
     colour_by = color_by, by_exprs_values = exprs_values, 
     block1 = NULL, block2 = NULL, ncol = 3,
@@ -80,7 +80,7 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
     seq_real_estate_long$colour_by <- rep(colour_by_vals, nfeatures)
 
     ## Set up plot
-    aes <- aes_string(x = "Feature", y = "Proportion_Library", group = "Cell")
+    aes <- aes(x = .data$Feature, y = .data$Proportion_Library, group = .data$Cell)
     if ( !is.null(colour_by) ) {
         aes$colour <- as.symbol("colour_by")
     }

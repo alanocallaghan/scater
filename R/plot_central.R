@@ -56,7 +56,7 @@
 NULL
 
 #' @importFrom ggbeeswarm geom_quasirandom
-#' @importFrom ggplot2 ggplot geom_violin aes_string xlab ylab stat_summary geom_jitter position_jitter coord_flip geom_point stat_smooth geom_tile theme_bw theme
+#' @importFrom ggplot2 ggplot geom_violin xlab ylab stat_summary geom_jitter position_jitter coord_flip geom_point stat_smooth geom_tile theme_bw theme
 .central_plotter <- function(object, xlab = NULL, ylab = NULL,
                              colour_by = NULL, shape_by = NULL, size_by = NULL, fill_by = NULL,
                              show_median = FALSE, show_violin = TRUE, show_smooth = FALSE, show_se = TRUE,
@@ -80,12 +80,13 @@ NULL
         }
 
         # Adding violins.
-        plot_out <- ggplot(object, aes_string(x="X", y="Y")) + xlab(xlab) + ylab(ylab)
+        plot_out <- ggplot(object, aes(x=.data$X, y=.data$Y)) +
+            xlab(xlab) + ylab(ylab)
         if (show_violin) {
             if (is.null(fill_by)) { 
                 viol_args <- list(fill="grey90")
             } else {
-                viol_args <- list(mapping=aes_string(fill="fill_by"))
+                viol_args <- list(mapping=aes(fill=.data[[fill_by]]))
             }
             plot_out <- plot_out + do.call(geom_violin, c(viol_args, list(colour = "gray60", alpha = 0.2, scale = "width", width = 0.8)))
         }
@@ -105,7 +106,7 @@ NULL
                 point_FUN <- function(...) geom_jitter(..., position = position_jitter(height = 0))
             }
         }
-        plot_out <- plot_out + do.call(point_FUN, point_out$args)
+        plot_out <- plot_out + point_out$aes + do.call(point_FUN, point_out$args)
 
         # Flipping.
         if (flipped) {
@@ -114,14 +115,14 @@ NULL
 
     } else if (is.numeric(object$Y) && is.numeric(object$X)) { 
         # Creating a scatter plot.
-        plot_out <- ggplot(object, aes_string(x="X", y="Y")) + xlab(xlab) + ylab(ylab)
+        plot_out <- ggplot(object, aes(x=.data$X, y=.data$Y)) + xlab(xlab) + ylab(ylab)
 
         # Adding points.
         point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size, shape = point_shape)
         if (is.null(point_FUN)) {
             point_FUN <- geom_point
         }
-        plot_out <- plot_out + do.call(point_FUN, point_out$args)
+        plot_out <- plot_out + point_out$aes + do.call(point_FUN, point_out$args)
 
         # Adding smoothing, if requested.
         if (show_smooth) {
@@ -157,20 +158,23 @@ NULL
         object$Y <- as.integer(object$Y) + combined$YWidth*runif(nrow(object), -1, 1)
 
         # Creating the plot:
-        plot_out <- ggplot(object, aes_string(x="X", y="Y")) + xlab(xlab) + ylab(ylab)
-        plot_out <- plot_out + geom_tile(aes_string(x = "X", y = "Y", height = "2*YWidth", width = "2*XWidth"),
-                                         data=summary.data, colour = 'grey60', size = 0.5, fill='grey90')
+        plot_out <- ggplot(object, aes(x=.data$X, y=.data$Y)) + xlab(xlab) + ylab(ylab)
+        plot_out <- plot_out +
+            geom_tile(
+                aes(x = .data$X, y = .data$Y, height = 2 * .data$YWidth, width = 2 * .data$XWidth),
+                data = summary.data, colour = 'grey60',
+                linewidth = 0.5, fill = 'grey90')
 
         # Adding points.
         point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size, shape = point_shape)
         if (is.null(point_FUN)) {
             point_FUN <- geom_point
         }
-        plot_out <- plot_out + do.call(point_FUN, point_out$args)
+        plot_out <- plot_out + point_out$aes + do.call(point_FUN, point_out$args)
     }
 
-    # Adding colour.       
-    if ( !is.null(colour_by) ) {
+    # Adding colour.
+    if (!is.null(colour_by)) {
         plot_out <- .resolve_plot_colours(plot_out, object$colour_by, colour_by, fill = point_out$fill)
     }
 
@@ -192,30 +196,30 @@ NULL
     plot_out
 }
 
-#' @importFrom ggplot2 aes_string
+
 .get_point_args <- function(colour_by, shape_by, size_by, alpha=0.65, size=NULL, shape = NULL) 
 ## Note the use of colour instead of fill when shape_by is set, as not all shapes have fill.
 ## (Fill is still the default as it looks nicer.)
 {
     aes_args <- list()
     fill_colour <- FALSE
+    aes <- list()
     if (!is.null(shape_by)) {
-        aes_args$shape <- "shape_by"
+        aes <- list(aes, aes(shape = shape_by))
         fill_colour <- FALSE
     }
     if (!is.null(colour_by)) {
         if (fill_colour) {
-            aes_args$fill <- "colour_by"
+            aes <- list(aes, aes(fill = colour_by))
         } else {
-            aes_args$colour <- "colour_by"
+            aes <- list(aes, aes(colour = colour_by))
         }
     }
     if (!is.null(size_by)) {
-        aes_args$size <- "size_by"
+        aes <- list(aes, aes(size = size_by))
     }
-    new_aes <- do.call(aes_string, aes_args)
-    
-    geom_args <- list(mapping=new_aes, alpha=alpha)
+
+    geom_args <- list(alpha=alpha)
     if (is.null(colour_by) || fill_colour) {
         geom_args$colour <- "grey70"
     }
@@ -228,7 +232,7 @@ NULL
     if (is.null(size_by)) {
         geom_args$size <- size
     }
-    return(list(args=geom_args, fill=fill_colour))
+    return(list(aes = aes, args=geom_args, fill=fill_colour))
 }
 
 #' @importFrom ggplot2 guide_legend guides

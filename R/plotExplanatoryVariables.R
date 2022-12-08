@@ -48,8 +48,8 @@ plotExplanatoryVariables <- function(object, nvars_to_plot = 10, min_marginal_r2
         Pct_Var_Explained=as.numeric(chosen_rsquared) # column major collapse.
     )
 
-    plot_out <- ggplot(df_to_plot, aes_string(x = "Pct_Var_Explained", colour = "Expl_Var")) +
-        geom_line(stat = "density", alpha = 0.7, size = 2) +
+    plot_out <- ggplot(df_to_plot, aes(x = .data$Pct_Var_Explained, colour = .data$Expl_Var)) +
+        geom_line(stat = "density", alpha = 0.7, linewidth = 2) +
         geom_vline(xintercept = 1, linetype = 2) +
         scale_x_log10(breaks = 10 ^ (-3:2), labels = c(0.001, 0.01, 0.1, 1, 10, 100)) +
         xlab("% variance explained") +

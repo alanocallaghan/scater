@@ -5,6 +5,8 @@
   \itemize{
     \item \code{swap_rownames} works in \code{retrieveCellInfo} for
     \code{altExp} now as well as in the main assay.
+    \item Add \code{point_shape} argument to \code{plotDots} and
+    \code{plotPlatePosition}.
   }
 }
 
