@@ -132,15 +132,15 @@
 .handle_features <- function(features, object) {
     if (is.logical(features)) {
         if (length(features) != nrow(object)) {
-            stop("logical features index should be the of length nrow(object).")
+            stop("logical features index should be of length nrow(object).")
         }
         features <- rownames(object)[features]
     } else if (is.numeric(features)) {
-        if (any(features > nrow(object)) | any(features <= 0) | any(features != round(features))) {
+        if (any(features > nrow(object)) || any(features <= 0) || any(features != round(features))) {
             stop("All features should be round numbers; > 0 and <= nrow(object).")
         }
         features <- rownames(object)[features]
-    } else if (is.character(features) | is.factor(features)) {
+    } else if (is.character(features) || is.factor(features)) {
         if (!all(as.character(features) %in% rownames(object))) {
             stop("Some features not in input object.")
         }

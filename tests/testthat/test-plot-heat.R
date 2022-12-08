@@ -122,19 +122,19 @@ test_that("we can produce grouped heatmaps", {
 
 
 test_that("plotHeatmap indexing is consistent", {
-    p1 <- plotHeatmap(example_sce, features=rownames(example_sce)[1:10], cluster_rows = FALSE, cluster_columns = FALSE)
-    p2 <- plotHeatmap(example_sce, features=1:10, cluster_rows = FALSE, cluster_columns = FALSE)
-    p3 <- plotHeatmap(example_sce, features=c(rep(TRUE, 10), rep(FALSE, 1990)), cluster_rows = FALSE, cluster_columns = FALSE)
-    p4 <- plotHeatmap(example_sce, features=factor(rownames(example_sce)[1:10]), cluster_rows = FALSE, cluster_columns = FALSE)
+    p1 <- plotHeatmap(example_sce, features=rownames(example_sce)[1:10], cluster_rows = FALSE, cluster_cols = FALSE)
+    p2 <- plotHeatmap(example_sce, features=1:10, cluster_rows = FALSE, cluster_cols = FALSE)
+    p3 <- plotHeatmap(example_sce, features=c(rep(TRUE, 10), rep(FALSE, 1990)), cluster_rows = FALSE, cluster_cols = FALSE)
+    p4 <- plotHeatmap(example_sce, features=factor(rownames(example_sce)[1:10]), cluster_rows = FALSE, cluster_cols = FALSE)
     
     ## this is apparently the ordering of genes!
     expect_equal(rownames(p1$gtable$grobs[[2]]$children[[1]]$gp$fill), rownames(p2$gtable$grobs[[2]]$children[[1]]$gp$fill))
     expect_equal(rownames(p2$gtable$grobs[[2]]$children[[1]]$gp$fill), rownames(p3$gtable$grobs[[2]]$children[[1]]$gp$fill))
     expect_equal(rownames(p3$gtable$grobs[[2]]$children[[1]]$gp$fill), rownames(p4$gtable$grobs[[2]]$children[[1]]$gp$fill))
 
-    p1 <- plotHeatmap(example_sce, features=rownames(example_sce)[10:1], cluster_rows = FALSE, cluster_columns = FALSE)
-    p2 <- plotHeatmap(example_sce, features=10:1, cluster_rows = FALSE, cluster_columns = FALSE)
-    p3 <- plotHeatmap(example_sce, features=factor(rownames(example_sce)[1:10], levels = rownames(example_sce)[10:1]), cluster_rows = FALSE, cluster_columns = FALSE)
+    p1 <- plotHeatmap(example_sce, features=rownames(example_sce)[10:1], cluster_rows = FALSE, cluster_cols = FALSE)
+    p2 <- plotHeatmap(example_sce, features=10:1, cluster_rows = FALSE, cluster_cols = FALSE)
+    p3 <- plotHeatmap(example_sce, features=factor(rownames(example_sce)[1:10], levels = rownames(example_sce)[10:1]), cluster_rows = FALSE, cluster_cols = FALSE)
     
 
     expect_equal(rownames(p1$gtable$grobs[[2]]$children[[1]]$gp$fill), rownames(p2$gtable$grobs[[2]]$children[[1]]$gp$fill))
