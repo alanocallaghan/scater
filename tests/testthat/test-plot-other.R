@@ -186,12 +186,12 @@ test_that("plotDots works as expected", {
     # Checking that other_fields play nice.
     rowData(example_sce)$stuff <- runif(nrow(example_sce))
     rowData(example_sce)$otherstuff <- runif(nrow(example_sce))
-    expect_s3_class(p <- plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[1:10], 
+    expect_s3_class(p <- plotDots(example_sce, group="Cell_Cycle", features=rownames(example_sce)[2:10], 
         other_fields=c("stuff", "otherstuff")), "ggplot")
 
     nuniq <- length(unique(example_sce$Cell_Cycle))
-    expect_identical(p$data$stuff, rep(rowData(example_sce)$stuff[1:10], nuniq))
-    expect_identical(p$data$otherstuff, rep(rowData(example_sce)$otherstuff[1:10], nuniq))
+    expect_identical(p$data$stuff, rep(rowData(example_sce)$stuff[2:10], nuniq))
+    expect_identical(p$data$otherstuff, rep(rowData(example_sce)$otherstuff[2:10], nuniq))
 })
 
 test_that("plotDots works w/factors", {
