@@ -240,15 +240,6 @@ test_that("plotDots indexing is consistent", {
     )
 })
 
-test_that("plotDots factor indexing retains order", {
-    example_sce <- logNormCounts(example_sce)
-    levs <- c("G1", "G2M", "S", "G0")
-    example_sce$CycleF <- factor(example_sce$Cell_Cycle, levels = levs)
-    p1 <- plotDots(example_sce, 1:10, group="Cell_Cycle", block="Mutation_Status")
-    p2 <- plotDots(example_sce, 1:10, group = "CycleF", block = "Cell_Cycle")
-    expect_equal(p1$data$Group, levs)
-})
-
 
 test_that("plotDots factor indexing retains order", {
     example_sce <- logNormCounts(example_sce)
@@ -256,16 +247,34 @@ test_that("plotDots factor indexing retains order", {
     example_sce$CycleF <- factor(example_sce$Cell_Cycle, levels = levs)
     p1 <- plotDots(example_sce, 1:10, group="Cell_Cycle", block="Mutation_Status")
     p2 <- plotDots(example_sce, 1:10, group = "CycleF", block = "Cell_Cycle")
-    expect_equal(p1$data$Group, levs)
+    expect_equal(levels(p1$data$Group), sort(unique(example_sce$Cell_Cycle)))
+    expect_equal(unique(as.character(p2$data$Group)), levs)
 })
 
 
 test_that("subset2index bug", {
     example_sce <- mockSCE()
     example_sce <- logNormCounts(example_sce)
-    cols <- rownames(example_sce)[2000:1000]
-    f <- factor(cols, levels = cols)
-    p1 <- plotHighestExprs(example_sce, drop_features = cols)
-    p2 <- plotHighestExprs(example_sce, drop_features = f)
+    feats <- rownames(example_sce)[2000:1000]
+    ffeats <- factor(feats, levels = feats)
+    p1 <- plotHighestExprs(example_sce, drop_features = feats)
+    p2 <- plotHighestExprs(example_sce, drop_features = ffeats)
     expect_equal(sort(p1$data$Tag), sort(p2$data$Tag))
+
+    feats <- rownames(example_sce)[20:10]
+    ffeats <- factor(feats, levels = feats)
+    p1 <- plotDots(example_sce, features = feats)
+    p2 <- plotDots(example_sce, features = ffeats)
+    expect_equal(sort(p1$data$Tag), sort(p2$data$Tag))
+
+    # Checking that other_fields play nice.
+    rowData(example_sce)$stuff <- runif(nrow(example_sce))
+    rowData(example_sce)$otherstuff <- runif(nrow(example_sce))
+    p <- plotDots(example_sce, group="Cell_Cycle",
+        features=rownames(example_sce)[2:10],
+        other_fields=c("stuff", "otherstuff"))
+
+    nuniq <- length(unique(example_sce$Cell_Cycle))
+    expect_identical(p$data$stuff, rep(rowData(example_sce)$stuff[2:10], nuniq))
+    expect_identical(p$data$otherstuff, rep(rowData(example_sce)$otherstuff[2:10], nuniq))
 })

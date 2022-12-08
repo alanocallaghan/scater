@@ -162,7 +162,7 @@ NULL
             geom_tile(
                 aes(x = X, y = Y, height = 2 * YWidth, width = 2 * XWidth),
                 data = summary.data, colour = 'grey60',
-                size = 0.5, fill = 'grey90')
+                linewidth = 0.5, fill = 'grey90')
 
         # Adding points.
         point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size, shape = point_shape)

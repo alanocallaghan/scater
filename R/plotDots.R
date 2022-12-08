@@ -103,7 +103,7 @@ plotDots <- function(object, features, group = NULL, block=NULL,
     }
 
     # Adding other fields, if requested.
-    vis_out <- .incorporate_common_vis_row(evals_long, se = object, 
+    vis_out <- .incorporate_common_vis_row(evals_long, se = object,
         colour_by = NULL, shape_by = NULL, size_by = NULL, 
         by_exprs_values = by_exprs_values, other_fields = other_fields,
         multiplier = rep(.subset2index(features, object), ncol(num)))
