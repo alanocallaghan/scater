@@ -109,7 +109,7 @@ plotDots <- function(object, features, group = NULL, block=NULL,
         multiplier = rep(.subset2index(features, object), ncol(num)))
     evals_long <- vis_out$df
     ggplot(evals_long) + 
-        geom_point(aes(x=Group, y=Feature, size=NumDetected, col=Average)) +
+        geom_point(aes(x=.data$Group, y=.data$Feature, size=.data$NumDetected, col=.data$Average)) +
         scale_size(limits=c(0, max(evals_long$NumDetected))) +
         heatmap_scale$colour_scale +
         theme(

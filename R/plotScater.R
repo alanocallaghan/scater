@@ -80,7 +80,7 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
     seq_real_estate_long$colour_by <- rep(colour_by_vals, nfeatures)
 
     ## Set up plot
-    aes <- aes(x = Feature, y = Proportion_Library, group = Cell)
+    aes <- aes(x = .data$Feature, y = .data$Proportion_Library, group = .data$Cell)
     if ( !is.null(colour_by) ) {
         aes$colour <- as.symbol("colour_by")
     }

@@ -180,7 +180,7 @@ plotReducedDim <- function(
                     data = data.frame(
                         x = by_text_x, y = by_text_y, label = names(by_text_x)
                     ),
-                    mapping = aes(x = x, y = y, label = label),
+                    mapping = aes(x = .data$x, y = .data$y, label = .data$label),
                     inherit.aes = FALSE,
                     size = text_size, colour = text_colour,
                     force = force, point.padding = point.padding
@@ -219,9 +219,9 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
     df_to_plot_big <- data.frame(gg1$all, df_to_plot[, -reddim_cols])
     colnames(df_to_plot_big)[-seq_len(4)] <- colnames(df_to_plot)
 
-    plot_out <- ggplot(df_to_plot_big, aes(x = x, y = y)) +
+    plot_out <- ggplot(df_to_plot_big, aes(x = .data$x, y = .data$y)) +
         facet_grid(xvar ~ yvar, scales = "free") +
-        stat_density(aes(x = x, y = (..scaled.. * diff(range(x)) + min(x))),
+        stat_density(aes(x = .data$x, y = (.data$..scaled.. * diff(range(.data$x)) + min(.data$x))),
                      data = gg1$densities, position = "identity",
                      colour = "grey20", geom = "line") +
         xlab("") +
