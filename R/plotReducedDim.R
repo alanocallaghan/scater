@@ -195,7 +195,7 @@ plotReducedDim <- function(
         dimred = dimred, label_format = label_format, rasterise = rasterise, ...)
 }
 
-#' @importFrom ggplot2 ggplot facet_grid stat_density geom_point theme
+#' @importFrom ggplot2 ggplot facet_grid stat_density geom_point theme after_stat
 paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
         colour_by=NULL, shape_by=NULL, size_by=NULL,
         label_format=c("%s %i", " (%i%%)"),
@@ -221,7 +221,7 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
 
     plot_out <- ggplot(df_to_plot_big, aes(x = .data$x, y = .data$y)) +
         facet_grid(xvar ~ yvar, scales = "free") +
-        stat_density(aes(x = .data$x, y = (.data$..scaled.. * diff(range(.data$x)) + min(.data$x))),
+        stat_density(aes(x = .data$x, y = (after_stat(..scaled..) * diff(range(.data$x)) + min(.data$x))),
                      data = gg1$densities, position = "identity",
                      colour = "grey20", geom = "line") +
         xlab("") +
@@ -233,7 +233,7 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
         colour_by, shape_by, size_by, alpha = point_alpha, size = point_size,
         shape = point_shape
     )
-    plot_out <- plot_out + do.call(geom_point, point_out$args)
+    plot_out <- plot_out + point_out$aes + do.call(geom_point, point_out$args)
     if (!is.null(colour_by)) {
         plot_out <- .resolve_plot_colours(
             plot_out, df_to_plot$colour_by, colour_by, fill = point_out$fill
