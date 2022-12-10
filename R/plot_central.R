@@ -201,7 +201,6 @@ NULL
 ## Note the use of colour instead of fill when shape_by is set, as not all shapes have fill.
 ## (Fill is still the default as it looks nicer.)
 {
-    aes_args <- list()
     fill_colour <- FALSE
     aes <- list()
     if (!is.null(shape_by)) {
