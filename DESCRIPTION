@@ -9,7 +9,8 @@ Authors@R: c(
         person("Felix G.M.", "Ernst", role=c("ctb"), email="felix.gm.ernst@outlook.com"),
         person("Alan", "O'Callaghan", role=c("ctb", "cre"), email="alan.ocallaghan@outlook.com"),
         person("Yun", "Peng", role=c("ctb"), email="yunyunp96@gmail.com"),
-        person("Leo", "Lahti", role=c("ctb"), email="leo.lahti@utu.fi")
+        person("Leo", "Lahti", role=c("ctb"), email="leo.lahti@utu.fi",
+	             comment = c(ORCID = "0000-0001-5537-637X"))
 	)
 Version: 1.27.4
 Date: 2022-12-27
