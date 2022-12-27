@@ -119,7 +119,7 @@ setMethod("calculateMultiUMAP", "SingleCellExperiment", function(x, exprs_values
           assay_name=exprs_values, altexp_assay_name=altexp_exprs_values, ...) {
     targets1 <- targets2 <- targets3 <- list()
 
-    if (!missing(assay_name)) {
+    if (!missing(exprs_values)) {
         targets1 <- lapply(assay_name, FUN=assay, x=x)
         targets1 <- lapply(targets1, t)
     }
