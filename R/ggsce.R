@@ -1,4 +1,4 @@
-4#' Create a ggplot from a SingleCellExperiment
+#' Create a ggplot from a SingleCellExperiment
 #'
 #' Create a base \link{ggplot} object from a \linkS4class{SingleCellExperiment},
 #' the contents of which can be directly referenced in subsequent layers without prior specification.
@@ -57,7 +57,7 @@ ggcells <- function(x, mapping=aes(), features=NULL, exprs_values="logcounts",
     extract_mapping=TRUE, assay_name=exprs_values, ...) 
 {
     features <- c(features, .aes_in_use(mapping, extract_mapping)) 
-    df <- makePerCellDF(x, features=features, assay_name=assay_name, use_altexps=use_altexps, 
+    df <- makePerCellDF(x, features=features, exprs_values=assay_name, use_altexps=use_altexps, 
         use_dimred=use_dimred, prefix_altexps=prefix_altexps, check_names=check_names)
     ggplot(df, mapping=mapping, ...)
 }
@@ -68,7 +68,7 @@ ggfeatures <- function(x, mapping=aes(), cells=NULL, exprs_values="logcounts",
     check_names=TRUE, extract_mapping=TRUE, assay_name=exprs_values, ...)
 {
     cells <- c(cells, .aes_in_use(mapping, extract_mapping))
-    df <- makePerFeatureDF(x, cells=cells, assay_name=assay_name, check_names=check_names)
+    df <- makePerFeatureDF(x, cells=cells, exprs_values=assay_name, check_names=check_names)
     ggplot(df, mapping=mapping, ...)
 }
 

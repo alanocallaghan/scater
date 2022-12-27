@@ -115,7 +115,8 @@ setMethod("calculateMultiUMAP", "SummarizedExperiment", function(x, exprs_values
 #' @importFrom Matrix t
 #' @importFrom SummarizedExperiment assay
 #' @importFrom SingleCellExperiment reducedDim altExp
-setMethod("calculateMultiUMAP", "SingleCellExperiment", function(x, exprs_values, dimred, altexp, altexp_exprs_values="logcounts", assay_name=exprs_values, ...) {
+setMethod("calculateMultiUMAP", "SingleCellExperiment", function(x, exprs_values, dimred, altexp, altexp_exprs_values="logcounts",
+          assay_name=exprs_values, altexp_assay_name=altexp_exprs_values, ...) {
     targets1 <- targets2 <- targets3 <- list()
 
     if (!missing(assay_name)) {

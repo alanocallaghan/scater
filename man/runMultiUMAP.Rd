@@ -27,6 +27,7 @@ calculateMultiUMAP(x, ...)
   altexp,
   altexp_exprs_values = "logcounts",
   assay_name = exprs_values,
+  altexp_assay_name = altexp_exprs_values,
   ...
 )
 
@@ -64,9 +65,9 @@ This argument can be missing, in which case no alternative experiments are used.
 \item{altexp_exprs_values}{A character or integer vector specifying the assay to extract from alternative experiments, when \code{altexp} is specified.
 This is recycled to the same length as \code{altexp}.}
 
-\item{name}{String specifying the name of the \code{\link{reducedDims}} in which to store the UMAP.}
-
 \item{altexp_assay_name}{Alias for altexp_exprs_values}
+
+\item{name}{String specifying the name of the \code{\link{reducedDims}} in which to store the UMAP.}
 }
 \value{
 For \code{calculateMultiUMAP}, a numeric matrix containing the low-dimensional UMAP embedding.
