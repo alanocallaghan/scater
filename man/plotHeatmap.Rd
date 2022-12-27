@@ -27,6 +27,8 @@ plotHeatmap(
   show_colnames = FALSE,
   cluster_cols = is.null(order_columns_by),
   swap_rownames = NULL,
+  assay_name = exprs_values,
+  by_assay_name = by_exprs_values,
   ...
 )
 }
@@ -90,6 +92,10 @@ for colouring of column-level data - see the \code{exprs_values} argument in \co
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
 identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
+
+\item{assay_name}{Alias for exprs_values.}
+
+\item{by_assay_name}{Alias for by_exprs_values.}
 }
 \value{
 A heatmap is produced on the current graphics device. 

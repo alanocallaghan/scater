@@ -21,14 +21,15 @@ calculateNMF(x, ...)
   ...
 )
 
-\S4method{calculateNMF}{SummarizedExperiment}(x, ..., exprs_values = "logcounts")
+\S4method{calculateNMF}{SummarizedExperiment}(x, ..., exprs_values = "logcounts", assay_name = exprs_values)
 
 \S4method{calculateNMF}{SingleCellExperiment}(
   x,
   ...,
   exprs_values = "logcounts",
   dimred = NULL,
-  n_dimred = NULL
+  n_dimred = NULL,
+  assay_name = exprs_values
 )
 
 runNMF(x, ..., altexp = NULL, name = "NMF")
@@ -59,6 +60,8 @@ This can be a character vector of row names, an integer vector of row indices or
 \item{seed}{Random number generation seed to be passed to \code{\link[RcppML]{nmf}}.}
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
+
+\item{assay_name}{Alias for exprs_values.}
 
 \item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use.}
 

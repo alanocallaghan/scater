@@ -19,7 +19,8 @@ plotPlatePosition(
   point_shape = 19,
   other_fields = list(),
   swap_rownames = NULL,
-  color_by = NULL
+  color_by = NULL,
+  by_assay_name = by_exprs_values
 )
 }
 \arguments{
@@ -58,6 +59,8 @@ identify features instead of \code{rownames(object)} when labelling plot
 elements.}
 
 \item{color_by}{Alias to \code{colour_by}.}
+
+\item{by_assay_name}{Alias for by_exprs_values.}
 }
 \value{
 A ggplot object.

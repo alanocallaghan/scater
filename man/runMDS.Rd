@@ -22,14 +22,15 @@ calculateMDS(x, ...)
   ...
 )
 
-\S4method{calculateMDS}{SummarizedExperiment}(x, ..., exprs_values = "logcounts")
+\S4method{calculateMDS}{SummarizedExperiment}(x, ..., exprs_values = "logcounts", assay_name = exprs_values)
 
 \S4method{calculateMDS}{SingleCellExperiment}(
   x,
   ...,
   exprs_values = "logcounts",
   dimred = NULL,
-  n_dimred = NULL
+  n_dimred = NULL,
+  assay_name = exprs_values
 )
 
 runMDS(x, ..., altexp = NULL, name = "MDS")
@@ -69,6 +70,8 @@ calculated by \code{FUN} should be stored as \sQuote{dist} attribute of the
 matrix returned/stored by \code{calculateMDS} or \code{runMDS}.}
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
+
+\item{assay_name}{Alias for exprs_values.}
 
 \item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use.}
 

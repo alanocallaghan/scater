@@ -29,7 +29,7 @@ calculateUMAP(x, ...)
   dens_lambda = 0.1
 )
 
-\S4method{calculateUMAP}{SummarizedExperiment}(x, ..., exprs_values = "logcounts")
+\S4method{calculateUMAP}{SummarizedExperiment}(x, ..., exprs_values = "logcounts", assay_name = exprs_values)
 
 \S4method{calculateUMAP}{SingleCellExperiment}(
   x,
@@ -37,7 +37,8 @@ calculateUMAP(x, ...)
   pca = if (!is.null(dimred)) NULL else 50,
   exprs_values = "logcounts",
   dimred = NULL,
-  n_dimred = NULL
+  n_dimred = NULL,
+  assay_name = exprs_values
 )
 
 runUMAP(x, ..., altexp = NULL, name = "UMAP")
@@ -85,6 +86,8 @@ otherwise, the \code{\link[uwot]{umap}} defaults are used.}
 \item{dens_frac, dens_lambda}{See \code{\link[densvis]{densne}}}
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
+
+\item{assay_name}{Alias for exprs_values.}
 
 \item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use.}
 

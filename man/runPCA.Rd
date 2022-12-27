@@ -22,14 +22,15 @@ calculatePCA(x, ...)
   BPPARAM = SerialParam()
 )
 
-\S4method{calculatePCA}{SummarizedExperiment}(x, ..., exprs_values = "logcounts")
+\S4method{calculatePCA}{SummarizedExperiment}(x, ..., exprs_values = "logcounts", assay_name = exprs_values)
 
 \S4method{calculatePCA}{SingleCellExperiment}(
   x,
   ...,
   exprs_values = "logcounts",
   dimred = NULL,
-  n_dimred = NULL
+  n_dimred = NULL,
+  assay_name = exprs_values
 )
 
 \S4method{runPCA}{SingleCellExperiment}(x, ..., altexp = NULL, name = "PCA")
@@ -61,6 +62,8 @@ This can be a character vector of row names, an integer vector of row indices or
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.}
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
+
+\item{assay_name}{Alias for exprs_values.}
 
 \item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use.}
 

@@ -14,7 +14,9 @@ plotHighestExprs(
   feature_names_to_plot = NULL,
   as_percentage = TRUE,
   swap_rownames = NULL,
-  color_cells_by = NULL
+  color_cells_by = NULL,
+  assay_name = exprs_values,
+  by_assay_name = by_exprs_values
 )
 }
 \arguments{
@@ -44,6 +46,10 @@ identify features instead of \code{rownames(object)} when labelling plot
 elements.}
 
 \item{color_cells_by}{Alias to \code{colour_cells_by}.}
+
+\item{assay_name}{Alias for exprs_values.}
+
+\item{by_assay_name}{Alias for by_exprs_values.}
 }
 \value{
 A \link{ggplot} object.

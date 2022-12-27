@@ -25,6 +25,7 @@ plotReducedDim(
   point.padding = NA,
   force = 1,
   rasterise = FALSE,
+  by_assay_name = by_exprs_values,
   ...
 )
 }
@@ -98,6 +99,8 @@ elements.}
 \code{\link[ggrastr]{rasterise}}. To control the dpi, set
 \code{options(ggrastr.default.dpi)},
 for example \code{options(ggrastr.default.dpi=300)}.}
+
+\item{by_assay_name}{Alias for by_exprs_values.}
 
 \item{...}{Additional arguments for visualization, see
 \code{?"\link{scater-plot-args}"} for details.}

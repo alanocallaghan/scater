@@ -8,7 +8,8 @@ retrieveFeatureInfo(
   x,
   by,
   search = c("rowData", "assays"),
-  exprs_values = "logcounts"
+  exprs_values = "logcounts",
+  assay_name = exprs_values
 )
 }
 \arguments{
@@ -20,6 +21,8 @@ Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.}
 \item{search}{Character vector specifying the types of data or metadata to use.}
 
 \item{exprs_values}{String or integer scalar specifying the assay from which expression values should be extracted.}
+
+\item{assay_name}{Alias for exprs_values.}
 }
 \value{
 A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
