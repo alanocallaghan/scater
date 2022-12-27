@@ -31,7 +31,7 @@ calculateTSNE(x, ...)
   dens_lambda = 0.1
 )
 
-\S4method{calculateTSNE}{SummarizedExperiment}(x, ..., exprs_values = "logcounts")
+\S4method{calculateTSNE}{SummarizedExperiment}(x, ..., exprs_values = "logcounts", assay_name = exprs_values)
 
 \S4method{calculateTSNE}{SingleCellExperiment}(
   x,
@@ -39,7 +39,8 @@ calculateTSNE(x, ...)
   pca = is.null(dimred),
   exprs_values = "logcounts",
   dimred = NULL,
-  n_dimred = NULL
+  n_dimred = NULL,
+  assay_name = exprs_values
 )
 
 runTSNE(x, ..., altexp = NULL, name = "TSNE")
@@ -90,6 +91,8 @@ otherwise, the \code{\link[Rtsne]{Rtsne}} defaults are used.}
 \item{dens_frac, dens_lambda}{See \code{\link[densvis]{densne}}}
 
 \item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
+
+\item{assay_name}{Alias for exprs_values.}
 
 \item{pca}{Logical scalar indicating whether a PCA step should be performed inside \code{\link[Rtsne]{Rtsne}}.}
 

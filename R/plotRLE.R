@@ -15,6 +15,10 @@
 #' for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object to be used to parallelise operations using \code{\link{DelayedArray}}.
 #' @param color_by Alias to \code{colour_by}.
+#' @param assay_name Alias for exprs_values.
+#' @param by_assay_name Alias for by_exprs_values.
+#' @param assay_values Alias for exprs_values
+#' @param assay_logged Alias for exprs_logged
 #' @param ... further arguments passed to \code{\link[ggplot2]{geom_boxplot}} when \code{style="full"}.
 #'
 #' @return A ggplot object
@@ -65,6 +69,10 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
                     style = "minimal", legend = TRUE, ordering = NULL, 
                     colour_by = color_by, by_exprs_values = exprs_values,
                     BPPARAM = BiocParallel::bpparam(), color_by = NULL,
+                    assay_name=exprs_values,
+                    by_assay_name=by_exprs_values,
+		    assay_values=exprs_values, # Never called in the code? Is this a passed argument.
+		    assay_logged=exprs_logged,		    
                     ...) {
 
     oldbp <- getAutoBPPARAM()
@@ -72,7 +80,7 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
     on.exit(setAutoBPPARAM(oldbp))
 
     ## Check aesthetic arguments.
-    colour_by_out <- retrieveCellInfo(object, colour_by, exprs_values = by_exprs_values)
+    colour_by_out <- retrieveCellInfo(object, colour_by, assay_name = by_assay_name)
     colour_by <- colour_by_out$name
     colour_by_vals <- colour_by_out$val
     if (!is.null(colour_by)) {
@@ -82,9 +90,9 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
     }
 
     ## Calculate RLE for each gene in each cell.
-    exprs_mat <- assay(object, i=exprs_values, withDimnames=FALSE)
+    exprs_mat <- assay(object, i=assay_name, withDimnames=FALSE)
     exprs_mat <- DelayedArray(exprs_mat)
-    if (!exprs_logged) {
+    if (!assay_logged) {
         exprs_mat <- log2(exprs_mat + 1)
     }
     features_meds <- rowMedians(exprs_mat)

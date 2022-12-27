@@ -15,7 +15,9 @@ plotScater(
   ncol = 3,
   line_width = 1.5,
   theme_size = 10,
-  color_by = NULL
+  color_by = NULL,
+  assay_name = exprs_values,
+  by_assay_name = by_exprs_values
 )
 }
 \arguments{
@@ -44,6 +46,10 @@ Default is \code{NULL}, in which case there is no blocking.}
 \item{theme_size}{Numeric scalar specifying the font size to use for the plotting theme.}
 
 \item{color_by}{Alias to \code{colour_by}.}
+
+\item{assay_name}{Alias for exprs_values.}
+
+\item{by_assay_name}{Alias for by_exprs_values.}
 }
 \value{
 A \link{ggplot} object.

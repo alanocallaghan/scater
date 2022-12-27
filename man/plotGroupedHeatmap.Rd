@@ -17,6 +17,7 @@ plotGroupedHeatmap(
   colour = color,
   swap_rownames = NULL,
   color = NULL,
+  assay_name = exprs_values,
   ...
 )
 }
@@ -55,6 +56,8 @@ identify features instead of \code{rownames(object)} when labelling plot
 elements.}
 
 \item{color}{Alias to \code{colour}.}
+
+\item{assay_name}{Alias for exprs_values.}
 
 \item{...}{Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.}
 }

@@ -15,6 +15,7 @@ ggcells(
   prefix_altexps = FALSE,
   check_names = TRUE,
   extract_mapping = TRUE,
+  assay_name = exprs_values,
   ...
 )
 
@@ -25,6 +26,7 @@ ggfeatures(
   exprs_values = "logcounts",
   check_names = TRUE,
   extract_mapping = TRUE,
+  assay_name = exprs_values,
   ...
 )
 }

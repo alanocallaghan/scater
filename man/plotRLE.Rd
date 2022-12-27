@@ -16,6 +16,10 @@ plotRLE(
   by_exprs_values = exprs_values,
   BPPARAM = BiocParallel::bpparam(),
   color_by = NULL,
+  assay_name = exprs_values,
+  by_assay_name = by_exprs_values,
+  assay_values = exprs_values,
+  assay_logged = exprs_logged,
   ...
 )
 }
@@ -42,6 +46,14 @@ for use in point aesthetics - see the \code{exprs_values} argument in \code{?\li
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object to be used to parallelise operations using \code{\link{DelayedArray}}.}
 
 \item{color_by}{Alias to \code{colour_by}.}
+
+\item{assay_name}{Alias for exprs_values.}
+
+\item{by_assay_name}{Alias for by_exprs_values.}
+
+\item{assay_values}{Alias for exprs_values}
+
+\item{assay_logged}{Alias for exprs_logged}
 
 \item{...}{further arguments passed to \code{\link[ggplot2]{geom_boxplot}} when \code{style="full"}.}
 }

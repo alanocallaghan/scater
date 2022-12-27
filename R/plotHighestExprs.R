@@ -19,6 +19,8 @@
 #'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
 #' @param color_cells_by Alias to \code{colour_cells_by}.
+#' @param assay_name Alias for exprs_values.
+#' @param by_assay_name Alias for by_exprs_values.
 #'
 #' @details 
 #' This function will plot the percentage of counts accounted for by the top \code{n} most highly expressed features across the dataset.
@@ -48,10 +50,13 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by,
     drop_features = NULL, exprs_values = "counts",
     by_exprs_values = exprs_values, feature_names_to_plot = NULL,
     as_percentage = TRUE, swap_rownames = NULL,
-    color_cells_by = NULL)
+    color_cells_by = NULL,
+    assay_name=exprs_values,
+    by_assay_name=by_exprs_values
+    )
 {
     ## Find the most highly expressed features in this dataset
-    exprs_mat <- assay(object, exprs_values, withDimnames=FALSE)
+    exprs_mat <- assay(object, assay_name, withDimnames=FALSE)
     ave_exprs <- rowSums2(exprs_mat)
     oo <- order(ave_exprs, decreasing=TRUE)
 
@@ -94,7 +99,7 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by,
     
     ## Colouring the individual dashes for the cells.
     if (!is.null(colour_cells_by)) {
-        colour_out <- retrieveCellInfo(object, colour_cells_by, exprs_values = by_exprs_values)
+        colour_out <- retrieveCellInfo(object, colour_cells_by, assay_name = by_assay_name)
         colour_cells_by <- colour_out$name
         df_exprs_by_cell_long$colour_by <- colour_out$val[df_exprs_by_cell_long$Cell]
         aes_to_use <- aes(y=.data$Tag, x=.data$value, colour=.data$colour_by)
@@ -104,7 +109,7 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by,
 
     ## Create the plot and annotations. 
     plot_most_expressed <- ggplot(df_exprs_by_cell_long, aes_to_use) + geom_point(alpha = 0.6, shape = 124)
-    plot_most_expressed <- plot_most_expressed + xlab(exprs_values) + ylab("Feature") + theme_bw(8) +
+    plot_most_expressed <- plot_most_expressed + labs(x=assay_name, y="Feature") + theme_bw(8) +
         theme(legend.position = c(1, 0), legend.justification = c(1, 0),
               axis.text.x = element_text(colour = "gray35"),
               axis.text.y = element_text(colour = "gray35"),
@@ -122,8 +127,8 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by,
         df_to_plot$pct_total <- 100 * sub_ave / total_exprs
         legend_val <- "pct_total"
     } else {
-        df_to_plot[[paste0("ave_", exprs_values)]] <- sub_ave
-        legend_val <- sprintf("ave_%s", exprs_values)
+        df_to_plot[[paste0("ave_", assay_name)]] <- sub_ave
+        legend_val <- sprintf("ave_%s", assay_name)
     }
 
     aes <- aes(x = .data[[legend_val]], y = .data$Feature)

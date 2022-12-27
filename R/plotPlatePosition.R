@@ -23,6 +23,7 @@
 #'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
 #' @param color_by Alias to \code{colour_by}.
+#' @param by_assay_name Alias for by_exprs_values.
 #'
 #' @details 
 #' This function expects plate positions to be given in a charcter format where a letter indicates the row on the plate and a numeric value  indicates the column. 
@@ -60,7 +61,8 @@ plotPlatePosition <- function(object, plate_position = NULL,
     by_exprs_values = "logcounts", 
     add_legend = TRUE, theme_size = 24, point_alpha = 0.6,
     point_size = 24, point_shape = 19, other_fields=list(),
-    swap_rownames = NULL, color_by = NULL) 
+    swap_rownames = NULL, color_by = NULL,
+    by_assay_name=by_exprs_values) 
 {
     ## check object is SingleCellExperiment object
     if ( !is(object, "SingleCellExperiment") ) {
@@ -91,7 +93,8 @@ plotPlatePosition <- function(object, plate_position = NULL,
     vis_out <- .incorporate_common_vis_col(df_to_plot, se = object, 
         colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
         order_by = order_by,
-        by_exprs_values = by_exprs_values, other_fields = other_fields,
+        by_assay_name = by_assay_name,
+	other_fields = other_fields,
         swap_rownames = swap_rownames)
 
     df_to_plot <- vis_out$df

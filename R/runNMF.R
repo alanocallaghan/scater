@@ -18,7 +18,6 @@
 #' @inheritSection calculatePCA Feature selection
 #' @inheritSection calculatePCA Using reduced dimensions
 #' @inheritSection calculatePCA Using alternative Experiments
-#' 
 #' @return 
 #' For \code{calculateNMF}, a numeric matrix is returned containing the NMF coordinates for each cell (row) and dimension (column).
 #' 
@@ -76,15 +75,15 @@ setMethod("calculateNMF", "ANY", .calculate_nmf)
 #' @export
 #' @rdname runNMF
 #' @importFrom SummarizedExperiment assay
-setMethod("calculateNMF", "SummarizedExperiment", function(x, ..., exprs_values="logcounts") {
-    .calculate_nmf(assay(x, exprs_values), ...)
+setMethod("calculateNMF", "SummarizedExperiment", function(x, ..., exprs_values="logcounts", assay_name=exprs_values) {
+    .calculate_nmf(assay(x, assay_name), ...)
 })
 
 #' @export
 #' @rdname runNMF
 setMethod("calculateNMF", "SingleCellExperiment",
-    function(x, ..., exprs_values="logcounts", dimred=NULL, n_dimred=NULL) {
-    mat <- .get_mat_from_sce(x, exprs_values=exprs_values, dimred=dimred, n_dimred=n_dimred)
+    function(x, ..., exprs_values="logcounts", dimred=NULL, n_dimred=NULL, assay_name=exprs_values) {
+    mat <- .get_mat_from_sce(x, assay_name=assay_name, dimred=dimred, n_dimred=n_dimred)
     .calculate_nmf(mat, transposed=!is.null(dimred), ...)
 })
 

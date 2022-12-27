@@ -12,7 +12,13 @@ calculateMultiUMAP(x, ...)
 
 \S4method{calculateMultiUMAP}{ANY}(x, ..., metric = "euclidean")
 
-\S4method{calculateMultiUMAP}{SummarizedExperiment}(x, exprs_values, metric = "euclidean", ...)
+\S4method{calculateMultiUMAP}{SummarizedExperiment}(
+  x,
+  exprs_values,
+  metric = "euclidean",
+  assay_name = exprs_values,
+  ...
+)
 
 \S4method{calculateMultiUMAP}{SingleCellExperiment}(
   x,
@@ -20,6 +26,8 @@ calculateMultiUMAP(x, ...)
   dimred,
   altexp,
   altexp_exprs_values = "logcounts",
+  assay_name = exprs_values,
+  altexp_assay_name = altexp_exprs_values,
   ...
 )
 
@@ -46,6 +54,8 @@ This is recycled to the same number of matrices supplied in \code{x}.}
 \item{exprs_values}{A character or integer vector of assays to extract and transpose for use in the UMAP.
 For the SingleCellExperiment, this argument can be missing, in which case no assays are used.}
 
+\item{assay_name}{Alias for exprs_values.}
+
 \item{dimred}{A character or integer vector of \code{\link{reducedDims}} to extract for use in the UMAP.
 This argument can be missing, in which case no assays are used.}
 
@@ -54,6 +64,8 @@ This argument can be missing, in which case no alternative experiments are used.
 
 \item{altexp_exprs_values}{A character or integer vector specifying the assay to extract from alternative experiments, when \code{altexp} is specified.
 This is recycled to the same length as \code{altexp}.}
+
+\item{altexp_assay_name}{Alias for altexp_exprs_values}
 
 \item{name}{String specifying the name of the \code{\link{reducedDims}} in which to store the UMAP.}
 }

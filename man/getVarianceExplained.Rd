@@ -10,7 +10,13 @@ getVarianceExplained(x, ...)
 
 \S4method{getVarianceExplained}{ANY}(x, variables, subset_row = NULL, BPPARAM = SerialParam())
 
-\S4method{getVarianceExplained}{SummarizedExperiment}(x, variables = NULL, ..., exprs_values = "logcounts")
+\S4method{getVarianceExplained}{SummarizedExperiment}(
+  x,
+  variables = NULL,
+  ...,
+  exprs_values = "logcounts",
+  assay_name = exprs_values
+)
 }
 \arguments{
 \item{x}{A numeric matrix of expression values, usually log-transformed and normalized.
@@ -30,7 +36,7 @@ or \code{NULL}, in which case all columns in \code{colData(x)} are used.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.}
 
-\item{exprs_values}{String or integer scalar specifying the expression values for which to compute the variance.}
+\item{exprs_values}{String or integer scalar specifying the expression values for which to compute the variance (also an alias assay_name is accepted).}
 }
 \value{
 A numeric matrix containing the percentage of variance explained by each factor (column) and for each gene (row).

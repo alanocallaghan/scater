@@ -54,6 +54,7 @@
 #' \code{\link[ggrastr]{rasterise}}. To control the dpi, set
 #' \code{options(ggrastr.default.dpi)},
 #' for example \code{options(ggrastr.default.dpi=300)}.
+#' @param by_assay_name Alias for by_exprs_values.
 #' @param ... Additional arguments for visualization, see
 #' \code{?"\link{scater-plot-args}"} for details.
 #'
@@ -105,7 +106,9 @@ plotReducedDim <- function(
         label_format = c("%s %i", " (%i%%)"), other_fields = list(),
         text_color = "black", color_by = NULL,
         swap_rownames = NULL, point.padding = NA, force = 1,
-        rasterise = FALSE, ...
+        rasterise = FALSE,
+        by_assay_name=by_exprs_values,
+	...
     ) {
 
     ## Extract reduced dimension representation of cells
@@ -137,7 +140,7 @@ plotReducedDim <- function(
     vis_out <- .incorporate_common_vis_col(df_to_plot, se = object,
         colour_by = colour_by, shape_by = shape_by, size_by = size_by,
         order_by = order_by,
-        by_exprs_values = by_exprs_values, other_fields = other_fields,
+        by_assay_name = by_assay_name, other_fields = other_fields,
         swap_rownames = swap_rownames)
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by

@@ -17,7 +17,8 @@
 #' @param line_width Numeric scalar specifying the line width.
 #' @param theme_size Numeric scalar specifying the font size to use for the plotting theme.
 #' @param color_by Alias to \code{colour_by}.
-#'
+#' @param assay_name Alias for exprs_values.
+#' @param by_assay_name Alias for by_exprs_values.
 #' @details 
 #' For each cell, the features are ordered from most-expressed to least-expressed.
 #' The cumulative proportion of the total expression for the cell is computed across the top \code{nfeatures} features. 
@@ -44,7 +45,10 @@
 plotScater <- function(x, nfeatures = 500, exprs_values = "counts", 
     colour_by = color_by, by_exprs_values = exprs_values, 
     block1 = NULL, block2 = NULL, ncol = 3,
-    line_width = 1.5, theme_size = 10, color_by = NULL)
+    line_width = 1.5, theme_size = 10, color_by = NULL,
+    assay_name=exprs_values,
+    by_assay_name=by_exprs_values    
+    )
 {
     if (!is(x, "SingleCellExperiment")) {
         stop("x must be of class SingleCellExperiment")
@@ -59,12 +63,12 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
     block2_vals <- block2_out$val
 
     ## Setting values to colour by.
-    colour_by_out <- retrieveCellInfo(x, colour_by, exprs_values = by_exprs_values)
+    colour_by_out <- retrieveCellInfo(x, colour_by, assay_name = by_assay_name)
     colour_by <- colour_by_out$name
     colour_by_vals <- colour_by_out$val
 
     ## Define an expression matrix depending on which values we're using
-    exprs_mat <- assay(x, i = exprs_values, withDimnames=FALSE)
+    exprs_mat <- assay(x, i = assay_name, withDimnames=FALSE)
     nfeatures <- min(nfeatures, nrow(exprs_mat))
 
     ## Use C++ to get the sequencing real estate accounted for by features
@@ -85,7 +89,7 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
         aes$colour <- as.symbol("colour_by")
     }
     plot_out <- ggplot(seq_real_estate_long, aes) +
-        geom_line(linetype = "solid", alpha = 0.3, size = line_width)
+        geom_line(linetype = "solid", alpha = 0.3, linewidth = line_width)
 
     ## Deal with blocks for grid
     if (!is.null(block1) && !is.null(block2)) {
