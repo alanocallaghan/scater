@@ -89,7 +89,7 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
         aes$colour <- as.symbol("colour_by")
     }
     plot_out <- ggplot(seq_real_estate_long, aes) +
-        geom_line(linetype = "solid", alpha = 0.3, size = line_width)
+        geom_line(linetype = "solid", alpha = 0.3, linewidth = line_width)
 
     ## Deal with blocks for grid
     if (!is.null(block1) && !is.null(block2)) {
