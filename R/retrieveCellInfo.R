@@ -11,6 +11,7 @@
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to
 #'  identify features instead of \code{rownames(object)} when labelling plot
 #'  elements.
+#' @param assay_name Alias for exprs_values.
 #'
 #' @return A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
 #' and \code{value}, a vector of length equal to \code{ncol(x)} containing per-cell (meta)data values.
@@ -65,7 +66,7 @@
 #' @importFrom SingleCellExperiment altExp altExpNames
 #' @importFrom SummarizedExperiment colData assay
 retrieveCellInfo <- function(x, by, search = c("colData", "assays", "altExps"),
-        exprs_values = "logcounts", swap_rownames = NULL)
+        exprs_values = "logcounts", swap_rownames = NULL, assay_name=exprs_values)
 {
     .mopUp <- function(name, value) {
         list(name=name, value=value)
@@ -111,7 +112,7 @@ retrieveCellInfo <- function(x, by, search = c("colData", "assays", "altExps"),
             x <- .swap_rownames(x, swap_rownames)
             m <- match(by, rownames(x))
             if (!is.na(m)) {
-                return(.mopUp(by, assay(x, exprs_values, withDimnames = FALSE)[m, ]))
+                return(.mopUp(by, assay(x, assay_name, withDimnames = FALSE)[m, ]))
             }
         } else if (s=="altExps") {
             for (i in seq_along(altExpNames(x))) {
@@ -119,7 +120,7 @@ retrieveCellInfo <- function(x, by, search = c("colData", "assays", "altExps"),
                 current <- .swap_rownames(current, swap_rownames)
                 m <- match(by, rownames(current))
                 if (!is.na(m)) {
-                    return(.mopUp(by, assay(current, exprs_values, withDimnames = FALSE)[m, ]))
+                    return(.mopUp(by, assay(current, assay_name, withDimnames = FALSE)[m, ]))
                 }
             }
         }

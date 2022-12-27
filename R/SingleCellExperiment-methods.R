@@ -4,20 +4,20 @@
 ################################################################################
 ### accessors
 
-GET_FUN <- function(exprs_values) {
-    (exprs_values) # To get evaluated.
+GET_FUN <- function(assay_name) {
+    (assay_name) # To get evaluated.
     function(object) {
-        if (exprs_values %in% assayNames(object))
-            return(assay(object, i = exprs_values))
+        if (assay_name %in% assayNames(object))
+            return(assay(object, i = assay_name))
         else
             return(NULL)
     }
 }
 
-SET_FUN <- function(exprs_values) {
-    (exprs_values) # To get evaluated.
+SET_FUN <- function(assay_name) {
+    (assay_name) # To get evaluated.
     function(object, value) {
-        assay(object, i = exprs_values) <- value
+        assay(object, i = assay_name) <- value
         object
     }
 }

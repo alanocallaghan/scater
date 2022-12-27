@@ -15,6 +15,7 @@
 #' for use in point aesthetics - see \code{?\link{retrieveFeatureInfo}} for details.
 #' @param other_fields Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param color_by Alias to \code{colour_by}.
+#' @param by_assay_name Alias for by_exprs_values.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -40,6 +41,7 @@
 plotRowData <- function(object, y, x = NULL, 
     colour_by = color_by, shape_by = NULL, size_by = NULL, 
     by_exprs_values = "logcounts", other_fields = list(), color_by = NULL,
+    by_assay_name=by_exprs_values,    
     ...)
 {
     if (!is(object, "SingleCellExperiment")) {
@@ -69,7 +71,7 @@ plotRowData <- function(object, y, x = NULL,
     ## checking visualization arguments
     vis_out <- .incorporate_common_vis_row(df_to_plot, se = object, 
         colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
-        by_exprs_values = by_exprs_values, other_fields = other_fields)
+        by_assay_name = by_assay_name, other_fields = other_fields)
 
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by

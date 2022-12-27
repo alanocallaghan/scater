@@ -152,19 +152,19 @@ setMethod("calculateTSNE", "ANY", .calculate_tsne)
 #' @export
 #' @rdname runTSNE
 #' @importFrom SummarizedExperiment assay
-setMethod("calculateTSNE", "SummarizedExperiment", function(x, ..., exprs_values="logcounts") {
-    .calculate_tsne(assay(x, exprs_values), ...)
+setMethod("calculateTSNE", "SummarizedExperiment", function(x, ..., exprs_values="logcounts", assay_name=exprs_values) {
+    .calculate_tsne(assay(x, assay_name), ...)
 })
 
 #' @export
 #' @rdname runTSNE
 setMethod("calculateTSNE", "SingleCellExperiment", function(x, ..., pca=is.null(dimred), 
-    exprs_values="logcounts", dimred=NULL, n_dimred=NULL)
+    exprs_values="logcounts", dimred=NULL, n_dimred=NULL, assay_name=exprs_values)
 {
     if ("use_dimred" %in% names(list(...))) {
         warning("`use_dimred` is unused; use `dimred` instead.")
     }
-    mat <- .get_mat_from_sce(x, exprs_values=exprs_values, dimred=dimred, n_dimred=n_dimred)
+    mat <- .get_mat_from_sce(x, assay_name=assay_name, dimred=dimred, n_dimred=n_dimred)
     .calculate_tsne(mat, transposed=!is.null(dimred), pca=pca, ...)
 })
 

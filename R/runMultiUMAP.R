@@ -18,6 +18,8 @@
 #' This argument can be missing, in which case no alternative experiments are used.
 #' @param altexp_exprs_values A character or integer vector specifying the assay to extract from alternative experiments, when \code{altexp} is specified.
 #' This is recycled to the same length as \code{altexp}.
+#' @param assay_name Alias for exprs_values.
+#' @param altexp_assay_name Alias for altexp_exprs_values
 #' @param ... For the generic, further arguments to pass to specific methods.
 #'
 #' For the ANY method, further arguments to pass to \code{\link[uwot]{umap}}.
@@ -102,8 +104,8 @@ setMethod("calculateMultiUMAP", "ANY", function(x, ..., metric="euclidean") {
 #' @rdname runMultiUMAP
 #' @importFrom Matrix t
 #' @importFrom SummarizedExperiment assay
-setMethod("calculateMultiUMAP", "SummarizedExperiment", function(x, exprs_values, metric="euclidean", ...) {
-    targets <- lapply(exprs_values, FUN=assay, x=x)
+setMethod("calculateMultiUMAP", "SummarizedExperiment", function(x, exprs_values, metric="euclidean", assay_name=exprs_values, ...) {
+    targets <- lapply(assay_name, FUN=assay, x=x)
     targets <- lapply(targets, t)
     callGeneric(targets, ...) 
 }) 
@@ -113,11 +115,11 @@ setMethod("calculateMultiUMAP", "SummarizedExperiment", function(x, exprs_values
 #' @importFrom Matrix t
 #' @importFrom SummarizedExperiment assay
 #' @importFrom SingleCellExperiment reducedDim altExp
-setMethod("calculateMultiUMAP", "SingleCellExperiment", function(x, exprs_values, dimred, altexp, altexp_exprs_values="logcounts", ...) {
+setMethod("calculateMultiUMAP", "SingleCellExperiment", function(x, exprs_values, dimred, altexp, altexp_exprs_values="logcounts", assay_name=exprs_values, ...) {
     targets1 <- targets2 <- targets3 <- list()
 
-    if (!missing(exprs_values)) {
-        targets1 <- lapply(exprs_values, FUN=assay, x=x)
+    if (!missing(assay_name)) {
+        targets1 <- lapply(assay_name, FUN=assay, x=x)
         targets1 <- lapply(targets1, t)
     }
 
@@ -127,8 +129,8 @@ setMethod("calculateMultiUMAP", "SingleCellExperiment", function(x, exprs_values
 
     if (!missing(altexp)) {
         targets3 <- lapply(altexp, FUN=altExp, x=x)
-        altexp_exprs_values <- rep(altexp_exprs_values, length.out=length(targets3))
-        targets3 <- mapply(FUN=assay, x=targets3, i=altexp_exprs_values, SIMPLIFY=FALSE)
+        altexp_assay_name <- rep(altexp_assay_name, length.out=length(targets3))
+        targets3 <- mapply(FUN=assay, x=targets3, i=altexp_assay_name, SIMPLIFY=FALSE)
         targets3 <- lapply(targets3, t)
     }
 
