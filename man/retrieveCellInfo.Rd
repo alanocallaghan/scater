@@ -21,7 +21,7 @@ Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.}
 
 \item{search}{Character vector specifying the types of data or metadata to use.}
 
-\item{exprs_values}{Alias for assay_name.}
+\item{exprs_values}{Alias to \code{assay_name}.}
 
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to
 identify features instead of \code{rownames(object)} when labelling plot

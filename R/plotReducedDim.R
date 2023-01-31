@@ -54,7 +54,7 @@
 #' \code{\link[ggrastr]{rasterise}}. To control the dpi, set
 #' \code{options(ggrastr.default.dpi)},
 #' for example \code{options(ggrastr.default.dpi=300)}.
-#' @param by_exprs_values Alias for by_assay_name.
+#' @param by_exprs_values Alias for \code{by_assay_name}.
 #' @param ... Additional arguments for visualization, see
 #' \code{?"\link{scater-plot-args}"} for details.
 #'

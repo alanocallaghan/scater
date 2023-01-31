@@ -60,7 +60,7 @@ possible values.}
 order points by, see the \code{by} argument in
 \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{by_exprs_values}{Alias for by_assay_name.}
+\item{by_exprs_values}{Alias for \code{by_assay_name}.}
 
 \item{text_by}{String specifying the column metadata field with which to add
 text labels on the plot.

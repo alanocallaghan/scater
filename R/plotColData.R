@@ -14,8 +14,8 @@
 #' @param order_by Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for
-#' details (also alias by_exprs_values is accepted for this argument name).
-#' @param by_exprs_values Alias for by_assay_name.
+#' details (also alias \code{by_exprs_values} is accepted for this argument).
+#' @param by_exprs_values Alias for \code{by_assay_name}.
 #' @param other_fields Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to
 #'  identify features instead of \code{rownames(object)} when labelling plot

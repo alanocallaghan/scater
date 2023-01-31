@@ -15,7 +15,7 @@
 #' for use in point aesthetics - see \code{?\link{retrieveFeatureInfo}} for details.
 #' @param other_fields Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param color_by Alias to \code{colour_by}.
-#' @param by_exprs_values Alias for by_assay_name.
+#' @param by_exprs_values Alias to \code{by_assay_name}.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 

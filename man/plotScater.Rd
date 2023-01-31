@@ -25,12 +25,12 @@ plotScater(
 
 \item{nfeatures}{Numeric scalar indicating the number of top-expressed features to show n the plot.}
 
-\item{exprs_values}{Alias for assay_name.}
+\item{exprs_values}{Alias to \code{assay_name}.}
 
 \item{colour_by}{Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 The curve for each cell will be coloured according to this specification.}
 
-\item{by_exprs_values}{Alias for by_assay_name.}
+\item{by_exprs_values}{Alias to \code{by_assay_name}.}
 
 \item{block1}{String specifying the column-level metadata field by which to separate the cells into separate panels in the plot. 
 Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.

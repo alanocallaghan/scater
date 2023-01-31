@@ -8,7 +8,7 @@
 #' Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.
 #' @param search Character vector specifying the types of data or metadata to use.
 #' @param assay_name String or integer scalar specifying the assay from which expression values should be extracted.
-#' @param exprs_values Alias for assay_name.
+#' @param exprs_values Alias to \code{assay_name}.
 #' 
 #' @return A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
 #' and \code{value}, a vector of length equal to \code{ncol(x)} containing per-feature (meta)data values.

@@ -15,9 +15,9 @@
 #' for use in point aesthetics - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object to be used to parallelise operations using \code{\link{DelayedArray}}.
 #' @param color_by Alias to \code{colour_by}.
-#' @param exprs_values Alias for assay_name.
-#' @param by_exprs_values Alias for by_assay_name.
-#' @param assay_logged Alias for exprs_logged
+#' @param exprs_values Alias to \code{assay_name}.
+#' @param by_exprs_values Alias to \code{by_assay_name}.
+#' @param assay_logged Alias to \code{exprs_logged}.
 #' @param ... further arguments passed to \code{\link[ggplot2]{geom_boxplot}} when \code{style="full"}.
 #'
 #' @return A ggplot object

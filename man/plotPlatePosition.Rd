@@ -38,7 +38,7 @@ Alternatively, a list of two factors (\code{"row"} and \code{"column"}) can be s
 
 \item{order_by}{Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{by_exprs_values}{Alias for by_assay_name.}
+\item{by_exprs_values}{Alias for \code{by_assay_name}.}
 
 \item{add_legend}{Logical scalar specifying whether a legend should be shown.}
 

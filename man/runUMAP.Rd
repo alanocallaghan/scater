@@ -85,7 +85,7 @@ otherwise, the \code{\link[uwot]{umap}} defaults are used.}
 
 \item{dens_frac, dens_lambda}{See \code{\link[densvis]{densne}}}
 
-\item{exprs_values}{Alias for assay_name.}
+\item{exprs_values}{Alias to \code{assay_name}.}
 
 \item{assay_name}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
 

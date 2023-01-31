@@ -17,8 +17,8 @@
 #' @param line_width Numeric scalar specifying the line width.
 #' @param theme_size Numeric scalar specifying the font size to use for the plotting theme.
 #' @param color_by Alias to \code{colour_by}.
-#' @param exprs_values Alias for assay_name.
-#' @param by_exprs_values Alias for by_assay_name.
+#' @param exprs_values Alias to \code{assay_name}.
+#' @param by_exprs_values Alias to \code{by_assay_name}.
 #' @details 
 #' For each cell, the features are ordered from most-expressed to least-expressed.
 #' The cumulative proportion of the total expression for the cell is computed across the top \code{nfeatures} features. 

@@ -34,7 +34,7 @@ Alternatively, any value that can be used in the \code{by} argument to \code{\li
 
 \item{columns}{A vector specifying the subset of columns in \code{object} to use when computing averages.}
 
-\item{exprs_values}{Alias for assay_name.}
+\item{exprs_values}{Alias to \code{assay_name}.}
 
 \item{center}{A logical scalar indicating whether each feature should have its mean expression 
 (specifically, the mean of averages across all groups) centered at zero prior to plotting.}

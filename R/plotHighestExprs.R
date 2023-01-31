@@ -19,8 +19,8 @@
 #'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
 #' @param color_cells_by Alias to \code{colour_cells_by}.
-#' @param exprs_values Alias for assay_name.
-#' @param by_exprs_values Alias for by_assay_name.
+#' @param exprs_values Alias to \code{assay_name}.
+#' @param by_exprs_values Alias to \code{by_assay_name}.
 #'
 #' @details 
 #' This function will plot the percentage of counts accounted for by the top \code{n} most highly expressed features across the dataset.

@@ -11,7 +11,7 @@
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to
 #'  identify features instead of \code{rownames(object)} when labelling plot
 #'  elements.
-#' @param exprs_values Alias for assay_name.
+#' @param exprs_values Alias to \code{assay_name}.
 #'
 #' @return A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
 #' and \code{value}, a vector of length equal to \code{ncol(x)} containing per-cell (meta)data values.

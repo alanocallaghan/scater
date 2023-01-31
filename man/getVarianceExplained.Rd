@@ -36,7 +36,7 @@ or \code{NULL}, in which case all columns in \code{colData(x)} are used.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.}
 
-\item{exprs_values}{Alias for assay_name.}
+\item{exprs_values}{Alias for \code{assay_name}.}
 
 \item{assay_name}{String or integer scalar specifying the expression values for which to compute the variance (also an alias exprs_value is accepted).}
 }

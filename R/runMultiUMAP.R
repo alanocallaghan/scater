@@ -18,8 +18,8 @@
 #' This argument can be missing, in which case no alternative experiments are used.
 #' @param altexp_assay_name A character or integer vector specifying the assay to extract from alternative experiments, when \code{altexp} is specified.
 #' This is recycled to the same length as \code{altexp}.
-#' @param exprs_values Alias for assay_name.
-#' @param altexp_exprs_values Alias for altexp_assay_name
+#' @param exprs_values Alias to \code{assay_name}.
+#' @param altexp_exprs_values Alias to \code{altexp_assay_name}.
 #' @param ... For the generic, further arguments to pass to specific methods.
 #'
 #' For the ANY method, further arguments to pass to \code{\link[uwot]{umap}}.

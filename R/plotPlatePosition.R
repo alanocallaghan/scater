@@ -23,7 +23,7 @@
 #'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
 #' @param color_by Alias to \code{colour_by}.
-#' @param by_exprs_values Alias for by_assay_name.
+#' @param by_exprs_values Alias for \code{by_assay_name}.
 #'
 #' @details 
 #' This function expects plate positions to be given in a charcter format where a letter indicates the row on the plate and a numeric value  indicates the column. 

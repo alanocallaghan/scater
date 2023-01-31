@@ -18,7 +18,7 @@
 #' @param altexp String or integer scalar specifying an alternative experiment containing the input data.
 #' @param dimred String or integer scalar specifying the existing dimensionality reduction results to use.
 #' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified.
-#' @param exprs_values Alias for assay_name.
+#' @param exprs_values Alias to \code{assay_name}.
 #' @param ... For the \code{calculatePCA} generic, additional arguments to pass to specific methods.
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
 #'

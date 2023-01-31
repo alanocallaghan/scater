@@ -6,14 +6,14 @@
 #' @param features A character vector or a list specifying the features to plot.
 #' If a list is supplied, each entry of the list can be a string, an AsIs-wrapped vector or a data.frame - see \code{?\link{retrieveCellInfo}}.
 #' @param x Specification of a column metadata field or a feature to show on the x-axis, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
-#' @param assay_name A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from. Also the alias assay_name is accepted.
+#' @param assay_name A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from. Also the alias \code{assay_name} is accepted.
 #' @param log2_values Logical scalar, specifying whether the expression values be transformed to the log2-scale for plotting (with an offset of 1 to avoid logging zeroes).
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param order_by Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.
 #' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in point aesthetics - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}. Also the alias by_assay_name is accepted.
+#' for use in point aesthetics - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}. Also the alias \code{by_assay_name} is accepted.
 #' @param xlab String specifying the label for x-axis.
 #' If \code{NULL} (default), \code{x} will be used as the x-axis label.
 #' @param feature_colours Logical scalar indicating whether violins should be coloured by feature when \code{x} and \code{colour_by} are not specified and \code{one_facet=TRUE}.
@@ -29,8 +29,8 @@
 #' @param color_by Alias to \code{colour_by}.
 #' @param feature_colors Alias to \code{feature_colours}.
 #' @param point_fun Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}.
-#' @param exprs_values Alias for assay_name.
-#' @param by_exprs_values Alias for by_assay_name.
+#' @param exprs_values Alias to \code{assay_name}.
+#' @param by_exprs_values Alias to \code{by_assay_name}.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 

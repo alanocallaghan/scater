@@ -10,8 +10,8 @@
 #' detected expression values.
 #' @param other_fields Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' Note that any \link{AsIs} vectors or data.frames must be of length equal to \code{nrow(object)}, not \code{features}.
-#' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from, for entries of \code{other_fields}. Also alias by_exprs_values is accepted as argument name.
-#' @param by_exprs_values Alias for by_assay_name.
+#' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from, for entries of \code{other_fields}. Also alias \code{by_exprs_values} is accepted as argument name.
+#' @param by_exprs_values Alias for \code{by_assay_name}.
 #'
 #' @return 
 #' A \link{ggplot} object containing a dot plot.

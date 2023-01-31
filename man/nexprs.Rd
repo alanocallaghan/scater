@@ -40,9 +40,9 @@ If \code{FALSE}, the function will count the number of detected features per cel
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.
 Only relevant when \code{x} is a \linkS4class{DelayedMatrix}.}
 
-\item{exprs_values}{Alias for assay_name.}
+\item{exprs_values}{Alias for \code{assay_name}.}
 
-\item{assay_name}{String or integer specifying the assay of \code{x} to obtain the count matrix from (also the alias exprs_values is accepted for this argument).}
+\item{assay_name}{String or integer specifying the assay of \code{x} to obtain the count matrix from (also the alias \code{exprs_values} is accepted for this argument).}
 }
 \value{
 An integer vector containing counts per gene or cell, depending on the provided arguments.
