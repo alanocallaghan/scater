@@ -7,7 +7,7 @@
 #' @param columns A vector specifying the subset of columns in \code{object} to show as columns in the heatmap. 
 #' Also specifies the column order if \code{cluster_cols=FALSE} and \code{order_columns_by=NULL}.
 #' By default, all columns are used.
-#' @param exprs_values A string or integer scalar indicating which assay of \code{object} should be used as expression values. 
+#' @param assay_name A string or integer scalar indicating which assay of \code{object} should be used as expression values. 
 #' @param center A logical scalar indicating whether each feature should have its mean expression centered at zero prior to plotting. 
 #' @param scale A logical scalar specifying whether each feature should have its expression values scaled to have unit variance prior to plotting.
 #' @param zlim A numeric vector of length 2, specifying the upper and lower bounds for colour mapping of expression values.
@@ -36,8 +36,8 @@
 #' Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
 #' A character vector can also be supplied and will be treated as a list of strings.
 #' This argument is automatically appended to \code{colour_columns_by}.
-#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for colouring of column-level data - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
+#' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from, 
+#' for colouring of column-level data - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}.
 #' @param show_colnames,cluster_cols,... Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to 
 #'  identify features instead of \code{rownames(object)} when labelling plot 
@@ -46,8 +46,8 @@
 #' Aliases to \code{color}, \code{color_columns_by},
 #' \code{column_annotation_colors}, \code{color_rows_by}, 
 #' \code{row_annotation_colors}.
-#' @param assay_name Alias for exprs_values.
-#' @param by_assay_name Alias for by_exprs_values.
+#' @param exprs_values Alias for assay_name.
+#' @param by_exprs_values Alias for by_assay_name.
 #'
 #' @details 
 #' Setting \code{center=TRUE} is useful for examining log-fold changes of each cell's expression profile from the average across all cells.

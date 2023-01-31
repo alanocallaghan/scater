@@ -39,9 +39,7 @@ If \code{NULL}, nothing is shown on the x-axis.}
 
 \item{order_by}{Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for
-details (also alias by_assay_name is accepted for this argument name).}
+\item{by_exprs_values}{Alias for by_assay_name.}
 
 \item{other_fields}{Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
@@ -52,6 +50,10 @@ elements.}
 \item{color_by}{Alias to \code{colour_by}.}
 
 \item{point_fun}{Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}.}
+
+\item{by_assay_name}{A string or integer scalar specifying which assay to obtain expression values from, 
+for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for
+details (also alias by_exprs_values is accepted for this argument name).}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }

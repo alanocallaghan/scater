@@ -18,7 +18,6 @@ plotRLE(
   color_by = NULL,
   assay_name = exprs_values,
   by_assay_name = by_exprs_values,
-  assay_values = exprs_values,
   assay_logged = exprs_logged,
   ...
 )
@@ -26,7 +25,7 @@ plotRLE(
 \arguments{
 \item{object}{A SingleCellExperiment object.}
 
-\item{exprs_values}{A string or integer scalar specifying the expression matrix in \code{object} to use.}
+\item{exprs_values}{Alias for assay_name.}
 
 \item{exprs_logged}{A logical scalar indicating whether the expression matrix is already log-transformed.
 If not, a log2-transformation (+1) will be performed prior to plotting.}
@@ -40,18 +39,16 @@ This can be useful for arranging cells by experimental conditions or batches.}
 
 \item{colour_by}{Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from,
-for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
+\item{by_exprs_values}{Alias for by_assay_name.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object to be used to parallelise operations using \code{\link{DelayedArray}}.}
 
 \item{color_by}{Alias to \code{colour_by}.}
 
-\item{assay_name}{Alias for exprs_values.}
+\item{assay_name}{A string or integer scalar specifying the expression matrix in \code{object} to use.}
 
-\item{by_assay_name}{Alias for by_exprs_values.}
-
-\item{assay_values}{Alias for exprs_values}
+\item{by_assay_name}{A string or integer scalar specifying which assay to obtain expression values from,
+for use in point aesthetics - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}.}
 
 \item{assay_logged}{Alias for exprs_logged}
 

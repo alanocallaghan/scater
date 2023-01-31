@@ -11,14 +11,14 @@
 #' @param ntop Numeric scalar specifying the number of features with the highest variances to use for dimensionality reduction.
 #' @param subset_row Vector specifying the subset of features to use for dimensionality reduction.
 #' This can be a character vector of row names, an integer vector of row indices or a logical vector.
-#' @param exprs_values Integer scalar or string indicating which assay of \code{x} contains the expression values.
+#' @param assay_name Integer scalar or string indicating which assay of \code{x} contains the expression values.
 #' @param scale Logical scalar, should the expression values be standardized? 
 #' @param BSPARAM A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.
 #' @param altexp String or integer scalar specifying an alternative experiment containing the input data.
 #' @param dimred String or integer scalar specifying the existing dimensionality reduction results to use.
 #' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified.
-#' @param assay_name Alias for exprs_values.
+#' @param exprs_values Alias for assay_name.
 #' @param ... For the \code{calculatePCA} generic, additional arguments to pass to specific methods.
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
 #'
@@ -35,7 +35,7 @@
 #' @section Feature selection:
 #' This section is relevant if \code{x} is a numeric matrix of (log-)expression values with features in rows and cells in columns;
 #' or if \code{x} is a \linkS4class{SingleCellExperiment} and \code{dimred=NULL}.
-#' In the latter, the expression values are obtained from the assay specified by \code{exprs_values}.
+#' In the latter, the expression values are obtained from the assay specified by \code{assay_name}.
 #'
 #' The \code{subset_row} argument specifies the features to use for dimensionality reduction.
 #' The aim is to allow users to specify highly variable features to improve the signal/noise ratio,
@@ -71,7 +71,7 @@
 #' In such cases, the method is run on data from an alternative \linkS4class{SummarizedExperiment} nested within \code{x}.
 #' This is useful for performing dimensionality reduction on other features stored in \code{\link{altExp}(x, altexp)}, e.g., antibody tags. 
 #' 
-#' Setting \code{altexp} with \code{exprs_values} will use the specified assay from the alternative SummarizedExperiment.
+#' Setting \code{altexp} with \code{assay_name} will use the specified assay from the alternative SummarizedExperiment.
 #' If the alternative is a SingleCellExperiment, setting \code{dimred} will use the specified dimensionality reduction results from the alternative. 
 #' This option will also interact as expected with \code{n_dimred}.
 #'

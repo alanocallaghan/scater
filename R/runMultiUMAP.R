@@ -10,16 +10,16 @@
 #'
 #' Alternatively, a \linkS4class{SingleCellExperiment} containing relevant matrices in its assays, \code{\link{reducedDims}} or \code{\link{altExps}}.
 #' This is also the only permissible argument for \code{runMultiUMAP}.
-#' @param exprs_values A character or integer vector of assays to extract and transpose for use in the UMAP.
+#' @param assay_name A character or integer vector of assays to extract and transpose for use in the UMAP.
 #' For the SingleCellExperiment, this argument can be missing, in which case no assays are used.
 #' @param dimred A character or integer vector of \code{\link{reducedDims}} to extract for use in the UMAP.
 #' This argument can be missing, in which case no assays are used.
 #' @param altexp A character or integer vector of \code{\link{altExps}} to extract and transpose for use in the UMAP.
 #' This argument can be missing, in which case no alternative experiments are used.
-#' @param altexp_exprs_values A character or integer vector specifying the assay to extract from alternative experiments, when \code{altexp} is specified.
+#' @param altexp_assay_name A character or integer vector specifying the assay to extract from alternative experiments, when \code{altexp} is specified.
 #' This is recycled to the same length as \code{altexp}.
-#' @param assay_name Alias for exprs_values.
-#' @param altexp_assay_name Alias for altexp_exprs_values
+#' @param exprs_values Alias for assay_name.
+#' @param altexp_exprs_values Alias for altexp_assay_name
 #' @param ... For the generic, further arguments to pass to specific methods.
 #'
 #' For the ANY method, further arguments to pass to \code{\link[uwot]{umap}}.

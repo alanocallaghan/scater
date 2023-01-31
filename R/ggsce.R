@@ -5,6 +5,7 @@
 #'
 #' @param x A \linkS4class{SingleCellExperiment} object.
 #' This is expected to have row names for \code{ggcells} and column names for \code{ggfeatures}.
+#' @param assay_name String or integer scalar specifying the expression values for which to compute the variance (also an alias exprs_value is accepted).
 #' @param mapping A list containing aesthetic mappings, usually the output of \code{\link{aes}} or related functions.
 #' @inheritParams scuttle::makePerCellDF
 #' @inheritParams scuttle::makePerFeatureDF

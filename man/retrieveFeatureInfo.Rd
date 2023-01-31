@@ -20,9 +20,9 @@ Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.}
 
 \item{search}{Character vector specifying the types of data or metadata to use.}
 
-\item{exprs_values}{String or integer scalar specifying the assay from which expression values should be extracted.}
+\item{exprs_values}{Alias for assay_name.}
 
-\item{assay_name}{Alias for exprs_values.}
+\item{assay_name}{String or integer scalar specifying the assay from which expression values should be extracted.}
 }
 \value{
 A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
@@ -45,7 +45,7 @@ Given a character string in \code{by}, this function will:
 \item Search \code{\link{rowData}} for a column named \code{by}, 
 and return the corresponding field as the output \code{value}.
 We do not consider nested elements within the \code{rowData}.
-\item Search \code{\link{assay}(x, exprs_values)} for a column named \code{by}, 
+\item Search \code{\link{assay}(x, assay_name)} for a column named \code{by}, 
 and return the expression vector for this feature as the output \code{value}.
 }
 Any match will cause the function to return without considering later possibilities.

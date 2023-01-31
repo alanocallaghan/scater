@@ -43,6 +43,8 @@ May also include features in alternative Experiments if permitted by \code{use.a
 
 \item{extract_mapping}{Logical scalar indicating whether \code{features} or \code{cells} should be automatically expanded to include variables referenced in \code{mapping}.}
 
+\item{assay_name}{String or integer scalar specifying the expression values for which to compute the variance (also an alias exprs_value is accepted).}
+
 \item{...}{Further arguments to pass to \link{ggplot}.}
 
 \item{cells}{Character vector specifying the features for which to extract expression profiles across cells.}

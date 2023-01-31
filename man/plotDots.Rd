@@ -35,7 +35,7 @@ Alternatively, any value that can be used in the \code{by} argument to \code{\li
 \item{block}{String specifying the field of \code{\link{colData}(object)} containing a blocking factor (e.g., batch of origin).
 Alternatively, any value that can be used in the \code{by} argument to \code{\link{retrieveCellInfo}}.}
 
-\item{exprs_values}{A string or integer scalar indicating which assay of \code{object} should be used as expression values.}
+\item{exprs_values}{Alias for assay_name.}
 
 \item{detection_limit}{Numeric scalar providing the value above which observations are deemed to be expressed.}
 
@@ -56,7 +56,7 @@ detected expression values.}
 \item{other_fields}{Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 Note that any \link{AsIs} vectors or data.frames must be of length equal to \code{nrow(object)}, not \code{features}.}
 
-\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, for entries of \code{other_fields}. Also alias by_assay_name is accepted as argument name.}
+\item{by_exprs_values}{Alias for by_assay_name.}
 
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
 identify features instead of \code{rownames(object)} when labelling plot 
@@ -68,7 +68,9 @@ elements.}
 \item{scale}{A logical scalar specifying whether each row should have its
 average expression values scaled to unit variance prior to plotting.}
 
-\item{assay_name}{Alias for exprs_values.}
+\item{assay_name}{A string or integer scalar indicating which assay of \code{object} should be used as expression values.}
+
+\item{by_assay_name}{A string or integer scalar specifying which assay to obtain expression values from, for entries of \code{other_fields}. Also alias by_exprs_values is accepted as argument name.}
 }
 \value{
 A \link{ggplot} object containing a dot plot.

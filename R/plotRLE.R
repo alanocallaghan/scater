@@ -3,7 +3,7 @@
 #' Produce a relative log expression (RLE) plot of one or more transformations of cell expression values.
 #'
 #' @param object A SingleCellExperiment object.
-#' @param exprs_values A string or integer scalar specifying the expression matrix in \code{object} to use.
+#' @param assay_name A string or integer scalar specifying the expression matrix in \code{object} to use.
 #' @param exprs_logged A logical scalar indicating whether the expression matrix is already log-transformed.
 #' If not, a log2-transformation (+1) will be performed prior to plotting.
 #' @param style String defining the boxplot style to use, either \code{"minimal"} (default) or \code{"full"}; see Details.
@@ -11,13 +11,12 @@
 #' @param ordering A vector specifying the ordering of cells in the RLE plot.
 #' This can be useful for arranging cells by experimental conditions or batches.
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
-#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from,
-#' for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
+#' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from,
+#' for use in point aesthetics - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object to be used to parallelise operations using \code{\link{DelayedArray}}.
 #' @param color_by Alias to \code{colour_by}.
-#' @param assay_name Alias for exprs_values.
-#' @param by_assay_name Alias for by_exprs_values.
-#' @param assay_values Alias for exprs_values
+#' @param exprs_values Alias for assay_name.
+#' @param by_exprs_values Alias for by_assay_name.
 #' @param assay_logged Alias for exprs_logged
 #' @param ... further arguments passed to \code{\link[ggplot2]{geom_boxplot}} when \code{style="full"}.
 #'
@@ -71,7 +70,6 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
                     BPPARAM = BiocParallel::bpparam(), color_by = NULL,
                     assay_name=exprs_values,
                     by_assay_name=by_exprs_values,
-		    assay_values=exprs_values, # Never called in the code? Is this a passed argument.
 		    assay_logged=exprs_logged,		    
                     ...) {
 

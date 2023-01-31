@@ -38,7 +38,7 @@ If a list is supplied, each entry of the list can be a string, an AsIs-wrapped v
 
 \item{x}{Specification of a column metadata field or a feature to show on the x-axis, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{exprs_values}{A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from. Also the alias assay_name is accepted.}
+\item{exprs_values}{Alias for assay_name.}
 
 \item{log2_values}{Logical scalar, specifying whether the expression values be transformed to the log2-scale for plotting (with an offset of 1 to avoid logging zeroes).}
 
@@ -50,8 +50,7 @@ If a list is supplied, each entry of the list can be a string, an AsIs-wrapped v
 
 \item{order_by}{Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}. Also the alias by_assay_name is accepted.}
+\item{by_exprs_values}{Alias for by_assay_name.}
 
 \item{xlab}{String specifying the label for x-axis.
 If \code{NULL} (default), \code{x} will be used as the x-axis label.}
@@ -78,9 +77,10 @@ elements.}
 
 \item{point_fun}{Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}.}
 
-\item{assay_name}{Alias for exprs_values.}
+\item{assay_name}{A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from. Also the alias assay_name is accepted.}
 
-\item{by_assay_name}{Alias for by_exprs_values.}
+\item{by_assay_name}{A string or integer scalar specifying which assay to obtain expression values from, 
+for use in point aesthetics - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}. Also the alias by_assay_name is accepted.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }

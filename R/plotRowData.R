@@ -11,11 +11,11 @@
 #' @param colour_by Specification of a row metadata field or a cell to colour by, see \code{?\link{retrieveFeatureInfo}} for possible values. 
 #' @param shape_by Specification of a row metadata field or a cell to shape by, see \code{?\link{retrieveFeatureInfo}} for possible values. 
 #' @param size_by Specification of a row metadata field or a cell to size by, see \code{?\link{retrieveFeatureInfo}} for possible values. 
-#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
+#' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see \code{?\link{retrieveFeatureInfo}} for details.
 #' @param other_fields Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param color_by Alias to \code{colour_by}.
-#' @param by_assay_name Alias for by_exprs_values.
+#' @param by_exprs_values Alias for by_assay_name.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 

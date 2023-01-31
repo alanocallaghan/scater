@@ -5,7 +5,8 @@
 #' @param x A numeric matrix of expression values, usually log-transformed and normalized.
 #' 
 #' Alternatively, a \linkS4class{SummarizedExperiment} containing such a matrix.
-#' @param exprs_values String or integer scalar specifying the expression values for which to compute the variance (also an alias assay_name is accepted).
+#' @param assay_name String or integer scalar specifying the expression values for which to compute the variance (also an alias exprs_value is accepted).
+#' @param exprs_values Alias for assay_name.
 #' @param variables A \linkS4class{DataFrame} or data.frame containing one or more variables of interest.
 #' This should have number of rows equal to the number of columns in \code{x}.
 #'

@@ -10,15 +10,15 @@
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' The curve for each cell will be coloured according to this specification.
 #' @param nfeatures Numeric scalar indicating the number of top-expressed features to show n the plot.
-#' @param exprs_values String or integer scalar indicating which assay of \code{object} should be used to obtain the expression values for this plot. 
-#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
+#' @param assay_name String or integer scalar indicating which assay of \code{object} should be used to obtain the expression values for this plot. 
+#' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from, 
+#' for use in point aesthetics - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}.
 #' @param ncol Number of columns to use for \code{\link{facet_wrap}} if only one block is defined.
 #' @param line_width Numeric scalar specifying the line width.
 #' @param theme_size Numeric scalar specifying the font size to use for the plotting theme.
 #' @param color_by Alias to \code{colour_by}.
-#' @param assay_name Alias for exprs_values.
-#' @param by_assay_name Alias for by_exprs_values.
+#' @param exprs_values Alias for assay_name.
+#' @param by_exprs_values Alias for by_assay_name.
 #' @details 
 #' For each cell, the features are ordered from most-expressed to least-expressed.
 #' The cumulative proportion of the total expression for the cell is computed across the top \code{nfeatures} features. 
@@ -35,7 +35,7 @@
 #' @examples
 #' example_sce <- mockSCE()
 #' plotScater(example_sce)
-#' plotScater(example_sce, exprs_values = "counts", colour_by = "Cell_Cycle")
+#' plotScater(example_sce, assay_name = "counts", colour_by = "Cell_Cycle")
 #' plotScater(example_sce, block1 = "Treatment", colour_by = "Cell_Cycle")
 #'
 #' @export

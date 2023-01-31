@@ -7,20 +7,20 @@
 #' @param colour_cells_by Specification of a column metadata field or a feature to colour by, see \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param drop_features A character, logical or numeric vector indicating which features (e.g. genes, transcripts) to drop when producing the plot. 
 #' For example, spike-in transcripts might be dropped to examine the contribution from endogenous genes.
-#' @param exprs_values A integer scalar or string specifying the assay to obtain expression values from.
+#' @param assay_name A integer scalar or string specifying the assay to obtain expression values from.
 #' @param feature_names_to_plot String specifying which row-level metadata column contains the feature names.
 #' Alternatively, an \link{AsIs}-wrapped vector or a data.frame, see \code{?\link{retrieveFeatureInfo}} for possible values.
 #' Default is \code{NULL}, in which case \code{rownames(object)} are used.
-#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, 
+#' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in colouring - see \code{?\link{retrieveCellInfo}} for details.
 #' @param as_percentage logical scalar indicating whether percentages should be  plotted. 
-#' If \code{FALSE}, the raw \code{exprs_values} are shown instead.
+#' If \code{FALSE}, the raw \code{assay_name} are shown instead.
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to 
 #'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
 #' @param color_cells_by Alias to \code{colour_cells_by}.
-#' @param assay_name Alias for exprs_values.
-#' @param by_assay_name Alias for by_exprs_values.
+#' @param exprs_values Alias for assay_name.
+#' @param by_exprs_values Alias for by_assay_name.
 #'
 #' @details 
 #' This function will plot the percentage of counts accounted for by the top \code{n} most highly expressed features across the dataset.
@@ -44,7 +44,7 @@
 #' @importMethodsFrom DelayedArray sweep
 #' @importFrom DelayedMatrixStats rowSums2 colSums2
 #' @importFrom SummarizedExperiment assay
-#' @importFrom ggplot2 ggplot geom_point ggtitle xlab ylab theme_bw theme element_text 
+#' @importFrom ggplot2 ggplot geom_point ggtitle xlab ylab theme_bw theme element_text labs
 #' scale_colour_gradient scale_fill_manual guides
 plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by, 
     drop_features = NULL, exprs_values = "counts",

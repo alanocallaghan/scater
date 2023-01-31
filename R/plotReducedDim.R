@@ -25,9 +25,9 @@
 #' @param order_by Specification of a column metadata field or a feature to
 #' order points by, see the \code{by} argument in
 #' \code{?\link{retrieveCellInfo}} for possible values.
-#' @param by_exprs_values A string or integer scalar specifying which assay to
+#' @param by_assay_name A string or integer scalar specifying which assay to
 #' obtain expression values from,
-#' for use in point aesthetics - see the \code{exprs_values} argument in
+#' for use in point aesthetics - see the \code{assay_name} argument in
 #' \code{?\link{retrieveCellInfo}}.
 #' @param text_by String specifying the column metadata field with which to add
 #' text labels on the plot.
@@ -54,7 +54,7 @@
 #' \code{\link[ggrastr]{rasterise}}. To control the dpi, set
 #' \code{options(ggrastr.default.dpi)},
 #' for example \code{options(ggrastr.default.dpi=300)}.
-#' @param by_assay_name Alias for by_exprs_values.
+#' @param by_exprs_values Alias for by_assay_name.
 #' @param ... Additional arguments for visualization, see
 #' \code{?"\link{scater-plot-args}"} for details.
 #'
@@ -205,6 +205,9 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
         add_legend = TRUE, theme_size = 10, point_alpha = 0.6, point_size = NULL, point_shape = NULL,
         rasterise = FALSE
     ) {
+
+    # Circumvent warnings on the missing undefined global variable
+    ..scaled.. <- NULL 
 
     reddim_cols <- seq_along(to_plot)
     df_to_expand <- df_to_plot[, reddim_cols]

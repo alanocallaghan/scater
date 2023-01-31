@@ -7,11 +7,11 @@
 #' @param by A string specifying the field to extract (see Details).
 #' Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.
 #' @param search Character vector specifying the types of data or metadata to use.
-#' @param exprs_values String or integer scalar specifying the assay from which expression values should be extracted.
+#' @param assay_name String or integer scalar specifying the assay from which expression values should be extracted.
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to
 #'  identify features instead of \code{rownames(object)} when labelling plot
 #'  elements.
-#' @param assay_name Alias for exprs_values.
+#' @param exprs_values Alias for assay_name.
 #'
 #' @return A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
 #' and \code{value}, a vector of length equal to \code{ncol(x)} containing per-cell (meta)data values.
@@ -29,10 +29,10 @@
 #' \item Search \code{\link{colData}} for a column named \code{by},
 #' and return the corresponding field as the output \code{value}.
 #' We do not consider nested elements within the \code{colData}.
-#' \item Search \code{\link{assay}(x, exprs_values)} for a row named \code{by},
+#' \item Search \code{\link{assay}(x, assay_name)} for a row named \code{by},
 #' and return the expression vector for this feature as the output \code{value}.
 #' \item Search each alternative experiment in \code{\link{altExps}(x)} for a row names \code{by},
-#' and return the expression vector for this feature at \code{exprs_values} as the output \code{value}.
+#' and return the expression vector for this feature at \code{assay_name} as the output \code{value}.
 #' }
 #' Any match will cause the function to return without considering later possibilities.
 #' The search can be modified by changing the presence and ordering of elements in \code{search}.
