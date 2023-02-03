@@ -83,9 +83,15 @@ plotGroupedHeatmap <- function(object, features, group, block = NULL,
         ids <- ids[columns,,drop=FALSE]
     }
     heat.se <- summarizeAssayByGroup(heat.vals, ids, statistic="mean")
-    heat.vals <- correctGroupSummary(assay(heat.se), group=heat.se$group, block=heat.se$group)
-    heatmap_scale <- .heatmap_scale(heat.vals, center=center, scale=scale, colour=colour, zlim=zlim)
+    if (!is.null(block)) {
+        heat.se <- correctGroupSummary(assay(heat.se), group=heat.se$group, block=heat.se$block)
+    }
+    if (inherits(heat.se, "SummarizedExperiment")) {
+        heat.se <- assay(heat.se)
+    }
+    heatmap_scale <- .heatmap_scale(heat.se, center=center, scale=scale, colour=colour, zlim=zlim)
 
     # Creating the heatmap as specified.
     pheatmap::pheatmap(heatmap_scale$x, color=heatmap_scale$colour, breaks=heatmap_scale$colour_breaks, ...) 
 }
+
