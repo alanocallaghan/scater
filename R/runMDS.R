@@ -91,16 +91,16 @@ setMethod("calculateMDS", "ANY", .calculate_mds)
 #' @export
 #' @rdname runMDS
 #' @importFrom SummarizedExperiment assay
-setMethod("calculateMDS", "SummarizedExperiment", function(x, ..., exprs_values="logcounts") {
-    .calculate_mds(assay(x, exprs_values), ...)
+setMethod("calculateMDS", "SummarizedExperiment", function(x, ..., exprs_values="logcounts", assay_name=exprs_values) {
+    .calculate_mds(assay(x, assay_name), ...)
 })
 
 #' @export
 #' @rdname runMDS
 #' @importFrom SummarizedExperiment assay
-setMethod("calculateMDS", "SingleCellExperiment", function(x, ..., exprs_values="logcounts", dimred=NULL, n_dimred=NULL)
+setMethod("calculateMDS", "SingleCellExperiment", function(x, ..., exprs_values="logcounts", dimred=NULL, n_dimred=NULL, assay_name=exprs_values)
 {
-    mat <- .get_mat_from_sce(x, exprs_values=exprs_values, dimred=dimred, n_dimred=n_dimred)
+    mat <- .get_mat_from_sce(x, assay_name=assay_name, dimred=dimred, n_dimred=n_dimred)
     .calculate_mds(mat, transposed=!is.null(dimred), ...)
 })
 

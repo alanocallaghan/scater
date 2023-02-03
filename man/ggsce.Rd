@@ -15,6 +15,7 @@ ggcells(
   prefix_altexps = FALSE,
   check_names = TRUE,
   extract_mapping = TRUE,
+  assay_name = exprs_values,
   ...
 )
 
@@ -25,6 +26,7 @@ ggfeatures(
   exprs_values = "logcounts",
   check_names = TRUE,
   extract_mapping = TRUE,
+  assay_name = exprs_values,
   ...
 )
 }
@@ -40,6 +42,8 @@ May also include features in alternative Experiments if permitted by \code{use.a
 \item{exprs_values, use_dimred, use_altexps, prefix_altexps, check_names}{Soft-deprecated equivalents of the arguments described above.}
 
 \item{extract_mapping}{Logical scalar indicating whether \code{features} or \code{cells} should be automatically expanded to include variables referenced in \code{mapping}.}
+
+\item{assay_name}{String or integer scalar specifying the expression values for which to compute the variance (also an alias \code{exprs_value} is accepted).}
 
 \item{...}{Further arguments to pass to \link{ggplot}.}
 

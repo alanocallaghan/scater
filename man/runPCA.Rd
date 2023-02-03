@@ -22,14 +22,15 @@ calculatePCA(x, ...)
   BPPARAM = SerialParam()
 )
 
-\S4method{calculatePCA}{SummarizedExperiment}(x, ..., exprs_values = "logcounts")
+\S4method{calculatePCA}{SummarizedExperiment}(x, ..., exprs_values = "logcounts", assay_name = exprs_values)
 
 \S4method{calculatePCA}{SingleCellExperiment}(
   x,
   ...,
   exprs_values = "logcounts",
   dimred = NULL,
-  n_dimred = NULL
+  n_dimred = NULL,
+  assay_name = exprs_values
 )
 
 \S4method{runPCA}{SingleCellExperiment}(x, ..., altexp = NULL, name = "PCA")
@@ -60,7 +61,9 @@ This can be a character vector of row names, an integer vector of row indices or
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.}
 
-\item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
+\item{exprs_values}{Alias to \code{assay_name}.}
+
+\item{assay_name}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
 
 \item{dimred}{String or integer scalar specifying the existing dimensionality reduction results to use.}
 
@@ -97,7 +100,7 @@ For full reproducibility, users should call \code{\link{set.seed}} prior to runn
 
 This section is relevant if \code{x} is a numeric matrix of (log-)expression values with features in rows and cells in columns;
 or if \code{x} is a \linkS4class{SingleCellExperiment} and \code{dimred=NULL}.
-In the latter, the expression values are obtained from the assay specified by \code{exprs_values}.
+In the latter, the expression values are obtained from the assay specified by \code{assay_name}.
 
 The \code{subset_row} argument specifies the features to use for dimensionality reduction.
 The aim is to allow users to specify highly variable features to improve the signal/noise ratio,
@@ -137,7 +140,7 @@ This section is relevant if \code{x} is a \linkS4class{SingleCellExperiment} and
 In such cases, the method is run on data from an alternative \linkS4class{SummarizedExperiment} nested within \code{x}.
 This is useful for performing dimensionality reduction on other features stored in \code{\link{altExp}(x, altexp)}, e.g., antibody tags. 
 
-Setting \code{altexp} with \code{exprs_values} will use the specified assay from the alternative SummarizedExperiment.
+Setting \code{altexp} with \code{assay_name} will use the specified assay from the alternative SummarizedExperiment.
 If the alternative is a SingleCellExperiment, setting \code{dimred} will use the specified dimensionality reduction results from the alternative. 
 This option will also interact as expected with \code{n_dimred}.
 

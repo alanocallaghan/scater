@@ -31,7 +31,7 @@ calculateTSNE(x, ...)
   dens_lambda = 0.1
 )
 
-\S4method{calculateTSNE}{SummarizedExperiment}(x, ..., exprs_values = "logcounts")
+\S4method{calculateTSNE}{SummarizedExperiment}(x, ..., exprs_values = "logcounts", assay_name = exprs_values)
 
 \S4method{calculateTSNE}{SingleCellExperiment}(
   x,
@@ -39,7 +39,8 @@ calculateTSNE(x, ...)
   pca = is.null(dimred),
   exprs_values = "logcounts",
   dimred = NULL,
-  n_dimred = NULL
+  n_dimred = NULL,
+  assay_name = exprs_values
 )
 
 runTSNE(x, ..., altexp = NULL, name = "TSNE")
@@ -89,7 +90,9 @@ otherwise, the \code{\link[Rtsne]{Rtsne}} defaults are used.}
 
 \item{dens_frac, dens_lambda}{See \code{\link[densvis]{densne}}}
 
-\item{exprs_values}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
+\item{exprs_values}{Alias to \code{assay_name}.}
+
+\item{assay_name}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
 
 \item{pca}{Logical scalar indicating whether a PCA step should be performed inside \code{\link[Rtsne]{Rtsne}}.}
 
@@ -130,7 +133,7 @@ This presumes that the existing dimensionality reduction is sufficient such that
 
 This section is relevant if \code{x} is a numeric matrix of (log-)expression values with features in rows and cells in columns;
 or if \code{x} is a \linkS4class{SingleCellExperiment} and \code{dimred=NULL}.
-In the latter, the expression values are obtained from the assay specified by \code{exprs_values}.
+In the latter, the expression values are obtained from the assay specified by \code{assay_name}.
 
 The \code{subset_row} argument specifies the features to use for dimensionality reduction.
 The aim is to allow users to specify highly variable features to improve the signal/noise ratio,
@@ -170,7 +173,7 @@ This section is relevant if \code{x} is a \linkS4class{SingleCellExperiment} and
 In such cases, the method is run on data from an alternative \linkS4class{SummarizedExperiment} nested within \code{x}.
 This is useful for performing dimensionality reduction on other features stored in \code{\link{altExp}(x, altexp)}, e.g., antibody tags. 
 
-Setting \code{altexp} with \code{exprs_values} will use the specified assay from the alternative SummarizedExperiment.
+Setting \code{altexp} with \code{assay_name} will use the specified assay from the alternative SummarizedExperiment.
 If the alternative is a SingleCellExperiment, setting \code{dimred} will use the specified dimensionality reduction results from the alternative. 
 This option will also interact as expected with \code{n_dimred}.
 

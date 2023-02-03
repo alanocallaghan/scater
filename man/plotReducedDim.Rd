@@ -25,6 +25,7 @@ plotReducedDim(
   point.padding = NA,
   force = 1,
   rasterise = FALSE,
+  by_assay_name = by_exprs_values,
   ...
 )
 }
@@ -59,10 +60,7 @@ possible values.}
 order points by, see the \code{by} argument in
 \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{by_exprs_values}{A string or integer scalar specifying which assay to
-obtain expression values from,
-for use in point aesthetics - see the \code{exprs_values} argument in
-\code{?\link{retrieveCellInfo}}.}
+\item{by_exprs_values}{Alias for \code{by_assay_name}.}
 
 \item{text_by}{String specifying the column metadata field with which to add
 text labels on the plot.
@@ -98,6 +96,11 @@ elements.}
 \code{\link[ggrastr]{rasterise}}. To control the dpi, set
 \code{options(ggrastr.default.dpi)},
 for example \code{options(ggrastr.default.dpi=300)}.}
+
+\item{by_assay_name}{A string or integer scalar specifying which assay to
+obtain expression values from,
+for use in point aesthetics - see the \code{assay_name} argument in
+\code{?\link{retrieveCellInfo}}.}
 
 \item{...}{Additional arguments for visualization, see
 \code{?"\link{scater-plot-args}"} for details.}

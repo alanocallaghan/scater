@@ -10,7 +10,8 @@
 #' detected expression values.
 #' @param other_fields Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' Note that any \link{AsIs} vectors or data.frames must be of length equal to \code{nrow(object)}, not \code{features}.
-#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from, for entries of \code{other_fields}. 
+#' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from, for entries of \code{other_fields}. Also alias \code{by_exprs_values} is accepted as argument name.
+#' @param by_exprs_values Alias for \code{by_assay_name}.
 #'
 #' @return 
 #' A \link{ggplot} object containing a dot plot.
@@ -55,8 +56,13 @@
 plotDots <- function(object, features, group = NULL, block=NULL,
     exprs_values = "logcounts", detection_limit = 0, zlim = NULL, 
     colour = color, color = NULL,
-    max_detected = NULL, other_fields = list(), by_exprs_values = exprs_values,
-    swap_rownames = NULL, center = FALSE, scale = FALSE)
+    max_detected = NULL, other_fields = list(),
+    by_exprs_values = exprs_values,
+    swap_rownames = NULL,
+    center = FALSE,
+    scale = FALSE,
+    assay_name=exprs_values,
+    by_assay_name=by_exprs_values)
 {
 
     if (is.null(group)) {
@@ -76,7 +82,7 @@ plotDots <- function(object, features, group = NULL, block=NULL,
     }
 
     summarized <- summarizeAssayByGroup(
-        assay(object, exprs_values)[as.character(features), , drop = FALSE],
+        assay(object, assay_name)[as.character(features), , drop = FALSE],
         ids=ids, statistics=c("mean", "prop.detected"),
         threshold=detection_limit)
     
@@ -105,7 +111,7 @@ plotDots <- function(object, features, group = NULL, block=NULL,
     # Adding other fields, if requested.
     vis_out <- .incorporate_common_vis_row(evals_long, se = object,
         colour_by = NULL, shape_by = NULL, size_by = NULL, 
-        by_exprs_values = by_exprs_values, other_fields = other_fields,
+        by_assay_name = by_assay_name, other_fields = other_fields,
         multiplier = rep(.subset2index(features, object), ncol(num)))
     evals_long <- vis_out$df
     ggplot(evals_long) + 

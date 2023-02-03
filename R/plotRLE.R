@@ -3,7 +3,7 @@
 #' Produce a relative log expression (RLE) plot of one or more transformations of cell expression values.
 #'
 #' @param object A SingleCellExperiment object.
-#' @param exprs_values A string or integer scalar specifying the expression matrix in \code{object} to use.
+#' @param assay_name A string or integer scalar specifying the expression matrix in \code{object} to use.
 #' @param exprs_logged A logical scalar indicating whether the expression matrix is already log-transformed.
 #' If not, a log2-transformation (+1) will be performed prior to plotting.
 #' @param style String defining the boxplot style to use, either \code{"minimal"} (default) or \code{"full"}; see Details.
@@ -11,10 +11,13 @@
 #' @param ordering A vector specifying the ordering of cells in the RLE plot.
 #' This can be useful for arranging cells by experimental conditions or batches.
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
-#' @param by_exprs_values A string or integer scalar specifying which assay to obtain expression values from,
-#' for use in point aesthetics - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.
+#' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from,
+#' for use in point aesthetics - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object to be used to parallelise operations using \code{\link{DelayedArray}}.
 #' @param color_by Alias to \code{colour_by}.
+#' @param exprs_values Alias to \code{assay_name}.
+#' @param by_exprs_values Alias to \code{by_assay_name}.
+#' @param assay_logged Alias to \code{exprs_logged}.
 #' @param ... further arguments passed to \code{\link[ggplot2]{geom_boxplot}} when \code{style="full"}.
 #'
 #' @return A ggplot object
@@ -65,6 +68,9 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
                     style = "minimal", legend = TRUE, ordering = NULL, 
                     colour_by = color_by, by_exprs_values = exprs_values,
                     BPPARAM = BiocParallel::bpparam(), color_by = NULL,
+                    assay_name=exprs_values,
+                    by_assay_name=by_exprs_values,
+		    assay_logged=exprs_logged,		    
                     ...) {
 
     oldbp <- getAutoBPPARAM()
@@ -72,7 +78,7 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
     on.exit(setAutoBPPARAM(oldbp))
 
     ## Check aesthetic arguments.
-    colour_by_out <- retrieveCellInfo(object, colour_by, exprs_values = by_exprs_values)
+    colour_by_out <- retrieveCellInfo(object, colour_by, assay_name = by_assay_name)
     colour_by <- colour_by_out$name
     colour_by_vals <- colour_by_out$val
     if (!is.null(colour_by)) {
@@ -82,9 +88,9 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
     }
 
     ## Calculate RLE for each gene in each cell.
-    exprs_mat <- assay(object, i=exprs_values, withDimnames=FALSE)
+    exprs_mat <- assay(object, i=assay_name, withDimnames=FALSE)
     exprs_mat <- DelayedArray(exprs_mat)
-    if (!exprs_logged) {
+    if (!assay_logged) {
         exprs_mat <- log2(exprs_mat + 1)
     }
     features_meds <- rowMedians(exprs_mat)

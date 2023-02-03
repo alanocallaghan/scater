@@ -17,7 +17,7 @@ nexprs(x, ...)
   BPPARAM = SerialParam()
 )
 
-\S4method{nexprs}{SummarizedExperiment}(x, ..., exprs_values = "counts")
+\S4method{nexprs}{SummarizedExperiment}(x, ..., exprs_values = "counts", assay_name = exprs_values)
 }
 \arguments{
 \item{x}{A numeric matrix of counts where features are rows and cells are columns.
@@ -40,7 +40,9 @@ If \code{FALSE}, the function will count the number of detected features per cel
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.
 Only relevant when \code{x} is a \linkS4class{DelayedMatrix}.}
 
-\item{exprs_values}{String or integer specifying the assay of \code{x} to obtain the count matrix from.}
+\item{exprs_values}{Alias for \code{assay_name}.}
+
+\item{assay_name}{String or integer specifying the assay of \code{x} to obtain the count matrix from (also the alias \code{exprs_values} is accepted for this argument).}
 }
 \value{
 An integer vector containing counts per gene or cell, depending on the provided arguments.

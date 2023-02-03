@@ -14,6 +14,7 @@ plotRowData(
   by_exprs_values = "logcounts",
   other_fields = list(),
   color_by = NULL,
+  by_assay_name = by_exprs_values,
   ...
 )
 }
@@ -33,12 +34,14 @@ If \code{NULL}, nothing is shown on the x-axis.}
 
 \item{size_by}{Specification of a row metadata field or a cell to size by, see \code{?\link{retrieveFeatureInfo}} for possible values.}
 
-\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in point aesthetics - see \code{?\link{retrieveFeatureInfo}} for details.}
+\item{by_exprs_values}{Alias to \code{by_assay_name}.}
 
 \item{other_fields}{Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
 \item{color_by}{Alias to \code{colour_by}.}
+
+\item{by_assay_name}{A string or integer scalar specifying which assay to obtain expression values from, 
+for use in point aesthetics - see \code{?\link{retrieveFeatureInfo}} for details.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }

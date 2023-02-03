@@ -103,8 +103,8 @@ setMethod("calculateUMAP", "ANY", .calculate_umap)
 #' @export
 #' @rdname runUMAP
 #' @importFrom SummarizedExperiment assay
-setMethod("calculateUMAP", "SummarizedExperiment", function(x, ..., exprs_values="logcounts") {
-    .calculate_umap(assay(x, exprs_values), ...)
+setMethod("calculateUMAP", "SummarizedExperiment", function(x, ..., exprs_values="logcounts", assay_name=exprs_values) {
+    .calculate_umap(assay(x, assay_name), ...)
 })
 
 #' @export
@@ -112,9 +112,9 @@ setMethod("calculateUMAP", "SummarizedExperiment", function(x, ..., exprs_values
 #' @importFrom SummarizedExperiment assay
 setMethod("calculateUMAP", "SingleCellExperiment", function(x, ..., 
     pca=if (!is.null(dimred)) NULL else 50,
-    exprs_values="logcounts", dimred=NULL, n_dimred=NULL)
+    exprs_values="logcounts", dimred=NULL, n_dimred=NULL, assay_name=exprs_values)
 {
-    mat <- .get_mat_from_sce(x, exprs_values=exprs_values, dimred=dimred, n_dimred=n_dimred)
+    mat <- .get_mat_from_sce(x, assay_name=assay_name, dimred=dimred, n_dimred=n_dimred)
     .calculate_umap(mat, transposed=!is.null(dimred), pca=pca, ...)
 })
 

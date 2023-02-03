@@ -6,7 +6,8 @@
 #'
 #' Alternatively, a \linkS4class{SummarizedExperiment} containing such counts.
 #' @param detection_limit Numeric scalar providing the value above which  observations are deemed to be expressed. 
-#' @param exprs_values String or integer specifying the assay of \code{x} to obtain the count matrix from.
+#' @param assay_name String or integer specifying the assay of \code{x} to obtain the count matrix from (also the alias \code{exprs_values} is accepted for this argument).
+#' @param exprs_values Alias for \code{assay_name}.
 #' @param byrow Logical scalar indicating whether to count the number of detected cells per feature.
 #' If \code{FALSE}, the function will count the number of detected features per cell.
 #' @param subset_row Logical, integer or character vector indicating which rows (i.e. features) to use.
@@ -70,6 +71,6 @@ setMethod("nexprs", "ANY", .nexprs)
 #' @rdname nexprs
 #' @importFrom SummarizedExperiment assay
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
-setMethod("nexprs", "SummarizedExperiment", function(x, ..., exprs_values="counts") {
-    .nexprs(assay(x, exprs_values), ...)    
+setMethod("nexprs", "SummarizedExperiment", function(x, ..., exprs_values="counts", assay_name=exprs_values) {
+    .nexprs(assay(x, assay_name), ...)    
 })

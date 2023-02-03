@@ -1,10 +1,11 @@
-4#' Create a ggplot from a SingleCellExperiment
+#' Create a ggplot from a SingleCellExperiment
 #'
 #' Create a base \link{ggplot} object from a \linkS4class{SingleCellExperiment},
 #' the contents of which can be directly referenced in subsequent layers without prior specification.
 #'
 #' @param x A \linkS4class{SingleCellExperiment} object.
 #' This is expected to have row names for \code{ggcells} and column names for \code{ggfeatures}.
+#' @param assay_name String or integer scalar specifying the expression values for which to compute the variance (also an alias \code{exprs_value} is accepted).
 #' @param mapping A list containing aesthetic mappings, usually the output of \code{\link{aes}} or related functions.
 #' @inheritParams scuttle::makePerCellDF
 #' @inheritParams scuttle::makePerFeatureDF
@@ -54,10 +55,10 @@
 #' @rdname ggsce
 ggcells <- function(x, mapping=aes(), features=NULL, exprs_values="logcounts", 
     use_dimred=TRUE, use_altexps=FALSE, prefix_altexps=FALSE, check_names=TRUE, 
-    extract_mapping=TRUE, ...) 
+    extract_mapping=TRUE, assay_name=exprs_values, ...) 
 {
     features <- c(features, .aes_in_use(mapping, extract_mapping)) 
-    df <- makePerCellDF(x, features=features, exprs_values=exprs_values, use_altexps=use_altexps, 
+    df <- makePerCellDF(x, features=features, exprs_values=assay_name, use_altexps=use_altexps, 
         use_dimred=use_dimred, prefix_altexps=prefix_altexps, check_names=check_names)
     ggplot(df, mapping=mapping, ...)
 }
@@ -65,10 +66,10 @@ ggcells <- function(x, mapping=aes(), features=NULL, exprs_values="logcounts",
 #' @export
 #' @rdname ggsce
 ggfeatures <- function(x, mapping=aes(), cells=NULL, exprs_values="logcounts", 
-    check_names=TRUE, extract_mapping=TRUE, ...)
+    check_names=TRUE, extract_mapping=TRUE, assay_name=exprs_values, ...)
 {
     cells <- c(cells, .aes_in_use(mapping, extract_mapping))
-    df <- makePerFeatureDF(x, cells=cells, exprs_values=exprs_values, check_names=check_names)
+    df <- makePerFeatureDF(x, cells=cells, exprs_values=assay_name, check_names=check_names)
     ggplot(df, mapping=mapping, ...)
 }
 

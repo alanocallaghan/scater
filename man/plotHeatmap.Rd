@@ -27,6 +27,8 @@ plotHeatmap(
   show_colnames = FALSE,
   cluster_cols = is.null(order_columns_by),
   swap_rownames = NULL,
+  assay_name = exprs_values,
+  by_assay_name = by_exprs_values,
   ...
 )
 }
@@ -39,7 +41,7 @@ plotHeatmap(
 Also specifies the column order if \code{cluster_cols=FALSE} and \code{order_columns_by=NULL}.
 By default, all columns are used.}
 
-\item{exprs_values}{A string or integer scalar indicating which assay of \code{object} should be used as expression values.}
+\item{exprs_values}{Alias to \code{assay_name}.}
 
 \item{center}{A logical scalar indicating whether each feature should have its mean expression centered at zero prior to plotting.}
 
@@ -82,14 +84,18 @@ Each entry of the list can be any acceptable input to the \code{by} argument in 
 A character vector can also be supplied and will be treated as a list of strings.
 This argument is automatically appended to \code{colour_columns_by}.}
 
-\item{by_exprs_values}{A string or integer scalar specifying which assay to obtain expression values from, 
-for colouring of column-level data - see the \code{exprs_values} argument in \code{?\link{retrieveCellInfo}}.}
+\item{by_exprs_values}{Alias to {by_assay_name}.}
 
 \item{show_colnames, cluster_cols, ...}{Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.}
 
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
 identify features instead of \code{rownames(object)} when labelling plot 
 elements.}
+
+\item{assay_name}{A string or integer scalar indicating which assay of \code{object} should be used as expression values.}
+
+\item{by_assay_name}{A string or integer scalar specifying which assay to obtain expression values from, 
+for colouring of column-level data - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}.}
 }
 \value{
 A heatmap is produced on the current graphics device. 
