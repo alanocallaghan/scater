@@ -18,7 +18,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          conda update -n base -c defaults conda
           dependencies <- remotes::local_package_deps(dependencies = TRUE)
           leftovers <- setdiff(dependencies, installed.packages())
           BiocManager::install(leftovers, ask=FALSE, Ncpu=2L)

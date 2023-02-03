@@ -206,9 +206,6 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
         rasterise = FALSE
     ) {
 
-    # Circumvent warnings on the missing undefined global variable
-    ..scaled.. <- NULL 
-
     reddim_cols <- seq_along(to_plot)
     df_to_expand <- df_to_plot[, reddim_cols]
 
