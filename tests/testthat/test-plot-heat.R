@@ -114,6 +114,7 @@ test_that("we can produce grouped heatmaps", {
     # Works with the various colour options.
     plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10], group="Group", colour=viridis::viridis(20))
     plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10], group="Group", zlim=c(0, 2))
+    plotGroupedHeatmap(example_sce, features=rownames(example_sce)[1:10], group="Group", block="Cell_Cycle", center=TRUE)
 
     # Works with rownames swapping.
     plotGroupedHeatmap(example_sce, features = rowData(example_sce)[1:10, "ENS"], 
