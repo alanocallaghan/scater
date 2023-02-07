@@ -88,22 +88,36 @@ NULL
             } else {
                 viol_args <- list(mapping=aes(fill=.data[[fill_by]]))
             }
-            plot_out <- plot_out + do.call(geom_violin, c(viol_args, list(colour = "gray60", alpha = 0.2, scale = "width", width = 0.8)))
+            plot_out <- plot_out +
+                do.call(
+                    geom_violin,
+                    c(viol_args, list(colour = "gray60", alpha = 0.2, scale = "width", width = 0.8))
+                )
         }
 
         # Adding median, if requested.
         if (show_median) {
-            plot_out <- plot_out + stat_summary(fun = median, fun.min = median, fun.max = median,
-                                                geom = "crossbar", width = 0.3, alpha = 0.8)
+            plot_out <- plot_out +
+                stat_summary(
+                    fun = median, fun.min = median, fun.max = median,
+                    geom = "crossbar", width = 0.3, alpha = 0.8
+                )
         }
 
         # Adding points.
-        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size, shape = point_shape)
+        point_out <- .get_point_args(
+            colour_by, shape_by, size_by,
+            alpha = point_alpha, size = point_size, shape = point_shape
+        )
         if (is.null(point_FUN)) {
             if (jitter_type=="swarm") {
-                point_FUN <- function(...) geom_quasirandom(..., width=0.4, groupOnX=TRUE, bandwidth=1)
+                point_FUN <- function(...) {
+                    geom_quasirandom(..., width=0.4, groupOnX=TRUE, bandwidth=1)
+                }
             } else {
-                point_FUN <- function(...) geom_jitter(..., position = position_jitter(height = 0))
+                point_FUN <- function(...) {
+                    geom_jitter(..., position = position_jitter(height = 0))
+                }
             }
         }
         plot_out <- plot_out + point_out$aes + do.call(point_FUN, point_out$args)
@@ -118,7 +132,10 @@ NULL
         plot_out <- ggplot(object, aes(x=.data$X, y=.data$Y)) + xlab(xlab) + ylab(ylab)
 
         # Adding points.
-        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size, shape = point_shape)
+        point_out <- .get_point_args(
+            colour_by, shape_by, size_by,
+            alpha = point_alpha, size = point_size, shape = point_shape
+        )
         if (is.null(point_FUN)) {
             point_FUN <- geom_point
         }
@@ -126,7 +143,8 @@ NULL
 
         # Adding smoothing, if requested.
         if (show_smooth) {
-            plot_out <- plot_out + stat_smooth(colour = "firebrick", linetype = 2, se = show_se)
+            plot_out <- plot_out +
+                stat_smooth(colour = "firebrick", linetype = 2, se = show_se)
         }
 
     } else {
@@ -166,7 +184,10 @@ NULL
                 linewidth = 0.5, fill = 'grey90')
 
         # Adding points.
-        point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size, shape = point_shape)
+        point_out <- .get_point_args(
+            colour_by, shape_by, size_by,
+            alpha = point_alpha, size = point_size, shape = point_shape
+        )
         if (is.null(point_FUN)) {
             point_FUN <- geom_point
         }
@@ -175,7 +196,10 @@ NULL
 
     # Adding colour.
     if (!is.null(colour_by)) {
-        plot_out <- .resolve_plot_colours(plot_out, object$colour_by, colour_by, fill = point_out$fill)
+        plot_out <- .resolve_plot_colours(
+            plot_out, object$colour_by, colour_by, fill = point_out$fill,
+            colour = !point_out$fill
+        )
     }
 
     ## Define plotting theme
@@ -199,7 +223,6 @@ NULL
 
 .get_point_args <- function(colour_by, shape_by, size_by, alpha=0.65, size=NULL, shape = NULL) 
 ## Note the use of colour instead of fill when shape_by is set, as not all shapes have fill.
-## (Fill is still the default as it looks nicer.)
 {
     fill_colour <- FALSE
     aes <- list()

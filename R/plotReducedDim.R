@@ -239,7 +239,8 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
     plot_out <- plot_out + point_out$aes + do.call(geom_point, point_out$args)
     if (!is.null(colour_by)) {
         plot_out <- .resolve_plot_colours(
-            plot_out, df_to_plot$colour_by, colour_by, fill = point_out$fill
+            plot_out, df_to_plot$colour_by, colour_by, fill = point_out$fill,
+            colour = !point_out$fill
         )
     }
 

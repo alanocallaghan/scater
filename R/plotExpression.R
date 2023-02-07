@@ -153,7 +153,7 @@ plotExpression <- function(object, features, x = NULL,
     size_by <- vis_out$size_by
 
     ## Set up the faceting.
-    if ( is.null(evals_long$X) ) { 
+    if (is.null(evals_long$X)) { 
         evals_long$X <- evals_long$Feature
     } else { 
         one_facet <- FALSE 
@@ -169,15 +169,17 @@ plotExpression <- function(object, features, x = NULL,
     } 
 
     # Creating the plot with faceting.        
-    plot_out <- .central_plotter(evals_long, xlab = xlab, ylab = ylab,
-                                 shape_by = shape_by, colour_by = colour_by, size_by = size_by, fill_by = fill_by,
-                                 ..., point_FUN = point_fun)
+    plot_out <- .central_plotter(
+        evals_long, xlab = xlab, ylab = ylab,
+        shape_by = shape_by, colour_by = colour_by, size_by = size_by, fill_by = fill_by,
+        ..., point_FUN = point_fun
+    )
     if (!one_facet) {
         plot_out <- plot_out + facet_wrap(~Feature, ncol = ncol, scales = scales)
     }
         
     # Do not show x-axis ticks or labels if there is no X.
-    if ( is.null(x) ) { 
+    if (is.null(x)) { 
         plot_out <- plot_out + theme(
             axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1),
             axis.ticks.x = element_blank(),

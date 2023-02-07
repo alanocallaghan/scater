@@ -118,7 +118,10 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by,
               title = element_text(colour = "gray35"))
 
     if (!is.null(colour_cells_by)) {
-        plot_most_expressed <- .resolve_plot_colours(plot_most_expressed, df_exprs_by_cell_long$colour_by, colour_cells_by)
+        plot_most_expressed <- .resolve_plot_colours(
+            plot_most_expressed, df_exprs_by_cell_long$colour_by, colour_cells_by,
+            fill = FALSE, colour = TRUE
+        )
     }
 
     ## Adding median expression values for each gene.
