@@ -36,39 +36,39 @@
 
 #' @importFrom ggplot2 scale_fill_manual scale_colour_manual
 #' @importFrom viridis scale_fill_viridis scale_colour_viridis
-.resolve_plot_colours <- function(plot_out, colour_by, colour_by_name, fill = FALSE) 
+.resolve_plot_colours <- function(plot_out, colour_by, colour_by_name, fill = FALSE, colour = FALSE) 
 # Get nice plotting colour schemes for very general colour variables
 {
-    if ( is.null(colour_by) ) {
+    if (is.null(colour_by)) {
         return(plot_out)
     }
 
     # Picking whether to fill or not.
-    if ( fill ) {
-        VIRIDFUN <- scale_fill_viridis
-        SCALEFUN <- scale_fill_manual
-    } else {
-        VIRIDFUN <- scale_colour_viridis
-        SCALEFUN <- scale_colour_manual
-    }
+    aesthetics <- c("fill", "colour")[c(fill, colour)]
 
+    VIRIDFUN <- scale_colour_viridis
+    SCALEFUN <- scale_colour_manual
+    
     # Set a sensible colour scheme and return the plot_out object
-    if ( is.numeric(colour_by) ) {
-        plot_out <- plot_out + VIRIDFUN(name = colour_by_name)
+    if (is.numeric(colour_by)) {
+        plot_out <- plot_out + VIRIDFUN(name = colour_by_name, aesthetics = aesthetics)
     } else {
         nlevs_colour_by <- nlevels(as.factor(colour_by))
         if (nlevs_colour_by <= 10) {
             plot_out <- plot_out + SCALEFUN(
                 values = .get_palette("tableau10medium"),
-                name = colour_by_name)
+                name = colour_by_name,
+                aesthetics = )
         } else {
             if (nlevs_colour_by > 10 && nlevs_colour_by <= 20) {
                 plot_out <- plot_out + SCALEFUN(
                     values = .get_palette("tableau20"),
-                    name = colour_by_name)
+                    name = colour_by_name,
+                    aesthetics = c("fill", "colour"))
             } else {
                 plot_out <- plot_out + VIRIDFUN(
-                    name = colour_by_name, discrete = TRUE)
+                    name = colour_by_name, discrete = TRUE,
+                    aesthetics = c("fill", "colour"))
             }
         }
     }

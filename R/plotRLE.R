@@ -123,8 +123,9 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
     } 
 
     # Adding colours.
-    plot_out <- .resolve_plot_colours(plot_out, colour_by_vals, colour_by, fill = FALSE)
-    plot_out <- .resolve_plot_colours(plot_out, colour_by_vals, colour_by, fill = TRUE)
+    # plot_out <- .resolve_plot_colours(plot_out, colour_by_vals, colour_by, fill = FALSE)
+    # plot_out <- .resolve_plot_colours(plot_out, colour_by_vals, colour_by, fill = TRUE)
+    plot_out <- .resolve_plot_colours(plot_out, colour_by_vals, colour_by, fill = TRUE, colour = TRUE)
     
     if (!legend) {
         plot_out <- plot_out + theme(legend.position = "none")

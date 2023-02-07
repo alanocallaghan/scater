@@ -58,7 +58,7 @@ plotExplanatoryPCs <- function(object, nvars_to_plot = 10, npcs_to_plot=50, them
         ylab("% variance explained") +
         coord_cartesian(ylim = c(10 ^ (-3), 100))
 
-    plot_out <- .resolve_plot_colours(plot_out, df_to_plot$Expl_Var, "")
+    plot_out <- .resolve_plot_colours(plot_out, df_to_plot$Expl_Var, "", fill = FALSE, colour = TRUE)
 
     if ( requireNamespace("cowplot", quietly = TRUE) ) {
         plot_out <- plot_out + cowplot::theme_cowplot(theme_size)

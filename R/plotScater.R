@@ -104,7 +104,10 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
 
     ## Add extra plot theme and details
     if ( !is.null(colour_by)) { 
-        plot_out <- .resolve_plot_colours(plot_out, seq_real_estate_long$colour_by, colour_by)
+        plot_out <- .resolve_plot_colours(
+            plot_out, seq_real_estate_long$colour_by, colour_by,
+            fill = FALSE, colour = TRUE
+        )
     }
 
     plot_out <- plot_out + xlab("Number of features") + ylab("Cumulative proportion of library")
