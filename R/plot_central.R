@@ -112,7 +112,7 @@ NULL
         if (is.null(point_FUN)) {
             if (jitter_type=="swarm") {
                 point_FUN <- function(...) {
-                    geom_quasirandom(..., width=0.4, groupOnX=TRUE, bandwidth=1)
+                    geom_quasirandom(..., width=0.4, bandwidth=1)
                 }
             } else {
                 point_FUN <- function(...) {
@@ -120,13 +120,12 @@ NULL
                 }
             }
         }
-        plot_out <- plot_out + point_out$aes + do.call(point_FUN, point_out$args)
+        plot_out <- plot_out + do.call(point_FUN, point_out$args)
 
         # Flipping.
         if (flipped) {
             plot_out <- plot_out + coord_flip()
         }
-
     } else if (is.numeric(object$Y) && is.numeric(object$X)) { 
         # Creating a scatter plot.
         plot_out <- ggplot(object, aes(x=.data$X, y=.data$Y)) + xlab(xlab) + ylab(ylab)
@@ -139,14 +138,13 @@ NULL
         if (is.null(point_FUN)) {
             point_FUN <- geom_point
         }
-        plot_out <- plot_out + point_out$aes + do.call(point_FUN, point_out$args)
+        plot_out <- plot_out + do.call(point_FUN, point_out$args)
 
         # Adding smoothing, if requested.
         if (show_smooth) {
             plot_out <- plot_out +
                 stat_smooth(colour = "firebrick", linetype = 2, se = show_se)
         }
-
     } else {
         # Creating a rectangle area plot.
         object$X <- as.factor(object$X)
@@ -179,9 +177,13 @@ NULL
         plot_out <- ggplot(object, aes(x=.data$X, y=.data$Y)) + xlab(xlab) + ylab(ylab)
         plot_out <- plot_out +
             geom_tile(
-                aes(x = .data$X, y = .data$Y, height = 2 * .data$YWidth, width = 2 * .data$XWidth),
+                aes(
+                    x = .data$X, y = .data$Y,
+                    height = 2 * .data$YWidth, width = 2 * .data$XWidth
+                ),
                 data = summary.data, colour = 'grey60',
-                linewidth = 0.5, fill = 'grey90')
+                linewidth = 0.5, fill = 'grey90'
+            )
 
         # Adding points.
         point_out <- .get_point_args(
@@ -191,7 +193,7 @@ NULL
         if (is.null(point_FUN)) {
             point_FUN <- geom_point
         }
-        plot_out <- plot_out + point_out$aes + do.call(point_FUN, point_out$args)
+        plot_out <- plot_out + do.call(point_FUN, point_out$args)
     }
 
     # Adding colour.
@@ -203,7 +205,7 @@ NULL
     }
 
     ## Define plotting theme
-    if ( requireNamespace("cowplot", quietly = TRUE) ) {
+    if (requireNamespace("cowplot", quietly = TRUE)) {
         plot_out <- plot_out + cowplot::theme_cowplot(theme_size)
     } else {
         plot_out <- plot_out + theme_bw(theme_size)
@@ -225,20 +227,23 @@ NULL
 ## Note the use of colour instead of fill when shape_by is set, as not all shapes have fill.
 {
     fill_colour <- FALSE
+    ## used to be able to use aes_string but this is now duplicated
+    ## adding a list to a ggplot adds all the list elements
+    ## this means we need to be careful about what geoms inherit the global aes
     aes <- list()
     if (!is.null(shape_by)) {
-        aes <- list(aes, aes(shape = shape_by))
+        aes <- modifyList(aes, aes(shape = shape_by))
         fill_colour <- FALSE
     }
     if (!is.null(colour_by)) {
         if (fill_colour) {
-            aes <- list(aes, aes(fill = colour_by))
+            aes <- modifyList(aes, aes(fill = colour_by))
         } else {
-            aes <- list(aes, aes(colour = colour_by))
+            aes <- modifyList(aes, aes(colour = colour_by))
         }
     }
     if (!is.null(size_by)) {
-        aes <- list(aes, aes(size = size_by))
+        aes <- modifyList(aes, aes(size = size_by))
     }
 
     geom_args <- list(alpha=alpha)
@@ -254,7 +259,8 @@ NULL
     if (is.null(size_by)) {
         geom_args$size <- size
     }
-    return(list(aes = aes, args=geom_args, fill=fill_colour))
+    class(aes) <- "uneval"
+    return(list(aes = aes, args = c(geom_args, list(mapping = aes)), fill=fill_colour))
 }
 
 #' @importFrom ggplot2 guide_legend guides

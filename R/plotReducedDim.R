@@ -184,7 +184,6 @@ plotReducedDim <- function(
                         x = by_text_x, y = by_text_y, label = names(by_text_x)
                     ),
                     mapping = aes(x = .data$x, y = .data$y, label = .data$label),
-                    inherit.aes = FALSE,
                     size = text_size, colour = text_colour,
                     force = force, point.padding = point.padding
                 )
@@ -224,9 +223,14 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
 
     plot_out <- ggplot(df_to_plot_big, aes(x = .data$x, y = .data$y)) +
         facet_grid(xvar ~ yvar, scales = "free") +
-        stat_density(aes(x = .data$x, y = (after_stat(..scaled..) * diff(range(.data$x)) + min(.data$x))),
-                     data = gg1$densities, position = "identity",
-                     colour = "grey20", geom = "line") +
+        stat_density(
+            aes(
+                x = .data$x,
+                y = after_stat(..scaled..) * diff(range(.data$x)) + min(.data$x)
+            ),
+            data = gg1$densities, position = "identity",
+            colour = "grey20", geom = "line"
+        ) +
         xlab("") +
         ylab("") +
         theme_bw(theme_size)
@@ -236,10 +240,11 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
         colour_by, shape_by, size_by, alpha = point_alpha, size = point_size,
         shape = point_shape
     )
-    plot_out <- plot_out + point_out$aes + do.call(geom_point, point_out$args)
+    plot_out <- plot_out + do.call(geom_point, point_out$args)
     if (!is.null(colour_by)) {
         plot_out <- .resolve_plot_colours(
-            plot_out, df_to_plot$colour_by, colour_by, fill = point_out$fill,
+            plot_out, df_to_plot$colour_by, colour_by,
+            fill = point_out$fill,
             colour = !point_out$fill
         )
     }

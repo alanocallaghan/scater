@@ -566,3 +566,4 @@ test_that("plotReducedDim works with point_shape", {
     p2 <- plotReducedDim(example_sce, "UMAP", point_shape = 12)
     expect_equal(p2$layers[[1]]$aes_params$shape, 12)
 })
+

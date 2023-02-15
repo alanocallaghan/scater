@@ -46,29 +46,37 @@
     # Picking whether to fill or not.
     aesthetics <- c("fill", "colour")[c(fill, colour)]
 
-    VIRIDFUN <- scale_colour_viridis
-    SCALEFUN <- scale_colour_manual
+    if (fill) {
+        VIRIDFUN <- scale_fill_viridis
+        SCALEFUN <- scale_fill_manual
+    } else if (colour) {
+        VIRIDFUN <- scale_colour_viridis
+        SCALEFUN <- scale_colour_manual
+    }
     
     # Set a sensible colour scheme and return the plot_out object
     if (is.numeric(colour_by)) {
-        plot_out <- plot_out + VIRIDFUN(name = colour_by_name, aesthetics = aesthetics)
+        plot_out <- plot_out + VIRIDFUN(
+            name = colour_by_name, aesthetics = aesthetics
+        )
     } else {
         nlevs_colour_by <- nlevels(as.factor(colour_by))
         if (nlevs_colour_by <= 10) {
             plot_out <- plot_out + SCALEFUN(
                 values = .get_palette("tableau10medium"),
                 name = colour_by_name,
-                aesthetics = )
+                aesthetics = aesthetics)
         } else {
             if (nlevs_colour_by > 10 && nlevs_colour_by <= 20) {
                 plot_out <- plot_out + SCALEFUN(
                     values = .get_palette("tableau20"),
                     name = colour_by_name,
-                    aesthetics = c("fill", "colour"))
+                    aesthetics = aesthetics)
             } else {
                 plot_out <- plot_out + VIRIDFUN(
-                    name = colour_by_name, discrete = TRUE,
-                    aesthetics = c("fill", "colour"))
+                    name = colour_by_name, discrete = TRUE
+                    # , aesthetics = aesthetics
+                    )
             }
         }
     }

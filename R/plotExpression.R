@@ -171,8 +171,8 @@ plotExpression <- function(object, features, x = NULL,
     # Creating the plot with faceting.        
     plot_out <- .central_plotter(
         evals_long, xlab = xlab, ylab = ylab,
-        shape_by = shape_by, colour_by = colour_by, size_by = size_by, fill_by = fill_by,
-        ..., point_FUN = point_fun
+        shape_by = shape_by, colour_by = colour_by, size_by = size_by,
+        fill_by = fill_by, ..., point_FUN = point_fun
     )
     if (!one_facet) {
         plot_out <- plot_out + facet_wrap(~Feature, ncol = ncol, scales = scales)

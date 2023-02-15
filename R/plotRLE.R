@@ -111,7 +111,15 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
             rle=as.numeric(med_devs) # column-major.
         )
         df_to_plot[["colour_by"]] <- rep(colour_by_vals, each=nrow(med_devs)) # done outside, just in case it's NULL.
-        aesth <- aes(x = .data$x, group = .data$x, y = .data$rle, colour = .data[[colour_lab]], fill = .data[[colour_lab]])
+        aesth <- aes(
+            x = .data$x, group = .data$x, y = .data$rle,
+            colour = .data[[colour_lab]], fill = .data[[colour_lab]]
+        )
+        if (is.null(colour_by)) {
+            aesth <- aes(
+                x = .data$x, group = .data$x, y = .data$rle
+            )
+        }
         plot_out <- .plotRLE_full(df_to_plot, aesth, ncol, ...)
 
     } else if (style == "minimal") {
@@ -148,10 +156,18 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
 
 #' @importFrom ggplot2 ggplot .data geom_segment geom_point geom_hline ylab xlab theme_classic theme element_blank
 .plotRLE_minimal <- function(df, colour_by, ncol) {
-    plot_out <- ggplot(df, aes(x = .data$x, fill = .data[[colour_by]])) +
+    plot_aes <- aes(x = .data$x)
+    useg_aes <- aes(xend = .data$x, y = .data$q75, yend = .data$whiskMax)
+    lseg_aes <- aes(xend = .data$x, y = .data$q25, yend = .data$whiskMin)
+    if (!is.null(colour_by)) {
+        plot_aes <- aes(x = .data$x, fill = .data[[colour_by]])
+        useg_aes <- aes(xend = .data$x, y = .data$q75, yend = .data$whiskMax, colour = .data[[colour_by]])
+        lseg_aes <- aes(xend = .data$x, y = .data$q25, yend = .data$whiskMin, colour = .data[[colour_by]])
+    }
+    plot_out <- ggplot(df, plot_aes) +
         geom_segment(aes(xend = .data$x, y = .data$q25, yend = .data$q75), colour = "gray60") +
-        geom_segment(aes(xend = .data$x, y = .data$q75, yend = .data$whiskMax, colour = .data[[colour_by]])) +
-        geom_segment(aes(xend = .data$x, y = .data$q25, yend = .data$whiskMin, colour = .data[[colour_by]])) +
+        geom_segment(lseg_aes) +
+        geom_segment(useg_aes) +
         geom_point(aes(y = .data$q50), shape = 21) +
         geom_hline(yintercept = 0, colour = "gray40", alpha = 0.5) +
         ylab("Relative log expression") + xlab("Sample") +

@@ -52,7 +52,7 @@ plotExplanatoryPCs <- function(object, nvars_to_plot = 10, npcs_to_plot=50, them
     
     plot_out <- ggplot(df_to_plot, aes(x = .data$PC, y = .data$"Pct_Var_Explained", colour = .data$"Expl_Var")) +
         geom_point(alpha= 1, shape = 16, size = 3) +
-        geom_line(alpha = 0.7, size = 2) +
+        geom_line(alpha = 0.7, linewidth = 2) +
         scale_y_log10(breaks = 10 ^ (-3:2), labels = c(0.001, 0.01, 0.1, 1, 10, 100)) +
         xlab("PC") +
         ylab("% variance explained") +
