@@ -58,7 +58,8 @@ Suggests:
     robustbase,
     rmarkdown,
     testthat,
-    Biobase
+    Biobase,
+    scattermore
 VignetteBuilder: knitr
 biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,
         Visualization, DimensionReduction, Transcriptomics,

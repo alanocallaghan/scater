@@ -25,7 +25,7 @@ test_that("we can produce PCA scatterplots", {
     expect_ggplot(plotPCA(example_sce, colour_by = "Gene_0001", by_exprs_values = "counts"))
     expect_ggplot(plotPCA(example_sce, percentVar = c(19, 5)))
     expect_ggplot(plotPCA(example_sce, text_by="Cell_Cycle"))
-    
+
     # Checking that specification of multiple ncomponents works.
     expect_ggplot(Pv <- plotPCA(example_sce, ncomponents=1:2))
     expect_equal(P$data, Pv$data)
@@ -36,6 +36,18 @@ test_that("we can produce PCA scatterplots", {
     # Check that dataframes etc are allowed
     reducedDim(example_sce, "PCA") <- DataFrame(reducedDim(example_sce, "PCA"))
     expect_error(plotReducedDim(example_sce, "PCA"), NA)
+
+    # Use scattermore
+    expect_ggplot(plotPCA(example_sce, scattermore = TRUE, point_size = 2))
+    expect_ggplot(plotPCA(example_sce, scattermore = TRUE, point_size = 2,
+                          colour_by = "Cell_Cycle"))
+
+    # Binning
+    expect_ggplot(plotPCA(example_sce, bins = 10))
+    expect_ggplot(plotPCA(example_sce, bins = 10, hex = TRUE))
+    expect_ggplot(plotPCA(example_sce, bins = 10, colour_by = "Gene_0001"))
+    expect_ggplot(plotPCA(example_sce, bins = 10, colour_by = "Gene_0001",
+                          hex = TRUE))
 })
 
 test_that("we can produce PCA pairplots", {
@@ -58,13 +70,25 @@ test_that("we can produce PCA pairplots", {
     expect_ggplot(plotPCA(example_sce, ncomponents = 4, colour_by = "Cell_Cycle", add_legend = FALSE))
     expect_ggplot(plotPCA(example_sce, ncomponents = 4, colour_by = "Gene_0001", by_exprs_values = "counts"))
     expect_ggplot(plotPCA(example_sce, ncomponents = 4, percentVar = c(19, 5, 3, 2)))
-    
+
     # Checking that specification of multiple ncomponents works.
     expect_ggplot(Pv <- plotPCA(example_sce, ncomponents = 1:4))
     expect_equal(P$data, Pv$data)
     expect_ggplot(Pv2 <- plotPCA(example_sce, ncomponents = 4:1))
     expect_false(isTRUE(all.equal(P$data, Pv2$data)))
     expect_error(plotPCA(example_sce, ncomponents = 5:1), "larger than")
+
+    # Use scattermore
+    expect_ggplot(plotPCA(example_sce, ncomponents = 4, scattermore = TRUE, point_size = 3))
+    expect_ggplot(plotPCA(example_sce, ncomponents = 4, scattermore = TRUE, point_size = 3, colour_by = "Gene_0001"))
+
+    # Binning
+    expect_ggplot(plotPCA(example_sce, ncomponents = 4, bins = 10))
+    expect_ggplot(plotPCA(example_sce, ncomponents = 4, bins = 10, hex = TRUE))
+    expect_ggplot(plotPCA(example_sce, ncomponents = 4, bins = 10,
+                          colour_by = "Gene_0001"))
+    expect_ggplot(plotPCA(example_sce, ncomponents = 4, bins = 10,
+                          colour_by = "Gene_0001", hex = TRUE))
 })
 
 test_that("we can produce TSNE plots", {

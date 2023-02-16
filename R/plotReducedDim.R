@@ -3,6 +3,7 @@
 #' Plot cell-level reduced dimension results stored in a SingleCellExperiment
 #' object.
 #'
+#' @inheritParams plotColData
 #' @param object A SingleCellExperiment object.
 #' @param dimred A string or integer scalar indicating the reduced dimension
 #' result in \code{reducedDims(object)} to plot.
@@ -75,6 +76,13 @@
 #' when there are too many levels to distinguish by colour.
 #' It is only available for scatterplots.
 #'
+#' @note Arguments \code{shape_by} and \code{size_by} are ignored when
+#' \code{scattermore = TRUE}. Using \code{scattermore} is only recommended for
+#' very large datasets to speed up plotting. Small point size is also
+#' recommended. For larger point size, the point shape may be distorted. Also,
+#' when \code{scattermore = TRUE}, the \code{point_size} argument works
+#' differently.
+#'
 #' @return A ggplot object
 #'
 #' @author Davis McCarthy, with modifications by Aaron Lun
@@ -99,14 +107,15 @@
 #' @importFrom SingleCellExperiment reducedDim
 #' @importFrom ggrepel geom_text_repel
 plotReducedDim <- function(
-        object, dimred, ncomponents = 2, percentVar = NULL, 
+        object, dimred, ncomponents = 2, percentVar = NULL,
         colour_by = color_by, shape_by = NULL, size_by = NULL,
-        order_by = NULL, by_exprs_values = "logcounts", 
+        order_by = NULL, by_exprs_values = "logcounts",
         text_by = NULL, text_size = 5, text_colour = text_color,
         label_format = c("%s %i", " (%i%%)"), other_fields = list(),
         text_color = "black", color_by = NULL,
         swap_rownames = NULL, point.padding = NA, force = 1,
-        rasterise = FALSE,
+        rasterise = FALSE, scattermore = FALSE,
+        bins = NULL, summary_fun = "sum", hex = FALSE,
         by_assay_name=by_exprs_values,
 	...
     ) {
@@ -146,7 +155,7 @@ plotReducedDim <- function(
     colour_by <- vis_out$colour_by
     shape_by <- vis_out$shape_by
     size_by <- vis_out$size_by
-    
+
     ## Dispatching to the central plotter in the simple case of two dimensions.
     if (length(to_plot) == 2L) {
         colnames(df_to_plot)[seq_along(to_plot)] <- c("X", "Y")
@@ -158,11 +167,13 @@ plotReducedDim <- function(
                 sprintf(label_format[2], round(percentVar[to_plot]))
             )
         }
-        
+
         plot_out <- .central_plotter(df_to_plot, xlab = labs[1], ylab = labs[2],
                                      colour_by = colour_by, size_by = size_by,
                                      shape_by = shape_by, ..., point_FUN = NULL,
-                                     rasterise = rasterise)
+                                     rasterise = rasterise,
+                                     scattermore = scattermore, bins = bins,
+                                     summary_fun = summary_fun, hex = hex)
 
         # Adding text with the median locations of the 'text_by' vector.
         if (!is.null(text_by)) {
@@ -194,7 +205,9 @@ plotReducedDim <- function(
     ## Otherwise, creating a paired reddim plot.
     paired_reddim_plot(df_to_plot, to_plot = to_plot, percentVar = percentVar,
         colour_by = colour_by, shape_by = shape_by, size_by = size_by,
-        dimred = dimred, label_format = label_format, rasterise = rasterise, ...)
+        dimred = dimred, label_format = label_format, rasterise = rasterise,
+        scattermore = scattermore, bins = bins, summary_fun = summary_fun,
+        hex = hex, ...)
 }
 
 #' @importFrom ggplot2 ggplot facet_grid stat_density geom_point theme after_stat
@@ -202,9 +215,20 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
         colour_by=NULL, shape_by=NULL, size_by=NULL,
         label_format=c("%s %i", " (%i%%)"),
         add_legend = TRUE, theme_size = 10, point_alpha = 0.6, point_size = NULL, point_shape = NULL,
-        rasterise = FALSE
+        rasterise = FALSE, scattermore = FALSE,
+        bins = NULL, summary_fun = "sum", hex = FALSE
     ) {
-
+    if (scattermore) {
+        rasterise <- FALSE
+        if (!is.null(shape_by) || !is.null(size_by)) {
+            warning("shape_by and size_by do not work with scattermore.")
+        }
+    }
+    if (!is.null(bins) && !is.null(colour_by) &&
+        !is.numeric(df_to_plot$colour_by)) {
+        message("Binning only applies to numeric colour_by or point counts")
+        bins <- NULL
+    }
     reddim_cols <- seq_along(to_plot)
     df_to_expand <- df_to_plot[, reddim_cols]
 
@@ -238,14 +262,22 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
     ## Setting up the point addition with various aesthetics.
     point_out <- .get_point_args(
         colour_by, shape_by, size_by, alpha = point_alpha, size = point_size,
-        shape = point_shape
+        shape = point_shape, scattermore = scattermore, bins = bins,
+        summary_fun = summary_fun
     )
-    plot_out <- plot_out + do.call(geom_point, point_out$args)
-    if (!is.null(colour_by)) {
+    point_FUN <- .get_point_fun(scattermore = scattermore, bins = bins,
+                                colour_by = colour_by, hex = hex)
+    plot_out <- plot_out + do.call(point_FUN, point_out$args)
+    if (!is.null(colour_by) || !is.null(bins)) {
+        if (!is.null(bins)) {
+            if (is.null(colour_by)) colour_by <- "count"
+            else if (is.character(summary_fun)) {
+                colour_by <- paste0(summary_fun, "(", colour_by, ")")
+            }
+        }
         plot_out <- .resolve_plot_colours(
-            plot_out, df_to_plot$colour_by, colour_by,
-            fill = point_out$fill,
-            colour = !point_out$fill
+            plot_out, df_to_plot$colour_by, colour_by, fill = point_out$fill,
+            colour = !point_out$fill, do_bin = !is.null(bins)
         )
     }
 

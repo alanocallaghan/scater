@@ -1,7 +1,7 @@
 #' General visualization parameters
 #'
 #' \pkg{scater} functions that plot points share a number of visualization parameters, which are described on this page.
-#' 
+#'
 #' @section Aesthetic parameters:
 #' \describe{
 #' \item{\code{add_legend}:}{Logical scalar, specifying whether a legend should be shown.
@@ -32,46 +32,54 @@
 #' Defaults to \code{TRUE}.}
 #' }
 #'
-#' @section Miscellaneous fields:
-#' Addititional fields can be added to the data.frame passed to \link{ggplot} by setting the \code{other_fields} argument.
-#' This allows users to easily incorporate additional metadata for use in further \pkg{ggplot} operations.
+#' @section Miscellaneous fields: Addititional fields can be added to the
+#'   data.frame passed to \link{ggplot} by setting the \code{other_fields}
+#'   argument. This allows users to easily incorporate additional metadata for
+#'   use in further \pkg{ggplot} operations.
 #'
-#' The \code{other_fields} argument should be character vector where each string is passed to \code{\link{retrieveCellInfo}} (for cell-based plots) or \code{\link{retrieveFeatureInfo}} (for feature-based plots).
-#' Alternatively, \code{other_fields} can be a named list where each element is of any type accepted by \code{\link{retrieveCellInfo}} or \code{\link{retrieveFeatureInfo}}.
-#' This includes \link{AsIs}-wrapped vectors, data.frames or \linkS4class{DataFrame}s.
+#'   The \code{other_fields} argument should be character vector where each
+#'   string is passed to \code{\link{retrieveCellInfo}} (for cell-based plots)
+#'   or \code{\link{retrieveFeatureInfo}} (for feature-based plots).
+#'   Alternatively, \code{other_fields} can be a named list where each element
+#'   is of any type accepted by \code{\link{retrieveCellInfo}} or
+#'   \code{\link{retrieveFeatureInfo}}. This includes \link{AsIs}-wrapped
+#'   vectors, data.frames or \linkS4class{DataFrame}s.
 #'
-#' Each additional column of the output data.frame will be named according to the \code{name} returned by \code{\link{retrieveCellInfo}} or \code{\link{retrieveFeatureInfo}}.
-#' If these clash with inbuilt names (e.g., \code{X}, \code{Y}, \code{colour_by}), a warning will be raised and the additional column will not be added to avoid overwriting an existing column.
+#'   Each additional column of the output data.frame will be named according to
+#'   the \code{name} returned by \code{\link{retrieveCellInfo}} or
+#'   \code{\link{retrieveFeatureInfo}}. If these clash with inbuilt names (e.g.,
+#'   \code{X}, \code{Y}, \code{colour_by}), a warning will be raised and the
+#'   additional column will not be added to avoid overwriting an existing
+#'   column.
 #'
 #' @name scater-plot-args
 #' @importFrom stats runif
 #'
-#' @seealso
-#' \code{\link{plotColData}}, 
-#' \code{\link{plotRowData}}, 
-#' \code{\link{plotReducedDim}}, 
-#' \code{\link{plotExpression}}, 
-#' \code{\link{plotPlatePosition}},
-#' and most other plotting functions.
+#' @seealso \code{\link{plotColData}}, \code{\link{plotRowData}},
+#' \code{\link{plotReducedDim}}, \code{\link{plotExpression}},
+#' \code{\link{plotPlatePosition}}, and most other plotting functions.
 NULL
 
 #' @importFrom ggbeeswarm geom_quasirandom
-#' @importFrom ggplot2 ggplot geom_violin xlab ylab stat_summary geom_jitter position_jitter coord_flip geom_point stat_smooth geom_tile theme_bw theme
+#' @importFrom ggplot2 ggplot geom_violin xlab ylab stat_summary geom_jitter
+#'   position_jitter coord_flip geom_point stat_smooth geom_tile theme_bw theme
+#'   geom_bin2d geom_hex stat_summary_2d stat_summary_hex
 .central_plotter <- function(object, xlab = NULL, ylab = NULL,
                              colour_by = NULL, shape_by = NULL, size_by = NULL, fill_by = NULL,
                              show_median = FALSE, show_violin = TRUE, show_smooth = FALSE, show_se = TRUE,
-                            #  show_points = TRUE,
+                             #  show_points = TRUE,
                              theme_size = 10, point_alpha = 0.6, point_size = NULL, point_shape = 19, add_legend = TRUE,
                              point_FUN = NULL, jitter_type = "swarm",
-                             rasterise = FALSE)
+                             rasterise = FALSE, scattermore = FALSE, bins = NULL,
+                             summary_fun = "sum", hex = FALSE)
 # Internal ggplot-creating function to plot anything that involves points.
 # Creates either a scatter plot, (horizontal) violin plots, or a rectangle plot.
 {
     if (is.numeric(object$Y)!=is.numeric(object$X)) {
         ## Making a (horizontal) violin plot.
         flipped <- (is.numeric(object$X) && !is.numeric(object$Y))
-        if (flipped) { 
-            tmp <- object$X 
+        if (flipped) {
+            tmp <- object$X
             object$X <- object$Y
             object$Y <- tmp
             tmp <- xlab
@@ -83,7 +91,7 @@ NULL
         plot_out <- ggplot(object, aes(x=.data$X, y=.data$Y)) +
             xlab(xlab) + ylab(ylab)
         if (show_violin) {
-            if (is.null(fill_by)) { 
+            if (is.null(fill_by)) {
                 viol_args <- list(fill="grey90")
             } else {
                 viol_args <- list(mapping=aes(fill=.data[[fill_by]]))
@@ -126,17 +134,30 @@ NULL
         if (flipped) {
             plot_out <- plot_out + coord_flip()
         }
-    } else if (is.numeric(object$Y) && is.numeric(object$X)) { 
+    } else if (is.numeric(object$Y) && is.numeric(object$X)) {
         # Creating a scatter plot.
         plot_out <- ggplot(object, aes(x=.data$X, y=.data$Y)) + xlab(xlab) + ylab(ylab)
 
+        if (scattermore) {
+            rasterise <- FALSE
+            if (!is.null(shape_by) || !is.null(size_by)) {
+                warning("shape_by and size_by do not work with scattermore.")
+            }
+        }
+        if (!is.null(bins) && !is.null(colour_by) &&
+            !is.numeric(object$colour_by)) {
+            warning("Binning only applies to numeric colour_by or point counts")
+            bins <- NULL
+        }
         # Adding points.
         point_out <- .get_point_args(
             colour_by, shape_by, size_by,
-            alpha = point_alpha, size = point_size, shape = point_shape
+            alpha = point_alpha, size = point_size, shape = point_shape,
+            scattermore = scattermore, bins = bins, summary_fun = summary_fun
         )
         if (is.null(point_FUN)) {
-            point_FUN <- geom_point
+            point_FUN <- .get_point_fun(scattermore = scattermore, bins = bins,
+                                        colour_by = colour_by, hex = hex)
         }
         plot_out <- plot_out + do.call(point_FUN, point_out$args)
 
@@ -197,10 +218,16 @@ NULL
     }
 
     # Adding colour.
-    if (!is.null(colour_by)) {
+    if (!is.null(colour_by) || !is.null(bins)) {
+        if (!is.null(bins)) {
+            if (is.null(colour_by)) colour_by <- "count"
+            else if (is.character(summary_fun)) {
+                colour_by <- paste0(summary_fun, "(", colour_by, ")")
+            }
+        }
         plot_out <- .resolve_plot_colours(
             plot_out, object$colour_by, colour_by, fill = point_out$fill,
-            colour = !point_out$fill
+            colour = !point_out$fill, do_bin = !is.null(bins)
         )
     }
 
@@ -223,7 +250,9 @@ NULL
 }
 
 
-.get_point_args <- function(colour_by, shape_by, size_by, alpha=0.65, size=NULL, shape = NULL) 
+.get_point_args <- function(colour_by, shape_by, size_by, alpha=0.65, size=NULL,
+                            shape = NULL, scattermore = FALSE, bins = NULL,
+                            summary_fun = sum)
 ## Note the use of colour instead of fill when shape_by is set, as not all shapes have fill.
 {
     fill_colour <- FALSE
@@ -231,15 +260,23 @@ NULL
     ## adding a list to a ggplot adds all the list elements
     ## this means we need to be careful about what geoms inherit the global aes
     aes <- list()
+    if (!is.null(bins)) {
+        shape_by <- size_by <- size <- shape <- NULL
+        fill_colour <- TRUE
+    }
     if (!is.null(shape_by)) {
         aes <- modifyList(aes, aes(shape = shape_by))
         fill_colour <- FALSE
     }
     if (!is.null(colour_by)) {
-        if (fill_colour) {
-            aes <- modifyList(aes, aes(fill = colour_by))
+        if (is.null(bins)) {
+            if (fill_colour) {
+                aes <- modifyList(aes, aes(fill = colour_by))
+            } else {
+                aes <- modifyList(aes, aes(colour = colour_by))
+            }
         } else {
-            aes <- modifyList(aes, aes(colour = colour_by))
+            aes <- modifyList(aes, aes(z = colour_by))
         }
     }
     if (!is.null(size_by)) {
@@ -247,35 +284,62 @@ NULL
     }
 
     geom_args <- list(alpha=alpha)
-    if (is.null(colour_by) || fill_colour) {
-        geom_args$colour <- "grey70"
+    if (is.null(bins)) {
+        if (is.null(colour_by) || fill_colour) {
+            geom_args$colour <- "grey70"
+        }
+        if (is.null(colour_by) || !fill_colour) { # set fill when there is no fill colour, to distinguish between e.g., pch=16 and pch=21.
+            geom_args$fill <- "grey20"
+        }
+        if (is.null(shape_by)) {
+            geom_args$shape <- shape
+        }
+        if (is.null(size_by)) {
+            if (scattermore) geom_args$pointsize <- size
+            else geom_args$size <- size
+        }
+    } else {
+        if (!is.null(colour_by)) {
+            if (is.character(summary_fun)) summary_fun <- match.fun(summary_fun)
+            geom_args$fun <- summary_fun
+        }
+        geom_args$bins <- bins
+        geom_args$alpha <- NULL
     }
-    if (is.null(colour_by) || !fill_colour) { # set fill when there is no fill colour, to distinguish between e.g., pch=16 and pch=21.
-        geom_args$fill <- "grey20"
-    }
-    if (is.null(shape_by)) {
-        geom_args$shape <- shape
-    }
-    if (is.null(size_by)) {
-        geom_args$size <- size
-    }
+
     class(aes) <- "uneval"
     return(list(aes = aes, args = c(geom_args, list(mapping = aes)), fill=fill_colour))
 }
 
 #' @importFrom ggplot2 guide_legend guides
-.add_extra_guide <- function(plot_out, shape_by, size_by) 
+.add_extra_guide <- function(plot_out, shape_by, size_by)
 # Adding extra legend information on the shape and size.
 {
     guide_args <- list()
     if (!is.null(shape_by)) {
         guide_args$shape <- guide_legend(title = shape_by)
     }
-    if (!is.null(size_by)) { 
+    if (!is.null(size_by)) {
         guide_args$size <- guide_legend(title = size_by)
     }
-    if (length(guide_args)) { 
+    if (length(guide_args)) {
         plot_out <- plot_out + do.call(guides, guide_args)
     }
     return(plot_out)
+}
+
+# Get function plotting points
+.get_point_fun <- function(scattermore, bins, colour_by = NULL,
+                           hex = FALSE) {
+    if (!is.null(bins)) {
+        if (is.null(colour_by))
+            point_FUN <- if (hex) geom_hex else geom_bin2d
+        else
+            point_FUN <- if (hex) stat_summary_hex else stat_summary_2d
+    } else if (scattermore) {
+        rlang::check_installed("scattermore")
+        point_FUN <- scattermore::geom_scattermore
+    } else
+        point_FUN <- geom_point
+    point_FUN
 }
