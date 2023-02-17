@@ -165,10 +165,10 @@ test_that("retrieveFeatureInfo works for rows with data.frames", {
 
 test_that("gg functions work as expected", {
     gg <- ggcells(example_sce, mapping=aes(x=Gene_0001, y=Gene_0002))
-    expect_s3_class(gg, "ggplot")
+    expect_ggplot(gg)
     
     gg <- ggfeatures(example_sce, mapping=aes(x=Cell_001, y=Cell_002))
-    expect_s3_class(gg, "ggplot")
+    expect_ggplot(gg)
 })
 
 

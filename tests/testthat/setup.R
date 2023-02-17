@@ -33,3 +33,9 @@ FAIL <- failgen()
 
 library(DelayedArray)
 setAutoBPPARAM(FAIL)
+
+
+expect_ggplot <- function(g) {
+    expect_s3_class(g, "ggplot")
+    expect_error(ggplot_build(g), NA)
+}

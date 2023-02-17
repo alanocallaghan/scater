@@ -75,15 +75,15 @@ setMethod("calculateNMF", "ANY", .calculate_nmf)
 #' @export
 #' @rdname runNMF
 #' @importFrom SummarizedExperiment assay
-setMethod("calculateNMF", "SummarizedExperiment", function(x, ..., exprs_values="logcounts", assay_name=exprs_values) {
-    .calculate_nmf(assay(x, assay_name), ...)
+setMethod("calculateNMF", "SummarizedExperiment", function(x, ..., exprs_values="logcounts", assay.type=exprs_values) {
+    .calculate_nmf(assay(x, assay.type), ...)
 })
 
 #' @export
 #' @rdname runNMF
 setMethod("calculateNMF", "SingleCellExperiment",
-    function(x, ..., exprs_values="logcounts", dimred=NULL, n_dimred=NULL, assay_name=exprs_values) {
-    mat <- .get_mat_from_sce(x, assay_name=assay_name, dimred=dimred, n_dimred=n_dimred)
+    function(x, ..., exprs_values="logcounts", dimred=NULL, n_dimred=NULL, assay.type=exprs_values) {
+    mat <- .get_mat_from_sce(x, assay.type=assay.type, dimred=dimred, n_dimred=n_dimred)
     .calculate_nmf(mat, transposed=!is.null(dimred), ...)
 })
 

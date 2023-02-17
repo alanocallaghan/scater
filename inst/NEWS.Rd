@@ -3,6 +3,15 @@
 
 \section{Changes in version 1.28.0, Bioconductor 3.17 Release}{
   \itemize{
+    \item Change \code{exprs_values} (and similar) to \code{assay.type}.
+    \item Tweak colouring of violin plots.
+    \item Fix use of block arguments in \code{plotGroupedHeatmap}.
+  }
+}
+
+
+\section{Changes in version 1.28.0, Bioconductor 3.17 Release}{
+  \itemize{
     \item \code{swap_rownames} works in \code{retrieveCellInfo} for
     \code{altExp} now as well as in the main assay.
     \item Add \code{point_shape} argument to \code{plotDots} and

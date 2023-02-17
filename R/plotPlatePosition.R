@@ -10,8 +10,8 @@
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param order_by Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
-#' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in point aesthetics - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}.
+#' @param by.assay.type A string or integer scalar specifying which assay to obtain expression values from, 
+#' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
 #' @param add_legend Logical scalar specifying whether a legend should be shown.
 #' @param theme_size Numeric scalar, see \code{?"\link{scater-plot-args}"} for details.
 #' @param point_alpha Numeric scalar specifying the transparency of the points, see \code{?"\link{scater-plot-args}"} for details.
@@ -23,7 +23,7 @@
 #'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
 #' @param color_by Alias to \code{colour_by}.
-#' @param by_exprs_values Alias for \code{by_assay_name}.
+#' @param by_exprs_values Alias for \code{by.assay.type}.
 #'
 #' @details 
 #' This function expects plate positions to be given in a charcter format where a letter indicates the row on the plate and a numeric value  indicates the column. 
@@ -62,7 +62,7 @@ plotPlatePosition <- function(object, plate_position = NULL,
     add_legend = TRUE, theme_size = 24, point_alpha = 0.6,
     point_size = 24, point_shape = 19, other_fields=list(),
     swap_rownames = NULL, color_by = NULL,
-    by_assay_name=by_exprs_values) 
+    by.assay.type=by_exprs_values) 
 {
     ## check object is SingleCellExperiment object
     if ( !is(object, "SingleCellExperiment") ) {
@@ -93,7 +93,7 @@ plotPlatePosition <- function(object, plate_position = NULL,
     vis_out <- .incorporate_common_vis_col(df_to_plot, se = object, 
         colour_by = colour_by, shape_by = shape_by, size_by = size_by, 
         order_by = order_by,
-        by_assay_name = by_assay_name,
+        by.assay.type = by.assay.type,
 	other_fields = other_fields,
         swap_rownames = swap_rownames)
 
@@ -106,10 +106,13 @@ plotPlatePosition <- function(object, plate_position = NULL,
     plot_out <- ggplot(df_to_plot, aes(x=.data$X, y=.data$Y))
 
     point_out <- .get_point_args(colour_by, shape_by, size_by, alpha = point_alpha, size = point_size, shape = point_shape)
-    plot_out <- plot_out + point_out$aes + do.call(geom_point, point_out$args)
+    plot_out <- plot_out + do.call(geom_point, point_out$args)
 
     if (!is.null(colour_by)) {
-        plot_out <- .resolve_plot_colours(plot_out, df_to_plot$colour_by, colour_by, fill = point_out$fill)
+        plot_out <- .resolve_plot_colours(
+            plot_out, df_to_plot$colour_by, colour_by, fill = point_out$fill,
+            colour = !point_out$fill
+        )
     }
 
     ## Define plotting theme

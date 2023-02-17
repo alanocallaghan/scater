@@ -5,8 +5,8 @@
 #' @param x A numeric matrix of expression values, usually log-transformed and normalized.
 #' 
 #' Alternatively, a \linkS4class{SummarizedExperiment} containing such a matrix.
-#' @param assay_name String or integer scalar specifying the expression values for which to compute the variance (also an alias \code{exprs_value} is accepted).
-#' @param exprs_values Alias for \code{assay_name}.
+#' @param assay.type String or integer scalar specifying the expression values for which to compute the variance (also an alias \code{exprs_value} is accepted).
+#' @param exprs_values Alias for \code{assay.type}.
 #' @param variables A \linkS4class{DataFrame} or data.frame containing one or more variables of interest.
 #' This should have number of rows equal to the number of columns in \code{x}.
 #'
@@ -106,12 +106,12 @@ setMethod("getVarianceExplained", "ANY", .get_variance_explained)
 #' @rdname getVarianceExplained
 #' @importFrom SummarizedExperiment colData assay
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
-setMethod("getVarianceExplained", "SummarizedExperiment", function(x, variables=NULL, ..., exprs_values="logcounts", assay_name=exprs_values)
+setMethod("getVarianceExplained", "SummarizedExperiment", function(x, variables=NULL, ..., exprs_values="logcounts", assay.type=exprs_values)
 {
     if (is.null(variables)) {
         variables <- colData(x)
     } else if (is.character(variables)) {
         variables <- colData(x)[,variables,drop=FALSE]
     }
-    .get_variance_explained(assay(x, assay_name), variables=variables, ...)
+    .get_variance_explained(assay(x, assay.type), variables=variables, ...)
 })

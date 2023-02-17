@@ -7,8 +7,8 @@
 #' @param by A string specifying the field to extract (see Details).
 #' Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.
 #' @param search Character vector specifying the types of data or metadata to use.
-#' @param assay_name String or integer scalar specifying the assay from which expression values should be extracted.
-#' @param exprs_values Alias to \code{assay_name}.
+#' @param assay.type String or integer scalar specifying the assay from which expression values should be extracted.
+#' @param exprs_values Alias to \code{assay.type}.
 #' 
 #' @return A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
 #' and \code{value}, a vector of length equal to \code{ncol(x)} containing per-feature (meta)data values.
@@ -26,7 +26,7 @@
 #' \item Search \code{\link{rowData}} for a column named \code{by}, 
 #' and return the corresponding field as the output \code{value}.
 #' We do not consider nested elements within the \code{rowData}.
-#' \item Search \code{\link{assay}(x, assay_name)} for a column named \code{by}, 
+#' \item Search \code{\link{assay}(x, assay.type)} for a column named \code{by}, 
 #' and return the expression vector for this feature as the output \code{value}.
 #' }
 #' Any match will cause the function to return without considering later possibilities.
@@ -57,7 +57,7 @@
 #'
 #' @export
 #' @importFrom SummarizedExperiment rowData assay
-retrieveFeatureInfo <- function(x, by, search=c("rowData", "assays"), exprs_values="logcounts", assay_name=exprs_values)
+retrieveFeatureInfo <- function(x, by, search=c("rowData", "assays"), exprs_values="logcounts", assay.type=exprs_values)
 {
     .mopUp <- function(name, value) {
         list(name=name, value=value)
@@ -104,7 +104,7 @@ retrieveFeatureInfo <- function(x, by, search=c("rowData", "assays"), exprs_valu
         } else if (s=="assays") {
             m <- match(by, colnames(x))
             if (!is.na(m)) {
-                return(.mopUp(by, assay(x, assay_name, withDimnames=FALSE)[,m]))
+                return(.mopUp(by, assay(x, assay.type, withDimnames=FALSE)[,m]))
             }
         }
     }

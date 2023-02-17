@@ -9,7 +9,7 @@ retrieveFeatureInfo(
   by,
   search = c("rowData", "assays"),
   exprs_values = "logcounts",
-  assay_name = exprs_values
+  assay.type = exprs_values
 )
 }
 \arguments{
@@ -20,9 +20,9 @@ Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.}
 
 \item{search}{Character vector specifying the types of data or metadata to use.}
 
-\item{exprs_values}{Alias to \code{assay_name}.}
+\item{exprs_values}{Alias to \code{assay.type}.}
 
-\item{assay_name}{String or integer scalar specifying the assay from which expression values should be extracted.}
+\item{assay.type}{String or integer scalar specifying the assay from which expression values should be extracted.}
 }
 \value{
 A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
@@ -45,7 +45,7 @@ Given a character string in \code{by}, this function will:
 \item Search \code{\link{rowData}} for a column named \code{by}, 
 and return the corresponding field as the output \code{value}.
 We do not consider nested elements within the \code{rowData}.
-\item Search \code{\link{assay}(x, assay_name)} for a column named \code{by}, 
+\item Search \code{\link{assay}(x, assay.type)} for a column named \code{by}, 
 and return the expression vector for this feature as the output \code{value}.
 }
 Any match will cause the function to return without considering later possibilities.

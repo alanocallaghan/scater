@@ -12,10 +12,10 @@
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param order_by Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
-#' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from, 
+#' @param by.assay.type A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for
 #' details (also alias \code{by_exprs_values} is accepted for this argument).
-#' @param by_exprs_values Alias for \code{by_assay_name}.
+#' @param by_exprs_values Alias for \code{by.assay.type}.
 #' @param other_fields Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to
 #'  identify features instead of \code{rownames(object)} when labelling plot
@@ -59,7 +59,7 @@
 plotColData <- function(object, y, x = NULL, 
     colour_by = color_by, shape_by = NULL, size_by = NULL, order_by = NULL,
     by_exprs_values = "logcounts", other_fields = list(),
-    swap_rownames = NULL, color_by = NULL, point_fun = NULL, by_assay_name=by_exprs_values, ...) {
+    swap_rownames = NULL, color_by = NULL, point_fun = NULL, by.assay.type=by_exprs_values, ...) {
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")
     }
@@ -87,7 +87,7 @@ plotColData <- function(object, y, x = NULL,
     ## checking visualization arguments
     vis_out <- .incorporate_common_vis_col(df_to_plot, se = object,
         colour_by = colour_by, shape_by = shape_by, size_by = size_by,
-        by_assay_name = by_assay_name, other_fields = other_fields,
+        by.assay.type = by.assay.type, other_fields = other_fields,
         order_by = order_by,
         swap_rownames = swap_rownames)
 

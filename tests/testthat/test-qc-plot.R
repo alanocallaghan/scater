@@ -11,28 +11,28 @@ counts(sparsified) <- as(counts(sparsified), "dgCMatrix")
 #######################################################################
 
 test_that("plotHighestExprs works on vanilla cases", {
-    expect_s3_class(plotHighestExprs(wt_qc), "ggplot")
-    expect_s3_class(plotHighestExprs(wt_qc), "ggplot")
-    expect_s3_class(plotHighestExprs(wt_qc, as_percentage = FALSE), "ggplot")
+    expect_ggplot(plotHighestExprs(wt_qc))
+    expect_ggplot(plotHighestExprs(wt_qc))
+    expect_ggplot(plotHighestExprs(wt_qc, as_percentage = FALSE))
 })
 
 test_that("plotHighestExprs' aesthetics choices work", {
-    expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = "sum"), "ggplot")
-    expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = "Mutation_Status"), "ggplot")
-    expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = NULL), "ggplot")
-    expect_s3_class(plotHighestExprs(wt_qc, colour_cells_by = "Gene_0001", by_exprs_values = "counts"), "ggplot")
+    expect_ggplot(plotHighestExprs(wt_qc, colour_cells_by = "sum"))
+    expect_ggplot(plotHighestExprs(wt_qc, colour_cells_by = "Mutation_Status"))
+    expect_ggplot(plotHighestExprs(wt_qc, colour_cells_by = NULL))
+    expect_ggplot(plotHighestExprs(wt_qc, colour_cells_by = "Gene_0001", by_exprs_values = "counts"))
 })
 
 test_that("plotHighestExprs works with different feature selections", {
-    expect_s3_class(plotHighestExprs(wt_qc, n=Inf), "ggplot")
+    expect_ggplot(plotHighestExprs(wt_qc, n=Inf))
 
     # Responds to other sources for row names.
     rowData(wt_qc)$Whee <- paste("Feature", seq_len(nrow(wt_qc)))
-    expect_s3_class(plotHighestExprs(wt_qc, feature_names_to_plot = "Whee"), "ggplot")
+    expect_ggplot(plotHighestExprs(wt_qc, feature_names_to_plot = "Whee"))
 
     dummy <- wt_qc
     rownames(dummy) <- NULL
-    expect_s3_class(plotHighestExprs(dummy), "ggplot")
+    expect_ggplot(plotHighestExprs(dummy))
     
     # Discarding and subset exclusion yield the same results.
     discard <- rbinom(nrow(wt_qc), 1, 0.5)==1
@@ -52,8 +52,8 @@ test_that("plotHighestExprs works with different feature selections", {
 test_that("plotHighestExprs works on alternative exprs", {
     alt_sce <- wt_qc 
     assayNames(alt_sce) <- "whee"
-    expect_s3_class(plotHighestExprs(alt_sce, exprs_values="whee"), "ggplot")
+    expect_ggplot(plotHighestExprs(alt_sce, exprs_values="whee"))
 
     # Works for sparse matrices.
-    expect_s3_class(plotHighestExprs(sparsified), "ggplot")
+    expect_ggplot(plotHighestExprs(sparsified))
 })

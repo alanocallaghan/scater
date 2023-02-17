@@ -15,8 +15,8 @@ plotHighestExprs(
   as_percentage = TRUE,
   swap_rownames = NULL,
   color_cells_by = NULL,
-  assay_name = exprs_values,
-  by_assay_name = by_exprs_values
+  assay.type = exprs_values,
+  by.assay.type = by_exprs_values
 )
 }
 \arguments{
@@ -29,16 +29,16 @@ plotHighestExprs(
 \item{drop_features}{A character, logical or numeric vector indicating which features (e.g. genes, transcripts) to drop when producing the plot. 
 For example, spike-in transcripts might be dropped to examine the contribution from endogenous genes.}
 
-\item{exprs_values}{Alias to \code{assay_name}.}
+\item{exprs_values}{Alias to \code{assay.type}.}
 
-\item{by_exprs_values}{Alias to \code{by_assay_name}.}
+\item{by_exprs_values}{Alias to \code{by.assay.type}.}
 
 \item{feature_names_to_plot}{String specifying which row-level metadata column contains the feature names.
 Alternatively, an \link{AsIs}-wrapped vector or a data.frame, see \code{?\link{retrieveFeatureInfo}} for possible values.
 Default is \code{NULL}, in which case \code{rownames(object)} are used.}
 
 \item{as_percentage}{logical scalar indicating whether percentages should be  plotted. 
-If \code{FALSE}, the raw \code{assay_name} are shown instead.}
+If \code{FALSE}, the raw \code{assay.type} are shown instead.}
 
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to 
 identify features instead of \code{rownames(object)} when labelling plot 
@@ -46,9 +46,9 @@ elements.}
 
 \item{color_cells_by}{Alias to \code{colour_cells_by}.}
 
-\item{assay_name}{A integer scalar or string specifying the assay to obtain expression values from.}
+\item{assay.type}{A integer scalar or string specifying the assay to obtain expression values from.}
 
-\item{by_assay_name}{A string or integer scalar specifying which assay to obtain expression values from, 
+\item{by.assay.type}{A string or integer scalar specifying which assay to obtain expression values from, 
 for use in colouring - see \code{?\link{retrieveCellInfo}} for details.}
 }
 \value{

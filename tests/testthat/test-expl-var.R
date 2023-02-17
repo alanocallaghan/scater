@@ -88,7 +88,7 @@ test_that("getVarianceExplained handles silly inputs correctly", {
 test_that("plotExplanatoryVariables works as expected", {
     out <- plotExplanatoryVariables(normed)
     ref <- plotExplanatoryVariables(varexp)
-    expect_s3_class(out, "ggplot")
+    expect_ggplot(out)
     expect_identical(out$data, ref$data)
 
     medians <- apply(varexp, 2, median, na.rm=TRUE)
@@ -96,33 +96,33 @@ test_that("plotExplanatoryVariables works as expected", {
     # Responds to choice of number of variables
     out <- plotExplanatoryVariables(normed, nvars_to_plot=2)
     ref <- plotExplanatoryVariables(varexp[,order(medians, decreasing=TRUE)[1:2]])
-    expect_s3_class(out, "ggplot")
+    expect_ggplot(out)
     expect_identical(out$data, ref$data)
 
     out <- plotExplanatoryVariables(normed, nvars_to_plot=Inf)
     ref <- plotExplanatoryVariables(varexp)
-    expect_s3_class(out, "ggplot")
+    expect_ggplot(out)
     expect_identical(out$data, ref$data)
 
     out <- plotExplanatoryVariables(normed, nvars_to_plot=0)
     ref <- plotExplanatoryVariables(varexp[,0,drop=FALSE])
-    expect_s3_class(out, "ggplot")
+    expect_ggplot(out)
     expect_identical(out$data, ref$data)
 
     # Responds to choice of minimum marginal R2.
     out <- plotExplanatoryVariables(normed, min_marginal_r2=0.5)
     ref <- plotExplanatoryVariables(varexp[,medians >= 0.5,drop=FALSE])
-    expect_s3_class(out, "ggplot")
+    expect_ggplot(out)
     expect_identical(out$data, ref$data)
 
     out <- plotExplanatoryVariables(normed, min_marginal_r2=0.05)
     ref <- plotExplanatoryVariables(varexp[,medians >= 0.05,drop=FALSE])
-    expect_s3_class(out, "ggplot")
+    expect_ggplot(out)
     expect_identical(out$data, ref$data)
 
     # Handles silly inputs.
-    expect_s3_class(plotExplanatoryVariables(varexp[0,,drop=FALSE]), "ggplot")
-    expect_s3_class(plotExplanatoryVariables(varexp[,0,drop=FALSE]), "ggplot")
+    expect_ggplot(plotExplanatoryVariables(varexp[0,,drop=FALSE]))
+    expect_ggplot(plotExplanatoryVariables(varexp[,0,drop=FALSE]))
 })
 
 #############################################################
@@ -182,14 +182,14 @@ test_that("getExplanatoryPCs responds to getVarianceExplained options", {
 test_that("plotExplanatoryPCs works with PC choice options", {
     out <- plotExplanatoryPCs(normed, npcs=nrow(exppcs))
     ref <- plotExplanatoryPCs(exppcs)
-    expect_s3_class(out, "ggplot")
+    expect_ggplot(out)
     expect_identical(out$data, ref$data)
 
     # Handles situations where different numbers of PCs are requested.
     out <- plotExplanatoryPCs(normed, npcs=5)
     allpcs <- runPCA(normed, ncomponents=5)
     ref <- plotExplanatoryPCs(allpcs)
-    expect_s3_class(out, "ggplot")
+    expect_ggplot(out)
     expect_identical(out$data, ref$data)
 })
 
@@ -198,21 +198,21 @@ test_that("plotExplanatoryPCs responds to choice of number of variables", {
 
     out <- plotExplanatoryPCs(normed, nvars_to_plot=2, npcs=nrow(exppcs))
     ref <- plotExplanatoryPCs(exppcs[,order(maxes, decreasing=TRUE)[1:2]])
-    expect_s3_class(out, "ggplot")
+    expect_ggplot(out)
     expect_identical(out$data, ref$data)
 
     out <- plotExplanatoryPCs(normed, nvars_to_plot=Inf, npcs=nrow(exppcs))
     ref <- plotExplanatoryPCs(exppcs)
-    expect_s3_class(out, "ggplot")
+    expect_ggplot(out)
     expect_identical(out$data, ref$data)
 
     out <- plotExplanatoryPCs(normed, nvars_to_plot=0, npcs=nrow(exppcs))
     ref <- plotExplanatoryPCs(exppcs[,0,drop=FALSE])
-    expect_s3_class(out, "ggplot")
+    expect_ggplot(out)
     expect_identical(out$data, ref$data)
 })
 
 test_that("plotExplanatoryPCs handles silly inputs.", {
-    expect_s3_class(suppressWarnings(plotExplanatoryPCs(exppcs[0,,drop=FALSE])), "ggplot")
-    expect_s3_class(plotExplanatoryPCs(exppcs[,0,drop=FALSE]), "ggplot")
+    expect_ggplot(suppressWarnings(plotExplanatoryPCs(exppcs[0,,drop=FALSE])))
+    expect_ggplot(plotExplanatoryPCs(exppcs[,0,drop=FALSE]))
 })
