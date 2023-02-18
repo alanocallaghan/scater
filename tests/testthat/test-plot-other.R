@@ -41,11 +41,11 @@ test_that("we can produce plots showing cells in plate position", {
     expect_error(plotPlatePosition(alt, colour_by = "ENS_0001", swap_rownames = "asda"),
         "Cannot find column asda in rowData")
 
-    expect_ggplot(plotPlatePosition(alt, size_by = "Gene_0001", shape_by = "Treatment", by.assay.type = "counts"))
+    expect_ggplot(plotPlatePosition(alt, size_by = "Gene_0001", shape_by = "Treatment", by_exprs_values = "counts"))
 
     # Checking that other arguments are passed through.
     expect_ggplot(plotPlatePosition(alt, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment", add_legend = FALSE))
-    expect_ggplot(plotPlatePosition(alt, size_by = "Gene_0001", by.assay.type = "counts"))
+    expect_ggplot(plotPlatePosition(alt, size_by = "Gene_0001", by_exprs_values = "counts"))
 
     # Checking that an error is thrown,
     expect_error(plotPlatePosition(example_sce, paste0(col, row)), "invalid format") 
@@ -74,7 +74,7 @@ test_that("we can produce plots for column metadata", {
     
     # Testing that other arguments are passed through.
     expect_ggplot(plotColData(example_sce, "sum", colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment", add_legend = FALSE))
-    expect_ggplot(plotColData(example_sce, "sum", size_by = "Gene_0001", by.assay.type = "counts"))
+    expect_ggplot(plotColData(example_sce, "sum", size_by = "Gene_0001", by_exprs_values = "counts"))
 
     # Fiddling with all the semi-analysis options.
     expect_ggplot(plotColData(example_sce, "sum", show_violin=FALSE))
@@ -85,8 +85,8 @@ test_that("we can produce plots for column metadata", {
     expect_ggplot(plotColData(example_sce, "sum", x="detected", show_smooth=TRUE, show_se=FALSE))
 
     # Checking that it doesn't try to retrieve expression data.
-    expect_error(plotColData(example_sce, "Gene_0001", assay.type = "counts"), "cannot find")
-    expect_error(plotColData(example_sce, "sum", x="Gene_0001", assay.type = "counts"), "cannot find")
+    expect_error(plotColData(example_sce, "Gene_0001", exprs_values = "counts"), "cannot find")
+    expect_error(plotColData(example_sce, "sum", x="Gene_0001", exprs_values = "counts"), "cannot find")
 })
 
 test_that("we can produce plots for row metadata", {
@@ -110,7 +110,7 @@ test_that("we can produce plots for row metadata", {
     
     # Testing that other arguments are passed through.
     expect_ggplot(plotRowData(example_sce, "mean", colour_by = "is_feature_control", size_by = "Cell_002", shape_by = "WHEE", add_legend = FALSE))
-    expect_ggplot(plotRowData(example_sce, "mean", size_by = "Cell_002", by.assay.type = "counts"))
+    expect_ggplot(plotRowData(example_sce, "mean", size_by = "Cell_002", by_exprs_values = "counts"))
 
     # Fiddling with all the semi-analysis options.
     expect_ggplot(plotRowData(example_sce, "mean", show_violin=FALSE))
@@ -121,8 +121,8 @@ test_that("we can produce plots for row metadata", {
     expect_ggplot(plotRowData(example_sce, "mean", x="detected", show_smooth=TRUE, show_se=FALSE))
 
     # Checking that it doesn't try to retrieve expression data.
-    expect_error(plotRowData(example_sce, "Cell_002", assay.type = "counts"), "cannot find")
-    expect_error(plotRowData(example_sce, "mean", x="Cell_002", assay.type = "counts"), "cannot find")
+    expect_error(plotRowData(example_sce, "Cell_002", exprs_values = "counts"), "cannot find")
+    expect_error(plotRowData(example_sce, "mean", x="Cell_002", exprs_values = "counts"), "cannot find")
 })
 
 test_that("plotRowData works for other fields", {
@@ -154,13 +154,13 @@ test_that("plotRLE works as expected", {
         p <- plotRLE(example_sce, colour_by = "Mutation_Status", style=style)
         expect_ggplot(p)
         
-        p <- plotRLE(example_sce, assay.type="cpm", assay.logged=FALSE, style=style)
+        p <- plotRLE(example_sce, exprs_values="cpm", exprs_logged=FALSE, style=style)
         expect_ggplot(p)
     
         p <- plotRLE(example_sce, colour_by = "Gene_0004", style=style)
         expect_ggplot(p)
     
-        p <- plotRLE(example_sce, colour_by = "Gene_0004", by.assay.type = "cpm", style=style)
+        p <- plotRLE(example_sce, colour_by = "Gene_0004", by_exprs_values = "cpm", style=style)
         expect_ggplot(p)
     }
 })

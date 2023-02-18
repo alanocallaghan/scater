@@ -18,7 +18,7 @@ test_that("we can produce heatmaps", {
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], columns = 1:20)
     plotHeatmap(example_sce, features=rowData(example_sce)[1:10, "ENS"], 
         swap_rownames = "ENS", columns = 1:20)
-    plotHeatmap(example_sce, features=rownames(example_sce)[1:10], assay.type='counts')
+    plotHeatmap(example_sce, features=rownames(example_sce)[1:10], exprs_values='counts')
 
     # Colour parameters for the expression values.
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], zlim=c(0, 2))
@@ -51,20 +51,20 @@ test_that("we can produce heatmaps", {
 
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
                 colour_columns_by=c("Mutation_Status", "Gene_0001"), 
-                by.assay.type = "logcounts")
+                by_exprs_values = "logcounts")
 
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
                 colour_columns_by=list(I(example_sce$Mutation_Status), "Gene_0001"), 
-                by.assay.type = "logcounts")
+                by_exprs_values = "logcounts")
 
     # Testing out the column ordering + colouring. 
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10],
                 order_columns_by=c("Mutation_Status", "Gene_0001"), 
-                by.assay.type = "logcounts")
+                by_exprs_values = "logcounts")
 
     plotHeatmap(example_sce, features=rownames(example_sce)[1:10], columns=1:10,
                 order_columns_by=c("Mutation_Status", "Gene_0001"), 
-                by.assay.type = "logcounts")
+                by_exprs_values = "logcounts")
 
     # Testing that column colouring still works when columns have no names.
     unnamed <- example_sce

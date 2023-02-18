@@ -86,7 +86,7 @@ test_that("runPCA responds to changes to various settings", {
     expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
-    normed3 <- runPCA(normed, assay.type = "counts")
+    normed3 <- runPCA(normed, exprs_values = "counts")
     expect_identical(ncol(reducedDim(normed3)), fullN)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
@@ -160,7 +160,7 @@ test_that("runPCA behaves with alternative assays", {
     assay(normed_alt, "whee") <- logcounts(normed)
     logcounts(normed_alt) <- NULL
 
-    normed3 <- runPCA(normed_alt, ncomponents = 4, assay.type = "whee")
+    normed3 <- runPCA(normed_alt, ncomponents = 4, exprs_values = "whee")
     normed4 <- runPCA(normed, ncomponents = 4)
     expect_identical(reducedDim(normed3), reducedDim(normed4))
 })
@@ -179,8 +179,7 @@ test_that("runColDataPCA works as expected for QC metrics", {
 
     # Checking outlier detection works correctly.
     expect_identical(normed$outlier, NULL)
-    expect_warning(normed <- runColDataPCA(normed, variables = vars, outliers = TRUE))
-    expect_no_error(normed <- runColDataPCA(normed, variables = vars, outliers = TRUE))
+    expect_warning(normed <- runColDataPCA(normed, variables = vars, outliers = TRUE), NA)
     expect_type(normed$outlier, "logical")
     expect_identical(length(normed$outlier), ncol(normed))
 })
@@ -236,7 +235,7 @@ test_that("runTSNE works as expected", {
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     set.seed(100)
-    normed3 <- runTSNE(normed, assay.type = "counts")
+    normed3 <- runTSNE(normed, exprs_values = "counts")
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     set.seed(100)
@@ -360,7 +359,7 @@ test_that("runUMAP works as expected", {
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     set.seed(100)
-    normed3 <- runUMAP(normed, assay.type = "counts")
+    normed3 <- runUMAP(normed, exprs_values = "counts")
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     set.seed(100)
@@ -413,7 +412,7 @@ test_that("multi-modal UMAP works as expected", {
     sce <- SingleCellExperiment(list(X = t(stuff)), reducedDims = list(Y = stuff[,1:5]), altExps = list(Z = SummarizedExperiment(t(stuff[, 1:20]))))
 
     set.seed(9999)
-    output2 <- runMultiUMAP(sce, assay.type = 1, dimred = 1, altexp = 1, altexp.assay.type = 1, n_components = 10)
+    output2 <- runMultiUMAP(sce, exprs_values = 1, dimred = 1, altexp = 1, altexp_exprs_values = 1, n_components = 10)
     expect_identical(output, reducedDim(output2, "MultiUMAP"))
 })
 
@@ -438,7 +437,7 @@ test_that("runNMF works as expected", {
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     set.seed(100)
-    normed3 <- runNMF(normed, assay.type = "counts")
+    normed3 <- runNMF(normed, exprs_values = "counts")
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     set.seed(100)
@@ -482,7 +481,7 @@ test_that("runMDS works as expected", {
     normed3 <- runMDS(normed, ntop = 100)
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
-    normed3 <- runMDS(normed, assay.type = "counts")
+    normed3 <- runMDS(normed, exprs_values = "counts")
     expect_false(isTRUE(all.equal(reducedDim(normed2), reducedDim(normed3))))
 
     normed3 <- runMDS(normed, subset_row = 1:100)

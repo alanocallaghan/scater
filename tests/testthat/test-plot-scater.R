@@ -20,12 +20,12 @@ test_that("plotScater works as expected", {
     expect_ggplot(plotScater(example_sce, block1 = "Cell_Cycle", block2 = "Treatment", colour_by = "Cell_Cycle"))
     expect_ggplot(plotScater(example_sce, block1 = "Cell_Cycle", block2 = "Treatment", colour_by = "Gene_0001"))
     
-    expect_ggplot(plotScater(example_sce, colour_by = "Gene_0001", by.assay.type = "counts"))
+    expect_ggplot(plotScater(example_sce, colour_by = "Gene_0001", by_exprs_values = "counts"))
 
     # Responds to different type of expression values.
     cpm(example_sce) <- calculateCPM(example_sce)
-    expect_ggplot(plotScater(example_sce, assay.type="cpm"))
-    expect_error(plotScater(example_sce, assay.type="tpm"), "not in names")
+    expect_ggplot(plotScater(example_sce, exprs_values="cpm"))
+    expect_error(plotScater(example_sce, exprs_values="tpm"), "not in names")
 })
 
 test_that("plotScater's underlying C++ code works as expected", {

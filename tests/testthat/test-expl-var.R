@@ -29,7 +29,7 @@ test_that("getVarianceExplained responds to the options", {
     blah <- normed
     assayNames(blah) <- c("yay", "whee")
     expect_error(getVarianceExplained(blah), "logcounts")
-    expect_identical(varexp, getVarianceExplained(blah, assay.type="whee"))
+    expect_identical(varexp, getVarianceExplained(blah, exprs_values="whee"))
     
     # Responds to choice of variable.
     expect_identical(varexp[,1,drop=FALSE], getVarianceExplained(normed, variables=colnames(varexp)[1]))
