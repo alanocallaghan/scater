@@ -14,8 +14,8 @@
 #' @param order_by Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param by.assay.type A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for
-#' details (alias \code{by_exprs_values} is deprecated).
-#' @param by_exprs_values alias for \code{by.assay.type} (deprecated).
+#' details (also alias \code{by_exprs_values} is accepted for this argument).
+#' @param by_exprs_values Alias for \code{by.assay.type}.
 #' @param other_fields Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to
 #'  identify features instead of \code{rownames(object)} when labelling plot
@@ -60,10 +60,6 @@ plotColData <- function(object, y, x = NULL,
     colour_by = color_by, shape_by = NULL, size_by = NULL, order_by = NULL,
     by_exprs_values = "logcounts", other_fields = list(),
     swap_rownames = NULL, color_by = NULL, point_fun = NULL, by.assay.type=by_exprs_values, ...) {
-
-    .Deprecated(msg="'by_exprs_values' argument is deprecated.\n
-        Use 'by.assay.type' instead.")
-
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")
     }

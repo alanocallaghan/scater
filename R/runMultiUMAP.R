@@ -18,8 +18,8 @@
 #' This argument can be missing, in which case no alternative experiments are used.
 #' @param altexp.assay.type A character or integer vector specifying the assay to extract from alternative experiments, when \code{altexp} is specified.
 #' This is recycled to the same length as \code{altexp}.
-#' @param exprs_values Deprecated. Use \code{assay.type}.
-#' @param altexp_exprs_values Deprecated. Use \code{altexp.assay.type}.
+#' @param exprs_values Alias to \code{assay.type}.
+#' @param altexp_exprs_values Alias to \code{altexp.assay.type}.
 #' @param ... For the generic, further arguments to pass to specific methods.
 #'
 #' For the ANY method, further arguments to pass to \code{\link[uwot]{umap}}.
@@ -105,8 +105,6 @@ setMethod("calculateMultiUMAP", "ANY", function(x, ..., metric="euclidean") {
 #' @importFrom Matrix t
 #' @importFrom SummarizedExperiment assay
 setMethod("calculateMultiUMAP", "SummarizedExperiment", function(x, exprs_values, metric="euclidean", assay.type=exprs_values, ...) {
-   .Deprecated(msg="'exprs_values' argument is deprecated.\n
-        Use 'assay.type' instead.") 
     targets <- lapply(assay.type, FUN=assay, x=x)
     targets <- lapply(targets, t)
     callGeneric(targets, ...) 
@@ -117,17 +115,11 @@ setMethod("calculateMultiUMAP", "SummarizedExperiment", function(x, exprs_values
 #' @importFrom Matrix t
 #' @importFrom SummarizedExperiment assay
 #' @importFrom SingleCellExperiment reducedDim altExp
-setMethod("calculateMultiUMAP", "SingleCellExperiment", function(x, exprs_values, dimred, altexp, altexp_exprs_values="logcounts", assay.type=exprs_values, altexp.assay.type=altexp_exprs_values, ...) {
-
-    .Deprecated(msg="'exprs_values' argument is deprecated.\n
-        Use 'assay.type' instead.")
-
-    .Deprecated(msg="'altexp_exprs_values' argument is deprecated.\n
-        Use 'altexp.assay.type' instead.")
-
+setMethod("calculateMultiUMAP", "SingleCellExperiment", function(x, exprs_values, dimred, altexp, altexp_exprs_values="logcounts",
+          assay.type=exprs_values, altexp.assay.type=altexp_exprs_values, ...) {
     targets1 <- targets2 <- targets3 <- list()
 
-    if (!missing(assay.type)) {
+    if (!missing(exprs_values)) {
         targets1 <- lapply(assay.type, FUN=assay, x=x)
         targets1 <- lapply(targets1, t)
     }

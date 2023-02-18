@@ -51,7 +51,7 @@ For the SummarizedExperiment and SingleCellExperiment methods, and for \code{run
 \item{metric}{Character vector specifying the type of distance to use for each matrix in \code{x}.
 This is recycled to the same number of matrices supplied in \code{x}.}
 
-\item{exprs_values}{Deprecated. Use \code{assay.type}.}
+\item{exprs_values}{Alias to \code{assay.type}.}
 
 \item{assay.type}{A character or integer vector of assays to extract and transpose for use in the UMAP.
 For the SingleCellExperiment, this argument can be missing, in which case no assays are used.}
@@ -62,7 +62,7 @@ This argument can be missing, in which case no assays are used.}
 \item{altexp}{A character or integer vector of \code{\link{altExps}} to extract and transpose for use in the UMAP.
 This argument can be missing, in which case no alternative experiments are used.}
 
-\item{altexp_exprs_values}{Deprecated. Use \code{altexp.assay.type}.}
+\item{altexp_exprs_values}{Alias to \code{altexp.assay.type}.}
 
 \item{altexp.assay.type}{A character or integer vector specifying the assay to extract from alternative experiments, when \code{altexp} is specified.
 This is recycled to the same length as \code{altexp}.}

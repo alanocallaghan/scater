@@ -153,17 +153,14 @@ setMethod("calculateTSNE", "ANY", .calculate_tsne)
 #' @rdname runTSNE
 #' @importFrom SummarizedExperiment assay
 setMethod("calculateTSNE", "SummarizedExperiment", function(x, ..., exprs_values="logcounts", assay.type=exprs_values) {
-   .Deprecated(msg="'exprs_values' argument is deprecated.\n
-        Use 'assay.type' instead.")
     .calculate_tsne(assay(x, assay.type), ...)
 })
 
 #' @export
 #' @rdname runTSNE
-setMethod("calculateTSNE", "SingleCellExperiment", function(x, ..., pca=is.null(dimred), exprs_values="logcounts", dimred=NULL, n_dimred=NULL, assay.type=exprs_values)
+setMethod("calculateTSNE", "SingleCellExperiment", function(x, ..., pca=is.null(dimred), 
+    exprs_values="logcounts", dimred=NULL, n_dimred=NULL, assay.type=exprs_values)
 {
-   .Deprecated(msg="'exprs_values' argument is deprecated.\n
-        Use 'assay.type' instead.")
     if ("use_dimred" %in% names(list(...))) {
         warning("`use_dimred` is unused; use `dimred` instead.")
     }

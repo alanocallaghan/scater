@@ -42,7 +42,7 @@ Only relevant when \code{x} is a \linkS4class{DelayedMatrix}.}
 
 \item{exprs_values}{Alias for \code{assay.type}.}
 
-\item{assay.type}{String or integer specifying the assay of \code{x} to obtain the count matrix from (alias \code{exprs_values} is deprecated).}
+\item{assay.type}{String or integer specifying the assay of \code{x} to obtain the count matrix from (also the alias \code{exprs_values} is accepted for this argument).}
 }
 \value{
 An integer vector containing counts per gene or cell, depending on the provided arguments.

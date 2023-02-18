@@ -104,8 +104,6 @@ setMethod("calculateUMAP", "ANY", .calculate_umap)
 #' @rdname runUMAP
 #' @importFrom SummarizedExperiment assay
 setMethod("calculateUMAP", "SummarizedExperiment", function(x, ..., exprs_values="logcounts", assay.type=exprs_values) {
-   .Deprecated(msg="'exprs_values' argument is deprecated.\n
-        Use 'assay.type' instead.")
     .calculate_umap(assay(x, assay.type), ...)
 })
 
@@ -116,8 +114,6 @@ setMethod("calculateUMAP", "SingleCellExperiment", function(x, ...,
     pca=if (!is.null(dimred)) NULL else 50,
     exprs_values="logcounts", dimred=NULL, n_dimred=NULL, assay.type=exprs_values)
 {
-   .Deprecated(msg="'exprs_values' argument is deprecated.\n
-        Use 'assay.type' instead.")
     mat <- .get_mat_from_sce(x, assay.type=assay.type, dimred=dimred, n_dimred=n_dimred)
     .calculate_umap(mat, transposed=!is.null(dimred), pca=pca, ...)
 })

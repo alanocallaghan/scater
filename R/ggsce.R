@@ -5,7 +5,7 @@
 #'
 #' @param x A \linkS4class{SingleCellExperiment} object.
 #' This is expected to have row names for \code{ggcells} and column names for \code{ggfeatures}.
-#' @param assay.type String or integer scalar specifying the expression values for which to compute the variance (alias \code{exprs_value} is deprecated).
+#' @param assay.type String or integer scalar specifying the expression values for which to compute the variance (also an alias \code{exprs_value} is accepted).
 #' @param mapping A list containing aesthetic mappings, usually the output of \code{\link{aes}} or related functions.
 #' @inheritParams scuttle::makePerCellDF
 #' @inheritParams scuttle::makePerFeatureDF
@@ -57,9 +57,6 @@ ggcells <- function(x, mapping=aes(), features=NULL, exprs_values="logcounts",
     use_dimred=TRUE, use_altexps=FALSE, prefix_altexps=FALSE, check_names=TRUE, 
     extract_mapping=TRUE, assay.type=exprs_values, ...) 
 {
-
-    .Deprecated(msg="'exprs_values' argument is deprecated.\n
-        Use 'assay.type' instead.")	
     features <- c(features, .aes_in_use(mapping, extract_mapping)) 
     df <- makePerCellDF(x, features=features, exprs_values=assay.type, use_altexps=use_altexps, 
         use_dimred=use_dimred, prefix_altexps=prefix_altexps, check_names=check_names)
@@ -71,10 +68,8 @@ ggcells <- function(x, mapping=aes(), features=NULL, exprs_values="logcounts",
 ggfeatures <- function(x, mapping=aes(), cells=NULL, exprs_values="logcounts", 
     check_names=TRUE, extract_mapping=TRUE, assay.type=exprs_values, ...)
 {
-    .Deprecated(msg="'exprs_values' argument is deprecated.\n
-        Use 'assay.type' instead.")
     cells <- c(cells, .aes_in_use(mapping, extract_mapping))
-    df <- makePerFeatureDF(x, cells=cells, assay.type=assay.type, check.names=check_names)
+    df <- makePerFeatureDF(x, cells=cells, exprs_values=assay.type, check_names=check_names)
     ggplot(df, mapping=mapping, ...)
 }
 

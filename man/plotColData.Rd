@@ -39,7 +39,7 @@ If \code{NULL}, nothing is shown on the x-axis.}
 
 \item{order_by}{Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{by_exprs_values}{alias for \code{by.assay.type} (deprecated).}
+\item{by_exprs_values}{Alias for \code{by.assay.type}.}
 
 \item{other_fields}{Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
@@ -53,7 +53,7 @@ elements.}
 
 \item{by.assay.type}{A string or integer scalar specifying which assay to obtain expression values from, 
 for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for
-details (alias \code{by_exprs_values} is deprecated).}
+details (also alias \code{by_exprs_values} is accepted for this argument).}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }

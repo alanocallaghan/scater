@@ -43,6 +43,6 @@ getExplanatoryPCs <- function(x, dimred="PCA", n_dimred=10, ...) {
 
     # Using getVarianceExplained to handle variable selection.
     dummy <- SingleCellExperiment(list(pc_space=t(reddims)), colData=colData(x))
-    getVarianceExplained(dummy, assay.type="pc_space", ...)
+    getVarianceExplained(dummy, exprs_values="pc_space", ...)
     
 }

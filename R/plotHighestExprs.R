@@ -19,8 +19,8 @@
 #'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
 #' @param color_cells_by Alias to \code{colour_cells_by}.
-#' @param exprs_values Deprecated. Use \code{assay.type}.
-#' @param by_exprs_values Deprecated. Use \code{by.assay.type}.
+#' @param exprs_values Alias to \code{assay.type}.
+#' @param by_exprs_values Alias to \code{by.assay.type}.
 #'
 #' @details 
 #' This function will plot the percentage of counts accounted for by the top \code{n} most highly expressed features across the dataset.
@@ -55,13 +55,6 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by,
     by.assay.type=by_exprs_values
     )
 {
-
-    .Deprecated(msg="'exprs_values' argument is deprecated.\n
-        Use 'assay.type' instead.")
-
-    .Deprecated(msg="'by_exprs_values' argument is deprecated.\n
-        Use 'by.assay.type' instead.")
-
     ## Find the most highly expressed features in this dataset
     exprs_mat <- assay(object, assay.type, withDimnames=FALSE)
     ave_exprs <- rowSums2(exprs_mat)

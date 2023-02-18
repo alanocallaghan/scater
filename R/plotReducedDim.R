@@ -54,7 +54,7 @@
 #' \code{\link[ggrastr]{rasterise}}. To control the dpi, set
 #' \code{options(ggrastr.default.dpi)},
 #' for example \code{options(ggrastr.default.dpi=300)}.
-#' @param by_exprs_values Deprecated. Use \code{by.assay.type}.
+#' @param by_exprs_values Alias for \code{by.assay.type}.
 #' @param ... Additional arguments for visualization, see
 #' \code{?"\link{scater-plot-args}"} for details.
 #'
@@ -110,9 +110,6 @@ plotReducedDim <- function(
         by.assay.type=by_exprs_values,
 	...
     ) {
-
-    .Deprecated(msg="'by_exprs_values' argument is deprecated.\n
-        Use 'by.assay.type' instead.")
 
     ## Extract reduced dimension representation of cells
     red_dim <- as.matrix(reducedDim(object, dimred))

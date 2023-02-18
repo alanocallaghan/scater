@@ -34,7 +34,7 @@ If \code{NULL}, nothing is shown on the x-axis.}
 
 \item{size_by}{Specification of a row metadata field or a cell to size by, see \code{?\link{retrieveFeatureInfo}} for possible values.}
 
-\item{by_exprs_values}{Deprecated. Use \code{by.assay.type}.}
+\item{by_exprs_values}{Alias to \code{by.assay.type}.}
 
 \item{other_fields}{Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 

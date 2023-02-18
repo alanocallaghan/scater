@@ -15,7 +15,7 @@
 #' for use in point aesthetics - see \code{?\link{retrieveFeatureInfo}} for details.
 #' @param other_fields Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' @param color_by Alias to \code{colour_by}.
-#' @param by_exprs_values Deprecated. Use \code{by.assay.type}.
+#' @param by_exprs_values Alias to \code{by.assay.type}.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -44,10 +44,6 @@ plotRowData <- function(object, y, x = NULL,
     by.assay.type=by_exprs_values,    
     ...)
 {
-
-    .Deprecated(msg="'by_exprs_values' argument is deprecated.\n
-        Use 'by.assay.type' instead.")
- 
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")
     }

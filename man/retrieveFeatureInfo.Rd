@@ -20,7 +20,7 @@ Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.}
 
 \item{search}{Character vector specifying the types of data or metadata to use.}
 
-\item{exprs_values}{Deprecated. Use \code{assay.type}.}
+\item{exprs_values}{Alias to \code{assay.type}.}
 
 \item{assay.type}{String or integer scalar specifying the assay from which expression values should be extracted.}
 }

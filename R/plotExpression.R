@@ -29,8 +29,8 @@
 #' @param color_by Alias to \code{colour_by}.
 #' @param feature_colors Alias to \code{feature_colours}.
 #' @param point_fun Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}.
-#' @param exprs_values Deprecated. Use \code{assay.type}.
-#' @param by_exprs_values Deprecated. Use \code{by.assay.type}.
+#' @param exprs_values Alias to \code{assay.type}.
+#' @param by_exprs_values Alias to \code{by.assay.type}.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -96,13 +96,6 @@ plotExpression <- function(object, features, x = NULL,
     by.assay.type=by_exprs_values,
     ...)
 {
-
-    .Deprecated(msg="'exprs_values' argument is deprecated.\n
-        Use 'assay.type' instead.")
-
-    .Deprecated(msg="'by_exprs_values' argument is deprecated.\n
-        Use 'by.assay.type' instead.")
-	
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")
     }
@@ -112,7 +105,7 @@ plotExpression <- function(object, features, x = NULL,
         assay.type <- "logcounts"
     }
 
-    assay_vals <- vector("list", length(features))
+    exprs_vals <- vector("list", length(features))
     for (i in seq_along(features)) {
         current <- retrieveCellInfo(object, features[i], 
             search = c("assays", "altExps"), assay.type = assay.type,
@@ -121,21 +114,21 @@ plotExpression <- function(object, features, x = NULL,
         if (is.null(current$value)) {
             stop("cannot find '%s' in 'object'", features[i])
         }
-        assay_vals[[i]] <- unname(current$value)
+        exprs_vals[[i]] <- unname(current$value)
     }
     nfeatures <- length(features)
 
     if (log2_values) {
-        exprs_val <- lapply(assay_vals, function(x) log2(x + 1))
-        ylab <- paste0("Assay (", assay.type, "; log2-scale)")
+        exprs_val <- lapply(exprs_vals, function(x) log2(x + 1))
+        ylab <- paste0("Expression (", assay.type, "; log2-scale)")
     } else {
-        ylab <- paste0("Assay (", assay.type, ")")
+        ylab <- paste0("Expression (", assay.type, ")")
     }
 
     ## melt the expression data.
     evals_long <- data.frame(
-        Feature=rep(factor(features, features), lengths(assay_vals)),
-        Y=unlist(assay_vals) 
+        Feature=rep(factor(features, features), lengths(exprs_vals)),
+        Y=unlist(exprs_vals) 
     )
 
     ## check x-coordinates are valid

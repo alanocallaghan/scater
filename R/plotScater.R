@@ -17,8 +17,8 @@
 #' @param line_width Numeric scalar specifying the line width.
 #' @param theme_size Numeric scalar specifying the font size to use for the plotting theme.
 #' @param color_by Alias to \code{colour_by}.
-#' @param exprs_values Deprecated. Use \code{assay.type}.
-#' @param by_exprs_values Deprecated. Use \code{by.assay.type}.
+#' @param exprs_values Alias to \code{assay.type}.
+#' @param by_exprs_values Alias to \code{by.assay.type}.
 #' @details 
 #' For each cell, the features are ordered from most-expressed to least-expressed.
 #' The cumulative proportion of the total expression for the cell is computed across the top \code{nfeatures} features. 
@@ -50,13 +50,6 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
     by.assay.type=by_exprs_values    
     )
 {
-
-   .Deprecated(msg="'exprs_values' argument is deprecated.\n
-        Use 'assay.type' instead.")
-
-    .Deprecated(msg="'by_exprs_values' argument is deprecated.\n
-        Use 'by.assay.type' instead.")
- 
     if (!is(x, "SingleCellExperiment")) {
         stop("x must be of class SingleCellExperiment")
     }
