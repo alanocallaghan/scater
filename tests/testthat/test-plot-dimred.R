@@ -22,7 +22,7 @@ test_that("we can produce PCA scatterplots", {
 
     # Checking other arguments are passed successfully to plotReducedDim.
     expect_ggplot(plotPCA(example_sce, colour_by = "Cell_Cycle", add_legend = FALSE))
-    expect_ggplot(plotPCA(example_sce, colour_by = "Gene_0001", by_exprs_values = "counts"))
+    expect_ggplot(plotPCA(example_sce, colour_by = "Gene_0001", by.assay.type = "counts"))
     expect_ggplot(plotPCA(example_sce, percentVar = c(19, 5)))
     expect_ggplot(plotPCA(example_sce, text_by="Cell_Cycle"))
     
@@ -56,7 +56,7 @@ test_that("we can produce PCA pairplots", {
 
     # Checking other arguments are passed successfully to plotReducedDim.
     expect_ggplot(plotPCA(example_sce, ncomponents = 4, colour_by = "Cell_Cycle", add_legend = FALSE))
-    expect_ggplot(plotPCA(example_sce, ncomponents = 4, colour_by = "Gene_0001", by_exprs_values = "counts"))
+    expect_ggplot(plotPCA(example_sce, ncomponents = 4, colour_by = "Gene_0001", by.assay.type = "counts"))
     expect_ggplot(plotPCA(example_sce, ncomponents = 4, percentVar = c(19, 5, 3, 2)))
     
     # Checking that specification of multiple ncomponents works.

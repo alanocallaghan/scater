@@ -22,7 +22,7 @@ test_that("plotExpression works for various aesthetics", {
     expect_ggplot(plotExpression(example_sce, gene_set, size_by = "Gene_0001", shape_by = "Treatment"))
     expect_ggplot(plotExpression(example_sce, gene_set, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"))
     
-    expect_ggplot(plotExpression(example_sce, gene_set, size_by = "Gene_0001", shape_by = "Treatment", by_exprs_values = "counts"))
+    expect_ggplot(plotExpression(example_sce, gene_set, size_by = "Gene_0001", shape_by = "Treatment", by.assay.type = "counts"))
 
     expect_ggplot(plotExpression(example_sce, rowData(example_sce)[1:10, "ENS"], colour_by = "ENS_0001", swap_rownames="ENS"))
 
@@ -41,11 +41,11 @@ test_that("plotExpression works with semi-analysis options", {
     expect_ggplot(plotExpression(example_sce, gene_set, x="Gene_0001", show_smooth=TRUE, show_se=FALSE))
 })
 
-test_that("plotExpression works for different exprs_values", {
+test_that("plotExpression works for different assay.type", {
     gene_set <- tail(rownames(example_sce))
-    expect_ggplot(plotExpression(example_sce, gene_set, x = "Mutation_Status", exprs_values = "counts"))
-    expect_ggplot(plotExpression(example_sce, gene_set, x = "Mutation_Status", exprs_values = "counts", log2_values = TRUE))
-    expect_error(plotExpression(example_sce, rownames(example_sce)[1:6], exprs_values = "silly"), "not in names")
+    expect_ggplot(plotExpression(example_sce, gene_set, x = "Mutation_Status", assay.type = "counts"))
+    expect_ggplot(plotExpression(example_sce, gene_set, x = "Mutation_Status", assay.type = "counts", log2_values = TRUE))
+    expect_error(plotExpression(example_sce, rownames(example_sce)[1:6], assay.type = "silly"), "not in names")
 
     # And on sparse matrices.        
     sparsified <- example_sce

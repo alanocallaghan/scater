@@ -20,7 +20,7 @@ test_that("plotHighestExprs' aesthetics choices work", {
     expect_ggplot(plotHighestExprs(wt_qc, colour_cells_by = "sum"))
     expect_ggplot(plotHighestExprs(wt_qc, colour_cells_by = "Mutation_Status"))
     expect_ggplot(plotHighestExprs(wt_qc, colour_cells_by = NULL))
-    expect_ggplot(plotHighestExprs(wt_qc, colour_cells_by = "Gene_0001", by_exprs_values = "counts"))
+    expect_ggplot(plotHighestExprs(wt_qc, colour_cells_by = "Gene_0001", by.assay.type = "counts"))
 })
 
 test_that("plotHighestExprs works with different feature selections", {
@@ -52,7 +52,7 @@ test_that("plotHighestExprs works with different feature selections", {
 test_that("plotHighestExprs works on alternative exprs", {
     alt_sce <- wt_qc 
     assayNames(alt_sce) <- "whee"
-    expect_ggplot(plotHighestExprs(alt_sce, exprs_values="whee"))
+    expect_ggplot(plotHighestExprs(alt_sce, assay.type="whee"))
 
     # Works for sparse matrices.
     expect_ggplot(plotHighestExprs(sparsified))
