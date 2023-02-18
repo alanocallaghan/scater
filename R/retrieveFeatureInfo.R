@@ -8,7 +8,7 @@
 #' Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.
 #' @param search Character vector specifying the types of data or metadata to use.
 #' @param assay.type String or integer scalar specifying the assay from which expression values should be extracted.
-#' @param exprs_values Alias to \code{assay.type}.
+#' @param exprs_values Deprecated. Use \code{assay.type}.
 #' 
 #' @return A list containing \code{name}, a string with the name of the extracted field (usually identically to \code{by});
 #' and \code{value}, a vector of length equal to \code{ncol(x)} containing per-feature (meta)data values.
@@ -59,7 +59,11 @@
 #' @importFrom SummarizedExperiment rowData assay
 retrieveFeatureInfo <- function(x, by, search=c("rowData", "assays"), exprs_values="logcounts", assay.type=exprs_values)
 {
-    .mopUp <- function(name, value) {
+
+   .Deprecated(msg="'exprs_values' argument is deprecated.\n
+        Use 'assay.type' instead.")
+
+     .mopUp <- function(name, value) {
         list(name=name, value=value)
     } 
     if (is.null(by)) {

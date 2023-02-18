@@ -76,6 +76,8 @@ setMethod("calculateNMF", "ANY", .calculate_nmf)
 #' @rdname runNMF
 #' @importFrom SummarizedExperiment assay
 setMethod("calculateNMF", "SummarizedExperiment", function(x, ..., exprs_values="logcounts", assay.type=exprs_values) {
+   .Deprecated(msg="'exprs_values' argument is deprecated.\n
+        Use 'assay.type' instead.")
     .calculate_nmf(assay(x, assay.type), ...)
 })
 
@@ -83,6 +85,8 @@ setMethod("calculateNMF", "SummarizedExperiment", function(x, ..., exprs_values=
 #' @rdname runNMF
 setMethod("calculateNMF", "SingleCellExperiment",
     function(x, ..., exprs_values="logcounts", dimred=NULL, n_dimred=NULL, assay.type=exprs_values) {
+   .Deprecated(msg="'exprs_values' argument is deprecated.\n
+        Use 'assay.type' instead.")    
     mat <- .get_mat_from_sce(x, assay.type=assay.type, dimred=dimred, n_dimred=n_dimred)
     .calculate_nmf(mat, transposed=!is.null(dimred), ...)
 })

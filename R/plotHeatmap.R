@@ -46,8 +46,8 @@
 #' Aliases to \code{color}, \code{color_columns_by},
 #' \code{column_annotation_colors}, \code{color_rows_by}, 
 #' \code{row_annotation_colors}.
-#' @param exprs_values Alias to \code{assay.type}.
-#' @param by_exprs_values Alias to {by.assay.type}.
+#' @param exprs_values Deprecated. Use \code{assay.type}.
+#' @param by_exprs_values Deprecated. Use {by.assay.type}.
 #'
 #' @details 
 #' Setting \code{center=TRUE} is useful for examining log-fold changes of each cell's expression profile from the average across all cells.
@@ -100,6 +100,12 @@ plotHeatmap <- function(object, features, columns = NULL,
     assay.type=exprs_values,
     by.assay.type=by_exprs_values,    
     ...) {
+
+    .Deprecated(msg="'exprs_values' argument is deprecated.\n
+        Use 'assay.type' instead.")
+
+    .Deprecated(msg="'by_exprs_values' argument is deprecated.\n
+        Use 'by.assay.type' instead.")
 
     # Setting names, otherwise the downstream colouring fails.
     if (is.null(colnames(object))) {

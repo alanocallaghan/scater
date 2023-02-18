@@ -5,7 +5,7 @@
 #' @param x A numeric matrix of expression values, usually log-transformed and normalized.
 #' 
 #' Alternatively, a \linkS4class{SummarizedExperiment} containing such a matrix.
-#' @param assay.type String or integer scalar specifying the expression values for which to compute the variance (also an alias \code{exprs_value} is accepted).
+#' @param assay.type String or integer scalar specifying the expression values for which to compute the variance (alias \code{exprs_value} is deprecated).
 #' @param exprs_values Alias for \code{assay.type}.
 #' @param variables A \linkS4class{DataFrame} or data.frame containing one or more variables of interest.
 #' This should have number of rows equal to the number of columns in \code{x}.
@@ -108,6 +108,10 @@ setMethod("getVarianceExplained", "ANY", .get_variance_explained)
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
 setMethod("getVarianceExplained", "SummarizedExperiment", function(x, variables=NULL, ..., exprs_values="logcounts", assay.type=exprs_values)
 {
+
+    .Deprecated(msg="'exprs_values' argument is deprecated.\n
+        Use 'assay.type' instead.")
+
     if (is.null(variables)) {
         variables <- colData(x)
     } else if (is.character(variables)) {

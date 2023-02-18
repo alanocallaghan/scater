@@ -18,16 +18,16 @@ plotRLE(
   color_by = NULL,
   assay.type = exprs_values,
   by.assay.type = by_exprs_values,
-  assay_logged = exprs_logged,
+  assay.logged = exprs_logged,
   ...
 )
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
 
-\item{exprs_values}{Alias to \code{assay.type}.}
+\item{exprs_values}{Deprecated. Use \code{assay.type}.}
 
-\item{exprs_logged}{A logical scalar indicating whether the expression matrix is already log-transformed.
+\item{exprs_logged}{Deprecated. Use \code{assay.logged}. 
 If not, a log2-transformation (+1) will be performed prior to plotting.}
 
 \item{style}{String defining the boxplot style to use, either \code{"minimal"} (default) or \code{"full"}; see Details.}
@@ -39,7 +39,7 @@ This can be useful for arranging cells by experimental conditions or batches.}
 
 \item{colour_by}{Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{by_exprs_values}{Alias to \code{by.assay.type}.}
+\item{by_exprs_values}{Deprecated. Use \code{by.assay.type}.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object to be used to parallelise operations using \code{\link{DelayedArray}}.}
 
@@ -50,7 +50,7 @@ This can be useful for arranging cells by experimental conditions or batches.}
 \item{by.assay.type}{A string or integer scalar specifying which assay to obtain expression values from,
 for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.}
 
-\item{assay_logged}{Alias to \code{exprs_logged}.}
+\item{assay.logged}{A logical scalar indicating whether the expression matrix is already log-transformed.}
 
 \item{...}{further arguments passed to \code{\link[ggplot2]{geom_boxplot}} when \code{style="full"}.}
 }

@@ -18,7 +18,7 @@
 #' @param altexp String or integer scalar specifying an alternative experiment containing the input data.
 #' @param dimred String or integer scalar specifying the existing dimensionality reduction results to use.
 #' @param n_dimred Integer scalar or vector specifying the dimensions to use if \code{dimred} is specified.
-#' @param exprs_values Alias to \code{assay.type}.
+#' @param exprs_values Deprecated. Use \code{assay.type}.
 #' @param ... For the \code{calculatePCA} generic, additional arguments to pass to specific methods.
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
 #'
@@ -157,6 +157,8 @@ setMethod("calculatePCA", "ANY", .calculate_pca)
 #' @rdname runPCA
 #' @importFrom SummarizedExperiment assay
 setMethod("calculatePCA", "SummarizedExperiment", function(x, ..., exprs_values="logcounts", assay.type=exprs_values) {
+   .Deprecated(msg="'exprs_values' argument is deprecated.\n
+        Use 'assay.type' instead.")
     .calculate_pca(assay(x, assay.type), ...)
 })
 
@@ -164,6 +166,8 @@ setMethod("calculatePCA", "SummarizedExperiment", function(x, ..., exprs_values=
 #' @rdname runPCA
 setMethod("calculatePCA", "SingleCellExperiment", function(x, ..., exprs_values="logcounts", dimred=NULL, n_dimred=NULL, assay.type=exprs_values) 
 {
+   .Deprecated(msg="'exprs_values' argument is deprecated.\n
+        Use 'assay.type' instead.")
     mat <- .get_mat_from_sce(x, assay.type=assay.type, dimred=dimred, n_dimred=n_dimred)
     .calculate_pca(mat, transposed=!is.null(dimred), ...)
 })

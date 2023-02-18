@@ -38,7 +38,7 @@ If a list is supplied, each entry of the list can be a string, an AsIs-wrapped v
 
 \item{x}{Specification of a column metadata field or a feature to show on the x-axis, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{exprs_values}{Alias to \code{assay.type}.}
+\item{exprs_values}{Deprecated. Use \code{assay.type}.}
 
 \item{log2_values}{Logical scalar, specifying whether the expression values be transformed to the log2-scale for plotting (with an offset of 1 to avoid logging zeroes).}
 
@@ -50,7 +50,7 @@ If a list is supplied, each entry of the list can be a string, an AsIs-wrapped v
 
 \item{order_by}{Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{by_exprs_values}{Alias to \code{by.assay.type}.}
+\item{by_exprs_values}{Deprecated. Use \code{by.assay.type}.}
 
 \item{xlab}{String specifying the label for x-axis.
 If \code{NULL} (default), \code{x} will be used as the x-axis label.}

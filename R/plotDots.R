@@ -10,8 +10,8 @@
 #' detected expression values.
 #' @param other_fields Additional feature-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.
 #' Note that any \link{AsIs} vectors or data.frames must be of length equal to \code{nrow(object)}, not \code{features}.
-#' @param by.assay.type A string or integer scalar specifying which assay to obtain expression values from, for entries of \code{other_fields}. Also alias \code{by_exprs_values} is accepted as argument name.
-#' @param by_exprs_values Alias for \code{by.assay.type}.
+#' @param by.assay.type A string or integer scalar specifying which assay to obtain expression values from, for entries of \code{other_fields}. Alias \code{by_exprs_values} is deprecated.
+#' @param by_exprs_values Deprecated. Use \code{by.assay.type}.
 #'
 #' @return 
 #' A \link{ggplot} object containing a dot plot.
@@ -64,6 +64,12 @@ plotDots <- function(object, features, group = NULL, block=NULL,
     assay.type=exprs_values,
     by.assay.type=by_exprs_values)
 {
+
+    .Deprecated(msg="'exprs_values' argument is deprecated.\n
+        Use 'assay.type' instead.")
+
+    .Deprecated(msg="'by_exprs_values' argument is deprecated.\n
+        Use 'by.assay.type' instead.")
 
     if (is.null(group)) {
         group <- rep("all", ncol(object))

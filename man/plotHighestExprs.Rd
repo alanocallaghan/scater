@@ -29,9 +29,9 @@ plotHighestExprs(
 \item{drop_features}{A character, logical or numeric vector indicating which features (e.g. genes, transcripts) to drop when producing the plot. 
 For example, spike-in transcripts might be dropped to examine the contribution from endogenous genes.}
 
-\item{exprs_values}{Alias to \code{assay.type}.}
+\item{exprs_values}{Deprecated. Use \code{assay.type}.}
 
-\item{by_exprs_values}{Alias to \code{by.assay.type}.}
+\item{by_exprs_values}{Deprecated. Use \code{by.assay.type}.}
 
 \item{feature_names_to_plot}{String specifying which row-level metadata column contains the feature names.
 Alternatively, an \link{AsIs}-wrapped vector or a data.frame, see \code{?\link{retrieveFeatureInfo}} for possible values.

@@ -59,7 +59,7 @@ This can be a character vector of row names, an integer vector of row indices or
 
 \item{seed}{Random number generation seed to be passed to \code{\link[RcppML]{nmf}}.}
 
-\item{exprs_values}{Alias to \code{assay.type}.}
+\item{exprs_values}{Deprecated. Use \code{assay.type}.}
 
 \item{assay.type}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
 

@@ -4,7 +4,7 @@
 #'
 #' @param object A SingleCellExperiment object.
 #' @param assay.type A string or integer scalar specifying the expression matrix in \code{object} to use.
-#' @param exprs_logged A logical scalar indicating whether the expression matrix is already log-transformed.
+#' @param exprs_logged Deprecated. Use \code{assay.logged}. 
 #' If not, a log2-transformation (+1) will be performed prior to plotting.
 #' @param style String defining the boxplot style to use, either \code{"minimal"} (default) or \code{"full"}; see Details.
 #' @param legend Logical scalar specifying whether a legend should be shown.
@@ -15,9 +15,9 @@
 #' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object to be used to parallelise operations using \code{\link{DelayedArray}}.
 #' @param color_by Alias to \code{colour_by}.
-#' @param exprs_values Alias to \code{assay.type}.
-#' @param by_exprs_values Alias to \code{by.assay.type}.
-#' @param assay_logged Alias to \code{exprs_logged}.
+#' @param exprs_values Deprecated. Use \code{assay.type}.
+#' @param by_exprs_values Deprecated. Use \code{by.assay.type}.
+#' @param assay.logged A logical scalar indicating whether the expression matrix is already log-transformed.
 #' @param ... further arguments passed to \code{\link[ggplot2]{geom_boxplot}} when \code{style="full"}.
 #'
 #' @return A ggplot object
@@ -70,8 +70,18 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
                     BPPARAM = BiocParallel::bpparam(), color_by = NULL,
                     assay.type=exprs_values,
                     by.assay.type=by_exprs_values,
-		    assay_logged=exprs_logged,		    
+		    assay.logged=exprs_logged,		    
                     ...) {
+
+
+    .Deprecated(msg="'exprs_values' argument is deprecated.\n
+        Use 'assay.type' instead.")
+
+    .Deprecated(msg="'by_exprs_values' argument is deprecated.\n
+        Use 'by.assay.type' instead.")
+
+    .Deprecated(msg="'exprs_logged' argument is deprecated.\n
+        Use 'assay.logged' instead.")
 
     oldbp <- getAutoBPPARAM()
     setAutoBPPARAM(BPPARAM)
@@ -90,7 +100,7 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
     ## Calculate RLE for each gene in each cell.
     exprs_mat <- assay(object, i=assay.type, withDimnames=FALSE)
     exprs_mat <- DelayedArray(exprs_mat)
-    if (!assay_logged) {
+    if (!assay.logged) {
         exprs_mat <- log2(exprs_mat + 1)
     }
     features_meds <- rowMedians(exprs_mat)

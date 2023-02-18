@@ -69,7 +69,7 @@ This can be a character vector of row names, an integer vector of row indices or
 calculated by \code{FUN} should be stored as \sQuote{dist} attribute of the 
 matrix returned/stored by \code{calculateMDS} or \code{runMDS}.}
 
-\item{exprs_values}{Alias to \code{assay.type}.}
+\item{exprs_values}{Deprecated. Use \code{assay.type}.}
 
 \item{assay.type}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
 

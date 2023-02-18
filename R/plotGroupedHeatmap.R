@@ -56,6 +56,9 @@ plotGroupedHeatmap <- function(object, features, group, block = NULL,
     columns=NULL, exprs_values = "logcounts", center = FALSE, scale = FALSE,
     zlim = NULL, colour = color, swap_rownames = NULL, color = NULL, assay.type=exprs_values, ...) {
 
+    .Deprecated(msg="'exprs_values' argument is deprecated.\n
+        Use 'assay.type' instead.")
+
     # Setting names, otherwise the downstream colouring fails.
     if (is.null(colnames(object))) { 
         colnames(object) <- seq_len(ncol(object)) 

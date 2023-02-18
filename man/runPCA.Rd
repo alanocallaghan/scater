@@ -61,7 +61,7 @@ This can be a character vector of row names, an integer vector of row indices or
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.}
 
-\item{exprs_values}{Alias to \code{assay.type}.}
+\item{exprs_values}{Deprecated. Use \code{assay.type}.}
 
 \item{assay.type}{Integer scalar or string indicating which assay of \code{x} contains the expression values.}
 

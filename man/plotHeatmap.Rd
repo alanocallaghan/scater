@@ -41,7 +41,7 @@ plotHeatmap(
 Also specifies the column order if \code{cluster_cols=FALSE} and \code{order_columns_by=NULL}.
 By default, all columns are used.}
 
-\item{exprs_values}{Alias to \code{assay.type}.}
+\item{exprs_values}{Deprecated. Use \code{assay.type}.}
 
 \item{center}{A logical scalar indicating whether each feature should have its mean expression centered at zero prior to plotting.}
 
@@ -84,7 +84,7 @@ Each entry of the list can be any acceptable input to the \code{by} argument in 
 A character vector can also be supplied and will be treated as a list of strings.
 This argument is automatically appended to \code{colour_columns_by}.}
 
-\item{by_exprs_values}{Alias to {by.assay.type}.}
+\item{by_exprs_values}{Deprecated. Use {by.assay.type}.}
 
 \item{show_colnames, cluster_cols, ...}{Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.}
 

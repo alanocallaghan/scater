@@ -92,7 +92,10 @@ setMethod("calculateMDS", "ANY", .calculate_mds)
 #' @rdname runMDS
 #' @importFrom SummarizedExperiment assay
 setMethod("calculateMDS", "SummarizedExperiment", function(x, ..., exprs_values="logcounts", assay.type=exprs_values) {
-    .calculate_mds(assay(x, assay.type), ...)
+
+   .Deprecated(msg="'exprs_values' argument is deprecated.\n
+        Use 'assay.type' instead.")
+   .calculate_mds(assay(x, assay.type), ...)
 })
 
 #' @export
@@ -100,6 +103,8 @@ setMethod("calculateMDS", "SummarizedExperiment", function(x, ..., exprs_values=
 #' @importFrom SummarizedExperiment assay
 setMethod("calculateMDS", "SingleCellExperiment", function(x, ..., exprs_values="logcounts", dimred=NULL, n_dimred=NULL, assay.type=exprs_values)
 {
+   .Deprecated(msg="'exprs_values' argument is deprecated.\n
+        Use 'assay.type' instead.")
     mat <- .get_mat_from_sce(x, assay.type=assay.type, dimred=dimred, n_dimred=n_dimred)
     .calculate_mds(mat, transposed=!is.null(dimred), ...)
 })

@@ -23,7 +23,7 @@
 #'  identify features instead of \code{rownames(object)} when labelling plot 
 #'  elements.
 #' @param color_by Alias to \code{colour_by}.
-#' @param by_exprs_values Alias for \code{by.assay.type}.
+#' @param by_exprs_values Deprecated. Use \code{by.assay.type}.
 #'
 #' @details 
 #' This function expects plate positions to be given in a charcter format where a letter indicates the row on the plate and a numeric value  indicates the column. 
@@ -64,6 +64,10 @@ plotPlatePosition <- function(object, plate_position = NULL,
     swap_rownames = NULL, color_by = NULL,
     by.assay.type=by_exprs_values) 
 {
+
+    .Deprecated(msg="'by_exprs_values' argument is deprecated.\n
+        Use 'by.assay.type' instead.")
+	
     ## check object is SingleCellExperiment object
     if ( !is(object, "SingleCellExperiment") ) {
         stop("Object must be of class SingleCellExperiment")
