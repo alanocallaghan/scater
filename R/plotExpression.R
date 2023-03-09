@@ -6,7 +6,7 @@
 #' @param features A character vector or a list specifying the features to plot.
 #' If a list is supplied, each entry of the list can be a string, an AsIs-wrapped vector or a data.frame - see \code{?\link{retrieveCellInfo}}.
 #' @param x Specification of a column metadata field or a feature to show on the x-axis, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
-#' @param assay.type A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from. Also the alias \code{assay.type} is accepted.
+#' @param assay.type A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from. Also the alias \code{exprs_values} is accepted.
 #' @param log2_values Logical scalar, specifying whether the expression values be transformed to the log2-scale for plotting (with an offset of 1 to avoid logging zeroes).
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
