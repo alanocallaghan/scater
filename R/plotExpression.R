@@ -13,7 +13,7 @@
 #' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param order_by Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.
 #' @param by.assay.type A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}. Also the alias \code{by.assay.type} is accepted.
+#' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}. Also the alias \code{by_exprs_values} is accepted.
 #' @param xlab String specifying the label for x-axis.
 #' If \code{NULL} (default), \code{x} will be used as the x-axis label.
 #' @param feature_colours Logical scalar indicating whether violins should be coloured by feature when \code{x} and \code{colour_by} are not specified and \code{one_facet=TRUE}.
