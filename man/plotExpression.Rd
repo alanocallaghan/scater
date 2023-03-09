@@ -77,10 +77,10 @@ elements.}
 
 \item{point_fun}{Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}.}
 
-\item{assay.type}{A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from. Also the alias \code{assay.type} is accepted.}
+\item{assay.type}{A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from. Also the alias \code{exprs_values} is accepted.}
 
 \item{by.assay.type}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}. Also the alias \code{by.assay.type} is accepted.}
+for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}. Also the alias \code{by_exprs_values} is accepted.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }
