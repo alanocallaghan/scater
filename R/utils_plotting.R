@@ -1,21 +1,21 @@
 .incorporate_common_vis_row <- function(df, se, mode, colour_by, size_by, shape_by, 
-    by_assay_name, by_show_single, other_fields, multiplier = NULL) 
+    by.assay.type, by_show_single, other_fields, multiplier = NULL) 
 {
-    colour_by_out <- retrieveFeatureInfo(se, colour_by, assay_name = by_assay_name)
+    colour_by_out <- retrieveFeatureInfo(se, colour_by, assay.type = by.assay.type)
     colour_by <- colour_by_out$name
     if (!is.null(multiplier)) {
         colour_by_out$value<- colour_by_out$value[multiplier]
     }
     df$colour_by <- colour_by_out$value
 
-    shape_by_out <- retrieveFeatureInfo(se, shape_by, assay_name = by_assay_name)
+    shape_by_out <- retrieveFeatureInfo(se, shape_by, assay.type = by.assay.type)
     shape_by <- shape_by_out$name
     if (!is.null(multiplier)) {
         shape_by_out$value<- shape_by_out$value[multiplier]
     }
     df$shape_by <- .coerce_to_factor(shape_by_out$value, 10, "shape_by")
 
-    size_by_out <- retrieveFeatureInfo(se, size_by, assay_name = by_assay_name)
+    size_by_out <- retrieveFeatureInfo(se, size_by, assay.type = by.assay.type)
     size_by <- size_by_out$name
     if (!is.null(multiplier)) {
         size_by_out$value<- size_by_out$value[multiplier]
@@ -23,7 +23,7 @@
     df$size_by <- size_by_out$value
 
     for (o in other_fields) {
-        other <- retrieveFeatureInfo(se, o, assay_name=by_assay_name)
+        other <- retrieveFeatureInfo(se, o, assay.type=by.assay.type)
         if (!is.null(multiplier)) {
             other$value<- other$value[multiplier]
         }
@@ -34,10 +34,10 @@
 }
 
 .incorporate_common_vis_col <- function(df, se, mode, colour_by, size_by,
-        shape_by, order_by, by_assay_name, by_show_single, other_fields,
+        shape_by, order_by, by.assay.type, by_show_single, other_fields,
         multiplier = NULL, swap_rownames = NULL) 
 {
-    colour_by_out <- retrieveCellInfo(se, colour_by, assay_name = by_assay_name,
+    colour_by_out <- retrieveCellInfo(se, colour_by, assay.type = by.assay.type,
         swap_rownames=swap_rownames)
     colour_by <- colour_by_out$name
     if (!is.null(multiplier)) {
@@ -45,7 +45,7 @@
     }
     df$colour_by <- colour_by_out$value
 
-    shape_by_out <- retrieveCellInfo(se, shape_by, assay_name = by_assay_name,
+    shape_by_out <- retrieveCellInfo(se, shape_by, assay.type = by.assay.type,
         swap_rownames=swap_rownames)
     shape_by <- shape_by_out$name
     if (!is.null(multiplier)) {
@@ -53,7 +53,7 @@
     }
     df$shape_by <- .coerce_to_factor(shape_by_out$value, 10, "shape_by")
 
-    size_by_out <- retrieveCellInfo(se, size_by, assay_name = by_assay_name,
+    size_by_out <- retrieveCellInfo(se, size_by, assay.type = by.assay.type,
         swap_rownames=swap_rownames)
     size_by <- size_by_out$name
     if (!is.null(multiplier)) {
@@ -61,7 +61,7 @@
     }
     df$size_by <- size_by_out$value
 
-    order_by_out <- retrieveCellInfo(se, order_by, assay_name = by_assay_name,
+    order_by_out <- retrieveCellInfo(se, order_by, assay.type = by.assay.type,
         swap_rownames=swap_rownames)
     order_by <- order_by_out$name
     df$order_by <- order_by_out$value
@@ -71,7 +71,7 @@
     df <- df[order(df$order_by), ]
 
     for (o in other_fields) {
-        other <- retrieveCellInfo(se, o, assay_name=by_assay_name,
+        other <- retrieveCellInfo(se, o, assay.type=by.assay.type,
             swap_rownames=swap_rownames)
         if (!is.null(multiplier)) {
             other$value <- other$value[multiplier]

@@ -1,6 +1,6 @@
 #' @importFrom SummarizedExperiment assay
 #' @importFrom SingleCellExperiment reducedDim
-.get_mat_from_sce <- function(x, exprs_values, dimred, n_dimred, assay_name=exprs_values) {
+.get_mat_from_sce <- function(x, exprs_values, dimred, n_dimred, assay.type=exprs_values) {
     if (!is.null(dimred)) {
         mat <- reducedDim(x, dimred)
         if (!is.null(n_dimred)) {
@@ -11,7 +11,7 @@
         }
         mat
     } else {
-        assay(x, assay_name)
+        assay(x, assay.type)
     }
 }
 

@@ -15,7 +15,7 @@ getVarianceExplained(x, ...)
   variables = NULL,
   ...,
   exprs_values = "logcounts",
-  assay_name = exprs_values
+  assay.type = exprs_values
 )
 }
 \arguments{
@@ -36,9 +36,9 @@ or \code{NULL}, in which case all columns in \code{colData(x)} are used.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.}
 
-\item{exprs_values}{Alias for \code{assay_name}.}
+\item{exprs_values}{Alias for \code{assay.type}.}
 
-\item{assay_name}{String or integer scalar specifying the expression values for which to compute the variance (also an alias \code{exprs_value} is accepted).}
+\item{assay.type}{String or integer scalar specifying the expression values for which to compute the variance (also an alias \code{exprs_value} is accepted).}
 }
 \value{
 A numeric matrix containing the percentage of variance explained by each factor (column) and for each gene (row).

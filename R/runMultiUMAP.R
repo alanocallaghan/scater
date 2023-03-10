@@ -10,16 +10,16 @@
 #'
 #' Alternatively, a \linkS4class{SingleCellExperiment} containing relevant matrices in its assays, \code{\link{reducedDims}} or \code{\link{altExps}}.
 #' This is also the only permissible argument for \code{runMultiUMAP}.
-#' @param assay_name A character or integer vector of assays to extract and transpose for use in the UMAP.
+#' @param assay.type A character or integer vector of assays to extract and transpose for use in the UMAP.
 #' For the SingleCellExperiment, this argument can be missing, in which case no assays are used.
 #' @param dimred A character or integer vector of \code{\link{reducedDims}} to extract for use in the UMAP.
 #' This argument can be missing, in which case no assays are used.
 #' @param altexp A character or integer vector of \code{\link{altExps}} to extract and transpose for use in the UMAP.
 #' This argument can be missing, in which case no alternative experiments are used.
-#' @param altexp_assay_name A character or integer vector specifying the assay to extract from alternative experiments, when \code{altexp} is specified.
+#' @param altexp.assay.type A character or integer vector specifying the assay to extract from alternative experiments, when \code{altexp} is specified.
 #' This is recycled to the same length as \code{altexp}.
-#' @param exprs_values Alias to \code{assay_name}.
-#' @param altexp_exprs_values Alias to \code{altexp_assay_name}.
+#' @param exprs_values Alias to \code{assay.type}.
+#' @param altexp_exprs_values Alias to \code{altexp.assay.type}.
 #' @param ... For the generic, further arguments to pass to specific methods.
 #'
 #' For the ANY method, further arguments to pass to \code{\link[uwot]{umap}}.
@@ -104,8 +104,8 @@ setMethod("calculateMultiUMAP", "ANY", function(x, ..., metric="euclidean") {
 #' @rdname runMultiUMAP
 #' @importFrom Matrix t
 #' @importFrom SummarizedExperiment assay
-setMethod("calculateMultiUMAP", "SummarizedExperiment", function(x, exprs_values, metric="euclidean", assay_name=exprs_values, ...) {
-    targets <- lapply(assay_name, FUN=assay, x=x)
+setMethod("calculateMultiUMAP", "SummarizedExperiment", function(x, exprs_values, metric="euclidean", assay.type=exprs_values, ...) {
+    targets <- lapply(assay.type, FUN=assay, x=x)
     targets <- lapply(targets, t)
     callGeneric(targets, ...) 
 }) 
@@ -116,11 +116,11 @@ setMethod("calculateMultiUMAP", "SummarizedExperiment", function(x, exprs_values
 #' @importFrom SummarizedExperiment assay
 #' @importFrom SingleCellExperiment reducedDim altExp
 setMethod("calculateMultiUMAP", "SingleCellExperiment", function(x, exprs_values, dimred, altexp, altexp_exprs_values="logcounts",
-          assay_name=exprs_values, altexp_assay_name=altexp_exprs_values, ...) {
+          assay.type=exprs_values, altexp.assay.type=altexp_exprs_values, ...) {
     targets1 <- targets2 <- targets3 <- list()
 
     if (!missing(exprs_values)) {
-        targets1 <- lapply(assay_name, FUN=assay, x=x)
+        targets1 <- lapply(assay.type, FUN=assay, x=x)
         targets1 <- lapply(targets1, t)
     }
 
@@ -130,8 +130,8 @@ setMethod("calculateMultiUMAP", "SingleCellExperiment", function(x, exprs_values
 
     if (!missing(altexp)) {
         targets3 <- lapply(altexp, FUN=altExp, x=x)
-        altexp_assay_name <- rep(altexp_assay_name, length.out=length(targets3))
-        targets3 <- mapply(FUN=assay, x=targets3, i=altexp_assay_name, SIMPLIFY=FALSE)
+        altexp.assay.type <- rep(altexp.assay.type, length.out=length(targets3))
+        targets3 <- mapply(FUN=assay, x=targets3, i=altexp.assay.type, SIMPLIFY=FALSE)
         targets3 <- lapply(targets3, t)
     }
 

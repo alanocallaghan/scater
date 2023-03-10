@@ -6,14 +6,14 @@
 #' @param features A character vector or a list specifying the features to plot.
 #' If a list is supplied, each entry of the list can be a string, an AsIs-wrapped vector or a data.frame - see \code{?\link{retrieveCellInfo}}.
 #' @param x Specification of a column metadata field or a feature to show on the x-axis, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
-#' @param assay_name A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from. Also the alias \code{assay_name} is accepted.
+#' @param assay.type A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from. Also the alias \code{exprs_values} is accepted.
 #' @param log2_values Logical scalar, specifying whether the expression values be transformed to the log2-scale for plotting (with an offset of 1 to avoid logging zeroes).
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param order_by Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.
-#' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in point aesthetics - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}. Also the alias \code{by_assay_name} is accepted.
+#' @param by.assay.type A string or integer scalar specifying which assay to obtain expression values from, 
+#' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}. Also the alias \code{by_exprs_values} is accepted.
 #' @param xlab String specifying the label for x-axis.
 #' If \code{NULL} (default), \code{x} will be used as the x-axis label.
 #' @param feature_colours Logical scalar indicating whether violins should be coloured by feature when \code{x} and \code{colour_by} are not specified and \code{one_facet=TRUE}.
@@ -29,8 +29,8 @@
 #' @param color_by Alias to \code{colour_by}.
 #' @param feature_colors Alias to \code{feature_colours}.
 #' @param point_fun Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}.
-#' @param exprs_values Alias to \code{assay_name}.
-#' @param by_exprs_values Alias to \code{by_assay_name}.
+#' @param exprs_values Alias to \code{assay.type}.
+#' @param by_exprs_values Alias to \code{by.assay.type}.
 #' @param ... Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.
 #'
 #' @details 
@@ -92,8 +92,8 @@ plotExpression <- function(object, features, x = NULL,
     scales = "fixed", other_fields = list(),
     swap_rownames = NULL, 
     color_by = NULL, feature_colors = TRUE, point_fun = NULL,
-    assay_name=exprs_values,
-    by_assay_name=by_exprs_values,
+    assay.type=exprs_values,
+    by.assay.type=by_exprs_values,
     ...)
 {
     if (!is(object, "SingleCellExperiment")) {
@@ -101,14 +101,14 @@ plotExpression <- function(object, features, x = NULL,
     }
 
     ## Define features to plot
-    if (assay_name == "exprs" && !(assay_name %in% assayNames(object))) {
-        assay_name <- "logcounts"
+    if (assay.type == "exprs" && !(assay.type %in% assayNames(object))) {
+        assay.type <- "logcounts"
     }
 
     exprs_vals <- vector("list", length(features))
     for (i in seq_along(features)) {
         current <- retrieveCellInfo(object, features[i], 
-            search = c("assays", "altExps"), assay_name = assay_name,
+            search = c("assays", "altExps"), assay.type = assay.type,
             swap_rownames = swap_rownames)
         features[[i]] <- current$name
         if (is.null(current$value)) {
@@ -120,9 +120,9 @@ plotExpression <- function(object, features, x = NULL,
 
     if (log2_values) {
         exprs_val <- lapply(exprs_vals, function(x) log2(x + 1))
-        ylab <- paste0("Expression (", assay_name, "; log2-scale)")
+        ylab <- paste0("Expression (", assay.type, "; log2-scale)")
     } else {
-        ylab <- paste0("Expression (", assay_name, ")")
+        ylab <- paste0("Expression (", assay.type, ")")
     }
 
     ## melt the expression data.
@@ -132,7 +132,7 @@ plotExpression <- function(object, features, x = NULL,
     )
 
     ## check x-coordinates are valid
-    x_by_out <- retrieveCellInfo(object, x, assay_name = assay_name)
+    x_by_out <- retrieveCellInfo(object, x, assay.type = assay.type)
     xcoord <- x_by_out$val
     if (is.null(xlab)) {
         xlab <- x_by_out$name
@@ -143,7 +143,7 @@ plotExpression <- function(object, features, x = NULL,
     vis_out <- .incorporate_common_vis_col(evals_long, se = object, 
         colour_by = colour_by, shape_by = shape_by, size_by = size_by,
         order_by = order_by,
-        by_assay_name = by_assay_name, other_fields = other_fields,
+        by.assay.type = by.assay.type, other_fields = other_fields,
         multiplier = rep(seq_len(ncol(object)), nfeatures),
         swap_rownames = swap_rownames)
 

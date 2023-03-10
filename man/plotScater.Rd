@@ -16,8 +16,8 @@ plotScater(
   line_width = 1.5,
   theme_size = 10,
   color_by = NULL,
-  assay_name = exprs_values,
-  by_assay_name = by_exprs_values
+  assay.type = exprs_values,
+  by.assay.type = by_exprs_values
 )
 }
 \arguments{
@@ -25,12 +25,12 @@ plotScater(
 
 \item{nfeatures}{Numeric scalar indicating the number of top-expressed features to show n the plot.}
 
-\item{exprs_values}{Alias to \code{assay_name}.}
+\item{exprs_values}{Alias to \code{assay.type}.}
 
 \item{colour_by}{Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 The curve for each cell will be coloured according to this specification.}
 
-\item{by_exprs_values}{Alias to \code{by_assay_name}.}
+\item{by_exprs_values}{Alias to \code{by.assay.type}.}
 
 \item{block1}{String specifying the column-level metadata field by which to separate the cells into separate panels in the plot. 
 Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
@@ -46,10 +46,10 @@ Default is \code{NULL}, in which case there is no blocking.}
 
 \item{color_by}{Alias to \code{colour_by}.}
 
-\item{assay_name}{String or integer scalar indicating which assay of \code{object} should be used to obtain the expression values for this plot.}
+\item{assay.type}{String or integer scalar indicating which assay of \code{object} should be used to obtain the expression values for this plot.}
 
-\item{by_assay_name}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in point aesthetics - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}.}
+\item{by.assay.type}{A string or integer scalar specifying which assay to obtain expression values from, 
+for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.}
 }
 \value{
 A \link{ggplot} object.
@@ -69,7 +69,7 @@ If both are specified, each panel corresponds to a combination of levels.
 \examples{
 example_sce <- mockSCE()
 plotScater(example_sce)
-plotScater(example_sce, assay_name = "counts", colour_by = "Cell_Cycle")
+plotScater(example_sce, assay.type = "counts", colour_by = "Cell_Cycle")
 plotScater(example_sce, block1 = "Treatment", colour_by = "Cell_Cycle")
 
 }

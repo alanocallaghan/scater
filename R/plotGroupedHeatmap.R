@@ -54,7 +54,7 @@
 #' @importFrom scuttle summarizeAssayByGroup
 plotGroupedHeatmap <- function(object, features, group, block = NULL, 
     columns=NULL, exprs_values = "logcounts", center = FALSE, scale = FALSE,
-    zlim = NULL, colour = color, swap_rownames = NULL, color = NULL, assay_name=exprs_values, ...) {
+    zlim = NULL, colour = color, swap_rownames = NULL, color = NULL, assay.type=exprs_values, ...) {
 
     # Setting names, otherwise the downstream colouring fails.
     if (is.null(colnames(object))) { 
@@ -65,7 +65,7 @@ plotGroupedHeatmap <- function(object, features, group, block = NULL,
     object <- .swap_rownames(object, swap_rownames)
     # in case of numeric or logical features, converts to character or factor
     features <- .handle_features(features, object)
-    heat.vals <- assay(object, assay_name)[as.character(features), , drop=FALSE]
+    heat.vals <- assay(object, assay.type)[as.character(features), , drop=FALSE]
     if (is.factor(features)) {
         heat.vals <- heat.vals[levels(features), , drop = FALSE]
     }

@@ -4,20 +4,20 @@
 ################################################################################
 ### accessors
 
-GET_FUN <- function(assay_name) {
-    (assay_name) # To get evaluated.
+GET_FUN <- function(assay.type) {
+    (assay.type) # To get evaluated.
     function(object) {
-        if (assay_name %in% assayNames(object))
-            return(assay(object, i = assay_name))
+        if (assay.type %in% assayNames(object))
+            return(assay(object, i = assay.type))
         else
             return(NULL)
     }
 }
 
-SET_FUN <- function(assay_name) {
-    (assay_name) # To get evaluated.
+SET_FUN <- function(assay.type) {
+    (assay.type) # To get evaluated.
     function(object, value) {
-        assay(object, i = assay_name) <- value
+        assay(object, i = assay.type) <- value
         object
     }
 }
@@ -252,9 +252,9 @@ setReplaceMethod("bootstraps", c("SingleCellExperiment", "array"),
 #'     featureControlInfo(merged_sceset) <- featureControlInfo(x)[!discard,]
 #'     
 #'     ## add remaining assayData to merged SCESet
-#'     assay_names <- intersect(names(Biobase::assayData(x)),
+#'     assay.types <- intersect(names(Biobase::assayData(x)),
 #'                              names(Biobase::assayData(y)))
-#'     for (assaydat in assay_names) {
+#'     for (assaydat in assay.types) {
 #'         new_dat <- Biobase::combine(get_exprs(x, assaydat), get_exprs(y, assaydat))
 #'         set_exprs(merged_sceset, assaydat) <- new_dat
 #'     }

@@ -17,7 +17,7 @@ plotColData(
   swap_rownames = NULL,
   color_by = NULL,
   point_fun = NULL,
-  by_assay_name = by_exprs_values,
+  by.assay.type = by_exprs_values,
   ...
 )
 }
@@ -39,7 +39,7 @@ If \code{NULL}, nothing is shown on the x-axis.}
 
 \item{order_by}{Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{by_exprs_values}{Alias for \code{by_assay_name}.}
+\item{by_exprs_values}{Alias for \code{by.assay.type}.}
 
 \item{other_fields}{Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
@@ -51,7 +51,7 @@ elements.}
 
 \item{point_fun}{Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}.}
 
-\item{by_assay_name}{A string or integer scalar specifying which assay to obtain expression values from, 
+\item{by.assay.type}{A string or integer scalar specifying which assay to obtain expression values from, 
 for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for
 details (also alias \code{by_exprs_values} is accepted for this argument).}
 

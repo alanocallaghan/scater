@@ -10,15 +10,15 @@
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' The curve for each cell will be coloured according to this specification.
 #' @param nfeatures Numeric scalar indicating the number of top-expressed features to show n the plot.
-#' @param assay_name String or integer scalar indicating which assay of \code{object} should be used to obtain the expression values for this plot. 
-#' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from, 
-#' for use in point aesthetics - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}.
+#' @param assay.type String or integer scalar indicating which assay of \code{object} should be used to obtain the expression values for this plot. 
+#' @param by.assay.type A string or integer scalar specifying which assay to obtain expression values from, 
+#' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
 #' @param ncol Number of columns to use for \code{\link{facet_wrap}} if only one block is defined.
 #' @param line_width Numeric scalar specifying the line width.
 #' @param theme_size Numeric scalar specifying the font size to use for the plotting theme.
 #' @param color_by Alias to \code{colour_by}.
-#' @param exprs_values Alias to \code{assay_name}.
-#' @param by_exprs_values Alias to \code{by_assay_name}.
+#' @param exprs_values Alias to \code{assay.type}.
+#' @param by_exprs_values Alias to \code{by.assay.type}.
 #' @details 
 #' For each cell, the features are ordered from most-expressed to least-expressed.
 #' The cumulative proportion of the total expression for the cell is computed across the top \code{nfeatures} features. 
@@ -35,7 +35,7 @@
 #' @examples
 #' example_sce <- mockSCE()
 #' plotScater(example_sce)
-#' plotScater(example_sce, assay_name = "counts", colour_by = "Cell_Cycle")
+#' plotScater(example_sce, assay.type = "counts", colour_by = "Cell_Cycle")
 #' plotScater(example_sce, block1 = "Treatment", colour_by = "Cell_Cycle")
 #'
 #' @export
@@ -46,8 +46,8 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
     colour_by = color_by, by_exprs_values = exprs_values, 
     block1 = NULL, block2 = NULL, ncol = 3,
     line_width = 1.5, theme_size = 10, color_by = NULL,
-    assay_name=exprs_values,
-    by_assay_name=by_exprs_values    
+    assay.type=exprs_values,
+    by.assay.type=by_exprs_values    
     )
 {
     if (!is(x, "SingleCellExperiment")) {
@@ -63,12 +63,12 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
     block2_vals <- block2_out$val
 
     ## Setting values to colour by.
-    colour_by_out <- retrieveCellInfo(x, colour_by, assay_name = by_assay_name)
+    colour_by_out <- retrieveCellInfo(x, colour_by, assay.type = by.assay.type)
     colour_by <- colour_by_out$name
     colour_by_vals <- colour_by_out$val
 
     ## Define an expression matrix depending on which values we're using
-    exprs_mat <- assay(x, i = assay_name, withDimnames=FALSE)
+    exprs_mat <- assay(x, i = assay.type, withDimnames=FALSE)
     nfeatures <- min(nfeatures, nrow(exprs_mat))
 
     ## Use C++ to get the sequencing real estate accounted for by features

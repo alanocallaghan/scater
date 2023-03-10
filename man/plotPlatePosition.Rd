@@ -20,7 +20,7 @@ plotPlatePosition(
   other_fields = list(),
   swap_rownames = NULL,
   color_by = NULL,
-  by_assay_name = by_exprs_values
+  by.assay.type = by_exprs_values
 )
 }
 \arguments{
@@ -38,7 +38,7 @@ Alternatively, a list of two factors (\code{"row"} and \code{"column"}) can be s
 
 \item{order_by}{Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{by_exprs_values}{Alias for \code{by_assay_name}.}
+\item{by_exprs_values}{Alias for \code{by.assay.type}.}
 
 \item{add_legend}{Logical scalar specifying whether a legend should be shown.}
 
@@ -59,8 +59,8 @@ elements.}
 
 \item{color_by}{Alias to \code{colour_by}.}
 
-\item{by_assay_name}{A string or integer scalar specifying which assay to obtain expression values from, 
-for use in point aesthetics - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}.}
+\item{by.assay.type}{A string or integer scalar specifying which assay to obtain expression values from, 
+for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.}
 }
 \value{
 A ggplot object.

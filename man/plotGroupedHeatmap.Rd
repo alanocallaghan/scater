@@ -17,7 +17,7 @@ plotGroupedHeatmap(
   colour = color,
   swap_rownames = NULL,
   color = NULL,
-  assay_name = exprs_values,
+  assay.type = exprs_values,
   ...
 )
 }
@@ -34,7 +34,7 @@ Alternatively, any value that can be used in the \code{by} argument to \code{\li
 
 \item{columns}{A vector specifying the subset of columns in \code{object} to use when computing averages.}
 
-\item{exprs_values}{Alias to \code{assay_name}.}
+\item{exprs_values}{Alias to \code{assay.type}.}
 
 \item{center}{A logical scalar indicating whether each feature should have its mean expression 
 (specifically, the mean of averages across all groups) centered at zero prior to plotting.}
@@ -57,7 +57,7 @@ elements.}
 
 \item{color}{Alias to \code{colour}.}
 
-\item{assay_name}{A string or integer scalar indicating which assay of \code{object} should be used as expression values.}
+\item{assay.type}{A string or integer scalar indicating which assay of \code{object} should be used as expression values.}
 
 \item{...}{Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.}
 }
