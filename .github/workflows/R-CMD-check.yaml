@@ -9,7 +9,7 @@ name: R-CMD-check
 jobs:
   R-CMD-check:
     runs-on: ubuntu-latest
-    container: alanocallaghan/scater:latest
+    container: ghcr.io/alanocallaghan/scater:latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
