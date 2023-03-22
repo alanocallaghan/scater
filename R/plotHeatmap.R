@@ -7,7 +7,7 @@
 #' @param columns A vector specifying the subset of columns in \code{object} to show as columns in the heatmap. 
 #' Also specifies the column order if \code{cluster_cols=FALSE} and \code{order_columns_by=NULL}.
 #' By default, all columns are used.
-#' @param assay_name A string or integer scalar indicating which assay of \code{object} should be used as expression values. 
+#' @param assay.type A string or integer scalar indicating which assay of \code{object} should be used as expression values. 
 #' @param center A logical scalar indicating whether each feature should have its mean expression centered at zero prior to plotting. 
 #' @param scale A logical scalar specifying whether each feature should have its expression values scaled to have unit variance prior to plotting.
 #' @param zlim A numeric vector of length 2, specifying the upper and lower bounds for colour mapping of expression values.
@@ -36,8 +36,8 @@
 #' Each entry of the list can be any acceptable input to the \code{by} argument in \code{?\link{retrieveCellInfo}}.
 #' A character vector can also be supplied and will be treated as a list of strings.
 #' This argument is automatically appended to \code{colour_columns_by}.
-#' @param by_assay_name A string or integer scalar specifying which assay to obtain expression values from, 
-#' for colouring of column-level data - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}.
+#' @param by.assay.type A string or integer scalar specifying which assay to obtain expression values from, 
+#' for colouring of column-level data - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
 #' @param show_colnames,cluster_cols,... Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.
 #' @param swap_rownames Column name of \code{rowData(object)} to be used to 
 #'  identify features instead of \code{rownames(object)} when labelling plot 
@@ -46,8 +46,8 @@
 #' Aliases to \code{color}, \code{color_columns_by},
 #' \code{column_annotation_colors}, \code{color_rows_by}, 
 #' \code{row_annotation_colors}.
-#' @param exprs_values Alias to \code{assay_name}.
-#' @param by_exprs_values Alias to {by_assay_name}.
+#' @param exprs_values Alias to \code{assay.type}.
+#' @param by_exprs_values Alias to {by.assay.type}.
 #'
 #' @details 
 #' Setting \code{center=TRUE} is useful for examining log-fold changes of each cell's expression profile from the average across all cells.
@@ -97,8 +97,8 @@ plotHeatmap <- function(object, features, columns = NULL,
     order_columns_by = NULL, by_exprs_values = exprs_values,
     show_colnames = FALSE, cluster_cols = is.null(order_columns_by),
     swap_rownames = NULL,
-    assay_name=exprs_values,
-    by_assay_name=by_exprs_values,    
+    assay.type=exprs_values,
+    by.assay.type=by_exprs_values,    
     ...) {
 
     # Setting names, otherwise the downstream colouring fails.
@@ -110,7 +110,7 @@ plotHeatmap <- function(object, features, columns = NULL,
     object <- .swap_rownames(object, swap_rownames)
     # in case of numeric or logical features, converts to character or factor
     features <- .handle_features(features, object)
-    heat.vals <- assay(object, assay_name)[as.character(features), , drop=FALSE]
+    heat.vals <- assay(object, assay.type)[as.character(features), , drop=FALSE]
     if (is.factor(features)) {
         heat.vals <- heat.vals[levels(features), , drop = FALSE]
     }
@@ -122,7 +122,7 @@ plotHeatmap <- function(object, features, columns = NULL,
     if (!is.null(order_columns_by)) {
         ordering <- list()
         for (i in seq_along(order_columns_by)) {
-            vals <- retrieveCellInfo(object, order_columns_by[[i]], assay_name = by_assay_name)$val
+            vals <- retrieveCellInfo(object, order_columns_by[[i]], assay.type = by.assay.type)$val
             if (!is.null(columns)) {
                 vals <- vals[columns]
             }
@@ -141,7 +141,7 @@ plotHeatmap <- function(object, features, columns = NULL,
         for (i in seq_along(colour_columns_by)) {
             field <- colour_columns_by[[i]]
             colour_by_out <- retrieveCellInfo(object, field,
-                assay_name = by_assay_name, swap_rownames = swap_rownames)
+                assay.type = by.assay.type, swap_rownames = swap_rownames)
 
             if (is.null(colour_by_out$val)) {
                 next
@@ -189,7 +189,7 @@ plotHeatmap <- function(object, features, columns = NULL,
         for (i in seq_along(colour_rows_by)) {
             field <- colour_rows_by[[i]]
             colour_by_out <- retrieveFeatureInfo(object, field,
-                assay_name = by_assay_name)
+                assay.type = by.assay.type)
 
             if (is.null(colour_by_out$val)) {
                 next

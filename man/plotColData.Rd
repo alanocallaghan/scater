@@ -54,7 +54,7 @@ possible values.}
 order points by, see the \code{by} argument in
 \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{by_exprs_values}{Alias for \code{by_assay_name}.}
+\item{by_exprs_values}{Alias for \code{by.assay.type}.}
 
 \item{other_fields}{Additional cell-based fields to include in the
 data.frame, see \code{?"\link{scater-plot-args}"} for details.}

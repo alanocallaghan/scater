@@ -26,9 +26,9 @@
 #' @param order_by Specification of a column metadata field or a feature to
 #' order points by, see the \code{by} argument in
 #' \code{?\link{retrieveCellInfo}} for possible values.
-#' @param by_assay_name A string or integer scalar specifying which assay to
+#' @param by.assay.type A string or integer scalar specifying which assay to
 #' obtain expression values from,
-#' for use in point aesthetics - see the \code{assay_name} argument in
+#' for use in point aesthetics - see the \code{assay.type} argument in
 #' \code{?\link{retrieveCellInfo}}.
 #' @param text_by String specifying the column metadata field with which to add
 #' text labels on the plot.
@@ -55,7 +55,7 @@
 #' \code{\link[ggrastr]{rasterise}}. To control the dpi, set
 #' \code{options(ggrastr.default.dpi)},
 #' for example \code{options(ggrastr.default.dpi=300)}.
-#' @param by_exprs_values Alias for \code{by_assay_name}.
+#' @param by_exprs_values Alias for \code{by.assay.type}.
 #' @param ... Additional arguments for visualization, see
 #' \code{?"\link{scater-plot-args}"} for details.
 #'
@@ -116,8 +116,7 @@ plotReducedDim <- function(
         swap_rownames = NULL, point.padding = NA, force = 1,
         rasterise = FALSE, scattermore = FALSE,
         bins = NULL, summary_fun = "sum", hex = FALSE,
-        by_assay_name=by_exprs_values,
-	...
+        by_assay_name=by_exprs_values, ...
     ) {
 
     ## Extract reduced dimension representation of cells
@@ -149,7 +148,7 @@ plotReducedDim <- function(
     vis_out <- .incorporate_common_vis_col(df_to_plot, se = object,
         colour_by = colour_by, shape_by = shape_by, size_by = size_by,
         order_by = order_by,
-        by_assay_name = by_assay_name, other_fields = other_fields,
+        by.assay.type = by.assay.type, other_fields = other_fields,
         swap_rownames = swap_rownames)
     df_to_plot <- vis_out$df
     colour_by <- vis_out$colour_by

@@ -42,7 +42,7 @@ If a list is supplied, each entry of the list can be a string, an AsIs-wrapped v
 
 \item{x}{Specification of a column metadata field or a feature to show on the x-axis, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{exprs_values}{Alias to \code{assay_name}.}
+\item{exprs_values}{Alias to \code{assay.type}.}
 
 \item{log2_values}{Logical scalar, specifying whether the expression values be transformed to the log2-scale for plotting (with an offset of 1 to avoid logging zeroes).}
 
@@ -54,7 +54,7 @@ If a list is supplied, each entry of the list can be a string, an AsIs-wrapped v
 
 \item{order_by}{Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{by_exprs_values}{Alias to \code{by_assay_name}.}
+\item{by_exprs_values}{Alias to \code{by.assay.type}.}
 
 \item{xlab}{String specifying the label for x-axis.
 If \code{NULL} (default), \code{x} will be used as the x-axis label.}
@@ -81,7 +81,7 @@ elements.}
 
 \item{point_fun}{Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}.}
 
-\item{assay_name}{A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from. Also the alias \code{assay_name} is accepted.}
+\item{assay.type}{A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from. Also the alias \code{exprs_values} is accepted.}
 
 \item{scattermore}{Logical, whether to use the \code{scattermore} package to
 greatly speed up plotting a large number of cells. Use \code{point_size =

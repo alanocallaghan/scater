@@ -3,7 +3,7 @@
 
 \section{Changes in version 1.28.0, Bioconductor 3.17 Release}{
   \itemize{
-    \item Change \code{exprs_values} (and similar) to \code{assay_name}.
+    \item Change \code{exprs_values} (and similar) to \code{assay.type}.
     \item Tweak colouring of violin plots.
     \item Fix use of block arguments in \code{plotGroupedHeatmap}.
   }
