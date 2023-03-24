@@ -10,11 +10,11 @@
 #' @param x String specifying the column-level metadata to show on the x-axis.
 #' Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
 #' If \code{NULL}, nothing is shown on the x-axis.
-#' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
-#' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
-#' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
-#' @param order_by Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
-#' @param by.assay.type A string or integer scalar specifying which assay to obtain expression values from, 
+#' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.
+#' @param shape_by Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.
+#' @param size_by Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.
+#' @param order_by Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.
+#' @param by.assay.type A string or integer scalar specifying which assay to obtain expression values from,
 #' for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for
 #' details (also alias \code{by_exprs_values} is accepted for this argument).
 #' @param by_exprs_values Alias for \code{by.assay.type}.
@@ -79,7 +79,13 @@
 #'
 #' plotColData(example_sce, y = "detected",
 #'    x = "Cell_Cycle", colour_by = "Mutation_Status")
-#'
+#' # With scattermore
+#' plotColData(example_sce, x = "sum", y = "detected", scattermore = TRUE,
+#'    point_size = 2)
+#' # Bin to show point density
+#' plotColData(example_sce, x = "sum", y = "detected", bins = 10)
+#' # Bin to summarize value (default is sum)
+#' plotColData(example_sce, x = "sum", y = "detected", bins = 10, colour_by = "total")
 #' @export
 plotColData <- function(object, y, x = NULL,
     colour_by = color_by, shape_by = NULL, size_by = NULL, order_by = NULL,
@@ -87,7 +93,7 @@ plotColData <- function(object, y, x = NULL,
     swap_rownames = NULL, color_by = NULL, point_fun = NULL,
     scattermore = FALSE,
     bins = NULL, summary_fun = "sum", hex = FALSE,
-    by_assay_name=by_exprs_values, ...) {
+    by.assay.type=by_exprs_values, ...) {
     if (!is(object, "SingleCellExperiment")) {
         stop("object must be an SingleCellExperiment object.")
     }

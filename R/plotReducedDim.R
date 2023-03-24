@@ -103,6 +103,14 @@
 #' plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle",
 #'     shape_by="Treatment")
 #'
+#' # Use scattermore
+#' plotPCA(example_sce, ncomponents = 4, scattermore = TRUE, point_size = 3)
+#'
+#' # Bin to show point density
+#' plotPCA(example_sce, bins = 10)
+#' # Bin to summarize values (default is sum)
+#' plotPCA(example_sce, bins = 10, colour_by = "Gene_0001")
+#'
 #' @export
 #' @importFrom SingleCellExperiment reducedDim
 #' @importFrom ggrepel geom_text_repel
@@ -116,7 +124,7 @@ plotReducedDim <- function(
         swap_rownames = NULL, point.padding = NA, force = 1,
         rasterise = FALSE, scattermore = FALSE,
         bins = NULL, summary_fun = "sum", hex = FALSE,
-        by_assay_name=by_exprs_values, ...
+        by.assay.type=by_exprs_values, ...
     ) {
 
     ## Extract reduced dimension representation of cells

@@ -29,7 +29,7 @@ plotReducedDim(
   bins = NULL,
   summary_fun = "sum",
   hex = FALSE,
-  by_assay_name = by_exprs_values,
+  by.assay.type = by_exprs_values,
   ...
 )
 }
@@ -117,7 +117,7 @@ x and y are numeric.}
 \item{hex}{Logical, whether to use \code{\link{geom_hex}}. Note that
 \code{geom_hex} is broken in \code{ggplot2} version 3.4.0.}
 
-\item{by_assay_name}{A string or integer scalar specifying which assay to
+\item{by.assay.type}{A string or integer scalar specifying which assay to
 obtain expression values from,
 for use in point aesthetics - see the \code{assay.type} argument in
 \code{?\link{retrieveCellInfo}}.}
@@ -169,6 +169,14 @@ plotReducedDim(example_sce, "PCA", colour_by="Gene_0001")
 plotReducedDim(example_sce, "PCA", ncomponents=5)
 plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle",
     shape_by="Treatment")
+
+# Use scattermore
+plotPCA(example_sce, ncomponents = 4, scattermore = TRUE, point_size = 3)
+
+# Bin to show point density
+plotPCA(example_sce, bins = 10)
+# Bin to summarize values (default is sum)
+plotPCA(example_sce, bins = 10, colour_by = "Gene_0001")
 
 }
 \author{

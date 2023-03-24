@@ -25,12 +25,12 @@ plotExpression(
   color_by = NULL,
   feature_colors = TRUE,
   point_fun = NULL,
-  assay_name = exprs_values,
+  assay.type = exprs_values,
   scattermore = FALSE,
   bins = NULL,
   summary_fun = "sum",
   hex = FALSE,
-  by_assay_name = by_exprs_values,
+  by.assay.type = by_exprs_values,
   ...
 )
 }
@@ -81,7 +81,7 @@ elements.}
 
 \item{point_fun}{Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}.}
 
-\item{assay.type}{A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from. Also the alias \code{exprs_values} is accepted.}
+\item{assay.type}{A string or integer scalar specifying which assay in \code{assays(object)} to obtain expression values from. Also the alias \code{assay.type} is accepted.}
 
 \item{scattermore}{Logical, whether to use the \code{scattermore} package to
 greatly speed up plotting a large number of cells. Use \code{point_size =
@@ -99,8 +99,8 @@ x and y are numeric.}
 \item{hex}{Logical, whether to use \code{\link{geom_hex}}. Note that
 \code{geom_hex} is broken in \code{ggplot2} version 3.4.0.}
 
-\item{by_assay_name}{A string or integer scalar specifying which assay to obtain expression values from,
-for use in point aesthetics - see the \code{assay_name} argument in \code{?\link{retrieveCellInfo}}. Also the alias \code{by_assay_name} is accepted.}
+\item{by.assay.type}{A string or integer scalar specifying which assay to obtain expression values from,
+for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}. Also the alias \code{by.assay.type} is accepted.}
 
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }
@@ -156,6 +156,15 @@ plotExpression(example_sce, rownames(example_sce)[1:6],
 ## plot expression against expression values for Gene_0004
 plotExpression(example_sce, rownames(example_sce)[1:4],
     "Gene_0004", show_smooth = TRUE)
+
+# Use scattermore
+plotExpression(example_sce, "Gene_0001", x = "Gene_0100", scattermore = TRUE,
+    point_size = 2)
+# Bin to show point density
+plotExpression(example_sce, "Gene_0001", x = "Gene_0100", bins = 10)
+# Bin to summarize values (default is sum but can be changed with summary_fun)
+plotExpression(example_sce, "Gene_0001", x = "Gene_0100", bins = 10,
+    colour_by = "Gene_0002", summary_fun = "mean")
 
 }
 \author{

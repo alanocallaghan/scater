@@ -21,7 +21,7 @@ plotColData(
   bins = NULL,
   summary_fun = "sum",
   hex = FALSE,
-  by_assay_name = by_exprs_values,
+  by.assay.type = by_exprs_values,
   ...
 )
 }
@@ -34,30 +34,20 @@ y-axis. Alternatively, an \link{AsIs} vector or data.frame, see
 \code{?\link{retrieveCellInfo}}.}
 
 \item{x}{String specifying the column-level metadata to show on the x-axis.
-Alternatively, an \link{AsIs} vector or data.frame, see
-\code{?\link{retrieveCellInfo}}. If \code{NULL}, nothing is shown on the
-x-axis.}
+Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
+If \code{NULL}, nothing is shown on the x-axis.}
 
-\item{colour_by}{Specification of a column metadata field or a feature to
-colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}}
-for possible values.}
+\item{colour_by}{Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{shape_by}{Specification of a column metadata field or a feature to
-shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for
-possible values.}
+\item{shape_by}{Specification of a column metadata field or a feature to shape by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{size_by}{Specification of a column metadata field or a feature to size
-by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for
-possible values.}
+\item{size_by}{Specification of a column metadata field or a feature to size by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
-\item{order_by}{Specification of a column metadata field or a feature to
-order points by, see the \code{by} argument in
-\code{?\link{retrieveCellInfo}} for possible values.}
+\item{order_by}{Specification of a column metadata field or a feature to order points by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values.}
 
 \item{by_exprs_values}{Alias for \code{by.assay.type}.}
 
-\item{other_fields}{Additional cell-based fields to include in the
-data.frame, see \code{?"\link{scater-plot-args}"} for details.}
+\item{other_fields}{Additional cell-based fields to include in the data.frame, see \code{?"\link{scater-plot-args}"} for details.}
 
 \item{swap_rownames}{Column name of \code{rowData(object)} to be used to
 identify features instead of \code{rownames(object)} when labelling plot
@@ -85,10 +75,9 @@ x and y are numeric.}
 \item{hex}{Logical, whether to use \code{\link{geom_hex}}. Note that
 \code{geom_hex} is broken in \code{ggplot2} version 3.4.0.}
 
-\item{by_assay_name}{A string or integer scalar specifying which assay to
-obtain expression values from, for use in point aesthetics - see
-\code{?\link{retrieveCellInfo}} for details (also alias
-\code{by_exprs_values} is accepted for this argument).}
+\item{by.assay.type}{A string or integer scalar specifying which assay to obtain expression values from,
+for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for
+details (also alias \code{by_exprs_values} is accepted for this argument).}
 
 \item{...}{Additional arguments for visualization, see
 \code{?"\link{scater-plot-args}"} for details.}
@@ -136,7 +125,13 @@ plotColData(example_sce, y = "Treatment", x = "sum",
 
 plotColData(example_sce, y = "detected",
    x = "Cell_Cycle", colour_by = "Mutation_Status")
-
+# With scattermore
+plotColData(example_sce, x = "sum", y = "detected", scattermore = TRUE,
+   point_size = 2)
+# Bin to show point density
+plotColData(example_sce, x = "sum", y = "detected", bins = 10)
+# Bin to summarize value (default is sum)
+plotColData(example_sce, x = "sum", y = "detected", bins = 10, colour_by = "total")
 }
 \author{
 Davis McCarthy, with modifications by Aaron Lun
