@@ -54,6 +54,7 @@
 #'
 #' @name scater-plot-args
 #' @importFrom stats runif
+#' @importFrom utils modifyList
 #'
 #' @seealso \code{\link{plotColData}}, \code{\link{plotRowData}},
 #' \code{\link{plotReducedDim}}, \code{\link{plotExpression}},

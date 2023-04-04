@@ -257,7 +257,7 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
         stat_density(
             aes(
                 x = .data$x,
-                y = after_stat(..scaled..) * diff(range(.data$x)) + min(.data$x)
+                y = after_stat(.data$..scaled..) * diff(range(.data$x)) + min(.data$x)
             ),
             data = gg1$densities, position = "identity",
             colour = "grey20", geom = "line"
