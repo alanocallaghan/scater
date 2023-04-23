@@ -1,4 +1,4 @@
-.get_palette <- function(palette_name) 
+.get_palette <- function(palette_name)
 # Function to define colour palettes.
 {
     switch(palette_name,
@@ -36,13 +36,13 @@
 
 #' @importFrom ggplot2 scale_fill_manual scale_colour_manual
 #' @importFrom viridis scale_fill_viridis scale_colour_viridis
-.resolve_plot_colours <- function(plot_out, colour_by, colour_by_name, fill = FALSE, colour = FALSE) 
+.resolve_plot_colours <- function(plot_out, colour_by, colour_by_name,
+                                  fill = FALSE, colour = FALSE, do_bin = FALSE)
 # Get nice plotting colour schemes for very general colour variables
 {
-    if (is.null(colour_by)) {
+    if (is.null(colour_by) && !do_bin) {
         return(plot_out)
     }
-
     # Picking whether to fill or not.
     aesthetics <- c("fill", "colour")[c(fill, colour)]
 
@@ -53,9 +53,9 @@
         VIRIDFUN <- scale_colour_viridis
         SCALEFUN <- scale_colour_manual
     }
-    
+
     # Set a sensible colour scheme and return the plot_out object
-    if (is.numeric(colour_by)) {
+    if (is.numeric(colour_by) || do_bin) {
         plot_out <- plot_out + VIRIDFUN(
             name = colour_by_name, aesthetics = aesthetics
         )

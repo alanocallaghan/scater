@@ -25,6 +25,10 @@ plotReducedDim(
   point.padding = NA,
   force = 1,
   rasterise = FALSE,
+  scattermore = FALSE,
+  bins = NULL,
+  summary_fun = "sum",
+  hex = FALSE,
   by.assay.type = by_exprs_values,
   ...
 )
@@ -97,6 +101,22 @@ elements.}
 \code{options(ggrastr.default.dpi)},
 for example \code{options(ggrastr.default.dpi=300)}.}
 
+\item{scattermore}{Logical, whether to use the \code{scattermore} package to
+greatly speed up plotting a large number of cells. Use \code{point_size =
+0} for the most performance gain.}
+
+\item{bins}{Number of bins, can be different in x and y, to bin and summarize
+the points and their values, to avoid overplotting. If \code{NULL}
+(default), then the points are plotted without binning. Only used when both
+x and y are numeric.}
+
+\item{summary_fun}{Function to summarize the feature value of each point
+(e.g. gene expression of each cell) when the points binned, defaults to
+\code{sum}. Can be either the name of the function or the function itself.}
+
+\item{hex}{Logical, whether to use \code{\link{geom_hex}}. Note that
+\code{geom_hex} is broken in \code{ggplot2} version 3.4.0.}
+
 \item{by.assay.type}{A string or integer scalar specifying which assay to
 obtain expression values from,
 for use in point aesthetics - see the \code{assay.type} argument in
@@ -129,6 +149,14 @@ This is useful for annotating position-related metadata (e.g., clusters)
 when there are too many levels to distinguish by colour.
 It is only available for scatterplots.
 }
+\note{
+Arguments \code{shape_by} and \code{size_by} are ignored when
+\code{scattermore = TRUE}. Using \code{scattermore} is only recommended for
+very large datasets to speed up plotting. Small point size is also
+recommended. For larger point size, the point shape may be distorted. Also,
+when \code{scattermore = TRUE}, the \code{point_size} argument works
+differently.
+}
 \examples{
 example_sce <- mockSCE()
 example_sce <- logNormCounts(example_sce)
@@ -141,6 +169,14 @@ plotReducedDim(example_sce, "PCA", colour_by="Gene_0001")
 plotReducedDim(example_sce, "PCA", ncomponents=5)
 plotReducedDim(example_sce, "PCA", ncomponents=5, colour_by="Cell_Cycle",
     shape_by="Treatment")
+
+# Use scattermore
+plotPCA(example_sce, ncomponents = 4, scattermore = TRUE, point_size = 3)
+
+# Bin to show point density
+plotPCA(example_sce, bins = 10)
+# Bin to summarize values (default is sum)
+plotPCA(example_sce, bins = 10, colour_by = "Gene_0001")
 
 }
 \author{

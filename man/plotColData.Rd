@@ -17,15 +17,21 @@ plotColData(
   swap_rownames = NULL,
   color_by = NULL,
   point_fun = NULL,
+  scattermore = FALSE,
+  bins = NULL,
+  summary_fun = "sum",
+  hex = FALSE,
   by.assay.type = by_exprs_values,
   ...
 )
 }
 \arguments{
-\item{object}{A \linkS4class{SingleCellExperiment} object containing expression values and experimental information.}
+\item{object}{A \linkS4class{SingleCellExperiment} object containing
+expression values and experimental information.}
 
-\item{y}{String specifying the column-level metadata field to show on the y-axis.
-Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.}
+\item{y}{String specifying the column-level metadata field to show on the
+y-axis. Alternatively, an \link{AsIs} vector or data.frame, see
+\code{?\link{retrieveCellInfo}}.}
 
 \item{x}{String specifying the column-level metadata to show on the x-axis.
 Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
@@ -49,13 +55,32 @@ elements.}
 
 \item{color_by}{Alias to \code{colour_by}.}
 
-\item{point_fun}{Function used to create a geom that shows individual cells. Should take \code{...} args and return a ggplot2 geom. For example, \code{point_fun=function(...) geom_quasirandom(...)}.}
+\item{point_fun}{Function used to create a geom that shows individual cells.
+Should take \code{...} args and return a ggplot2 geom. For example,
+\code{point_fun=function(...) geom_quasirandom(...)}.}
 
-\item{by.assay.type}{A string or integer scalar specifying which assay to obtain expression values from, 
+\item{scattermore}{Logical, whether to use the \code{scattermore} package to
+greatly speed up plotting a large number of cells. Use \code{point_size =
+0} for the most performance gain.}
+
+\item{bins}{Number of bins, can be different in x and y, to bin and summarize
+the points and their values, to avoid overplotting. If \code{NULL}
+(default), then the points are plotted without binning. Only used when both
+x and y are numeric.}
+
+\item{summary_fun}{Function to summarize the feature value of each point
+(e.g. gene expression of each cell) when the points binned, defaults to
+\code{sum}. Can be either the name of the function or the function itself.}
+
+\item{hex}{Logical, whether to use \code{\link{geom_hex}}. Note that
+\code{geom_hex} is broken in \code{ggplot2} version 3.4.0.}
+
+\item{by.assay.type}{A string or integer scalar specifying which assay to obtain expression values from,
 for use in point aesthetics - see \code{?\link{retrieveCellInfo}} for
 details (also alias \code{by_exprs_values} is accepted for this argument).}
 
-\item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
+\item{...}{Additional arguments for visualization, see
+\code{?"\link{scater-plot-args}"} for details.}
 }
 \value{
 A \link{ggplot} object.
@@ -64,12 +89,23 @@ A \link{ggplot} object.
 Plot column-level (i.e., cell) metadata in an SingleCellExperiment object.
 }
 \details{
-If \code{y} is continuous and \code{x=NULL}, a violin plot is generated.
-If \code{x} is categorical, a grouped violin plot will be generated, with one violin for each level of \code{x}.
-If \code{x} is continuous, a scatter plot will be generated.
+If \code{y} is continuous and \code{x=NULL}, a violin plot is
+  generated. If \code{x} is categorical, a grouped violin plot will be
+  generated, with one violin for each level of \code{x}. If \code{x} is
+  continuous, a scatter plot will be generated.
 
-If \code{y} is categorical and \code{x} is continuous, horizontal violin plots will be generated.
-If \code{x} is missing or categorical, rectangule plots will be generated where the area of a rectangle is proportional to the number of points for a combination of factors.
+  If \code{y} is categorical and \code{x} is continuous, horizontal violin
+  plots will be generated. If \code{x} is missing or categorical, rectangule
+  plots will be generated where the area of a rectangle is proportional to
+  the number of points for a combination of factors.
+}
+\note{
+Arguments \code{shape_by} and \code{size_by} are ignored when
+\code{scattermore = TRUE}. Using \code{scattermore} is only recommended for
+very large datasets to speed up plotting. Small point size is also
+recommended. For larger point size, the point shape may be distorted. Also,
+when \code{scattermore = TRUE}, the \code{point_size} argument works
+differently.
 }
 \examples{
 example_sce <- mockSCE()
@@ -89,7 +125,13 @@ plotColData(example_sce, y = "Treatment", x = "sum",
 
 plotColData(example_sce, y = "detected",
    x = "Cell_Cycle", colour_by = "Mutation_Status")
-
+# With scattermore
+plotColData(example_sce, x = "sum", y = "detected", scattermore = TRUE,
+   point_size = 2)
+# Bin to show point density
+plotColData(example_sce, x = "sum", y = "detected", bins = 10)
+# Bin to summarize value (default is sum)
+plotColData(example_sce, x = "sum", y = "detected", bins = 10, colour_by = "total")
 }
 \author{
 Davis McCarthy, with modifications by Aaron Lun

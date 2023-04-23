@@ -21,7 +21,7 @@ test_that("plotExpression works for various aesthetics", {
     expect_ggplot(plotExpression(example_sce, gene_set, colour_by = "Cell_Cycle", shape_by = "Treatment"))
     expect_ggplot(plotExpression(example_sce, gene_set, size_by = "Gene_0001", shape_by = "Treatment"))
     expect_ggplot(plotExpression(example_sce, gene_set, colour_by = "Cell_Cycle", size_by = "Gene_0001", shape_by = "Treatment"))
-    
+
     expect_ggplot(plotExpression(example_sce, gene_set, size_by = "Gene_0001", shape_by = "Treatment", by_exprs_values = "counts"))
 
     expect_ggplot(plotExpression(example_sce, rowData(example_sce)[1:10, "ENS"], colour_by = "ENS_0001", swap_rownames="ENS"))
@@ -47,7 +47,7 @@ test_that("plotExpression works for different exprs_values", {
     expect_ggplot(plotExpression(example_sce, gene_set, x = "Mutation_Status", exprs_values = "counts", log2_values = TRUE))
     expect_error(plotExpression(example_sce, rownames(example_sce)[1:6], exprs_values = "silly"), "not in names")
 
-    # And on sparse matrices.        
+    # And on sparse matrices.
     sparsified <- example_sce
     logcounts(sparsified) <- as(logcounts(sparsified), "dgCMatrix")
     sparse <- plotExpression(sparsified, "Gene_0001")
@@ -56,7 +56,7 @@ test_that("plotExpression works for different exprs_values", {
 })
 
 test_that("plotExpression works for other fields", {
-    gg <- plotExpression(example_sce, head(rownames(example_sce)), 
+    gg <- plotExpression(example_sce, head(rownames(example_sce)),
         other_fields=c("Cell_Cycle", "Mutation_Status"))
 
     expect_true("Cell_Cycle" %in% colnames(gg$data))
@@ -64,9 +64,23 @@ test_that("plotExpression works for other fields", {
 
     expect_identical(gg$data$Cell_Cycle, rep(example_sce$Cell_Cycle, 6)) # default 'n' in head().
 
-    # This should throw a warning. 
+    # This should throw a warning.
     example_sce$colour_by <- example_sce$Cell_Cycle
-    expect_warning(gg <- plotExpression(example_sce, head(rownames(example_sce)), 
+    expect_warning(gg <- plotExpression(example_sce, head(rownames(example_sce)),
         colour_by="Cell_Cycle", other_fields=c("colour_by")), "duplicated")
 })
 
+test_that("plotExpression with scattermore", {
+    expect_ggplot(plotExpression(example_sce, "Gene_0001", x = "Gene_0100", scattermore = TRUE, point_size = 2))
+    expect_ggplot(plotExpression(example_sce, "Gene_0001", x = "Gene_0100", scattermore = TRUE, point_size = 2, color_by = "Cell_Cycle"))
+})
+
+test_that("plotExpression with binning", {
+    expect_ggplot(plotExpression(example_sce, "Gene_0001", x = "Gene_0100", bins = 10))
+    expect_ggplot(plotExpression(example_sce, "Gene_0001", x = "Gene_0100", bins = 10, hex = TRUE))
+    expect_ggplot(plotExpression(example_sce, "Gene_0001", x = "Gene_0100",
+                                 bins = 10, colour_by = "Gene_0002", summary_fun = "mean"))
+    expect_ggplot(plotExpression(example_sce, "Gene_0001", x = "Gene_0100",
+                                 bins = 10, colour_by = "Gene_0002", hex = TRUE,
+                                 summary_fun = "mean"))
+})
