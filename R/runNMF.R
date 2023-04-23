@@ -63,7 +63,12 @@ NULL
 
     # RcppML doesn't use transposed data
     nmf_x <- t(nmf_out$h)
-    attr(nmf_x, "basis") <- nmf_out$w
+    rownames(nmf_x) <- colnames(x)
+    colnames(nmf_x) <- paste0("NMF", seq_len(ncol(nmf_x)))
+    nmf_basis <- nmf_out$w
+    rownames(nmf_basis) <- rownames(x)
+    colnames(nmf_basis) <- paste0("NMF", seq_len(ncol(nmf_basis)))
+    attr(nmf_x, "basis") <- nmf_basis
 
     nmf_x
 }

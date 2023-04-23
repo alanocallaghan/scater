@@ -141,7 +141,7 @@ NULL
             c(list(nn_out$index, nn_out$distance), args)
         )$Y
     }
-
+    colnames(tsne_out) <- paste0("TSNE", seq_len(ncol(tsne_out)))
     tsne_out
 }
 

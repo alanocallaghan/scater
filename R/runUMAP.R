@@ -90,10 +90,12 @@ NULL
     }
 
     if (use_densvis) {
-        do.call(densvis::densmap, args)
+        umap_out <- do.call(densvis::densmap, args)
     } else {
-        do.call(uwot::umap, args)
+        umap_out <- do.call(uwot::umap, args)
     }
+    colnames(umap_out) <- paste0("UMAP", seq_len(ncol(umap_out)))
+    umap_out
 }
 
 #' @export
