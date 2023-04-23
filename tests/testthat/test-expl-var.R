@@ -180,13 +180,13 @@ test_that("getExplanatoryPCs responds to getVarianceExplained options", {
 # plotExplanatoryPCs() tests:
 
 test_that("plotExplanatoryPCs works with PC choice options", {
-    out <- plotExplanatoryPCs(normed, npcs=nrow(exppcs))
+    out <- plotExplanatoryPCs(normed, npcs_to_plot=nrow(exppcs))
     ref <- plotExplanatoryPCs(exppcs)
     expect_ggplot(out)
     expect_identical(out$data, ref$data)
 
     # Handles situations where different numbers of PCs are requested.
-    out <- plotExplanatoryPCs(normed, npcs=5)
+    out <- plotExplanatoryPCs(normed, npcs_to_plot=5)
     allpcs <- runPCA(normed, ncomponents=5)
     ref <- plotExplanatoryPCs(allpcs)
     expect_ggplot(out)
@@ -196,17 +196,17 @@ test_that("plotExplanatoryPCs works with PC choice options", {
 test_that("plotExplanatoryPCs responds to choice of number of variables", {
     maxes <- apply(exppcs, 2, max, na.rm=TRUE)
 
-    out <- plotExplanatoryPCs(normed, nvars_to_plot=2, npcs=nrow(exppcs))
+    out <- plotExplanatoryPCs(normed, nvars_to_plot=2, npcs_to_plot=nrow(exppcs))
     ref <- plotExplanatoryPCs(exppcs[,order(maxes, decreasing=TRUE)[1:2]])
     expect_ggplot(out)
     expect_identical(out$data, ref$data)
 
-    out <- plotExplanatoryPCs(normed, nvars_to_plot=Inf, npcs=nrow(exppcs))
+    out <- plotExplanatoryPCs(normed, nvars_to_plot=Inf, npcs_to_plot=nrow(exppcs))
     ref <- plotExplanatoryPCs(exppcs)
     expect_ggplot(out)
     expect_identical(out$data, ref$data)
 
-    out <- plotExplanatoryPCs(normed, nvars_to_plot=0, npcs=nrow(exppcs))
+    out <- plotExplanatoryPCs(normed, nvars_to_plot=0, npcs_to_plot=nrow(exppcs))
     ref <- plotExplanatoryPCs(exppcs[,0,drop=FALSE])
     expect_ggplot(out)
     expect_identical(out$data, ref$data)

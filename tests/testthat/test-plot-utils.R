@@ -11,29 +11,29 @@ rownames(altExp(example_sce, 2)) <- paste0(rownames(altExp(example_sce, 2)), "-R
 
 test_that("retrieveCellInfo works in the basic case", {
     out <- retrieveCellInfo(example_sce, "Mutation_Status")
-    expect_identical(out$val, example_sce$Mutation_Status)
+    expect_identical(out$value, example_sce$Mutation_Status)
     expect_identical(out$name, "Mutation_Status")
 
     out <- retrieveCellInfo(example_sce, "Cell_Cycle")
-    expect_identical(out$val, example_sce$Cell_Cycle)
+    expect_identical(out$value, example_sce$Cell_Cycle)
     expect_identical(out$name, "Cell_Cycle")
 
     # Known gene exprs. 
     out <- retrieveCellInfo(example_sce, "Gene_0001")
-    expect_identical(out$val, logcounts(example_sce)["Gene_0001",])
+    expect_identical(out$value, logcounts(example_sce)["Gene_0001",])
     expect_identical(out$name, "Gene_0001")
 
     out <- retrieveCellInfo(example_sce, "Gene_0100")
-    expect_identical(out$val, logcounts(example_sce)["Gene_0100",])
+    expect_identical(out$value, logcounts(example_sce)["Gene_0100",])
     expect_identical(out$name, "Gene_0100")
 
     # Alternative experiments.
     out <- retrieveCellInfo(example_sce, "Gene_0005.0")
-    expect_identical(out$val, logcounts(altExp(example_sce))["Gene_0005.0",])
+    expect_identical(out$value, logcounts(altExp(example_sce))["Gene_0005.0",])
     expect_identical(out$name, "Gene_0005.0")
 
     out <- retrieveCellInfo(example_sce, "Gene_0005-R")
-    expect_identical(out$val, logcounts(altExp(example_sce, 2))["Gene_0005-R",])
+    expect_identical(out$value, logcounts(altExp(example_sce, 2))["Gene_0005-R",])
     expect_identical(out$name, "Gene_0005-R")
 
     # Known not to be either.
@@ -47,19 +47,19 @@ test_that("retrieveCellInfo works in the basic case", {
 test_that("retrieveCellInfo works with AsIs'd factors", {
     fac <- factor(example_sce$Mutation_Status)
     out <- retrieveCellInfo(example_sce, I(fac))
-    expect_identical(out$val, fac)
-    expect_false("AsIs" %in% class(out$val))
+    expect_identical(out$value, fac)
+    expect_false("AsIs" %in% class(out$value))
 })
 
 
 test_that("retrieveCellInfo handles clashes correctly", {
     example_sce$Gene_0002 <- seq_len(ncol(example_sce))
     out_m <- retrieveCellInfo(example_sce, "Gene_0002", search = "colData")
-    expect_identical(out_m$val, example_sce$Gene_0002)
+    expect_identical(out_m$value, example_sce$Gene_0002)
     expect_identical(out_m$name, "Gene_0002")
 
     out_f <- retrieveCellInfo(example_sce, "Gene_0002", search = "assays")
-    expect_identical(out_f$val, logcounts(example_sce)["Gene_0002",])
+    expect_identical(out_f$value, logcounts(example_sce)["Gene_0002",])
     expect_identical(out_f$name, "Gene_0002")
 
     # Respects ordering of inputs.
@@ -70,17 +70,17 @@ test_that("retrieveCellInfo handles clashes correctly", {
 test_that("retrieveCellInfo handles wrapped elements and columns with data.frames", {
     thing <- data.frame(B=runif(ncol(example_sce)))
     out <- retrieveCellInfo(example_sce, thing)
-    expect_identical(out$val, thing$B)
+    expect_identical(out$value, thing$B)
     expect_identical(out$name, "B")
 
     thing <- DataFrame(B=runif(ncol(example_sce)))
     out <- retrieveCellInfo(example_sce, thing)
-    expect_identical(out$val, thing$B)
+    expect_identical(out$value, thing$B)
     expect_identical(out$name, "B")
 
     thing <- I(runif(ncol(example_sce)))
     out <- retrieveCellInfo(example_sce, thing)
-    expect_identical(out$val, as.numeric(thing))
+    expect_identical(out$value, as.numeric(thing))
     expect_identical(out$name, "")
 
     # Check errors.
@@ -97,20 +97,20 @@ rowData(example_sce) <- DataFrame(HAPPY=runif(nrow(example_sce)), SAD=rbinom(nro
 test_that("retrieveFeatureInfo works for rows with strings", {
     # Known metadata.
     out <- retrieveFeatureInfo(example_sce, "HAPPY")
-    expect_identical(out$val, rowData(example_sce)$HAPPY)
+    expect_identical(out$value, rowData(example_sce)$HAPPY)
     expect_identical(out$name, "HAPPY")
 
     out <- retrieveFeatureInfo(example_sce, "SAD")
-    expect_identical(out$val, rowData(example_sce)$SAD)
+    expect_identical(out$value, rowData(example_sce)$SAD)
     expect_identical(out$name, "SAD")
 
     # Known exprs.
     out <- retrieveFeatureInfo(example_sce, "Cell_001")
-    expect_identical(out$val, logcounts(example_sce)[,"Cell_001"])
+    expect_identical(out$value, logcounts(example_sce)[,"Cell_001"])
     expect_identical(out$name, "Cell_001")
 
     out <- retrieveFeatureInfo(example_sce, "Cell_010")
-    expect_identical(out$val, logcounts(example_sce)[,"Cell_010"])
+    expect_identical(out$value, logcounts(example_sce)[,"Cell_010"])
     expect_identical(out$name, "Cell_010")
 
     # Handles errors properly.
@@ -124,11 +124,11 @@ test_that("retrieveFeatureInfo works for rows with strings", {
 test_that("retrieveFeatureInfo is responsive to search mode", {
     rowData(example_sce)$Cell_002 <- seq_len(nrow(example_sce))
     out_m <- retrieveFeatureInfo(example_sce, "Cell_002", search = "rowData")
-    expect_identical(out_m$val, rowData(example_sce)$Cell_002)
+    expect_identical(out_m$value, rowData(example_sce)$Cell_002)
     expect_identical(out_m$name, "Cell_002")
 
     out_f <- retrieveFeatureInfo(example_sce, "Cell_002", , search = "assays")
-    expect_identical(out_f$val, logcounts(example_sce)[,"Cell_002"])
+    expect_identical(out_f$value, logcounts(example_sce)[,"Cell_002"])
     expect_identical(out_f$name, "Cell_002")
 
     expect_identical(out_m, retrieveFeatureInfo(example_sce, "Cell_002", search=c("rowData", "assays")))
@@ -138,24 +138,24 @@ test_that("retrieveFeatureInfo is responsive to search mode", {
 test_that("retrieveFeatureInfo works with AsIs'd factors", {
     fac <- factor(rownames(example_sce))
     out <- retrieveFeatureInfo(example_sce, I(fac))
-    expect_identical(out$val, fac)
-    expect_false("AsIs" %in% class(out$val))
+    expect_identical(out$value, fac)
+    expect_false("AsIs" %in% class(out$value))
 })
 
 test_that("retrieveFeatureInfo works for rows with data.frames", {
     thing <- data.frame(B=runif(nrow(example_sce)))
     out <- retrieveFeatureInfo(example_sce, thing, )
-    expect_identical(out$val, thing$B)
+    expect_identical(out$value, thing$B)
     expect_identical(out$name, "B")
 
     thing <- DataFrame(B=runif(nrow(example_sce)))
     out <- retrieveFeatureInfo(example_sce, thing)
-    expect_identical(out$val, thing$B)
+    expect_identical(out$value, thing$B)
     expect_identical(out$name, "B")
 
     thing <- I(runif(nrow(example_sce)))
     out <- retrieveFeatureInfo(example_sce, thing)
-    expect_identical(out$val, as.numeric(thing))
+    expect_identical(out$value, as.numeric(thing))
     expect_identical(out$name, "")
 
     rething <- data.frame(B=runif(ncol(example_sce)), C=2)

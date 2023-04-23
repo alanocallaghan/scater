@@ -79,7 +79,7 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by,
             feature_names <- sprintf("Feature %i", seq_len(nrow(object)))
         }
     } else {
-        feature_names <- retrieveFeatureInfo(object, feature_names_to_plot, search = "rowData")$val
+        feature_names <- retrieveFeatureInfo(object, feature_names_to_plot, search = "rowData")$value
     }
     sub_names <- feature_names[chosen]
 
@@ -101,7 +101,7 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by,
     if (!is.null(colour_cells_by)) {
         colour_out <- retrieveCellInfo(object, colour_cells_by, assay.type = by.assay.type)
         colour_cells_by <- colour_out$name
-        df_exprs_by_cell_long$colour_by <- colour_out$val[df_exprs_by_cell_long$Cell]
+        df_exprs_by_cell_long$colour_by <- colour_out$value[df_exprs_by_cell_long$Cell]
         aes_to_use <- aes(y=.data$Tag, x=.data$value, colour=.data$colour_by)
     } else {
         aes_to_use <- aes(y=.data$Tag, x=.data$value)

@@ -249,7 +249,7 @@ NULL
     plot_out
 }
 
-
+#' @importFrom utils modifyList
 .get_point_args <- function(colour_by, shape_by, size_by, alpha=0.65, size=NULL,
                             shape = NULL, scattermore = FALSE, bins = NULL,
                             summary_fun = sum)

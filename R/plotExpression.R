@@ -152,7 +152,7 @@ plotExpression <- function(object, features, x = NULL,
 
     ## check x-coordinates are valid
     x_by_out <- retrieveCellInfo(object, x, assay.type = assay.type)
-    xcoord <- x_by_out$val
+    xcoord <- x_by_out$value
     if (is.null(xlab)) {
         xlab <- x_by_out$name
     }

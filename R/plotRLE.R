@@ -80,7 +80,7 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
     ## Check aesthetic arguments.
     colour_by_out <- retrieveCellInfo(object, colour_by, assay.type = by.assay.type)
     colour_by <- colour_by_out$name
-    colour_by_vals <- colour_by_out$val
+    colour_by_vals <- colour_by_out$value
     if (!is.null(colour_by)) {
         colour_lab <- "colour_by"
     } else {

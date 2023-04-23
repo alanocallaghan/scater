@@ -6,6 +6,7 @@
     \item Change \code{exprs_values} (and similar) to \code{assay.type}.
     \item Tweak colouring of violin plots.
     \item Fix use of block arguments in \code{plotGroupedHeatmap}.
+    \item Add scattermore and binning support to various plots (eg \code{plotReducedDim}).
   }
 }
 

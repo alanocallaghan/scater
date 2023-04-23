@@ -122,7 +122,7 @@ plotHeatmap <- function(object, features, columns = NULL,
     if (!is.null(order_columns_by)) {
         ordering <- list()
         for (i in seq_along(order_columns_by)) {
-            vals <- retrieveCellInfo(object, order_columns_by[[i]], assay.type = by.assay.type)$val
+            vals <- retrieveCellInfo(object, order_columns_by[[i]], assay.type = by.assay.type)$value
             if (!is.null(columns)) {
                 vals <- vals[columns]
             }
@@ -143,13 +143,13 @@ plotHeatmap <- function(object, features, columns = NULL,
             colour_by_out <- retrieveCellInfo(object, field,
                 assay.type = by.assay.type, swap_rownames = swap_rownames)
 
-            if (is.null(colour_by_out$val)) {
+            if (is.null(colour_by_out$value)) {
                 next
-            } else if (is.numeric(colour_by_out$val)) {
-                colour_fac <- colour_by_out$val
+            } else if (is.numeric(colour_by_out$value)) {
+                colour_fac <- colour_by_out$value
                 col_scale <- viridis(25)
             } else {
-                colour_fac <- as.factor(colour_by_out$val)
+                colour_fac <- as.factor(colour_by_out$value)
 
                 nlevs_colour_by <- nlevels(colour_fac)
                 if (nlevs_colour_by <= 10) {
@@ -191,13 +191,13 @@ plotHeatmap <- function(object, features, columns = NULL,
             colour_by_out <- retrieveFeatureInfo(object, field,
                 assay.type = by.assay.type)
 
-            if (is.null(colour_by_out$val)) {
+            if (is.null(colour_by_out$value)) {
                 next
-            } else if (is.numeric(colour_by_out$val)) {
-                colour_fac <- colour_by_out$val
+            } else if (is.numeric(colour_by_out$value)) {
+                colour_fac <- colour_by_out$value
                 col_scale <- viridis(25)
             } else {
-                colour_fac <- as.factor(colour_by_out$val)
+                colour_fac <- as.factor(colour_by_out$value)
 
                 nlevs_colour_by <- nlevels(colour_fac)
                 if (nlevs_colour_by <= 10) {
@@ -245,7 +245,8 @@ plotHeatmap <- function(object, features, columns = NULL,
         annotation_colors = annotation_colours,
         show_colnames = show_colnames,
         cluster_cols = cluster_cols,
-        ...)
+        ...
+    )
 }
 
 #' @importFrom ggplot2 scale_colour_gradientn

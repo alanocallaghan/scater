@@ -54,7 +54,7 @@ plotRowData <- function(object, y, x = NULL,
     if (is.null(y_lab)) {
         stop(sprintf("could not find '%s' in 'rowData(object)'", y))
     }
-    df_to_plot <- data.frame(Y=y_by_out$val)
+    df_to_plot <- data.frame(Y=y_by_out$value)
 
     if (!is.null(x)) {
         x_by_out <- retrieveFeatureInfo(object, x, search = "rowData")
@@ -62,7 +62,7 @@ plotRowData <- function(object, y, x = NULL,
         if (is.null(x_lab)) {
             stop(sprintf("could not find '%s' in 'rowData(object)'", x))
         }
-        df_to_plot$X <- x_by_out$val
+        df_to_plot$X <- x_by_out$value
     } else {
         x_lab <- NULL
         df_to_plot$X <- factor(character(nrow(object)))

@@ -56,16 +56,16 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
     
     block1_out <- retrieveCellInfo(x, block1, search = "colData")
     block1 <- block1_out$name
-    block1_vals <- block1_out$val
+    block1_vals <- block1_out$value
 
     block2_out <- retrieveCellInfo(x, block2, search = "colData")
     block2 <- block2_out$name
-    block2_vals <- block2_out$val
+    block2_vals <- block2_out$value
 
     ## Setting values to colour by.
     colour_by_out <- retrieveCellInfo(x, colour_by, assay.type = by.assay.type)
     colour_by <- colour_by_out$name
-    colour_by_vals <- colour_by_out$val
+    colour_by_vals <- colour_by_out$value
 
     ## Define an expression matrix depending on which values we're using
     exprs_mat <- assay(x, i = assay.type, withDimnames=FALSE)
