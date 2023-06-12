@@ -116,6 +116,9 @@ NULL
             )
         } else {
             if (use_densvis) {
+                if (!require("densvis", quietly = TRUE)) {
+                    stop("densvis is not installed.")
+                }
                 args$dens_frac <- dens_frac
                 args$dens_lambda <- dens_lambda
                 tsne_out <- do.call(
