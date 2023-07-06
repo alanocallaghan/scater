@@ -90,7 +90,7 @@ NULL
     }
 
     if (use_densvis) {
-        if (!require("densvis", quietly = TRUE)) {
+        if (!requireNamespace("densvis", quietly = TRUE)) {
             stop("densvis is not installed.")
         }
         umap_out <- do.call(densvis::densmap, args)

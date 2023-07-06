@@ -116,7 +116,7 @@ NULL
             )
         } else {
             if (use_densvis) {
-                if (!require("densvis", quietly = TRUE)) {
+                if (!requireNamespace("densvis", quietly = TRUE)) {
                     stop("densvis is not installed.")
                 }
                 args$dens_frac <- dens_frac
