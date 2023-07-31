@@ -61,7 +61,7 @@
 #'        outlier.alpha = 0.1, outlier.shape = 3, outlier.size = 0)
 #' 
 #' @importFrom DelayedArray DelayedArray
-#' @importFrom DelayedMatrixStats rowMedians
+#' @importFrom MatrixGenerics rowMedians
 #' @importFrom SummarizedExperiment assay
 #' @importFrom ggplot2 theme
 plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE, 
@@ -142,7 +142,7 @@ plotRLE <- function(object, exprs_values="logcounts", exprs_logged = TRUE,
 }
 
 #' @importFrom DelayedArray DelayedArray
-#' @importFrom DelayedMatrixStats colQuantiles
+#' @importFrom MatrixGenerics colQuantiles
 .rle_boxplot_stats <- function(mat) {
     boxstats <- colQuantiles(DelayedArray(mat))
     colnames(boxstats) <- c("q0", "q25", "q50", "q75", "q100")

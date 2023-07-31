@@ -53,7 +53,7 @@ NULL
     output * 100
 }
 
-#' @importFrom DelayedMatrixStats rowVars
+#' @importFrom MatrixGenerics rowVars
 #' @importFrom stats model.matrix
 #' @importFrom scuttle fitLinearModel
 .get_variance_explained_internal <- function(block, variables) {
@@ -75,14 +75,14 @@ NULL
         keep <- !is.na(curvar)
         if (all(keep)) {
             if (is.null(tss.all)) {
-                tss.all <- rowVars(block) * (ncol(block) - 1) 
+                tss.all <- rowVars(block, useNames = TRUE) * (ncol(block) - 1)
             }
             tss <- tss.all
             y <- block
         } else {
             curvar <- curvar[keep]
             y <- block[,keep,drop=FALSE]
-            tss <- rowVars(y) * (ncol(y) - 1)
+            tss <- rowVars(y, useNames = TRUE) * (ncol(y) - 1)
         }
 
         design <- model.matrix(~curvar)

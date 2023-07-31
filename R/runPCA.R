@@ -108,7 +108,7 @@
 #' head(reducedDim(example_sce))
 NULL
 
-#' @importFrom DelayedMatrixStats colVars
+#' @importFrom MatrixGenerics colVars
 #' @importFrom DelayedArray DelayedArray 
 #' @importFrom BiocSingular runPCA bsparam
 #' @importFrom BiocParallel SerialParam bpstart bpstop
@@ -132,7 +132,7 @@ NULL
         x <- out$x
         cv <- out$v
     } else {
-        cv <- colVars(DelayedArray(x))
+        cv <- colVars(DelayedArray(x), useNames = TRUE)
     }
 
     pca <- runPCA(x, rank=ncomponents, BSPARAM=BSPARAM, BPPARAM=BPPARAM)

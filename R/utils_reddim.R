@@ -18,7 +18,7 @@
 #' @importFrom utils head
 #' @importFrom Matrix t
 #' @importFrom DelayedArray DelayedArray
-#' @importFrom DelayedMatrixStats rowVars
+#' @importFrom MatrixGenerics rowVars
 #' @importFrom beachmat realizeFileBackedMatrix
 .get_mat_for_reddim <- function(x, subset_row, ntop, scale, get.var=FALSE)
 # Picking the 'ntop' most highly variable features or just using a pre-specified set of features.
@@ -27,7 +27,7 @@
 {
     use.var <- is.null(subset_row) || scale || get.var
     if (use.var) {
-        rv <- rowVars(DelayedArray(x))
+        rv <- MatrixGenerics::rowVars(DelayedArray(x), useNames = TRUE)
     }
 
     if (is.null(subset_row)) {

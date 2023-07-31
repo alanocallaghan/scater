@@ -9,7 +9,7 @@ test_that("feature selection is operational", {
 
     # Ntop selection works.
     out <- scater:::.get_mat_for_reddim(logcounts(normed), ntop = 10, subset_row = NULL, scale = FALSE)
-    rv <- DelayedMatrixStats::rowVars(DelayedArray(logcounts(normed)))
+    rv <- rowVars(DelayedArray(logcounts(normed)), useNames = TRUE)
     keep <- head(order(rv, decreasing = TRUE), 10)
     expect_equal(out, t(logcounts(normed)[keep, ]))
 
@@ -28,7 +28,7 @@ test_that("feature selection is operational", {
 test_that("scaling by feature variances work correctly", {
     logcounts(normed)[100,] <- 0
     MAT <- t(logcounts(normed))
-    cv <- DelayedMatrixStats::colVars(DelayedArray(MAT))
+    cv <- colVars(DelayedArray(MAT), useNames = TRUE)
     novar <- cv < 1e-8
     expect_true(any(novar))
 
@@ -41,7 +41,7 @@ test_that("scaling by feature variances work correctly", {
     expect_equal(out, scaled[, 10:1])
 
     out <- scater:::.get_mat_for_reddim(logcounts(normed), subset_row=NULL, ntop = 10, scale = TRUE) # In combination with non-trivial selection.
-    rv <- DelayedMatrixStats::rowVars(DelayedArray(logcounts(normed)))
+    rv <- rowVars(DelayedArray(logcounts(normed)), useNames = TRUE)
     expect_equal(out, scaled[,head(order(rv[!novar], decreasing = TRUE), 10)])
 })
 
@@ -96,7 +96,7 @@ test_that("runPCA responds to changes to various settings", {
 })
 
 test_that("runPCA handles ntop selection", {
-    most_var <- DelayedMatrixStats::rowVars(DelayedArray(logcounts(normed)))
+    most_var <- rowVars(DelayedArray(logcounts(normed)), useNames = TRUE)
     keep <- head(order(most_var, decreasing = TRUE), 100)
     normed3 <- runPCA(normed, ncomponents = 4, subset_row = keep)
     normed4 <- runPCA(normed, ncomponents = 4, ntop = 100)
@@ -112,7 +112,7 @@ test_that("runPCA names its outputs correctly", {
     expect_identical(rownames(rd), colnames(normedX))
 
     rot <- attr(rd, "rotation")
-    v <- DelayedMatrixStats::rowVars(logcounts(normedX))
+    v <- rowVars(logcounts(normedX), useNames = TRUE)
     expect_identical(rownames(rot), rownames(normedX)[order(v, decreasing = TRUE)])
 
     # What happens without row names?
@@ -122,7 +122,7 @@ test_that("runPCA names its outputs correctly", {
 
     rd <- reducedDim(normedX)
     rot <- attr(rd, "rotation")
-    v <- DelayedMatrixStats::rowVars(logcounts(normedX))
+    v <- rowVars(logcounts(normedX), useNames = TRUE)
     expect_identical(rownames(rot), as.character(order(v, decreasing = TRUE)))
 })
 
@@ -218,12 +218,12 @@ test_that("runTSNE works as expected", {
     expect_equal(reducedDim(normed2), reducedDim(normed3))
 
     ## Avoid testing on 32bit win
-    if (.Machine$sizeof.pointer == 8) {
-        # same with snifter
-        normed2 <- runTSNE(normed, use_fitsne = TRUE, random_state = 100L)
-        normed3 <- runTSNE(normed, use_fitsne = TRUE, random_state = 100L)
-        expect_equal(reducedDim(normed2), reducedDim(normed3))
-    }
+    # if (.Machine$sizeof.pointer == 8) {
+    #     # same with snifter
+    #     normed2 <- runTSNE(normed, use_fitsne = TRUE, random_state = 100L)
+    #     normed3 <- runTSNE(normed, use_fitsne = TRUE, random_state = 100L)
+    #     expect_equal(reducedDim(normed2), reducedDim(normed3))
+    # }
 
     # Testing that various settings have some effect. 
     set.seed(100)

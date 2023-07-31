@@ -101,6 +101,9 @@ NULL
 
     if (!external_neighbors || theta == 0) {
         if (use_fitsne) {
+            if (!requireNamespace("snifter")) {
+                stop("snifter is required for FI-tSNE.")
+            }
             if (use_densvis) {
                 warning("Can't use_fitsne and use_densvis at the same time; using fitsne")
             }
@@ -116,7 +119,7 @@ NULL
             )
         } else {
             if (use_densvis) {
-                if (!require("densvis", quietly = TRUE)) {
+                if (!requireNamespace("densvis", quietly = TRUE)) {
                     stop("densvis is not installed.")
                 }
                 args$dens_frac <- dens_frac

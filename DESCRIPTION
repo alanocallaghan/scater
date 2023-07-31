@@ -32,7 +32,7 @@ Imports:
     S4Vectors,
     SummarizedExperiment,
     DelayedArray,
-    DelayedMatrixStats,
+    MatrixGenerics,
     beachmat,
     BiocNeighbors,
     BiocSingular,

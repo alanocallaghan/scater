@@ -47,7 +47,7 @@
 #' head(reducedDim(example_sce))
 #'
 #' @export
-#' @importFrom DelayedMatrixStats colVars
+#' @importFrom MatrixGenerics colVars
 #' @importFrom DelayedArray DelayedArray 
 #' @importFrom BiocSingular runPCA ExactParam 
 #' @importFrom BiocParallel SerialParam
@@ -61,7 +61,7 @@ runColDataPCA <- function(x, ncomponents = 2,
         exprs_to_plot[,it] <- retrieveCellInfo(x, variables[[it]], search = "colData")$val
     }
 
-    cv <- colVars(exprs_to_plot)
+    cv <- colVars(exprs_to_plot, useNames = TRUE)
     if (scale) {
         keep <- cv >= 1e-8
         exprs_to_plot <- sweep(exprs_to_plot[,keep,drop=FALSE], 2, sqrt(cv[keep]), "/")

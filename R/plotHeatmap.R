@@ -80,7 +80,7 @@
 #'
 #' @export
 #' @importFrom DelayedArray DelayedArray
-#' @importFrom DelayedMatrixStats rowMeans2
+#' @importFrom MatrixGenerics rowMeans2
 #' @importFrom viridis viridis
 #' @importFrom SummarizedExperiment assay assayNames
 plotHeatmap <- function(object, features, columns = NULL,
@@ -256,10 +256,10 @@ plotHeatmap <- function(object, features, columns = NULL,
         x <- x - rowMeans(x)
     }
     if (scale) {
-        if (!center & any(rowSums(x) == 0)) {
+        if (!center & any(rowSums(x, useNames = TRUE) == 0)) {
             stop("Cannot include non-expressed genes when scale=TRUE.")
         }
-        x <- x / sqrt(rowSums(x^2) / (ncol(x) - 1))
+        x <- x / sqrt(rowSums(x^2, useNames = TRUE) / (ncol(x) - 1))
     }
     if (is.null(zlim)) {
         if (center) {

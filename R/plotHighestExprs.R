@@ -42,7 +42,7 @@
 #' @importFrom utils head
 #' @importFrom DelayedArray DelayedArray
 #' @importMethodsFrom DelayedArray sweep
-#' @importFrom DelayedMatrixStats rowSums2 colSums2
+#' @importFrom MatrixGenerics rowSums2 colSums2
 #' @importFrom SummarizedExperiment assay
 #' @importFrom ggplot2 ggplot geom_point ggtitle xlab ylab theme_bw theme element_text labs
 #' scale_colour_gradient scale_fill_manual guides
@@ -57,7 +57,7 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by,
 {
     ## Find the most highly expressed features in this dataset
     exprs_mat <- assay(object, assay.type, withDimnames=FALSE)
-    ave_exprs <- rowSums2(exprs_mat)
+    ave_exprs <- rowSums2(exprs_mat, useNames = TRUE)
     oo <- order(ave_exprs, decreasing=TRUE)
 
     if (!is.null(drop_features)) { 
@@ -87,7 +87,7 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by,
     if (as_percentage) { 
         total_exprs <- sum(ave_exprs)
         top_pctage <- 100 * sum(sub_ave) / total_exprs
-        sub_mat <- 100 * sweep(sub_mat, 2, colSums2(exprs_mat), "/", check.margin=FALSE)
+        sub_mat <- 100 * sweep(sub_mat, 2, colSums2(exprs_mat, useNames = TRUE), "/", check.margin=FALSE)
     }
 
     ordered_names <- factor(sub_names, rev(sub_names)) # rev() so that most highly expressed is last (i.e., highest y-axis).
