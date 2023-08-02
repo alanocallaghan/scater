@@ -25,9 +25,9 @@ test_that("nexprs responds to other options", {
 
     # Handles parallelization.
     expect_equal(nexprs(original), nexprs(original, BPPARAM=safeBPParam(2)))
-    expect_equal(nexprs(original), nexprs(original, BPPARAM=SnowParam(3)))
+    expect_equal(nexprs(original), nexprs(original, BPPARAM=SnowParam(2)))
     expect_equal(nexprs(original, byrow=TRUE), nexprs(original, byrow=TRUE, BPPARAM=safeBPParam(2)))
-    expect_equal(nexprs(original, byrow=TRUE), nexprs(original, byrow=TRUE, BPPARAM=SnowParam(3)))
+    expect_equal(nexprs(original, byrow=TRUE), nexprs(original, byrow=TRUE, BPPARAM=SnowParam(2)))
 })
 
 test_that("nexprs works on a sparse matrix", {
