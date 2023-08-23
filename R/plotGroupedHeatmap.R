@@ -83,6 +83,7 @@ plotGroupedHeatmap <- function(object, features, group, block = NULL,
         ids <- ids[columns,,drop=FALSE]
     }
     heat.se <- summarizeAssayByGroup(heat.vals, ids, statistics="mean")
+    colnames(heat.se) <- heat.se$group
     if (!is.null(block)) {
         heat.se <- correctGroupSummary(assay(heat.se), group=heat.se$group, block=heat.se$block)
     }
