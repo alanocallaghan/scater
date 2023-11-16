@@ -47,9 +47,8 @@ plotExplanatoryPCs <- function(object, nvars_to_plot = 10, npcs_to_plot=50, them
     df_to_plot <- data.frame(
         PC=rep(seq_len(nrow(chosen_rsquared)), ncol(chosen_rsquared)),
         Expl_Var=rep(ordered_vars, each=nrow(chosen_rsquared)),
-        Pct_Var_Explained=as.numeric(chosen_rsquared) * 100 # column major collapse.
+        Pct_Var_Explained=as.numeric(chosen_rsquared) # column major collapse.
     )
-    
     plot_out <- ggplot(df_to_plot, aes(x = .data$PC, y = .data$"Pct_Var_Explained", colour = .data$"Expl_Var")) +
         geom_point(alpha= 1, shape = 16, size = 3) +
         geom_line(alpha = 0.7, linewidth = 2) +
