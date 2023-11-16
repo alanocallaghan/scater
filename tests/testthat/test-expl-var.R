@@ -151,6 +151,28 @@ test_that("getExplanatoryPCs matches with a reference function", {
     }
 })
 
+
+test_that("getExplanatoryPCs doesn't return more than 100%", {
+    example_sce <- mockSCE()
+    example_sce <- logNormCounts(example_sce)
+    example_sce <- runPCA(example_sce)
+     
+    r2mat <- getExplanatoryPCs(example_sce)
+    expect_true(all(r2mat <= 100))
+})
+
+
+test_that("plotExplanatoryPCs doesn't return more than 100%", {
+    example_sce <- mockSCE()
+    example_sce <- logNormCounts(example_sce)
+    example_sce <- runPCA(example_sce)
+     
+    g <- plotExplanatoryPCs(example_sce)
+    expect_true(all(g$data$Pct_Var_Explained <= 100))
+})
+
+
+
 test_that("getExplanatoryPCs responds to PC-specific options", {
     # Responds to differences in the reduced dimension slot.
     blah <- normed
