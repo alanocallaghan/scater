@@ -66,43 +66,43 @@
 #' plotMDS(example_sce)
 #'
 #' @export
-plotPCASCE <- function(object, ..., ncomponents=2) {
-    plotReducedDim(object, ncomponents = ncomponents, dimred = "PCA", ...)
+plotPCASCE <- function(object, ..., ncomponents=2, dimred = "PCA") {
+    plotReducedDim(object, ncomponents = ncomponents, dimred = dimred, ...)
 }
 
 #' @rdname plot_reddim
 #' @aliases plotTSNE 
 #' @export
-plotTSNE <- function(object, ..., ncomponents=2) {
-    plotReducedDim(object, ncomponents = ncomponents, dimred = "TSNE", ...)
+plotTSNE <- function(object, ..., ncomponents=2, dimred = "TSNE") {
+    plotReducedDim(object, ncomponents = ncomponents, dimred = dimred, ...)
 }
 
 #' @rdname plot_reddim
 #' @aliases plotUMAP 
 #' @export
-plotUMAP <- function(object, ..., ncomponents=2) {
-    plotReducedDim(object, ncomponents = ncomponents, dimred = "UMAP", ...)
+plotUMAP <- function(object, ..., ncomponents=2, dimred = "UMAP") {
+    plotReducedDim(object, ncomponents = ncomponents, dimred = dimred, ...)
 }
 
 #' @rdname plot_reddim
 #' @aliases plotDiffusionMap
 #' @export
-plotDiffusionMap <- function(object, ..., ncomponents=2) {
-    plotReducedDim(object, ncomponents = ncomponents, dimred = "DiffusionMap", ...)
+plotDiffusionMap <- function(object, ..., ncomponents=2, dimred = "DiffusionMap") {
+    plotReducedDim(object, ncomponents = ncomponents, dimred = dimred, ...)
 }
 
 #' @rdname plot_reddim
 #' @aliases plotMDS 
 #' @export
-plotMDS <- function(object, ..., ncomponents=2) {
-    plotReducedDim(object, ncomponents = ncomponents, dimred = "MDS", ...)
+plotMDS <- function(object, ..., ncomponents=2, dimred = "MDS") {
+    plotReducedDim(object, ncomponents = ncomponents, dimred = dimred, ...)
 }
 
 #' @rdname plot_reddim
 #' @aliases plotNMF 
 #' @export
-plotNMF <- function(object, ..., ncomponents=2) {
-    plotReducedDim(object, ncomponents = ncomponents, dimred = "NMF", ...)
+plotNMF <- function(object, ..., ncomponents=2, dimred = "NMF") {
+    plotReducedDim(object, ncomponents = ncomponents, dimred = dimred, ...)
 }
 
 #' @rdname plot_reddim
