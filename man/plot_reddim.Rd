@@ -12,19 +12,19 @@
 \alias{plotPCA}
 \title{Plot specific reduced dimensions}
 \usage{
-plotPCASCE(object, ..., ncomponents = 2)
+plotPCASCE(object, ..., ncomponents = 2, dimred = "PCA")
 
-plotTSNE(object, ..., ncomponents = 2)
+plotTSNE(object, ..., ncomponents = 2, dimred = "TSNE")
 
-plotUMAP(object, ..., ncomponents = 2)
+plotUMAP(object, ..., ncomponents = 2, dimred = "UMAP")
 
-plotDiffusionMap(object, ..., ncomponents = 2)
+plotDiffusionMap(object, ..., ncomponents = 2, dimred = "DiffusionMap")
 
-plotMDS(object, ..., ncomponents = 2)
+plotMDS(object, ..., ncomponents = 2, dimred = "MDS")
 
-plotNMF(object, ..., ncomponents = 2)
+plotNMF(object, ..., ncomponents = 2, dimred = "NMF")
 
-\S4method{plotPCA}{SingleCellExperiment}(object, ..., ncomponents = 2)
+\S4method{plotPCA}{SingleCellExperiment}(object, ..., ncomponents = 2, dimred = "PCA")
 }
 \arguments{
 \item{object}{A SingleCellExperiment object.}
