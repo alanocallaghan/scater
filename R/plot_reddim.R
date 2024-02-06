@@ -5,6 +5,8 @@
 #' @param object A SingleCellExperiment object.
 #' @param ncomponents Numeric scalar indicating the number of dimensions components to (calculate and) plot.
 #' This can also be a numeric vector, see \code{?\link{plotReducedDim}} for details.
+#' @param dimred  A string or integer scalar indicating the reduced dimension
+#' result in \code{reducedDims(object)} to plot.
 #' @param ... Additional arguments to pass to \code{\link{plotReducedDim}}. 
 #'
 #' @details 

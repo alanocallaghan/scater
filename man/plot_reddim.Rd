@@ -33,6 +33,9 @@ plotNMF(object, ..., ncomponents = 2, dimred = "NMF")
 
 \item{ncomponents}{Numeric scalar indicating the number of dimensions components to (calculate and) plot.
 This can also be a numeric vector, see \code{?\link{plotReducedDim}} for details.}
+
+\item{dimred}{A string or integer scalar indicating the reduced dimension
+result in \code{reducedDims(object)} to plot.}
 }
 \value{
 A \link{ggplot} object.
