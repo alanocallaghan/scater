@@ -23,6 +23,7 @@ of the points. Details see \code{vignette("ggplot2-specs")}. Defaults to
 \item{\code{jitter_type}:}{String to define how points are to be jittered in a violin plot.
 This is either with random jitter on the x-axis (\code{"jitter"}) or in a \dQuote{beeswarm} style (if \code{"swarm"}, default).
 The latter usually looks more attractive, but for datasets with a large number of cells, or for dense plots, the jitter option may work better.}
+\item{\code{layout}:}{String to define layout of plot. Must be \code{"violin"} (violin plot, default) or \code{"box"} (box plot).}
 }
 }
 

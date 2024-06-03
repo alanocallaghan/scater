@@ -18,6 +18,7 @@
 #' \item{\code{jitter_type}:}{String to define how points are to be jittered in a violin plot.
 #' This is either with random jitter on the x-axis (\code{"jitter"}) or in a \dQuote{beeswarm} style (if \code{"swarm"}, default).
 #' The latter usually looks more attractive, but for datasets with a large number of cells, or for dense plots, the jitter option may work better.}
+#' \item{\code{layout}:}{String to define layout of plot. Must be \code{"violin"} (violin plot, default) or \code{"box"} (box plot).}
 #' }
 #'
 #' @section Distributional calculations:
@@ -63,7 +64,7 @@ NULL
 #' @importFrom ggbeeswarm geom_quasirandom
 #' @importFrom ggplot2 ggplot geom_violin xlab ylab stat_summary geom_jitter
 #'   position_jitter coord_flip geom_point stat_smooth geom_tile theme_bw theme
-#'   geom_bin2d geom_hex stat_summary_2d stat_summary_hex
+#'   geom_bin2d geom_hex stat_summary_2d stat_summary_hex geom_boxplot
 .central_plotter <- function(object, xlab = NULL, ylab = NULL,
                              colour_by = NULL, shape_by = NULL, size_by = NULL, fill_by = NULL,
                              show_median = FALSE, show_violin = TRUE, show_smooth = FALSE, show_se = TRUE,
@@ -71,7 +72,7 @@ NULL
                              theme_size = 10, point_alpha = 0.6, point_size = NULL, point_shape = 19, add_legend = TRUE,
                              point_FUN = NULL, jitter_type = "swarm",
                              rasterise = FALSE, scattermore = FALSE, bins = NULL,
-                             summary_fun = "sum", hex = FALSE)
+                             summary_fun = "sum", hex = FALSE, layout = "violin")
 # Internal ggplot-creating function to plot anything that involves points.
 # Creates either a scatter plot, (horizontal) violin plots, or a rectangle plot.
 {
@@ -90,7 +91,7 @@ NULL
         # Adding violins.
         plot_out <- ggplot(object, aes(x=.data$X, y=.data$Y)) +
             xlab(xlab) + ylab(ylab)
-        if (show_violin) {
+        if (show_violin && layout == "violin") {
             if (is.null(fill_by)) {
                 viol_args <- list(fill="grey90")
             } else {
@@ -100,6 +101,18 @@ NULL
                 do.call(
                     geom_violin,
                     c(viol_args, list(colour = "gray60", alpha = 0.2, scale = "width", width = 0.8))
+                )
+        } else if (layout == "box") {
+            # User can choose also to plot box plot instaed of violin plot
+            if (is.null(fill_by)) {
+                box_args <- list(fill="grey90")
+            } else {
+                box_args <- list(mapping=aes(fill=.data[[fill_by]]))
+            }
+            plot_out <- plot_out +
+                do.call(
+                    geom_boxplot,
+                    c(box_args, list(colour = "black", alpha = 0.2))
                 )
         }
 
