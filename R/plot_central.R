@@ -109,11 +109,15 @@ NULL
             } else {
                 box_args <- list(mapping=aes(fill=.data[[fill_by]]))
             }
+            box_args <- c(box_args, list(colour = "black", alpha = 0.2))
+            # If user wants that jitter plot is not added, add outliers.
+            # Otherwise remove outliers since then they would be plotted twice;
+            # once as outlier and once as part of jitter plot.
+            if( !is.na(point_shape) ){
+                box_args[["outlier.shape"]] <- NA
+            }
             plot_out <- plot_out +
-                do.call(
-                    geom_boxplot,
-                    c(box_args, list(colour = "black", alpha = 0.2))
-                )
+                do.call(geom_boxplot, box_args)
         }
 
         # Adding median, if requested.
