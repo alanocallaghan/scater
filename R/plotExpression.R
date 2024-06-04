@@ -88,7 +88,7 @@
 #'     colour_by = "Mutation_Status", shape_by = "Treatment",
 #'     size_by = "Gene_0010")
 #' 
-#' ## use boxplot instead of violin plot
+#' ## use boxplot as well as violin plot
 #' plotExpression(example_sce, rownames(example_sce)[1:6],
 #'     show_boxplot = TRUE, show_violin = FALSE)
 #'
