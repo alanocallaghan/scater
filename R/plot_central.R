@@ -18,7 +18,6 @@
 #' \item{\code{jitter_type}:}{String to define how points are to be jittered in a violin plot.
 #' This is either with random jitter on the x-axis (\code{"jitter"}) or in a \dQuote{beeswarm} style (if \code{"swarm"}, default).
 #' The latter usually looks more attractive, but for datasets with a large number of cells, or for dense plots, the jitter option may work better.}
-#' \item{\code{layout}:}{String to define layout of plot. Must be \code{"violin"} (violin plot, default) or \code{"box"} (box plot).}
 #' }
 #'
 #' @section Distributional calculations:
@@ -31,6 +30,7 @@
 #' Defaults to \code{FALSE}.}
 #' \item{\code{show_se}:}{Logical, should standard errors for the fitted line be shown on a scatter plot when \code{show_smooth=TRUE}?
 #' Defaults to \code{TRUE}.}
+#' \item{\code{show_boxplot}:}{Logical, should a box plot be shown? Defaults to \code{FALSE}.}
 #' }
 #'
 #' @section Miscellaneous fields: Addititional fields can be added to the
@@ -72,7 +72,7 @@ NULL
                              theme_size = 10, point_alpha = 0.6, point_size = NULL, point_shape = 19, add_legend = TRUE,
                              point_FUN = NULL, jitter_type = "swarm",
                              rasterise = FALSE, scattermore = FALSE, bins = NULL,
-                             summary_fun = "sum", hex = FALSE, layout = "violin")
+                             summary_fun = "sum", hex = FALSE, show_boxplot = FALSE)
 # Internal ggplot-creating function to plot anything that involves points.
 # Creates either a scatter plot, (horizontal) violin plots, or a rectangle plot.
 {
@@ -91,7 +91,7 @@ NULL
         # Adding violins.
         plot_out <- ggplot(object, aes(x=.data$X, y=.data$Y)) +
             xlab(xlab) + ylab(ylab)
-        if (show_violin && layout == "violin") {
+        if (show_violin) {
             if (is.null(fill_by)) {
                 viol_args <- list(fill="grey90")
             } else {
@@ -102,12 +102,18 @@ NULL
                     geom_violin,
                     c(viol_args, list(colour = "gray60", alpha = 0.2, scale = "width", width = 0.8))
                 )
-        } else if (layout == "box") {
-            # User can choose also to plot box plot instaed of violin plot
+        }
+        # Adding box plot
+        if (show_boxplot) {
             if (is.null(fill_by)) {
                 box_args <- list(fill="grey90")
             } else {
                 box_args <- list(mapping=aes(fill=.data[[fill_by]]))
+            }
+            # If violin plot is plotted, make the width of box plot smaller to
+            # improve readability.
+            if (show_violin){
+                box_args[["width"]] <- 0.25
             }
             box_args <- c(box_args, list(colour = "black", alpha = 0.2))
             # If user wants that jitter plot is not added, add outliers.
