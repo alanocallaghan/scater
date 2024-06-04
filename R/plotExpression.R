@@ -87,6 +87,10 @@
 #' plotExpression(example_sce, rownames(example_sce)[1:6],
 #'     colour_by = "Mutation_Status", shape_by = "Treatment",
 #'     size_by = "Gene_0010")
+#' 
+#' ## use boxplot instead of violin plot
+#' plotExpression(example_sce, rownames(example_sce)[1:6],
+#'     colour_by = "Mutation_Status", show_boxplot = TRUE, show_violin = FALSE)
 #'
 #' ## plot expression against expression values for Gene_0004
 #' plotExpression(example_sce, rownames(example_sce)[1:4],
