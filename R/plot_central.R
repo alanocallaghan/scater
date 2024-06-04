@@ -112,14 +112,14 @@ NULL
             }
             # If violin plot is plotted, make the width of box plot smaller to
             # improve readability.
-            if (show_violin){
+            if (show_violin) {
                 box_args[["width"]] <- 0.25
             }
             box_args <- c(box_args, list(colour = "black", alpha = 0.2))
             # If user wants that jitter plot is not added, add outliers.
             # Otherwise remove outliers since then they would be plotted twice;
             # once as outlier and once as part of jitter plot.
-            if( !is.na(point_shape) ){
+            if (!is.na(point_shape)) {
                 box_args[["outlier.shape"]] <- NA
             }
             plot_out <- plot_out +
