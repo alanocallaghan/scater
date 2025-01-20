@@ -56,6 +56,7 @@
 #' \code{options(ggrastr.default.dpi)},
 #' for example \code{options(ggrastr.default.dpi=300)}.
 #' @param by_exprs_values Alias for \code{by.assay.type}.
+#' @param min.value,max.value Minimum and maximum values, beyond which \code{colour_by} values (if numeric) are truncated. Can be set to a numeric value to prevent outlying values from skewing the colour scale, or set to quantiles of the \code{colour_by} variable by setting to (e.g.) \code{"q10"} for the 10th quantile.
 #' @param ... Additional arguments for visualization, see
 #' \code{?"\link{scater-plot-args}"} for details.
 #'
@@ -124,7 +125,9 @@ plotReducedDim <- function(
         swap_rownames = NULL, point.padding = NA, force = 1,
         rasterise = FALSE, scattermore = FALSE,
         bins = NULL, summary_fun = "sum", hex = FALSE,
-        by.assay.type=by_exprs_values, ...
+        by.assay.type=by_exprs_values, 
+        min.value=NULL, max.value=NULL,
+        ...
     ) {
 
     ## Extract reduced dimension representation of cells
@@ -162,6 +165,11 @@ plotReducedDim <- function(
     colour_by <- vis_out$colour_by
     shape_by <- vis_out$shape_by
     size_by <- vis_out$size_by
+    
+    if (is.numeric(df_to_plot$colour_by)) {
+        df_to_plot$colour_by <- .truncate_values(df_to_plot$colour_by, min.value, max.value)
+
+    }
 
     ## Dispatching to the central plotter in the simple case of two dimensions.
     if (length(to_plot) == 2L) {
@@ -297,4 +305,29 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
         plot_out <- ggrastr::rasterise(plot_out, geoms = "Point")
     }
     plot_out
+}
+
+
+
+.truncate_values <- function(values, min.value=NULL, max.value=NULL) {
+    if (!is.null(min.value)) {
+        min.value <- .handle_truncval(unlist(values), min.value)
+        values[values < min.value] <- min.value
+    }
+    if (!is.null(max.value)) {
+        max.value <- .handle_truncval(unlist(values), max.value)
+        values[values > max.value] <- max.value
+    }
+    values
+}
+
+.handle_truncval <- function(col, truncval) {
+    if (is.character(truncval)) {
+        stopifnot(grepl("q\\d+", truncval))
+        return (quantile(col, as.numeric(sub("q", "", truncval)) / 100))
+    }
+    if (is.numeric(truncval)) {
+        # do nothing?
+    }
+    truncval
 }
