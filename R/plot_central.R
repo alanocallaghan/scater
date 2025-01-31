@@ -126,15 +126,6 @@ NULL
                 do.call(geom_boxplot, box_args)
         }
 
-        # Adding median, if requested.
-        if (show_median) {
-            plot_out <- plot_out +
-                stat_summary(
-                    fun = median, fun.min = median, fun.max = median,
-                    geom = "crossbar", width = 0.3, alpha = 0.8
-                )
-        }
-
         # Adding points.
         point_out <- .get_point_args(
             colour_by, shape_by, size_by,
@@ -152,6 +143,16 @@ NULL
             }
         }
         plot_out <- plot_out + do.call(point_FUN, point_out$args)
+
+
+        # Adding median, if requested, after points and violin geom.
+        if (show_median) {
+            plot_out <- plot_out +
+                stat_summary(
+                    fun = median, fun.min = median, fun.max = median,
+                    geom = "crossbar", width = 0.3, alpha = 0.8
+                )
+        }
 
         # Flipping.
         if (flipped) {
