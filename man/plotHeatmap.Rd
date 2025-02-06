@@ -84,7 +84,7 @@ Each entry of the list can be any acceptable input to the \code{by} argument in 
 A character vector can also be supplied and will be treated as a list of strings.
 This argument is automatically appended to \code{colour_columns_by}.}
 
-\item{by_exprs_values}{Alias to {by.assay.type}.}
+\item{by_exprs_values}{Alias to \code{by.assay.type}.}
 
 \item{show_colnames, cluster_cols, ...}{Additional arguments to pass to \code{\link[pheatmap]{pheatmap}}.}
 

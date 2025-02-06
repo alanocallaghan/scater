@@ -84,3 +84,10 @@ test_that("plotExpression with binning", {
                                  bins = 10, colour_by = "Gene_0002", hex = TRUE,
                                  summary_fun = "mean"))
 })
+
+
+test_that("log2_values works as expected", {
+    g1 <- plotExpression(example_sce, features=rownames(example_sce)[1:10], assay.type="counts", log2_values=FALSE)
+    g2 <- plotExpression(example_sce, features=rownames(example_sce)[1:10], assay.type="counts", log2_values=TRUE)
+    expect_false(isTRUE(all.equal(g1$data$Y, g2$data$Y)))
+})

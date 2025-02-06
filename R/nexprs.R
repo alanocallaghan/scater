@@ -36,7 +36,7 @@
 NULL
 
 #' @importFrom BiocParallel SerialParam
-#' @importFrom Matrix rowSums colSums
+#' @importFrom MatrixGenerics rowSums colSums
 #' @importFrom DelayedArray getAutoBPPARAM setAutoBPPARAM
 .nexprs <- function(x, byrow=FALSE, detection_limit=0, subset_row=NULL, subset_col=NULL, BPPARAM=SerialParam()) {
     if (!is.null(subset_row)) {

@@ -12,8 +12,8 @@ Authors@R: c(
         person("Leo", "Lahti", role=c("ctb"), email="leo.lahti@utu.fi", comment = c(ORCID = "0000-0001-5537-637X")),
         person("Tuomas", "Borman", role = c("ctb"), comment = c(ORCID = "0000-0002-8563-8884"))
     )
-Version: 1.33.2
-Date: 2024-06-21
+Version: 1.35.1
+Date: 2025-01-31
 License: GPL-3
 Title: Single-Cell Analysis Toolkit for Gene Expression Data in R
 Description: A collection of tools for doing various analyses of
@@ -31,8 +31,9 @@ Imports:
     BiocGenerics,
     S4Vectors,
     SummarizedExperiment,
-    DelayedArray,
     MatrixGenerics,
+    SparseArray,
+    DelayedArray,
     beachmat,
     BiocNeighbors,
     BiocSingular,
@@ -49,6 +50,7 @@ Imports:
     ggrastr
 Suggests: 
     BiocStyle,
+    DelayedMatrixStats,
     snifter,
     densvis,
     cowplot,
@@ -66,6 +68,6 @@ biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, No
         GeneExpression, Sequencing, Software, DataImport,
         DataRepresentation, Infrastructure, Coverage
 Encoding: UTF-8
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 URL: http://bioconductor.org/packages/scater/
 BugReports: https://support.bioconductor.org/

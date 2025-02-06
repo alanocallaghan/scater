@@ -50,7 +50,7 @@
 #'
 #' @export
 #' @importFrom SummarizedExperiment assay 
-#' @importFrom Matrix rowMeans
+#' @importFrom MatrixGenerics rowMeans
 #' @importFrom scuttle summarizeAssayByGroup
 plotGroupedHeatmap <- function(object, features, group, block = NULL, 
     columns=NULL, exprs_values = "logcounts", center = FALSE, scale = FALSE,

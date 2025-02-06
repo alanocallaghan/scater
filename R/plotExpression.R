@@ -142,7 +142,7 @@ plotExpression <- function(object, features, x = NULL,
     nfeatures <- length(features)
 
     if (log2_values) {
-        exprs_val <- lapply(exprs_vals, function(x) log2(x + 1))
+        exprs_vals <- lapply(exprs_vals, function(x) log2(x + 1))
         ylab <- paste0("Expression (", assay.type, "; log2-scale)")
     } else {
         ylab <- paste0("Expression (", assay.type, ")")

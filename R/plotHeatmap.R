@@ -47,7 +47,7 @@
 #' \code{column_annotation_colors}, \code{color_rows_by}, 
 #' \code{row_annotation_colors}.
 #' @param exprs_values Alias to \code{assay.type}.
-#' @param by_exprs_values Alias to {by.assay.type}.
+#' @param by_exprs_values Alias to \code{by.assay.type}.
 #'
 #' @details 
 #' Setting \code{center=TRUE} is useful for examining log-fold changes of each cell's expression profile from the average across all cells.
