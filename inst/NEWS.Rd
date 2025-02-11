@@ -1,7 +1,14 @@
 \name{NEWS}
 \title{News for Package \pkg{scater}}
 
-\section{Changes in version 1.28.0, Bioconductor 3.17 Release}{
+\section{Changes in version 1.36.0, Bioconductor 3.21 Release}{
+  \itemize{
+    \item Add \code{min.value,max.value} arguments to \code{plotReducedDim}
+    to enable truncating colour scales using a numeric value or a quantile (eg \code{"q10"}).
+  }
+}
+
+\section{Changes in version 1.28.0, Bioconductor 3.18 Release}{
   \itemize{
     \item Change \code{exprs_values} (and similar) to \code{assay.type}.
     \item Tweak colouring of violin plots.

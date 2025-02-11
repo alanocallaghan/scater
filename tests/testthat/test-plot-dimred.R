@@ -48,6 +48,19 @@ test_that("we can produce PCA scatterplots", {
     expect_ggplot(plotPCA(example_sce, bins = 10, colour_by = "Gene_0001"))
     expect_ggplot(plotPCA(example_sce, bins = 10, colour_by = "Gene_0001",
                           hex = TRUE))
+
+    # truncating color scale
+    expect_ggplot(plotPCA(example_sce, min.value = 1))
+    expect_ggplot(plotPCA(example_sce, min.value = "1"))
+    expect_ggplot(plotPCA(example_sce, min.value = factor(1)))
+    expect_ggplot(plotPCA(example_sce, min.value = factor("q1")))
+    expect_ggplot(plotPCA(example_sce, min.value = "q1"))
+
+    expect_ggplot(plotPCA(example_sce, max.value = 2))
+    expect_ggplot(plotPCA(example_sce, max.value = "2"))
+    expect_ggplot(plotPCA(example_sce, max.value = factor(2)))
+    expect_ggplot(plotPCA(example_sce, max.value = factor("q90")))
+    expect_ggplot(plotPCA(example_sce, max.value = "q90"))
 })
 
 test_that("we can produce PCA pairplots", {
