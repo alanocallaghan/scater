@@ -110,7 +110,8 @@ plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by,
     ## Create the plot and annotations. 
     plot_most_expressed <- ggplot(df_exprs_by_cell_long, aes_to_use) + geom_point(alpha = 0.6, shape = 124)
     plot_most_expressed <- plot_most_expressed + labs(x=assay.type, y="Feature") + theme_bw(8) +
-        theme(legend.position = c(1, 0), legend.justification = c(1, 0),
+        theme(legend.position.inside = c(1, 0),
+              legend.justification = c(1, 0),
               axis.text.x = element_text(colour = "gray35"),
               axis.text.y = element_text(colour = "gray35"),
               axis.title.x = element_text(colour = "gray35"),
