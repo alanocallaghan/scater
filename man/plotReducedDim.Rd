@@ -30,6 +30,8 @@ plotReducedDim(
   summary_fun = "sum",
   hex = FALSE,
   by.assay.type = by_exprs_values,
+  min.value = NULL,
+  max.value = NULL,
   ...
 )
 }
@@ -120,6 +122,8 @@ x and y are numeric.}
 obtain expression values from,
 for use in point aesthetics - see the \code{assay.type} argument in
 \code{?\link{retrieveCellInfo}}.}
+
+\item{min.value, max.value}{Minimum and maximum values, beyond which \code{colour_by} values (if numeric) are truncated. Can be set to a numeric value to prevent outlying values from skewing the colour scale, or set to quantiles of the \code{colour_by} variable by setting to (e.g.) \code{"q10"} for the 10th quantile.}
 
 \item{...}{Additional arguments for visualization, see
 \code{?"\link{scater-plot-args}"} for details.}
