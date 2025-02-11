@@ -322,9 +322,12 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
 }
 
 .handle_truncval <- function(col, truncval) {
-    if (is.character(truncval)) {
+    if (is.character(truncval) || is.factor(truncval)) {
+        if (!is.na(as.character(as.numeric(truncval)))) {
+            return (as.character(as.numeric(truncval)))
+        }
         stopifnot(grepl("q\\d+", truncval))
-        return (quantile(col, as.numeric(sub("q", "", truncval)) / 100))
+        return (quantile(col, as.numeric(sub("q", "", as.character(truncval))) / 100))
     }
     if (is.numeric(truncval)) {
         # do nothing?
