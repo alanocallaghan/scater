@@ -8,9 +8,8 @@
 #' For \code{runNMF}, a \linkS4class{SingleCellExperiment} object.
 #' @param ncomponents Numeric scalar indicating the number of NMF dimensions to obtain.
 #' @inheritParams runPCA
-#' @param seed Random number generation seed to be passed to \code{\link[RcppML]{nmf}}.
 #' @param ... For the \code{calculateNMF} generic, additional arguments to pass to specific methods.
-#' For the ANY method, additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.
+#' For the ANY method, additional arguments to pass to \code{\link[RcppML]{nmf}}.
 #' For the SummarizedExperiment and SingleCellExperiment methods, additional arguments to pass to the ANY method.
 #'
 #' For \code{runNMF}, additional arguments to pass to \code{calculateNMF}.
@@ -51,14 +50,14 @@ NULL
 #' @importFrom BiocNeighbors KmknnParam findKNN
 #' @importFrom BiocParallel SerialParam
 .calculate_nmf <- function(x, ncomponents = 2, ntop = 500,
-    subset_row = NULL, scale=FALSE, transposed=FALSE, seed=1, ...)
+    subset_row = NULL, scale=FALSE, transposed=FALSE, ...)
 { 
     if (!transposed) {
         x <- .get_mat_for_reddim(x, subset_row=subset_row, ntop=ntop, scale=scale) 
     }
     x <- t(as.matrix(x))
 
-    args <- list(k=ncomponents, verbose=FALSE, seed=seed, ...)
+    args <- list(k=ncomponents, verbose=FALSE, ...)
     nmf_out <- do.call(RcppML::nmf, c(list(x), args))
 
     # RcppML doesn't use transposed data
