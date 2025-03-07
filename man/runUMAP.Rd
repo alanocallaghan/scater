@@ -19,7 +19,7 @@ calculateUMAP(x, ...)
   transposed = FALSE,
   pca = if (transposed) NULL else 50,
   n_neighbors = 15,
-  n_threads = NULL,
+  n_threads = bpnworkers(BPPARAM),
   ...,
   external_neighbors = FALSE,
   BNPARAM = KmknnParam(),

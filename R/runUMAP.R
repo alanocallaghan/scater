@@ -64,10 +64,10 @@
 NULL
 
 #' @importFrom BiocNeighbors findKNN KmknnParam
-#' @importFrom BiocParallel SerialParam
+#' @importFrom BiocParallel SerialParam bpnworkers
 .calculate_umap <- function(x, ncomponents = 2, ntop = 500, 
     subset_row = NULL, scale=FALSE, transposed=FALSE, pca=if (transposed) NULL else 50,
-    n_neighbors=15, n_threads=NULL, ..., 
+    n_neighbors=15, n_threads=bpnworkers(BPPARAM), ..., 
     external_neighbors=FALSE, BNPARAM = KmknnParam(), BPPARAM = SerialParam(),
     use_densvis=FALSE, dens_frac = 0.3, dens_lambda = 0.1)
 {
