@@ -5,9 +5,18 @@
 \alias{categoricalHlinesNamed}
 \title{Draw horizontal lines by category}
 \usage{
-categoricalHlines(x, y, levels, line.length = 0.5, ...)
+categoricalHlines(
+  x,
+  y,
+  levels,
+  other_fields = NULL,
+  color = "red",
+  linetype = 1,
+  linewidth = 1,
+  ...
+)
 
-categoricalHlinesNamed(y, levels, line.length = 0.5, ...)
+categoricalHlinesNamed(y, ...)
 }
 \arguments{
 \item{x}{Categorical factor on the x-axis, or a vector that can be coerced into a factor.
@@ -20,9 +29,17 @@ For \code{categoricalHlinesNamed}, the names will be used as \code{x}.}
 If \code{NULL}, the sorted and unique values of \code{x} are used.
 Ignored if \code{x} is already a factor.}
 
-\item{line.length}{Number specifying the length of each line.}
+\item{other_fields}{Named list of additional fields to be added to the data frame that is passed to the \pkg{ggplot2} layer.
+Each entry should be a vector or factor of length equal to \code{x}.}
 
-\item{...}{More arguments to pass to \code{\link[ggplot2]{geom_segment}}.}
+\item{color}{String specifying the color of each line.}
+
+\item{linetype}{String specifying the type of each line.}
+
+\item{linewidth}{Number specifying the width of each line.}
+
+\item{...}{More arguments to pass to \code{\link[ggplot2]{geom_boxplot}}.
+For \code{categorialHlinesNamed}, these are passed to \code{categoricalHlines}.}
 }
 \value{
 A \pkg{ggplot2} layer that can be added to an existing plot.
@@ -42,13 +59,23 @@ colData(example_sce) <- cbind(colData(example_sce),
 qc.filter <- isOutlier(example_sce$sum)
 qc.threshold <- attr(qc.filter, "thresholds")["lower"]
 plotColData(example_sce, y = "sum") +
-    categoricalHlines(NULL, qc.threshold, levels=NULL, color="red") +
+    categoricalHlines(NULL, qc.threshold, levels=NULL, linetype=2) +
     scale_y_log10()
 
 qc.filter <- isOutlier(example_sce$sum, batch=example_sce$Mutation_Status)
 qc.thresholds <- attr(qc.filter, "thresholds")["lower",]
 plotColData(example_sce, y = "sum", x = "Mutation_Status") +
-    categoricalHlinesNamed(qc.thresholds, levels=NULL, color="red") +
+    categoricalHlinesNamed(qc.thresholds, levels=NULL) +
+    scale_y_log10()
+
+combined <- paste0(example_sce$Mutation_Status, "-", example_sce$Treatment)
+example_sce$Combined <- combined
+qc.filter2 <- isOutlier(example_sce$sum, batch=example_sce$Combined)
+qc.thresholds2 <- attr(qc.filter2, "thresholds")["lower",]
+plotColData(example_sce, y = "sum", x = "Combined", other_fields = "Mutation_Status") +
+    categoricalHlinesNamed(qc.thresholds2, levels=NULL, color="red", size=10,
+        other_fields=list(Mutation_Status=sub("-.*", "", names(qc.thresholds2)))) +
+    facet_grid(~Mutation_Status) +
     scale_y_log10()
 
 }
