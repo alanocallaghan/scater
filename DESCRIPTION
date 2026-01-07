@@ -68,6 +68,6 @@ biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, No
         GeneExpression, Sequencing, Software, DataImport,
         DataRepresentation, Infrastructure, Coverage
 Encoding: UTF-8
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 URL: http://bioconductor.org/packages/scater/
 BugReports: https://support.bioconductor.org/
