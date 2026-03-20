@@ -321,6 +321,7 @@ paired_reddim_plot <- function(df_to_plot, to_plot, dimred, percentVar = NULL,
     values
 }
 
+#' @importFrom stats quantile
 .handle_truncval <- function(col, truncval) {
     if (is.character(truncval) || is.factor(truncval)) {
         if (!is.na(as.character(as.numeric(truncval)))) {
