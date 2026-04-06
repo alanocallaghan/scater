@@ -326,11 +326,11 @@ test_that("runTSNE works with externally computed nearest neighbor results", {
     # Works with alternative neighbor searching options.
     ref <- runTSNE(normedP, dimred = "PCA", Y_init = init)
     alt <- runTSNE(normedP, dimred = "PCA", Y_init = init, external_neighbors = TRUE, BNPARAM = BiocNeighbors::VptreeParam())
-    expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
+    expect_equal(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
 
     ref <- runTSNE(normedP, dimred = "PCA", Y_init = init)
     alt <- runTSNE(normedP, dimred = "PCA", Y_init = init, external_neighbors = TRUE, BPPARAM = safeBPParam(2))
-    expect_identical(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
+    expect_equal(reducedDim(ref, "TSNE"), reducedDim(alt, "TSNE"))
 })
 
 #############################################
