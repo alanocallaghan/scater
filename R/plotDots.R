@@ -52,7 +52,6 @@
 #' scale_size scale_colour_gradient theme element_line element_rect 
 #' scale_colour_gradient2
 #' @importFrom SummarizedExperiment assay
-#' @importFrom scuttle summarizeAssayByGroup
 plotDots <- function(object, features, group = NULL, block=NULL,
     exprs_values = "logcounts", detection_limit = 0, zlim = NULL, 
     colour = color, color = NULL,
@@ -81,13 +80,11 @@ plotDots <- function(object, features, group = NULL, block=NULL,
         ids$block <- retrieveCellInfo(object, block, search="colData")$value
     }
 
-    summarized <- summarizeAssayByGroup(
-        assay(object, assay.type)[as.character(features), , drop = FALSE],
-        ids=ids, statistics=c("mean", "prop.detected"),
-        threshold=detection_limit)
-    
-    ave <- assay(summarized, "mean")
-    num <- assay(summarized, "prop.detected")
+    combo.ids <- S4Vectors::selfmatch(ids)
+    submat <- assay(object, assay.type)[as.character(features), , drop = FALSE]
+    ave <- quick_means_by_group(submat, combo.ids)
+    num <- quick_means_by_group(submat > detection_limit, combo.ids)
+    summarized <- ids[!duplicated(combo.ids),,drop=FALSE]
     group.names <- summarized$group
 
     if (!is.null(block)) {

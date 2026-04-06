@@ -51,7 +51,6 @@
 #' @export
 #' @importFrom SummarizedExperiment assay 
 #' @importFrom MatrixGenerics rowMeans
-#' @importFrom scuttle summarizeAssayByGroup
 plotGroupedHeatmap <- function(object, features, group, block = NULL, 
     columns=NULL, exprs_values = "logcounts", center = FALSE, scale = FALSE,
     zlim = NULL, colour = color, swap_rownames = NULL, color = NULL, assay.type=exprs_values, ...) {
@@ -82,15 +81,15 @@ plotGroupedHeatmap <- function(object, features, group, block = NULL,
     if (!is.null(columns)) {
         ids <- ids[columns,,drop=FALSE]
     }
-    heat.se <- summarizeAssayByGroup(heat.vals, ids, statistics="mean")
-    colnames(heat.se) <- heat.se$group
+
+    combo.ids <- S4Vectors::selfmatch(ids)
+    heat.mat <- quick_means_by_group(heat.vals, combo.ids)
+    heat.ids <- ids[!duplicated(combo.ids),]
+
     if (!is.null(block)) {
-        heat.se <- correctGroupSummary(assay(heat.se), group=heat.se$group, block=heat.se$block)
+        heat.mat <- correctGroupSummary(heat.mat, group=heat.ids$group, block=heat.ids$block)
     }
-    if (inherits(heat.se, "SummarizedExperiment")) {
-        heat.se <- assay(heat.se)
-    }
-    heatmap_scale <- .heatmap_scale(heat.se, center=center, scale=scale, colour=colour, zlim=zlim)
+    heatmap_scale <- .heatmap_scale(heat.mat, center=center, scale=scale, colour=colour, zlim=zlim)
 
     # Creating the heatmap as specified.
     pheatmap::pheatmap(heatmap_scale$x, color=heatmap_scale$colour, breaks=heatmap_scale$colour_breaks, ...) 
