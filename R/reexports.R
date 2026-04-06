@@ -79,7 +79,7 @@ scuttle::sumCountsAcrossFeatures
 #' @export
 scuttle::uniquifyFeatureNames
 
-# Vendored from scuttle given that it's otherwise deprecated and we don't want to add a depedency on scrapper.
+# Vendored from scuttle given that it's otherwise deprecated and we don't want to add a dependency on scrapper.
 quick_means_by_group <- function(x, groups) {
     groups <- factor(groups)
     num.groups <- nlevels(groups)
