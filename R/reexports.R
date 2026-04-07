@@ -80,14 +80,9 @@ scuttle::sumCountsAcrossFeatures
 scuttle::uniquifyFeatureNames
 
 # Vendored from scuttle given that it's otherwise deprecated and we don't want to add a dependency on scrapper.
-quick_means_by_group <- function(x, groups) {
-    groups <- factor(groups)
-    num.groups <- nlevels(groups)
-    gid <- as.integer(groups)
-
-    multiplier <- Matrix::sparseMatrix(i = seq_along(gid), j = gid, x = rep(1, length(groups)))
+quick_means_by_group <- function(x, num.groups, group.id) {
+    multiplier <- Matrix::sparseMatrix(i = seq_along(group.id), j = group.id, x = rep(1, length(group.id)))
     sums <- x %*% multiplier
-    group.sizes <- tabulate(gid, nbins=num.groups)
-
+    group.sizes <- tabulate(group.id, nbins=num.groups)
     t(t(as.matrix(sums)) / group.sizes)
 }
