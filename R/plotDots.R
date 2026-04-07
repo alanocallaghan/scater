@@ -81,11 +81,13 @@ plotDots <- function(object, features, group = NULL, block=NULL,
     }
 
     combo.ids <- S4Vectors::selfmatch(ids)
-    submat <- assay(object, assay.type)[as.character(features), , drop = FALSE]
-    ave <- quick_means_by_group(submat, combo.ids)
-    num <- quick_means_by_group(submat > detection_limit, combo.ids)
-    summarized <- ids[!duplicated(combo.ids),,drop=FALSE]
+    is.unique.id <- !duplicated(combo.ids)
+    summarized <- ids[is.unique.id,,drop=FALSE]
     group.names <- summarized$group
+    submat <- assay(object, assay.type)[as.character(features), , drop = FALSE]
+    m <- match(combo.ids, combo.ids[is.unique.id])
+    ave <- quick_means_by_group(submat, nrow(summarized), m)
+    num <- quick_means_by_group(submat > detection_limit, nrow(summarized), m)
 
     if (!is.null(block)) {
         ave <- correctGroupSummary(ave, group=summarized$group, block=summarized$block)

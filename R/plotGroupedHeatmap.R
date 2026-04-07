@@ -83,8 +83,10 @@ plotGroupedHeatmap <- function(object, features, group, block = NULL,
     }
 
     combo.ids <- S4Vectors::selfmatch(ids)
-    heat.mat <- quick_means_by_group(heat.vals, combo.ids)
-    heat.ids <- ids[!duplicated(combo.ids),]
+    is.unique.id <- !duplicated(combo.ids)
+    heat.ids <- ids[is.unique.id,,drop=FALSE]
+    heat.mat <- quick_means_by_group(heat.vals, nrow(heat.ids), match(combo.ids, combo.ids[is.unique.id]))
+    colnames(heat.mat) <- heat.ids$group
 
     if (!is.null(block)) {
         heat.mat <- correctGroupSummary(heat.mat, group=heat.ids$group, block=heat.ids$block)
