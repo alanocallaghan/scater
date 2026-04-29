@@ -2,7 +2,7 @@
 ## library(scater); library(testthat); source("setup.R"); source("test-plot-heat.R")
 
 example_sce <- normed 
-colData(example_sce) <- cbind(colData(example_sce), perCellQCMetrics(example_sce))
+colData(example_sce) <- cbind(colData(example_sce), scrapper::computeRnaQcMetrics(example_sce))
 rowData(example_sce) <- cbind(rowData(example_sce), perFeatureQCMetrics(example_sce))
 rowData(example_sce)$ENS <- gsub("Gene", "ENS", rownames(example_sce))
 rowData(example_sce)$ENS_e1 <- rowData(example_sce)$ENS

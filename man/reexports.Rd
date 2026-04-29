@@ -14,7 +14,6 @@
 \alias{computeLibraryFactors}
 \alias{computeMedianFactors}
 \alias{isOutlier}
-\alias{librarySizeFactors}
 \alias{logNormCounts}
 \alias{makePerCellDF}
 \alias{makePerFeatureDF}
@@ -23,8 +22,6 @@
 \alias{normalizeCounts}
 \alias{numDetectedAcrossCells}
 \alias{numDetectedAcrossFeatures}
-\alias{perCellQCMetrics}
-\alias{perFeatureQCMetrics}
 \alias{quickPerCellQC}
 \alias{readSparseCounts}
 \alias{sumCountsAcrossCells}
@@ -37,6 +34,8 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{scuttle}{\code{\link[scuttle:addPerCellQCMetrics]{addPerCellQC}}, \code{\link[scuttle:addPerCellQCMetrics]{addPerFeatureQC}}, \code{\link[scuttle]{aggregateAcrossCells}}, \code{\link[scuttle]{aggregateAcrossFeatures}}, \code{\link[scuttle]{calculateAverage}}, \code{\link[scuttle]{calculateCPM}}, \code{\link[scuttle]{calculateFPKM}}, \code{\link[scuttle]{calculateTPM}}, \code{\link[scuttle:librarySizeFactors]{computeLibraryFactors}}, \code{\link[scuttle:medianSizeFactors]{computeMedianFactors}}, \code{\link[scuttle]{isOutlier}}, \code{\link[scuttle]{librarySizeFactors}}, \code{\link[scuttle]{logNormCounts}}, \code{\link[scuttle]{makePerCellDF}}, \code{\link[scuttle]{makePerFeatureDF}}, \code{\link[scuttle]{medianSizeFactors}}, \code{\link[scuttle]{mockSCE}}, \code{\link[scuttle]{normalizeCounts}}, \code{\link[scuttle]{numDetectedAcrossCells}}, \code{\link[scuttle]{numDetectedAcrossFeatures}}, \code{\link[scuttle]{perCellQCMetrics}}, \code{\link[scuttle]{perFeatureQCMetrics}}, \code{\link[scuttle]{quickPerCellQC}}, \code{\link[scuttle]{readSparseCounts}}, \code{\link[scuttle]{sumCountsAcrossCells}}, \code{\link[scuttle]{sumCountsAcrossFeatures}}, \code{\link[scuttle]{uniquifyFeatureNames}}}
+  \item{scrapper}{\code{\link[scrapper]{normalizeCounts}}}
+
+  \item{scuttle}{\code{\link[scuttle:addPerCellQCMetrics]{addPerCellQC}}, \code{\link[scuttle:addPerCellQCMetrics]{addPerFeatureQC}}, \code{\link[scuttle]{aggregateAcrossCells}}, \code{\link[scuttle]{aggregateAcrossFeatures}}, \code{\link[scuttle]{calculateAverage}}, \code{\link[scuttle]{calculateCPM}}, \code{\link[scuttle]{calculateFPKM}}, \code{\link[scuttle]{calculateTPM}}, \code{\link[scuttle:librarySizeFactors]{computeLibraryFactors}}, \code{\link[scuttle:medianSizeFactors]{computeMedianFactors}}, \code{\link[scuttle]{isOutlier}}, \code{\link[scuttle]{logNormCounts}}, \code{\link[scuttle]{makePerCellDF}}, \code{\link[scuttle]{makePerFeatureDF}}, \code{\link[scuttle]{medianSizeFactors}}, \code{\link[scuttle]{mockSCE}}, \code{\link[scuttle]{numDetectedAcrossCells}}, \code{\link[scuttle]{numDetectedAcrossFeatures}}, \code{\link[scuttle]{quickPerCellQC}}, \code{\link[scuttle]{readSparseCounts}}, \code{\link[scuttle]{sumCountsAcrossCells}}, \code{\link[scuttle]{sumCountsAcrossFeatures}}, \code{\link[scuttle]{uniquifyFeatureNames}}}
 }}
 

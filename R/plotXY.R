@@ -86,8 +86,8 @@ plotXY <- function(
     if (!is.null(colour_by)) {
         if (is.data.frame(colour_by) || is(colour_by, "DataFrame")) {
             stopifnot(ncol(colour_by) == 1)
-            df_to_plot$colour_by <- colour_by[,1]
-            colour_by <- colnmames(colour_by)
+            df_to_plot$colour_by <- colour_by[, 1]
+            colour_by <- colnames(colour_by)
         } else {
             df_to_plot$colour_by <- colour_by
             colour_by <- "colour"
@@ -97,7 +97,7 @@ plotXY <- function(
     if (!is.null(size_by)) {
         if (is.data.frame(size_by) || is(size_by, "DataFrame")) {
             stopifnot(ncol(size_by) == 1)
-            df_to_plot$size_by <- size_by[,1]
+            df_to_plot$size_by <- size_by[, 1]
             size_by <- colnames(size_by)
         } else {
             df_to_plot$size_by <- size_by
@@ -108,7 +108,7 @@ plotXY <- function(
     if (!is.null(shape_by)) {
         if (is.data.frame(shape_by) || is(shape_by, "DataFrame")) {
             stopifnot(ncol(shape_by) == 1)
-            df_to_plot$shape_by <- shape_by[,1]
+            df_to_plot$shape_by <- shape_by[, 1]
             shape_by <- colnames(shape_by)
         } else {
             df_to_plot$shape_by <- shape_by

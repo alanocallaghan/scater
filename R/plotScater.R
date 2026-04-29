@@ -121,8 +121,7 @@ plotScater <- function(x, nfeatures = 500, exprs_values = "counts",
     plot_out
 }
 
-#' @importFrom scuttle perCellQCMetrics
 top_cumprop <- function(x, chosen) {
-    out <- perCellQCMetrics(x, percent.top=chosen, flatten=FALSE)
+    out <- scrapper::computeRnaQcMetrics(x, percent.top=chosen, flatten=FALSE)
     out$percent.top
 }

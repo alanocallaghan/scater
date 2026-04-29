@@ -55,7 +55,7 @@ test_that("we can produce plots showing cells in plate position", {
 # Testing plotColData and plotRowData
 
 test_that("we can produce plots for column metadata", {
-    example_sce <- addPerCellQC(example_sce)
+    example_sce <- scrapper::quickRnaQc.se(example_sce)
 
     for (y in c("detected", "Mutation_Status")) { # discrete or continuous.
         for (x in list(NULL, "sum", "Cell_Cycle")) { # nothing, discrete or continuous.
@@ -199,7 +199,7 @@ test_that("plotDots works w/factors", {
     counts <- matrix(rpois(100, 5), ncol = 10)
     rownames(counts) <- paste("Feature", 1:10)
     sce <- SingleCellExperiment(assays = list(counts = counts))
-    sce <- logNormCounts(sce)
+    logcounts(sce) <- scrapper::normalizeCounts(counts(sce), sizefactors = colSums(counts(sce)))
 
     p1 <- plotDots(sce, features=factor(rownames(counts), levels = paste("Feature", 10:1)))
     p2 <- plotDots(sce, features=factor(rownames(counts), levels = paste("Feature", 1:10)))
