@@ -81,7 +81,7 @@ scuttle::uniquifyFeatureNames
 
 # Vendored from scuttle given that it's otherwise deprecated and we don't want to add a dependency on scrapper.
 quick_means_by_group <- function(x, num.groups, group.id) {
-    multiplier <- Matrix::sparseMatrix(i = seq_along(group.id), j = group.id, x = rep(1, length(group.id)))
+    multiplier <- Matrix::sparseMatrix(i = seq_along(group.id), j = group.id, x = rep(1, length(group.id)), dims=c(ncol(x), num.groups))
     sums <- x %*% multiplier
     group.sizes <- tabulate(group.id, nbins=num.groups)
     t(t(as.matrix(sums)) / group.sizes)
