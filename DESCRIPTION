@@ -61,7 +61,8 @@ Suggests:
     testthat,
     Biobase,
     scattermore,
-    ggrastr
+    ggrastr,
+    MASS
 VignetteBuilder: knitr
 biocViews: ImmunoOncology, SingleCell, RNASeq, QualityControl, Preprocessing, Normalization,
         Visualization, DimensionReduction, Transcriptomics,

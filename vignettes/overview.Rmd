@@ -245,6 +245,7 @@ Reduced dimension results are easily pulled in to create customized equivalents 
 In this example, we create a $t$-SNE plot faceted by tissue and coloured by _Snap25_ expression:
 
 ```{r}
+library("MASS")
 ggcells(example_sce, mapping=aes(x=TSNE.1, y=TSNE.2, colour=Snap25)) +
     geom_point() +
     stat_density_2d() +

@@ -12,3 +12,5 @@ README.md
 inst/scater_*
 inst/sticker_*
 inst/web/*
+^doc$
+^Meta$
