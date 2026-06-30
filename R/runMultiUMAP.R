@@ -6,15 +6,15 @@
 #' @param x For \code{calculateMultiUMAP}, a list of numeric matrices where each row is a cell and each column is some dimension/variable.
 #' For gene expression data, this is usually the matrix of PC coordinates.
 #'
-#' Alternatively, a \linkS4class{SummarizedExperiment} containing relevant matrices in its assays.
+#' Alternatively, a \link[SummarizedExperiment]{SummarizedExperiment-class} containing relevant matrices in its assays.
 #'
-#' Alternatively, a \linkS4class{SingleCellExperiment} containing relevant matrices in its assays, \code{\link{reducedDims}} or \code{\link{altExps}}.
+#' Alternatively, a \link[SingleCellExperiment]{SingleCellExperiment-class} containing relevant matrices in its assays, \code{\link[SingleCellExperiment]{reducedDims}} or \code{\link[SingleCellExperiment]{altExps}}.
 #' This is also the only permissible argument for \code{runMultiUMAP}.
 #' @param assay.type A character or integer vector of assays to extract and transpose for use in the UMAP.
 #' For the SingleCellExperiment, this argument can be missing, in which case no assays are used.
-#' @param dimred A character or integer vector of \code{\link{reducedDims}} to extract for use in the UMAP.
+#' @param dimred A character or integer vector of \code{\link[SingleCellExperiment]{reducedDims}} to extract for use in the UMAP.
 #' This argument can be missing, in which case no assays are used.
-#' @param altexp A character or integer vector of \code{\link{altExps}} to extract and transpose for use in the UMAP.
+#' @param altexp A character or integer vector of \code{\link[SingleCellExperiment]{altExps}} to extract and transpose for use in the UMAP.
 #' This argument can be missing, in which case no alternative experiments are used.
 #' @param altexp.assay.type A character or integer vector specifying the assay to extract from alternative experiments, when \code{altexp} is specified.
 #' This is recycled to the same length as \code{altexp}.
@@ -27,12 +27,12 @@
 #' For the SummarizedExperiment and SingleCellExperiment methods, and for \code{runMultiUMAP}, further arguments to pass to the ANY method.
 #' @param metric Character vector specifying the type of distance to use for each matrix in \code{x}.
 #' This is recycled to the same number of matrices supplied in \code{x}.
-#' @param name String specifying the name of the \code{\link{reducedDims}} in which to store the UMAP.
+#' @param name String specifying the name of the \code{\link[SingleCellExperiment]{reducedDims}} in which to store the UMAP.
 #'
 #' @return 
 #' For \code{calculateMultiUMAP}, a numeric matrix containing the low-dimensional UMAP embedding.
 #'
-#' For \code{runMultiUMAP}, \code{x} is returned with a \code{MultiUMAP} field in its \code{\link{reducedDims}}.
+#' For \code{runMultiUMAP}, \code{x} is returned with a \code{MultiUMAP} field in its \code{\link[SingleCellExperiment]{reducedDims}}.
 #'
 #' @details
 #' These functions serve as convenience wrappers around \code{\link[uwot]{umap}} for multi-modal analysis.

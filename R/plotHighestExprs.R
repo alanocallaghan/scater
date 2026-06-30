@@ -28,7 +28,7 @@
 #' The distribution of expression across all cells is shown as tick marks for each feature.
 #' These ticks can be coloured according to cell-level metadata, as specified by \code{colour_cells_by}.
 #'
-#' @return A \link{ggplot} object.
+#' @return A \link[ggplot2]{ggplot} object.
 #'
 #' @examples
 #' example_sce <- mockSCE()
@@ -44,8 +44,7 @@
 #' @importMethodsFrom DelayedArray sweep
 #' @importFrom MatrixGenerics rowSums2 colSums2
 #' @importFrom SummarizedExperiment assay
-#' @importFrom ggplot2 ggplot geom_point ggtitle xlab ylab theme_bw theme element_text labs
-#' scale_colour_gradient scale_fill_manual guides
+#' @importFrom ggplot2 ggplot geom_point ggtitle xlab ylab theme_bw theme element_text labs scale_colour_gradient scale_fill_manual guides
 plotHighestExprs <- function(object, n = 50, colour_cells_by = color_cells_by, 
     drop_features = NULL, exprs_values = "counts",
     by_exprs_values = exprs_values, feature_names_to_plot = NULL,

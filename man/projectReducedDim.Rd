@@ -21,7 +21,7 @@ projectReducedDim(x, ...)
 }
 \arguments{
 \item{x}{A numeric matrix of a dimensionality reduction containing the cells that should be projected into the existing embedding defined in either \code{old.embedding} or \code{old.sce}.
-Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.}
+Alternatively, a \link[SummarizedExperiment]{SummarizedExperiment-class} or \link[SingleCellExperiment]{SingleCellExperiment-class} containing such a matrix.}
 
 \item{...}{Passed to methods.}
 
@@ -33,14 +33,14 @@ Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellEx
 
 \item{dimred.knn}{The name of the dimensionality reduction to use to identify the K-nearest neighbours from \code{x} in the dimensionality reduction slot of the same name defined in either \code{old} or \code{old.sce}.}
 
-\item{dimred.name}{The name of the dimensionality reduction that the projected embedding will be saved as, for the \linkS4class{SummarizedExperiment} method.}
+\item{dimred.name}{The name of the dimensionality reduction that the projected embedding will be saved as, for the \link[SummarizedExperiment]{SummarizedExperiment-class} method.}
 
 \item{k}{The number of nearest neighours to use to project points into the embedding.}
 }
 \value{
 When \code{x} is a matrix, a matrix is returned. When \code{x} is a
-\code{\linkS4class{SummarizedExperiment}}
-(or \code{\linkS4class{SingleCellExperiment}}), the return value is of
+\code{\link[SummarizedExperiment]{SummarizedExperiment-class}}
+(or \code{\link[SingleCellExperiment]{SingleCellExperiment-class}}), the return value is of
 the same class as the input, but the projected dimensionality reduction
 is added as a \code{reducedDim} field.
 }

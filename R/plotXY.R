@@ -19,7 +19,7 @@
 #' Alternatively, a named list of vectors of length equal to that of \code{y}.
 #' @inheritParams plotColData
 #'
-#' @return A \link{ggplot} object.
+#' @return A \link[ggplot2]{ggplot} object.
 #'
 #' @author Aaron Lun
 #'
@@ -87,7 +87,7 @@ plotXY <- function(
         if (is.data.frame(colour_by) || is(colour_by, "DataFrame")) {
             stopifnot(ncol(colour_by) == 1)
             df_to_plot$colour_by <- colour_by[,1]
-            colour_by <- colnmames(colour_by)
+            colour_by <- colnames(colour_by)
         } else {
             df_to_plot$colour_by <- colour_by
             colour_by <- "colour"

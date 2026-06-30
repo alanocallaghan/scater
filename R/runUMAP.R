@@ -3,9 +3,9 @@
 #' Perform uniform manifold approximation and projection (UMAP) for the cells, based on the data in a SingleCellExperiment object.
 #'
 #' @param x For \code{calculateUMAP}, a numeric matrix of log-expression values where rows are features and columns are cells.
-#' Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
+#' Alternatively, a \link[SummarizedExperiment]{SummarizedExperiment-class} or \link[SingleCellExperiment]{SingleCellExperiment-class} containing such a matrix.
 #'
-#' For \code{runTSNE}, a \linkS4class{SingleCellExperiment} object containing such a matrix.
+#' For \code{runTSNE}, a \link[SingleCellExperiment]{SingleCellExperiment-class} object containing such a matrix.
 #' @param ncomponents Numeric scalar indicating the number of UMAP dimensions to obtain.
 #' @inheritParams runPCA 
 #' @param ... For the \code{calculateUMAP} generic, additional arguments to pass to specific methods.
@@ -17,7 +17,7 @@
 #' By default, no PCA is performed if the input is a dimensionality reduction result.
 #' @param n_neighbors Integer scalar, number of nearest neighbors to identify when constructing the initial graph.
 #' @param n_threads Integer scalar specifying the number of threads to use in \code{\link[uwot]{umap}}.
-#' If \code{NULL} and \code{BPPARAM} is a \linkS4class{MulticoreParam}, it is set to the number of workers in \code{BPPARAM};
+#' If \code{NULL} and \code{BPPARAM} is a \link[BiocParallel]{MulticoreParam}, it is set to the number of workers in \code{BPPARAM};
 #' otherwise, the \code{\link[uwot]{umap}} defaults are used.
 #' @param use_densvis Logical scalar indicating whether \code{\link[densvis]{densne}} should be used to perform density-preserving t-SNE.
 #' @param dens_frac,dens_lambda See \code{\link[densvis]{densne}}
@@ -30,7 +30,7 @@
 #' @return 
 #' For \code{calculateUMAP}, a matrix is returned containing the UMAP coordinates for each cell (row) and dimension (column).
 #' 
-#' For \code{runUMAP}, a modified \code{x} is returned that contains the UMAP coordinates in \code{\link{reducedDim}(x, name)}.
+#' For \code{runUMAP}, a modified \code{x} is returned that contains the UMAP coordinates in \code{\link[SingleCellExperiment]{reducedDim}(x, name)}.
 #'
 #' @details 
 #' The function \code{\link[uwot]{umap}} is used internally to compute the UMAP. 

@@ -3,9 +3,9 @@
 #' Perform t-stochastic neighbour embedding (t-SNE) for the cells, based on the data in a SingleCellExperiment object.
 #'
 #' @param x For \code{calculateTSNE}, a numeric matrix of log-expression values where rows are features and columns are cells.
-#' Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
+#' Alternatively, a \link[SummarizedExperiment]{SummarizedExperiment-class} or \link[SingleCellExperiment]{SingleCellExperiment-class} containing such a matrix.
 #'
-#' For \code{runTSNE}, a \linkS4class{SingleCellExperiment} object.
+#' For \code{runTSNE}, a \link[SingleCellExperiment]{SingleCellExperiment-class} object.
 #' @param ncomponents Numeric scalar indicating the number of t-SNE dimensions to obtain.
 #' @inheritParams runPCA
 #' @param normalize Logical scalar indicating if input values should be scaled for numerical precision, see \code{\link[Rtsne]{normalize_input}}.
@@ -17,11 +17,11 @@
 #'
 #' For \code{runTSNE}, additional arguments to pass to \code{calculateTSNE}.
 #' @param num_threads Integer scalar specifying the number of threads to use in \code{\link[Rtsne]{Rtsne}}.
-#' If \code{NULL} and \code{BPPARAM} is a \linkS4class{MulticoreParam}, it is set to the number of workers in \code{BPPARAM};
+#' If \code{NULL} and \code{BPPARAM} is a \link[BiocParallel]{MulticoreParam}, it is set to the number of workers in \code{BPPARAM};
 #' otherwise, the \code{\link[Rtsne]{Rtsne}} defaults are used.
-#' @param external_neighbors Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.
-#' @param BNPARAM A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.
-#' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.
+#' @param external_neighbors Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link[BiocNeighbors]{findKNN}}.
+#' @param BNPARAM A \link[BiocNeighbors]{BiocNeighborParam-class} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.
+#' @param BPPARAM A \link[BiocParallel]{BiocParallelParam-class} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.
 #' @param pca Logical scalar indicating whether a PCA step should be performed inside \code{\link[Rtsne]{Rtsne}}.
 #' @param use_fitsne Logical scalar indicating whether \code{\link[snifter]{fitsne}} should be used to perform t-SNE.
 #' @param use_densvis Logical scalar indicating whether \code{\link[densvis]{densne}} should be used to perform density-preserving t-SNE.
@@ -34,7 +34,7 @@
 #' @return 
 #' For \code{calculateTSNE}, a numeric matrix is returned containing the t-SNE coordinates for each cell (row) and dimension (column).
 #' 
-#' For \code{runTSNE}, a modified \code{x} is returned that contains the t-SNE coordinates in \code{\link{reducedDim}(x, name)}.
+#' For \code{runTSNE}, a modified \code{x} is returned that contains the t-SNE coordinates in \code{\link[SingleCellExperiment]{reducedDim}(x, name)}.
 #'
 #' @details 
 #' The function \code{\link[Rtsne]{Rtsne}} is used internally to compute the t-SNE. 

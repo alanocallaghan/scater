@@ -10,7 +10,7 @@
 #' @param ... Additional arguments to pass to \code{\link{plotReducedDim}}. 
 #'
 #' @details 
-#' Each function is a convenient wrapper around \code{\link{plotReducedDim}} that searches the \code{\link{reducedDims}} slot for an appropriately named dimensionality reduction result:
+#' Each function is a convenient wrapper around \code{\link{plotReducedDim}} that searches the \code{\link[SingleCellExperiment]{reducedDims}} slot for an appropriately named dimensionality reduction result:
 #' \itemize{
 #' \item \code{"PCA"} for \code{plotPCA}
 #' \item \code{"TSNE"} for \code{plotTSNE}
@@ -21,7 +21,7 @@
 #' }
 #' Its only purpose is to streamline workflows to avoid the need to specify the \code{dimred} argument.
 #'
-#' @return A \link{ggplot} object.
+#' @return A \link[ggplot2]{ggplot} object.
 #'
 #' @author Davis McCarthy, with modifications by Aaron Lun
 #'

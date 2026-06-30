@@ -13,7 +13,7 @@
 #' @param colour_by Specification of a column metadata field or a feature to colour by, see the \code{by} argument in \code{?\link{retrieveCellInfo}} for possible values. 
 #' @param by.assay.type A string or integer scalar specifying which assay to obtain expression values from,
 #' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
-#' @param BPPARAM A \linkS4class{BiocParallelParam} object to be used to parallelise operations using \code{\link{DelayedArray}}.
+#' @param BPPARAM A \link[BiocParallel]{BiocParallelParam-class} object to be used to parallelise operations using \code{\link[DelayedArray]{DelayedArray}}.
 #' @param color_by Alias to \code{colour_by}.
 #' @param exprs_values Alias to \code{assay.type}.
 #' @param by_exprs_values Alias to \code{by.assay.type}.

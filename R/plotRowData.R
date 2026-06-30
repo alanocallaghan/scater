@@ -26,7 +26,7 @@
 #' If \code{y} is categorical and \code{x} is continuous, horizontal violin plots will be generated.
 #' If \code{x} is missing or categorical, rectangule plots will be generated where the area of a rectangle is proportional to the number of points for a combination of factors.
 #'
-#' @return A \link{ggplot} object.
+#' @return A \link[ggplot2]{ggplot} object.
 #'
 #' @examples
 #' example_sce <- mockSCE()

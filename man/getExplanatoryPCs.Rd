@@ -7,7 +7,7 @@
 getExplanatoryPCs(x, dimred = "PCA", n_dimred = 10, ...)
 }
 \arguments{
-\item{x}{A \linkS4class{SingleCellExperiment} object containing dimensionality reduction results.}
+\item{x}{A \link[SingleCellExperiment]{SingleCellExperiment-class} object containing dimensionality reduction results.}
 
 \item{dimred}{String or integer scalar specifying the field in \code{reducedDims(x)} that contains the PCA results.}
 

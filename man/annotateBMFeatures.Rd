@@ -40,15 +40,15 @@ or to \code{"hgnc_symbol"} if \code{dataset="hsapiens_gene_ensembl"},}
 
 For \code{getBMFeatureAnnos}, further arguments to pass to \code{annotateBMFeatures}.}
 
-\item{x}{A \linkS4class{SingleCellExperiment} object.}
+\item{x}{A \link[SingleCellExperiment]{SingleCellExperiment-class} object.}
 }
 \value{
-For \code{annotateBMFeatures}, a \linkS4class{DataFrame} containing feature annotation, with one row per value in \code{ids}.
+For \code{annotateBMFeatures}, a \link[S4Vectors]{DataFrame-class} containing feature annotation, with one row per value in \code{ids}.
 
-For \code{getBMFeatureAnnos}, \code{x} is returned containing the output of \code{annotateBMFeatures} appended to its \code{\link{rowData}}.
+For \code{getBMFeatureAnnos}, \code{x} is returned containing the output of \code{annotateBMFeatures} appended to its \code{\link[SummarizedExperiment]{rowData}}.
 }
 \description{
-Use the \pkg{biomaRt} package to add feature annotation information to an \code{\link{SingleCellExperiment}}.
+Use the \pkg{biomaRt} package to add feature annotation information to an \code{\link[SingleCellExperiment]{SingleCellExperiment}}.
 }
 \details{
 These functions provide convenient wrappers around \pkg{biomaRt} to quickly obtain annotation in the required format.

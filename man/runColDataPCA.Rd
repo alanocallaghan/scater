@@ -16,7 +16,7 @@ runColDataPCA(
 )
 }
 \arguments{
-\item{x}{A \linkS4class{SingleCellExperiment} object.}
+\item{x}{A \link[SingleCellExperiment]{SingleCellExperiment-class} object.}
 
 \item{ncomponents}{Numeric scalar indicating the number of principal components to obtain.}
 
@@ -28,9 +28,9 @@ This will also remove features with standard deviations below 1e-8.}
 
 \item{outliers}{Logical indicating whether outliers should be detected based on PCA coordinates.}
 
-\item{BSPARAM}{A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.}
+\item{BSPARAM}{A \link[BiocSingular]{BiocSingularParam-class} object specifying which algorithm should be used to perform the PCA.}
 
-\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.}
+\item{BPPARAM}{A \link[BiocParallel]{BiocParallelParam-class} object specifying whether the PCA should be parallelized.}
 
 \item{name}{String specifying the name to be used to store the result in the \code{reducedDims} of the output.}
 }
@@ -44,7 +44,7 @@ This specifies the cells that correspond to the identified outliers.
 }
 \description{
 Perform a principal components analysis (PCA) on cells, 
-based on the column metadata in a SingleCellExperiment object.
+based on the column metadata in a \link[SingleCellExperiment]{SingleCellExperiment-class} object.
 }
 \details{
 This function performs PCA on variables from the column-level metadata instead of the gene expression matrix. 

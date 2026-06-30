@@ -47,9 +47,9 @@ runTSNE(x, ..., altexp = NULL, name = "TSNE")
 }
 \arguments{
 \item{x}{For \code{calculateTSNE}, a numeric matrix of log-expression values where rows are features and columns are cells.
-Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
+Alternatively, a \link[SummarizedExperiment]{SummarizedExperiment-class} or \link[SingleCellExperiment]{SingleCellExperiment-class} containing such a matrix.
 
-For \code{runTSNE}, a \linkS4class{SingleCellExperiment} object.}
+For \code{runTSNE}, a \link[SingleCellExperiment]{SingleCellExperiment-class} object.}
 
 \item{...}{For the \code{calculateTSNE} generic, additional arguments to pass to specific methods.
 For the ANY method, additional arguments to pass to \code{\link[Rtsne]{Rtsne}}.
@@ -75,14 +75,14 @@ This can be a character vector of row names, an integer vector of row indices or
 \item{theta}{Numeric scalar specifying the approximation accuracy of the Barnes-Hut algorithm, see \code{\link[Rtsne]{Rtsne}} for details.}
 
 \item{num_threads}{Integer scalar specifying the number of threads to use in \code{\link[Rtsne]{Rtsne}}.
-If \code{NULL} and \code{BPPARAM} is a \linkS4class{MulticoreParam}, it is set to the number of workers in \code{BPPARAM};
+If \code{NULL} and \code{BPPARAM} is a \link[BiocParallel]{MulticoreParam}, it is set to the number of workers in \code{BPPARAM};
 otherwise, the \code{\link[Rtsne]{Rtsne}} defaults are used.}
 
-\item{external_neighbors}{Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link{findKNN}}.}
+\item{external_neighbors}{Logical scalar indicating whether a nearest neighbors search should be computed externally with \code{\link[BiocNeighbors]{findKNN}}.}
 
-\item{BNPARAM}{A \linkS4class{BiocNeighborParam} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.}
+\item{BNPARAM}{A \link[BiocNeighbors]{BiocNeighborParam-class} object specifying the neighbor search algorithm to use when \code{external_neighbors=TRUE}.}
 
-\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.}
+\item{BPPARAM}{A \link[BiocParallel]{BiocParallelParam-class} object specifying how the neighbor search should be parallelized when \code{external_neighbors=TRUE}.}
 
 \item{use_fitsne}{Logical scalar indicating whether \code{\link[snifter]{fitsne}} should be used to perform t-SNE.}
 
@@ -102,12 +102,12 @@ otherwise, the \code{\link[Rtsne]{Rtsne}} defaults are used.}
 
 \item{altexp}{String or integer scalar specifying an alternative experiment containing the input data.}
 
-\item{name}{String specifying the name to be used to store the result in the \code{\link{reducedDims}} of the output.}
+\item{name}{String specifying the name to be used to store the result in the \code{\link[SingleCellExperiment]{reducedDims}} of the output.}
 }
 \value{
 For \code{calculateTSNE}, a numeric matrix is returned containing the t-SNE coordinates for each cell (row) and dimension (column).
 
-For \code{runTSNE}, a modified \code{x} is returned that contains the t-SNE coordinates in \code{\link{reducedDim}(x, name)}.
+For \code{runTSNE}, a modified \code{x} is returned that contains the t-SNE coordinates in \code{\link[SingleCellExperiment]{reducedDim}(x, name)}.
 }
 \description{
 Perform t-stochastic neighbour embedding (t-SNE) for the cells, based on the data in a SingleCellExperiment object.
@@ -132,7 +132,7 @@ This presumes that the existing dimensionality reduction is sufficient such that
 \section{Feature selection}{
 
 This section is relevant if \code{x} is a numeric matrix of (log-)expression values with features in rows and cells in columns;
-or if \code{x} is a \linkS4class{SingleCellExperiment} and \code{dimred=NULL}.
+or if \code{x} is a \link[SingleCellExperiment]{SingleCellExperiment-class} and \code{dimred=NULL}.
 In the latter, the expression values are obtained from the assay specified by \code{assay.type}.
 
 The \code{subset_row} argument specifies the features to use for dimensionality reduction.
@@ -150,11 +150,11 @@ This will also remove features with standard deviations below 1e-8.
 
 \section{Using reduced dimensions}{
 
-If \code{x} is a \linkS4class{SingleCellExperiment}, the method can be applied on existing dimensionality reduction results in \code{x} by setting the \code{dimred} argument.
+If \code{x} is a \link[SingleCellExperiment]{SingleCellExperiment-class}, the method can be applied on existing dimensionality reduction results in \code{x} by setting the \code{dimred} argument.
 This is typically used to run slower non-linear algorithms (t-SNE, UMAP) on the results of fast linear decompositions (PCA).
 We might also use this with existing reduced dimensions computed from \emph{a priori} knowledge (e.g., gene set scores), where further dimensionality reduction could be applied to compress the data.
 
-The matrix of existing reduced dimensions is taken from \code{\link{reducedDim}(x, dimred)}.
+The matrix of existing reduced dimensions is taken from \code{\link[SingleCellExperiment]{reducedDim}(x, dimred)}.
 By default, all dimensions are used to compute the second set of reduced dimensions.
 If \code{n_dimred} is also specified, only the first \code{n_dimred} columns are used.
 Alternatively, \code{n_dimred} can be an integer vector specifying the column indices of the dimensions to use.
@@ -163,21 +163,21 @@ When \code{dimred} is specified, no additional feature selection or standardizat
 This means that any settings of \code{ntop}, \code{subset_row} and \code{scale} are ignored.
 
 If \code{x} is a numeric matrix, setting \code{transposed=TRUE} will treat the rows as cells and the columns as the variables/diemnsions.
-This allows users to manually pass in dimensionality reduction results without needing to wrap them in a \linkS4class{SingleCellExperiment}.
+This allows users to manually pass in dimensionality reduction results without needing to wrap them in a \link[SingleCellExperiment]{SingleCellExperiment-class}.
 As such, no feature selection or standardization is performed, i.e., \code{ntop}, \code{subset_row} and \code{scale} are ignored.
 }
 
 \section{Using alternative Experiments}{
 
-This section is relevant if \code{x} is a \linkS4class{SingleCellExperiment} and \code{altexp} is not \code{NULL}.
-In such cases, the method is run on data from an alternative \linkS4class{SummarizedExperiment} nested within \code{x}.
-This is useful for performing dimensionality reduction on other features stored in \code{\link{altExp}(x, altexp)}, e.g., antibody tags. 
+This section is relevant if \code{x} is a \link[SingleCellExperiment]{SingleCellExperiment-class} and \code{altexp} is not \code{NULL}.
+In such cases, the method is run on data from an alternative \link[SummarizedExperiment]{SummarizedExperiment-class} nested within \code{x}.
+This is useful for performing dimensionality reduction on other features stored in \code{\link[SingleCellExperiment]{altExp}(x, altexp)}, e.g., antibody tags. 
 
 Setting \code{altexp} with \code{assay.type} will use the specified assay from the alternative SummarizedExperiment.
 If the alternative is a SingleCellExperiment, setting \code{dimred} will use the specified dimensionality reduction results from the alternative. 
 This option will also interact as expected with \code{n_dimred}.
 
-Note that the output is still stored in the \code{\link{reducedDims}} of the output SingleCellExperiment.
+Note that the output is still stored in the \code{\link[SingleCellExperiment]{reducedDims}} of the output SingleCellExperiment.
 It is advisable to use a different \code{name} to distinguish this output from the results generated from the main experiment's assay values.
 }
 

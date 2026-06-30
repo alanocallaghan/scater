@@ -38,13 +38,13 @@ This can also be a numeric vector, see \code{?\link{plotReducedDim}} for details
 result in \code{reducedDims(object)} to plot.}
 }
 \value{
-A \link{ggplot} object.
+A \link[ggplot2]{ggplot} object.
 }
 \description{
 Wrapper functions to create plots for specific types of reduced dimension results in a SingleCellExperiment object.
 }
 \details{
-Each function is a convenient wrapper around \code{\link{plotReducedDim}} that searches the \code{\link{reducedDims}} slot for an appropriately named dimensionality reduction result:
+Each function is a convenient wrapper around \code{\link{plotReducedDim}} that searches the \code{\link[SingleCellExperiment]{reducedDims}} slot for an appropriately named dimensionality reduction result:
 \itemize{
 \item \code{"PCA"} for \code{plotPCA}
 \item \code{"TSNE"} for \code{plotTSNE}

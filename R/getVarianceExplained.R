@@ -4,16 +4,16 @@
 #'
 #' @param x A numeric matrix of expression values, usually log-transformed and normalized.
 #' 
-#' Alternatively, a \linkS4class{SummarizedExperiment} containing such a matrix.
+#' Alternatively, a \link[SummarizedExperiment]{SummarizedExperiment-class} containing such a matrix.
 #' @param assay.type String or integer scalar specifying the expression values for which to compute the variance (also an alias \code{exprs_value} is accepted).
 #' @param exprs_values Alias for \code{assay.type}.
-#' @param variables A \linkS4class{DataFrame} or data.frame containing one or more variables of interest.
+#' @param variables A \link[S4Vectors]{DataFrame-class} or data.frame containing one or more variables of interest.
 #' This should have number of rows equal to the number of columns in \code{x}.
 #'
 #' For the SummarizedExperiment method, this can also be a character vector specifying column names of \code{colData(x)} to use;
 #' or \code{NULL}, in which case all columns in \code{colData(x)} are used.
 #' @param subset_row A vector specifying the subset of rows of \code{x} for which to return a result.
-#' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.
+#' @param BPPARAM A \link[BiocParallel]{BiocParallelParam-class} object specifying whether the calculations should be parallelized.
 #' @param ... For the generic, arguments to be passed to specific methods.
 #' For the SummarizedExperiment method, arguments to be passed to the ANY method.
 #'

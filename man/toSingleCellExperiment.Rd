@@ -13,7 +13,7 @@ toSingleCellExperiment(object)
 \item{object}{an \code{\link{SCESet}} object to be updated}
 }
 \value{
-a \code{\link{SingleCellExperiment}} object
+a \code{\link[SingleCellExperiment]{SingleCellExperiment}} object
 }
 \description{
 Convert an SCESet object produced with an older version of the

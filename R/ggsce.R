@@ -1,19 +1,19 @@
 #' Create a ggplot from a SingleCellExperiment
 #'
-#' Create a base \link{ggplot} object from a \linkS4class{SingleCellExperiment},
+#' Create a base \link[ggplot2]{ggplot} object from a \link[SingleCellExperiment]{SingleCellExperiment-class},
 #' the contents of which can be directly referenced in subsequent layers without prior specification.
 #'
-#' @param x A \linkS4class{SingleCellExperiment} object.
+#' @param x A \link[SingleCellExperiment]{SingleCellExperiment-class} object.
 #' This is expected to have row names for \code{ggcells} and column names for \code{ggfeatures}.
 #' @param assay.type String or integer scalar specifying the expression values for which to compute the variance (also an alias \code{exprs_value} is accepted).
-#' @param mapping A list containing aesthetic mappings, usually the output of \code{\link{aes}} or related functions.
+#' @param mapping A list containing aesthetic mappings, usually the output of \code{\link[ggplot2]{aes}} or related functions.
 #' @inheritParams scuttle::makePerCellDF
 #' @inheritParams scuttle::makePerFeatureDF
 #' @param extract_mapping Logical scalar indicating whether \code{features} or \code{cells} should be automatically expanded to include variables referenced in \code{mapping}.
-#' @param ... Further arguments to pass to \link{ggplot}.
+#' @param ... Further arguments to pass to \link[ggplot2]{ggplot}.
 #' 
 #' @details
-#' These functions generate a data.frame from the contents of a \linkS4class{SingleCellExperiment} and pass it to \code{\link{ggplot}}.
+#' These functions generate a data.frame from the contents of a \link[SingleCellExperiment]{SingleCellExperiment-class} and pass it to \code{\link[ggplot2]{ggplot}}.
 #' Rows, columns or metadata fields in the \code{x} can then be referenced in subsequent \pkg{ggplot2} commands.
 #'
 #' \code{ggcells} treats cells as the data values so users can reference row names of \code{x} (if provided in \code{features}), column metadata variables and dimensionality reduction results.
@@ -26,7 +26,7 @@
 #' Developers may wish to turn this off with \code{extract_mapping=FALSE} for greater control.
 #'
 #' @return
-#' A \link{ggplot} object containing the specified contents of \code{x}.
+#' A \link[ggplot2]{ggplot} object containing the specified contents of \code{x}.
 #'
 #' @author Aaron Lun
 #'

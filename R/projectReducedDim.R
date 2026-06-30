@@ -3,19 +3,19 @@
 #' Projects observations into arbitrary dimensionality reduction space (e.g., t-SNE, UMAP) using a tricube weighted average of the k nearest neighbours.
 #'
 #' @param x A numeric matrix of a dimensionality reduction containing the cells that should be projected into the existing embedding defined in either \code{old.embedding} or \code{old.sce}.
-#' Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
+#' Alternatively, a \link[SummarizedExperiment]{SummarizedExperiment-class} or \link[SingleCellExperiment]{SingleCellExperiment-class} containing such a matrix.
 #' @param old.sce The object containing the original dimensionality points. If \code{x} is a matrix, then \code{old.points} must be supplied as a matrix of 
 #' @param old.embedding If \code{x} is a matrix and \code{old} is given, then \code{old.embedding} is the existing dimensionality reduction embedding that \code{x} should be projected into.
 #' @param dimred.embed The name of the target dimensionality reduction that points should be embedded into, if \code{}.
 #' @param dimred.knn The name of the dimensionality reduction to use to identify the K-nearest neighbours from \code{x} in the dimensionality reduction slot of the same name defined in either \code{old} or \code{old.sce}.
-#' @param dimred.name The name of the dimensionality reduction that the projected embedding will be saved as, for the \linkS4class{SummarizedExperiment} method.
+#' @param dimred.name The name of the dimensionality reduction that the projected embedding will be saved as, for the \link[SummarizedExperiment]{SummarizedExperiment-class} method.
 #' @param k The number of nearest neighours to use to project points into the embedding.
 #' @param ... Passed to methods.
 #' @name projectReducedDim
 #'
 #' @return When \code{x} is a matrix, a matrix is returned. When \code{x} is a
-#' \code{\linkS4class{SummarizedExperiment}}
-#' (or \code{\linkS4class{SingleCellExperiment}}), the return value is of
+#' \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}
+#' (or \code{\link[SingleCellExperiment]{SingleCellExperiment-class}}), the return value is of
 #' the same class as the input, but the projected dimensionality reduction
 #' is added as a \code{reducedDim} field.
 #' @examples

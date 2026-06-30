@@ -3,9 +3,9 @@
 #' Perform non-negative matrix factorization (NMF) for the cells, based on the data in a SingleCellExperiment object.
 #'
 #' @param x For \code{calculateNMF}, a numeric matrix of log-expression values where rows are features and columns are cells.
-#' Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
+#' Alternatively, a \link[SummarizedExperiment]{SummarizedExperiment-class} or \link[SingleCellExperiment]{SingleCellExperiment-class} containing such a matrix.
 #'
-#' For \code{runNMF}, a \linkS4class{SingleCellExperiment} object.
+#' For \code{runNMF}, a \link[SingleCellExperiment]{SingleCellExperiment-class} object.
 #' @param ncomponents Numeric scalar indicating the number of NMF dimensions to obtain.
 #' @inheritParams runPCA
 #' @param ... For the \code{calculateNMF} generic, additional arguments to pass to specific methods.
@@ -20,7 +20,7 @@
 #' @return 
 #' For \code{calculateNMF}, a numeric matrix is returned containing the NMF coordinates for each cell (row) and dimension (column).
 #' 
-#' For \code{runNMF}, a modified \code{x} is returned that contains the NMF coordinates in \code{\link{reducedDim}(x, name)}.
+#' For \code{runNMF}, a modified \code{x} is returned that contains the NMF coordinates in \code{\link[SingleCellExperiment]{reducedDim}(x, name)}.
 #'
 #' In both cases, the matrix will have the attribute \code{"basis"} containing the gene-by-factor basis matrix.
 #'

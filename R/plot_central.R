@@ -34,7 +34,7 @@
 #' }
 #'
 #' @section Miscellaneous fields: Addititional fields can be added to the
-#'   data.frame passed to \link{ggplot} by setting the \code{other_fields}
+#'   data.frame passed to \link[ggplot2]{ggplot} by setting the \code{other_fields}
 #'   argument. This allows users to easily incorporate additional metadata for
 #'   use in further \pkg{ggplot} operations.
 #'
@@ -44,7 +44,7 @@
 #'   Alternatively, \code{other_fields} can be a named list where each element
 #'   is of any type accepted by \code{\link{retrieveCellInfo}} or
 #'   \code{\link{retrieveFeatureInfo}}. This includes \link{AsIs}-wrapped
-#'   vectors, data.frames or \linkS4class{DataFrame}s.
+#'   vectors, data.frames or \link[S4Vectors]{DataFrame-class}s.
 #'
 #'   Each additional column of the output data.frame will be named according to
 #'   the \code{name} returned by \code{\link{retrieveCellInfo}} or
@@ -62,9 +62,7 @@
 NULL
 
 #' @importFrom ggbeeswarm geom_quasirandom
-#' @importFrom ggplot2 ggplot geom_violin xlab ylab stat_summary geom_jitter
-#'   position_jitter coord_flip geom_point stat_smooth geom_tile theme_bw theme
-#'   geom_bin2d geom_hex stat_summary_2d stat_summary_hex geom_boxplot
+#' @importFrom ggplot2 ggplot geom_violin xlab ylab stat_summary geom_jitter position_jitter coord_flip geom_point stat_smooth geom_tile theme_bw theme geom_bin2d geom_hex stat_summary_2d stat_summary_hex geom_boxplot
 .central_plotter <- function(object, xlab = NULL, ylab = NULL,
                              colour_by = NULL, shape_by = NULL, size_by = NULL, fill_by = NULL,
                              show_median = FALSE, show_violin = TRUE, show_smooth = FALSE, show_se = TRUE,

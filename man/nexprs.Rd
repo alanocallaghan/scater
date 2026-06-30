@@ -22,7 +22,7 @@ nexprs(x, ...)
 \arguments{
 \item{x}{A numeric matrix of counts where features are rows and cells are columns.
 
-Alternatively, a \linkS4class{SummarizedExperiment} containing such counts.}
+Alternatively, a \link[SummarizedExperiment]{SummarizedExperiment-class} containing such counts.}
 
 \item{...}{For the generic, further arguments to pass to specific methods.
 
@@ -37,8 +37,8 @@ If \code{FALSE}, the function will count the number of detected features per cel
 
 \item{subset_col}{Logical, integer or character vector indicating which columns (i.e., cells) to use.}
 
-\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.
-Only relevant when \code{x} is a \linkS4class{DelayedMatrix}.}
+\item{BPPARAM}{A \link[BiocParallel]{BiocParallelParam-class} object specifying whether the calculations should be parallelized.
+Only relevant when \code{x} is a \link[DelayedArray]{DelayedMatrix-class}.}
 
 \item{exprs_values}{Alias for \code{assay.type}.}
 

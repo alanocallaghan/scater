@@ -41,7 +41,7 @@ This can be useful for arranging cells by experimental conditions or batches.}
 
 \item{by_exprs_values}{Alias to \code{by.assay.type}.}
 
-\item{BPPARAM}{A \linkS4class{BiocParallelParam} object to be used to parallelise operations using \code{\link{DelayedArray}}.}
+\item{BPPARAM}{A \link[BiocParallel]{BiocParallelParam-class} object to be used to parallelise operations using \code{\link[DelayedArray]{DelayedArray}}.}
 
 \item{color_by}{Alias to \code{colour_by}.}
 

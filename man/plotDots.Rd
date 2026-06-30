@@ -25,14 +25,14 @@ plotDots(
 )
 }
 \arguments{
-\item{object}{A \linkS4class{SingleCellExperiment} object.}
+\item{object}{A \link[SingleCellExperiment]{SingleCellExperiment-class} object.}
 
 \item{features}{A character (or factor) vector of row names, a logical vector, or integer vector of indices specifying rows of \code{object} to visualize. When using character or integer vectors, the ordering specified by the user is retained. When using factor vectors, ordering is controlled by the factor levels.}
 
-\item{group}{String specifying the field of \code{\link{colData}(object)} containing the grouping factor, e.g., cell types or clusters.
+\item{group}{String specifying the field of \code{\link[SummarizedExperiment]{colData}(object)} containing the grouping factor, e.g., cell types or clusters.
 Alternatively, any value that can be used in the \code{by} argument to \code{\link{retrieveCellInfo}}.}
 
-\item{block}{String specifying the field of \code{\link{colData}(object)} containing a blocking factor (e.g., batch of origin).
+\item{block}{String specifying the field of \code{\link[SummarizedExperiment]{colData}(object)} containing a blocking factor (e.g., batch of origin).
 Alternatively, any value that can be used in the \code{by} argument to \code{\link{retrieveCellInfo}}.}
 
 \item{exprs_values}{Alias to \code{assay.type}.}
@@ -73,7 +73,7 @@ average expression values scaled to unit variance prior to plotting.}
 \item{by.assay.type}{A string or integer scalar specifying which assay to obtain expression values from, for entries of \code{other_fields}. Also alias \code{by_exprs_values} is accepted as argument name.}
 }
 \value{
-A \link{ggplot} object containing a dot plot.
+A \link[ggplot2]{ggplot} object containing a dot plot.
 }
 \description{
 Create a dot plot of expression values for a grouping of cells,
@@ -83,7 +83,7 @@ respectively, for each feature in each group of cells.
 \details{
 This implements a \pkg{Seurat}-style \dQuote{dot plot} that creates a dot for each feature (row) in each group of cells (column).
 The proportion of detected expression values and the average expression for each feature in each group of cells is visualized efficiently using the size and colour, respectively, of each dot.
-If \code{block} is specified, batch-corrected averages and proportions for each group are computed with \code{\link{correctGroupSummary}}.
+If \code{block} is specified, batch-corrected averages and proportions for each group are computed with \code{\link[scuttle]{correctGroupSummary}}.
 
 Some caution is required during interpretation due to the difficulty of simultaneously interpreting both size and colour.
 For example, if we coloured by z-score on a conventional blue-white-red colour axis, a gene that is downregulated in a group of cells would show up as a small blue dot.

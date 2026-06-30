@@ -2,7 +2,7 @@
 #'
 #' Plot column-level (i.e., cell) metadata in an SingleCellExperiment object.
 #'
-#' @param object A \linkS4class{SingleCellExperiment} object containing
+#' @param object A \link[SingleCellExperiment]{SingleCellExperiment-class} object containing
 #'   expression values and experimental information.
 #' @param y String specifying the column-level metadata field to show on the
 #'   y-axis. Alternatively, an \link{AsIs} vector or data.frame, see
@@ -36,7 +36,7 @@
 #' @param summary_fun Function to summarize the feature value of each point
 #'   (e.g. gene expression of each cell) when the points binned, defaults to
 #'   \code{sum}. Can be either the name of the function or the function itself.
-#' @param hex Logical, whether to use \code{\link{geom_hex}}.
+#' @param hex Logical, whether to use \code{\link[ggplot2]{geom_hex}}.
 #' @param ... Additional arguments for visualization, see
 #'   \code{?"\link{scater-plot-args}"} for details.
 #'
@@ -56,7 +56,7 @@
 #' when \code{scattermore = TRUE}, the \code{point_size} argument works
 #' differently.
 #'
-#' @return A \link{ggplot} object.
+#' @return A \link[ggplot2]{ggplot} object.
 #'
 #' @author Davis McCarthy, with modifications by Aaron Lun
 #'

@@ -52,7 +52,7 @@ elements.}
 for use in colouring - see \code{?\link{retrieveCellInfo}} for details.}
 }
 \value{
-A \link{ggplot} object.
+A \link[ggplot2]{ggplot} object.
 }
 \description{
 Plot the features with the highest average expression across all cells, along with their expression in each individual cell.

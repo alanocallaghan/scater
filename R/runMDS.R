@@ -4,9 +4,9 @@
 #'
 #' @param x For \code{calculateMDS}, a numeric matrix of log-expression values
 #' where rows are features and columns are cells.
-#' Alternatively, a \linkS4class{SummarizedExperiment} or \linkS4class{SingleCellExperiment} containing such a matrix.
+#' Alternatively, a \link[SummarizedExperiment]{SummarizedExperiment-class} or \link[SingleCellExperiment]{SingleCellExperiment-class} containing such a matrix.
 #'
-#' For \code{runMDS}, a \linkS4class{SingleCellExperiment} object.
+#' For \code{runMDS}, a \link[SingleCellExperiment]{SingleCellExperiment-class} object.
 #' @param ncomponents Numeric scalar indicating the number of MDS?g dimensions
 #' to obtain.
 #' @inheritParams runPCA
@@ -28,7 +28,7 @@
 #' for each cell (row) and dimension (column).
 #'
 #' For \code{runMDS}, a modified \code{x} is returned that contains the MDS 
-#' coordinates in \code{\link{reducedDim}(x, name)}.
+#' coordinates in \code{\link[SingleCellExperiment]{reducedDim}(x, name)}.
 #'
 #' @inheritSection calculatePCA Feature selection
 #' @inheritSection calculatePCA Using reduced dimensions

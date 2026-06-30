@@ -1,6 +1,6 @@
 #' Get feature annotation information from Biomart
 #' 
-#' Use the \pkg{biomaRt} package to add feature annotation information to an \code{\link{SingleCellExperiment}}. 
+#' Use the \pkg{biomaRt} package to add feature annotation information to an \code{\link[SingleCellExperiment]{SingleCellExperiment}}. 
 #' 
 #' @param ids A character vector containing feature identifiers.
 #' @param biomart String defining the biomaRt to be used, to be passed to \code{\link[biomaRt]{useMart}}.
@@ -11,7 +11,7 @@
 #' or to \code{"hgnc_symbol"} if \code{dataset="hsapiens_gene_ensembl"},
 #' @param attributes Character vector defining the attributes to pass to \code{\link[biomaRt]{getBM}}.
 #' @param filters String defining the type of identifier in \code{ids}, to be used as a filter in \code{\link[biomaRt]{getBM}}.
-#' @param x A \linkS4class{SingleCellExperiment} object.
+#' @param x A \link[SingleCellExperiment]{SingleCellExperiment-class} object.
 #' @param ... For \code{annotateBMFeatures}, further named arguments to pass to \code{biomaRt::useMart}.
 #'
 #' For \code{getBMFeatureAnnos}, further arguments to pass to \code{annotateBMFeatures}.
@@ -20,9 +20,9 @@
 #' These functions provide convenient wrappers around \pkg{biomaRt} to quickly obtain annotation in the required format.
 #'
 #' @return 
-#' For \code{annotateBMFeatures}, a \linkS4class{DataFrame} containing feature annotation, with one row per value in \code{ids}.
+#' For \code{annotateBMFeatures}, a \link[S4Vectors]{DataFrame-class} containing feature annotation, with one row per value in \code{ids}.
 #'
-#' For \code{getBMFeatureAnnos}, \code{x} is returned containing the output of \code{annotateBMFeatures} appended to its \code{\link{rowData}}.
+#' For \code{getBMFeatureAnnos}, \code{x} is returned containing the output of \code{annotateBMFeatures} appended to its \code{\link[SummarizedExperiment]{rowData}}.
 #' 
 #' @author Aaron Lun, based on code by Davis McCarthy
 #'

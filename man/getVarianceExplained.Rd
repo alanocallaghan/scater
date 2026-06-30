@@ -21,12 +21,12 @@ getVarianceExplained(x, ...)
 \arguments{
 \item{x}{A numeric matrix of expression values, usually log-transformed and normalized.
 
-Alternatively, a \linkS4class{SummarizedExperiment} containing such a matrix.}
+Alternatively, a \link[SummarizedExperiment]{SummarizedExperiment-class} containing such a matrix.}
 
 \item{...}{For the generic, arguments to be passed to specific methods.
 For the SummarizedExperiment method, arguments to be passed to the ANY method.}
 
-\item{variables}{A \linkS4class{DataFrame} or data.frame containing one or more variables of interest.
+\item{variables}{A \link[S4Vectors]{DataFrame-class} or data.frame containing one or more variables of interest.
 This should have number of rows equal to the number of columns in \code{x}.
 
 For the SummarizedExperiment method, this can also be a character vector specifying column names of \code{colData(x)} to use;
@@ -34,7 +34,7 @@ or \code{NULL}, in which case all columns in \code{colData(x)} are used.}
 
 \item{subset_row}{A vector specifying the subset of rows of \code{x} for which to return a result.}
 
-\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.}
+\item{BPPARAM}{A \link[BiocParallel]{BiocParallelParam-class} object specifying whether the calculations should be parallelized.}
 
 \item{exprs_values}{Alias for \code{assay.type}.}
 

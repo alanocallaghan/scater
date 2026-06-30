@@ -4,7 +4,7 @@
 #'
 #' @param x A numeric matrix of counts where features are rows and cells are columns.
 #'
-#' Alternatively, a \linkS4class{SummarizedExperiment} containing such counts.
+#' Alternatively, a \link[SummarizedExperiment]{SummarizedExperiment-class} containing such counts.
 #' @param detection_limit Numeric scalar providing the value above which  observations are deemed to be expressed. 
 #' @param assay.type String or integer specifying the assay of \code{x} to obtain the count matrix from (also the alias \code{exprs_values} is accepted for this argument).
 #' @param exprs_values Alias for \code{assay.type}.
@@ -12,8 +12,8 @@
 #' If \code{FALSE}, the function will count the number of detected features per cell.
 #' @param subset_row Logical, integer or character vector indicating which rows (i.e. features) to use.
 #' @param subset_col Logical, integer or character vector indicating which columns (i.e., cells) to use.
-#' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the calculations should be parallelized.
-#' Only relevant when \code{x} is a \linkS4class{DelayedMatrix}.
+#' @param BPPARAM A \link[BiocParallel]{BiocParallelParam-class} object specifying whether the calculations should be parallelized.
+#' Only relevant when \code{x} is a \link[DelayedArray]{DelayedMatrix-class}.
 #' @param ... For the generic, further arguments to pass to specific methods.
 #'
 #' For the SummarizedExperiment method, further arguments to pass to the ANY method.

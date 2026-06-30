@@ -18,7 +18,7 @@ updateSCESet <- function(object) {
 #'
 #' @param object an \code{\link{SCESet}} object to be updated
 #'
-#' @return a \code{\link{SingleCellExperiment}} object
+#' @return a \code{\link[SingleCellExperiment]{SingleCellExperiment}} object
 #' 
 #' @name toSingleCellExperiment
 #' @rdname toSingleCellExperiment

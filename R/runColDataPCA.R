@@ -1,17 +1,17 @@
 #' Perform PCA on column metadata
 #'
 #' Perform a principal components analysis (PCA) on cells, 
-#' based on the column metadata in a SingleCellExperiment object. 
+#' based on the column metadata in a \link[SingleCellExperiment]{SingleCellExperiment-class} object. 
 #'
-#' @param x A \linkS4class{SingleCellExperiment} object.
+#' @param x A \link[SingleCellExperiment]{SingleCellExperiment-class} object.
 #' @param ncomponents Numeric scalar indicating the number of principal components to obtain.
 #' @param variables List of strings or a character vector indicating which variables in \code{colData(x)} to use.
 #' If a list, each entry can also be an \link{AsIs} vector or a data.frame, as described in \code{?\link{retrieveCellInfo}}.
 #' @param scale Logical scalar, should the expression values be standardised so that each feature has unit variance?
 #' This will also remove features with standard deviations below 1e-8. 
 #' @param outliers Logical indicating whether outliers should be detected based on PCA coordinates.
-#' @param BSPARAM A \linkS4class{BiocSingularParam} object specifying which algorithm should be used to perform the PCA.
-#' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether the PCA should be parallelized.
+#' @param BSPARAM A \link[BiocSingular]{BiocSingularParam-class} object specifying which algorithm should be used to perform the PCA.
+#' @param BPPARAM A \link[BiocParallel]{BiocParallelParam-class} object specifying whether the PCA should be parallelized.
 #' @param name String specifying the name to be used to store the result in the \code{reducedDims} of the output.
 #'
 #' @details 

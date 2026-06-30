@@ -116,7 +116,7 @@ x and y are numeric.}
 (e.g. gene expression of each cell) when the points binned, defaults to
 \code{sum}. Can be either the name of the function or the function itself.}
 
-\item{hex}{Logical, whether to use \code{\link{geom_hex}}.}
+\item{hex}{Logical, whether to use \code{\link[ggplot2]{geom_hex}}.}
 
 \item{by.assay.type}{A string or integer scalar specifying which assay to
 obtain expression values from,

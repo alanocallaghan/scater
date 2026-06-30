@@ -14,12 +14,12 @@
 #' @param by_exprs_values Alias for \code{by.assay.type}.
 #'
 #' @return 
-#' A \link{ggplot} object containing a dot plot.
+#' A \link[ggplot2]{ggplot} object containing a dot plot.
 #' 
 #' @details
 #' This implements a \pkg{Seurat}-style \dQuote{dot plot} that creates a dot for each feature (row) in each group of cells (column).
 #' The proportion of detected expression values and the average expression for each feature in each group of cells is visualized efficiently using the size and colour, respectively, of each dot.
-#' If \code{block} is specified, batch-corrected averages and proportions for each group are computed with \code{\link{correctGroupSummary}}.
+#' If \code{block} is specified, batch-corrected averages and proportions for each group are computed with \code{\link[scuttle]{correctGroupSummary}}.
 #'
 #' Some caution is required during interpretation due to the difficulty of simultaneously interpreting both size and colour.
 #' For example, if we coloured by z-score on a conventional blue-white-red colour axis, a gene that is downregulated in a group of cells would show up as a small blue dot.
@@ -48,9 +48,7 @@
 #' for alternatives to visualizing group-level expression values.
 #'
 #' @export
-#' @importFrom ggplot2 ggplot geom_point
-#' scale_size scale_colour_gradient theme element_line element_rect 
-#' scale_colour_gradient2
+#' @importFrom ggplot2 ggplot geom_point scale_size scale_colour_gradient theme element_line element_rect scale_colour_gradient2
 #' @importFrom SummarizedExperiment assay
 plotDots <- function(object, features, group = NULL, block=NULL,
     exprs_values = "logcounts", detection_limit = 0, zlim = NULL, 

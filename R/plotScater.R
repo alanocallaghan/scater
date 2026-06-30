@@ -2,7 +2,7 @@
 #'
 #' Plot the relative proportion of the library size that is accounted for by the most highly expressed features for each cell in a SingleCellExperiment object. 
 #'
-#' @param x A \linkS4class{SingleCellExperiment} object.
+#' @param x A \link[SingleCellExperiment]{SingleCellExperiment-class} object.
 #' @param block1 String specifying the column-level metadata field by which to separate the cells into separate panels in the plot. 
 #' Alternatively, an \link{AsIs} vector or data.frame, see \code{?\link{retrieveCellInfo}}.
 #' Default is \code{NULL}, in which case there is no blocking.
@@ -13,7 +13,7 @@
 #' @param assay.type String or integer scalar indicating which assay of \code{object} should be used to obtain the expression values for this plot. 
 #' @param by.assay.type A string or integer scalar specifying which assay to obtain expression values from, 
 #' for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.
-#' @param ncol Number of columns to use for \code{\link{facet_wrap}} if only one block is defined.
+#' @param ncol Number of columns to use for \code{\link[ggplot2]{facet_wrap}} if only one block is defined.
 #' @param line_width Numeric scalar specifying the line width.
 #' @param theme_size Numeric scalar specifying the font size to use for the plotting theme.
 #' @param color_by Alias to \code{colour_by}.
@@ -28,7 +28,7 @@
 #' If only one of \code{block1} and \code{block2} are specified, each panel corresponds to a separate level of the specified blocking factor.
 #' If both are specified, each panel corresponds to a combination of levels.
 #'
-#' @return A \link{ggplot} object.
+#' @return A \link[ggplot2]{ggplot} object.
 #'
 #' @author Davis McCarthy, with modifications by Aaron Lun
 #'

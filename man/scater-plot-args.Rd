@@ -43,7 +43,7 @@ Defaults to \code{TRUE}.}
 
 \section{Miscellaneous fields}{
  Addititional fields can be added to the
-  data.frame passed to \link{ggplot} by setting the \code{other_fields}
+  data.frame passed to \link[ggplot2]{ggplot} by setting the \code{other_fields}
   argument. This allows users to easily incorporate additional metadata for
   use in further \pkg{ggplot} operations.
 
@@ -53,7 +53,7 @@ Defaults to \code{TRUE}.}
   Alternatively, \code{other_fields} can be a named list where each element
   is of any type accepted by \code{\link{retrieveCellInfo}} or
   \code{\link{retrieveFeatureInfo}}. This includes \link{AsIs}-wrapped
-  vectors, data.frames or \linkS4class{DataFrame}s.
+  vectors, data.frames or \link[S4Vectors]{DataFrame-class}s.
 
   Each additional column of the output data.frame will be named according to
   the \code{name} returned by \code{\link{retrieveCellInfo}} or

@@ -31,10 +31,10 @@ ggfeatures(
 )
 }
 \arguments{
-\item{x}{A \linkS4class{SingleCellExperiment} object.
+\item{x}{A \link[SingleCellExperiment]{SingleCellExperiment-class} object.
 This is expected to have row names for \code{ggcells} and column names for \code{ggfeatures}.}
 
-\item{mapping}{A list containing aesthetic mappings, usually the output of \code{\link{aes}} or related functions.}
+\item{mapping}{A list containing aesthetic mappings, usually the output of \code{\link[ggplot2]{aes}} or related functions.}
 
 \item{features}{Character vector specifying the features for which to extract expression profiles across cells.
 May also include features in alternative Experiments if permitted by \code{use.altexps}.}
@@ -45,19 +45,19 @@ May also include features in alternative Experiments if permitted by \code{use.a
 
 \item{assay.type}{String or integer scalar specifying the expression values for which to compute the variance (also an alias \code{exprs_value} is accepted).}
 
-\item{...}{Further arguments to pass to \link{ggplot}.}
+\item{...}{Further arguments to pass to \link[ggplot2]{ggplot}.}
 
 \item{cells}{Character vector specifying the features for which to extract expression profiles across cells.}
 }
 \value{
-A \link{ggplot} object containing the specified contents of \code{x}.
+A \link[ggplot2]{ggplot} object containing the specified contents of \code{x}.
 }
 \description{
-Create a base \link{ggplot} object from a \linkS4class{SingleCellExperiment},
+Create a base \link[ggplot2]{ggplot} object from a \link[SingleCellExperiment]{SingleCellExperiment-class},
 the contents of which can be directly referenced in subsequent layers without prior specification.
 }
 \details{
-These functions generate a data.frame from the contents of a \linkS4class{SingleCellExperiment} and pass it to \code{\link{ggplot}}.
+These functions generate a data.frame from the contents of a \link[SingleCellExperiment]{SingleCellExperiment-class} and pass it to \code{\link[ggplot2]{ggplot}}.
 Rows, columns or metadata fields in the \code{x} can then be referenced in subsequent \pkg{ggplot2} commands.
 
 \code{ggcells} treats cells as the data values so users can reference row names of \code{x} (if provided in \code{features}), column metadata variables and dimensionality reduction results.

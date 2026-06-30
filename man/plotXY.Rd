@@ -68,13 +68,13 @@ x and y are numeric.}
 (e.g. gene expression of each cell) when the points binned, defaults to
 \code{sum}. Can be either the name of the function or the function itself.}
 
-\item{hex}{Logical, whether to use \code{\link{geom_hex}}.}
+\item{hex}{Logical, whether to use \code{\link[ggplot2]{geom_hex}}.}
 
 \item{...}{Additional arguments for visualization, see
 \code{?"\link{scater-plot-args}"} for details.}
 }
 \value{
-A \link{ggplot} object.
+A \link[ggplot2]{ggplot} object.
 }
 \description{
 Reuse \pkg{scater}'s plotting machinery for arbitrary x- and y-coordinates.

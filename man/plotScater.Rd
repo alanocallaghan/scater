@@ -21,7 +21,7 @@ plotScater(
 )
 }
 \arguments{
-\item{x}{A \linkS4class{SingleCellExperiment} object.}
+\item{x}{A \link[SingleCellExperiment]{SingleCellExperiment-class} object.}
 
 \item{nfeatures}{Numeric scalar indicating the number of top-expressed features to show n the plot.}
 
@@ -38,7 +38,7 @@ Default is \code{NULL}, in which case there is no blocking.}
 
 \item{block2}{Same as \code{block1}, providing another level of blocking.}
 
-\item{ncol}{Number of columns to use for \code{\link{facet_wrap}} if only one block is defined.}
+\item{ncol}{Number of columns to use for \code{\link[ggplot2]{facet_wrap}} if only one block is defined.}
 
 \item{line_width}{Numeric scalar specifying the line width.}
 
@@ -52,7 +52,7 @@ Default is \code{NULL}, in which case there is no blocking.}
 for use in point aesthetics - see the \code{assay.type} argument in \code{?\link{retrieveCellInfo}}.}
 }
 \value{
-A \link{ggplot} object.
+A \link[ggplot2]{ggplot} object.
 }
 \description{
 Plot the relative proportion of the library size that is accounted for by the most highly expressed features for each cell in a SingleCellExperiment object.

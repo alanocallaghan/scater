@@ -46,7 +46,7 @@ for use in point aesthetics - see \code{?\link{retrieveFeatureInfo}} for details
 \item{...}{Additional arguments for visualization, see \code{?"\link{scater-plot-args}"} for details.}
 }
 \value{
-A \link{ggplot} object.
+A \link[ggplot2]{ggplot} object.
 }
 \description{
 Plot row-level (i.e., gene) metadata from a SingleCellExperiment object.

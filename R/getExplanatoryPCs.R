@@ -2,7 +2,7 @@
 #'
 #' Compute, for each principal component, the percentage of variance that is explained by one or more variables of interest.
 #'
-#' @param x A \linkS4class{SingleCellExperiment} object containing dimensionality reduction results.
+#' @param x A \link[SingleCellExperiment]{SingleCellExperiment-class} object containing dimensionality reduction results.
 #' @param dimred String or integer scalar specifying the field in \code{reducedDims(x)} that contains the PCA results.
 #' @param n_dimred Integer scalar specifying the number of the top principal components to use.
 #' @param ... Additional arguments passed to \code{\link{getVarianceExplained}}.

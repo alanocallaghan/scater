@@ -14,10 +14,10 @@ retrieveCellInfo(
 )
 }
 \arguments{
-\item{x}{A \linkS4class{SingleCellExperiment} object.}
+\item{x}{A \link[SingleCellExperiment]{SingleCellExperiment-class} object.}
 
 \item{by}{A string specifying the field to extract (see Details).
-Alternatively, a data.frame, \linkS4class{DataFrame} or an \link{AsIs} vector.}
+Alternatively, a data.frame, \link[S4Vectors]{DataFrame-class} or an \link{AsIs} vector.}
 
 \item{search}{Character vector specifying the types of data or metadata to use.}
 
@@ -35,7 +35,7 @@ and \code{value}, a vector of length equal to \code{ncol(x)} containing per-cell
 If \code{by=NULL}, both \code{name} and \code{value} are set to \code{NULL}.
 }
 \description{
-Retrieves a per-cell (meta)data field from a \linkS4class{SingleCellExperiment} based on a single keyword,
+Retrieves a per-cell (meta)data field from a \link[SingleCellExperiment]{SingleCellExperiment-class} based on a single keyword,
 typically for use in visualization functions.
 }
 \details{
@@ -47,12 +47,12 @@ This allows downstream visualization functions to accommodate arbitrary inputs f
 
 Given a character string in \code{by}, this function will:
 \enumerate{
-\item Search \code{\link{colData}} for a column named \code{by},
+\item Search \code{\link[SummarizedExperiment]{colData}} for a column named \code{by},
 and return the corresponding field as the output \code{value}.
 We do not consider nested elements within the \code{colData}.
-\item Search \code{\link{assay}(x, assay.type)} for a row named \code{by},
+\item Search \code{\link[SummarizedExperiment]{assay}(x, assay.type)} for a row named \code{by},
 and return the expression vector for this feature as the output \code{value}.
-\item Search each alternative experiment in \code{\link{altExps}(x)} for a row names \code{by},
+\item Search each alternative experiment in \code{\link[SingleCellExperiment]{altExps}(x)} for a row names \code{by},
 and return the expression vector for this feature at \code{assay.type} as the output \code{value}.
 }
 Any match will cause the function to return without considering later possibilities.
